@@ -31,3 +31,9 @@
 .directory
 CMakeLists.txt
 !*/CMakeLists.txt
+
+#Eclipse
+.cproject
+.project
+.settings/
+
