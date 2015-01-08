@@ -30,3 +30,4 @@
 #OS
 .directory
 CMakeLists.txt
+!*/CMakeLists.txt
