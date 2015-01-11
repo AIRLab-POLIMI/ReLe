@@ -75,4 +75,5 @@ private:
 
 }
 
+
 #endif /* RANDOMGENERATOR_H_ */

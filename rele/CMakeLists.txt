@@ -18,6 +18,7 @@ include_directories(include/core
 
 # ----------------------- LIBRARIES ---------------------------
 
+find_package(Boost 1.46 REQUIRED COMPONENTS random)
   
 
 # ----------------------- GCC FLAGS ----------------------------
@@ -40,7 +41,11 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-add_library(rele src/core/FiniteMDP.cpp)
+add_library(rele src/utils/RandomGenerator.cpp
+                 src/core/FiniteMDP.cpp)
+
+add_executable(simple_chain src/test/SimpleChain.cpp)
+target_link_libraries(simple_chain rele)
 
 
 # ------------------------ INSTALLATION ------------------------
