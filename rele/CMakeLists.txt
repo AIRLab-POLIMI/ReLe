@@ -39,7 +39,7 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-
+add_library(rele src/FiniteMDP.cpp)
 
 
 # ------------------------ INSTALLATION ------------------------

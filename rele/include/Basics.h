@@ -33,9 +33,45 @@ class Action
 
 };
 
+class FiniteAction : public Action
+{
+public:
+	inline int getActionN() const
+	{
+		return actionN;
+	}
+
+private:
+	int actionN;
+};
+
 class State
 {
+public:
+	inline bool isAbsorbing() const
+	{
+		return absorbing;
+	}
 
+private:
+	bool absorbing;
+};
+
+class FiniteState : public State
+{
+public:
+	inline std::size_t getStateN() const
+	{
+		return stateN;
+	}
+
+	inline void setStateN(std::size_t stateN)
+	{
+		this->stateN = stateN;
+	}
+
+private:
+	std::size_t stateN;
 };
 
 typedef std::vector<double> Reward;

@@ -21,48 +21,37 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ENVIRORMENT_H_
-#define ENVIRORMENT_H_
+#ifndef FINITEMDP_H_
+#define FINITEMDP_H_
+
+#include "Basics.h"
+#include "Envirorment.h"
 
 #include <vector>
 
 namespace ReLe
 {
 
-struct EnvirormentSettings
+class FiniteMDP : public Envirorment<FiniteAction, FiniteState>
 {
-	double gamma;
-	bool isDiscreteActions;
-	bool isDiscreteStates;
-	bool isAverageReward;
-	bool isFiniteHorizon;
-	bool isEpisodic;
-	int horizon;
-};
 
-template<class ActionC, class StateC>
-class Envirorment
-{
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-	virtual bool step(const ActionC& action, StateC& nextState,
-				Reward& reward) = 0;
-	virtual void getInitialState(StateC& state) = 0;
+	FiniteMDP(double*** Pdata, double*** Rdata, std::size_t statesNumber, std::size_t actionsNumber);
+	virtual bool step(const FiniteAction& action, FiniteState& nextState,
+					Reward& reward);
+	virtual void getInitialState(FiniteState& state);
 
-	inline const EnvirormentSettings& getSettings()
-	{
-		return settings;
-	}
-
-	virtual ~Envirorment()
-	{
-	}
 
 private:
-	EnvirormentSettings settings;
+	std::vector<std::vector<std::vector<double>>> P;
+	std::vector<std::vector<std::vector<double>>> R;
+	FiniteState currentState;
+
+	void initP(std::size_t actionsNumber, std::size_t statesNumber, double*** Pdata);
+	void initR(std::size_t actionsNumber, std::size_t statesNumber, double*** Rdata);
 };
 
 }
 
-#endif /* ENVIRORMENT_H_ */
+
+#endif /* FINITEMDP_H_ */
