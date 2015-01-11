@@ -21,34 +21,51 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AGENT_H_
-#define AGENT_H_
+#ifndef CORE_H_
+#define CORE_H_
 
-#include <vector>
+#include "Envirorment.h"
 
-#include "Basics.h"
+//TODO: move all code in cpp and include at the bottom of the file
+//TODO: or leave the code in this file
+
+
 
 namespace ReLe
 {
 
+struct CoreSettings
+{
+	int episodes;
+
+};
+
 template<class ActionC, class StateC>
-class Agent
+class Core
 {
 	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
 	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-	virtual void initEpisode() = 0;
-	virtual void sampleAction(const StateC& state, ActionC& action) = 0;
-	virtual void step(const Reward& reward, const StateC& nextState) = 0;
-	virtual void endEpisode(const Reward& reward) = 0;
-
-	virtual ~Agent()
+	Core(Envirorment<ActionC, StateC>& envirorment,
+				Agent<ActionC, StateC>& state) :
+				envirorment(envirorment), state(state)
 	{
 
 	}
+
+	void run()
+	{
+		 //depending on envirorment settings, do stuff
+	}
+
+
+
+private:
+	Envirorment<ActionC, StateC>& envirorment;
+	Agent<ActionC, StateC>& state;
+	CoreSettings settings;
 };
 
 }
 
-
-#endif /* AGENT_H_ */
+#endif /* CORE_H_ */

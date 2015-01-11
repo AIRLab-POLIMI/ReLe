@@ -22,6 +22,8 @@
  */
 
 #include "FiniteMDP.h"
+#include "td/TDlambda.h"
+#include "Core.h"
 
 #include <iostream>
 
@@ -69,12 +71,15 @@ int main(int argc, char *argv[])
 	};
 
 	ReLe::FiniteMDP mdp(Pdata, Rdata);
+	ReLe::TD_lambda agent(0.8);
+	ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
+	core.run();
+
+	//TODO levami
 	ReLe::FiniteState x;
 	ReLe::Action a;
-
 	mdp.getInitialState(x);
-
 	cout << "x: " << x.getStateN() << endl;
 
 }

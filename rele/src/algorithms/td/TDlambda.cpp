@@ -21,34 +21,40 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef AGENT_H_
-#define AGENT_H_
-
-#include <vector>
-
-#include "Basics.h"
+#include "td/TDlambda.h"
 
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
-class Agent
+TD_lambda::TD_lambda(double lambda) :
+			lambda(lambda)
 {
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
-public:
-	virtual void initEpisode() = 0;
-	virtual void sampleAction(const StateC& state, ActionC& action) = 0;
-	virtual void step(const Reward& reward, const StateC& nextState) = 0;
-	virtual void endEpisode(const Reward& reward) = 0;
-
-	virtual ~Agent()
-	{
-
-	}
-};
 
 }
 
+void TD_lambda::initEpisode()
+{
 
-#endif /* AGENT_H_ */
+}
+
+void TD_lambda::sampleAction(const FiniteState& state, FiniteAction& action)
+{
+
+}
+
+void TD_lambda::step(const Reward& reward, const FiniteState& nextState)
+{
+
+}
+
+void TD_lambda::endEpisode(const Reward& reward)
+{
+
+}
+
+TD_lambda::~TD_lambda()
+{
+
+}
+
+}

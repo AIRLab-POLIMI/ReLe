@@ -14,7 +14,8 @@ endif()
 # ----------------------- INCLUDES ----------------------------
 
 include_directories(include/core
-                    include/utils)
+                    include/utils
+                    include/algorithms)
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -41,8 +42,9 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-add_library(rele src/utils/RandomGenerator.cpp
-                 src/core/FiniteMDP.cpp)
+file(GLOB_RECURSE ReLe_SOURCE src/core/*.cpp src/algorithms/*.cpp src/utils/*.cpp)
+
+add_library(rele ${ReLe_SOURCE})
 
 add_executable(simple_chain src/test/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)
