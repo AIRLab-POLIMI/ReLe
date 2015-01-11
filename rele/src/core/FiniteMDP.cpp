@@ -30,7 +30,7 @@ namespace ReLe
 {
 
 FiniteMDP::FiniteMDP(double*** Pdata, double*** Rdata,
-			std::size_t statesNumber, std::size_t actionsNumber)
+			std::size_t statesNumber, std::size_t actionsNumber) : Envirorment()
 {
 	initP(actionsNumber, statesNumber, Pdata);
 	initR(actionsNumber, statesNumber, Rdata);

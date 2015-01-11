@@ -13,7 +13,8 @@ endif()
 
 # ----------------------- INCLUDES ----------------------------
 
-include_directories(include)
+include_directories(include/core
+                    include/utils)
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -39,7 +40,7 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-add_library(rele src/FiniteMDP.cpp)
+add_library(rele src/core/FiniteMDP.cpp)
 
 
 # ------------------------ INSTALLATION ------------------------
