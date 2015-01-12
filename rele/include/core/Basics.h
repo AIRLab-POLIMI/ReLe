@@ -33,7 +33,7 @@ class Action
 
 };
 
-class FiniteAction : public Action
+class FiniteAction: public Action
 {
 public:
 	inline int getActionN() const
@@ -48,6 +48,12 @@ private:
 class State
 {
 public:
+	State() :
+				absorbing(false)
+	{
+
+	}
+
 	inline bool isAbsorbing() const
 	{
 		return absorbing;
@@ -57,7 +63,7 @@ private:
 	bool absorbing;
 };
 
-class FiniteState : public State
+class FiniteState: public State
 {
 public:
 	inline std::size_t getStateN() const

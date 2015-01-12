@@ -45,7 +45,7 @@ public:
 		initR(Rdata);
 	}
 
-	virtual bool step(const FiniteAction& action, FiniteState& nextState,
+	virtual void step(const FiniteAction& action, FiniteState& nextState,
 					Reward& reward);
 	virtual void getInitialState(FiniteState& state);
 

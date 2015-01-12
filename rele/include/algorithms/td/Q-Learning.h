@@ -21,40 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "td/TDlambda.h"
+#ifndef INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_
+#define INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_
 
-namespace ReLe
-{
 
-TD_lambda::TD_lambda(double lambda) :
-			lambda(lambda)
-{
 
-}
 
-void TD_lambda::initEpisode()
-{
-
-}
-
-void TD_lambda::sampleAction(const FiniteState& state, FiniteAction& action)
-{
-
-}
-
-void TD_lambda::step(const Reward& reward, const FiniteState& nextState)
-{
-
-}
-
-void TD_lambda::endEpisode(const Reward& reward)
-{
-
-}
-
-TD_lambda::~TD_lambda()
-{
-
-}
-
-}
+#endif /* INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_ */

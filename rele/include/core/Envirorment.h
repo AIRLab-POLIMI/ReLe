@@ -46,7 +46,7 @@ class Envirorment
 	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
 	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-	virtual bool step(const ActionC& action, StateC& nextState,
+	virtual void step(const ActionC& action, StateC& nextState,
 				Reward& reward) = 0;
 	virtual void getInitialState(StateC& state) = 0;
 

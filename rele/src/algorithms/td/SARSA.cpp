@@ -21,39 +21,40 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TDLAMBDA_H_
-#define TDLAMBDA_H_
-
-#include "Agent.h"
+#include "td/SARSA.h"
 
 namespace ReLe
 {
 
-class TD_lambda : public Agent<FiniteAction, FiniteState>
+SARSA_lambda::SARSA_lambda(double lambda) :
+			lambda(lambda)
 {
-public:
-	TD_lambda(double lambda);
-	virtual void initEpisode();
-	virtual void sampleAction(const FiniteState& state, FiniteAction& action);
-	virtual void step(const Reward& reward, const FiniteState& nextState);
-	virtual void endEpisode(const Reward& reward);
-
-	virtual ~TD_lambda();
-
-private:
-	double lambda;
-};
-
-class TD_0 : public TD_lambda
-{
-public:
-	virtual void initEpisode();
-	virtual void sampleAction(const FiniteState& state, FiniteAction& action);
-	virtual void step(const Reward& reward, const FiniteState& nextState);
-	virtual void endEpisode(const Reward& reward);
-
-	virtual ~TD_0();
-};
 
 }
-#endif /* TDLAMBDA_H_ */
+
+void SARSA_lambda::initEpisode()
+{
+
+}
+
+void SARSA_lambda::sampleAction(const FiniteState& state, FiniteAction& action)
+{
+
+}
+
+void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState)
+{
+
+}
+
+void SARSA_lambda::endEpisode(const Reward& reward)
+{
+
+}
+
+SARSA_lambda::~SARSA_lambda()
+{
+
+}
+
+}

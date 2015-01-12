@@ -29,14 +29,12 @@
 //TODO: move all code in cpp and include at the bottom of the file
 //TODO: or leave the code in this file
 
-
-
 namespace ReLe
 {
 
 struct CoreSettings
 {
-	int episodes;
+	unsigned int episodeLenght;
 
 };
 
@@ -48,21 +46,45 @@ class Core
 public:
 	Core(Envirorment<ActionC, StateC>& envirorment,
 				Agent<ActionC, StateC>& state) :
-				envirorment(envirorment), state(state)
+				envirorment(envirorment), agent(agent)
 	{
 
 	}
 
-	void run()
+	CoreSettings& getSettings()
 	{
-		 //depending on envirorment settings, do stuff
+		return settings;
 	}
 
+	void runEpisode()
+	{
+		StateC xn;
+		ActionC u;
 
+		envirorment.getInitialState(xn);
+
+		for (int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+		{
+			Reward r;
+			agent.sampleAction(xn, u);
+			envirorment.step(u, xn, r);
+			agent.step(r, xn);
+		}
+	}
+
+	/*void setupAgent() serve?
+	{
+		EnvirormentSettings& task = envirorment.getSettings();
+
+		if (!task.isFiniteHorizon)
+		{
+			//set gamma
+		}
+	}*/
 
 private:
 	Envirorment<ActionC, StateC>& envirorment;
-	Agent<ActionC, StateC>& state;
+	Agent<ActionC, StateC>& agent;
 	CoreSettings settings;
 };
 

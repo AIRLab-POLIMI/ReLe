@@ -22,7 +22,7 @@
  */
 
 #include "FiniteMDP.h"
-#include "td/TDlambda.h"
+#include "td/SARSA.h"
 #include "Core.h"
 
 #include <iostream>
@@ -71,10 +71,11 @@ int main(int argc, char *argv[])
 	};
 
 	ReLe::FiniteMDP mdp(Pdata, Rdata);
-	ReLe::TD_lambda agent(0.8);
+	ReLe::SARSA_lambda agent(0.8);
 	ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
-	core.run();
+	core.getSettings().episodeLenght = 300;
+	core.runEpisode();
 
 	//TODO levami
 	ReLe::FiniteState x;
