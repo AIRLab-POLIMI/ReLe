@@ -20,6 +20,7 @@ include_directories(include/core
 # ----------------------- LIBRARIES ---------------------------
 
 find_package(Boost 1.46 REQUIRED COMPONENTS random)
+find_package(Armadillo REQUIRED)
   
 
 # ----------------------- GCC FLAGS ----------------------------

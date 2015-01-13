@@ -25,20 +25,51 @@
 #define BASICS_H_
 
 #include <vector>
+#include <iostream>
+#include <string>
 
 namespace ReLe
 {
 class Action
 {
+public:
+	inline virtual std::string to_str() const
+	{
+		return "action";
+	}
 
+	inline virtual ~Action()
+	{
+
+	}
 };
 
 class FiniteAction: public Action
 {
 public:
+	FiniteAction()
+	{
+		actionN = 0;
+	}
+
 	inline int getActionN() const
 	{
 		return actionN;
+	}
+
+	inline void setActionN(int actionN)
+	{
+		this->actionN = actionN;
+	}
+
+	inline virtual std::string to_str() const
+	{
+		return "u = " + std::to_string(actionN);
+	}
+
+	inline virtual ~FiniteAction()
+	{
+
 	}
 
 private:
@@ -59,6 +90,16 @@ public:
 		return absorbing;
 	}
 
+	inline virtual std::string to_str() const
+	{
+		return "state";
+	}
+
+	inline virtual ~State()
+	{
+
+	}
+
 private:
 	bool absorbing;
 };
@@ -66,6 +107,11 @@ private:
 class FiniteState: public State
 {
 public:
+	FiniteState()
+	{
+		stateN = 0;
+	}
+
 	inline std::size_t getStateN() const
 	{
 		return stateN;
@@ -76,11 +122,43 @@ public:
 		this->stateN = stateN;
 	}
 
+	inline virtual std::string to_str() const
+	{
+		return "x = " + std::to_string(stateN);
+	}
+
+	inline virtual ~FiniteState()
+	{
+
+	}
+
 private:
 	std::size_t stateN;
 };
 
 typedef std::vector<double> Reward;
+
+inline std::ostream& operator<<(std::ostream& os, const Action& action)
+{
+	os << action.to_str();
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const State& state)
+{
+	os << state.to_str();
+	return os;
+}
+
+inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
+{
+	os << "[ ";
+	for(auto r : reward)
+		os << r << " ";
+	os << "]";
+	return os;
+}
+
 
 }
 

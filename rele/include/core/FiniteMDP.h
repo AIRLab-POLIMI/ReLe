@@ -32,27 +32,27 @@
 namespace ReLe
 {
 
-class FiniteMDP : public Envirorment<FiniteAction, FiniteState>
+class FiniteMDP: public Envirorment<FiniteAction, FiniteState>
 {
 //TODO: levare tutti sti template del cavolo per poter compilare un esempuio statico.
 //TODO: magari usare una libreria di matrici... o classi apposta.
 public:
 	template<int statesNumber, int actionsNumber>
 	FiniteMDP(const double (&Pdata)[actionsNumber][statesNumber][statesNumber],
-				const double (&Rdata)[actionsNumber][statesNumber][2]) : Envirorment()
+				const double (&Rdata)[statesNumber][2]) :
+				Envirorment()
 	{
 		initP(Pdata);
 		initR(Rdata);
 	}
 
 	virtual void step(const FiniteAction& action, FiniteState& nextState,
-					Reward& reward);
+				Reward& reward);
 	virtual void getInitialState(FiniteState& state);
 
-
 private:
-	std::vector<std::vector<std::vector<double>>> P;
-	std::vector<std::vector<std::vector<double>>> R;
+	std::vector<std::vector<std::vector<double>>>P;
+	std::vector<std::vector<double>> R;
 	FiniteState currentState;
 
 private:
@@ -74,24 +74,21 @@ private:
 		}
 	}
 
-	template<int statesNumber, int actionsNumber>
-	void initR(const double (&Rdata)[actionsNumber][statesNumber][2])
+	template<int statesNumber>
+	void initR(const double (&Rdata)[statesNumber][2])
 	{
-		R.resize(actionsNumber);
-		for (std::size_t k = 0; k < actionsNumber; k++)
+
+		R.resize(statesNumber);
+		for (std::size_t i = 0; i < statesNumber; i++)
 		{
-			R[k].resize(statesNumber);
-			for (std::size_t i = 0; i < statesNumber; i++)
-			{
-				R[k][i].resize(2);
-				R[k][i][0] = Rdata[k][i][0]; //mean
-				R[k][i][1] = Rdata[k][i][1]; //variance
-			}
+			R[i].resize(2);
+			R[i][0] = Rdata[i][0]; //mean
+			R[i][1] = Rdata[i][1];//variance
 		}
+
 	}
 };
 
 }
-
 
 #endif /* FINITEMDP_H_ */

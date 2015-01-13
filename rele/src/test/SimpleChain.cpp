@@ -34,22 +34,13 @@ int main(int argc, char *argv[])
 	const size_t statesNumber = 5;
 	const size_t actionsNumber = 2;
 
-	const double Rdata[actionsNumber][statesNumber][2] =
+	const double Rdata[statesNumber][2] =
 	{
-				{
-							{0,0},
-							{0,0},
-							{1,0},
-							{0,0},
-							{0,0}
-				},
-				{
-							{0,0},
-							{0,0},
-							{1,0},
-							{0,0},
-							{0,0}
-				}
+		{0,0},
+		{0,0},
+		{1,0},
+		{0,0},
+		{0,0}
 	};
 
 	const double Pdata[actionsNumber][statesNumber][statesNumber] =
@@ -71,10 +62,11 @@ int main(int argc, char *argv[])
 	};
 
 	ReLe::FiniteMDP mdp(Pdata, Rdata);
-	ReLe::SARSA_lambda agent(0.8);
+	ReLe::SARSA agent(statesNumber, actionsNumber);
 	ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
-	core.getSettings().episodeLenght = 300;
+	core.getSettings().episodeLenght = 10000;
+	cout << "starting episode" << endl;
 	core.runEpisode();
 
 	//TODO levami

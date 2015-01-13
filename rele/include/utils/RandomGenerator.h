@@ -67,6 +67,12 @@ public:
 		return dist(gen);
 	}
 
+	inline static bool sampleEvent(double prob)
+	{
+		boost::random::uniform_real_distribution<> dist(0, 1);
+		return dist(gen) < prob;
+	}
+
 private:
 	//random generators
 	static boost::random::mt19937 gen;

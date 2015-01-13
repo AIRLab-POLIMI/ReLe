@@ -22,9 +22,91 @@
  */
 
 #include "td/SARSA.h"
+#include "RandomGenerator.h"
+
+using namespace std;
+using namespace arma;
 
 namespace ReLe
 {
+
+SARSA::SARSA(size_t statesN, size_t actionN) :
+			Q(statesN, actionN, fill::zeros)
+{
+	x = 0;
+	u = 0;
+
+	//Default algorithm parameters
+	alpha = 1;
+	gamma = 0.9;
+
+	//time step
+	t = 0;
+}
+
+void SARSA::initEpisode()
+{
+	t = 0;
+}
+
+void SARSA::sampleAction(const FiniteState& state, FiniteAction& action)
+{
+	x = state.getStateN();
+	u = policy(x);
+
+	action.setActionN(u);
+}
+
+void SARSA::step(const Reward& reward, const FiniteState& nextState)
+{
+	size_t xn = nextState.getStateN();
+	unsigned int un = policy(xn);
+
+	double delta = reward[0] + gamma * Q(xn, un) - Q(x, u);
+	Q(x, u) = Q(x, u) + alpha * delta;
+}
+
+void SARSA::endEpisode(const Reward& reward)
+{
+	//TODO che ci metto qui?
+	// Per ora stampo la action-value function...
+	for (unsigned int i = 0; i < Q.n_rows; i++)
+		for (unsigned int j = 0; j < Q.n_cols; j++)
+		{
+			cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
+		}
+
+	//E la policy...
+	for (unsigned int i = 0; i < Q.n_rows; i++)
+	{
+		unsigned int policy;
+		Q.row(i).max(policy);
+		cout << "policy(" << i << ") = " << policy << endl;
+	}
+
+
+}
+
+SARSA::~SARSA()
+{
+
+}
+
+unsigned int SARSA::policy(size_t x)
+{
+	unsigned int un;
+
+	const rowvec& Qx = Q.row(x);
+
+	double eps = 1.0/t;
+
+	if (RandomGenerator::sampleEvent(eps))
+		un = RandomGenerator::sampleUniformInt(0, Q.n_cols - 1);
+	else
+		Qx.max(un);
+
+	return un;
+}
 
 SARSA_lambda::SARSA_lambda(double lambda) :
 			lambda(lambda)

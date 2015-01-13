@@ -42,12 +42,11 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 	nextState.setStateN(xn);
 
 	//compute reward
-	double m = R[u][xn][0];
-	double sigma = R[u][xn][1];
+	double m = R[xn][0];
+	double sigma = R[xn][1];
 	double r = RandomGenerator::sampleNormal(m, sigma);
 
 	reward.push_back(r);
-
 
 }
 

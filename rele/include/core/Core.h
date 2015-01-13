@@ -45,7 +45,7 @@ class Core
 	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
 	Core(Envirorment<ActionC, StateC>& envirorment,
-				Agent<ActionC, StateC>& state) :
+				Agent<ActionC, StateC>& agent) :
 				envirorment(envirorment), agent(agent)
 	{
 
@@ -62,14 +62,21 @@ public:
 		ActionC u;
 
 		envirorment.getInitialState(xn);
+		agent.initEpisode();
 
 		for (int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
 		{
 			Reward r;
+			std::cout << "t = " << i << ": (" << xn << ", ";
 			agent.sampleAction(xn, u);
 			envirorment.step(u, xn, r);
 			agent.step(r, xn);
+			std::cout << u << ") -> "<< " (" << xn << ", " << r << ")" << std::endl;
 		}
+
+		//ma serve end episode?
+		Reward r;
+		agent.endEpisode(r);
 	}
 
 	/*void setupAgent() serve?
