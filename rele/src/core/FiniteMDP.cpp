@@ -34,9 +34,9 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 {
 
 	//Compute next state
-	int u = action.getActionN();
+	unsigned int u = action.getActionN();
 	size_t x = currentState.getStateN();
-	int xn = RandomGenerator::sampleDiscrete(P[u][x]);
+	size_t xn = RandomGenerator::sampleDiscrete(P[u][x]);
 
 	currentState.setStateN(xn);
 	nextState.setStateN(xn);
@@ -52,7 +52,7 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 
 void FiniteMDP::getInitialState(FiniteState& state)
 {
-	int x = RandomGenerator::sampleUniformInt(0, P[0].size() - 1);
+	size_t x = RandomGenerator::sampleUniformInt(0, P[0].size() - 1);
 
 	currentState.setStateN(x);
 	state.setStateN(x);

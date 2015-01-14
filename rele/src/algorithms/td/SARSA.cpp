@@ -41,29 +41,44 @@ SARSA::SARSA(size_t statesN, size_t actionN) :
 	gamma = 0.9;
 
 	//time step
-	t = 0;
+	t = 1;
+	actionReady = false;
 }
 
 void SARSA::initEpisode()
 {
-	t = 0;
+	t = 1;
 }
 
 void SARSA::sampleAction(const FiniteState& state, FiniteAction& action)
 {
 	x = state.getStateN();
-	u = policy(x);
+
+	if (!actionReady)
+	{
+		u = policy(x);
+	}
 
 	action.setActionN(u);
+	actionReady = false;
 }
 
 void SARSA::step(const Reward& reward, const FiniteState& nextState)
 {
 	size_t xn = nextState.getStateN();
 	unsigned int un = policy(xn);
+	double r = reward[0];
 
-	double delta = reward[0] + gamma * Q(xn, un) - Q(x, u);
+	double delta = r + gamma * Q(xn, un) - Q(x, u);
 	Q(x, u) = Q(x, u) + alpha * delta;
+
+	cout << "Q(" << x << ", " << u << ") = " << Q(x, u) << endl;
+
+	//update action
+	u = un;
+	actionReady = true;
+
+	t++;
 }
 
 void SARSA::endEpisode(const Reward& reward)
@@ -84,7 +99,6 @@ void SARSA::endEpisode(const Reward& reward)
 		cout << "policy(" << i << ") = " << policy << endl;
 	}
 
-
 }
 
 SARSA::~SARSA()
@@ -98,7 +112,7 @@ unsigned int SARSA::policy(size_t x)
 
 	const rowvec& Qx = Q.row(x);
 
-	double eps = 1.0/t;
+	double eps = 0.15;
 
 	if (RandomGenerator::sampleEvent(eps))
 		un = RandomGenerator::sampleUniformInt(0, Q.n_cols - 1);

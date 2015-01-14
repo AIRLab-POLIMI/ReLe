@@ -1,4 +1,4 @@
-18:14:14 **** Incremental Build of configuration Default for project rele ****
+13:55:27 **** Incremental Build of configuration Default for project rele ****
 catkin_make --pkg rele 
 [ 83%] Built target rele
 [100%] Built target simple_chain
@@ -14,5 +14,5 @@ Install space: /home/dave/ReLe/install
 #### Running command: "make -j8 -l8" in "/home/dave/ReLe/build/rele"
 ####
 
-18:14:14 Build Finished (took 218ms)
+13:55:27 Build Finished (took 220ms)
 

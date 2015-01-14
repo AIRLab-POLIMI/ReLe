@@ -51,7 +51,7 @@ public:
 	virtual void getInitialState(FiniteState& state);
 
 private:
-	std::vector<std::vector<std::vector<double>>>P;
+	std::vector<std::vector<std::vector<double>>> P;
 	std::vector<std::vector<double>> R;
 	FiniteState currentState;
 

@@ -52,12 +52,12 @@ public:
 		actionN = 0;
 	}
 
-	inline int getActionN() const
+	inline unsigned int getActionN() const
 	{
 		return actionN;
 	}
 
-	inline void setActionN(int actionN)
+	inline void setActionN(unsigned int actionN)
 	{
 		this->actionN = actionN;
 	}
@@ -73,7 +73,7 @@ public:
 	}
 
 private:
-	int actionN;
+	unsigned int actionN;
 };
 
 class State

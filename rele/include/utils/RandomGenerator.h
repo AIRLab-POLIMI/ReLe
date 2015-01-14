@@ -55,15 +55,15 @@ public:
 		return dist(gen);
 	}
 
-	inline static int sampleUniformInt(const int lo, const int hi)
+	inline static std::size_t sampleUniformInt(const int lo, const int hi)
 	{
 		boost::random::uniform_int_distribution<> dist(lo, hi);
 		return dist(gen);
 	}
 
-	inline static int sampleDiscrete(std::vector<double>& prob)
+	inline static std::size_t sampleDiscrete(std::vector<double>& prob)
 	{
-		boost::random::discrete_distribution<> dist(prob.begin(), prob.end());
+		boost::random::discrete_distribution<std::size_t> dist(prob.begin(), prob.end());
 		return dist(gen);
 	}
 

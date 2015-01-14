@@ -25,6 +25,7 @@
 #define CORE_H_
 
 #include "Envirorment.h"
+#include "Logger.h"
 
 //TODO: move all code in cpp and include at the bottom of the file
 //TODO: or leave the code in this file
@@ -58,25 +59,29 @@ public:
 
 	void runEpisode()
 	{
+		Logger<ActionC, StateC> logger;
 		StateC xn;
 		ActionC u;
 
 		envirorment.getInitialState(xn);
 		agent.initEpisode();
+		logger.log(xn);
 
-		for (int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+		for (unsigned int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
 		{
 			Reward r;
-			std::cout << "t = " << i << ": (" << xn << ", ";
+
 			agent.sampleAction(xn, u);
 			envirorment.step(u, xn, r);
 			agent.step(r, xn);
-			std::cout << u << ") -> "<< " (" << xn << ", " << r << ")" << std::endl;
+			logger.log(u, xn, r, i);
 		}
 
 		//ma serve end episode?
 		Reward r;
 		agent.endEpisode(r);
+
+		logger.printStatistics();
 	}
 
 	/*void setupAgent() serve?

@@ -47,9 +47,12 @@ private:
 	unsigned int u;
 
 	//algorithm parameters
-	int t;
 	double alpha;
 	double gamma;
+
+	//algorithm data
+	int t;
+	bool actionReady;
 
 };
 
