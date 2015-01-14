@@ -84,14 +84,21 @@ void SARSA::step(const Reward& reward, const FiniteState& nextState)
 void SARSA::endEpisode(const Reward& reward)
 {
 	//TODO che ci metto qui?
-	// Per ora stampo la action-value function...
+	// Per ora stampo la action-value function e la policy...
+
+	std::cout << std::endl << std::endl << "--- Learning results ---" << std::endl
+						<< std::endl;
+
+	std::cout << "- Action-value function" << std::endl;
+
 	for (unsigned int i = 0; i < Q.n_rows; i++)
 		for (unsigned int j = 0; j < Q.n_cols; j++)
 		{
 			cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
 		}
 
-	//E la policy...
+	std::cout << "- Policy" << std::endl;
+
 	for (unsigned int i = 0; i < Q.n_rows; i++)
 	{
 		unsigned int policy;

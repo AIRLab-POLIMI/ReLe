@@ -68,21 +68,29 @@ public:
 		std::size_t x = history.back();
 		history.push_back(xn.getStateN());
 
-		std::cout << "t = " << t << ": (" << x << ", " << u << ") -> " << " ("
+		std::cout << "t = " << t << ": (x = " << x << ", " << u << ") -> " << " ("
 					<< xn << ", " << r << ")" << std::endl;
 
 	}
 
 	void printStatistics()
 	{
-		std::cout << "State visits statistics";
+		std::cout << std::endl << std::endl << "--- statistics ---" << std::endl
+					<< std::endl;
+
+		std::cout << "- State visits" << std::endl;
 		//FIXME stati non noti a priori
-		std::size_t statesNumbers = 5;
-		for (std::size_t i = 0; i < statesNumbers; i++)
+		std::size_t totalVisits = history.size();
+		std::size_t countedVisits = 0;
+		for (std::size_t i = 0; countedVisits < totalVisits; i++)
 		{
 			std::size_t visits = std::count(history.begin(), history.end(), i);
 			std::cout << "x(" << i << ") = " << visits << std::endl;
+			countedVisits += visits;
 		}
+
+		std::cout << "- initial State" << std::endl << "x(t = 0): "
+					<< history[0] << std::endl;
 	}
 
 private:

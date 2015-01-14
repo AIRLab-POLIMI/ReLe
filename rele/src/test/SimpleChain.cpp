@@ -69,10 +69,4 @@ int main(int argc, char *argv[])
 	cout << "starting episode" << endl;
 	core.runEpisode();
 
-	//TODO levami
-	ReLe::FiniteState x;
-	ReLe::Action a;
-	mdp.getInitialState(x);
-	cout << "x: " << x.getStateN() << endl;
-
 }
