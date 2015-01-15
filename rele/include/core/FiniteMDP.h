@@ -49,6 +49,9 @@ private:
 	arma::cube R;
 	FiniteState currentState;
 
+	void chekMatricesDimensions(const arma::cube& P, const arma::cube& R);
+	void setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
+				double gamma, const arma::cube& P);
 };
 
 }

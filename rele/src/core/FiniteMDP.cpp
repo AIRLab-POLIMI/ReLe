@@ -21,6 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdexcept>
+
 #include "FiniteMDP.h"
 #include "RandomGenerator.h"
 
@@ -33,20 +35,8 @@ FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, bool isFiniteHorizon,
 			double gamma, unsigned int horizon) :
 			Envirorment(), P(P), R(R)
 {
-	EnvirormentSettings& task = getWritableSettings();
-	task.isFiniteHorizon = isFiniteHorizon;
-	task.horizon = horizon;
-	task.gamma = gamma;
-
-	task.isAverageReward = false;
-	task.isEpisodic = false;
-
-
-	task.finiteStateDim = P.n_cols;
-	task.finiteActionDim = P.n_rows;
-
-	task.continuosStateDim = 0;
-	task.continuosActionDim = 0;
+	chekMatricesDimensions(P, R);
+	setupEnvirorment(isFiniteHorizon, horizon, gamma, P);
 }
 
 void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
@@ -77,6 +67,30 @@ void FiniteMDP::getInitialState(FiniteState& state)
 
 	currentState.setStateN(x);
 	state.setStateN(x);
+}
+
+void FiniteMDP::chekMatricesDimensions(const arma::cube& P, const arma::cube& R)
+{
+	if ((P.n_rows != R.n_rows) || (P.n_cols != R.n_cols)
+				|| (P.n_cols != P.n_slices) || (R.n_slices != 2))
+		throw invalid_argument("Invalid matrices:\n" //
+								"\t\tP must be [actions x states x states]\n"//
+								"\t\tR must be [actions x states x 2]\n");
+}
+
+void FiniteMDP::setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
+			double gamma, const arma::cube& P)
+{
+	EnvirormentSettings& task = getWritableSettings();
+	task.isFiniteHorizon = isFiniteHorizon;
+	task.horizon = horizon;
+	task.gamma = gamma;
+	task.isAverageReward = false;
+	task.isEpisodic = false;
+	task.finiteStateDim = P.n_cols;
+	task.finiteActionDim = P.n_rows;
+	task.continuosStateDim = 0;
+	task.continuosActionDim = 0;
 }
 
 }
