@@ -61,11 +61,12 @@ int main(int argc, char *argv[])
 				}
 	};
 
-	ReLe::FiniteMDP mdp(Pdata, Rdata);
+	ReLe::FiniteMDP mdp(Pdata, Rdata, false, 0.9);
 	ReLe::SARSA agent(statesNumber, actionsNumber);
 	ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
+	core.setupAgent();
 
-	core.getSettings().episodeLenght = 10000;
+	core.getSettings().episodeLenght = 1000;
 	cout << "starting episode" << endl;
 	core.runEpisode();
 

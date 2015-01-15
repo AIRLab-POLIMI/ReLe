@@ -37,33 +37,23 @@ SARSA::SARSA(size_t statesN, size_t actionN) :
 	u = 0;
 
 	//Default algorithm parameters
-	alpha = 1;
-	gamma = 0.9;
-
-	//time step
-	t = 1;
-	actionReady = false;
+	alpha = 0.2;
 }
 
-void SARSA::initEpisode()
+void SARSA::initEpisode(const FiniteState& state,  FiniteAction& action)
 {
-	t = 1;
+	sampleAction(state, action);
 }
 
 void SARSA::sampleAction(const FiniteState& state, FiniteAction& action)
 {
 	x = state.getStateN();
-
-	if (!actionReady)
-	{
-		u = policy(x);
-	}
+	u = policy(x);
 
 	action.setActionN(u);
-	actionReady = false;
 }
 
-void SARSA::step(const Reward& reward, const FiniteState& nextState)
+void SARSA::step(const Reward& reward, const FiniteState& nextState, FiniteAction& action)
 {
 	size_t xn = nextState.getStateN();
 	unsigned int un = policy(xn);
@@ -74,38 +64,29 @@ void SARSA::step(const Reward& reward, const FiniteState& nextState)
 
 	cout << "Q(" << x << ", " << u << ") = " << Q(x, u) << endl;
 
-	//update action
+	//update action and state
+	x = xn;
 	u = un;
-	actionReady = true;
 
-	t++;
+	//set next action
+	action.setActionN(u);
+}
+
+void SARSA::endEpisode()
+{
+	//print statistics
+	printStatistics();
 }
 
 void SARSA::endEpisode(const Reward& reward)
 {
-	//TODO che ci metto qui?
-	// Per ora stampo la action-value function e la policy...
+	//Last update
+	double r = reward[0];
+	double delta = r - Q(x, u);
+	Q(x, u) = Q(x, u) + alpha * delta;
 
-	std::cout << std::endl << std::endl << "--- Learning results ---" << std::endl
-						<< std::endl;
-
-	std::cout << "- Action-value function" << std::endl;
-
-	for (unsigned int i = 0; i < Q.n_rows; i++)
-		for (unsigned int j = 0; j < Q.n_cols; j++)
-		{
-			cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
-		}
-
-	std::cout << "- Policy" << std::endl;
-
-	for (unsigned int i = 0; i < Q.n_rows; i++)
-	{
-		unsigned int policy;
-		Q.row(i).max(policy);
-		cout << "policy(" << i << ") = " << policy << endl;
-	}
-
+	//print statistics
+	printStatistics();
 }
 
 SARSA::~SARSA()
@@ -129,13 +110,40 @@ unsigned int SARSA::policy(size_t x)
 	return un;
 }
 
+void SARSA::printStatistics()
+{
+	//TODO dentro la classe o altrove???
+	cout << endl << endl << "--- Parameters --"
+				<< endl << endl;
+	cout << "gamma: " << gamma << endl;
+	cout << "alpha: " << alpha << endl;
+
+	cout << endl << endl << "--- Learning results ---"
+				<< endl << endl;
+
+	cout << "- Action-value function" << endl;
+	for (unsigned int i = 0; i < Q.n_rows; i++)
+		for (unsigned int j = 0; j < Q.n_cols; j++)
+		{
+			cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
+		}
+	cout << "- Policy" << endl;
+	for (unsigned int i = 0; i < Q.n_rows; i++)
+	{
+		unsigned int policy;
+		Q.row(i).max(policy);
+		cout << "policy(" << i << ") = " << policy << endl;
+	}
+
+}
+
 SARSA_lambda::SARSA_lambda(double lambda) :
 			lambda(lambda)
 {
 
 }
 
-void SARSA_lambda::initEpisode()
+void SARSA_lambda::initEpisode(const FiniteState& state, FiniteAction& action)
 {
 
 }
@@ -145,7 +153,12 @@ void SARSA_lambda::sampleAction(const FiniteState& state, FiniteAction& action)
 
 }
 
-void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState)
+void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState, FiniteAction& action)
+{
+
+}
+
+void SARSA_lambda::endEpisode()
 {
 
 }

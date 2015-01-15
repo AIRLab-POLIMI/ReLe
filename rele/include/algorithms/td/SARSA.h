@@ -14,29 +14,27 @@
 namespace ReLe
 {
 
-class SARSA : public Agent<FiniteAction, FiniteState>
+class SARSA: public Agent<FiniteAction, FiniteState>
 {
 public:
 	SARSA(std::size_t statesN, std::size_t actionN);
-	virtual void initEpisode();
+	virtual void initEpisode(const FiniteState& state, FiniteAction& action);
 	virtual void sampleAction(const FiniteState& state, FiniteAction& action);
-	virtual void step(const Reward& reward, const FiniteState& nextState);
+	virtual void step(const Reward& reward, const FiniteState& nextState,
+				FiniteAction& action);
 	virtual void endEpisode(const Reward& reward);
+	virtual void endEpisode();
 
 	void setAlpha(double alpha)
 	{
 		this->alpha = alpha;
 	}
 
-	void setGamma(double gamma)
-	{
-		this->gamma = gamma;
-	}
-
 	virtual ~SARSA();
 
 private:
 	unsigned int policy(std::size_t x);
+	void printStatistics();
 
 private:
 	//Action-value function
@@ -48,22 +46,19 @@ private:
 
 	//algorithm parameters
 	double alpha;
-	double gamma;
-
-	//algorithm data
-	int t;
-	bool actionReady;
 
 };
 
-class SARSA_lambda : public Agent<FiniteAction, FiniteState>
+class SARSA_lambda: public Agent<FiniteAction, FiniteState>
 {
 public:
 	SARSA_lambda(double lambda);
-	virtual void initEpisode();
+	virtual void initEpisode(const FiniteState& state, FiniteAction& action);
 	virtual void sampleAction(const FiniteState& state, FiniteAction& action);
-	virtual void step(const Reward& reward, const FiniteState& nextState);
+	virtual void step(const Reward& reward, const FiniteState& nextState,
+				FiniteAction& action);
 	virtual void endEpisode(const Reward& reward);
+	virtual void endEpisode();
 
 	virtual ~SARSA_lambda();
 

@@ -50,13 +50,19 @@ public:
 				Reward& reward) = 0;
 	virtual void getInitialState(StateC& state) = 0;
 
-	inline const EnvirormentSettings& getSettings()
+	inline const EnvirormentSettings& getSettings() const
 	{
 		return settings;
 	}
 
 	virtual ~Envirorment()
 	{
+	}
+
+protected:
+	inline EnvirormentSettings& getWritableSettings()
+	{
+		return settings;
 	}
 
 private:

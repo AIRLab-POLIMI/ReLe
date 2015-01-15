@@ -35,8 +35,16 @@ namespace ReLe
 template<class ActionC, class StateC>
 class Logger
 {
+	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+
 public:
 	void log(StateC& xn)
+	{
+
+	}
+
+	void log(StateC& xn, Reward& r)
 	{
 
 	}
@@ -63,13 +71,18 @@ public:
 		history.push_back(xn.getStateN());
 	}
 
+	void log(FiniteState& xn, Reward& r)
+	{
+		history.push_back(xn.getStateN());
+	}
+
 	void log(FiniteAction& u, FiniteState& xn, Reward& r, unsigned int t)
 	{
 		std::size_t x = history.back();
 		history.push_back(xn.getStateN());
 
-		std::cout << "t = " << t << ": (x = " << x << ", " << u << ") -> " << " ("
-					<< xn << ", " << r << ")" << std::endl;
+		std::cout << "t = " << t << ": (x = " << x << ", " << u << ") -> "
+					<< " (" << xn << ", " << r << ")" << std::endl;
 
 	}
 
@@ -78,8 +91,7 @@ public:
 		std::cout << std::endl << std::endl << "--- statistics ---" << std::endl
 					<< std::endl;
 
-		std::cout << "- State visits" << std::endl;
-		//FIXME stati non noti a priori
+		std::cout << "- State Visits" << std::endl;
 		std::size_t totalVisits = history.size();
 		std::size_t countedVisits = 0;
 		for (std::size_t i = 0; countedVisits < totalVisits; i++)
@@ -89,7 +101,7 @@ public:
 			countedVisits += visits;
 		}
 
-		std::cout << "- initial State" << std::endl << "x(t = 0): "
+		std::cout << "- Initial State" << std::endl << "x(t = 0): "
 					<< history[0] << std::endl;
 	}
 

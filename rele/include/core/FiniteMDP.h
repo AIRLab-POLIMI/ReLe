@@ -39,11 +39,19 @@ class FiniteMDP: public Envirorment<FiniteAction, FiniteState>
 public:
 	template<int statesNumber, int actionsNumber>
 	FiniteMDP(const double (&Pdata)[actionsNumber][statesNumber][statesNumber],
-				const double (&Rdata)[statesNumber][2]) :
+				const double (&Rdata)[statesNumber][2], bool isFiniteHorizon, double gamma = 1.0) :
 				Envirorment()
 	{
 		initP(Pdata);
 		initR(Rdata);
+
+		EnvirormentSettings& task = getWritableSettings();
+		task.isAverageReward = false;
+		task.isDiscreteActions = true;
+		task.isDiscreteStates = true;
+		task.isEpisodic = false;
+		task.isFiniteHorizon = isFiniteHorizon;
+		task.gamma = gamma;
 	}
 
 	virtual void step(const FiniteAction& action, FiniteState& nextState,
@@ -51,7 +59,7 @@ public:
 	virtual void getInitialState(FiniteState& state);
 
 private:
-	std::vector<std::vector<std::vector<double>>> P;
+	std::vector<std::vector<std::vector<double>>>P;
 	std::vector<std::vector<double>> R;
 	FiniteState currentState;
 

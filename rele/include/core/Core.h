@@ -64,35 +64,41 @@ public:
 		ActionC u;
 
 		envirorment.getInitialState(xn);
-		agent.initEpisode();
+		agent.initEpisode(xn, u);
 		logger.log(xn);
 
-		for (unsigned int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+		for (unsigned int i = 0; i < settings.episodeLenght; i++)
 		{
 			Reward r;
 
-			agent.sampleAction(xn, u);
 			envirorment.step(u, xn, r);
-			agent.step(r, xn);
+
+			if(xn.isAbsorbing())
+			{
+				agent.endEpisode(r);
+				logger.log(xn, r);
+				break;
+			}
+
+			agent.step(r, xn, u);
 			logger.log(u, xn, r, i);
 		}
 
-		//ma serve end episode?
-		Reward r;
-		agent.endEpisode(r);
+		if(!xn.isAbsorbing())
+			agent.endEpisode();
 
 		logger.printStatistics();
 	}
 
-	/*void setupAgent() serve?
+	void setupAgent()
 	{
-		EnvirormentSettings& task = envirorment.getSettings();
+		const EnvirormentSettings& task = envirorment.getSettings();
 
 		if (!task.isFiniteHorizon)
 		{
-			//set gamma
+			agent.setGamma(task.gamma);
 		}
-	}*/
+	}
 
 private:
 	Envirorment<ActionC, StateC>& envirorment;
