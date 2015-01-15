@@ -50,7 +50,7 @@ public:
 				Agent<ActionC, StateC>& agent) :
 				envirorment(envirorment), agent(agent)
 	{
-
+		settings.logTransitions = false;
 	}
 
 	CoreSettings& getSettings()

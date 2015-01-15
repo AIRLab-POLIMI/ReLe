@@ -92,8 +92,9 @@ public:
 		std::size_t x = history.back();
 		history.push_back(xn.getStateN());
 
-		std::cout << "t = " << t << ": (x = " << x << ", " << u << ") -> "
-					<< " (" << xn << ", " << r << ")" << std::endl;
+		if (logTransitions)
+			std::cout << "t = " << t << ": (x = " << x << ", " << u << ") -> "
+						<< " (" << xn << ", " << r << ")" << std::endl;
 
 	}
 

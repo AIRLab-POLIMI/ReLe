@@ -62,8 +62,6 @@ void SARSA::step(const Reward& reward, const FiniteState& nextState, FiniteActio
 	double delta = r + gamma * Q(xn, un) - Q(x, u);
 	Q(x, u) = Q(x, u) + alpha * delta;
 
-	cout << "Q(" << x << ", " << u << ") = " << Q(x, u) << endl;
-
 	//update action and state
 	x = xn;
 	u = un;
