@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 	core.setupAgent();
 
-	core.getSettings().episodeLenght = 1000;
+	core.getSettings().episodeLenght = 10000;
 	cout << "starting episode" << endl;
 	core.runEpisode();
 

@@ -39,6 +39,11 @@ class Logger
 	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
 public:
+	Logger(bool logTransitions)
+	{
+
+	}
+
 	void log(StateC& xn)
 	{
 
@@ -66,6 +71,12 @@ class Logger<FiniteAction, FiniteState>
 {
 
 public:
+	Logger(bool logTransitions) :
+				logTransitions(logTransitions)
+	{
+
+	}
+
 	void log(FiniteState& xn)
 	{
 		history.push_back(xn.getStateN());
@@ -106,6 +117,7 @@ public:
 	}
 
 private:
+	bool logTransitions;
 	std::vector<std::size_t> history;
 
 };

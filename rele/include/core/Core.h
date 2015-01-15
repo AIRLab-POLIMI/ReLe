@@ -35,6 +35,7 @@ namespace ReLe
 
 struct CoreSettings
 {
+	bool logTransitions;
 	unsigned int episodeLenght;
 
 };
@@ -59,7 +60,7 @@ public:
 
 	void runEpisode()
 	{
-		Logger<ActionC, StateC> logger;
+		Logger<ActionC, StateC> logger(settings.logTransitions);
 		StateC xn;
 		ActionC u;
 
