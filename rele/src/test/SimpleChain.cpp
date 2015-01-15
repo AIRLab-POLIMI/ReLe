@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
 
 	arma::cube R(actionsNumber, statesNumber, 2);
 	arma::mat R0(statesNumber, 2);
-	R0 << 0 << 0 << arma::endr //
+	R0 << //
+				0 << 0 << arma::endr //
 				<< 0 << 0 << arma::endr //
 				<< 1 << 0 << arma::endr //
 				<< 0 << 0 << arma::endr //
