@@ -38,6 +38,9 @@ struct EnvirormentSettings
 	bool isFiniteHorizon;
 	bool isEpisodic;
 	int horizon;
+
+	size_t stateDim;
+	unsigned int actionDim;
 };
 
 template<class ActionC, class StateC>

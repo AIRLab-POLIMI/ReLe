@@ -44,10 +44,10 @@ public:
 	}
 
 	/*inline static double sampleUniform()
-	{
-		boost::random::uniform_01<> dist();
-		return dist(gen);
-	}*/
+	 {
+	 boost::random::uniform_01<> dist();
+	 return dist(gen);
+	 }*/
 
 	inline static double sampleUniform(const double lo, const double hi)
 	{
@@ -63,7 +63,15 @@ public:
 
 	inline static std::size_t sampleDiscrete(std::vector<double>& prob)
 	{
-		boost::random::discrete_distribution<std::size_t> dist(prob.begin(), prob.end());
+		boost::random::discrete_distribution<std::size_t> dist(prob.begin(),
+					prob.end());
+		return dist(gen);
+	}
+
+	template<class Iterator>
+	inline static std::size_t sampleDiscrete(Iterator begin, Iterator end)
+	{
+		boost::random::discrete_distribution<std::size_t> dist(begin, end);
 		return dist(gen);
 	}
 
@@ -80,6 +88,5 @@ private:
 };
 
 }
-
 
 #endif /* RANDOMGENERATOR_H_ */

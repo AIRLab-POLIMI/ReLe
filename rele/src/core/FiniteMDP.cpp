@@ -29,6 +29,19 @@ using namespace std;
 namespace ReLe
 {
 
+FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, bool isFiniteHorizon,
+			double gamma) :
+			Envirorment(), P(P), R(R)
+{
+	EnvirormentSettings& task = getWritableSettings();
+	task.isAverageReward = false;
+	task.isDiscreteActions = true;
+	task.isDiscreteStates = true;
+	task.isEpisodic = false;
+	task.isFiniteHorizon = isFiniteHorizon;
+	task.gamma = gamma;
+}
+
 void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 			Reward& reward)
 {
@@ -36,14 +49,15 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 	//Compute next state
 	unsigned int u = action.getActionN();
 	size_t x = currentState.getStateN();
-	size_t xn = RandomGenerator::sampleDiscrete(P[u][x]);
+	arma::vec prob = P.tube(u, x);
+	size_t xn = RandomGenerator::sampleDiscrete(prob.begin(), prob.end());
 
 	currentState.setStateN(xn);
 	nextState.setStateN(xn);
 
 	//compute reward
-	double m = R[xn][0];
-	double sigma = R[xn][1];
+	double m = R(u, xn, 0);
+	double sigma = R(u, xn, 1);
 	double r = RandomGenerator::sampleNormal(m, sigma);
 
 	reward.push_back(r);
@@ -52,7 +66,7 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 
 void FiniteMDP::getInitialState(FiniteState& state)
 {
-	size_t x = RandomGenerator::sampleUniformInt(0, P[0].size() - 1);
+	size_t x = RandomGenerator::sampleUniformInt(0, P.n_rows - 1);
 
 	currentState.setStateN(x);
 	state.setStateN(x);

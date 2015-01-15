@@ -34,34 +34,40 @@ int main(int argc, char *argv[])
 	const size_t statesNumber = 5;
 	const size_t actionsNumber = 2;
 
-	const double Rdata[statesNumber][2] =
-	{
-		{0,0},
-		{0,0},
-		{1,0},
-		{0,0},
-		{0,0}
-	};
+	arma::cube R(actionsNumber, statesNumber, 2);
+	arma::mat R0(statesNumber, 2);
+	R0 << 0 << 0 << arma::endr //
+				<< 0 << 0 << arma::endr //
+				<< 1 << 0 << arma::endr //
+				<< 0 << 0 << arma::endr //
+				<< 0 << 0 << arma::endr;
 
-	const double Pdata[actionsNumber][statesNumber][statesNumber] =
-	{
-				{
-							{0.2, 0.8, 0, 0, 0},
-							{0, 0.2, 0.8, 0, 0},
-							{0, 0, 0.2, 0.8, 0},
-							{0, 0, 0, 0.2, 0.8},
-							{0, 0, 0, 0, 1}
-				},
-				{
-							{1, 0, 0, 0, 0},
-							{0.8, 0.2, 0, 0, 0},
-							{0, 0.8, 0.2, 0, 0},
-							{0, 0, 0.8, 0.2, 0},
-							{0, 0, 0, 0.8, 0.2}
-				}
-	};
+	R.tube(arma::span(0), arma::span::all) = R0;
+	R.tube(arma::span(1), arma::span::all) = R0;
 
-	ReLe::FiniteMDP mdp(Pdata, Rdata, false, 0.9);
+	arma::cube P(actionsNumber, statesNumber, statesNumber);
+
+	arma::mat P0(statesNumber, statesNumber);
+	arma::mat P1(statesNumber, statesNumber);
+
+	P0 << //
+				0.2 << 0.8 << 0 << 0 << 0 << arma::endr //
+				<< 0 << 0.2 << 0.8 << 0 << 0 << arma::endr //
+				<< 0 << 0 << 0.2 << 0.8 << 0 << arma::endr //
+				<< 0 << 0 << 0 << 0.2 << 0.8 << arma::endr //
+				<< 0 << 0 << 0 << 0 << 1;
+
+	P1 << //
+				1 << 0 << 0 << 0 << 0 << arma::endr //
+				<< 0.8 << 0.2 << 0 << 0 << 0 << arma::endr //
+				<< 0 << 0.8 << 0.2 << 0 << 0 << arma::endr //
+				<< 0 << 0 << 0.8 << 0.2 << 0 << arma::endr //
+				<< 0 << 0 << 0 << 0.8 << 0.2;
+
+	P.tube(arma::span(0), arma::span::all) = P0;
+	P.tube(arma::span(1), arma::span::all) = P1;
+
+	ReLe::FiniteMDP mdp(P, R, false, 0.9);
 	ReLe::SARSA agent(statesNumber, actionsNumber);
 	ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 	core.setupAgent();
