@@ -51,6 +51,7 @@ public:
 				envirorment(envirorment), agent(agent)
 	{
 		settings.logTransitions = false;
+		agent.setTask(envirorment.getSettings());
 	}
 
 	CoreSettings& getSettings()
@@ -89,11 +90,6 @@ public:
 			agent.endEpisode();
 
 		logger.printStatistics();
-	}
-
-	void setupAgent()
-	{
-		agent.setTask(envirorment.getSettings());
 	}
 
 private:
