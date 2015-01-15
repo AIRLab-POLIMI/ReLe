@@ -30,6 +30,23 @@
 
 namespace ReLe
 {
+
+struct EnvirormentSettings
+{
+	bool isFiniteHorizon;
+	double gamma;
+	unsigned int horizon;
+
+	bool isAverageReward;
+	bool isEpisodic;
+
+	size_t finiteStateDim;
+	unsigned int finiteActionDim;
+
+	unsigned int continuosStateDim;
+	unsigned int continuosActionDim;
+};
+
 class Action
 {
 public:

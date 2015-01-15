@@ -26,22 +26,10 @@
 
 #include <vector>
 
+#include "Basics.h"
+
 namespace ReLe
 {
-
-struct EnvirormentSettings
-{
-	double gamma;
-	bool isDiscreteActions;
-	bool isDiscreteStates;
-	bool isAverageReward;
-	bool isFiniteHorizon;
-	bool isEpisodic;
-	int horizon;
-
-	size_t stateDim;
-	unsigned int actionDim;
-};
 
 template<class ActionC, class StateC>
 class Envirorment

@@ -44,9 +44,9 @@ public:
 	virtual void endEpisode(const Reward& reward) = 0;
 	virtual void endEpisode() = 0;
 
-	void setGamma(double gamma)
+	void setTask(const EnvirormentSettings& task)
 	{
-		this->gamma = gamma;
+		this->task = task;
 	}
 
 	virtual ~Agent()
@@ -55,7 +55,7 @@ public:
 	}
 
 protected:
-	double gamma;
+	EnvirormentSettings task;
 };
 
 }

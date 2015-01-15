@@ -30,16 +30,23 @@ namespace ReLe
 {
 
 FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, bool isFiniteHorizon,
-			double gamma) :
+			double gamma, unsigned int horizon) :
 			Envirorment(), P(P), R(R)
 {
 	EnvirormentSettings& task = getWritableSettings();
-	task.isAverageReward = false;
-	task.isDiscreteActions = true;
-	task.isDiscreteStates = true;
-	task.isEpisodic = false;
 	task.isFiniteHorizon = isFiniteHorizon;
+	task.horizon = horizon;
 	task.gamma = gamma;
+
+	task.isAverageReward = false;
+	task.isEpisodic = false;
+
+
+	task.finiteStateDim = P.n_cols;
+	task.finiteActionDim = P.n_rows;
+
+	task.continuosStateDim = 0;
+	task.continuosActionDim = 0;
 }
 
 void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,

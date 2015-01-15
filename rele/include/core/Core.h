@@ -93,12 +93,7 @@ public:
 
 	void setupAgent()
 	{
-		const EnvirormentSettings& task = envirorment.getSettings();
-
-		if (!task.isFiniteHorizon)
-		{
-			agent.setGamma(task.gamma);
-		}
+		agent.setTask(envirorment.getSettings());
 	}
 
 private:

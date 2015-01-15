@@ -59,7 +59,7 @@ void SARSA::step(const Reward& reward, const FiniteState& nextState, FiniteActio
 	unsigned int un = policy(xn);
 	double r = reward[0];
 
-	double delta = r + gamma * Q(xn, un) - Q(x, u);
+	double delta = r + task.gamma * Q(xn, un) - Q(x, u);
 	Q(x, u) = Q(x, u) + alpha * delta;
 
 	//update action and state
