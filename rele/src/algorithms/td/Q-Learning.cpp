@@ -57,19 +57,18 @@ void Q_Learning::sampleAction(const FiniteState& state, FiniteAction& action)
 void Q_Learning::step(const Reward& reward, const FiniteState& nextState, FiniteAction& action)
 {
     size_t xn = nextState.getStateN();
-    unsigned int un = policy(xn);
     double r = reward[0];
-    double maxQ;
+    double maxQxn;
 
-    const rowvec& Qx = Q.row(x);
-    maxQ = Qx.max();
+    const rowvec& Qxn = Q.row(xn);
+    maxQxn = Qxn.max();
 
-    double delta = r + task.gamma * maxQ - Q(x, u);
+    double delta = r + task.gamma * maxQxn - Q(x, u);
     Q(x, u) = Q(x, u) + alpha * delta;
 
     //update action and state
     x = xn;
-    u = un;
+    u = policy(xn);
 
     //set next action
     action.setActionN(u);

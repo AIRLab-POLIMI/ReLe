@@ -30,6 +30,9 @@
 namespace ReLe
 {
 
+/**
+ * http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node65.html
+ */
 class Q_Learning: public Agent<FiniteAction, FiniteState>
 {
 public:
