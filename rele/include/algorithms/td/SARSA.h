@@ -30,6 +30,11 @@ public:
 		this->alpha = alpha;
 	}
 
+	void setEpsilon(double eps)
+	{
+		this->eps = eps;
+	}
+
 	virtual ~SARSA();
 
 private:
@@ -46,6 +51,7 @@ private:
 
 	//algorithm parameters
 	double alpha;
+	double eps;
 
 };
 

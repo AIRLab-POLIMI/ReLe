@@ -38,6 +38,7 @@ SARSA::SARSA(size_t statesN, size_t actionN) :
 
 	//Default algorithm parameters
 	alpha = 0.2;
+	eps = 0.15;
 }
 
 void SARSA::initEpisode(const FiniteState& state,  FiniteAction& action)
@@ -98,8 +99,6 @@ unsigned int SARSA::policy(size_t x)
 
 	const rowvec& Qx = Q.row(x);
 
-	double eps = 0.15;
-
 	if (RandomGenerator::sampleEvent(eps))
 		un = RandomGenerator::sampleUniformInt(0, Q.n_cols - 1);
 	else
@@ -111,10 +110,13 @@ unsigned int SARSA::policy(size_t x)
 void SARSA::printStatistics()
 {
 	//TODO dentro la classe o altrove???
+	cout << endl << endl << "### SARSA ###";
+
 	cout << endl << endl << "--- Parameters --"
 				<< endl << endl;
 	cout << "gamma: " << gamma << endl;
 	cout << "alpha: " << alpha << endl;
+	cout << "eps: " << eps << endl;
 
 	cout << endl << endl << "--- Learning results ---"
 				<< endl << endl;
