@@ -52,7 +52,7 @@ class BatchRegressor
 {
 
 public:
-	void train(/* classe che rappresenta il dataset da decidere*/);
+    void train(/* classe che rappresenta il dataset da decidere*/);
 };
 
 class BasisFunction

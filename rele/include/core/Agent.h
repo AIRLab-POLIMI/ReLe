@@ -34,28 +34,28 @@ namespace ReLe
 template<class ActionC, class StateC>
 class Agent
 {
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-	virtual void initEpisode(const StateC& state, ActionC& action) = 0;
-	virtual void sampleAction(const StateC& state, ActionC& action) = 0;
-	virtual void step(const Reward& reward, const StateC& nextState,
-				ActionC& action) = 0;
-	virtual void endEpisode(const Reward& reward) = 0;
-	virtual void endEpisode() = 0;
+    virtual void initEpisode(const StateC& state, ActionC& action) = 0;
+    virtual void sampleAction(const StateC& state, ActionC& action) = 0;
+    virtual void step(const Reward& reward, const StateC& nextState,
+                      ActionC& action) = 0;
+    virtual void endEpisode(const Reward& reward) = 0;
+    virtual void endEpisode() = 0;
 
-	void setTask(const EnvirormentSettings& task)
-	{
-		this->task = task;
-	}
+    void setTask(const EnvirormentSettings& task)
+    {
+        this->task = task;
+    }
 
-	virtual ~Agent()
-	{
+    virtual ~Agent()
+    {
 
-	}
+    }
 
 protected:
-	EnvirormentSettings task;
+    EnvirormentSettings task;
 };
 
 }

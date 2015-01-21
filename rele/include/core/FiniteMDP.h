@@ -37,21 +37,21 @@ namespace ReLe
 class FiniteMDP: public Envirorment<FiniteAction, FiniteState>
 {
 public:
-	FiniteMDP(arma::cube P, arma::cube R, bool isFiniteHorizon, double gamma =
-				1.0, unsigned int horizon = 0);
+    FiniteMDP(arma::cube P, arma::cube R, bool isFiniteHorizon, double gamma =
+                  1.0, unsigned int horizon = 0);
 
-	virtual void step(const FiniteAction& action, FiniteState& nextState,
-				Reward& reward);
-	virtual void getInitialState(FiniteState& state);
+    virtual void step(const FiniteAction& action, FiniteState& nextState,
+                      Reward& reward);
+    virtual void getInitialState(FiniteState& state);
 
 private:
-	arma::cube P;
-	arma::cube R;
-	FiniteState currentState;
+    arma::cube P;
+    arma::cube R;
+    FiniteState currentState;
 
-	void chekMatricesDimensions(const arma::cube& P, const arma::cube& R);
-	void setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
-				double gamma, const arma::cube& P);
+    void chekMatricesDimensions(const arma::cube& P, const arma::cube& R);
+    void setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
+                          double gamma, const arma::cube& P);
 };
 
 }

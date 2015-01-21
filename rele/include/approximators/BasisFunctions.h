@@ -26,7 +26,8 @@
 #include <vector>
 #include "Approximators.h"
 
-namespace ReLe {
+namespace ReLe
+{
 
 class BasisFunctions : public std::vector<BasisFunction*>
 {
@@ -64,18 +65,18 @@ private:
     void display(std::vector<unsigned int> v);
 
     /**
-         * Function to generate combinations
-         * @param  deg  Vector of polynomial degrees
-         * @param  dim  Vector that lists dimensions
-         * @param  place  position to be modified
-         */
+     * Function to generate combinations
+     * @param  deg  Vector of polynomial degrees
+     * @param  dim  Vector that lists dimensions
+     * @param  place  position to be modified
+     */
     void GeneratePolynomials(std::vector<unsigned int> deg, std::vector<unsigned int>& dim, unsigned int place);
 
     /**
-         * Function to generate permutations
-         * @param  deg  Vector of polynomial degrees
-         * @param  dim  Vector that lists dimensions
-         */
+     * Function to generate permutations
+     * @param  deg  Vector of polynomial degrees
+     * @param  dim  Vector that lists dimensions
+     */
     void GeneratePolynomialsPermutations(std::vector<unsigned int> deg, std::vector<unsigned int>& dim);
 };
 

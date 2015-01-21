@@ -31,61 +31,61 @@ namespace ReLe
 {
 
 SARSA::SARSA(size_t statesN, size_t actionN) :
-			Q(statesN, actionN, fill::zeros)
+    Q(statesN, actionN, fill::zeros)
 {
-	x = 0;
-	u = 0;
+    x = 0;
+    u = 0;
 
-	//Default algorithm parameters
-	alpha = 0.2;
-	eps = 0.15;
+    //Default algorithm parameters
+    alpha = 0.2;
+    eps = 0.15;
 }
 
 void SARSA::initEpisode(const FiniteState& state,  FiniteAction& action)
 {
-	sampleAction(state, action);
+    sampleAction(state, action);
 }
 
 void SARSA::sampleAction(const FiniteState& state, FiniteAction& action)
 {
-	x = state.getStateN();
-	u = policy(x);
+    x = state.getStateN();
+    u = policy(x);
 
-	action.setActionN(u);
+    action.setActionN(u);
 }
 
 void SARSA::step(const Reward& reward, const FiniteState& nextState, FiniteAction& action)
 {
-	size_t xn = nextState.getStateN();
-	unsigned int un = policy(xn);
-	double r = reward[0];
+    size_t xn = nextState.getStateN();
+    unsigned int un = policy(xn);
+    double r = reward[0];
 
-	double delta = r + task.gamma * Q(xn, un) - Q(x, u);
-	Q(x, u) = Q(x, u) + alpha * delta;
+    double delta = r + task.gamma * Q(xn, un) - Q(x, u);
+    Q(x, u) = Q(x, u) + alpha * delta;
 
-	//update action and state
-	x = xn;
-	u = un;
+    //update action and state
+    x = xn;
+    u = un;
 
-	//set next action
-	action.setActionN(u);
+    //set next action
+    action.setActionN(u);
 }
 
 void SARSA::endEpisode()
 {
-	//print statistics
-	printStatistics();
+    //print statistics
+    printStatistics();
 }
 
 void SARSA::endEpisode(const Reward& reward)
 {
-	//Last update
-	double r = reward[0];
-	double delta = r - Q(x, u);
-	Q(x, u) = Q(x, u) + alpha * delta;
+    //Last update
+    double r = reward[0];
+    double delta = r - Q(x, u);
+    Q(x, u) = Q(x, u) + alpha * delta;
 
-	//print statistics
-	printStatistics();
+    //print statistics
+    printStatistics();
 }
 
 SARSA::~SARSA()
@@ -95,50 +95,50 @@ SARSA::~SARSA()
 
 unsigned int SARSA::policy(size_t x)
 {
-	unsigned int un;
+    unsigned int un;
 
-	const rowvec& Qx = Q.row(x);
+    const rowvec& Qx = Q.row(x);
 
-	if (RandomGenerator::sampleEvent(eps))
-		un = RandomGenerator::sampleUniformInt(0, Q.n_cols - 1);
-	else
-		Qx.max(un);
+    if (RandomGenerator::sampleEvent(eps))
+        un = RandomGenerator::sampleUniformInt(0, Q.n_cols - 1);
+    else
+        Qx.max(un);
 
-	return un;
+    return un;
 }
 
 void SARSA::printStatistics()
 {
-	//TODO dentro la classe o altrove???
-	cout << endl << endl << "### SARSA ###";
+    //TODO dentro la classe o altrove???
+    cout << endl << endl << "### SARSA ###";
 
-	cout << endl << endl << "--- Parameters --"
-				<< endl << endl;
-	cout << "gamma: " << gamma << endl;
-	cout << "alpha: " << alpha << endl;
-	cout << "eps: " << eps << endl;
+    cout << endl << endl << "--- Parameters --"
+         << endl << endl;
+    cout << "gamma: " << gamma << endl;
+    cout << "alpha: " << alpha << endl;
+    cout << "eps: " << eps << endl;
 
-	cout << endl << endl << "--- Learning results ---"
-				<< endl << endl;
+    cout << endl << endl << "--- Learning results ---"
+         << endl << endl;
 
-	cout << "- Action-value function" << endl;
-	for (unsigned int i = 0; i < Q.n_rows; i++)
-		for (unsigned int j = 0; j < Q.n_cols; j++)
-		{
-			cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
-		}
-	cout << "- Policy" << endl;
-	for (unsigned int i = 0; i < Q.n_rows; i++)
-	{
-		unsigned int policy;
-		Q.row(i).max(policy);
-		cout << "policy(" << i << ") = " << policy << endl;
-	}
+    cout << "- Action-value function" << endl;
+    for (unsigned int i = 0; i < Q.n_rows; i++)
+        for (unsigned int j = 0; j < Q.n_cols; j++)
+        {
+            cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
+        }
+    cout << "- Policy" << endl;
+    for (unsigned int i = 0; i < Q.n_rows; i++)
+    {
+        unsigned int policy;
+        Q.row(i).max(policy);
+        cout << "policy(" << i << ") = " << policy << endl;
+    }
 
 }
 
 SARSA_lambda::SARSA_lambda(double lambda) :
-			lambda(lambda)
+    lambda(lambda)
 {
 
 }

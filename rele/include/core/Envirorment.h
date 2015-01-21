@@ -34,30 +34,30 @@ namespace ReLe
 template<class ActionC, class StateC>
 class Envirorment
 {
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-	virtual void step(const ActionC& action, StateC& nextState,
-				Reward& reward) = 0;
-	virtual void getInitialState(StateC& state) = 0;
+    virtual void step(const ActionC& action, StateC& nextState,
+                      Reward& reward) = 0;
+    virtual void getInitialState(StateC& state) = 0;
 
-	inline const EnvirormentSettings& getSettings() const
-	{
-		return settings;
-	}
+    inline const EnvirormentSettings& getSettings() const
+    {
+        return settings;
+    }
 
-	virtual ~Envirorment()
-	{
-	}
+    virtual ~Envirorment()
+    {
+    }
 
 protected:
-	inline EnvirormentSettings& getWritableSettings()
-	{
-		return settings;
-	}
+    inline EnvirormentSettings& getWritableSettings()
+    {
+        return settings;
+    }
 
 private:
-	EnvirormentSettings settings;
+    EnvirormentSettings settings;
 };
 
 }

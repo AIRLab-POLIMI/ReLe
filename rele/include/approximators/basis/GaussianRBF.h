@@ -16,11 +16,13 @@ public:
     virtual ~GaussianRbf();
     double operator() (const DenseArray& input);
 
-    void GetMean(arma::vec &meanval) {
+    void GetMean(arma::vec &meanval)
+    {
         meanval = mean;
     }
 
-    unsigned int GetDimension() {
+    unsigned int GetDimension()
+    {
         return mean.n_rows;
     }
 

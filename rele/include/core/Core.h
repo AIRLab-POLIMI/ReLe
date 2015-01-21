@@ -35,67 +35,67 @@ namespace ReLe
 
 struct CoreSettings
 {
-	bool logTransitions;
-	unsigned int episodeLenght;
+    bool logTransitions;
+    unsigned int episodeLenght;
 
 };
 
 template<class ActionC, class StateC>
 class Core
 {
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-	Core(Envirorment<ActionC, StateC>& envirorment,
-				Agent<ActionC, StateC>& agent) :
-				envirorment(envirorment), agent(agent)
-	{
-		settings.logTransitions = false;
-		agent.setTask(envirorment.getSettings());
-	}
+    Core(Envirorment<ActionC, StateC>& envirorment,
+         Agent<ActionC, StateC>& agent) :
+        envirorment(envirorment), agent(agent)
+    {
+        settings.logTransitions = false;
+        agent.setTask(envirorment.getSettings());
+    }
 
-	CoreSettings& getSettings()
-	{
-		return settings;
-	}
+    CoreSettings& getSettings()
+    {
+        return settings;
+    }
 
-	void runEpisode()
-	{
-		Logger<ActionC, StateC> logger(settings.logTransitions);
-		StateC xn;
-		ActionC u;
+    void runEpisode()
+    {
+        Logger<ActionC, StateC> logger(settings.logTransitions);
+        StateC xn;
+        ActionC u;
 
-		envirorment.getInitialState(xn);
-		agent.initEpisode(xn, u);
-		logger.log(xn);
+        envirorment.getInitialState(xn);
+        agent.initEpisode(xn, u);
+        logger.log(xn);
 
-		for (unsigned int i = 0; i < settings.episodeLenght; i++)
-		{
-			Reward r;
+        for (unsigned int i = 0; i < settings.episodeLenght; i++)
+        {
+            Reward r;
 
-			envirorment.step(u, xn, r);
+            envirorment.step(u, xn, r);
 
-			if(xn.isAbsorbing())
-			{
-				agent.endEpisode(r);
-				logger.log(xn, r);
-				break;
-			}
+            if(xn.isAbsorbing())
+            {
+                agent.endEpisode(r);
+                logger.log(xn, r);
+                break;
+            }
 
-			agent.step(r, xn, u);
-			logger.log(u, xn, r, i);
-		}
+            agent.step(r, xn, u);
+            logger.log(u, xn, r, i);
+        }
 
-		if(!xn.isAbsorbing())
-			agent.endEpisode();
+        if(!xn.isAbsorbing())
+            agent.endEpisode();
 
-		logger.printStatistics();
-	}
+        logger.printStatistics();
+    }
 
 private:
-	Envirorment<ActionC, StateC>& envirorment;
-	Agent<ActionC, StateC>& agent;
-	CoreSettings settings;
+    Envirorment<ActionC, StateC>& envirorment;
+    Agent<ActionC, StateC>& agent;
+    CoreSettings settings;
 };
 
 }
