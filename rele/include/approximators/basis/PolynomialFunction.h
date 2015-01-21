@@ -33,6 +33,7 @@ namespace ReLe
 class PolynomialFunction : public BasisFunction
 {
 public:
+    PolynomialFunction(std::vector<unsigned int> dimension, std::vector<unsigned int> degree);
     PolynomialFunction(unsigned int _dimension = 0, unsigned int _degree = 0);
     virtual ~PolynomialFunction();
     double operator() (const DenseArray& input);

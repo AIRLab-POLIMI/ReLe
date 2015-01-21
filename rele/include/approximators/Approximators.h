@@ -73,13 +73,39 @@ public:
      * @param in the input stream
      */
     virtual void ReadFromStream (std::istream& in) = 0;
+
+    /**
+     * @brief Write the internal state to the stream.
+     * @see WriteOnStream
+     * @param out the output stream
+     * @param bf an instance of basis function
+     * @return the output stream
+     */
+    friend std::ostream& operator<< (std::ostream& out, BasisFunction& bf)
+    {
+        bf.WriteOnStream(out);
+        return out;
+    }
+
+    /**
+     * @brief Read the internal stream from a stream
+     * @see ReadFromStream
+     * @param in the input stream
+     * @param bf an instance of basis function
+     * @return the input stream
+     */
+    friend std::istream& operator>> (std::istream& in, BasisFunction& bf)
+    {
+        bf.ReadFromStream(in);
+        return in;
+    }
 };
 
-class BasisFunctions : public std::vector<BasisFunction>
-{
-public:
-    virtual void operator() (const DenseArray& input, DenseArray& output) = 0; //TODO NON sono tanto convinto di questo...
-};
+//class BasisFunctions : public std::vector<BasisFunction>
+//{
+//public:
+//    virtual void operator() (const DenseArray& input, DenseArray& output) = 0; //TODO NON sono tanto convinto di questo...
+//};
 
 
 }

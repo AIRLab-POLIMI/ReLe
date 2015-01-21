@@ -2,6 +2,11 @@
 
 namespace ReLe {
 
+PolynomialFunction::PolynomialFunction(std::vector<unsigned int> dimension, std::vector<unsigned int> degree)
+    : dimension(dimension), degree(degree)
+{
+}
+
 PolynomialFunction::PolynomialFunction(unsigned int _dimension, unsigned int _degree)
     : dimension(_dimension)
 {
