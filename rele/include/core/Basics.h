@@ -27,6 +27,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 namespace ReLe
 {
@@ -45,6 +46,17 @@ struct EnvirormentSettings
 
 	unsigned int continuosStateDim;
 	unsigned int continuosActionDim;
+};
+
+class DenseArray
+{
+public:
+	virtual double& operator[](std::size_t idx) = 0;
+	virtual const double& operator[](std::size_t idx) const = 0;
+
+	virtual ~DenseArray()
+	{
+	}
 };
 
 class Action
@@ -151,6 +163,50 @@ public:
 
 private:
 	std::size_t stateN;
+
+};
+
+class DenseState: public State, public DenseArray
+{
+public:
+	DenseState(std::size_t size)
+	{
+		state.resize(size);
+	}
+
+	double& operator[](std::size_t idx)
+	{
+		return state[idx];
+	}
+
+	const double& operator[](std::size_t idx) const
+	{
+		return state[idx];
+	}
+
+	inline virtual std::string to_str() const
+	{
+		std::stringstream ss;
+		ss <<  "x = [" << state[0];
+
+		for(size_t i = 1; i < state.size(); i++)
+		{
+			ss << ", " << state [i];
+		}
+
+		ss << "]";
+
+		return ss.str();
+	}
+
+	inline virtual ~DenseState()
+	{
+
+	}
+
+private:
+	std::vector<double> state;
+
 };
 
 typedef std::vector<double> Reward;
@@ -170,12 +226,11 @@ inline std::ostream& operator<<(std::ostream& os, const State& state)
 inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
 	os << "[ ";
-	for(auto r : reward)
+	for (auto r : reward)
 		os << r << " ";
 	os << "]";
 	return os;
 }
-
 
 }
 
