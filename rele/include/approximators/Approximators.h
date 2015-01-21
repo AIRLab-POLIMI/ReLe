@@ -59,6 +59,20 @@ class BasisFunction
 {
 public:
     virtual double operator() (const DenseArray& input) = 0; //Questo è una figata
+    /**
+     * @brief Write a complete description of the instance to
+     * a stream.
+     * @param out the output stream
+     */
+    virtual void WriteOnStream (std::ostream& out) = 0;
+
+    /**
+     * @brief Read the description of the basis function from
+     * a file and reset the internal state according to that.
+     * This function is complementary to WriteOnStream
+     * @param in the input stream
+     */
+    virtual void ReadFromStream (std::istream& in) = 0;
 };
 
 class BasisFunctions : public std::vector<BasisFunction>
