@@ -15,7 +15,8 @@ endif()
 
 include_directories(include/core
                     include/utils
-                    include/algorithms)
+                    include/algorithms
+                    include/approximators)
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -43,7 +44,8 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-file(GLOB_RECURSE ReLe_SOURCE src/core/*.cpp src/algorithms/*.cpp src/utils/*.cpp)
+file(GLOB_RECURSE ReLe_SOURCE src/core/*.cpp src/algorithms/*.cpp src/utils/*.cpp
+src/approximators/*.cpp src/approximators/basis/*.cpp)
 
 add_library(rele ${ReLe_SOURCE})
 

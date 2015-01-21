@@ -35,7 +35,7 @@ class Regressor
 {
 
 public:
-	void evaluate (const DenseArray& input, DenseArray& output) = 0; //TODO anche questo con un operatore???
+    virtual void evaluate (const DenseArray& input, DenseArray& output) = 0; //TODO anche questo con un operatore???
 };
 
 class ParametricRegressor : public Regressor
@@ -58,13 +58,13 @@ public:
 class BasisFunction
 {
 public:
-	double operator() (const DenseArray& input) = 0; //Questo è una figata
+    virtual double operator() (const DenseArray& input) = 0; //Questo è una figata
 };
 
 class BasisFunctions : public std::vector<BasisFunction>
 {
 public:
-	void operator() (const DenseArray& input, DenseArray& output) = 0; //TODO NON sono tanto convinto di questo...
+    virtual void operator() (const DenseArray& input, DenseArray& output) = 0; //TODO NON sono tanto convinto di questo...
 };
 
 
