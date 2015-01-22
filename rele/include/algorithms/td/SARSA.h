@@ -8,13 +8,13 @@
 #ifndef INCLUDE_ALGORITHMS_TD_SARSA_H_
 #define INCLUDE_ALGORITHMS_TD_SARSA_H_
 
-#include "Agent.h"
+#include "td/TD.h"
 #include <armadillo>
 
 namespace ReLe
 {
 
-class SARSA: public Agent<FiniteAction, FiniteState>
+class SARSA: public FiniteTD
 {
 public:
     SARSA(std::size_t statesN, std::size_t actionN);
@@ -25,33 +25,10 @@ public:
     virtual void endEpisode(const Reward& reward);
     virtual void endEpisode();
 
-    void setAlpha(double alpha)
-    {
-        this->alpha = alpha;
-    }
-
-    void setEpsilon(double eps)
-    {
-        this->eps = eps;
-    }
-
     virtual ~SARSA();
 
-private:
-    unsigned int policy(std::size_t x);
-    void printStatistics();
-
-private:
-    //Action-value function
-    arma::mat Q;
-
-    //current an previous actions and states
-    size_t x;
-    unsigned int u;
-
-    //algorithm parameters
-    double alpha;
-    double eps;
+protected:
+    virtual void printStatistics();
 
 };
 

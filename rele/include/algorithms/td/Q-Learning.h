@@ -24,8 +24,7 @@
 #ifndef INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_
 #define INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_
 
-#include "Agent.h"
-#include <armadillo>
+#include "TD.h"
 
 namespace ReLe
 {
@@ -33,7 +32,7 @@ namespace ReLe
 /**
  * http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node65.html
  */
-class Q_Learning: public Agent<FiniteAction, FiniteState>
+class Q_Learning: public FiniteTD
 {
 public:
     Q_Learning(std::size_t statesN, std::size_t actionN);
@@ -44,33 +43,11 @@ public:
     virtual void endEpisode(const Reward& reward);
     virtual void endEpisode();
 
-    void setAlpha(double alpha)
-    {
-        this->alpha = alpha;
-    }
-
-    void setEpsilon(double eps)
-    {
-        this->eps = eps;
-    }
 
     virtual ~Q_Learning();
 
-private:
-    unsigned int policy(std::size_t x);
+protected:
     void printStatistics();
-
-private:
-    //Action-value function
-    arma::mat Q;
-
-    //current an previous actions and states
-    size_t x;
-    unsigned int u;
-
-    //algorithm parameters
-    double alpha;
-    double eps;
 
 };
 
