@@ -32,7 +32,7 @@ namespace ReLe
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
-	FiniteTD(std::size_t statesN, std::size_t actionN);
+	FiniteTD();
 
 	void setAlpha(double alpha)
 	{
@@ -45,6 +45,7 @@ public:
 	}
 
 protected:
+	virtual void init();
 	unsigned int policy(std::size_t x);
 	void printStatistics();
 

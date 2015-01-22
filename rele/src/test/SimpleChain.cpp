@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
     P.tube(arma::span(1), arma::span::all) = P1;
 
     ReLe::FiniteMDP mdp(P, R, false, 0.9);
-    ReLe::SARSA agent(statesNumber, actionsNumber);
-// 	ReLe::Q_Learning agent(statesNumber, actionsNumber);
+    ReLe::SARSA agent;
+// 	ReLe::Q_Learning agent;
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;

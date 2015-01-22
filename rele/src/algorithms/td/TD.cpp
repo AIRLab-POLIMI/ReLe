@@ -29,8 +29,7 @@ using namespace arma;
 
 namespace ReLe
 {
-FiniteTD::FiniteTD(size_t statesN, size_t actionN) :
-			Q(statesN, actionN, fill::zeros)
+FiniteTD::FiniteTD()
 {
 	x = 0;
 	u = 0;
@@ -38,6 +37,11 @@ FiniteTD::FiniteTD(size_t statesN, size_t actionN) :
 	//Default algorithm parameters
 	alpha = 0.2;
 	eps = 0.15;
+}
+
+void FiniteTD::init()
+{
+	Q.zeros(task.finiteStateDim, task.finiteActionDim);
 }
 
 unsigned int FiniteTD::policy(std::size_t x)

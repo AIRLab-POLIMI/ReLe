@@ -30,8 +30,8 @@ using namespace arma;
 namespace ReLe
 {
 
-Q_Learning::Q_Learning(size_t statesN, size_t actionN) :
-			FiniteTD(statesN, actionN)
+Q_Learning::Q_Learning() :
+			FiniteTD()
 {
 }
 

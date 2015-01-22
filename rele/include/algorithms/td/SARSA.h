@@ -17,7 +17,7 @@ namespace ReLe
 class SARSA: public FiniteTD
 {
 public:
-    SARSA(std::size_t statesN, std::size_t actionN);
+    SARSA();
     virtual void initEpisode(const FiniteState& state, FiniteAction& action);
     virtual void sampleAction(const FiniteState& state, FiniteAction& action);
     virtual void step(const Reward& reward, const FiniteState& nextState,
@@ -35,7 +35,7 @@ protected:
 class SARSA_lambda: public Agent<FiniteAction, FiniteState>
 {
 public:
-    SARSA_lambda(double lambda);
+    SARSA_lambda();
     virtual void initEpisode(const FiniteState& state, FiniteAction& action);
     virtual void sampleAction(const FiniteState& state, FiniteAction& action);
     virtual void step(const Reward& reward, const FiniteState& nextState,

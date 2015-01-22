@@ -35,7 +35,7 @@ namespace ReLe
 class Q_Learning: public FiniteTD
 {
 public:
-    Q_Learning(std::size_t statesN, std::size_t actionN);
+    Q_Learning();
     virtual void initEpisode(const FiniteState& state, FiniteAction& action);
     virtual void sampleAction(const FiniteState& state, FiniteAction& action);
     virtual void step(const Reward& reward, const FiniteState& nextState,

@@ -47,12 +47,20 @@ public:
     void setTask(const EnvirormentSettings& task)
     {
         this->task = task;
+        this->init();
     }
 
     virtual ~Agent()
     {
 
     }
+
+protected:
+    virtual void init()
+    {
+
+    }
+
 
 protected:
     EnvirormentSettings task;

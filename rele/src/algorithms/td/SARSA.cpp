@@ -29,8 +29,8 @@ using namespace arma;
 namespace ReLe
 {
 
-SARSA::SARSA(size_t statesN, size_t actionN) :
-			FiniteTD(statesN, actionN)
+SARSA::SARSA() :
+			FiniteTD()
 {
 }
 
@@ -89,15 +89,13 @@ SARSA::~SARSA()
 
 void SARSA::printStatistics()
 {
-	//TODO dentro la classe o altrove???
 	cout << endl << endl << "### SARSA ###";
 	FiniteTD::printStatistics();
 }
 
-SARSA_lambda::SARSA_lambda(double lambda) :
-			lambda(lambda)
+SARSA_lambda::SARSA_lambda()
 {
-
+	lambda = 1;
 }
 
 void SARSA_lambda::initEpisode(const FiniteState& state, FiniteAction& action)
