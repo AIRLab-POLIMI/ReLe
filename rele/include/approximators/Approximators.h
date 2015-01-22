@@ -35,17 +35,31 @@ class Regressor
 {
 
 public:
+
+    Regressor(unsigned int input=1, unsigned int output = 1)
+        :inputDimension(input), outputDimension(output)
+    {}
+
     virtual void evaluate (const DenseArray& input, DenseArray& output) = 0; //TODO anche questo con un operatore???
+
+protected:
+    unsigned int inputDimension, outputDimension;
 };
 
 class ParametricRegressor : public Regressor
 {
-
+public:
+    ParametricRegressor(unsigned int input=1, unsigned int output = 1)
+        : Regressor(input, output)
+    {}
 };
 
 class NonParametricRegressor : public Regressor
 {
-
+public:
+    NonParametricRegressor(unsigned int input=1, unsigned int output = 1)
+        : Regressor(input, output)
+    {}
 };
 
 class BatchRegressor
@@ -59,6 +73,7 @@ class BasisFunction
 {
 public:
     virtual double operator() (const DenseArray& input) = 0; //Questo è una figata
+
     /**
      * @brief Write a complete description of the instance to
      * a stream.

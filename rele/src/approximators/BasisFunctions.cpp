@@ -1,6 +1,7 @@
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/GaussianRBF.h"
+#include <cassert>
 
 namespace ReLe
 {
@@ -18,9 +19,36 @@ BasisFunctions::~BasisFunctions()
     }
 }
 
+void BasisFunctions::operator()(const DenseArray &input, DenseArray &output)
+{
+    unsigned int i = 0;
+    std::vector<BasisFunction*>::iterator it;
+    for (it = this->begin(); it != this->end(); ++it)
+    {
+        BasisFunction& bf = *(*it);
+        output[i++] = bf(input);
+    }
+}
+
+double BasisFunctions::dot(const DenseArray &input, const DenseArray &otherVector)
+{
+    assert(this->size() == otherVector.size());
+
+    double dotprod = 0.0;
+    unsigned int i = 0;
+
+    std::vector<BasisFunction*>::iterator it;
+    for (it = this->begin(); it != this->end(); ++it)
+    {
+        BasisFunction& bf = *(*it);
+        dotprod += otherVector[i++] * bf(input);
+    }
+
+    return dotprod;
+}
+
 void
-BasisFunctions::GeneratePolynomialBasisFunctions(
-    unsigned int degree, unsigned int input_size)
+BasisFunctions::GeneratePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
 {
     //  AddBasisFunction(new PolynomialFunction(0,0));
     std::vector<unsigned int> dim;

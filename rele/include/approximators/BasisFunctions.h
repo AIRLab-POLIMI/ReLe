@@ -34,6 +34,8 @@ class BasisFunctions : public std::vector<BasisFunction*>
 public:
     BasisFunctions();
     virtual ~BasisFunctions();
+    virtual void operator() (const DenseArray& input, DenseArray& output);
+    virtual double dot (const DenseArray& input, const DenseArray &otherVector);
 
     /**
          * Automatically generates polynomial basis functions up to the specified degree

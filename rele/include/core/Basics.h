@@ -53,6 +53,7 @@ class DenseArray
 public:
     virtual double& operator[](std::size_t idx) = 0;
     virtual const double& operator[](std::size_t idx) const = 0;
+    virtual std::size_t size() const = 0;
 
     virtual ~DenseArray()
     {
