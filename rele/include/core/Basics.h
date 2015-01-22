@@ -202,7 +202,7 @@ inline std::ostream& operator<<(std::ostream& os, const State& state)
 
 inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
-	os << "[ ";
+	os << "r = [";
 
 	size_t i;
 	for (i = 0; i + 1 < reward.size(); i++)
