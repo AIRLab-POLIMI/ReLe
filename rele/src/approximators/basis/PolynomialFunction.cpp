@@ -1,5 +1,7 @@
 #include "basis/PolynomialFunction.h"
 
+using namespace arma;
+
 namespace ReLe
 {
 
@@ -20,7 +22,7 @@ PolynomialFunction::PolynomialFunction(unsigned int _dimension, unsigned int _de
 PolynomialFunction::~PolynomialFunction()
 {}
 
-double PolynomialFunction::operator()(const DenseArray &input)
+double PolynomialFunction::operator()(const vec& input)
 {
     float result = 1.0;
     unsigned int i, j;

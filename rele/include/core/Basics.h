@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <armadillo>
 
 namespace ReLe
 {
@@ -46,18 +47,6 @@ struct EnvirormentSettings
 
     unsigned int continuosStateDim;
     unsigned int continuosActionDim;
-};
-
-class DenseArray
-{
-public:
-    virtual double& operator[](std::size_t idx) = 0;
-    virtual const double& operator[](std::size_t idx) const = 0;
-    virtual std::size_t size() const = 0;
-
-    virtual ~DenseArray()
-    {
-    }
 };
 
 class Action
@@ -167,32 +156,22 @@ private:
 
 };
 
-class DenseState: public State, public DenseArray
+class DenseState: public State, public arma::vec
 {
 public:
-    DenseState(std::size_t size)
+    DenseState(std::size_t size) : arma::vec(size)
     {
-        state.resize(size);
-    }
-
-    double& operator[](std::size_t idx)
-    {
-        return state[idx];
-    }
-
-    const double& operator[](std::size_t idx) const
-    {
-        return state[idx];
     }
 
     inline virtual std::string to_str() const
     {
+    	const arma::vec& self = *this;
         std::stringstream ss;
-        ss <<  "x = [" << state[0];
+        ss <<  "x = [";
 
-        for(size_t i = 1; i < state.size(); i++)
+        for(size_t i = 0; i < self.n_elem; i++)
         {
-            ss << ", " << state [i];
+            ss << self[i] << (i + 1 < self.n_elem) ? ", " : "";
         }
 
         ss << "]";
@@ -204,9 +183,6 @@ public:
     {
 
     }
-
-private:
-    std::vector<double> state;
 
 };
 

@@ -1,5 +1,7 @@
 #include "basis/GaussianRBF.h"
 
+using namespace arma;
+
 namespace ReLe
 {
 
@@ -19,7 +21,7 @@ GaussianRbf::~GaussianRbf()
 {
 }
 
-double GaussianRbf::operator()(const DenseArray &input)
+double GaussianRbf::operator()(const vec& input)
 {
     double normv = 0.0;
     unsigned int dim = mean.n_rows;

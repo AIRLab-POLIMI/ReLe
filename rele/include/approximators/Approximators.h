@@ -36,94 +36,46 @@ class Regressor
 
 public:
 
-    Regressor(unsigned int input=1, unsigned int output = 1)
-        :inputDimension(input), outputDimension(output)
-    {}
+	Regressor(unsigned int input = 1, unsigned int output = 1) :
+				inputDimension(input), outputDimension(output)
+	{
+	}
 
-    virtual void evaluate (const DenseArray& input, DenseArray& output) = 0; //TODO anche questo con un operatore???
+	virtual void evaluate(const arma::vec& input, arma::vec& output) = 0;
+
+	virtual ~Regressor()
+	{
+	}
 
 protected:
-    unsigned int inputDimension, outputDimension;
+	unsigned int inputDimension, outputDimension;
 };
 
-class ParametricRegressor : public Regressor
+class ParametricRegressor: public Regressor
 {
 public:
-    ParametricRegressor(unsigned int input=1, unsigned int output = 1)
-        : Regressor(input, output)
-    {}
+	ParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
+				Regressor(input, output)
+	{
+	}
 };
 
-class NonParametricRegressor : public Regressor
+class NonParametricRegressor: public Regressor
 {
 public:
-    NonParametricRegressor(unsigned int input=1, unsigned int output = 1)
-        : Regressor(input, output)
-    {}
+	NonParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
+				Regressor(input, output)
+	{
+	}
 };
 
 class BatchRegressor
 {
 
 public:
-    void train(/* classe che rappresenta il dataset da decidere*/);
+	void train(/* classe che rappresenta il dataset da decidere*/);
 };
-
-class BasisFunction
-{
-public:
-    virtual double operator() (const DenseArray& input) = 0; //Questo è una figata
-
-    /**
-     * @brief Write a complete description of the instance to
-     * a stream.
-     * @param out the output stream
-     */
-    virtual void WriteOnStream (std::ostream& out) = 0;
-
-    /**
-     * @brief Read the description of the basis function from
-     * a file and reset the internal state according to that.
-     * This function is complementary to WriteOnStream
-     * @param in the input stream
-     */
-    virtual void ReadFromStream (std::istream& in) = 0;
-
-    /**
-     * @brief Write the internal state to the stream.
-     * @see WriteOnStream
-     * @param out the output stream
-     * @param bf an instance of basis function
-     * @return the output stream
-     */
-    friend std::ostream& operator<< (std::ostream& out, BasisFunction& bf)
-    {
-        bf.WriteOnStream(out);
-        return out;
-    }
-
-    /**
-     * @brief Read the internal stream from a stream
-     * @see ReadFromStream
-     * @param in the input stream
-     * @param bf an instance of basis function
-     * @return the input stream
-     */
-    friend std::istream& operator>> (std::istream& in, BasisFunction& bf)
-    {
-        bf.ReadFromStream(in);
-        return in;
-    }
-};
-
-//class BasisFunctions : public std::vector<BasisFunction>
-//{
-//public:
-//    virtual void operator() (const DenseArray& input, DenseArray& output) = 0; //TODO NON sono tanto convinto di questo...
-//};
-
 
 }
-
 
 #endif /* APPROXIMATORS_H_ */

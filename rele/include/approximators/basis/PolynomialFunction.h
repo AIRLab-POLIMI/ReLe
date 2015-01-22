@@ -24,8 +24,7 @@
 #ifndef POLYNOMIALFUNCTION_H
 #define POLYNOMIALFUNCTION_H
 
-#include <vector>
-#include "Approximators.h"
+#include "BasisFunctions.h"
 
 namespace ReLe
 {
@@ -36,7 +35,7 @@ public:
     PolynomialFunction(std::vector<unsigned int> dimension, std::vector<unsigned int> degree);
     PolynomialFunction(unsigned int _dimension = 0, unsigned int _degree = 0);
     virtual ~PolynomialFunction();
-    double operator() (const DenseArray& input);
+    double operator() (const arma::vec& input);
 
 
     virtual void WriteOnStream (std::ostream& out);

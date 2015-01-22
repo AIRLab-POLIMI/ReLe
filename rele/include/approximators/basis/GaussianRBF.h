@@ -1,7 +1,7 @@
 #ifndef GAUSSIANRBF_H
 #define GAUSSIANRBF_H
 
-#include "Approximators.h"
+#include "BasisFunctions.h"
 #include <armadillo>
 
 namespace ReLe
@@ -14,9 +14,9 @@ public:
 
     GaussianRbf(unsigned int dimension = 0, float mean_vec[] = 0, float scale_factor = 0);
     virtual ~GaussianRbf();
-    double operator() (const DenseArray& input);
+    double operator() (const arma::vec& input);
 
-    void GetMean(arma::vec &meanval)
+    void GetMean(arma::vec& meanval)
     {
         meanval = mean;
     }

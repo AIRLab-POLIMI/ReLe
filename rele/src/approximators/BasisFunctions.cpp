@@ -2,6 +2,8 @@
 #include "basis/PolynomialFunction.h"
 #include "basis/GaussianRBF.h"
 #include <cassert>
+using namespace arma;
+
 
 namespace ReLe
 {
@@ -19,8 +21,10 @@ BasisFunctions::~BasisFunctions()
     }
 }
 
-void BasisFunctions::operator()(const DenseArray &input, DenseArray &output)
+vec BasisFunctions::operator()(const vec& input)
 {
+	vec output(this->size());
+
     unsigned int i = 0;
     std::vector<BasisFunction*>::iterator it;
     for (it = this->begin(); it != this->end(); ++it)
@@ -28,9 +32,11 @@ void BasisFunctions::operator()(const DenseArray &input, DenseArray &output)
         BasisFunction& bf = *(*it);
         output[i++] = bf(input);
     }
+
+    return output;
 }
 
-double BasisFunctions::dot(const DenseArray &input, const DenseArray &otherVector)
+double BasisFunctions::dot(const vec& input, const vec& otherVector)
 {
     assert(this->size() == otherVector.size());
 

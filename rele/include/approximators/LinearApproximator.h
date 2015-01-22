@@ -31,21 +31,20 @@
 namespace ReLe
 {
 
-class LinearApproximator : public ParametricRegressor
+class LinearApproximator: public ParametricRegressor
 {
 
 public:
-    LinearApproximator(unsigned int input_dim, unsigned int output_dim); //TODO SISTEMARE PER L'USCITA MULTI-DIM
-    LinearApproximator(const unsigned int input_dim, BasisFunctions &bfs);
-    virtual ~LinearApproximator();
-    void evaluate(const DenseArray &input, DenseArray &output);
+	LinearApproximator(unsigned int input_dim, unsigned int output_dim); //TODO SISTEMARE PER L'USCITA MULTI-DIM
+	LinearApproximator(const unsigned int input_dim, BasisFunctions& bfs);
+	virtual ~LinearApproximator();
+	void evaluate(const arma::vec& input, arma::vec& output);
 
 private:
-    arma::vec parameters;
-    BasisFunctions basis; // TODO estendere al caso di uscita multidimensionale (si potrebbe fare la classe BasisFunctionsMatrix
+	arma::vec parameters;
+	BasisFunctions basis; // TODO estendere al caso di uscita multidimensionale (si potrebbe fare la classe BasisFunctionsMatrix
 };
 
-
-}//end namespace
+} //end namespace
 
 #endif //LINEARAPPROXIMATOR_H
