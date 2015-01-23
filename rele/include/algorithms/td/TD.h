@@ -26,9 +26,11 @@
 
 #include "Agent.h"
 #include <armadillo>
+#include "LinearApproximator.h"
 
 namespace ReLe
 {
+
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
@@ -63,5 +65,43 @@ protected:
 
 };
 
-}
+class LinearTD : public Agent<FiniteAction, DenseState>
+{
+public:
+    LinearTD(LinearApproximator &la);
+
+    void setAlpha(double alpha)
+    {
+        this->alpha = alpha;
+    }
+
+    void setEpsilon(double eps)
+    {
+        this->eps = eps;
+    }
+
+    void setLinearApproximator(LinearApproximator &la)
+    {
+        this->Q = la;
+    }
+
+protected:
+    unsigned int policy(DenseState state);
+    void printStatistics();
+
+protected:
+    //Linear action-value function
+    LinearApproximator Q;
+
+    //current an previous actions and states
+    DenseState x;
+    unsigned int u;
+
+    //algorithm parameters
+    double alpha;
+    double eps;
+};
+
+}//end namespace
+
 #endif /* INCLUDE_ALGORITHMS_TD_TD_H_ */

@@ -40,6 +40,14 @@ public:
 	virtual ~LinearApproximator();
 	void evaluate(const arma::vec& input, arma::vec& output);
 
+    BasisFunctions& getBasis() {
+        return basis;
+    }
+
+    arma::vec& getParameters() {
+        return parameters;
+    }
+
 private:
 	arma::vec parameters;
 	BasisFunctions basis; // TODO estendere al caso di uscita multidimensionale (si potrebbe fare la classe BasisFunctionsMatrix
