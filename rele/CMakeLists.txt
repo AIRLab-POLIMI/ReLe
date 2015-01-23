@@ -5,7 +5,8 @@ find_package(catkin QUIET)
 project(rele)
 
 if(catkin_FOUND)
-	catkin_package()
+	catkin_package(INCLUDE_DIRS include
+	               LIBRARIES rele)
 	set(CATKIN_MSG TRUE)
 else()
 	set(CATKIN_MSG FALSE)
@@ -55,12 +56,18 @@ target_link_libraries(simple_chain rele)
 
 # ------------------------ INSTALLATION ------------------------
 
-## Mark executables and/or libraries for installation
-#install(TARGETS rele
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+# Mark executables and/or libraries for installation
+install(TARGETS rele
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+# Install headers
+install(DIRECTORY include/
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/${PROJECT_NAME}
+  PATTERN ".svn" EXCLUDE
+)
 
 # --------------------------------------------------------------
 

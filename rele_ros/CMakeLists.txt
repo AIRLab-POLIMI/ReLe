@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 
 
-find_package(catkin)
+find_package(catkin REQUIRED COMPONENTS rele roscpp vrep_common)
 project(rele_ros)
 
 catkin_package()
@@ -9,7 +9,7 @@ catkin_package()
 
 # ----------------------- INCLUDES ----------------------------
 
-include_directories(include)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -34,7 +34,11 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
+add_executable(basketbot src/basketbot_sim.cpp)
 
+target_link_libraries(basketbot ${catkin_LIBRARIES})
+
+add_dependencies(basketbot ${catkin_EXPORTED_TARGETS})
 
 
 # ------------------------ INSTALLATION ------------------------
