@@ -161,7 +161,7 @@ SARSA_lambda::~SARSA_lambda()
 
 void SARSA_lambda::printStatistics()
 {
-	cout << endl << endl << "### SARSA(Lambda) ###";
+	cout << endl << endl << "### SARSA(" << lambda << ") ###";
 	FiniteTD::printStatistics();
 }
 
