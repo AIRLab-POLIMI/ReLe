@@ -100,33 +100,69 @@ SARSA_lambda::SARSA_lambda()
 
 void SARSA_lambda::initEpisode(const FiniteState& state, FiniteAction& action)
 {
-
+	sampleAction(state, action);
 }
 
 void SARSA_lambda::sampleAction(const FiniteState& state, FiniteAction& action)
 {
+	x = state.getStateN();
+	u = policy(x);
 
+	action.setActionN(u);
 }
 
 void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState,
 			FiniteAction& action)
 {
+	size_t xn = nextState.getStateN();
+	unsigned int un = policy(xn);
+	double r = reward[0];
 
+	//compute TD error and eligibility trace
+	double delta = r + task.gamma * Q(xn, un) - Q(x, u);
+	Z(x, u) = Z(x, u) + 1;
+
+	//update action value function and eligibility trace
+	Q = Q + alpha * delta * Z;
+	Z = task.gamma * lambda * Z;
+
+	//update action and state
+	x = xn;
+	u = un;
+
+	//set next action
+	action.setActionN(u);
 }
 
 void SARSA_lambda::endEpisode()
 {
-
+	printStatistics();
 }
 
 void SARSA_lambda::endEpisode(const Reward& reward)
 {
+	//Last update
+	double r = reward[0];
 
+	//compute TD error and eligibility trace
+	double delta = r - Q(x, u);
+	Z(x, u) = Z(x, u) + 1;
+
+	//update action value function
+	Q = Q + alpha * delta * Z;
+
+	printStatistics();
 }
 
 SARSA_lambda::~SARSA_lambda()
 {
 
+}
+
+void SARSA_lambda::printStatistics()
+{
+	cout << endl << endl << "### SARSA(Lambda) ###";
+	FiniteTD::printStatistics();
 }
 
 }
