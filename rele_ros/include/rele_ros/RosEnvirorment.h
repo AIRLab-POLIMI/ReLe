@@ -61,6 +61,7 @@ public:
 		} while (stateReady);
 
 		setState(state);
+		r.reset();
 	}
 
 	virtual ~RosEnvirorment()
