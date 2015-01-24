@@ -44,7 +44,7 @@ public:
     virtual ~SARSA();
 
 protected:
-    virtual void printStatistics();
+    void printStatistics();
 
 };
 
@@ -67,7 +67,8 @@ public:
     }
 
 protected:
-    virtual void printStatistics();
+    virtual void init();
+    void printStatistics();
 
 private:
     double lambda;

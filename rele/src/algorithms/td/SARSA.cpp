@@ -159,6 +159,12 @@ SARSA_lambda::~SARSA_lambda()
 
 }
 
+void SARSA_lambda::init()
+{
+	FiniteTD::init();
+	Z.zeros(task.finiteStateDim, task.finiteActionDim);
+}
+
 void SARSA_lambda::printStatistics()
 {
 	cout << endl << endl << "### SARSA(" << lambda << ") ###";
