@@ -9,7 +9,7 @@ catkin_package()
 
 # ----------------------- INCLUDES ----------------------------
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include/rele_ros ${catkin_INCLUDE_DIRS})
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -34,7 +34,7 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-add_executable(basketbot src/basketbot_sim.cpp)
+add_executable(basketbot src/simulator_handlers/basketbot_sim.cpp)
 
 target_link_libraries(basketbot ${catkin_LIBRARIES})
 
