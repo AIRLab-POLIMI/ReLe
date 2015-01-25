@@ -46,9 +46,11 @@ LinearApproximator::~LinearApproximator()
 {
 }
 
-void LinearApproximator::evaluate(const vec& input, vec& output)
+vec LinearApproximator::operator()(const vec& input)
 {
+	vec output(1);
     output[0] = basis.dot(input, parameters);
+    return output;
 }
 
 }

@@ -41,7 +41,7 @@ public:
 	{
 	}
 
-	virtual void evaluate(const arma::vec& input, arma::vec& output) = 0;
+	virtual arma::vec operator() (const arma::vec& input) = 0;
 
 	virtual ~Regressor()
 	{

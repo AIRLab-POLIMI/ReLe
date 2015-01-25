@@ -31,7 +31,6 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
     unsigned int un = policy(nextState);
 
     //Prepare input for the regressor
-    vec Qxu(1), Qxnun(1);
     vec regInput(nstates + 1);
 
     // Q(x,u)
@@ -40,7 +39,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
         regInput[i] = x[i];
     }
     regInput[nstates] = u;
-    Q.evaluate(regInput, Qxu);
+    vec&& Qxu = Q(regInput);
 
 
     //Compute gradient dQ(x,u)
@@ -53,7 +52,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
         regInput[i] = nextState[i];
     }
     regInput[nstates] = un;
-    Q.evaluate(regInput, Qxnun);
+    vec&& Qxnun = Q(regInput);
 
     double r = reward[0];
 
@@ -80,7 +79,6 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
     unsigned int nstates = task.continuosStateDim;
 
     //Prepare input for the regressor
-    vec Qxu(1);
     vec regInput(nstates + 1);
 
     // Q(x,u)
@@ -89,7 +87,7 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
         regInput[i] = x[i];
     }
     regInput[nstates] = u;
-    Q.evaluate(regInput, Qxu);
+    vec&& Qxu = Q(regInput);
 
 
     //Compute gradient dQ(x,u)

@@ -14,15 +14,15 @@ endif()
 
 # ----------------------- INCLUDES ----------------------------
 
-include_directories(include/core
-                    include/utils
-                    include/generators
-                    include/algorithms
-                    include/approximators)
+include_directories(include/rele/core
+                    include/rele/utils
+                    include/rele/generators
+                    include/rele/algorithms
+                    include/rele/approximators)
 
 # ----------------------- LIBRARIES ---------------------------
 
-find_package(Boost 1.46 REQUIRED COMPONENTS random)
+find_package(Boost REQUIRED COMPONENTS random)
 find_package(Armadillo REQUIRED)
   
 

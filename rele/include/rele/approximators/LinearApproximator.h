@@ -38,15 +38,17 @@ public:
 	LinearApproximator(unsigned int input_dim, unsigned int output_dim); //TODO SISTEMARE PER L'USCITA MULTI-DIM
 	LinearApproximator(const unsigned int input_dim, BasisFunctions& bfs);
 	virtual ~LinearApproximator();
-	void evaluate(const arma::vec& input, arma::vec& output);
+	arma::vec operator()(const arma::vec& input);
 
-    BasisFunctions& getBasis() {
-        return basis;
-    }
+	BasisFunctions& getBasis()
+	{
+		return basis;
+	}
 
-    arma::vec& getParameters() {
-        return parameters;
-    }
+	arma::vec& getParameters()
+	{
+		return parameters;
+	}
 
 private:
 	arma::vec parameters;
