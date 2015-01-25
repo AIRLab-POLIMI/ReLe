@@ -25,6 +25,7 @@
 #define CORE_H_
 
 #include "Envirorment.h"
+#include "Agent.h"
 #include "Logger.h"
 
 //TODO: move all code in cpp and include at the bottom of the file
@@ -69,7 +70,8 @@ public:
         agent.initEpisode(xn, u);
         logger.log(xn);
 
-        for (unsigned int i = 0; i < settings.episodeLenght; i++)
+        bool episodic = envirorment.getSettings().isEpisodic;
+        for (unsigned int i = 0; episodic || i < settings.episodeLenght; i++)
         {
             Reward r;
 
@@ -96,6 +98,7 @@ private:
     Envirorment<ActionC, StateC>& envirorment;
     Agent<ActionC, StateC>& agent;
     CoreSettings settings;
+
 };
 
 }

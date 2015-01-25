@@ -109,6 +109,11 @@ public:
 		return absorbing;
 	}
 
+	inline void setAbsorbing(bool absorbing = true)
+	{
+		this->absorbing = absorbing;
+	}
+
 	inline virtual std::string to_str() const
 	{
 		return "state";
@@ -159,6 +164,10 @@ private:
 class DenseState: public State, public arma::vec
 {
 public:
+	DenseState()
+	{
+	}
+
 	DenseState(std::size_t size) :
 				arma::vec(size)
 	{

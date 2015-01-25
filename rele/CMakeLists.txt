@@ -18,6 +18,7 @@ include_directories(include/rele/core
                     include/rele/utils
                     include/rele/generators
                     include/rele/algorithms
+                    include/rele/envirorments
                     include/rele/approximators)
 
 # ----------------------- LIBRARIES ---------------------------
@@ -48,11 +49,11 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 file(GLOB_RECURSE ReLe_SOURCE 
                   src/core/*.cpp 
-                  src/algorithms/*.cpp 
+                  src/algorithms/*.cpp
+                  src/envirorments/*.cpp 
                   src/utils/*.cpp
                   src/generators/*.cpp
-                  src/approximators/*.cpp 
-                  src/approximators/basis/*.cpp)
+                  src/approximators/*.cpp)
 
 add_library(rele ${ReLe_SOURCE})
 
@@ -61,6 +62,9 @@ target_link_libraries(simple_chain rele)
 
 add_executable(grid_world src/test/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
+
+add_executable(mountain_car src/test/MountainCarTest.cpp)
+target_link_libraries(mountain_car rele)
 
 # ------------------------ INSTALLATION ------------------------
 
@@ -72,8 +76,8 @@ install(TARGETS rele
 )
 
 # Install headers
-install(DIRECTORY include/
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}/${PROJECT_NAME}
+install(DIRECTORY include/rele
+  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
   PATTERN ".svn" EXCLUDE
 )
 
