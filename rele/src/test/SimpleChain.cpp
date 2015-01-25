@@ -35,17 +35,11 @@ int main(int argc, char *argv[])
     const size_t statesNumber = 5;
     const size_t actionsNumber = 2;
 
-    arma::cube R(actionsNumber, statesNumber, 2);
-    arma::mat R0(statesNumber, 2);
-    R0 << //
-       0 << 0 << arma::endr //
-       << 0 << 0 << arma::endr //
-       << 1 << 0 << arma::endr //
-       << 0 << 0 << arma::endr //
-       << 0 << 0 << arma::endr;
+    arma::cube R(actionsNumber, statesNumber, statesNumber, arma::fill::zeros);
+    arma::cube Rsigma(actionsNumber, statesNumber, statesNumber, arma::fill::zeros);
 
-    R.tube(arma::span(0), arma::span::all) = R0;
-    R.tube(arma::span(1), arma::span::all) = R0;
+    R(0, 1, 2) = 1;
+    R(1, 3, 2) = 1;
 
     arma::cube P(actionsNumber, statesNumber, statesNumber);
 
@@ -69,7 +63,7 @@ int main(int argc, char *argv[])
     P.tube(arma::span(0), arma::span::all) = P0;
     P.tube(arma::span(1), arma::span::all) = P1;
 
-    ReLe::FiniteMDP mdp(P, R, false, 0.9);
+    ReLe::FiniteMDP mdp(P, R, Rsigma, false, 0.9);
     ReLe::SARSA agent;
 // 	ReLe::Q_Learning agent;
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);

@@ -32,20 +32,27 @@ namespace ReLe
 
 GridWorldGenerator::GridWorldGenerator()
 {
+	//setup algorithm data
 	stateN = 0;
 	currentState = 0;
 	actionN = 4;
+
+	//default mdp parameters
+	p = 0.9;
+	rgoal = 10.0;
+	rfall = -1.0;
+	rstep = 0.0;
 }
 
 void GridWorldGenerator::load(const string& path)
 {
-	string line;
-	vector<vector<char>> matrix;
-	vector<vector<int>> stateNMatrix;
+	matrix.clear();
+	stateNMatrix.clear();
 
 	ifstream ifs;
 	ifs.open(path);
 
+	string line;
 	while (getline(ifs, line))
 	{
 		cout << line << endl;
@@ -59,14 +66,15 @@ void GridWorldGenerator::load(const string& path)
 	}
 
 	P.zeros(actionN, stateN, stateN);
-	R.zeros(actionN, stateN, 2);
+	R.zeros(actionN, stateN, stateN);
+	Rsigma.zeros(actionN, stateN, stateN);
 	currentState = 0;
 
 	for (size_t i = 0; i < matrix.size(); i++)
 	{
 		for (size_t j = 0; j < matrix[i].size(); j++)
 		{
-			assignStateNumbers(matrix, stateNMatrix, i, j);
+			assignStateNumbers(i, j);
 		}
 	}
 
@@ -74,7 +82,7 @@ void GridWorldGenerator::load(const string& path)
 	{
 		for (size_t j = 0; j < matrix[i].size(); j++)
 		{
-			handleChar(matrix, i, j);
+			handleChar(i, j);
 		}
 	}
 
@@ -82,44 +90,120 @@ void GridWorldGenerator::load(const string& path)
 
 FiniteMDP GridWorldGenerator::getMPD(double gamma)
 {
-	return FiniteMDP(P, R, false, gamma);
+	return FiniteMDP(P, R, Rsigma, false, gamma);
 }
 
-void GridWorldGenerator::assignStateNumbers(vector<vector<char>>& matrix,
-			vector<vector<int>>& stateNMatrix, size_t i, size_t j)
+void GridWorldGenerator::assignStateNumbers(size_t i, size_t j)
 {
 	switch (matrix[i][j])
 	{
 		case '0':
+			stateNMatrix[i][j] = currentState++;
 			break;
 
 		case 'G':
+			stateNMatrix[i][j] = stateN - 1;
+			break;
+
+		case '#':
+			stateNMatrix[i][j] = -1;
 			break;
 
 		default:
+			stateNMatrix[i][j] = -2;
 			break;
 
 	}
 
 }
 
-void GridWorldGenerator::handleChar(std::vector<std::vector<char>>& matrix,
-			std::size_t i, std::size_t j)
+void GridWorldGenerator::handleChar(size_t i, size_t j)
 {
 	char c = matrix[i][j];
 
-	if (c == '0')
+	if (c == '0' || c == 'G')
 	{
-		for (int action = 0; action < actionN; action++)
+		for (int consideredS = 0; consideredS < stateN; consideredS++)
 		{
-			for (int state = 0; state < stateN; state++)
+			int currentS = stateNMatrix[i][j];
+			for (int action = 0; action < actionN; action++)
 			{
-				//P(action, currentState, )
+				int actionS = getActionState(i, j, action);
+
+				//compute probability to go from current to considered using action
+				P(action, currentS, consideredS) = computeProbability(currentS,
+							consideredS, actionS);
+
+				//compute mean and sigma of reward
+				R(action, currentS, consideredS) = computeReward(consideredS, actionS);
 			}
 		}
 	}
 
-	currentState++;
+}
+
+double GridWorldGenerator::computeProbability(int currentS, int consideredS,
+			int actionS)
+{
+	if (currentS == getGoalStateN())
+		return 0;
+
+	if (actionS == consideredS)
+		return p;
+
+	if (currentS == consideredS && actionS >= 0)
+		return 1.0 - p;
+
+	if (currentS == consideredS && actionS < 0)
+		return 1.0;
+
+	return 0;
+
+}
+
+double GridWorldGenerator::computeReward(int consideredS, int actionS)
+{
+	if (actionS == -2)
+		return rfall;
+
+	if (actionS == consideredS && consideredS == getGoalStateN())
+		return rgoal;
+
+	return rstep;
+}
+
+int GridWorldGenerator::getGoalStateN()
+{
+	return stateN - 1;
+}
+
+int GridWorldGenerator::getActionState(std::size_t i, std::size_t j, int action)
+{
+	switch (action)
+	{
+		case N:
+			i--;
+			break;
+		case S:
+			i++;
+			break;
+		case W:
+			j--;
+			break;
+		case E:
+			j++;
+			break;
+	}
+
+	if (i < stateNMatrix.size() && j < stateNMatrix[i].size())
+	{
+		return stateNMatrix[i][j];
+	}
+	else
+	{
+		return -2;
+	}
+
 }
 
 }
