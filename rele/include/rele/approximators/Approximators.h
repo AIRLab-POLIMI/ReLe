@@ -36,44 +36,44 @@ class Regressor
 
 public:
 
-	Regressor(unsigned int input = 1, unsigned int output = 1) :
-				inputDimension(input), outputDimension(output)
-	{
-	}
+    Regressor(unsigned int input = 1, unsigned int output = 1) :
+        inputDimension(input), outputDimension(output)
+    {
+    }
 
-	virtual arma::vec operator() (const arma::vec& input) = 0;
+    virtual arma::vec operator() (const arma::vec& input) = 0;
 
-	virtual ~Regressor()
-	{
-	}
+    virtual ~Regressor()
+    {
+    }
 
 protected:
-	unsigned int inputDimension, outputDimension;
+    unsigned int inputDimension, outputDimension;
 };
 
 class ParametricRegressor: public Regressor
 {
 public:
-	ParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
-				Regressor(input, output)
-	{
-	}
+    ParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
+        Regressor(input, output)
+    {
+    }
 };
 
 class NonParametricRegressor: public Regressor
 {
 public:
-	NonParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
-				Regressor(input, output)
-	{
-	}
+    NonParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
+        Regressor(input, output)
+    {
+    }
 };
 
 class BatchRegressor
 {
 
 public:
-	void train(/* classe che rappresenta il dataset da decidere*/);
+    void train(/* classe che rappresenta il dataset da decidere*/);
 };
 
 }

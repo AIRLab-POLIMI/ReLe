@@ -30,20 +30,20 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	int episodes = 1;
-	ReLe::MountainCar mdp;
+    int episodes = 1;
+    ReLe::MountainCar mdp;
 
-	ReLe::BasisFunctions bf;
-	ReLe::LinearApproximator approximator(3, bf);
-	ReLe::LinearGradientSARSA agent(approximator);
+    ReLe::BasisFunctions bf;
+    ReLe::LinearApproximator approximator(3, bf);
+    ReLe::LinearGradientSARSA agent(approximator);
 
-	ReLe::Core<ReLe::FiniteAction, ReLe::DenseState> core(mdp, agent);
+    ReLe::Core<ReLe::FiniteAction, ReLe::DenseState> core(mdp, agent);
 
-	for (int i = 0; i < episodes; i++)
-	{
-		core.getSettings().episodeLenght = 10000;
-		core.getSettings().logTransitions = false;
-		cout << "starting episode" << endl;
-		core.runEpisode();
-	}
+    for (int i = 0; i < episodes; i++)
+    {
+        core.getSettings().episodeLenght = 10000;
+        core.getSettings().logTransitions = false;
+        cout << "starting episode" << endl;
+        core.runEpisode();
+    }
 }

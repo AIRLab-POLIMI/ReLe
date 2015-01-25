@@ -33,9 +33,9 @@ namespace ReLe
 GridWorldGenerator::GridWorldGenerator()
 {
 	//setup algorithm data
-	stateN = 0;
-	currentState = 0;
-	actionN = 4;
+    stateN = 0;
+    currentState = 0;
+    actionN = 4;
 
 	//default mdp parameters
 	p = 0.9;
@@ -49,42 +49,42 @@ void GridWorldGenerator::load(const string& path)
 	matrix.clear();
 	stateNMatrix.clear();
 
-	ifstream ifs;
-	ifs.open(path);
+    ifstream ifs;
+    ifs.open(path);
 
 	string line;
-	while (getline(ifs, line))
-	{
-		cout << line << endl;
-		stateN += count(line.begin(), line.end(), '0');
-		stateN += count(line.begin(), line.end(), 'G');
+    while (getline(ifs, line))
+    {
+        cout << line << endl;
+        stateN += count(line.begin(), line.end(), '0');
+        stateN += count(line.begin(), line.end(), 'G');
 
-		vector<char> chars(line.begin(), line.end());
-		vector<int> numbers(line.length(), -1);
-		matrix.push_back(chars);
-		stateNMatrix.push_back(numbers);
-	}
+        vector<char> chars(line.begin(), line.end());
+        vector<int> numbers(line.length(), -1);
+        matrix.push_back(chars);
+        stateNMatrix.push_back(numbers);
+    }
 
-	P.zeros(actionN, stateN, stateN);
+    P.zeros(actionN, stateN, stateN);
 	R.zeros(actionN, stateN, stateN);
 	Rsigma.zeros(actionN, stateN, stateN);
-	currentState = 0;
+    currentState = 0;
 
-	for (size_t i = 0; i < matrix.size(); i++)
-	{
-		for (size_t j = 0; j < matrix[i].size(); j++)
-		{
+    for (size_t i = 0; i < matrix.size(); i++)
+    {
+        for (size_t j = 0; j < matrix[i].size(); j++)
+        {
 			assignStateNumbers(i, j);
-		}
-	}
+        }
+    }
 
-	for (size_t i = 0; i < matrix.size(); i++)
-	{
-		for (size_t j = 0; j < matrix[i].size(); j++)
-		{
+    for (size_t i = 0; i < matrix.size(); i++)
+    {
+        for (size_t j = 0; j < matrix[i].size(); j++)
+        {
 			handleChar(i, j);
-		}
-	}
+        }
+    }
 
 }
 
@@ -95,31 +95,31 @@ FiniteMDP GridWorldGenerator::getMPD(double gamma)
 
 void GridWorldGenerator::assignStateNumbers(size_t i, size_t j)
 {
-	switch (matrix[i][j])
-	{
-		case '0':
+    switch (matrix[i][j])
+    {
+    case '0':
 			stateNMatrix[i][j] = currentState++;
-			break;
+        break;
 
-		case 'G':
+    case 'G':
 			stateNMatrix[i][j] = stateN - 1;
 			break;
 
 		case '#':
 			stateNMatrix[i][j] = -1;
-			break;
+        break;
 
-		default:
+    default:
 			stateNMatrix[i][j] = -2;
-			break;
+        break;
 
-	}
+    }
 
 }
 
 void GridWorldGenerator::handleChar(size_t i, size_t j)
 {
-	char c = matrix[i][j];
+    char c = matrix[i][j];
 
 	if (c == '0' || c == 'G')
 	{
@@ -202,7 +202,7 @@ int GridWorldGenerator::getActionState(std::size_t i, std::size_t j, int action)
 	else
 	{
 		return -2;
-	}
+    }
 
 }
 

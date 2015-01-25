@@ -46,7 +46,7 @@ BasisFunctions::~BasisFunctions()
 
 vec BasisFunctions::operator()(const vec& input)
 {
-	vec output(this->size());
+    vec output(this->size());
 
     unsigned int i = 0;
     std::vector<BasisFunction*>::iterator it;

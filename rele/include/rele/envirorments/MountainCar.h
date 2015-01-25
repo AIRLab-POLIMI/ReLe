@@ -32,16 +32,16 @@ namespace ReLe
 class MountainCar: public DenseMDP
 {
 public:
-	MountainCar();
-	virtual void step(const FiniteAction& action, DenseState& nextState,
-				Reward& reward);
-	virtual void getInitialState(DenseState& state);
+    MountainCar();
+    virtual void step(const FiniteAction& action, DenseState& nextState,
+                      Reward& reward);
+    virtual void getInitialState(DenseState& state);
 
 private:
-	enum StateLabel
-	{
-		velocity = 0, position = 1
-	};
+    enum StateLabel
+    {
+        velocity = 0, position = 1
+    };
 
 };
 

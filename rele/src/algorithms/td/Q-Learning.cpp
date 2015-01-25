@@ -31,59 +31,59 @@ namespace ReLe
 {
 
 Q_Learning::Q_Learning() :
-			FiniteTD()
+    FiniteTD()
 {
 }
 
 void Q_Learning::initEpisode(const FiniteState& state, FiniteAction& action)
 {
-	sampleAction(state, action);
+    sampleAction(state, action);
 }
 
 void Q_Learning::sampleAction(const FiniteState& state, FiniteAction& action)
 {
-	x = state.getStateN();
-	u = policy(x);
+    x = state.getStateN();
+    u = policy(x);
 
-	action.setActionN(u);
+    action.setActionN(u);
 }
 
 void Q_Learning::step(const Reward& reward, const FiniteState& nextState,
-			FiniteAction& action)
+                      FiniteAction& action)
 {
-	size_t xn = nextState.getStateN();
-	double r = reward[0];
-	double maxQxn;
+    size_t xn = nextState.getStateN();
+    double r = reward[0];
+    double maxQxn;
 
-	const rowvec& Qxn = Q.row(xn);
-	maxQxn = Qxn.max();
+    const rowvec& Qxn = Q.row(xn);
+    maxQxn = Qxn.max();
 
-	double delta = r + task.gamma * maxQxn - Q(x, u);
-	Q(x, u) = Q(x, u) + alpha * delta;
+    double delta = r + task.gamma * maxQxn - Q(x, u);
+    Q(x, u) = Q(x, u) + alpha * delta;
 
-	//update action and state
-	x = xn;
-	u = policy(xn);
+    //update action and state
+    x = xn;
+    u = policy(xn);
 
-	//set next action
-	action.setActionN(u);
+    //set next action
+    action.setActionN(u);
 }
 
 void Q_Learning::endEpisode()
 {
-	//print statistics
-	printStatistics();
+    //print statistics
+    printStatistics();
 }
 
 void Q_Learning::endEpisode(const Reward& reward)
 {
-	//Last update
-	double r = reward[0];
-	double delta = r - Q(x, u);
-	Q(x, u) = Q(x, u) + alpha * delta;
+    //Last update
+    double r = reward[0];
+    double delta = r - Q(x, u);
+    Q(x, u) = Q(x, u) + alpha * delta;
 
-	//print statistics
-	printStatistics();
+    //print statistics
+    printStatistics();
 }
 
 Q_Learning::~Q_Learning()
@@ -93,8 +93,8 @@ Q_Learning::~Q_Learning()
 
 void Q_Learning::printStatistics()
 {
-	cout << endl << endl << "### Q-Learning ###";
-	FiniteTD::printStatistics();
+    cout << endl << endl << "### Q-Learning ###";
+    FiniteTD::printStatistics();
 }
 
 }

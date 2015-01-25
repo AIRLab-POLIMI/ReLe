@@ -63,7 +63,7 @@ public:
 
     inline void setLambda(double lambda)
     {
-    	this->lambda = lambda;
+        this->lambda = lambda;
     }
 
 protected:

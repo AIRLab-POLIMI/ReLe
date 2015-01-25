@@ -70,10 +70,11 @@ public:
         agent.initEpisode(xn, u);
         logger.log(xn);
 
-        bool episodic = envirorment.getSettings().isEpisodic;
-        for (unsigned int i = 0; episodic || i < settings.episodeLenght; i++)
+        Reward r(envirorment.getSettings().rewardDim);
+
+//        bool episodic = envirorment.getSettings().isEpisodic;
+        for (unsigned int i = 0; /*episodic ||*/ i < settings.episodeLenght; i++)
         {
-            Reward r;
 
             envirorment.step(u, xn, r);
 

@@ -34,22 +34,22 @@ namespace ReLe
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
-	FiniteTD();
+    FiniteTD();
 
-	void setAlpha(double alpha)
-	{
-		this->alpha = alpha;
-	}
+    void setAlpha(double alpha)
+    {
+        this->alpha = alpha;
+    }
 
-	void setEpsilon(double eps)
-	{
-		this->eps = eps;
-	}
+    void setEpsilon(double eps)
+    {
+        this->eps = eps;
+    }
 
 protected:
-	virtual void init();
-	unsigned int policy(std::size_t x);
-	void printStatistics();
+    virtual void init();
+    unsigned int policy(std::size_t x);
+    void printStatistics();
 
 protected:
     //Action-value function
