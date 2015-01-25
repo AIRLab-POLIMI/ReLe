@@ -57,7 +57,7 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 	double sigma = Rsigma(u, x, xn);
 	double r = RandomGenerator::sampleNormal(m, sigma);
 
-	reward.push_back(r);
+	reward[0] = r;
 
 }
 
