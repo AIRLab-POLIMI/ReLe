@@ -16,6 +16,7 @@ endif()
 
 include_directories(include/core
                     include/utils
+                    include/generators
                     include/algorithms
                     include/approximators)
 
@@ -45,14 +46,21 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-file(GLOB_RECURSE ReLe_SOURCE src/core/*.cpp src/algorithms/*.cpp src/utils/*.cpp
-src/approximators/*.cpp src/approximators/basis/*.cpp)
+file(GLOB_RECURSE ReLe_SOURCE 
+                  src/core/*.cpp 
+                  src/algorithms/*.cpp 
+                  src/utils/*.cpp
+                  src/generators/*.cpp
+                  src/approximators/*.cpp 
+                  src/approximators/basis/*.cpp)
 
 add_library(rele ${ReLe_SOURCE})
 
 add_executable(simple_chain src/test/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)
 
+add_executable(grid_world src/test/GridWorldTest.cpp)
+target_link_libraries(grid_world rele)
 
 # ------------------------ INSTALLATION ------------------------
 
