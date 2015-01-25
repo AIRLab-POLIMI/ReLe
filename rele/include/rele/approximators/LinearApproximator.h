@@ -35,24 +35,24 @@ class LinearApproximator: public ParametricRegressor
 {
 
 public:
-	LinearApproximator(unsigned int input_dim, unsigned int output_dim); //TODO SISTEMARE PER L'USCITA MULTI-DIM
-	LinearApproximator(const unsigned int input_dim, BasisFunctions& bfs);
-	virtual ~LinearApproximator();
-	arma::vec operator()(const arma::vec& input);
+    LinearApproximator(unsigned int input_dim, unsigned int output_dim); //TODO SISTEMARE PER L'USCITA MULTI-DIM
+    LinearApproximator(const unsigned int input_dim, BasisFunctions& bfs);
+    virtual ~LinearApproximator();
+    arma::vec operator()(const arma::vec& input);
 
-	BasisFunctions& getBasis()
-	{
-		return basis;
-	}
+    BasisFunctions& getBasis()
+    {
+        return basis;
+    }
 
-	arma::vec& getParameters()
-	{
-		return parameters;
-	}
+    arma::vec& getParameters()
+    {
+        return parameters;
+    }
 
 private:
-	arma::vec parameters;
-	BasisFunctions basis; // TODO estendere al caso di uscita multidimensionale (si potrebbe fare la classe BasisFunctionsMatrix
+    arma::vec parameters;
+    BasisFunctions basis; // TODO estendere al caso di uscita multidimensionale (si potrebbe fare la classe BasisFunctionsMatrix
 };
 
 } //end namespace

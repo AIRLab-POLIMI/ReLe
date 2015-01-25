@@ -32,94 +32,94 @@ namespace ReLe
 
 GridWorldGenerator::GridWorldGenerator()
 {
-	stateN = 0;
-	currentState = 0;
-	actionN = 4;
+    stateN = 0;
+    currentState = 0;
+    actionN = 4;
 }
 
 void GridWorldGenerator::load(const string& path)
 {
-	string line;
-	vector<vector<char>> matrix;
-	vector<vector<int>> stateNMatrix;
+    string line;
+    vector<vector<char>> matrix;
+    vector<vector<int>> stateNMatrix;
 
-	ifstream ifs;
-	ifs.open(path);
+    ifstream ifs;
+    ifs.open(path);
 
-	while (getline(ifs, line))
-	{
-		cout << line << endl;
-		stateN += count(line.begin(), line.end(), '0');
-		stateN += count(line.begin(), line.end(), 'G');
+    while (getline(ifs, line))
+    {
+        cout << line << endl;
+        stateN += count(line.begin(), line.end(), '0');
+        stateN += count(line.begin(), line.end(), 'G');
 
-		vector<char> chars(line.begin(), line.end());
-		vector<int> numbers(line.length(), -1);
-		matrix.push_back(chars);
-		stateNMatrix.push_back(numbers);
-	}
+        vector<char> chars(line.begin(), line.end());
+        vector<int> numbers(line.length(), -1);
+        matrix.push_back(chars);
+        stateNMatrix.push_back(numbers);
+    }
 
-	P.zeros(actionN, stateN, stateN);
-	R.zeros(actionN, stateN, 2);
-	currentState = 0;
+    P.zeros(actionN, stateN, stateN);
+    R.zeros(actionN, stateN, 2);
+    currentState = 0;
 
-	for (size_t i = 0; i < matrix.size(); i++)
-	{
-		for (size_t j = 0; j < matrix[i].size(); j++)
-		{
-			assignStateNumbers(matrix, stateNMatrix, i, j);
-		}
-	}
+    for (size_t i = 0; i < matrix.size(); i++)
+    {
+        for (size_t j = 0; j < matrix[i].size(); j++)
+        {
+            assignStateNumbers(matrix, stateNMatrix, i, j);
+        }
+    }
 
-	for (size_t i = 0; i < matrix.size(); i++)
-	{
-		for (size_t j = 0; j < matrix[i].size(); j++)
-		{
-			handleChar(matrix, i, j);
-		}
-	}
+    for (size_t i = 0; i < matrix.size(); i++)
+    {
+        for (size_t j = 0; j < matrix[i].size(); j++)
+        {
+            handleChar(matrix, i, j);
+        }
+    }
 
 }
 
 FiniteMDP GridWorldGenerator::getMPD(double gamma)
 {
-	return FiniteMDP(P, R, false, gamma);
+    return FiniteMDP(P, R, false, gamma);
 }
 
 void GridWorldGenerator::assignStateNumbers(vector<vector<char>>& matrix,
-			vector<vector<int>>& stateNMatrix, size_t i, size_t j)
+        vector<vector<int>>& stateNMatrix, size_t i, size_t j)
 {
-	switch (matrix[i][j])
-	{
-		case '0':
-			break;
+    switch (matrix[i][j])
+    {
+    case '0':
+        break;
 
-		case 'G':
-			break;
+    case 'G':
+        break;
 
-		default:
-			break;
+    default:
+        break;
 
-	}
+    }
 
 }
 
 void GridWorldGenerator::handleChar(std::vector<std::vector<char>>& matrix,
-			std::size_t i, std::size_t j)
+                                    std::size_t i, std::size_t j)
 {
-	char c = matrix[i][j];
+    char c = matrix[i][j];
 
-	if (c == '0')
-	{
-		for (int action = 0; action < actionN; action++)
-		{
-			for (int state = 0; state < stateN; state++)
-			{
-				//P(action, currentState, )
-			}
-		}
-	}
+    if (c == '0')
+    {
+        for (int action = 0; action < actionN; action++)
+        {
+            for (int state = 0; state < stateN; state++)
+            {
+                //P(action, currentState, )
+            }
+        }
+    }
 
-	currentState++;
+    currentState++;
 }
 
 }

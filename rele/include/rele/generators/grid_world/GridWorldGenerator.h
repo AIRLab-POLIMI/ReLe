@@ -32,24 +32,24 @@ namespace ReLe
 class GridWorldGenerator
 {
 public:
-	GridWorldGenerator();
-	void load(const std::string& path);
-	FiniteMDP getMPD(double gamma);
+    GridWorldGenerator();
+    void load(const std::string& path);
+    FiniteMDP getMPD(double gamma);
 
 private:
-	void assignStateNumbers(std::vector<std::vector<char>>& matrix,
-				std::vector<std::vector<int>>& stateNMatrix, std::size_t i,
-				std::size_t j);
-	void handleChar(std::vector<std::vector<char>>& matrix, std::size_t i,
-				std::size_t j);
+    void assignStateNumbers(std::vector<std::vector<char>>& matrix,
+                            std::vector<std::vector<int>>& stateNMatrix, std::size_t i,
+                            std::size_t j);
+    void handleChar(std::vector<std::vector<char>>& matrix, std::size_t i,
+                    std::size_t j);
 
 private:
-	arma::cube P;
-	arma::cube R;
+    arma::cube P;
+    arma::cube R;
 
-	size_t stateN;
-	size_t currentState;
-	int actionN;
+    size_t stateN;
+    size_t currentState;
+    int actionN;
 
 };
 

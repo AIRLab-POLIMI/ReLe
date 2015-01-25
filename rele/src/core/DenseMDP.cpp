@@ -28,28 +28,29 @@ using namespace std;
 namespace ReLe
 {
 
-DenseMDP::DenseMDP(size_t stateSize, unsigned int actionN, bool isFiniteHorizon,
-			bool isEpisodic, double gamma, unsigned int horizon) :
-			currentState(stateSize)
+DenseMDP::DenseMDP(size_t stateSize, unsigned int actionN, size_t rewardSize, bool isFiniteHorizon,
+                   bool isEpisodic, double gamma, unsigned int horizon) :
+    currentState(stateSize)
 {
-	setupEnvirorment(stateSize, actionN, isFiniteHorizon, isEpisodic, horizon,
-				gamma);
+    setupEnvirorment(stateSize, actionN, rewardSize, isFiniteHorizon, isEpisodic, horizon,
+                     gamma);
 }
 
-void DenseMDP::setupEnvirorment(size_t stateSize, unsigned int actionN,
-			bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
-			double gamma)
+void DenseMDP::setupEnvirorment(size_t stateSize, unsigned int actionN, size_t rewardSize,
+                                bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
+                                double gamma)
 {
-	EnvirormentSettings& task = getWritableSettings();
-	task.isFiniteHorizon = isFiniteHorizon;
-	task.horizon = horizon;
-	task.gamma = gamma;
-	task.isAverageReward = false;
-	task.isEpisodic = isEpisodic;
-	task.finiteStateDim = 0;
-	task.finiteActionDim = actionN;
-	task.continuosStateDim = stateSize;
-	task.continuosActionDim = 0;
+    EnvirormentSettings& task = getWritableSettings();
+    task.isFiniteHorizon = isFiniteHorizon;
+    task.horizon = horizon;
+    task.gamma = gamma;
+    task.isAverageReward = false;
+    task.isEpisodic = isEpisodic;
+    task.finiteStateDim = 0;
+    task.finiteActionDim = actionN;
+    task.continuosStateDim = stateSize;
+    task.continuosActionDim = 0;
+    task.rewardDim = rewardSize;
 }
 
 }

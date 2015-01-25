@@ -29,43 +29,43 @@ namespace ReLe
 {
 
 MountainCar::MountainCar() :
-			DenseMDP(2, 3, false, true)
+    DenseMDP(2, 3, 1, false, true)
 {
 
 }
 
 void MountainCar::step(const FiniteAction& action,
-			DenseState& nextState, Reward& reward)
+                       DenseState& nextState, Reward& reward)
 {
-	int motorAction = action.getActionN() - 1;
+    int motorAction = action.getActionN() - 1;
 
-	double computedVelocity = currentState[velocity] + motorAction * 0.001
-				- 0.0025 * cos(3 * currentState[position]);
-	double computedPosition = currentState[position] + currentState[velocity];
+    double computedVelocity = currentState[velocity] + motorAction * 0.001
+                              - 0.0025 * cos(3 * currentState[position]);
+    double computedPosition = currentState[position] + currentState[velocity];
 
-	currentState[velocity] = min(max(computedVelocity, -0.07), 0.07);
-	currentState[position] = min(max(computedPosition, -1.2), 0.6);
+    currentState[velocity] = min(max(computedVelocity, -0.07), 0.07);
+    currentState[position] = min(max(computedPosition, -1.2), 0.6);
 
-	if (currentState[position] >= 0.6)
-	{
-		reward[0] = -1;
-		currentState.setAbsorbing();
-	}
-	else
-	{
-		reward[0] = 0;
-	}
+    if (currentState[position] >= 0.6)
+    {
+        reward[0] = -1;
+        currentState.setAbsorbing();
+    }
+    else
+    {
+        reward[0] = 0;
+    }
 
-	nextState = currentState;
+    nextState = currentState;
 }
 
 void MountainCar::getInitialState(DenseState& state)
 {
-	currentState[0] = -0.5;
-	currentState[1] = 0.0;
-	currentState.setAbsorbing(false);
+    currentState[0] = -0.5;
+    currentState[1] = 0.0;
+    currentState.setAbsorbing(false);
 
-	state = currentState;
+    state = currentState;
 }
 
 }

@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     ReLe::FiniteMDP mdp(P, R, false, 0.9);
     ReLe::SARSA agent;
-// 	ReLe::Q_Learning agent;
+    // 	ReLe::Q_Learning agent;
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;
@@ -81,9 +81,9 @@ int main(int argc, char *argv[])
     cout << "starting episode" << endl;
     core.runEpisode();*/
 
-	if(argc > 1)
-	{
-		ReLe::GridWorldGenerator generator;
-		generator.load(argv[1]);
-	}
+    if(argc > 1)
+    {
+        ReLe::GridWorldGenerator generator;
+        generator.load(argv[1]);
+    }
 }
