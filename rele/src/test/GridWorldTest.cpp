@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
         ReLe::FiniteMDP&& mdp = generator.getMPD(1.0);
 
-        ReLe::SARSA_lambda agent;
+        ReLe::SARSA_lambda agent(false);
         //ReLe::SARSA agent;
         //ReLe::Q_Learning agent;
 
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
         core.getSettings().episodeLenght = 100000;
         core.getSettings().logTransitions = false;
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 2000; i++)
         {
             cout << "starting episode" << endl;
             core.runEpisode();

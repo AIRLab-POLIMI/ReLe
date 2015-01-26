@@ -93,7 +93,8 @@ void SARSA::printStatistics()
     FiniteTD::printStatistics();
 }
 
-SARSA_lambda::SARSA_lambda()
+SARSA_lambda::SARSA_lambda(bool accumulating) :
+    accumulating(accumulating)
 {
     lambda = 1;
 }
@@ -121,7 +122,10 @@ void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState,
 
     //compute TD error and eligibility trace
     double delta = r + task.gamma * Q(xn, un) - Q(x, u);
-    Z(x, u) = Z(x, u) + 1;
+    if (accumulating)
+        Z(x, u) = Z(x, u) + 1;
+    else
+        Z(x, u) = 1;
 
     //update action value function and eligibility trace
     Q = Q + alpha * delta * Z;
@@ -147,7 +151,10 @@ void SARSA_lambda::endEpisode(const Reward& reward)
 
     //compute TD error and eligibility trace
     double delta = r - Q(x, u);
-    Z(x, u) = Z(x, u) + 1;
+    if (accumulating)
+        Z(x, u) = Z(x, u) + 1;
+    else
+        Z(x, u) = 1;
 
     //update action value function
     Q = Q + alpha * delta * Z;
@@ -168,7 +175,8 @@ void SARSA_lambda::init()
 
 void SARSA_lambda::printStatistics()
 {
-    cout << endl << endl << "### SARSA(" << lambda << ") ###";
+    cout << endl << endl << "### SARSA(" << lambda << ") -"
+         << (accumulating ? "accumulating" : "replacing") << " trace ###";
     FiniteTD::printStatistics();
 }
 

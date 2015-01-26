@@ -51,7 +51,7 @@ protected:
 class SARSA_lambda: public FiniteTD
 {
 public:
-    SARSA_lambda();
+    SARSA_lambda(bool accumulating);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action);
     virtual void sampleAction(const FiniteState& state, FiniteAction& action);
     virtual void step(const Reward& reward, const FiniteState& nextState,
@@ -73,6 +73,7 @@ protected:
 private:
     double lambda;
     arma::mat Z;
+    const bool accumulating;
 };
 
 }

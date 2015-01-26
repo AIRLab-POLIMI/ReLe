@@ -36,6 +36,26 @@ public:
     void load(const std::string& path);
     FiniteMDP getMPD(double gamma);
 
+    inline void setP(double p)
+    {
+        this->p = p;
+    }
+
+    inline void setRfall(double rfall)
+    {
+        this->rfall = rfall;
+    }
+
+    inline void setRgoal(double rgoal)
+    {
+        this->rgoal = rgoal;
+    }
+
+    inline void setRstep(double rstep)
+    {
+        this->rstep = rstep;
+    }
+
 private:
     void assignStateNumbers(std::size_t i, std::size_t j);
     void handleChar(std::size_t i, std::size_t j);
