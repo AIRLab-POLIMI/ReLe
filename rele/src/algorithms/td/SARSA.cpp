@@ -101,6 +101,7 @@ SARSA_lambda::SARSA_lambda()
 void SARSA_lambda::initEpisode(const FiniteState& state, FiniteAction& action)
 {
     sampleAction(state, action);
+    Z.zeros();
 }
 
 void SARSA_lambda::sampleAction(const FiniteState& state, FiniteAction& action)

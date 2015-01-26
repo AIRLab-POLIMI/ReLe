@@ -30,11 +30,12 @@
 
 #include <iostream>
 
+
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-
     if (argc > 1)
     {
         ReLe::GridWorldGenerator generator;
@@ -42,9 +43,9 @@ int main(int argc, char *argv[])
 
         ReLe::FiniteMDP&& mdp = generator.getMPD(1.0);
 
-        //ReLe::SARSA_lambda agent;
+        ReLe::SARSA_lambda agent;
         //ReLe::SARSA agent;
-        ReLe::Q_Learning agent;
+        //ReLe::Q_Learning agent;
 
         agent.setEpsilon(0.5);
 

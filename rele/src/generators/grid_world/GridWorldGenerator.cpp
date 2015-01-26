@@ -90,20 +90,6 @@ void GridWorldGenerator::load(const string& path)
 
 FiniteMDP GridWorldGenerator::getMPD(double gamma)
 {
-    cout << "P" << endl;
-    for (int i = 0; i < P.n_rows; i++)
-    {
-        arma::mat M = P(arma::span(i), arma::span::all, arma::span::all);
-        cout << M << endl << endl;
-    }
-
-    cout << "R" << endl;
-    for (int i = 0; i < R.n_rows; i++)
-    {
-        arma::mat M = R(arma::span(i), arma::span::all, arma::span::all);
-        cout << M << endl << endl;
-    }
-
     return FiniteMDP(P, R, Rsigma, false, gamma);
 }
 
