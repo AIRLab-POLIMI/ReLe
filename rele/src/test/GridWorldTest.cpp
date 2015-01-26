@@ -47,8 +47,6 @@ int main(int argc, char *argv[])
         //ReLe::SARSA agent;
         //ReLe::Q_Learning agent;
 
-        agent.setEpsilon(0.5);
-
         ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
         core.getSettings().episodeLenght = 100000;

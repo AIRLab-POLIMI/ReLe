@@ -54,7 +54,13 @@ unsigned int FiniteTD::policy(std::size_t x)
     if (RandomGenerator::sampleEvent(this->eps))
         un = RandomGenerator::sampleUniformInt(0, Q.n_cols - 1);
     else
-        Qx.max(un);
+    {
+        double qmax = Qx.max();
+        uvec maxIndex = find(Qx == qmax);
+        unsigned int index = RandomGenerator::sampleUniformInt(0,
+                             maxIndex.n_elem - 1);
+        un = maxIndex[index];
+    }
 
     return un;
 }
