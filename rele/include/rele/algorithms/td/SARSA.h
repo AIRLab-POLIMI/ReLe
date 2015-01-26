@@ -72,7 +72,7 @@ protected:
 
 private:
     double lambda;
-    arma::vec Z;
+    arma::mat Z;
 };
 
 }

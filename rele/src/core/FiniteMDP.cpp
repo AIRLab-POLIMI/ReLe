@@ -32,71 +32,92 @@ namespace ReLe
 {
 
 FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
-			bool isFiniteHorizon, double gamma, unsigned int horizon) :
-			Envirorment(), P(P), R(R), Rsigma(Rsigma)
+                     bool isFiniteHorizon, double gamma, unsigned int horizon) :
+    Envirorment(), P(P), R(R), Rsigma(Rsigma)
 {
-	chekMatricesDimensions(P, R, Rsigma);
-	setupEnvirorment(isFiniteHorizon, horizon, gamma, P);
+    chekMatricesDimensions(P, R, Rsigma);
+    setupEnvirorment(isFiniteHorizon, horizon, gamma, P);
+    findAbsorbingStates();
 }
 
 void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
-			Reward& reward)
+                     Reward& reward)
 {
 
-	//Compute next state
-	unsigned int u = action.getActionN();
-	size_t x = currentState.getStateN();
-	arma::vec prob = P.tube(u, x);
-	size_t xn = RandomGenerator::sampleDiscrete(prob.begin(), prob.end());
+    //Compute next state
+    unsigned int u = action.getActionN();
+    size_t x = currentState.getStateN();
+    arma::vec prob = P.tube(u, x);
+    size_t xn = RandomGenerator::sampleDiscrete(prob.begin(), prob.end());
 
-	currentState.setStateN(xn);
-	nextState.setStateN(xn);
+    currentState.setStateN(xn);
+    currentState.setAbsorbing(absorbingStates.count(xn));
+    nextState = currentState;
 
-	//compute reward
-	double m = R(u, x, xn);
-	double sigma = Rsigma(u, x, xn);
-	double r = RandomGenerator::sampleNormal(m, sigma);
+    //compute reward
+    double m = R(u, x, xn);
+    double sigma = Rsigma(u, x, xn);
+    double r = RandomGenerator::sampleNormal(m, sigma);
 
-	reward[0] = r;
+    reward[0] = r;
 
 }
 
 void FiniteMDP::getInitialState(FiniteState& state)
 {
-	size_t x = RandomGenerator::sampleUniformInt(0, P.n_rows - 1);
+    size_t x = RandomGenerator::sampleUniformInt(0, P.n_rows - 1);
 
-	currentState.setStateN(x);
-	state.setStateN(x);
+    currentState.setStateN(x);
+    state.setStateN(x);
 }
 
 void FiniteMDP::chekMatricesDimensions(const arma::cube& P, const arma::cube& R,
-			const arma::cube& Rsigma)
+                                       const arma::cube& Rsigma)
 {
-	bool sameRows = (P.n_rows == R.n_rows) && (R.n_rows == Rsigma.n_rows);
-	bool sameCols = (P.n_cols == R.n_cols) && (R.n_cols == Rsigma.n_cols);
-	bool sameSlices = (P.n_slices == R.n_slices) && (R.n_slices == Rsigma.n_slices);
-	bool sameState = P.n_cols == P.n_slices;
+    bool sameRows = (P.n_rows == R.n_rows) && (R.n_rows == Rsigma.n_rows);
+    bool sameCols = (P.n_cols == R.n_cols) && (R.n_cols == Rsigma.n_cols);
+    bool sameSlices = (P.n_slices == R.n_slices) && (R.n_slices == Rsigma.n_slices);
+    bool sameState = P.n_cols == P.n_slices;
 
-	if (!sameRows || !sameCols || !sameSlices || !sameState)
-		throw invalid_argument("Invalid matrices:\n" //
-								"\t\tP must be [actions x states x states]\n"//
-								"\t\tR must be [actions x states x states]\n"//
-								"\t\tRsigma must be [actions x states x states]");
+    if (!sameRows || !sameCols || !sameSlices || !sameState)
+        throw invalid_argument("Invalid matrices:\n" //
+                               "\t\tP must be [actions x states x states]\n"//
+                               "\t\tR must be [actions x states x states]\n"//
+                               "\t\tRsigma must be [actions x states x states]");
 }
 
 void FiniteMDP::setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
-			double gamma, const arma::cube& P)
+                                 double gamma, const arma::cube& P)
 {
-	EnvirormentSettings& task = getWritableSettings();
-	task.isFiniteHorizon = isFiniteHorizon;
-	task.horizon = horizon;
-	task.gamma = gamma;
-	task.isAverageReward = false;
-	task.isEpisodic = false;
-	task.finiteStateDim = P.n_cols;
-	task.finiteActionDim = P.n_rows;
-	task.continuosStateDim = 0;
-	task.continuosActionDim = 0;
+    EnvirormentSettings& task = getWritableSettings();
+    task.isFiniteHorizon = isFiniteHorizon;
+    task.horizon = horizon;
+    task.gamma = gamma;
+    task.isAverageReward = false;
+    task.isEpisodic = false;
+    task.finiteStateDim = P.n_cols;
+    task.finiteActionDim = P.n_rows;
+    task.continuosStateDim = 0;
+    task.continuosActionDim = 0;
+    task.rewardDim = 1;
+}
+
+void FiniteMDP::findAbsorbingStates()
+{
+    for(unsigned int state = 0; state < P.n_cols; state++)
+    {
+        unsigned int count = 0;
+        for(unsigned int action = 0; action < P.n_rows; action++)
+        {
+            if(P(action, state, state) == 1.0)
+                count++;
+            else
+                break;
+        }
+
+        if(count == P.n_rows)
+            absorbingStates.insert(state);
+    }
 }
 
 }

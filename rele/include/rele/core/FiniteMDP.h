@@ -27,7 +27,7 @@
 #include "Basics.h"
 #include "Envirorment.h"
 
-#include <vector>
+#include <set>
 
 #include <armadillo>
 
@@ -37,22 +37,28 @@ namespace ReLe
 class FiniteMDP: public Envirorment<FiniteAction, FiniteState>
 {
 public:
-    FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, bool isFiniteHorizon, double gamma =
-                  1.0, unsigned int horizon = 0);
+    FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
+              bool isFiniteHorizon, double gamma = 1.0, unsigned int horizon =
+                  0);
 
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward);
     virtual void getInitialState(FiniteState& state);
 
 private:
+    void chekMatricesDimensions(const arma::cube& P, const arma::cube& R,
+                                const arma::cube& Rsigma);
+    void setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
+                          double gamma, const arma::cube& P);
+    void findAbsorbingStates();
+
+private:
     arma::cube P;
     arma::cube R;
     arma::cube Rsigma;
     FiniteState currentState;
+    std::set<unsigned int> absorbingStates;
 
-    void chekMatricesDimensions(const arma::cube& P, const arma::cube& R, const arma::cube& Rsigma);
-    void setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
-                          double gamma, const arma::cube& P);
 };
 
 }

@@ -34,52 +34,54 @@ template<class ActionC, class StateC>
 class RosEnvirorment: public ReLe::Envirorment<ActionC, StateC>
 {
 public:
-	RosEnvirorment(double controlFrequency) :
-				ReLe::Envirorment(), r(controlFrequency)
-	{
-		setupPublishers();
-		setupSubscribers();
-	}
+    RosEnvirorment(double controlFrequency) :
+        ReLe::Envirorment(), r(controlFrequency)
+    {
+        setupPublishers();
+        setupSubscribers();
+    }
 
-	virtual void step(const ActionC& action, StateC& nextState, ReLe::Reward& reward)
-	{
-		do
-		{
-			publishAction(action);
-			ros::spinOnce();
-			r.sleep();
-		} while (stateReady);
+    virtual void step(const ActionC& action, StateC& nextState, ReLe::Reward& reward)
+    {
+        do
+        {
+            publishAction(action);
+            ros::spinOnce();
+            r.sleep();
+        }
+        while (stateReady);
 
-		setState(state);
-	}
+        setState(state);
+    }
 
-	virtual void getInitialState(StateC& state)
-	{
-		do
-		{
-			ros::spinOnce();
-		} while (stateReady);
+    virtual void getInitialState(StateC& state)
+    {
+        do
+        {
+            ros::spinOnce();
+        }
+        while (stateReady);
 
-		setState(state);
-		r.reset();
-	}
+        setState(state);
+        r.reset();
+    }
 
-	virtual ~RosEnvirorment()
-	{
+    virtual ~RosEnvirorment()
+    {
 
-	}
-
-protected:
-	virtual void setupPublishers() = 0;
-	virtual void setupSubscribers() = 0;
-	virtual void publishAction(const ActionC& action) = 0;
-	virtual void setState(StateC& state) = 0;
-	virtual void setReward(const ActionC& action, const StateC& state, ReLe::Reward reward) = 0;
+    }
 
 protected:
-	ros::NodeHandle n;
-	ros::Rate r;
-	bool stateReady;
+    virtual void setupPublishers() = 0;
+    virtual void setupSubscribers() = 0;
+    virtual void publishAction(const ActionC& action) = 0;
+    virtual void setState(StateC& state) = 0;
+    virtual void setReward(const ActionC& action, const StateC& state, ReLe::Reward reward) = 0;
+
+protected:
+    ros::NodeHandle n;
+    ros::Rate r;
+    bool stateReady;
 
 };
 

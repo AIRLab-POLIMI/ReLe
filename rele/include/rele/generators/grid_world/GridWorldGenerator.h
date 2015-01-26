@@ -37,38 +37,38 @@ public:
     FiniteMDP getMPD(double gamma);
 
 private:
-	void assignStateNumbers(std::size_t i, std::size_t j);
-	void handleChar(std::size_t i, std::size_t j);
-	double computeProbability(int currentS, int consideredS, int actionS);
-	double computeReward(int consideredS, int actionS);
-	int getGoalStateN();
-	int getActionState(std::size_t i, std::size_t j, int action);
+    void assignStateNumbers(std::size_t i, std::size_t j);
+    void handleChar(std::size_t i, std::size_t j);
+    double computeProbability(int currentS, int consideredS, int actionS);
+    double computeReward(int consideredS, int actionS);
+    int getGoalStateN();
+    int getActionState(std::size_t i, std::size_t j, int action);
 
 private:
-	//output of the algorithm
+    //output of the algorithm
     arma::cube P;
     arma::cube R;
-	arma::cube Rsigma;
+    arma::cube Rsigma;
 
-	//generator data
+    //generator data
     size_t stateN;
     size_t currentState;
     int actionN;
 
-	std::vector<std::vector<char>> matrix;
-	std::vector<std::vector<int>> stateNMatrix;
+    std::vector<std::vector<char>> matrix;
+    std::vector<std::vector<int>> stateNMatrix;
 
-	//mdp data
-	double p;
-	double rgoal;
-	double rfall;
-	double rstep;
+    //mdp data
+    double p;
+    double rgoal;
+    double rfall;
+    double rstep;
 
 private:
-	enum ActionsEnum
-	{
-		N = 0, S = 1, W = 2, E = 3
-	};
+    enum ActionsEnum
+    {
+        N = 0, S = 1, W = 2, E = 3
+    };
 
 };
 

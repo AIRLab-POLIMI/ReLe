@@ -72,8 +72,7 @@ public:
 
         Reward r(envirorment.getSettings().rewardDim);
 
-//        bool episodic = envirorment.getSettings().isEpisodic;
-        for (unsigned int i = 0; /*episodic ||*/ i < settings.episodeLenght; i++)
+        for (unsigned int i = 0; i < settings.episodeLenght; i++)
         {
 
             envirorment.step(u, xn, r);
