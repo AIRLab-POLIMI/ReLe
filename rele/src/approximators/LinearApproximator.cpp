@@ -53,4 +53,10 @@ vec LinearApproximator::operator()(const vec& input)
     return output;
 }
 
+arma::vec LinearApproximator::diff(const vec& input)
+{
+    BasisFunctions& tmpbasis = *(basis);
+    return tmpbasis(input);
+}
+
 }

@@ -39,6 +39,7 @@ public:
     LinearApproximator(const unsigned int input_dim, BasisFunctions* bfs);
     virtual ~LinearApproximator();
     arma::vec operator()(const arma::vec& input);
+    arma::vec diff(const arma::vec& input);
 
     BasisFunctions& getBasis()
     {
