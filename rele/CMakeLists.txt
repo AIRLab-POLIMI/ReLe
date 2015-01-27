@@ -7,6 +7,7 @@ project(rele)
 if(catkin_FOUND)
 	catkin_package(INCLUDE_DIRS include
 	                            include/rele/core
+	                            include/rele/policy
                                 include/rele/utils
                                 include/rele/generators
                                 include/rele/algorithms
@@ -21,6 +22,7 @@ endif()
 # ----------------------- INCLUDES ----------------------------
 
 include_directories(include/rele/core
+                    include/rele/policy
                     include/rele/utils
                     include/rele/generators
                     include/rele/algorithms
@@ -55,8 +57,9 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 file(GLOB_RECURSE ReLe_SOURCE 
                   src/core/*.cpp 
+                  src/policy/*.cpp
                   src/algorithms/*.cpp
-                  src/envirorments/*.cpp 
+                  src/envirorments/*.cpp  
                   src/utils/*.cpp
                   src/generators/*.cpp
                   src/approximators/*.cpp)

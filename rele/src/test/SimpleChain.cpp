@@ -26,6 +26,8 @@
 #include "td/Q-Learning.h"
 #include "Core.h"
 
+#include "q_policy/e_Greedy.h"
+
 #include <iostream>
 
 using namespace std;
@@ -72,5 +74,8 @@ int main(int argc, char *argv[])
     core.getSettings().logTransitions = false;
     cout << "starting episode" << endl;
     core.runEpisode();
+
+    ReLe::e_Greedy policy;
+    ReLe::e_GreedyApproximate policy2;
 
 }

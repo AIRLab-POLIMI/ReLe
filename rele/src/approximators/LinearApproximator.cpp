@@ -34,6 +34,7 @@ LinearApproximator::LinearApproximator(unsigned int input_dim, unsigned int outp
     : ParametricRegressor(input_dim, output_dim)
 {
     assert(output_dim == 1);
+    basis = NULL;
 }
 
 LinearApproximator::LinearApproximator(const unsigned int input_dim, BasisFunctions *bfs)
