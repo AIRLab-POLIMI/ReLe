@@ -30,11 +30,18 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int episodes = 1;
+    int episodes = 40;
     ReLe::MountainCar mdp;
+//    srand(time(0));
 
     ReLe::BasisFunctions bf;
-    ReLe::LinearApproximator approximator(3, bf);
+    bf.GeneratePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
+    ReLe::LinearApproximator approximator(3, &bf);
+//    arma::vec& w = approximator.getParameters();
+//    for (int i = 0; i < w.n_elem; i++)
+//        w[i] = rand() / ((double) RAND_MAX);
+//    cout << w << endl;
+
     ReLe::LinearGradientSARSA agent(approximator);
 
     ReLe::Core<ReLe::FiniteAction, ReLe::DenseState> core(mdp, agent);

@@ -36,9 +36,9 @@ LinearApproximator::LinearApproximator(unsigned int input_dim, unsigned int outp
     assert(output_dim == 1);
 }
 
-LinearApproximator::LinearApproximator(const unsigned int input_dim, BasisFunctions& bfs)
+LinearApproximator::LinearApproximator(const unsigned int input_dim, BasisFunctions *bfs)
     : ParametricRegressor(input_dim, 1), basis(bfs),
-      parameters(bfs.size(), fill::zeros)
+      parameters(bfs->size(), fill::zeros)
 {
 }
 
@@ -49,7 +49,7 @@ LinearApproximator::~LinearApproximator()
 vec LinearApproximator::operator()(const vec& input)
 {
     vec output(1);
-    output[0] = basis.dot(input, parameters);
+    output[0] = basis->dot(input, parameters);
     return output;
 }
 

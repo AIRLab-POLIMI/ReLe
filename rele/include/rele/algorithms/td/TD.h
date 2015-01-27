@@ -80,7 +80,7 @@ public:
         this->eps = eps;
     }
 
-    void setLinearApproximator(LinearApproximator &la)
+    void setLinearApproximator(LinearApproximator& la)
     {
         this->Q = la;
     }

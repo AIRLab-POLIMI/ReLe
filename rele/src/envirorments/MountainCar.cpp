@@ -46,14 +46,18 @@ void MountainCar::step(const FiniteAction& action,
     currentState[velocity] = min(max(computedVelocity, -0.07), 0.07);
     currentState[position] = min(max(computedPosition, -1.2), 0.6);
 
+    if (currentState[position] <= -1.2) {
+        currentState[velocity] = 0;
+    }
+
     if (currentState[position] >= 0.6)
     {
-        reward[0] = -1;
+        reward[0] = 0;
         currentState.setAbsorbing();
     }
     else
     {
-        reward[0] = 0;
+        reward[0] = -1;
     }
 
     nextState = currentState;
