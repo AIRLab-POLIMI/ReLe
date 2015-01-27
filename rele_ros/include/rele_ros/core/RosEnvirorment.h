@@ -2,7 +2,7 @@
  * rele_ros,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele_ros.
@@ -27,6 +27,14 @@
 #include <rele/core/Envirorment.h>
 #include <ros/ros.h>
 
+#include <iostream>
+#include <exception>
+
+class RosExitException : public std::exception
+{
+    //TODO... qualcosa?
+};
+
 namespace ReLe_ROS
 {
 
@@ -35,32 +43,45 @@ class RosEnvirorment: public ReLe::Envirorment<ActionC, StateC>
 {
 public:
     RosEnvirorment(double controlFrequency) :
-        ReLe::Envirorment(), r(controlFrequency)
+        r(controlFrequency)
     {
-        setupPublishers();
-        setupSubscribers();
+        stateReady = false;
     }
 
-    virtual void step(const ActionC& action, StateC& nextState, ReLe::Reward& reward)
+    virtual void step(const ActionC& action, StateC& nextState,
+                      ReLe::Reward& reward)
     {
         do
         {
             publishAction(action);
             ros::spinOnce();
             r.sleep();
+            std::cout << "waiting for next state" << std::endl;
+            checkTermination();
         }
-        while (stateReady);
+        while (!stateReady && ros::ok());
 
-        setState(state);
+        setState(nextState);
+
+        if (nextState.isAbsorbing())
+        {
+            stop();
+        }
     }
 
     virtual void getInitialState(StateC& state)
     {
+        start();
+
         do
         {
             ros::spinOnce();
+            std::cout << "waiting for initial state" << std::endl;
+            checkTermination();
         }
-        while (stateReady);
+        while (!stateReady && ros::ok());
+
+
 
         setState(state);
         r.reset();
@@ -72,11 +93,19 @@ public:
     }
 
 protected:
-    virtual void setupPublishers() = 0;
-    virtual void setupSubscribers() = 0;
+    virtual void start() = 0;
+    virtual void stop() = 0;
     virtual void publishAction(const ActionC& action) = 0;
     virtual void setState(StateC& state) = 0;
-    virtual void setReward(const ActionC& action, const StateC& state, ReLe::Reward reward) = 0;
+    virtual void setReward(const ActionC& action, const StateC& state,
+                           ReLe::Reward reward) = 0;
+
+private:
+    void checkTermination()
+    {
+        if(!ros::ok())
+            throw RosExitException();
+    }
 
 protected:
     ros::NodeHandle n;

@@ -81,11 +81,13 @@ bool getHandle(std::string name,int& variable)
     ros::ServiceClient client = n.serviceClient<vrep_common::simRosGetObjectHandle>("/vrep/simRosGetObjectHandle");
     vrep_common::simRosGetObjectHandle robot_handle;
     robot_handle.request.objectName = name;
+
     if(!client.call(robot_handle))
     {
         std::cout <<"error in service call"<<std::endl;
         return false;
     }
+
     if(robot_handle.response.handle < 0)
     {
         std::cout <<"error, unable to get the handle of the vrep object "<<name<<std::endl;
@@ -96,25 +98,11 @@ bool getHandle(std::string name,int& variable)
     std::cout << name<<" handle: " <<robot_handle.response.handle<<std::endl;
 
     return true;
-
 }
 
 // Main code:
 int main(int argc,char* argv[])
 {
-    // The joint handles and proximity sensor handles are given in the argument list
-    // (when V-REP launches this executable, V-REP will also provide the argument list)
-
-    /*if (argc>=3) {
-    	leftMotorHandle=atoi(argv[1]);
-    	rightMotorHandle=atoi(argv[2]);
-    	std::cout << "argomenti: "<<argv[1]<< " , " << argv[2]<<std::endl;
-    } else {
-    	printf("Indicate following arguments: 'leftMotorHandle rightMotorHandle sensorHandle'!\n");
-    	sleep(5000);
-    	return 0;
-    }*/
-
     // Create a ROS node. The name has a random component:
     int _argc = 0;
     char** _argv = NULL;
