@@ -7,7 +7,8 @@ namespace ReLe
 {
 
 LinearGradientSARSA::LinearGradientSARSA(LinearApproximator& la)
-    : LinearTD(la), lambda(0.0), eligibility(la.getBasis().size(), fill::zeros)
+    : LinearTD(la), lambda(0.0), eligibility(la.getBasis().size(), fill::zeros),
+      useReplacingTraces(false)
 {
 }
 
@@ -30,6 +31,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
     unsigned int nstates = task.continuosStateDim;
     unsigned int un = policy(nextState);
 
+
     //Prepare input for the regressor
     vec regInput(nstates + 1);
 
@@ -46,6 +48,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
     BasisFunctions& basis = Q.getBasis();
     vec dQxu = basis(regInput);
 
+
     //Q(xn, un)
     for (unsigned int i = 0; i < nstates; ++i)
     {
@@ -57,7 +60,17 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
     double r = reward[0];
 
     double delta = r + task.gamma * Qxnun[0] - Qxu[0];
-    this->eligibility = task.gamma * this->lambda * this->eligibility + dQxu;
+    //accumulatiog or replacing eligibility traces
+    if (useReplacingTraces) {
+        for (int i = 0; i < dQxu.n_elem; ++i) {
+            if (dQxu[i] == 0)
+                this->eligibility[i] =  task.gamma * this->lambda * this->eligibility[i];
+            else
+                this->eligibility[i] = dQxu[i];
+        }
+    } else {
+        this->eligibility = task.gamma * this->lambda * this->eligibility + dQxu;
+    }
 
     vec deltaWeights = this->alpha * delta * this->eligibility;
 

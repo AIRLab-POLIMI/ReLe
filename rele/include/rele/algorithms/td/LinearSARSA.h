@@ -30,6 +30,9 @@
 namespace ReLe
 {
 
+/**
+ * http://jmlr.org/proceedings/papers/v32/seijen14.pdf
+ */
 class LinearGradientSARSA: public LinearTD
 {
 public:
@@ -43,12 +46,17 @@ public:
 
     virtual ~LinearGradientSARSA();
 
+    void setReplacingTraces(bool val) {
+        useReplacingTraces = val;
+    }
+
 protected:
     virtual void printStatistics();
 
 private:
     arma::vec eligibility;
     double lambda;
+    bool useReplacingTraces;
 
 };
 
