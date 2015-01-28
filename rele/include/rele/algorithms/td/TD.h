@@ -27,6 +27,7 @@
 #include "Agent.h"
 #include <armadillo>
 #include "LinearApproximator.h"
+#include "q_policy/e_Greedy.h"
 
 namespace ReLe
 {
@@ -43,7 +44,7 @@ public:
 
     void setEpsilon(double eps)
     {
-        this->eps = eps;
+        e_policy.setEpsilon(eps);
     }
 
 protected:
@@ -61,7 +62,7 @@ protected:
 
     //algorithm parameters
     double alpha;
-    double eps;
+    e_Greedy e_policy;
 
 };
 
@@ -77,13 +78,14 @@ public:
 
     void setEpsilon(double eps)
     {
-        this->eps = eps;
+        e_policy.setEpsilon(eps);
     }
 
-    void setLinearApproximator(LinearApproximator& la)
-    {
-        this->Q = la;
-    }
+//    void setLinearApproximator(LinearApproximator& la)
+//    {
+//        this->Q = la;
+//        e_policy.setRegressor(&Q);
+//    }
 
 protected:
     unsigned int policy(DenseState state);
@@ -99,7 +101,7 @@ protected:
 
     //algorithm parameters
     double alpha;
-    double eps;
+    e_GreedyApproximate e_policy;
 };
 
 }//end namespace

@@ -35,194 +35,194 @@ namespace ReLe
 
 struct EnvirormentSettings
 {
-	bool isFiniteHorizon;
-	double gamma;
-	unsigned int horizon;
+    bool isFiniteHorizon;
+    double gamma;
+    unsigned int horizon;
 
-	bool isAverageReward;
-	bool isEpisodic;
+    bool isAverageReward;
+    bool isEpisodic;
 
-	size_t finiteStateDim;
-	unsigned int finiteActionDim;
+    size_t finiteStateDim;
+    unsigned int finiteActionDim;
 
-	unsigned int continuosStateDim;
-	unsigned int continuosActionDim;
+    unsigned int continuosStateDim;
+    unsigned int continuosActionDim;
 
-	unsigned int rewardDim;
+    unsigned int rewardDim;
 };
 
 class Action
 {
 public:
-	inline virtual std::string to_str() const
-	{
-		return "action";
-	}
+    inline virtual std::string to_str() const
+    {
+        return "action";
+    }
 
-	inline virtual ~Action()
-	{
+    inline virtual ~Action()
+    {
 
-	}
+    }
 };
 
 class FiniteAction: public Action
 {
 public:
-	FiniteAction()
-	{
-		actionN = 0;
-	}
+    FiniteAction()
+    {
+        actionN = 0;
+    }
 
-	inline unsigned int getActionN() const
-	{
-		return actionN;
-	}
+    inline unsigned int getActionN() const
+    {
+        return actionN;
+    }
 
-	inline void setActionN(unsigned int actionN)
-	{
-		this->actionN = actionN;
-	}
+    inline void setActionN(unsigned int actionN)
+    {
+        this->actionN = actionN;
+    }
 
-	inline virtual std::string to_str() const
-	{
-		return "u = " + std::to_string(actionN);
-	}
+    inline virtual std::string to_str() const
+    {
+        return "u = " + std::to_string(actionN);
+    }
 
-	inline virtual ~FiniteAction()
-	{
+    inline virtual ~FiniteAction()
+    {
 
-	}
+    }
 
 private:
-	unsigned int actionN;
+    unsigned int actionN;
 };
 
 class DenseAction: public Action, public arma::vec
 {
-	DenseAction(std::size_t size) :
-				arma::vec(size)
-	{
+    DenseAction(std::size_t size) :
+        arma::vec(size)
+    {
 
-	}
+    }
 
-	inline virtual std::string to_str() const
-	{
-		const arma::vec& self = *this;
-		std::stringstream ss;
-		ss << "x = [";
+    inline virtual std::string to_str() const
+    {
+        const arma::vec& self = *this;
+        std::stringstream ss;
+        ss << "x = [";
 
-		size_t i;
-		for (i = 0; i + 1 < self.n_elem; i++)
-			ss << self[i] << ", ";
+        size_t i;
+        for (i = 0; i + 1 < self.n_elem; i++)
+            ss << self[i] << ", ";
 
-		ss << self[i] << "]";
+        ss << self[i] << "]";
 
-		return ss.str();
-	}
+        return ss.str();
+    }
 
-	inline virtual ~DenseAction()
-	{
+    inline virtual ~DenseAction()
+    {
 
-	}
+    }
 };
 
 class State
 {
 public:
-	State() :
-				absorbing(false)
-	{
+    State() :
+        absorbing(false)
+    {
 
-	}
+    }
 
-	inline bool isAbsorbing() const
-	{
-		return absorbing;
-	}
+    inline bool isAbsorbing() const
+    {
+        return absorbing;
+    }
 
-	inline void setAbsorbing(bool absorbing = true)
-	{
-		this->absorbing = absorbing;
-	}
+    inline void setAbsorbing(bool absorbing = true)
+    {
+        this->absorbing = absorbing;
+    }
 
-	inline virtual std::string to_str() const
-	{
-		return "state";
-	}
+    inline virtual std::string to_str() const
+    {
+        return "state";
+    }
 
-	inline virtual ~State()
-	{
+    inline virtual ~State()
+    {
 
-	}
+    }
 
 private:
-	bool absorbing;
+    bool absorbing;
 };
 
 class FiniteState: public State
 {
 public:
-	FiniteState()
-	{
-		stateN = 0;
-	}
+    FiniteState()
+    {
+        stateN = 0;
+    }
 
-	inline std::size_t getStateN() const
-	{
-		return stateN;
-	}
+    inline std::size_t getStateN() const
+    {
+        return stateN;
+    }
 
-	inline void setStateN(std::size_t stateN)
-	{
-		this->stateN = stateN;
-	}
+    inline void setStateN(std::size_t stateN)
+    {
+        this->stateN = stateN;
+    }
 
-	inline virtual std::string to_str() const
-	{
-		return "x = " + std::to_string(stateN);
-	}
+    inline virtual std::string to_str() const
+    {
+        return "x = " + std::to_string(stateN);
+    }
 
-	inline virtual ~FiniteState()
-	{
+    inline virtual ~FiniteState()
+    {
 
-	}
+    }
 
 private:
-	std::size_t stateN;
+    std::size_t stateN;
 
 };
 
 class DenseState: public State, public arma::vec
 {
 public:
-	DenseState()
-	{
-	}
+    DenseState()
+    {
+    }
 
-	DenseState(std::size_t size) :
-				arma::vec(size)
-	{
-	}
+    DenseState(std::size_t size) :
+        arma::vec(size)
+    {
+    }
 
-	inline virtual std::string to_str() const
-	{
-		const arma::vec& self = *this;
-		std::stringstream ss;
-		ss << "x = [";
+    inline virtual std::string to_str() const
+    {
+        const arma::vec& self = *this;
+        std::stringstream ss;
+        ss << "x = [";
 
-		size_t i;
-		for (i = 0; i + 1 < self.n_elem; i++)
-			ss << self[i] << ", ";
+        size_t i;
+        for (i = 0; i + 1 < self.n_elem; i++)
+            ss << self[i] << ", ";
 
-		ss << self[i] << "]";
+        ss << self[i] << "]";
 
-		return ss.str();
-	}
+        return ss.str();
+    }
 
-	inline virtual ~DenseState()
-	{
+    inline virtual ~DenseState()
+    {
 
-	}
+    }
 
 };
 
@@ -230,26 +230,26 @@ typedef std::vector<double> Reward;
 
 inline std::ostream& operator<<(std::ostream& os, const Action& action)
 {
-	os << action.to_str();
-	return os;
+    os << action.to_str();
+    return os;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const State& state)
 {
-	os << state.to_str();
-	return os;
+    os << state.to_str();
+    return os;
 }
 
 inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
-	os << "r = [";
+    os << "r = [";
 
-	size_t i;
-	for (i = 0; i + 1 < reward.size(); i++)
-		os << reward[i] << ", ";
+    size_t i;
+    for (i = 0; i + 1 < reward.size(); i++)
+        os << reward[i] << ", ";
 
-	os << reward[i] << "]";
-	return os;
+    os << reward[i] << "]";
+    return os;
 }
 
 }

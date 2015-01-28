@@ -73,6 +73,11 @@ public:
         return this->eps;
     }
 
+    void setRegressor(Regressor* r)
+    {
+        Q = r;
+    }
+
 protected:
     Regressor* Q;
     double eps;

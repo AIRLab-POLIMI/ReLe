@@ -34,37 +34,37 @@ namespace ReLe
 template<class ActionC>
 struct action_type
 {
-	typedef typename std::add_pointer<void>::type type;
+    typedef typename std::add_pointer<void>::type type;
 };
 
 template<>
 struct action_type<FiniteAction>
 {
-	typedef int type;
+    typedef int type;
 };
 
 template<>
 struct action_type<DenseAction>
 {
-	typedef typename std::add_lvalue_reference<arma::vec>::type type;
+    typedef typename std::add_lvalue_reference<arma::vec>::type type;
 };
 
 template<class StateC>
 struct state_type
 {
-	typedef typename std::add_pointer<void>::type type;
+    typedef typename std::add_pointer<void>::type type;
 };
 
 template<>
 struct state_type<FiniteState>
 {
-	typedef int type;
+    typedef int type;
 };
 
 template<>
 struct state_type<DenseState>
 {
-	typedef typename std::add_lvalue_reference<arma::vec>::type type;
+    typedef typename std::add_lvalue_reference<arma::vec>::type type;
 };
 
 
