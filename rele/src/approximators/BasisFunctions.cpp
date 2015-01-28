@@ -38,7 +38,8 @@ BasisFunctions::BasisFunctions()
 BasisFunctions::~BasisFunctions()
 {
     BasisFunctions::iterator it;
-    for (it = this->begin(); it != this->end(); ++it) {
+    for (it = this->begin(); it != this->end(); ++it)
+    {
         delete *it;
     }
     this->clear();

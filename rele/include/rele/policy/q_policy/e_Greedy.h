@@ -25,6 +25,7 @@
 #define E_GREEDY_H_
 
 #include "Policy.h"
+#include "Approximators.h"
 
 namespace ReLe
 {
@@ -32,19 +33,50 @@ namespace ReLe
 class e_Greedy: public ActionValuePolicy<FiniteState>
 {
 public:
-	 virtual int operator() (int state);
-	 virtual double operator() (int state, int action);
+    e_Greedy(arma::mat* Q);
+    virtual ~e_Greedy();
 
-	 virtual ~e_Greedy();
+    virtual int operator() (int state);
+    virtual double operator() (int state, int action);
+
+    void setEpsilon(double eps)
+    {
+        this->eps = eps;
+    }
+
+    double getEpsilon()
+    {
+        return this->eps;
+    }
+
+protected:
+    arma::mat* Q;
+    double eps;
 };
 
 class e_GreedyApproximate: public ActionValuePolicy<DenseState>
 {
 public:
-	 virtual int operator() (arma::vec& state);
-	 virtual double operator() (arma::vec& state, int action);
+    e_GreedyApproximate(Regressor* Q, unsigned int nactions);
+    virtual ~e_GreedyApproximate();
 
-	 virtual ~e_GreedyApproximate();
+    virtual int operator() (arma::vec& state);
+    virtual double operator() (arma::vec& state, int action);
+
+    void setEpsilon(double eps)
+    {
+        this->eps = eps;
+    }
+
+    double getEpsilon()
+    {
+        return this->eps;
+    }
+
+protected:
+    Regressor* Q;
+    double eps;
+    unsigned int nactions;
 };
 
 }

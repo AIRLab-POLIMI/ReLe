@@ -75,7 +75,4 @@ int main(int argc, char *argv[])
     cout << "starting episode" << endl;
     core.runEpisode();
 
-    ReLe::e_Greedy policy;
-    ReLe::e_GreedyApproximate policy2;
-
 }

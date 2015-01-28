@@ -118,7 +118,7 @@ unsigned int LinearTD::policy(DenseState state)
         un = 0;
         for (unsigned int i = 1; i < nactions; ++i)
         {
-            regInput[i] = i;
+            regInput[nstates] = i;
             vec&& qvalue = Q(regInput);
             if (qmax < qvalue[0])
             {

@@ -61,14 +61,18 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
 
     double delta = r + task.gamma * Qxnun[0] - Qxu[0];
     //accumulatiog or replacing eligibility traces
-    if (useReplacingTraces) {
-        for (int i = 0; i < dQxu.n_elem; ++i) {
+    if (useReplacingTraces)
+    {
+        for (int i = 0; i < dQxu.n_elem; ++i)
+        {
             if (dQxu[i] == 0)
                 this->eligibility[i] =  task.gamma * this->lambda * this->eligibility[i];
             else
                 this->eligibility[i] = dQxu[i];
         }
-    } else {
+    }
+    else
+    {
         this->eligibility = task.gamma * this->lambda * this->eligibility + dQxu;
     }
 

@@ -46,7 +46,8 @@ public:
 
     virtual ~LinearGradientSARSA();
 
-    void setReplacingTraces(bool val) {
+    void setReplacingTraces(bool val)
+    {
         useReplacingTraces = val;
     }
 
