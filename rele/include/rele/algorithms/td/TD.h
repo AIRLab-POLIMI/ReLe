@@ -77,6 +77,7 @@ public:
 //    }
 
 protected:
+    virtual void init();
     void printStatistics();
 
 protected:

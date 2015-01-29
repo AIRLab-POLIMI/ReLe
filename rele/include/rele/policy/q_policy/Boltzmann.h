@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -32,50 +32,55 @@ namespace ReLe
 class Boltzmann: public ActionValuePolicy<FiniteState>
 {
 public:
-	Boltzmann(arma::mat* Q);
-    virtual ~Boltzmann();
+	Boltzmann();
+	virtual ~Boltzmann();
 
-    virtual int operator() (int state);
-    virtual double operator() (int state, int action);
+	virtual int operator()(int state);
+	virtual double operator()(int state, int action);
 
-    void setEpsilon(double eps)
-    {
-        this->eps = eps;
-    }
+	void setTemperature(double tau)
+	{
+		this->tau = tau;
+	}
 
-    double getEpsilon()
-    {
-        return this->eps;
-    }
+	double getTemperature()
+	{
+		return this->tau;
+	}
+
 
 protected:
-    arma::mat* Q;
-    double eps;
+	double tau;
+
+private:
+	arma::vec computeProbabilities(int state);
 };
 
 class BoltzmannApproximate: public ActionValuePolicy<DenseState>
 {
 public:
-	BoltzmannApproximate(Regressor* Q);
-    virtual ~BoltzmannApproximate();
+	BoltzmannApproximate();
+	virtual ~BoltzmannApproximate();
 
-    virtual int operator() (const arma::vec& state);
-    virtual double operator() (const arma::vec& state, int action);
+	virtual int operator()(const arma::vec& state);
+	virtual double operator()(const arma::vec& state, int action);
 
-    void setEpsilon(double eps)
-    {
-        this->eps = eps;
-    }
+	void setTemperature(double tau)
+	{
+		this->tau = tau;
+	}
 
-    double getEpsilon()
-    {
-        return this->eps;
-    }
+	double getTemperature()
+	{
+		return this->tau;
+	}
+
+private:
+	arma::vec computeProbabilities(const arma::vec& state);
 
 protected:
-    Regressor* Q;
-    double eps;
-    unsigned int nactions;
+	double tau;
+
 };
 
 }

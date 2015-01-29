@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -35,8 +35,6 @@ FiniteTD::FiniteTD(ActionValuePolicy<FiniteState>& policy) :
 {
 	x = 0;
 	u = 0;
-	policy.setQ(&Q);
-	policy.setNactions(task.finiteActionDim);
 
 	//Default algorithm parameters
 	alpha = 0.2;
@@ -45,6 +43,8 @@ FiniteTD::FiniteTD(ActionValuePolicy<FiniteState>& policy) :
 void FiniteTD::init()
 {
 	Q.zeros(task.finiteStateDim, task.finiteActionDim);
+	policy.setQ(&Q);
+	policy.setNactions(task.finiteActionDim);
 }
 
 void FiniteTD::printStatistics()
@@ -73,14 +73,19 @@ void FiniteTD::printStatistics()
 
 LinearTD::LinearTD(ActionValuePolicy<DenseState>& policy,
 			LinearApproximator& la) :
-			Q(la), x(task.continuosStateDim), policy(policy)
+			Q(la), policy(policy)
 {
 	u = 0;
-	policy.setQ(&Q);
-	policy.setNactions(task.finiteActionDim);
 
 	//Default parameters
 	alpha = 0.2;
+}
+
+void LinearTD::init()
+{
+	x.zeros(task.continuosStateDim);
+	policy.setQ(&Q);
+	policy.setNactions(task.finiteActionDim);
 }
 
 void LinearTD::printStatistics()

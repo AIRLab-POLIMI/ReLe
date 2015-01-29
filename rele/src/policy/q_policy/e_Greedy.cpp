@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -106,10 +106,9 @@ int e_GreedyApproximate::operator()(const arma::vec& state)
 
         unsigned int nstates = state.size();
         vec regInput(nstates + 1);
-        for (unsigned int i = 0; i < nstates; ++i)
-        {
-            regInput[i] = state[i];
-        }
+
+
+        regInput.subvec(0, nstates - 1) = state;
         regInput[nstates] = 0;
 
         vec&& qvalue0 = Qref(regInput);
@@ -132,6 +131,8 @@ int e_GreedyApproximate::operator()(const arma::vec& state)
 
 double e_GreedyApproximate::operator()(const arma::vec& state, const int action)
 {
+	//TODO implement
+	assert(false);
     return 0.0;
 }
 

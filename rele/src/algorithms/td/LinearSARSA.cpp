@@ -29,7 +29,7 @@ void LinearGradientSARSA::sampleAction(const DenseState& state, FiniteAction& ac
 void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState, FiniteAction& action)
 {
     unsigned int nstates = task.continuosStateDim;
-    unsigned int un = policy(nextState); //FIXME
+    unsigned int un = policy(nextState);
 
 
     //Prepare input for the regressor
@@ -99,10 +99,7 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
     vec regInput(nstates + 1);
 
     // Q(x,u)
-    for (unsigned int i = 0; i < nstates; ++i)
-    {
-        regInput[i] = x[i];
-    }
+    regInput.subvec(0, nstates - 1) = x;
     regInput[nstates] = u;
     vec&& Qxu = Q(regInput);
 

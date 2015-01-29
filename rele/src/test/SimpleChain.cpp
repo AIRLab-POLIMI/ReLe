@@ -27,6 +27,7 @@
 #include "Core.h"
 
 #include "q_policy/e_Greedy.h"
+#include "q_policy/Boltzmann.h"
 
 #include <iostream>
 
@@ -66,7 +67,8 @@ int main(int argc, char *argv[])
     P.tube(arma::span(1), arma::span::all) = P1;
 
     ReLe::FiniteMDP mdp(P, R, Rsigma, false, 0.9);
-    ReLe::e_Greedy policy;
+    //ReLe::e_Greedy policy;
+    ReLe::Boltzmann policy;
     ReLe::SARSA agent(policy);
 // 	ReLe::Q_Learning agent(policy);
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
