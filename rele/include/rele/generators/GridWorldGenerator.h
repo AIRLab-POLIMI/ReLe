@@ -64,16 +64,8 @@ private:
     int getActionState(std::size_t i, std::size_t j, int action);
 
 private:
-    //output of the algorithm
-    arma::cube P;
-    arma::cube R;
-    arma::cube Rsigma;
-
-    //generator data
-    size_t stateN;
+    //Generator data
     size_t currentState;
-    int actionN;
-
     std::vector<std::vector<char>> matrix;
     std::vector<std::vector<int>> stateNMatrix;
 
