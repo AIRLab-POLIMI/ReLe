@@ -36,7 +36,7 @@ namespace ReLe
 class LinearGradientSARSA: public LinearTD
 {
 public:
-    LinearGradientSARSA(LinearApproximator &la);
+    LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, LinearApproximator &la);
     virtual void initEpisode(const DenseState& state, FiniteAction& action);
     virtual void sampleAction(const DenseState& state, FiniteAction& action);
     virtual void step(const Reward& reward, const DenseState& nextState,

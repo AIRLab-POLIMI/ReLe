@@ -43,9 +43,10 @@ int main(int argc, char *argv[])
 
         ReLe::FiniteMDP&& mdp = generator.getMPD(1.0);
 
-        ReLe::SARSA_lambda agent(false);
-        //ReLe::SARSA agent;
-        //ReLe::Q_Learning agent;
+        ReLe::e_Greedy policy;
+        ReLe::SARSA_lambda agent(policy, false);
+        //ReLe::SARSA agent(policy);
+        //ReLe::Q_Learning agent(policy);
 
         ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 

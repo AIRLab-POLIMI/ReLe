@@ -21,60 +21,63 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef E_GREEDY_H_
-#define E_GREEDY_H_
+#ifndef INCLUDE_RELE_POLICY_Q_POLICY_BOLTZMANN_H_
+#define INCLUDE_RELE_POLICY_Q_POLICY_BOLTZMANN_H_
 
-#include "q_policy/ActionValuePolicy.h"
+#include "ActionValuePolicy.h"
 
 namespace ReLe
 {
 
-class e_Greedy: public ActionValuePolicy<FiniteState>
+class Boltzmann: public ActionValuePolicy<FiniteState>
 {
 public:
-    e_Greedy();
-    virtual ~e_Greedy();
+	Boltzmann(arma::mat* Q);
+    virtual ~Boltzmann();
 
-    virtual int operator() (const int state);
-    virtual double operator() (const int state, const int action);
+    virtual int operator() (int state);
+    virtual double operator() (int state, int action);
 
-    inline void setEpsilon(double eps)
+    void setEpsilon(double eps)
     {
         this->eps = eps;
     }
 
-    inline double getEpsilon()
+    double getEpsilon()
     {
         return this->eps;
     }
 
 protected:
+    arma::mat* Q;
     double eps;
 };
 
-class e_GreedyApproximate: public ActionValuePolicy<DenseState>
+class BoltzmannApproximate: public ActionValuePolicy<DenseState>
 {
 public:
-    e_GreedyApproximate();
-    virtual ~e_GreedyApproximate();
+	BoltzmannApproximate(Regressor* Q);
+    virtual ~BoltzmannApproximate();
 
     virtual int operator() (const arma::vec& state);
-    virtual double operator() (const arma::vec& state, const int action);
+    virtual double operator() (const arma::vec& state, int action);
 
-    inline void setEpsilon(double eps)
+    void setEpsilon(double eps)
     {
         this->eps = eps;
     }
 
-    inline double getEpsilon()
+    double getEpsilon()
     {
         return this->eps;
     }
 
 protected:
+    Regressor* Q;
     double eps;
-
+    unsigned int nactions;
 };
 
 }
-#endif /* E_GREEDY_H_ */
+
+#endif /* INCLUDE_RELE_POLICY_Q_POLICY_BOLTZMANN_H_ */

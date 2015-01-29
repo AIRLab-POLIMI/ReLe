@@ -26,8 +26,6 @@
 
 #include "Basics.h"
 
-//TODO densearray deve essere una classe proxy... così puoi usare il container che vuoi...
-//oppue deve avere una sottoclasse tipo DenseVector che abbia un vector all'internno...
 namespace ReLe
 {
 

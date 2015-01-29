@@ -35,36 +35,42 @@ template<class ActionC>
 struct action_type
 {
     typedef typename std::add_pointer<void>::type type;
+    typedef const std::add_pointer<const void>::type const_type;
 };
 
 template<>
 struct action_type<FiniteAction>
 {
     typedef int type;
+    typedef const int const_type;
 };
 
 template<>
 struct action_type<DenseAction>
 {
     typedef typename std::add_lvalue_reference<arma::vec>::type type;
+    typedef typename std::add_lvalue_reference<const arma::vec>::type const_type;
 };
 
 template<class StateC>
 struct state_type
 {
     typedef typename std::add_pointer<void>::type type;
+    typedef const std::add_pointer<const void>::type const_type;
 };
 
 template<>
 struct state_type<FiniteState>
 {
     typedef int type;
+    typedef const int const_type;
 };
 
 template<>
 struct state_type<DenseState>
 {
     typedef typename std::add_lvalue_reference<arma::vec>::type type;
+    typedef typename std::add_lvalue_reference<const arma::vec>::type const_type;
 };
 
 

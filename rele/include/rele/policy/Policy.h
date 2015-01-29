@@ -34,10 +34,11 @@ class Policy
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+    static_assert(std::is_const<typename action_type<ActionC>::const_type>::value, "Non const type");
 
 public:
-    virtual typename action_type<ActionC>::type operator() (const typename state_type<StateC>::type state) = 0;
-    virtual double operator() (const typename state_type<StateC>::type state, const typename action_type<ActionC>::type action) = 0;
+    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type state) = 0;
+    virtual double operator() (typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
 
     virtual ~Policy()
     {
@@ -55,8 +56,8 @@ template<class ActionC, class StateC>
 class ParametricPolicy: public Policy<ActionC, StateC>
 {
 public:
-    arma::vec diff(const typename state_type<StateC>::type state, const typename action_type<ActionC>::type action) = 0;
-    arma::vec difflog(const typename state_type<StateC>::type state, const typename action_type<ActionC>::type action) = 0;
+    arma::vec diff(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
+    arma::vec difflog(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
 
     inline const arma::vec& getParameters() const
     {
@@ -65,12 +66,6 @@ public:
 
 protected:
     arma::vec w;
-
-};
-
-template<class StateC>
-class ActionValuePolicy: public NonParametricPolicy<FiniteAction, StateC>
-{
 
 };
 

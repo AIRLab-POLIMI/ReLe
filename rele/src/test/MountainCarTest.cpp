@@ -42,7 +42,8 @@ int main(int argc, char *argv[])
 //        w[i] = rand() / ((double) RAND_MAX);
 //    cout << w << endl;
 
-    ReLe::LinearGradientSARSA agent(approximator);
+    ReLe::e_GreedyApproximate policy;
+    ReLe::LinearGradientSARSA agent(policy, approximator);
 
     ReLe::Core<ReLe::FiniteAction, ReLe::DenseState> core(mdp, agent);
 

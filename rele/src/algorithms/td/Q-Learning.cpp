@@ -30,8 +30,8 @@ using namespace arma;
 namespace ReLe
 {
 
-Q_Learning::Q_Learning() :
-    FiniteTD()
+Q_Learning::Q_Learning(ActionValuePolicy<FiniteState>& policy) :
+    FiniteTD(policy)
 {
 }
 

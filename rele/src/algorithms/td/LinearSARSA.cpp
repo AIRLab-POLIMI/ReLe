@@ -6,8 +6,8 @@ using namespace arma;
 namespace ReLe
 {
 
-LinearGradientSARSA::LinearGradientSARSA(LinearApproximator& la)
-    : LinearTD(la), lambda(0.0), eligibility(la.getBasis().size(), fill::zeros),
+LinearGradientSARSA::LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, LinearApproximator& la)
+    : LinearTD(policy, la), lambda(0.0), eligibility(la.getBasis().size(), fill::zeros),
       useReplacingTraces(false)
 {
 }
@@ -29,7 +29,7 @@ void LinearGradientSARSA::sampleAction(const DenseState& state, FiniteAction& ac
 void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState, FiniteAction& action)
 {
     unsigned int nstates = task.continuosStateDim;
-    unsigned int un = policy(nextState);
+    unsigned int un = policy(nextState); //FIXME
 
 
     //Prepare input for the regressor

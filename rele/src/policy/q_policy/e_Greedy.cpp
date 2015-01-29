@@ -29,11 +29,17 @@ using namespace arma;
 namespace ReLe
 {
 
-e_Greedy::e_Greedy(arma::mat *Q) : Q(Q)
-{ }
+e_Greedy::e_Greedy()
+{
+	Q = NULL;
+	eps = 0.15;
+	nactions = 0;
+}
 
 e_Greedy::~e_Greedy()
-{ }
+{
+
+}
 
 int e_Greedy::operator()(const int state)
 {
@@ -77,17 +83,19 @@ double e_Greedy::operator()(const int state, const int action)
 }
 
 
-e_GreedyApproximate::e_GreedyApproximate(Regressor *Q, unsigned int nactions)
-    : Q(Q), nactions(nactions)
-{ }
+e_GreedyApproximate::e_GreedyApproximate()
+{
+	Q = NULL;
+	nactions = 0;
+	eps = 0.15;
+}
 
 e_GreedyApproximate::~e_GreedyApproximate()
 { }
 
-int e_GreedyApproximate::operator()(arma::vec& state)
+int e_GreedyApproximate::operator()(const arma::vec& state)
 {
     unsigned int un;
-
 
     /*epsilon--greedy policy*/
     if (RandomGenerator::sampleEvent(this->eps))
@@ -122,7 +130,7 @@ int e_GreedyApproximate::operator()(arma::vec& state)
     return un;
 }
 
-double e_GreedyApproximate::operator()(arma::vec& state, int action)
+double e_GreedyApproximate::operator()(const arma::vec& state, const int action)
 {
     return 0.0;
 }

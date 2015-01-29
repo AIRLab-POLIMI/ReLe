@@ -35,21 +35,15 @@ namespace ReLe
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
-    FiniteTD();
+    FiniteTD(ActionValuePolicy<FiniteState>& policy);
 
     void setAlpha(double alpha)
     {
         this->alpha = alpha;
     }
 
-    void setEpsilon(double eps)
-    {
-        e_policy.setEpsilon(eps);
-    }
-
 protected:
     virtual void init();
-    unsigned int policy(std::size_t x);
     void printStatistics();
 
 protected:
@@ -62,23 +56,18 @@ protected:
 
     //algorithm parameters
     double alpha;
-    e_Greedy e_policy;
+    ActionValuePolicy<FiniteState>& policy;
 
 };
 
 class LinearTD : public Agent<FiniteAction, DenseState>
 {
 public:
-    LinearTD(LinearApproximator &la);
+    LinearTD(ActionValuePolicy<DenseState>& policy, LinearApproximator& la);
 
     void setAlpha(double alpha)
     {
         this->alpha = alpha;
-    }
-
-    void setEpsilon(double eps)
-    {
-        e_policy.setEpsilon(eps);
     }
 
 //    void setLinearApproximator(LinearApproximator& la)
@@ -88,7 +77,6 @@ public:
 //    }
 
 protected:
-    unsigned int policy(DenseState state);
     void printStatistics();
 
 protected:
@@ -101,7 +89,7 @@ protected:
 
     //algorithm parameters
     double alpha;
-    e_GreedyApproximate e_policy;
+    ActionValuePolicy<DenseState>& policy;
 };
 
 }//end namespace
