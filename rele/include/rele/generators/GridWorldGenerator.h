@@ -24,17 +24,16 @@
 #ifndef GRIDWORLDGENERATOR_H_
 #define GRIDWORLDGENERATOR_H_
 
-#include "FiniteMDP.h"
+#include "FiniteGenerator.h"
 
 namespace ReLe
 {
 
-class GridWorldGenerator
+class GridWorldGenerator: public FiniteGenerator
 {
 public:
     GridWorldGenerator();
     void load(const std::string& path);
-    FiniteMDP getMPD(double gamma);
 
     inline void setP(double p)
     {

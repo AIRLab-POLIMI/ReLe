@@ -21,8 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "grid_world/GridWorldGenerator.h"
-
+#include "GridWorldGenerator.h"
 #include <iostream>
 
 using namespace std;
@@ -86,11 +85,6 @@ void GridWorldGenerator::load(const string& path)
         }
     }
 
-}
-
-FiniteMDP GridWorldGenerator::getMPD(double gamma)
-{
-    return FiniteMDP(P, R, Rsigma, false, gamma);
 }
 
 void GridWorldGenerator::assignStateNumbers(size_t i, size_t j)

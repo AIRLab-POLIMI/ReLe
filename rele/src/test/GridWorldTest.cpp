@@ -26,9 +26,8 @@
 #include "td/Q-Learning.h"
 #include "Core.h"
 
-#include "grid_world/GridWorldGenerator.h"
-
 #include <iostream>
+#include "GridWorldGenerator.h"
 
 
 
