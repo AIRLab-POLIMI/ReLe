@@ -176,7 +176,7 @@ void SARSA_lambda::init()
 
 void SARSA_lambda::printStatistics()
 {
-	cout << endl << endl << "### SARSA(" << lambda << ") -"
+	cout << endl << endl << "### SARSA(" << lambda << ") - "
 				<< (accumulating ? "accumulating" : "replacing")
 				<< " trace ###";
 	FiniteTD::printStatistics();

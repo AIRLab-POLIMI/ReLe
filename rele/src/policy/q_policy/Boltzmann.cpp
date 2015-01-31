@@ -25,6 +25,7 @@
 #include "RandomGenerator.h"
 
 using namespace arma;
+using namespace std;
 
 namespace ReLe
 {
@@ -62,6 +63,15 @@ double Boltzmann::operator()(int state, int action)
 	{
 		return 1 / nactions;
 	}
+}
+
+string Boltzmann::getPolicyHyperparameters()
+{
+	stringstream ss;
+
+	ss << "tau: " << tau << endl;
+
+	return ss.str();
 }
 
 Boltzmann::~Boltzmann()
@@ -118,6 +128,16 @@ double BoltzmannApproximate::operator()(const arma::vec& state, int action)
 		return 1 / nactions;
 	}
 }
+
+string BoltzmannApproximate::getPolicyHyperparameters()
+{
+	stringstream ss;
+
+	ss << "tau: " << tau << endl;
+
+	return ss.str();
+}
+
 
 BoltzmannApproximate::~BoltzmannApproximate()
 {

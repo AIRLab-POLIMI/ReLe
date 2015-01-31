@@ -49,10 +49,13 @@ void FiniteTD::init()
 
 void FiniteTD::printStatistics()
 {
-	cout << endl << endl << "--- Parameters --" << endl << endl;
+	cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
+				<< endl << endl;
+
+	cout << "--- Parameters --" << endl << endl;
 	cout << "gamma: " << gamma << endl;
 	cout << "alpha: " << alpha << endl;
-	//cout << "eps: " << e_policy.getEpsilon() << endl; FIXME
+	cout << policy.getPolicyHyperparameters();
 
 	cout << endl << endl << "--- Learning results ---" << endl << endl;
 
@@ -93,13 +96,13 @@ void LinearTD::printStatistics()
 	cout << endl << endl << "--- Parameters --" << endl << endl;
 	cout << "gamma: " << gamma << endl;
 	cout << "alpha: " << alpha << endl;
-	//cout << "eps: " << e_policy.getEpsilon() << endl; FIXME
+	cout << policy.getPolicyHyperparameters();
 
 	cout << endl << endl << "--- Learning results ---" << endl << endl;
 
 	cout << "- Action-value function" << endl;
 	cout << Q.getParameters().t() << endl;
-//    cout << "- Policy" << endl;
+//    cout << "- Policy" << endl; FIXME
 }
 
 }

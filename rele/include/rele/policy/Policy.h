@@ -26,6 +26,8 @@
 
 #include "BasicsTraits.h"
 
+#include <string>
+
 namespace ReLe
 {
 
@@ -34,11 +36,14 @@ class Policy
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
-    static_assert(std::is_const<typename action_type<ActionC>::const_type>::value, "Non const type");
 
 public:
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type state) = 0;
     virtual double operator() (typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
+
+    virtual std::string getPolicyName() = 0;
+    virtual std::string getPolicyHyperparameters() = 0;
+    virtual std::string printPolicy() = 0;
 
     virtual ~Policy()
     {

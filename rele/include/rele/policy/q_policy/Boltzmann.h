@@ -38,6 +38,13 @@ public:
 	virtual int operator()(int state);
 	virtual double operator()(int state, int action);
 
+	inline virtual std::string getPolicyName()
+	{
+		return "Boltzmann";
+	}
+
+	virtual std::string getPolicyHyperparameters();
+
 	void setTemperature(double tau)
 	{
 		this->tau = tau;
@@ -47,7 +54,6 @@ public:
 	{
 		return this->tau;
 	}
-
 
 protected:
 	double tau;
@@ -64,6 +70,12 @@ public:
 
 	virtual int operator()(const arma::vec& state);
 	virtual double operator()(const arma::vec& state, int action);
+
+	inline virtual std::string getPolicyName()
+	{
+		return "Approximate Boltzmann";
+	}
+	virtual std::string getPolicyHyperparameters();
 
 	void setTemperature(double tau)
 	{

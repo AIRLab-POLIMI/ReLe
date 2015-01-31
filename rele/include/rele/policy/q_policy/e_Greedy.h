@@ -32,47 +32,59 @@ namespace ReLe
 class e_Greedy: public ActionValuePolicy<FiniteState>
 {
 public:
-    e_Greedy();
-    virtual ~e_Greedy();
+	e_Greedy();
+	virtual ~e_Greedy();
 
-    virtual int operator() (const int state);
-    virtual double operator() (const int state, const int action);
+	virtual int operator()(const int state);
+	virtual double operator()(const int state, const int action);
 
-    inline void setEpsilon(double eps)
-    {
-        this->eps = eps;
-    }
+	inline virtual std::string getPolicyName()
+	{
+		return "e-Greedy";
+	}
+	virtual std::string getPolicyHyperparameters();
 
-    inline double getEpsilon()
-    {
-        return this->eps;
-    }
+	inline void setEpsilon(double eps)
+	{
+		this->eps = eps;
+	}
+
+	inline double getEpsilon()
+	{
+		return this->eps;
+	}
 
 protected:
-    double eps;
+	double eps;
 };
 
 class e_GreedyApproximate: public ActionValuePolicy<DenseState>
 {
 public:
-    e_GreedyApproximate();
-    virtual ~e_GreedyApproximate();
+	e_GreedyApproximate();
+	virtual ~e_GreedyApproximate();
 
-    virtual int operator() (const arma::vec& state);
-    virtual double operator() (const arma::vec& state, const int action);
+	virtual int operator()(const arma::vec& state);
+	virtual double operator()(const arma::vec& state, const int action);
 
-    inline void setEpsilon(double eps)
-    {
-        this->eps = eps;
-    }
+	inline virtual std::string getPolicyName()
+	{
+		return "Approximate e-Greedy";
+	}
+	virtual std::string getPolicyHyperparameters();
 
-    inline double getEpsilon()
-    {
-        return this->eps;
-    }
+	inline void setEpsilon(double eps)
+	{
+		this->eps = eps;
+	}
+
+	inline double getEpsilon()
+	{
+		return this->eps;
+	}
 
 protected:
-    double eps;
+	double eps;
 
 };
 

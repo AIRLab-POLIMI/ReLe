@@ -28,6 +28,7 @@
 #include "Approximators.h"
 
 #include <type_traits>
+#include <sstream>
 
 namespace ReLe
 {
@@ -62,6 +63,39 @@ public:
 	inline void setNactions(unsigned int nactions)
 	{
 		this->nactions = nactions;
+	}
+
+	virtual std::string printPolicy()
+	{
+		return printPolicyWorker(static_cast<StateC*>(0));
+	}
+
+	virtual ~ActionValuePolicy()
+	{
+
+	}
+
+private:
+	//TODO forse non è il meglio che si può fare, ma non voglio scrivere migliaia di classi. forse con un tratto?
+	std::string printPolicyWorker(FiniteState*)
+	{
+		//TODO decidere come formattare l'output...
+		std::stringstream ss;
+		ss << "- Policy" << std::endl;
+		for (unsigned int i = 0; i < Q->n_rows; i++)
+		{
+			unsigned int policy;
+			Q->row(i).max(policy);
+			ss << "policy(" << i << ") = " << policy << std::endl;
+		}
+
+		return ss.str();
+	}
+
+	template<class T>
+	std::string printPolicyWorker(T*)
+	{
+		return "";
 	}
 
 protected:
