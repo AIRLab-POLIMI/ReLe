@@ -31,77 +31,77 @@ namespace ReLe
 {
 
 FiniteTD::FiniteTD(ActionValuePolicy<FiniteState>& policy) :
-			policy(policy)
+    policy(policy)
 {
-	x = 0;
-	u = 0;
+    x = 0;
+    u = 0;
 
-	//Default algorithm parameters
-	alpha = 0.2;
+    //Default algorithm parameters
+    alpha = 0.2;
 }
 
 void FiniteTD::init()
 {
-	Q.zeros(task.finiteStateDim, task.finiteActionDim);
-	policy.setQ(&Q);
-	policy.setNactions(task.finiteActionDim);
+    Q.zeros(task.finiteStateDim, task.finiteActionDim);
+    policy.setQ(&Q);
+    policy.setNactions(task.finiteActionDim);
 }
 
 void FiniteTD::printStatistics()
 {
-	cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
-				<< endl << endl;
+    cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
+         << endl << endl;
 
-	cout << "--- Parameters --" << endl << endl;
-	cout << "gamma: " << gamma << endl;
-	cout << "alpha: " << alpha << endl;
-	cout << policy.getPolicyHyperparameters();
+    cout << "--- Parameters --" << endl << endl;
+    cout << "gamma: " << gamma << endl;
+    cout << "alpha: " << alpha << endl;
+    cout << policy.getPolicyHyperparameters();
 
-	cout << endl << endl << "--- Learning results ---" << endl << endl;
+    cout << endl << endl << "--- Learning results ---" << endl << endl;
 
-	cout << "- Action-value function" << endl;
-	for (unsigned int i = 0; i < Q.n_rows; i++)
-		for (unsigned int j = 0; j < Q.n_cols; j++)
-		{
-			cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
-		}
-	cout << "- Policy" << endl;
-	for (unsigned int i = 0; i < Q.n_rows; i++)
-	{
-		unsigned int policy;
-		Q.row(i).max(policy);
-		cout << "policy(" << i << ") = " << policy << endl;
-	}
+    cout << "- Action-value function" << endl;
+    for (unsigned int i = 0; i < Q.n_rows; i++)
+        for (unsigned int j = 0; j < Q.n_cols; j++)
+        {
+            cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
+        }
+    cout << "- Policy" << endl;
+    for (unsigned int i = 0; i < Q.n_rows; i++)
+    {
+        unsigned int policy;
+        Q.row(i).max(policy);
+        cout << "policy(" << i << ") = " << policy << endl;
+    }
 }
 
 LinearTD::LinearTD(ActionValuePolicy<DenseState>& policy,
-			LinearApproximator& la) :
-			Q(la), policy(policy)
+                   LinearApproximator& la) :
+    Q(la), policy(policy)
 {
-	u = 0;
+    u = 0;
 
-	//Default parameters
-	alpha = 0.2;
+    //Default parameters
+    alpha = 0.2;
 }
 
 void LinearTD::init()
 {
-	x.zeros(task.continuosStateDim);
-	policy.setQ(&Q);
-	policy.setNactions(task.finiteActionDim);
+    x.zeros(task.continuosStateDim);
+    policy.setQ(&Q);
+    policy.setNactions(task.finiteActionDim);
 }
 
 void LinearTD::printStatistics()
 {
-	cout << endl << endl << "--- Parameters --" << endl << endl;
-	cout << "gamma: " << gamma << endl;
-	cout << "alpha: " << alpha << endl;
-	cout << policy.getPolicyHyperparameters();
+    cout << endl << endl << "--- Parameters --" << endl << endl;
+    cout << "gamma: " << gamma << endl;
+    cout << "alpha: " << alpha << endl;
+    cout << policy.getPolicyHyperparameters();
 
-	cout << endl << endl << "--- Learning results ---" << endl << endl;
+    cout << endl << endl << "--- Learning results ---" << endl << endl;
 
-	cout << "- Action-value function" << endl;
-	cout << Q.getParameters().t() << endl;
+    cout << "- Action-value function" << endl;
+    cout << Q.getParameters().t() << endl;
 //    cout << "- Policy" << endl; FIXME
 }
 

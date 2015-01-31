@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     //ReLe::e_Greedy policy;
     ReLe::Boltzmann policy;
     ReLe::SARSA agent(policy);
- 	//ReLe::Q_Learning agent(policy);
+    //ReLe::Q_Learning agent(policy);
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;

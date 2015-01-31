@@ -31,54 +31,54 @@ namespace ReLe
 class SimpleChainGenerator: public FiniteGenerator
 {
 public:
-	SimpleChainGenerator();
-	void generate(std::size_t size, std::size_t goalState);
+    SimpleChainGenerator();
+    void generate(std::size_t size, std::size_t goalState);
 
-	inline void setP(double p)
-	{
-		this->p = p;
-	}
+    inline void setP(double p)
+    {
+        this->p = p;
+    }
 
-	inline void setRgoal(double rgoal)
-	{
-		this->rgoal = rgoal;
-	}
-
-private:
-
-	inline bool isLeftmostState(std::size_t state)
-	{
-		return state == 0;
-	}
-
-	inline bool isRightmostState(std::size_t state)
-	{
-		return state == stateN - 1;
-	}
-
-	inline std::size_t previousState(std::size_t state)
-	{
-		return state - 1;
-	}
-
-	inline std::size_t nextState(std::size_t state)
-	{
-		return state + 1;
-	}
-
-	void computeReward(size_t goalState);
-	void computeprobabilities();
+    inline void setRgoal(double rgoal)
+    {
+        this->rgoal = rgoal;
+    }
 
 private:
-	//mdp data
-	double p;
-	double rgoal;
+
+    inline bool isLeftmostState(std::size_t state)
+    {
+        return state == 0;
+    }
+
+    inline bool isRightmostState(std::size_t state)
+    {
+        return state == stateN - 1;
+    }
+
+    inline std::size_t previousState(std::size_t state)
+    {
+        return state - 1;
+    }
+
+    inline std::size_t nextState(std::size_t state)
+    {
+        return state + 1;
+    }
+
+    void computeReward(size_t goalState);
+    void computeprobabilities();
 
 private:
-	enum ActionsEnum
-	{
-		RIGHT = 0, LEFT = 1
-	};
+    //mdp data
+    double p;
+    double rgoal;
+
+private:
+    enum ActionsEnum
+    {
+        RIGHT = 0, LEFT = 1
+    };
 
 };
 }

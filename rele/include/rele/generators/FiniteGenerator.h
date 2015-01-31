@@ -34,46 +34,46 @@ namespace ReLe
 class FiniteGenerator
 {
 public:
-	inline FiniteMDP getMPD(double gamma)
-	{
-		return FiniteMDP(P, R, Rsigma, false, gamma);
-	}
+    inline FiniteMDP getMPD(double gamma)
+    {
+        return FiniteMDP(P, R, Rsigma, false, gamma);
+    }
 
-	inline void printMatrices()
-	{
-		std::cout << "### P matrix ###" << std::endl;
-		for (size_t i = 0; i < P.n_rows; i++)
-		{
-			std::cout << "- action " << i << std::endl;
-			arma::mat Pi = P(arma::span(0), arma::span::all, arma::span::all);
-			std::cout << Pi << std::endl;
-		}
+    inline void printMatrices()
+    {
+        std::cout << "### P matrix ###" << std::endl;
+        for (size_t i = 0; i < P.n_rows; i++)
+        {
+            std::cout << "- action " << i << std::endl;
+            arma::mat Pi = P(arma::span(0), arma::span::all, arma::span::all);
+            std::cout << Pi << std::endl;
+        }
 
-		std::cout << "### R matrix ###" << std::endl;
-		for (size_t i = 0; i < R.n_rows; i++)
-		{
-			std::cout << "- action " << i << std::endl;
-			arma::mat Ri = R(arma::span(0), arma::span::all, arma::span::all);
-			std::cout << Ri << std::endl;
-		}
+        std::cout << "### R matrix ###" << std::endl;
+        for (size_t i = 0; i < R.n_rows; i++)
+        {
+            std::cout << "- action " << i << std::endl;
+            arma::mat Ri = R(arma::span(0), arma::span::all, arma::span::all);
+            std::cout << Ri << std::endl;
+        }
 
-		std::cout << "### Rsigma matrix ###" << std::endl;
-		for (size_t i = 0; i < Rsigma.n_rows; i++)
-		{
-			std::cout << "- action " << i << std::endl;
-			arma::mat Rsigmai = Rsigma(arma::span(0), arma::span::all, arma::span::all);
-			std::cout << Rsigmai << std::endl;
-		}
-	}
+        std::cout << "### Rsigma matrix ###" << std::endl;
+        for (size_t i = 0; i < Rsigma.n_rows; i++)
+        {
+            std::cout << "- action " << i << std::endl;
+            arma::mat Rsigmai = Rsigma(arma::span(0), arma::span::all, arma::span::all);
+            std::cout << Rsigmai << std::endl;
+        }
+    }
 protected:
-	//output of the algorithm
-	arma::cube P;
-	arma::cube R;
-	arma::cube Rsigma;
+    //output of the algorithm
+    arma::cube P;
+    arma::cube R;
+    arma::cube Rsigma;
 
-	//generator data
-	size_t stateN;
-	unsigned int actionN;
+    //generator data
+    size_t stateN;
+    unsigned int actionN;
 };
 
 }

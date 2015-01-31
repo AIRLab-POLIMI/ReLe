@@ -34,9 +34,9 @@ namespace ReLe
 
 e_Greedy::e_Greedy()
 {
-	Q = NULL;
-	eps = 0.15;
-	nactions = 0;
+    Q = NULL;
+    eps = 0.15;
+    nactions = 0;
 }
 
 e_Greedy::~e_Greedy()
@@ -46,58 +46,58 @@ e_Greedy::~e_Greedy()
 
 int e_Greedy::operator()(const int state)
 {
-	unsigned int un;
+    unsigned int un;
 
-	const rowvec& Qx = Q->row(state);
+    const rowvec& Qx = Q->row(state);
 
-	/*epsilon--greedy policy*/
-	if (RandomGenerator::sampleEvent(this->eps))
-		un = RandomGenerator::sampleUniformInt(0, Q->n_cols - 1);
-	else
-	{
-		double qmax = Qx.max();
-		uvec maxIndex = find(Qx == qmax);
+    /*epsilon--greedy policy*/
+    if (RandomGenerator::sampleEvent(this->eps))
+        un = RandomGenerator::sampleUniformInt(0, Q->n_cols - 1);
+    else
+    {
+        double qmax = Qx.max();
+        uvec maxIndex = find(Qx == qmax);
 
-		unsigned int index = RandomGenerator::sampleUniformInt(0,
-					maxIndex.n_elem - 1);
-		un = maxIndex[index];
-	}
+        unsigned int index = RandomGenerator::sampleUniformInt(0,
+                             maxIndex.n_elem - 1);
+        un = maxIndex[index];
+    }
 
-	return un;
+    return un;
 }
 
 double e_Greedy::operator()(const int state, const int action)
 {
-	const rowvec& Qx = Q->row(state);
-	double qmax = Qx.max();
-	uvec maxIndex = find(Qx == qmax);
+    const rowvec& Qx = Q->row(state);
+    double qmax = Qx.max();
+    uvec maxIndex = find(Qx == qmax);
 
-	bool found = false;
-	for (unsigned int i = 0; i < maxIndex.n_elem && !found; ++i)
-	{
-		if (maxIndex[i] == action)
-			found = true;
-	}
-	if (found)
-	{
-		return 1.0 - eps + eps / Q->n_cols;
-	}
-	return eps / Q->n_cols;
+    bool found = false;
+    for (unsigned int i = 0; i < maxIndex.n_elem && !found; ++i)
+    {
+        if (maxIndex[i] == action)
+            found = true;
+    }
+    if (found)
+    {
+        return 1.0 - eps + eps / Q->n_cols;
+    }
+    return eps / Q->n_cols;
 }
 
 string e_Greedy::getPolicyHyperparameters()
 {
-	stringstream ss;
-	ss << "eps: " << eps << endl;
+    stringstream ss;
+    ss << "eps: " << eps << endl;
 
-	return ss.str();
+    return ss.str();
 }
 
 e_GreedyApproximate::e_GreedyApproximate()
 {
-	Q = NULL;
-	nactions = 0;
-	eps = 0.15;
+    Q = NULL;
+    nactions = 0;
+    eps = 0.15;
 }
 
 e_GreedyApproximate::~e_GreedyApproximate()
@@ -106,51 +106,51 @@ e_GreedyApproximate::~e_GreedyApproximate()
 
 int e_GreedyApproximate::operator()(const arma::vec& state)
 {
-	unsigned int un;
+    unsigned int un;
 
-	/*epsilon--greedy policy*/
-	if (RandomGenerator::sampleEvent(this->eps))
-		un = RandomGenerator::sampleUniformInt(0, nactions - 1);
-	else
-	{
-		Regressor& Qref = *Q;
+    /*epsilon--greedy policy*/
+    if (RandomGenerator::sampleEvent(this->eps))
+        un = RandomGenerator::sampleUniformInt(0, nactions - 1);
+    else
+    {
+        Regressor& Qref = *Q;
 
-		unsigned int nstates = state.size();
-		vec regInput(nstates + 1);
+        unsigned int nstates = state.size();
+        vec regInput(nstates + 1);
 
-		regInput.subvec(0, nstates - 1) = state;
-		regInput[nstates] = 0;
+        regInput.subvec(0, nstates - 1) = state;
+        regInput[nstates] = 0;
 
-		vec&& qvalue0 = Qref(regInput);
-		double qmax = qvalue0[0];
-		un = 0;
-		for (unsigned int i = 1; i < nactions; ++i)
-		{
-			regInput[nstates] = i;
-			vec&& qvalue = Qref(regInput);
-			if (qmax < qvalue[0])
-			{
-				qmax = qvalue[0];
-				un = i;
-			}
-		}
-	}
+        vec&& qvalue0 = Qref(regInput);
+        double qmax = qvalue0[0];
+        un = 0;
+        for (unsigned int i = 1; i < nactions; ++i)
+        {
+            regInput[nstates] = i;
+            vec&& qvalue = Qref(regInput);
+            if (qmax < qvalue[0])
+            {
+                qmax = qvalue[0];
+                un = i;
+            }
+        }
+    }
 
-	return un;
+    return un;
 }
 
 double e_GreedyApproximate::operator()(const arma::vec& state, const int action)
 {
-	//TODO implement
-	assert(false);
-	return 0.0;
+    //TODO implement
+    assert(false);
+    return 0.0;
 }
 
 string e_GreedyApproximate::getPolicyHyperparameters()
 {
-	stringstream ss;
-	ss << "eps: " << eps << endl;
-	return ss.str();
+    stringstream ss;
+    ss << "eps: " << eps << endl;
+    return ss.str();
 }
 
 }

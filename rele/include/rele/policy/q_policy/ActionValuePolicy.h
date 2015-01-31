@@ -36,71 +36,71 @@ namespace ReLe
 template<class StateC>
 struct q_type
 {
-	typedef std::add_pointer<void>::type type;
+    typedef std::add_pointer<void>::type type;
 };
 
 template<>
 struct q_type<FiniteState>
 {
-	typedef std::add_pointer<arma::mat>::type type;
+    typedef std::add_pointer<arma::mat>::type type;
 };
 
 template<>
 struct q_type<DenseState>
 {
-	typedef std::add_pointer<Regressor>::type type;
+    typedef std::add_pointer<Regressor>::type type;
 };
 
 template<class StateC>
 class ActionValuePolicy: public NonParametricPolicy<FiniteAction, StateC>
 {
 public:
-	inline void setQ(typename q_type<StateC>::type Q)
-	{
-		this->Q = Q;
-	}
+    inline void setQ(typename q_type<StateC>::type Q)
+    {
+        this->Q = Q;
+    }
 
-	inline void setNactions(unsigned int nactions)
-	{
-		this->nactions = nactions;
-	}
+    inline void setNactions(unsigned int nactions)
+    {
+        this->nactions = nactions;
+    }
 
-	virtual std::string printPolicy()
-	{
-		return printPolicyWorker(static_cast<StateC*>(0));
-	}
+    virtual std::string printPolicy()
+    {
+        return printPolicyWorker(static_cast<StateC*>(0));
+    }
 
-	virtual ~ActionValuePolicy()
-	{
+    virtual ~ActionValuePolicy()
+    {
 
-	}
+    }
 
 private:
-	//TODO forse non è il meglio che si può fare, ma non voglio scrivere migliaia di classi. forse con un tratto?
-	std::string printPolicyWorker(FiniteState*)
-	{
-		//TODO decidere come formattare l'output...
-		std::stringstream ss;
-		ss << "- Policy" << std::endl;
-		for (unsigned int i = 0; i < Q->n_rows; i++)
-		{
-			unsigned int policy;
-			Q->row(i).max(policy);
-			ss << "policy(" << i << ") = " << policy << std::endl;
-		}
+    //TODO forse non è il meglio che si può fare, ma non voglio scrivere migliaia di classi. forse con un tratto?
+    std::string printPolicyWorker(FiniteState*)
+    {
+        //TODO decidere come formattare l'output...
+        std::stringstream ss;
+        ss << "- Policy" << std::endl;
+        for (unsigned int i = 0; i < Q->n_rows; i++)
+        {
+            unsigned int policy;
+            Q->row(i).max(policy);
+            ss << "policy(" << i << ") = " << policy << std::endl;
+        }
 
-		return ss.str();
-	}
+        return ss.str();
+    }
 
-	template<class T>
-	std::string printPolicyWorker(T*)
-	{
-		return "";
-	}
+    template<class T>
+    std::string printPolicyWorker(T*)
+    {
+        return "";
+    }
 
 protected:
-	typename q_type<StateC>::type Q;
-	unsigned int nactions;
+    typename q_type<StateC>::type Q;
+    unsigned int nactions;
 };
 
 }

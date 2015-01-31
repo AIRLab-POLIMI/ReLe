@@ -32,66 +32,66 @@ namespace ReLe
 class Boltzmann: public ActionValuePolicy<FiniteState>
 {
 public:
-	Boltzmann();
-	virtual ~Boltzmann();
+    Boltzmann();
+    virtual ~Boltzmann();
 
-	virtual int operator()(int state);
-	virtual double operator()(int state, int action);
+    virtual int operator()(int state);
+    virtual double operator()(int state, int action);
 
-	inline virtual std::string getPolicyName()
-	{
-		return "Boltzmann";
-	}
+    inline virtual std::string getPolicyName()
+    {
+        return "Boltzmann";
+    }
 
-	virtual std::string getPolicyHyperparameters();
+    virtual std::string getPolicyHyperparameters();
 
-	void setTemperature(double tau)
-	{
-		this->tau = tau;
-	}
+    void setTemperature(double tau)
+    {
+        this->tau = tau;
+    }
 
-	double getTemperature()
-	{
-		return this->tau;
-	}
+    double getTemperature()
+    {
+        return this->tau;
+    }
 
 protected:
-	double tau;
+    double tau;
 
 private:
-	arma::vec computeProbabilities(int state);
+    arma::vec computeProbabilities(int state);
 };
 
 class BoltzmannApproximate: public ActionValuePolicy<DenseState>
 {
 public:
-	BoltzmannApproximate();
-	virtual ~BoltzmannApproximate();
+    BoltzmannApproximate();
+    virtual ~BoltzmannApproximate();
 
-	virtual int operator()(const arma::vec& state);
-	virtual double operator()(const arma::vec& state, int action);
+    virtual int operator()(const arma::vec& state);
+    virtual double operator()(const arma::vec& state, int action);
 
-	inline virtual std::string getPolicyName()
-	{
-		return "Approximate Boltzmann";
-	}
-	virtual std::string getPolicyHyperparameters();
+    inline virtual std::string getPolicyName()
+    {
+        return "Approximate Boltzmann";
+    }
+    virtual std::string getPolicyHyperparameters();
 
-	void setTemperature(double tau)
-	{
-		this->tau = tau;
-	}
+    void setTemperature(double tau)
+    {
+        this->tau = tau;
+    }
 
-	double getTemperature()
-	{
-		return this->tau;
-	}
+    double getTemperature()
+    {
+        return this->tau;
+    }
 
 private:
-	arma::vec computeProbabilities(const arma::vec& state);
+    arma::vec computeProbabilities(const arma::vec& state);
 
 protected:
-	double tau;
+    double tau;
 
 };
 

@@ -46,7 +46,8 @@ void MountainCar::step(const FiniteAction& action,
     currentState[velocity] = min(max(computedVelocity, -0.07), 0.07);
     currentState[position] = min(max(computedPosition, -1.2), 0.6);
 
-    if (currentState[position] <= -1.2) {
+    if (currentState[position] <= -1.2)
+    {
         currentState[velocity] = 0;
     }
 
