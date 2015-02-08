@@ -25,6 +25,7 @@
 #include "MountainCar.h"
 #include "td/LinearSARSA.h"
 #include "basis/GaussianRBF.h"
+#include "Hashing.h"
 
 using namespace std;
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
     ReLe::MountainCar mdp;
 //    srand(time(0));
 
-    ReLe::BasisFunctions bf;
+    ReLe::DenseBasisVector bf;
     bf.GeneratePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
     ReLe::LinearApproximator approximator(3, &bf);
 //    arma::vec& w = approximator.getParameters();
@@ -54,4 +55,8 @@ int main(int argc, char *argv[])
         cout << "starting episode" << endl;
         core.runEpisode();
     }
+    
+    
+  ReLe::Hashing* hashing = new ReLe::UNH(1000);
+//   ReLe::ParametricRegressor* projector = new ReLe::TileCoderHashing(hashing, mdp.getSettings().continuosStateDim, 10, 10, false);
 }

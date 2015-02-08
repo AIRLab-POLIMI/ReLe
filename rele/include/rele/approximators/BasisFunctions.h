@@ -81,13 +81,30 @@ public:
 
 };
 
-class BasisFunctions: public std::vector<BasisFunction*>
+class AbstractBasisVector
 {
 public:
-    BasisFunctions();
-    virtual ~BasisFunctions();
+    virtual ~AbstractBasisVector() {};
+    virtual arma::vec operator()(const arma::vec& input) = 0;
+    virtual double dot(const arma::vec& input, const arma::vec &otherVector) = 0;
+
+    virtual size_t size() const = 0;
+
+};
+
+class DenseBasisVector: public std::vector<BasisFunction*>, public AbstractBasisVector
+{
+public:
+    DenseBasisVector();
+    virtual ~DenseBasisVector();
     virtual arma::vec operator()(const arma::vec& input);
     virtual double dot(const arma::vec& input, const arma::vec &otherVector);
+
+
+    size_t size() const
+    {
+        return std::vector<BasisFunction*>::size();
+    }
 
     /**
      * Automatically generates polynomial basis functions up to the specified degree
@@ -104,7 +121,7 @@ public:
      * @param bf an instance of basis functions
      * @return the output stream
      */
-    friend std::ostream& operator<<(std::ostream& out, BasisFunctions& bf);
+    friend std::ostream& operator<<(std::ostream& out, DenseBasisVector& bf);
 
     /**
      * @brief Read the internal stream from a stream
@@ -113,7 +130,7 @@ public:
      * @param bf an instance of basis functions
      * @return the input stream
      */
-    friend std::istream& operator>>(std::istream& in, BasisFunctions& bf);
+    friend std::istream& operator>>(std::istream& in, DenseBasisVector& bf);
 
 private:
 

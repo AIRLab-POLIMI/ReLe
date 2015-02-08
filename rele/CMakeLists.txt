@@ -77,18 +77,20 @@ target_link_libraries(mountain_car rele)
 
 # ------------------------ INSTALLATION ------------------------
 
-# Mark executables and/or libraries for installation
-install(TARGETS rele
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
+if(catkin_FOUND)
+	# Mark executables and/or libraries for installation
+	install(TARGETS rele
+	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+	)
 
-# Install headers
-install(DIRECTORY include/rele
-  DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
-  PATTERN ".svn" EXCLUDE
-)
+	# Install headers
+	install(DIRECTORY include/rele
+	DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
+	PATTERN ".svn" EXCLUDE
+	)
+endif()
 
 # --------------------------------------------------------------
 

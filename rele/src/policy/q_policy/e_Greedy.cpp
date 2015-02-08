@@ -124,16 +124,27 @@ int e_GreedyApproximate::operator()(const arma::vec& state)
         vec&& qvalue0 = Qref(regInput);
         double qmax = qvalue0[0];
         un = 0;
+        std::vector<int> optimal_actions;
+        optimal_actions.push_back(un);
         for (unsigned int i = 1; i < nactions; ++i)
         {
             regInput[nstates] = i;
             vec&& qvalue = Qref(regInput);
             if (qmax < qvalue[0])
             {
+                optimal_actions.clear();
+                optimal_actions.push_back(un);
                 qmax = qvalue[0];
                 un = i;
             }
+            else if (qmax == qvalue[0])
+            {
+                optimal_actions.push_back(i);
+            }
         }
+        unsigned int index = RandomGenerator::sampleUniformInt(0,
+                             optimal_actions.size() - 1);
+        un = optimal_actions[index];
     }
 
     return un;

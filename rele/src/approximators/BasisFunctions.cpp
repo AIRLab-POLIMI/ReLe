@@ -31,13 +31,13 @@ using namespace arma;
 namespace ReLe
 {
 
-BasisFunctions::BasisFunctions()
+DenseBasisVector::DenseBasisVector()
 {
 }
 
-BasisFunctions::~BasisFunctions()
+DenseBasisVector::~DenseBasisVector()
 {
-    BasisFunctions::iterator it;
+    DenseBasisVector::iterator it;
     for (it = this->begin(); it != this->end(); ++it)
     {
         delete *it;
@@ -45,7 +45,7 @@ BasisFunctions::~BasisFunctions()
     this->clear();
 }
 
-vec BasisFunctions::operator()(const vec& input)
+vec DenseBasisVector::operator()(const vec& input)
 {
     vec output(this->size());
 
@@ -60,7 +60,7 @@ vec BasisFunctions::operator()(const vec& input)
     return output;
 }
 
-double BasisFunctions::dot(const vec& input, const vec& otherVector)
+double DenseBasisVector::dot(const vec& input, const vec& otherVector)
 {
     assert(this->size() == otherVector.size());
 
@@ -78,7 +78,7 @@ double BasisFunctions::dot(const vec& input, const vec& otherVector)
 }
 
 void
-BasisFunctions::GeneratePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
+DenseBasisVector::GeneratePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
 {
     //  AddBasisFunction(new PolynomialFunction(0,0));
     std::vector<unsigned int> dim;
@@ -97,7 +97,7 @@ BasisFunctions::GeneratePolynomialBasisFunctions(unsigned int degree, unsigned i
 }
 
 
-void BasisFunctions::display(std::vector<unsigned int> v)
+void DenseBasisVector::display(std::vector<unsigned int> v)
 {
     for (vector<unsigned int >::iterator it = v.begin(); it != v.end(); ++it)
     {
@@ -106,7 +106,7 @@ void BasisFunctions::display(std::vector<unsigned int> v)
     std::cout << std::endl;
 }
 
-void BasisFunctions::GeneratePolynomialsPermutations(vector<unsigned int> deg,
+void DenseBasisVector::GeneratePolynomialsPermutations(vector<unsigned int> deg,
         vector<unsigned int>& dim)
 {
     std::sort(deg.begin(), deg.end());
@@ -119,7 +119,7 @@ void BasisFunctions::GeneratePolynomialsPermutations(vector<unsigned int> deg,
     while (next_permutation(deg.begin(), deg.end()));
 }
 
-void BasisFunctions::GeneratePolynomials(vector<unsigned int> deg,
+void DenseBasisVector::GeneratePolynomials(vector<unsigned int> deg,
         vector<unsigned int>& dim,
         unsigned int place)
 {
@@ -140,7 +140,7 @@ void BasisFunctions::GeneratePolynomials(vector<unsigned int> deg,
     }
 }
 
-std::ostream& operator<< (std::ostream& out, BasisFunctions& bf)
+std::ostream& operator<< (std::ostream& out, DenseBasisVector& bf)
 {
     out << bf.size() << std::endl;
     for (unsigned int i = 0; i < bf.size(); i++)
@@ -151,7 +151,7 @@ std::ostream& operator<< (std::ostream& out, BasisFunctions& bf)
     return out;
 }
 
-std::istream& operator>> (std::istream& in, BasisFunctions& bf)
+std::istream& operator>> (std::istream& in, DenseBasisVector& bf)
 {
     unsigned int num_basis_functions;
     in >> num_basis_functions;
