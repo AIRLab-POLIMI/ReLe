@@ -64,7 +64,10 @@ file(GLOB_RECURSE ReLe_SOURCE
                   src/generators/*.cpp
                   src/approximators/*.cpp)
 
-add_library(rele ${ReLe_SOURCE})
+file(GLOB_RECURSE ReLe_INCLUDE
+                  include/*.h)
+
+add_library(rele ${ReLe_SOURCE} ${ReLe_INCLUDE})
 target_link_libraries(rele ${ARMADILLO_LIBRARIES})
 
 add_executable(simple_chain src/test/SimpleChain.cpp)
