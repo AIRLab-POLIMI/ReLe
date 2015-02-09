@@ -24,4 +24,4 @@
 #include "RandomGenerator.h"
 #include <ctime>
 
-boost::random::mt19937 ReLe::RandomGenerator::gen(std::time(0));
+std::mt19937 ReLe::RandomGenerator::gen(std::time(0));

@@ -31,7 +31,7 @@ include_directories(include/rele/core
 
 # ----------------------- LIBRARIES ---------------------------
 
-find_package(Boost REQUIRED COMPONENTS random)
+#find_package(Boost REQUIRED COMPONENTS random)
 find_package(Armadillo REQUIRED)
   
 
@@ -65,6 +65,7 @@ file(GLOB_RECURSE ReLe_SOURCE
                   src/approximators/*.cpp)
 
 add_library(rele ${ReLe_SOURCE})
+target_link_libraries(rele ${ARMADILLO_LIBRARIES})
 
 add_executable(simple_chain src/test/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)

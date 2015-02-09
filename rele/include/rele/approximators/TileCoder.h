@@ -40,7 +40,7 @@ class TileCoder: public AbstractBasisVector
 protected:
     bool includeActiveFeature;
     bool useLastForHashing;
-    sp_mat vector;
+    arma::vec vector; // TODO farlo sparso
     int nbTilings;
 
 public:
@@ -63,7 +63,7 @@ public:
         if (includeActiveFeature)
         {
             coder(input, useLastForHashing);
-            vector[vector->n_elem - 1] =  1.0;
+            vector[vector.n_elem - 1] =  1.0;
         }
         else
             coder(input, useLastForHashing);
@@ -76,12 +76,12 @@ public:
         if (includeActiveFeature)
         {
             coder(input, useLastForHashing);
-            vector[vector->n_elem - 1] =  1.0;
+            vector[vector.n_elem - 1] =  1.0;
         }
         else
             coder(input, useLastForHashing);
-        double tot = vector.t() * otherVector;
-        return tot;
+        arma::mat tot = vector.t() * otherVector;
+        return tot(0,0);
     }
 
     size_t size() const
@@ -97,14 +97,14 @@ private:
     typedef TileCoder Base;
     arma::vec gridResolutions;
     arma::vec inputs;
-    Tiles* tiles;
+    Tiles<double>* tiles;
 
 public:
-    TileCoderHashing(Hashing* hashing, const int& nbInputs, const T& gridResolution,
+    TileCoderHashing(Hashing* hashing, const int& nbInputs, const double& gridResolution,
                      const int& nbTilings, const bool& includeActiveFeature = true, bool useLastForHashing = false) :
-        TileCoder<T>(hashing->getMemorySize(), nbTilings, includeActiveFeature, useLastForHashing),
+        TileCoder(hashing->getMemorySize(), nbTilings, includeActiveFeature, useLastForHashing),
         gridResolutions(nbInputs), inputs(nbInputs),
-        tiles(new Tiles(hashing))
+        tiles(new Tiles<double>(hashing))
     {
         gridResolutions.fill(gridResolution);
     }
@@ -113,7 +113,7 @@ public:
                      const int& nbTilings, const bool& includeActiveFeature = true) :
         TileCoder(hashing->getMemorySize(), nbTilings, includeActiveFeature, useLastForHashing),
         gridResolutions(gridResolutions), inputs(nbInputs),
-        tiles(new Tiles(hashing))
+        tiles(new Tiles<double>(hashing))
     { }
 
     virtual ~TileCoderHashing()
@@ -127,7 +127,10 @@ public:
         inputs = x % gridResolutions;
         int dim = inputs.n_elem;
         if (useLastAsInt == true)
-            tiles->tiles(&(Base::vector), Base::nbTilings, &(inputs), dim-1, inputs[dim-1]);
+        {
+            int intval = inputs[dim-1];
+            tiles->tiles_reducedinput(&(Base::vector), Base::nbTilings, &(inputs), dim-1, intval);
+        }
         else
             tiles->tiles(&(Base::vector), Base::nbTilings, &(inputs));
     }

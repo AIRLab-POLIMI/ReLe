@@ -25,6 +25,7 @@
 #include "RandomGenerator.h"
 
 #include <sstream>
+#include <cassert>
 
 using namespace arma;
 using namespace std;

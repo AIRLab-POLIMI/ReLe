@@ -43,7 +43,7 @@ public:
 
     AbstractBasisVector& getBasis()
     {
-        return *basis;  // TODO QUESTA CONVERSIONE VA BENE???
+        return *basis;
     }
 
     arma::vec& getParameters()

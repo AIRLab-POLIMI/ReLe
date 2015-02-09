@@ -24,6 +24,7 @@
 
 #include <limits.h>
 #include <RandomGenerator.h>
+#include <cassert>
 
 namespace ReLe
 {

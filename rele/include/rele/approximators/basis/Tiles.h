@@ -65,8 +65,8 @@ protected:
     arma::Col<T>* f_tmp_arr;
 
 public:
-    Tiles(Hashing<T>* hashing) :
-        hashing(hashing), i_tmp_arr(new arma::Col<int>(Hashing<T>::MAX_NUM_VARS)), f_tmp_arr(
+    Tiles(Hashing* hashing) :
+        hashing(hashing), i_tmp_arr(new arma::Col<int>(Hashing::MAX_NUM_VARS)), f_tmp_arr(
             new arma::Col<T>(Hashing::MAX_NUM_VARS))
     {
     }
@@ -136,106 +136,105 @@ public:
         tiles(the_tiles, nt, floats, i_tmp_arr, 0);
     }
 
-    //one int
-    void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int floats_dim, int h1)
+    void tiles_reducedinput(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int floats_dim, int h1)
     {
-        i_tmp_arr->setEntry(0, h1);
+        i_tmp_arr->at(0) =  h1;
         tiles(the_tiles, nt, floats, floats_dim, i_tmp_arr, 1);
     }
 
     //one int
     void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int h1)
     {
-        i_tmp_arr->setEntry(0, h1);
+        i_tmp_arr->at(0) = h1;
         tiles(the_tiles, nt, floats, i_tmp_arr, 1);
     }
 
 // two ints
     void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int h1, int h2)
     {
-        i_tmp_arr->setEntry(0, h1);
-        i_tmp_arr->setEntry(1, h2);
+        i_tmp_arr->at(0) = h1;
+        i_tmp_arr->at(1) = h2;
         tiles(the_tiles, nt, floats, i_tmp_arr, 2);
     }
 
 // three ints
     void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int h1, int h2, int h3)
     {
-        i_tmp_arr->setEntry(0, h1);
-        i_tmp_arr->setEntry(1, h2);
-        i_tmp_arr->setEntry(2, h3);
+        i_tmp_arr->at(0) = h1;
+        i_tmp_arr->at(1) = h2;
+        i_tmp_arr->at(2) = h3;
         tiles(the_tiles, nt, floats, i_tmp_arr, 3);
     }
 
 // one float, No ints
     void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1)
     {
-        f_tmp_arr->setEntry(0, f1);
+        f_tmp_arr->at(0) = f1;
         tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 0);
     }
 
 // one float, one int
     void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1, int h1)
     {
-        f_tmp_arr->setEntry(0, f1);
-        i_tmp_arr->setEntry(0, h1);
+        f_tmp_arr->at(0) = f1;
+        i_tmp_arr->at(0) = h1;
         tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 1);
     }
 
 // one float, two ints
     void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1, int h1, int h2)
     {
-        f_tmp_arr->setEntry(0, f1);
-        i_tmp_arr->setEntry(0, h1);
-        i_tmp_arr->setEntry(1, h2);
+        f_tmp_arr->at(0) = f1;
+        i_tmp_arr->at(0) = h1;
+        i_tmp_arr->at(1) = h2;
         tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 2);
     }
 
 // one float, three ints
     void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1, int h1, int h2, int h3)
     {
-        f_tmp_arr->setEntry(0, f1);
-        i_tmp_arr->setEntry(0, h1);
-        i_tmp_arr->setEntry(1, h2);
-        i_tmp_arr->setEntry(2, h3);
+        f_tmp_arr->at(0) = f1;
+        i_tmp_arr->at(0) = h1;
+        i_tmp_arr->at(1) = h2;
+        i_tmp_arr->at(2) = h3;
         tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 3);
     }
 
 // two floats, No ints
     void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2)
     {
-        f_tmp_arr->setEntry(0, f1);
-        f_tmp_arr->setEntry(1, f2);
+        f_tmp_arr->at(0) = f1;
+        f_tmp_arr->at(1) = f2;
         tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 0);
     }
 
 // two floats, one int
     void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2, int h1)
     {
-        f_tmp_arr->setEntry(0, f1);
-        f_tmp_arr->setEntry(1, f2);
-        i_tmp_arr->setEntry(0, h1);
+        f_tmp_arr->at(0) = f1;
+        f_tmp_arr->at(1) = f2;
+        i_tmp_arr->at(0) = h1;
         tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 1);
     }
 
 // two floats, two ints
     void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2, int h1, int h2)
     {
-        f_tmp_arr->setEntry(0, f1);
-        f_tmp_arr->setEntry(1, f2);
-        i_tmp_arr->setEntry(0, h1);
-        i_tmp_arr->setEntry(1, h2);
+        f_tmp_arr->at(0) = f1;
+        f_tmp_arr->at(1) = f2;
+        i_tmp_arr->at(0) = h1;
+        i_tmp_arr->at(1) = h2;
         tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 2);
     }
 
 // two floats, three ints
     void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2, int h1, int h2, int h3)
     {
-        f_tmp_arr->setEntry(0, f1);
-        f_tmp_arr->setEntry(1, f2);
-        i_tmp_arr->setEntry(0, h1);
-        i_tmp_arr->setEntry(1, h2);
-        i_tmp_arr->setEntry(2, h3);
+        f_tmp_arr->at(0) = f1;
+        f_tmp_arr->at(1) = f2;
+        i_tmp_arr->at(0) = h1;
+        i_tmp_arr->at(1) = h2;
+        i_tmp_arr->at(2) = h3;
         tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 3);
     }
 

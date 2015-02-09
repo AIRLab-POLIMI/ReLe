@@ -26,6 +26,7 @@
 #include "td/LinearSARSA.h"
 #include "basis/GaussianRBF.h"
 #include "Hashing.h"
+#include "TileCoder.h"
 
 using namespace std;
 
@@ -55,8 +56,10 @@ int main(int argc, char *argv[])
         cout << "starting episode" << endl;
         core.runEpisode();
     }
-    
-    
-  ReLe::Hashing* hashing = new ReLe::UNH(1000);
-//   ReLe::ParametricRegressor* projector = new ReLe::TileCoderHashing(hashing, mdp.getSettings().continuosStateDim, 10, 10, false);
+
+
+    ReLe::Hashing* hashing = new ReLe::UNH(1000);
+    ReLe::TileCoderHashing tiles(hashing, mdp.getSettings().continuosStateDim, 10, 10, false);
+    ReLe::LinearApproximator projector(3, &bf);
+    delete hashing;
 }

@@ -69,6 +69,11 @@ public:
         return w;
     }
 
+    inline const void setParameters(arma::vec& w) const
+    {
+        this->w = w;
+    }
+
 protected:
     arma::vec w;
 
