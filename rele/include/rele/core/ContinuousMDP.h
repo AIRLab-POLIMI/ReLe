@@ -33,7 +33,7 @@ class ContinuousMDP: public Envirorment<DenseAction, DenseState>
 {
 public:
     ContinuousMDP(std::size_t stateSize, std::size_t actionSize, std::size_t rewardSize, bool isFiniteHorizon,
-             bool isEpisodic, double gamma = 1.0, unsigned int horizon = 0);
+                  bool isEpisodic, double gamma = 1.0, unsigned int horizon = 0);
 
 private:
     void setupEnvirorment(std::size_t stateSize, std::size_t actionSize, std::size_t rewardSize,

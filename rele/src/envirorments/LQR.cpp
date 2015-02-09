@@ -45,19 +45,23 @@ LQR::LQR(arma::mat &A, arma::mat &B, std::vector<arma::mat> &Q, std::vector<arma
 }
 
 void LQR::step(const DenseAction& action,
-                       DenseState& nextState, Reward& reward)
+               DenseState& nextState, Reward& reward)
 {
-    for (unsigned int i = 0, ie = Q.size(); i < ie; ++i) {
-        reward[i] = -(currentState.t()*Q[i]*currentState + action.t()*R[i]*action);
+    arma::vec& x = currentState;
+    const arma::vec& u = action;
+    for (unsigned int i = 0, ie = Q.size(); i < ie; ++i)
+    {
+        reward[i] = -(x.t()*Q[i]*x + u.t()*R[i]*u)[0];
     }
-    currentState = A*currentstate + B*action;
+    x = A*x + B*u;
 
     nextState = currentState;
 }
 
 void LQR::getInitialState(DenseState& state)
 {
-    for (unsigned int i = 0, ie = Q.size(); i < ie; ++i) {
+    for (unsigned int i = 0, ie = Q.size(); i < ie; ++i)
+    {
         currentState[i] = RandomGenerator::sampleUniform(-20,20);
     }
     currentState.setAbsorbing(false);
@@ -73,18 +77,24 @@ void LQR::initialize(unsigned int stateActionSize, unsigned int rewardSize, doub
     arma::mat IdMtx(stateActionSize, stateActionSize);
     IdMtx.eye();
 
-    for (int i = 0, ie = rewardSize; i < ie; ++i) {
+    for (int i = 0, ie = rewardSize; i < ie; ++i)
+    {
         Q.push_back(IdMtx);
         R.push_back(IdMtx);
     }
 
-    for (int i = 0, ie = stateActionSize; i < ie; ++i) {
-        for (int j = 0, je = stateActionSize; j < je; ++j) {
+    for (int i = 0, ie = stateActionSize; i < ie; ++i)
+    {
+        for (int j = 0, je = stateActionSize; j < je; ++j)
+        {
 
-            if (i == j) {
+            if (i == j)
+            {
                 Q[i](j,j) = 1.0 - e;
                 R[i](j,j) = e;
-            } else {
+            }
+            else
+            {
                 Q[i](j,j) = e;
                 R[i](j,j) = 1.0 - e;
             }

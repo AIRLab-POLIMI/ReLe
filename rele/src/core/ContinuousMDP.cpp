@@ -29,7 +29,7 @@ namespace ReLe
 {
 
 ContinuousMDP::ContinuousMDP(size_t stateSize, size_t actionSize, size_t rewardSize, bool isFiniteHorizon,
-                   bool isEpisodic, double gamma, unsigned int horizon) :
+                             bool isEpisodic, double gamma, unsigned int horizon) :
     currentState(stateSize)
 {
     setupEnvirorment(stateSize, actionSize, rewardSize, isFiniteHorizon, isEpisodic, horizon,
@@ -37,8 +37,8 @@ ContinuousMDP::ContinuousMDP(size_t stateSize, size_t actionSize, size_t rewardS
 }
 
 void ContinuousMDP::setupEnvirorment(size_t stateSize, size_t actionSize, size_t rewardSize,
-                                bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
-                                double gamma)
+                                     bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
+                                     double gamma)
 {
     EnvirormentSettings& task = getWritableSettings();
     task.isFiniteHorizon = isFiniteHorizon;
