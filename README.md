@@ -25,6 +25,7 @@ The ReLe core library can be build also using plain cmake (without catkin). To b
 `cmake ../src/rele` <br\>
 `make` <br\>
 
+Ros features will be disabled.
 Currently plain cmake installation is not supported.
 
 
