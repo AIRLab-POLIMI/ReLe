@@ -31,12 +31,60 @@ namespace ReLe
 
 class TabularPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
 {
+
+public:
+	class updater
+	{
+	public:
+		updater(arma::rowvec& row);
+		void operator<<(double weight);
+
+		inline bool toFill()
+		{
+			return currentIndex != nactions;
+		}
+
+		~updater();
+
+	private:
+		void normalize();
+
+	private:
+		arma::rowvec& row;
+		unsigned int nactions;
+		unsigned int currentIndex;
+	};
+
+public:
 	virtual unsigned int operator()(size_t state);
 	virtual double operator()(size_t state, unsigned int action);
 
-	virtual std::string getPolicyName();
-	virtual std::string getPolicyHyperparameters();
+	inline virtual std::string getPolicyName()
+	{
+		return "Tabular";
+	}
+
+	virtual std::string getPolicyHyperparameters()
+	{
+		return "";
+	}
+
 	virtual std::string printPolicy();
+
+	updater update(size_t state)
+	{
+		arma::rowvec row = pi.row(state);
+		return updater(row);
+	}
+
+	inline void init(size_t nstates, unsigned int nactions)
+	{
+		pi.set_size(nstates, nactions);
+		pi.fill(1/nactions);
+	}
+
+private:
+	arma::mat pi;
 };
 
 }

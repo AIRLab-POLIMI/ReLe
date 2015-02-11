@@ -1,0 +1,82 @@
+/*
+ * rele,
+ *
+ *
+ * Copyright (C) 2015 Davide Tateo
+ * Versione 1.0
+ *
+ * This file is part of rele.
+ *
+ * rele is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * rele is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include "nonparametric/TabularPolicy.h"
+#include "RandomGenerator.h"
+
+#include <sstream>
+
+namespace ReLe
+{
+
+TabularPolicy::updater::updater(arma::rowvec& row) :
+			row(row)
+{
+	nactions = row.size();
+	currentIndex = 0;
+}
+
+void TabularPolicy::updater::operator<<(double weight)
+{
+	row(currentIndex) = weight;
+	currentIndex++;
+}
+
+TabularPolicy::updater::~updater()
+{
+	normalize();
+}
+
+void TabularPolicy::updater::normalize()
+{
+	double normalization = sum(row);
+	row /= normalization;
+}
+
+unsigned int TabularPolicy::operator()(size_t state)
+{
+	arma::rowvec&& row = pi.row(state);
+	return RandomGenerator::sampleDiscrete(row.begin(), row.end());
+}
+
+double TabularPolicy::operator()(size_t state, unsigned int action)
+{
+	return pi(state, action);
+}
+
+std::string TabularPolicy::printPolicy()
+{
+	//TODO choose policy format
+	std::stringstream ss;
+	ss << "- Policy" << std::endl;
+	for (unsigned int i = 0; i < pi.n_rows; i++)
+	{
+		unsigned int policy;
+		pi.row(i).max(policy);
+		ss << "policy(" << i << ") = " << policy << std::endl;
+	}
+
+	return ss.str();
+}
+
+}
