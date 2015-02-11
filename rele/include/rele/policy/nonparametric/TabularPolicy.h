@@ -67,6 +67,7 @@ public:
 	class updater
 	{
 		updater(arma::subview_row<double>&& row);
+
 	public:
 		friend updater TabularPolicy::update(size_t state);
 
@@ -77,9 +78,6 @@ public:
 			return currentIndex != nactions;
 		}
 
-		~updater();
-
-	private:
 		void normalize();
 
 	private:

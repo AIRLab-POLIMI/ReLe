@@ -42,11 +42,6 @@ void TabularPolicy::updater::operator<<(double weight)
 	currentIndex++;
 }
 
-TabularPolicy::updater::~updater()
-{
-	normalize();
-}
-
 void TabularPolicy::updater::normalize()
 {
 	double normalization = sum(row);
