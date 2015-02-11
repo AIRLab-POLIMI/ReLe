@@ -41,8 +41,8 @@ struct action_type
 template<>
 struct action_type<FiniteAction>
 {
-    typedef int type;
-    typedef const int const_type;
+    typedef unsigned int type;
+    typedef const unsigned int const_type;
 };
 
 template<>
@@ -62,8 +62,8 @@ struct state_type
 template<>
 struct state_type<FiniteState>
 {
-    typedef int type;
-    typedef const int const_type;
+    typedef size_t type;
+    typedef const size_t const_type;
 };
 
 template<>

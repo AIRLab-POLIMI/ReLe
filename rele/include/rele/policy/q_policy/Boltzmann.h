@@ -35,8 +35,8 @@ public:
     Boltzmann();
     virtual ~Boltzmann();
 
-    virtual int operator()(int state);
-    virtual double operator()(int state, int action);
+    virtual unsigned int operator()(size_t state);
+    virtual double operator()(size_t state, unsigned int action);
 
     inline virtual std::string getPolicyName()
     {
@@ -59,7 +59,7 @@ protected:
     double tau;
 
 private:
-    arma::vec computeProbabilities(int state);
+    arma::vec computeProbabilities(size_t state);
 };
 
 class BoltzmannApproximate: public ActionValuePolicy<DenseState>
@@ -68,8 +68,8 @@ public:
     BoltzmannApproximate();
     virtual ~BoltzmannApproximate();
 
-    virtual int operator()(const arma::vec& state);
-    virtual double operator()(const arma::vec& state, int action);
+    virtual unsigned int operator()(const arma::vec& state);
+    virtual double operator()(const arma::vec& state, unsigned int action);
 
     inline virtual std::string getPolicyName()
     {

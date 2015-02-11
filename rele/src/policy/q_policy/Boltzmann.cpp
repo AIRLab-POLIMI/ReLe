@@ -39,7 +39,7 @@ Boltzmann::Boltzmann()
 
 }
 
-int Boltzmann::operator()(int state)
+unsigned int Boltzmann::operator()(size_t state)
 {
     if (tau != 0)
     {
@@ -52,7 +52,7 @@ int Boltzmann::operator()(int state)
     }
 }
 
-double Boltzmann::operator()(int state, int action)
+double Boltzmann::operator()(size_t state, unsigned int action)
 {
     if (tau != 0)
     {
@@ -79,7 +79,7 @@ Boltzmann::~Boltzmann()
 
 }
 
-vec Boltzmann::computeProbabilities(int state)
+vec Boltzmann::computeProbabilities(size_t state)
 {
     const rowvec& Qx = Q->row(state);
     vec p(nactions);
@@ -103,7 +103,7 @@ BoltzmannApproximate::BoltzmannApproximate()
     tau = 1;
 }
 
-int BoltzmannApproximate::operator()(const arma::vec& state)
+unsigned int BoltzmannApproximate::operator()(const arma::vec& state)
 {
     if (tau != 0)
     {
@@ -116,7 +116,7 @@ int BoltzmannApproximate::operator()(const arma::vec& state)
     }
 }
 
-double BoltzmannApproximate::operator()(const arma::vec& state, int action)
+double BoltzmannApproximate::operator()(const arma::vec& state, unsigned int action)
 {
     if (tau != 0)
     {

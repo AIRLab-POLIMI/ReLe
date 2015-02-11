@@ -35,8 +35,8 @@ public:
     e_Greedy();
     virtual ~e_Greedy();
 
-    virtual int operator()(const int state);
-    virtual double operator()(const int state, const int action);
+    virtual unsigned int operator()(size_t state);
+    virtual double operator()(size_t state, unsigned int action);
 
     inline virtual std::string getPolicyName()
     {
@@ -64,8 +64,8 @@ public:
     e_GreedyApproximate();
     virtual ~e_GreedyApproximate();
 
-    virtual int operator()(const arma::vec& state);
-    virtual double operator()(const arma::vec& state, const int action);
+    virtual unsigned int operator()(const arma::vec& state);
+    virtual double operator()(const arma::vec& state, unsigned int action);
 
     inline virtual std::string getPolicyName()
     {

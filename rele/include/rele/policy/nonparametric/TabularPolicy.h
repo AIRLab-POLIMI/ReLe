@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,18 +21,24 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REPS_H_
-#define REPS_H_
+#ifndef INCLUDE_RELE_POLICY_NONPARAMETRIC_TABULARPOLICY_H_
+#define INCLUDE_RELE_POLICY_NONPARAMETRIC_TABULARPOLICY_H_
+
+#include "Policy.h"
 
 namespace ReLe
 {
 
-
-class TabularREPS
+class TabularPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
 {
+	virtual unsigned int operator()(size_t state);
+	virtual double operator()(size_t state, unsigned int action);
 
+	virtual std::string getPolicyName();
+	virtual std::string getPolicyHyperparameters();
+	virtual std::string printPolicy();
 };
 
 }
 
-#endif /* REPS_H_ */
+#endif /* INCLUDE_RELE_POLICY_NONPARAMETRIC_TABULARPOLICY_H_ */
