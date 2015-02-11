@@ -19,6 +19,10 @@ else()
 	set(CATKIN_MSG FALSE)
 endif()
 
+#----------------------- CMAKE MODULES ------------------------
+
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
+
 # ----------------------- INCLUDES ----------------------------
 
 include_directories(include/rele/core
@@ -33,6 +37,7 @@ include_directories(include/rele/core
 
 #find_package(Boost REQUIRED COMPONENTS random)
 find_package(Armadillo REQUIRED)
+find_package(NLopt REQUIRED)
   
 
 # ----------------------- GCC FLAGS ----------------------------
@@ -68,7 +73,8 @@ file(GLOB_RECURSE ReLe_INCLUDE
                   include/*.h)
 
 add_library(rele ${ReLe_SOURCE} ${ReLe_INCLUDE})
-target_link_libraries(rele ${ARMADILLO_LIBRARIES})
+target_link_libraries(rele ${ARMADILLO_LIBRARIES}
+                           ${NLOPT_LIBRARY})
 
 add_executable(simple_chain src/test/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)

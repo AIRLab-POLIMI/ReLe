@@ -24,12 +24,56 @@
 #ifndef REPS_H_
 #define REPS_H_
 
+#include "Agent.h"
+#include "nonparametric/TabularPolicy.h"
+
+#include <nlopt.hpp>
+
 namespace ReLe
 {
 
-
-class TabularREPS
+class TabularREPS: public Agent<FiniteAction, FiniteState>
 {
+public:
+	TabularREPS();
+
+	virtual void initEpisode(const FiniteState& state, FiniteAction& action);
+	virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+	virtual void step(const Reward& reward, const FiniteState& nextState,
+				FiniteAction& action);
+	virtual void endEpisode(const Reward& reward);
+	virtual void endEpisode();
+
+	virtual ~TabularREPS();
+
+private:
+	void updatePolicy();
+	void updateSamples(size_t xn, double r);
+	void resetSamples();
+
+protected:
+	virtual void init();
+	void printStatistics();
+
+private:
+	TabularPolicy policy;
+	arma::vec theta;
+	double eta;
+
+	int N;
+	int currentIteration;
+	double eps;
+
+	//current an previous actions and states
+	size_t x;
+	unsigned int u;
+
+	//Data structures needed by the algorithm
+	arma::mat ndelta;
+	arma::mat nlambda;
+	arma::mat d;
+
+	nlopt::opt optimizator;
 
 };
 

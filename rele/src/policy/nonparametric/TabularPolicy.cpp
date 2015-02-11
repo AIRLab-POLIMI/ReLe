@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -29,10 +29,10 @@
 namespace ReLe
 {
 
-TabularPolicy::updater::updater(arma::rowvec& row) :
+TabularPolicy::updater::updater(arma::subview_row<double>&& row) :
 			row(row)
 {
-	nactions = row.size();
+	nactions = row.n_elem;
 	currentIndex = 0;
 }
 

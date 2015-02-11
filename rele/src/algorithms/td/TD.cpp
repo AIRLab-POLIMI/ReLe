@@ -52,7 +52,7 @@ void FiniteTD::printStatistics()
     cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
          << endl << endl;
 
-    cout << "--- Parameters --" << endl << endl;
+    cout << "--- Parameters ---" << endl << endl;
     cout << "gamma: " << gamma << endl;
     cout << "alpha: " << alpha << endl;
     cout << policy.getPolicyHyperparameters();

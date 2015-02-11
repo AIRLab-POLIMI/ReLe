@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -33,27 +33,7 @@ class TabularPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
 {
 
 public:
-	class updater
-	{
-	public:
-		updater(arma::rowvec& row);
-		void operator<<(double weight);
-
-		inline bool toFill()
-		{
-			return currentIndex != nactions;
-		}
-
-		~updater();
-
-	private:
-		void normalize();
-
-	private:
-		arma::rowvec& row;
-		unsigned int nactions;
-		unsigned int currentIndex;
-	};
+	class updater;
 
 public:
 	virtual unsigned int operator()(size_t state);
@@ -73,8 +53,7 @@ public:
 
 	updater update(size_t state)
 	{
-		arma::rowvec row = pi.row(state);
-		return updater(row);
+		return updater(pi.row(state));
 	}
 
 	inline void init(size_t nstates, unsigned int nactions)
@@ -82,6 +61,32 @@ public:
 		pi.set_size(nstates, nactions);
 		pi.fill(1/nactions);
 	}
+
+
+public:
+	class updater
+	{
+		updater(arma::subview_row<double>&& row);
+	public:
+		friend updater TabularPolicy::update(size_t state);
+
+		void operator<<(double weight);
+
+		inline bool toFill()
+		{
+			return currentIndex != nactions;
+		}
+
+		~updater();
+
+	private:
+		void normalize();
+
+	private:
+		arma::subview_row<double> row;
+		unsigned int nactions;
+		unsigned int currentIndex;
+	};
 
 private:
 	arma::mat pi;
