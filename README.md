@@ -16,15 +16,14 @@ check [this](http://ros.org/wiki/catkin/Tutorials/create_a_workspace) tutorial t
 
 The ReLe core library can be build also using plain cmake (without catkin). To build the core library, use the following commands:
 
-mkdir ReLe <br/>
-mkdir ReLe/build <br/>
-mkdir ReLe/src <br/>
-cd ReLe/src <br/>
-git clone git@github.com:AIRLab-POLIMI/ReLe.git <br/>
-cd ../build <br/>
-cmake ../src/rele <br/>
-make <br/>
-<br/>
+`mkdir ReLe 
+mkdir ReLe/build 
+mkdir ReLe/src
+cd ReLe/src
+git clone git@github.com:AIRLab-POLIMI/ReLe.git
+cd ../build
+cmake ../src/rele 
+make`
 
 Currently plain cmake installation is not supported.
 
