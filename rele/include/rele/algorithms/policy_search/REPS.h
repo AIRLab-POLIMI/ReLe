@@ -51,6 +51,11 @@ private:
 	void updateSamples(size_t xn, double r);
 	void resetSamples();
 
+	double computeObjectiveFunction(const double* x, double* grad);
+
+private:
+	static double wrapper(unsigned int n, const double* x, double* grad, void* o);
+
 protected:
 	virtual void init();
 	void printStatistics();
@@ -70,7 +75,7 @@ private:
 
 	//Data structures needed by the algorithm
 	arma::mat ndelta;
-	arma::mat nlambda;
+	arma::cube nlambda;
 	arma::mat d;
 
 	nlopt::opt optimizator;

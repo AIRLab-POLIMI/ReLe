@@ -103,13 +103,30 @@ TabularREPS::~TabularREPS()
 
 void TabularREPS::updatePolicy()
 {
+	//optimize dual function
+	std::vector<double> parameters(theta.begin(), theta.end());
+	parameters.push_back(eta);
+	optimizator.optimize(parameters);
+
+	//update parameters
+	eta = parameters.back();
+	parameters.pop_back();
+	theta = arma::vec(parameters);
+
+	//compute new policy
+
+
 
 }
 
 void TabularREPS::updateSamples(size_t xn, double r)
 {
 	ndelta(x, u) += r + theta[xn] - theta[x];
-	nlambda(x, u) += 0; //TODO FIXME
+	arma::vec phi(task.finiteStateDim);
+	phi(x) = 1;
+	arma::vec phin(task.finiteStateDim);
+	phin(xn) = 1;
+	nlambda.tube(x, u) += phin - phi;
 	d(x, u) += 1;
 
 	currentIteration++;
@@ -118,10 +135,20 @@ void TabularREPS::updateSamples(size_t xn, double r)
 void TabularREPS::resetSamples()
 {
 	ndelta.zeros(task.finiteStateDim, task.finiteActionDim);
-	nlambda.zeros(task.finiteStateDim, task.finiteActionDim);
+	nlambda.zeros(task.finiteStateDim, task.finiteActionDim, task.finiteStateDim);
 	d.zeros(task.finiteStateDim, task.finiteActionDim);
 
 	currentIteration = 0;
+}
+
+double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
+{
+	return 0; //TODO implement
+}
+
+double TabularREPS::wrapper(unsigned int n, const double* x, double* grad, void* o)
+{
+	return reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(x, grad);
 }
 
 void TabularREPS::init()
@@ -133,6 +160,8 @@ void TabularREPS::init()
 
 	//setup optimization algorithm
 	optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, theta.n_elem + 1);
+	optimizator.set_min_objective(TabularREPS::wrapper, this);
+	optimizator.set_xtol_rel(0.001);
 }
 
 void TabularREPS::printStatistics()
