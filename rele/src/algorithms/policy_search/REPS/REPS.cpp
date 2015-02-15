@@ -123,6 +123,8 @@ void TabularREPS::updatePolicy()
             unsigned int ui = updater.getCurrentState();
             updater << policy(xi, ui) * std::exp(deltaOpt(xi, ui) / etaOpt);
         }
+
+        updater.normalize();
     }
 
 }
