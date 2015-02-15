@@ -29,6 +29,7 @@
 
 #include <map>
 #include <vector>
+#include <cassert>
 
 namespace ReLe
 {
@@ -75,11 +76,11 @@ public:
 
 	}
 
-	DeltaFunctor getDelta(arma::vec& theta)
+	DeltaFunctor getDelta(const arma::vec& theta)
 	{
-		for (auto sample : samples)
+		for (auto& sample : samples)
 		{
-			if(ndelta.count(sample.x) == 0 || ndelta)
+			if(ndelta.count(sample.x) == 0 || ndelta[sample.x].count(sample.u) == 0)
 			{
 				ndelta[sample.x][sample.u] = 0;
 			}
@@ -88,7 +89,7 @@ public:
 						- theta[sample.x];
 		}
 
-		return DeltaFunct(ndelta, d);
+		return DeltaFunctor(ndelta, d);
 
 	}
 
@@ -131,6 +132,17 @@ public:
 		d.clear();
 		ndelta.clear();
 		nlambda.clear();
+	}
+
+
+	typename SampleVector::iterator begin()
+	{
+		return samples.begin();
+	}
+
+	typename SampleVector::iterator end()
+	{
+		return samples.end();
 	}
 
 private:

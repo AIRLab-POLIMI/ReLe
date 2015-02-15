@@ -28,7 +28,6 @@ using namespace arma;
 namespace ReLe
 {
 
-
 TabularREPS::TabularREPS()
 {
 	x = 0;
@@ -135,12 +134,42 @@ void TabularREPS::resetSamples()
 double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 {
 	//Get state parameters
-	//const arma::vec theta(x, this->theta.size(), true);
+	const arma::vec theta(const_cast<double*>(x), this->theta.size(), false); //TODO check this
 	double eta = x[this->theta.size()];
 
-	//compute
+	auto&& delta = s.getDelta(theta);
 
-	return 0; //eta * log(1/N * sum());
+	//compute needed sums
+	double sum1 = 0;
+	for (auto& sample : s)
+	{
+		sum1 += std::exp(eps + delta(sample.x, sample.u) / eta);
+	}
+
+	double sum2 = 0;
+	for (auto& sample : s)
+	{
+		sum2 += std::exp(eps + delta(sample.x, sample.u) / eta)
+					* delta(sample.x, sample.u) / std::pow(eta, 2);
+	}
+
+	arma::vec sum3(this->theta.size(), arma::fill::zeros);
+	for (auto& sample : s)
+	{
+		sum3 += std::exp(eps + delta(sample.x, sample.u) / eta)
+					* s.lambda(sample.x, sample.u);
+	}
+
+	//compute theta gradient
+	arma::vec dTheta(grad, this->theta.size(), false);
+	dTheta = eta * sum3 / sum1;
+
+	//compute eta gradient
+	double& dEta = grad[this->theta.size()];
+	dEta = std::log(sum1) - sum2 / sum1;
+
+	//compute dual function
+	return eta * std::log(sum1 / N);
 }
 
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
