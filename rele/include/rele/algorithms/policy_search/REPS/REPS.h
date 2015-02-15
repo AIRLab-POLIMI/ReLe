@@ -37,48 +37,48 @@ namespace ReLe
 class TabularREPS: public Agent<FiniteAction, FiniteState>
 {
 public:
-	TabularREPS();
+    TabularREPS();
 
-	virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-	virtual void sampleAction(const FiniteState& state, FiniteAction& action);
-	virtual void step(const Reward& reward, const FiniteState& nextState,
-				FiniteAction& action);
-	virtual void endEpisode(const Reward& reward);
-	virtual void endEpisode();
+    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+    virtual void step(const Reward& reward, const FiniteState& nextState,
+                      FiniteAction& action);
+    virtual void endEpisode(const Reward& reward);
+    virtual void endEpisode();
 
-	virtual ~TabularREPS();
-
-private:
-	void updatePolicy();
-	void updateSamples(size_t xn, double r);
-	void resetSamples();
-
-	double computeObjectiveFunction(const double* x, double* grad);
+    virtual ~TabularREPS();
 
 private:
-	static double wrapper(unsigned int n, const double* x, double* grad,
-				void* o);
+    void updatePolicy();
+    void updateSamples(size_t xn, double r);
+    void resetSamples();
+
+    double computeObjectiveFunction(const double* x, double* grad);
+
+private:
+    static double wrapper(unsigned int n, const double* x, double* grad,
+                          void* o);
 
 protected:
-	virtual void init();
-	void printStatistics();
+    virtual void init();
+    void printStatistics();
 
 private:
-	TabularPolicy policy;
-	arma::vec theta;
-	double eta;
+    TabularPolicy policy;
+    arma::vec thetaOpt;
+    double etaOpt;
 
-	int N;
-	int currentIteration;
-	double eps;
+    int N;
+    int currentIteration;
+    double eps;
 
-	//current an previous actions and states
-	size_t x;
-	unsigned int u;
+    //current an previous actions and states
+    size_t x;
+    unsigned int u;
 
-	SampleManager<FiniteAction, FiniteState> s;
+    SampleManager<FiniteAction, FiniteState> s;
 
-	nlopt::opt optimizator;
+    nlopt::opt optimizator;
 
 };
 

@@ -33,61 +33,66 @@ class TabularPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
 {
 
 public:
-	class updater;
+    class updater;
 
 public:
-	virtual unsigned int operator()(size_t state);
-	virtual double operator()(size_t state, unsigned int action);
+    virtual unsigned int operator()(size_t state);
+    virtual double operator()(size_t state, unsigned int action);
 
-	inline virtual std::string getPolicyName()
-	{
-		return "Tabular";
-	}
+    inline virtual std::string getPolicyName()
+    {
+        return "Tabular";
+    }
 
-	virtual std::string getPolicyHyperparameters()
-	{
-		return "";
-	}
+    virtual std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
 
-	virtual std::string printPolicy();
+    virtual std::string printPolicy();
 
-	updater update(size_t state)
-	{
-		return updater(pi.row(state));
-	}
+    updater update(size_t state)
+    {
+        return updater(pi.row(state));
+    }
 
-	inline void init(size_t nstates, unsigned int nactions)
-	{
-		pi.set_size(nstates, nactions);
-		pi.fill(1/nactions);
-	}
+    inline void init(size_t nstates, unsigned int nactions)
+    {
+        pi.set_size(nstates, nactions);
+        pi.fill(1/nactions);
+    }
 
 
 public:
-	class updater
-	{
-		updater(arma::subview_row<double>&& row);
+    class updater
+    {
+        updater(arma::subview_row<double>&& row);
 
-	public:
-		friend updater TabularPolicy::update(size_t state);
+    public:
+        friend updater TabularPolicy::update(size_t state);
 
-		void operator<<(double weight);
+        void operator<<(double weight);
 
-		inline bool toFill()
-		{
-			return currentIndex != nactions;
-		}
+        inline bool toFill()
+        {
+            return currentIndex != nactions;
+        }
 
-		void normalize();
+        inline unsigned int getCurrentState()
+        {
+            return currentIndex;
+        }
 
-	private:
-		arma::subview_row<double> row;
-		unsigned int nactions;
-		unsigned int currentIndex;
-	};
+        void normalize();
+
+    private:
+        arma::subview_row<double> row;
+        unsigned int nactions;
+        unsigned int currentIndex;
+    };
 
 private:
-	arma::mat pi;
+    arma::mat pi;
 };
 
 }

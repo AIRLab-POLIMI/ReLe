@@ -32,19 +32,19 @@ namespace ReLe
 template<class ActionC, class StateC>
 struct Sample
 {
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
-	Sample(size_t x, unsigned int u, size_t xn, double r) :
-				x(x), u(u), xn(xn), r(r)
-	{
+    Sample(size_t x, unsigned int u, size_t xn, double r) :
+        x(x), u(u), xn(xn), r(r)
+    {
 
-	}
+    }
 
-	typename state_type<StateC>::type x;
-	typename action_type<ActionC>::type u;
-	typename state_type<StateC>::type xn;
-	double r;
+    typename state_type<StateC>::type x;
+    typename action_type<ActionC>::type u;
+    typename state_type<StateC>::type xn;
+    double r;
 };
 
 }

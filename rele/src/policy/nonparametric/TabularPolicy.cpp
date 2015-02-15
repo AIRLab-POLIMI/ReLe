@@ -30,48 +30,48 @@ namespace ReLe
 {
 
 TabularPolicy::updater::updater(arma::subview_row<double>&& row) :
-			row(row)
+    row(row)
 {
-	nactions = row.n_elem;
-	currentIndex = 0;
+    nactions = row.n_elem;
+    currentIndex = 0;
 }
 
 void TabularPolicy::updater::operator<<(double weight)
 {
-	row(currentIndex) = weight;
-	currentIndex++;
+    row(currentIndex) = weight;
+    currentIndex++;
 }
 
 void TabularPolicy::updater::normalize()
 {
-	double normalization = sum(row);
-	row /= normalization;
+    double normalization = sum(row);
+    row /= normalization;
 }
 
 unsigned int TabularPolicy::operator()(size_t state)
 {
-	arma::rowvec&& row = pi.row(state);
-	return RandomGenerator::sampleDiscrete(row.begin(), row.end());
+    arma::rowvec&& row = pi.row(state);
+    return RandomGenerator::sampleDiscrete(row.begin(), row.end());
 }
 
 double TabularPolicy::operator()(size_t state, unsigned int action)
 {
-	return pi(state, action);
+    return pi(state, action);
 }
 
 std::string TabularPolicy::printPolicy()
 {
-	//TODO choose policy format
-	std::stringstream ss;
-	ss << "- Policy" << std::endl;
-	for (unsigned int i = 0; i < pi.n_rows; i++)
-	{
-		unsigned int policy;
-		pi.row(i).max(policy);
-		ss << "policy(" << i << ") = " << policy << std::endl;
-	}
+    //TODO choose policy format
+    std::stringstream ss;
+    ss << "- Policy" << std::endl;
+    for (unsigned int i = 0; i < pi.n_rows; i++)
+    {
+        unsigned int policy;
+        pi.row(i).max(policy);
+        ss << "policy(" << i << ") = " << policy << std::endl;
+    }
 
-	return ss.str();
+    return ss.str();
 }
 
 }
