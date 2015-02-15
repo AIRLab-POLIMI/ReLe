@@ -25,9 +25,11 @@
 #define REPS_H_
 
 #include "Agent.h"
+#include "SampleManager.h"
 #include "nonparametric/TabularPolicy.h"
 
 #include <nlopt.hpp>
+#include <map>
 
 namespace ReLe
 {
@@ -54,7 +56,8 @@ private:
 	double computeObjectiveFunction(const double* x, double* grad);
 
 private:
-	static double wrapper(unsigned int n, const double* x, double* grad, void* o);
+	static double wrapper(unsigned int n, const double* x, double* grad,
+				void* o);
 
 protected:
 	virtual void init();
@@ -73,10 +76,7 @@ private:
 	size_t x;
 	unsigned int u;
 
-	//Data structures needed by the algorithm
-	arma::mat ndelta;
-	arma::cube nlambda;
-	arma::mat d;
+	SampleManager<FiniteAction, FiniteState> s;
 
 	nlopt::opt optimizator;
 

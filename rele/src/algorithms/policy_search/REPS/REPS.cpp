@@ -21,12 +21,13 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/REPS.h"
+#include "policy_search/REPS/REPS.h"
 
 using namespace arma;
 
 namespace ReLe
 {
+
 
 TabularREPS::TabularREPS()
 {
@@ -115,38 +116,35 @@ void TabularREPS::updatePolicy()
 
 	//compute new policy
 
-
-
 }
 
 void TabularREPS::updateSamples(size_t xn, double r)
 {
-	ndelta(x, u) += r + theta[xn] - theta[x];
-	arma::vec phi(task.finiteStateDim);
-	phi(x) = 1;
-	arma::vec phin(task.finiteStateDim);
-	phin(xn) = 1;
-	nlambda.tube(x, u) += phin - phi;
-	d(x, u) += 1;
+	Sample<FiniteAction, FiniteState> sample(x, u, xn, r);
+	s.addSample(sample);
 
 	currentIteration++;
 }
 
 void TabularREPS::resetSamples()
 {
-	ndelta.zeros(task.finiteStateDim, task.finiteActionDim);
-	nlambda.zeros(task.finiteStateDim, task.finiteActionDim, task.finiteStateDim);
-	d.zeros(task.finiteStateDim, task.finiteActionDim);
-
+	s.reset();
 	currentIteration = 0;
 }
 
 double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 {
-	return 0; //TODO implement
+	//Get state parameters
+	//const arma::vec theta(x, this->theta.size(), true);
+	double eta = x[this->theta.size()];
+
+	//compute
+
+	return 0; //eta * log(1/N * sum());
 }
 
-double TabularREPS::wrapper(unsigned int n, const double* x, double* grad, void* o)
+double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
+			void* o)
 {
 	return reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(x, grad);
 }
