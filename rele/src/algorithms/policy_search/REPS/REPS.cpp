@@ -36,7 +36,7 @@ TabularREPS::TabularREPS() :
 	etaOpt = 1;
 
 	//default parameters
-	N = 1;
+	N = 100;
 	eps = 0.5;
 
 	//sample iteration counter
@@ -188,14 +188,15 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
 			void* o)
 {
-	return reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(x, grad);
+	double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(x, grad);
+	return value;
 }
 
 void TabularREPS::init()
 {
 	//Init policy and parameters
 	policy.init(task.finiteStateDim, task.finiteActionDim);
-	thetaOpt = vec(task.finiteStateDim, fill::ones);
+	thetaOpt = vec(task.finiteStateDim, fill::zeros);
 	etaOpt = 1;
 
 	//setup basis function

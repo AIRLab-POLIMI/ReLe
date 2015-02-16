@@ -80,6 +80,7 @@ public:
 
 	DeltaFunctor getDelta(const arma::vec& theta)
 	{
+		ndelta.clear();
 		for (auto& sample : samples)
 		{
 			if (ndelta.count(sample.x) == 0
