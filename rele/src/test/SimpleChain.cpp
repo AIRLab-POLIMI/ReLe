@@ -24,6 +24,7 @@
 #include "FiniteMDP.h"
 #include "td/SARSA.h"
 #include "td/Q-Learning.h"
+#include "policy_search/REPS/REPS.h"
 #include "Core.h"
 
 #include "q_policy/e_Greedy.h"
@@ -42,9 +43,10 @@ int main(int argc, char *argv[])
 
     ReLe::FiniteMDP mdp = generator.getMPD(0.9);
     //ReLe::e_Greedy policy;
-    ReLe::Boltzmann policy;
-    ReLe::SARSA agent(policy);
+    //ReLe::Boltzmann policy;
+    //ReLe::SARSA agent(policy);
     //ReLe::Q_Learning agent(policy);
+    ReLe::TabularREPS agent;
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;

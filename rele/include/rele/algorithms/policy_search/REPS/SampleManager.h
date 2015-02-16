@@ -110,7 +110,7 @@ public:
 		if (d.count(sample.x) == 0 || d[sample.x].count(sample.u) == 0)
 		{
 			d[sample.x][sample.u] = 1;
-			nlambda[sample.x][sample.u] += phi(sample.xn) - phi(sample.x);
+			nlambda[sample.x][sample.u] = phi(sample.xn) - phi(sample.x);
 		}
 		else
 		{
