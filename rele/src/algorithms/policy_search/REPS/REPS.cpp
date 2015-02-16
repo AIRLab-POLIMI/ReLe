@@ -31,72 +31,72 @@ namespace ReLe
 {
 
 TabularREPS::TabularREPS() :
-			s(phi)
+    s(phi)
 {
-	x = 0;
-	u = 0;
-	etaOpt = 1;
+    x = 0;
+    u = 0;
+    etaOpt = 1;
 
-	//default parameters
-	N = 1;
-	eps = 0.5;
+    //default parameters
+    N = 1;
+    eps = 0.5;
 
-	//sample iteration counter
-	currentIteration = 0;
+    //sample iteration counter
+    currentIteration = 0;
 }
 
 void TabularREPS::initEpisode(const FiniteState& state, FiniteAction& action)
 {
-	x = state.getStateN();
-	u = policy(x);
+    x = state.getStateN();
+    u = policy(x);
 
-	action.setActionN(u);
+    action.setActionN(u);
 
-	resetSamples();
+    resetSamples();
 }
 
 void TabularREPS::sampleAction(const FiniteState& state, FiniteAction& action)
 {
-	x = state.getStateN();
-	u = policy(x);
+    x = state.getStateN();
+    u = policy(x);
 
-	action.setActionN(u);
+    action.setActionN(u);
 }
 
 void TabularREPS::step(const Reward& reward, const FiniteState& nextState,
-			FiniteAction& action)
+                       FiniteAction& action)
 {
 
-	size_t xn = nextState.getStateN();
-	unsigned int un = policy(xn);
-	double r = reward[0];
+    size_t xn = nextState.getStateN();
+    unsigned int un = policy(xn);
+    double r = reward[0];
 
-	updateSamples(xn, r);
+    updateSamples(xn, r);
 
-	if (currentIteration >= N)
-	{
-		currentIteration = 0;
-		updatePolicy();
-		resetSamples();
-	}
+    if (currentIteration >= N)
+    {
+        currentIteration = 0;
+        updatePolicy();
+        resetSamples();
+    }
 
-	//update action and state
-	x = xn;
-	u = un;
+    //update action and state
+    x = xn;
+    u = un;
 
-	//set next action
-	action.setActionN(u);
+    //set next action
+    action.setActionN(u);
 }
 
 void TabularREPS::endEpisode(const Reward& reward)
 {
-	updatePolicy();
-	printStatistics();
+    updatePolicy();
+    printStatistics();
 }
 
 void TabularREPS::endEpisode()
 {
-	printStatistics();
+    printStatistics();
 }
 
 TabularREPS::~TabularREPS()
@@ -106,142 +106,140 @@ TabularREPS::~TabularREPS()
 
 void TabularREPS::updatePolicy()
 {
-	//optimize dual function
-	std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
-	parameters.push_back(1.0 / etaOpt);
-	auto&& newParameters = optimizator.optimize(parameters);
+    //optimize dual function
+    std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
+    parameters.push_back(1.0 / etaOpt);
+    auto&& newParameters = optimizator.optimize(parameters);
 
-	cout << "----------------------------" << endl;
+    cout << "----------------------------" << endl;
 
-	//update parameters
-	etaOpt = 1.0 / newParameters.back();
-	newParameters.pop_back();
-	thetaOpt = vec(newParameters);
+    //update parameters
+    etaOpt = 1.0 / newParameters.back();
+    newParameters.pop_back();
+    thetaOpt = vec(newParameters);
 
-	//compute new policy
-	auto&& deltaOpt = s.getDelta(thetaOpt);
-	for (size_t xi = 0; xi < task.finiteStateDim; xi++)
-	{
-		auto&& updater = policy.update(xi);
-		while (updater.toFill())
-		{
-			unsigned int ui = updater.getCurrentState();
-			updater << policy(xi, ui) * std::exp(deltaOpt(xi, ui) / etaOpt);
-		}
+    //compute new policy
+    auto&& deltaOpt = s.getDelta(thetaOpt);
+    for (size_t xi = 0; xi < task.finiteStateDim; xi++)
+    {
+        auto&& updater = policy.update(xi);
+        while (updater.toFill())
+        {
+            unsigned int ui = updater.getCurrentState();
+            updater << policy(xi, ui) * std::exp(deltaOpt(xi, ui) / etaOpt);
+        }
 
-		updater.normalize();
-	}
+        updater.normalize();
+    }
 
 }
 
 void TabularREPS::updateSamples(size_t xn, double r)
 {
-	Sample<FiniteAction, FiniteState> sample(x, u, xn, r);
-	s.addSample(sample);
+    Sample<FiniteAction, FiniteState> sample(x, u, xn, r);
+    s.addSample(sample);
 
-	currentIteration++;
+    currentIteration++;
 }
 
 void TabularREPS::resetSamples()
 {
-	s.reset();
-	currentIteration = 0;
+    s.reset();
+    currentIteration = 0;
 }
 
 double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 {
-	//Get state parameters
-	const vec theta(const_cast<double*>(x), this->thetaOpt.size(), false); //TODO check this
-	double eta = x[this->thetaOpt.size()];
+    //Get state parameters
+    const vec theta(const_cast<double*>(x), this->thetaOpt.size(), false); //TODO check this
+    double etaTilde = x[this->thetaOpt.size()];
 
-	auto&& delta = s.getDelta(theta);
+    auto&& delta = s.getDelta(theta);
 
-	//compute needed sums
-	double sum1 = 0;
-	for (auto& sample : s)
-	{
-		sum1 += std::exp(eps + delta(sample.x, sample.u) * eta);
-	}
+    //compute needed sums
+    double sum1 = 0;
+    double sum2 = 0;
+    vec sum3(this->thetaOpt.size(), fill::zeros);
+    for (auto& sample : s)
+    {
+        double deltaxu = delta(sample.x, sample.u);
+        sum1 += std::exp(eps + deltaxu * etaTilde);
+        sum2 += std::exp(eps + deltaxu * etaTilde) * deltaxu
+                * std::pow(etaTilde, 2);
+        sum3 += std::exp(eps + deltaxu * etaTilde)
+                * s.lambda(sample.x, sample.u);
+    }
 
-	double sum2 = 0;
-	for (auto& sample : s)
-	{
-		sum2 += std::exp(eps + delta(sample.x, sample.u) * eta)
-					* delta(sample.x, sample.u) * std::pow(eta, 2);
-	}
+    cout << "sum1 " << sum1 << endl;
+    cout << "sum2 " << sum2 << endl;
+    cout << "sum3" << sum3.t();
 
-	vec sum3(this->thetaOpt.size(), fill::zeros);
-	for (auto& sample : s)
-	{
-		sum3 += std::exp(eps + delta(sample.x, sample.u) * eta)
-					* s.lambda(sample.x, sample.u);
-	}
+    //compute theta gradient
+    vec dTheta(grad, this->thetaOpt.size(), false);
+    dTheta = sum3 / sum1 / etaTilde;
 
-	//compute theta gradient
-	vec dTheta(grad, this->thetaOpt.size(), false);
-	dTheta = sum3 / sum1 / eta;
+    //compute eta gradient
+    double& dEta = grad[this->thetaOpt.size()];
+    dEta = (sum2 / sum1 - std::log(sum1)) / std::pow(etaTilde, 2);
 
-	//compute eta gradient
-	double& dEta = grad[this->thetaOpt.size()];
-	dEta = (sum2 / sum1 - std::log(sum1)) / std::pow(eta, 2);
-
-	//compute dual function
-	return std::log(sum1 / N) / eta;
+    //compute dual function
+    return std::log(sum1 / N) / etaTilde;
 }
 
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
-			void* o)
+                            void* o)
 {
-	double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(
-				x, grad);
+    cout << "x = [" << x[0];
+    for (int i = 1; i < n; i++)
+    {
+        cout << "," << x[i];
+    }
+    cout << "]" << endl;
 
-	cout << "x = [" << x[0];
-	for (int i = 1; i < n; i++)
-	{
-		cout << "," << x[i];
-	}
-	cout << "]" << endl;
+    double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(
+                       x, grad);
 
-	cout << "grad = [" << grad[0];
-	for (int i = 1; i < n; i++)
-	{
-		cout << "," << grad[i];
-	}
-	cout << "]" << endl;
+    cout << "grad = [" << grad[0];
+    for (int i = 1; i < n; i++)
+    {
+        cout << "," << grad[i];
+    }
+    cout << "]" << endl;
+    cout << "value " << value << endl;
 
-	return value;
+    return value;
 }
 
 void TabularREPS::init()
 {
-	//Init policy and parameters
-	policy.init(task.finiteStateDim, task.finiteActionDim);
-	thetaOpt = vec(task.finiteStateDim, fill::zeros);
-	etaOpt = 1;
+    //Init policy and parameters
+    policy.init(task.finiteStateDim, task.finiteActionDim);
+    thetaOpt = vec(task.finiteStateDim, fill::zeros);
+    etaOpt = 1;
 
-	//setup basis function
-	phi.setSize(task.finiteStateDim);
+    //setup basis function
+    phi.setSize(task.finiteStateDim);
 
-	//setup optimization algorithm
-	optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, thetaOpt.size() + 1);
-	optimizator.set_min_objective(TabularREPS::wrapper, this);
-	optimizator.set_xtol_rel(0.001);
-	optimizator.set_ftol_rel(0.001);
+    //setup optimization algorithm
+    optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, thetaOpt.size() + 1);
+    optimizator.set_min_objective(TabularREPS::wrapper, this);
+    optimizator.set_xtol_rel(0.01);
+    optimizator.set_ftol_rel(0.01);
 }
 
 void TabularREPS::printStatistics()
 {
-	cout << endl << endl << "### Tabular REPS ###";
-	cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
-				<< endl << endl;
+    cout << endl << endl << "### Tabular REPS ###";
+    cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
+         << endl << endl;
 
-	cout << "--- Parameters ---" << endl << endl;
-	cout << "N: " << N << endl;
-	cout << "eps: " << eps << endl;
+    cout << "--- Parameters ---" << endl << endl;
+    cout << "N: " << N << endl;
+    cout << "eps: " << eps << endl;
 
-	cout << endl << endl << "--- Learning results ---" << endl << endl;
-	cout << "- Policy" << endl;
-	cout << policy.printPolicy();
+    cout << endl << endl << "--- Learning results ---" << endl << endl;
+    cout << "- Policy" << endl;
+    cout << policy.printPolicy();
 }
 
 }

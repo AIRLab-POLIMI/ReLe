@@ -63,7 +63,7 @@ public:
         inline double operator()(typename state_type<StateC>::type x,
                                  typename action_type<ActionC>::type u)
         {
-            return ndelta[x][u] / d[x][u];
+            return ndelta[x][u] / static_cast<double>(d[x][u]);
         }
 
     private:
@@ -101,7 +101,7 @@ public:
                      typename action_type<ActionC>::type u)
     {
         assert(nlambda.count(x) != 0 && nlambda[x].count(u) != 0);
-        return nlambda[x][u] / d[x][u];
+        return nlambda[x][u] / static_cast<double>(d[x][u]);
     }
 
     void addSample(Sample<ActionC, StateC>& sample)
