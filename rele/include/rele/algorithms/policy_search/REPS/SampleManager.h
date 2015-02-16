@@ -38,112 +38,112 @@ namespace ReLe
 template<class ActionC, class StateC>
 class SampleManager
 {
-	static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-	static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
-	typedef std::map<typename state_type<StateC>::type,
-				std::map<typename action_type<ActionC>::type, double>> DeltaMap;
-	typedef std::map<typename state_type<StateC>::type,
-				std::map<typename action_type<ActionC>::type, arma::vec>> LambdaMap;
-	typedef std::map<typename state_type<StateC>::type,
-				std::map<typename action_type<ActionC>::type, int>> CountMap;
+    typedef std::map<typename state_type<StateC>::type,
+            std::map<typename action_type<ActionC>::type, double>> DeltaMap;
+    typedef std::map<typename state_type<StateC>::type,
+            std::map<typename action_type<ActionC>::type, arma::vec>> LambdaMap;
+    typedef std::map<typename state_type<StateC>::type,
+            std::map<typename action_type<ActionC>::type, int>> CountMap;
 
-	typedef std::vector<Sample<ActionC, StateC>> SampleVector;
-
-public:
-	class DeltaFunctor
-	{
-	public:
-		DeltaFunctor(DeltaMap& ndelta, CountMap& d) :
-					ndelta(ndelta), d(d)
-		{
-
-		}
-
-		inline double operator()(typename state_type<StateC>::type x,
-					typename action_type<ActionC>::type u)
-		{
-			return ndelta[x][u] / d[x][u];
-		}
-
-	private:
-		DeltaMap& ndelta;
-		CountMap& d;
-	};
+    typedef std::vector<Sample<ActionC, StateC>> SampleVector;
 
 public:
-	SampleManager(AbstractBasisVector& phi) :
-				phi(phi)
-	{
+    class DeltaFunctor
+    {
+    public:
+        DeltaFunctor(DeltaMap& ndelta, CountMap& d) :
+            ndelta(ndelta), d(d)
+        {
 
-	}
+        }
 
-	DeltaFunctor getDelta(const arma::vec& theta)
-	{
-		ndelta.clear();
-		for (auto& sample : samples)
-		{
-			if (ndelta.count(sample.x) == 0
-						|| ndelta[sample.x].count(sample.u) == 0)
-			{
-				ndelta[sample.x][sample.u] = 0;
-			}
+        inline double operator()(typename state_type<StateC>::type x,
+                                 typename action_type<ActionC>::type u)
+        {
+            return ndelta[x][u] / d[x][u];
+        }
 
-			ndelta[sample.x][sample.u] += sample.r + phi.dot(sample.xn, theta)
-						- phi.dot(sample.x, theta);
-		}
+    private:
+        DeltaMap& ndelta;
+        CountMap& d;
+    };
 
-		return DeltaFunctor(ndelta, d);
+public:
+    SampleManager(AbstractBasisVector& phi) :
+        phi(phi)
+    {
 
-	}
+    }
 
-	arma::vec lambda(typename state_type<StateC>::type x,
-				typename action_type<ActionC>::type u)
-	{
-		assert(nlambda.count(x) != 0 && nlambda[x].count(u) != 0);
-		return nlambda[x][u] / d[x][u];
-	}
+    DeltaFunctor getDelta(const arma::vec& theta)
+    {
+        ndelta.clear();
+        for (auto& sample : samples)
+        {
+            if (ndelta.count(sample.x) == 0
+                    || ndelta[sample.x].count(sample.u) == 0)
+            {
+                ndelta[sample.x][sample.u] = 0;
+            }
 
-	void addSample(Sample<ActionC, StateC>& sample)
-	{
-		samples.push_back(sample);
+            ndelta[sample.x][sample.u] += sample.r + phi.dot(sample.xn, theta)
+                                          - phi.dot(sample.x, theta);
+        }
 
-		if (d.count(sample.x) == 0 || d[sample.x].count(sample.u) == 0)
-		{
-			d[sample.x][sample.u] = 1;
-			nlambda[sample.x][sample.u] = phi(sample.xn) - phi(sample.x);
-		}
-		else
-		{
-			d[sample.x][sample.u]++;
-			nlambda[sample.x][sample.u] += phi(sample.xn) - phi(sample.x);
-		}
-	}
+        return DeltaFunctor(ndelta, d);
 
-	void reset()
-	{
-		samples.clear();
-		d.clear();
-		ndelta.clear();
-		nlambda.clear();
-	}
+    }
 
-	typename SampleVector::iterator begin()
-	{
-		return samples.begin();
-	}
+    arma::vec lambda(typename state_type<StateC>::type x,
+                     typename action_type<ActionC>::type u)
+    {
+        assert(nlambda.count(x) != 0 && nlambda[x].count(u) != 0);
+        return nlambda[x][u] / d[x][u];
+    }
 
-	typename SampleVector::iterator end()
-	{
-		return samples.end();
-	}
+    void addSample(Sample<ActionC, StateC>& sample)
+    {
+        samples.push_back(sample);
+
+        if (d.count(sample.x) == 0 || d[sample.x].count(sample.u) == 0)
+        {
+            d[sample.x][sample.u] = 1;
+            nlambda[sample.x][sample.u] = phi(sample.xn) - phi(sample.x);
+        }
+        else
+        {
+            d[sample.x][sample.u]++;
+            nlambda[sample.x][sample.u] += phi(sample.xn) - phi(sample.x);
+        }
+    }
+
+    void reset()
+    {
+        samples.clear();
+        d.clear();
+        ndelta.clear();
+        nlambda.clear();
+    }
+
+    typename SampleVector::iterator begin()
+    {
+        return samples.begin();
+    }
+
+    typename SampleVector::iterator end()
+    {
+        return samples.end();
+    }
 
 private:
-	DeltaMap ndelta;
-	LambdaMap nlambda;
-	CountMap d;
-	SampleVector samples;
-	AbstractBasisVector& phi;
+    DeltaMap ndelta;
+    LambdaMap nlambda;
+    CountMap d;
+    SampleVector samples;
+    AbstractBasisVector& phi;
 
 };
 

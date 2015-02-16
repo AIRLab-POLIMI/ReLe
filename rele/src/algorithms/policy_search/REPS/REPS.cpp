@@ -39,7 +39,7 @@ TabularREPS::TabularREPS() :
 
 	//default parameters
 	N = 1;
-	eps = 0.1;
+	eps = 0.5;
 
 	//sample iteration counter
 	currentIteration = 0;
@@ -108,13 +108,15 @@ void TabularREPS::updatePolicy()
 {
 	//optimize dual function
 	std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
-	parameters.push_back(etaOpt);
-	optimizator.optimize(parameters);
+	parameters.push_back(1.0 / etaOpt);
+	auto&& newParameters = optimizator.optimize(parameters);
+
+	cout << "----------------------------" << endl;
 
 	//update parameters
-	etaOpt = parameters.back();
-	parameters.pop_back();
-	thetaOpt = vec(parameters);
+	etaOpt = 1.0 / newParameters.back();
+	newParameters.pop_back();
+	thetaOpt = vec(newParameters);
 
 	//compute new policy
 	auto&& deltaOpt = s.getDelta(thetaOpt);
@@ -158,33 +160,33 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 	double sum1 = 0;
 	for (auto& sample : s)
 	{
-		sum1 += std::exp(eps + delta(sample.x, sample.u) / eta);
+		sum1 += std::exp(eps + delta(sample.x, sample.u) * eta);
 	}
 
 	double sum2 = 0;
 	for (auto& sample : s)
 	{
-		sum2 += std::exp(eps + delta(sample.x, sample.u) / eta)
-					* delta(sample.x, sample.u) / std::pow(eta, 2);
+		sum2 += std::exp(eps + delta(sample.x, sample.u) * eta)
+					* delta(sample.x, sample.u) * std::pow(eta, 2);
 	}
 
 	vec sum3(this->thetaOpt.size(), fill::zeros);
 	for (auto& sample : s)
 	{
-		sum3 += std::exp(eps + delta(sample.x, sample.u) / eta)
+		sum3 += std::exp(eps + delta(sample.x, sample.u) * eta)
 					* s.lambda(sample.x, sample.u);
 	}
 
 	//compute theta gradient
 	vec dTheta(grad, this->thetaOpt.size(), false);
-	dTheta = eta * sum3 / sum1;
+	dTheta = sum3 / sum1 / eta;
 
 	//compute eta gradient
 	double& dEta = grad[this->thetaOpt.size()];
-	dEta = std::log(sum1) - sum2 / sum1;
+	dEta = (sum2 / sum1 - std::log(sum1)) / std::pow(eta, 2);
 
 	//compute dual function
-	return eta * std::log(sum1 / N);
+	return std::log(sum1 / N) / eta;
 }
 
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,

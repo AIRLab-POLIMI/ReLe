@@ -59,7 +59,7 @@ public:
     inline void init(size_t nstates, unsigned int nactions)
     {
         pi.set_size(nstates, nactions);
-        pi.fill(1/nactions);
+        pi.fill(1.0/nactions);
     }
 
 
