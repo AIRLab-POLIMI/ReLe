@@ -23,6 +23,8 @@
 
 #include "policy_search/REPS/REPS.h"
 
+#include <iostream>
+
 using namespace arma;
 
 namespace ReLe
@@ -36,8 +38,8 @@ TabularREPS::TabularREPS() :
 	etaOpt = 1;
 
 	//default parameters
-	N = 100;
-	eps = 0.5;
+	N = 1;
+	eps = 0.1;
 
 	//sample iteration counter
 	currentIteration = 0;
@@ -112,7 +114,7 @@ void TabularREPS::updatePolicy()
 	//update parameters
 	etaOpt = parameters.back();
 	parameters.pop_back();
-	thetaOpt = arma::vec(parameters);
+	thetaOpt = vec(parameters);
 
 	//compute new policy
 	auto&& deltaOpt = s.getDelta(thetaOpt);
@@ -147,7 +149,7 @@ void TabularREPS::resetSamples()
 double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 {
 	//Get state parameters
-	const arma::vec theta(const_cast<double*>(x), this->thetaOpt.size(), false); //TODO check this
+	const vec theta(const_cast<double*>(x), this->thetaOpt.size(), false); //TODO check this
 	double eta = x[this->thetaOpt.size()];
 
 	auto&& delta = s.getDelta(theta);
@@ -166,7 +168,7 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 					* delta(sample.x, sample.u) / std::pow(eta, 2);
 	}
 
-	arma::vec sum3(this->thetaOpt.size(), arma::fill::zeros);
+	vec sum3(this->thetaOpt.size(), fill::zeros);
 	for (auto& sample : s)
 	{
 		sum3 += std::exp(eps + delta(sample.x, sample.u) / eta)
@@ -174,7 +176,7 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 	}
 
 	//compute theta gradient
-	arma::vec dTheta(grad, this->thetaOpt.size(), false);
+	vec dTheta(grad, this->thetaOpt.size(), false);
 	dTheta = eta * sum3 / sum1;
 
 	//compute eta gradient
@@ -188,7 +190,23 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
 			void* o)
 {
-	double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(x, grad);
+	double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(
+				x, grad);
+
+	cout << "x = [" << x[0];
+	for (int i = 1; i < n; i++)
+	{
+		cout << "," << x[i];
+	}
+	cout << "]" << endl;
+
+	cout << "grad = [" << grad[0];
+	for (int i = 1; i < n; i++)
+	{
+		cout << "," << grad[i];
+	}
+	cout << "]" << endl;
+
 	return value;
 }
 
@@ -206,6 +224,7 @@ void TabularREPS::init()
 	optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, thetaOpt.size() + 1);
 	optimizator.set_min_objective(TabularREPS::wrapper, this);
 	optimizator.set_xtol_rel(0.001);
+	optimizator.set_ftol_rel(0.001);
 }
 
 void TabularREPS::printStatistics()
