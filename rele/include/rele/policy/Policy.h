@@ -80,6 +80,6 @@ protected:
 };
 
 
-}
+} //end namespace
 
 #endif /* POLICY_H_ */

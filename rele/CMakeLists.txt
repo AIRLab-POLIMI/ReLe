@@ -31,7 +31,8 @@ include_directories(include/rele/core
                     include/rele/generators
                     include/rele/algorithms
                     include/rele/envirorments
-                    include/rele/approximators)
+                    include/rele/approximators
+                    include/rele/statistics)
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -67,7 +68,8 @@ file(GLOB_RECURSE ReLe_SOURCE
                   src/envirorments/*.cpp  
                   src/utils/*.cpp
                   src/generators/*.cpp
-                  src/approximators/*.cpp)
+                  src/approximators/*.cpp
+                  src/statistics/*.cpp)
 
 file(GLOB_RECURSE ReLe_INCLUDE
                   include/*.h)
