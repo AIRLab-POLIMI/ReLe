@@ -132,6 +132,14 @@ void TabularREPS::updatePolicy()
         updater.normalize();
     }
 
+    cout << "$policy$";
+    cout << policy(0,0) << ", " << policy(0,1) << endl;
+    cout << policy(1,0) << ", " << policy(1,1) << endl;
+    cout << policy(2,0) << ", " << policy(2,1) << endl;
+    cout << policy(3,0) << ", " << policy(3,1) << endl;
+    cout << policy(4,0) << ", " << policy(4,1) << endl;
+    cout << "----------------------------" << endl;
+
 }
 
 void TabularREPS::updateSamples(size_t xn, double r)
@@ -206,6 +214,8 @@ double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
     }
     cout << "]" << endl;
     cout << "value " << value << endl;
+
+    cout << "---" << endl;
 
     return value;
 }
