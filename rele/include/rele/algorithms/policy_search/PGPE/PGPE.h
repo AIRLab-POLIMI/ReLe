@@ -27,6 +27,7 @@
 #include "Agent.h"
 #include "Distribution.h"
 #include "Policy.h"
+#include <cassert>
 
 namespace ReLe
 {
@@ -115,9 +116,9 @@ public:
 protected:
     void init()
     {
-        Jep = vec(Base::task.rewardDim, arma::fill::zeros);
+        Jep = arma::vec(Base::task.rewardDim, arma::fill::zeros);
         for (int i = 0; i < Base::task.rewardDim; ++i)
-            diffObjFunc.push_back(vec(policy->getParametersSize(), arma::fill::zeros));
+            diffObjFunc.push_back(arma::vec(policy->getParametersSize(), arma::fill::zeros));
 
         assert(Base::task.rewardDim == 1);
     }

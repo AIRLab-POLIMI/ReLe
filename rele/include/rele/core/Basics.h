@@ -99,11 +99,13 @@ private:
 
 class DenseAction: public Action, public arma::vec
 {
+public:
+    DenseAction ()
+    { }
+
     DenseAction(std::size_t size) :
         arma::vec(size)
-    {
-
-    }
+    {    }
 
     inline virtual std::string to_str() const
     {
@@ -123,6 +125,18 @@ class DenseAction: public Action, public arma::vec
     inline virtual ~DenseAction()
     {
 
+    }
+
+    inline virtual bool isAlmostEqual(const arma::vec& other, double epsilon = 1e-6) const
+    {
+        int i, dim = this->n_elem;
+        if (other.n_elem != dim)
+            return false;
+        for (i = 0; i < dim; ++i)
+            if (fabs(this->at(i) - other[i]) > epsilon)
+                return false;
+
+        return true;
     }
 };
 

@@ -87,6 +87,9 @@ target_link_libraries(grid_world rele)
 add_executable(mountain_car src/test/MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
 
+add_executable(lqr_pgpe src/test/LqrPGPETest.cpp)
+target_link_libraries(lqr_pgpe rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)
