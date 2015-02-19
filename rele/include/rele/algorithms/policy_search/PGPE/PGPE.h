@@ -33,10 +33,10 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class PGPE: public Agent<DenseAction, StateC>
+class PGPE: public Agent<ActionC, StateC>
 {
 
-    typedef Agent<DenseAction, StateC> Base;
+    typedef Agent<ActionC, StateC> Base;
 public:
     PGPE(DifferentiableDistribution* dist, ParametricPolicy<DenseAction,DenseState>* policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length)

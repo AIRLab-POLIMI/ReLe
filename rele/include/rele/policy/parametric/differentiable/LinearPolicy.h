@@ -85,10 +85,9 @@ public:
     virtual typename action_type<DenseAction>::type operator() (
             typename state_type<StateC>::const_type state)
     {
-        return (*approximator)(state);
-//        arma::vec output = (*approximator)(state);
-//        DenseAction action = output;
-//        return action;
+        arma::vec output = (*approximator)(state);
+        DenseAction action = output;
+        return action;
     }
 
     virtual double operator() (
