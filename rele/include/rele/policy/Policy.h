@@ -61,22 +61,31 @@ template<class ActionC, class StateC>
 class ParametricPolicy: public Policy<ActionC, StateC>
 {
 public:
-    arma::vec diff(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
-    arma::vec difflog(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
-
     inline const arma::vec& getParameters() const
     {
         return w;
     }
 
-    inline const void setParameters(arma::vec& w) const
+    inline const unsigned int getParametersSize() const
+    {
+        return w.n_elem;
+    }
+
+    inline void setParameters(arma::vec& w)
     {
         this->w = w;
     }
 
 protected:
     arma::vec w;
+};
 
+template<class ActionC, class StateC>
+class DifferentiablePolicy: public ParametricPolicy<ActionC, StateC>
+{
+public:
+    arma::vec diff(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
+    arma::vec difflog(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
 };
 
 
