@@ -32,8 +32,8 @@ public:
     // DifferentiableDistribution interface
 public:
     virtual void Update(arma::vec &increment);
-    virtual arma::vec difflog(arma::vec &point);
-    virtual arma::mat diff2Log(arma::vec &point);
+    virtual arma::vec difflog(const arma::vec &point);
+    virtual arma::mat diff2Log(const arma::vec &point);
 
     // WritableInterface interface
 public:
@@ -88,10 +88,13 @@ public:
                              double variance_asymptote,
                              arma::vec& params);
 
+    virtual ~ParametricLogisticNormal()
+    {}
+
     // DifferentiableDistribution interface
 public:
-    arma::vec difflog(arma::vec &point);
-    arma::mat diff2Log(arma::vec &point);
+    arma::vec difflog(const arma::vec& point);
+    arma::mat diff2Log(const arma::vec& point);
 
     // WritableInterface interface
 public:

@@ -68,12 +68,12 @@ void ParametricNormal::Update(vec &increment)
     this->UpdateInternalState();
 }
 
-vec ParametricNormal::difflog(vec& point)
+vec ParametricNormal::difflog(const vec& point)
 {
     return invCov * (point - parameters);
 }
 
-mat ParametricNormal::diff2Log(vec &point)
+mat ParametricNormal::diff2Log(const vec&point)
 {
     return -invCov;
 }
@@ -145,7 +145,7 @@ ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, doubl
     UpdateInternalState();
 }
 
-vec ParametricLogisticNormal::difflog(vec& point)
+vec ParametricLogisticNormal::difflog(const vec& point)
 {
     vec diff(pointSize);
     for (unsigned int i = 0; i < pointSize; ++i)
@@ -175,7 +175,7 @@ vec ParametricLogisticNormal::difflog(vec& point)
     return gradient;
 }
 
-mat ParametricLogisticNormal::diff2Log(vec &point)
+mat ParametricLogisticNormal::diff2Log(const vec& point)
 {
     mat hessian(paramSize,paramSize,fill::zeros);
     for (unsigned i = 0; i < pointSize; ++i)
@@ -204,6 +204,48 @@ mat ParametricLogisticNormal::diff2Log(vec &point)
         // d2 logp / dmdp
         hessian(pointSize+i, i) = hessian(i, pointSize+i);
     }
+}
+
+void ParametricLogisticNormal::WriteOnStream(ostream &out)
+{
+    out << "ParametricLogisticNormal " << std::endl;
+    out << pointSize << " " << paramSize << " " << asVariance << std::endl;
+    for (unsigned i = 0; i < paramSize; ++i)
+    {
+        out << parameters(i) << " ";
+    }
+}
+
+void ParametricLogisticNormal::ReadFromStream(istream &in)
+{
+    double val;
+    in >> pointSize;
+    in >> paramSize;
+    in >> asVariance;
+    parameters = vec(paramSize);
+    for (unsigned i = 0; i < paramSize; ++i)
+    {
+        in >> val;
+        parameters(i) = val;
+    }
+
+    UpdateInternalState();
+}
+
+void ParametricLogisticNormal::UpdateInternalState()
+{
+    //    Cov.zeros();
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        mean(i) = parameters(i);
+    }
+    for (int i = pointSize, ie = paramSize; i < ie; ++i)
+    {
+        int idx = i - pointSize;
+        Cov(idx,idx) = logistic(parameters(i), asVariance);
+    }
+    invCov = arma::inv(Cov);
+    detValue = arma::det(Cov);
 }
 
 } //end namespace

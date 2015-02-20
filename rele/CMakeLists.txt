@@ -13,6 +13,7 @@ if(catkin_FOUND)
                                 include/rele/algorithms
                                 include/rele/envirorments
                                 include/rele/approximators
+                                include/rele/statistics
 	               LIBRARIES rele)
 	set(CATKIN_MSG TRUE)
 else()

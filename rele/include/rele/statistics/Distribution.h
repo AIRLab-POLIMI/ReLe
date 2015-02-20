@@ -119,7 +119,7 @@ public:
      * @param point the point where the gradient is evaluated
      * @param gradient The gradient vector (out)
      */
-    virtual arma::vec difflog(arma::vec& point) = 0;
+    virtual arma::vec difflog(const arma::vec& point) = 0;
 
 
     /**
@@ -129,7 +129,7 @@ public:
      * @param point the point where the gradient is evaluated
      * @param hessian The hessian matrix (out)
      */
-    virtual arma::mat diff2Log(arma::vec& point) = 0;
+    virtual arma::mat diff2Log(const arma::vec& point) = 0;
 
 protected:
     unsigned int paramSize;

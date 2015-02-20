@@ -59,8 +59,10 @@ public:
         : approximator(projector), clearRegressorOnExit(false)
     { }
 
-    virtual ~DetLinearPolicy() {
-        if (clearRegressorOnExit == true) {
+    virtual ~DetLinearPolicy()
+    {
+        if (clearRegressorOnExit == true)
+        {
             delete approximator;
         }
     }
@@ -83,35 +85,42 @@ public:
     }
 
     virtual typename action_type<DenseAction>::type operator() (
-            typename state_type<StateC>::const_type state)
+        typename state_type<StateC>::const_type state)
     {
+        //TODO CONTROLLARE ASSEGNAMENTO
         arma::vec output = (*approximator)(state);
-        DenseAction action = output;
+        DenseAction action(output);
         return action;
     }
 
     virtual double operator() (
-            typename state_type<StateC>::const_type state,
-            typename action_type<DenseAction>::const_type action)
+        typename state_type<StateC>::const_type state,
+        typename action_type<DenseAction>::const_type action)
     {
-        DenseAction a = this->operator ()(state);
+        arma::vec output = this->operator ()(state);
+
+        //TODO CONTROLLARE ASSEGNAMENTO
+        DenseAction a;
+        a.copy_vec(output);
         if (a.isAlmostEqual(action))
+        {
             return 1.0;
+        }
         return 0.0;
     }
 
     // DifferentiablePolicy interface
 public:
     arma::vec diff(
-            typename state_type<StateC>::const_type state,
-            typename action_type<DenseAction>::const_type action)
+        typename state_type<StateC>::const_type state,
+        typename action_type<DenseAction>::const_type action)
     {
         return approximator->diff(state);
     }
 
     arma::vec difflog(
-            typename state_type<StateC>::const_type state,
-            typename action_type<DenseAction>::const_type action)
+        typename state_type<StateC>::const_type state,
+        typename action_type<DenseAction>::const_type action)
     {
         //TODO ???
     }

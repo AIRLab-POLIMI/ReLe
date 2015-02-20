@@ -107,6 +107,13 @@ public:
         arma::vec(size)
     {    }
 
+    DenseAction(arma::vec& other) :
+        arma::vec(other.n_elem)
+    {
+        for (int i = 0; i < other.n_elem; ++i)
+            this->at(i) = other[i];
+    }
+
     inline virtual std::string to_str() const
     {
         const arma::vec& self = *this;
@@ -125,6 +132,13 @@ public:
     inline virtual ~DenseAction()
     {
 
+    }
+
+    inline virtual void copy_vec(const arma::vec& other)
+    {
+        this->set_size(other.n_elem);
+        for (int i = 0; i < other.n_elem; ++i)
+            this->at(i) = other[i];
     }
 
     inline virtual bool isAlmostEqual(const arma::vec& other, double epsilon = 1e-6) const

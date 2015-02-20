@@ -50,27 +50,37 @@ public:
 
     // Agent interface
 public:
-    void initEpisode(const StateC& state, ActionC& action) {
+    void initEpisode(const StateC& state, ActionC& action)
+    {
         df = 1.0;    //reset discount factor
         Jep.zeros(); //reset policy score
-        if (epiCount == 0) {
+        if (epiCount == 0)
+        {
             //obtain new parameters
             arma::vec new_params = (*dist)();
             //set to policy
             policy->setParameters(new_params);
         }
-        action = (*policy)(state);
+        sampleAction(state, action);
     }
 
-    void sampleAction(const StateC& state, ActionC& action) {
-        action = (*policy)(state);
+    void sampleAction(const StateC& state, ActionC& action)
+    {
+        // TODO CONTROLLARE ASSEGNAMENTO
+        arma::vec vect = (*policy)(state);
+        for (int i = 0; i < vect.n_elem; ++i)
+            action[i] = vect[i];
     }
 
-    void step(const Reward& reward, const StateC& nextState, ActionC& action) {
+    void step(const Reward& reward, const StateC& nextState, ActionC& action)
+    {
         for (int i = 0; i < Jep.n_elem; ++i)
             Jep[i] += df * reward[i];
         df *= Base::task.gamma;
-        action = (*policy)(nextState);
+        // TODO CONTROLLARE ASSEGNAMENTO
+        arma::vec vect = (*policy)(nextState);
+        for (int i = 0; i < vect.n_elem; ++i)
+            action[i] = vect[i];
     }
 
     virtual void endEpisode(const Reward& reward)
@@ -83,7 +93,7 @@ public:
     virtual void endEpisode()
     {
 
-        arma::vec& theta = policy->getParameters();
+        const arma::vec& theta = policy->getParameters();
         arma::vec dlogdist = dist->difflog(theta); //\nabla \log D(\theta|\rho)
         for (int i = 0; i < Jep.n_elem; ++i)
             diffObjFunc[i] += dlogdist*Jep[i];
@@ -92,12 +102,14 @@ public:
         //last episode is the number epiCount+1
         epiCount++;
         //check evaluation of actual policy
-        if (epiCount == nbEpisodesToEvalPolicy) {
+        if (epiCount == nbEpisodesToEvalPolicy)
+        {
             ++polCount; //until now polCount policies have been analyzed
             epiCount = 0;
         }
 
-        if (polCount == nbPoliciesToEvalMetap) {
+        if (polCount == nbPoliciesToEvalMetap)
+        {
 
             //update meta-distribution
             diffObjFunc[0] *= step_length/polCount;
