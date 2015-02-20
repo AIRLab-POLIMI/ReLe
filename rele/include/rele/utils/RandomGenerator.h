@@ -25,9 +25,21 @@
 #define RANDOMGENERATOR_H_
 
 #include <random>
+#include <armadillo>
 
 namespace ReLe
 {
+
+class RngGenerators
+{
+public:
+    RngGenerators(long int seed) : gen(std::time(0))
+    {
+        srand(seed);
+        arma::arma_rng::set_seed(seed);
+    }
+    std::mt19937 gen;
+};
 
 //-----------------------------------------------------------------------------
 class RandomGenerator
@@ -35,62 +47,63 @@ class RandomGenerator
 public:
     inline static uint32_t randu32()
     {
-        return gen();
+        return gen.gen();
     }
 
     inline static double sampleNormal()
     {
         std::normal_distribution<> dist;
-        return dist(gen);
+        return dist(gen.gen);
     }
 
     inline static double sampleNormal(double m, double sigma)
     {
         std::normal_distribution<> dist(m, sigma);
-        return dist(gen);
+        return dist(gen.gen);
     }
 
     /*inline static double sampleUniform()
      {
      std::uniform_01<> dist();
-     return dist(gen);
+     return dist(gen.gen);
      }*/
 
     inline static double sampleUniform(const double lo, const double hi)
     {
         std::uniform_real_distribution<> dist(lo, hi);
-        return dist(gen);
+        return dist(gen.gen);
     }
 
     inline static std::size_t sampleUniformInt(const int lo, const int hi)
     {
         std::uniform_int_distribution<> dist(lo, hi);
-        return dist(gen);
+        return dist(gen.gen);
     }
 
     inline static std::size_t sampleDiscrete(std::vector<double>& prob)
     {
         std::discrete_distribution<std::size_t> dist(prob.begin(),
                 prob.end());
-        return dist(gen);
+        return dist(gen.gen);
     }
 
     template<class Iterator>
     inline static std::size_t sampleDiscrete(Iterator begin, Iterator end)
     {
         std::discrete_distribution<std::size_t> dist(begin, end);
-        return dist(gen);
+        return dist(gen.gen);
     }
 
     inline static bool sampleEvent(double prob)
     {
         std::uniform_real_distribution<> dist(0, 1);
-        return dist(gen) < prob;
+        return dist(gen.gen) < prob;
     }
 
 private:
     //random generators
-    static std::mt19937 gen;
+//    static std::mt19937 gen;
+    static RngGenerators gen;
 
 };
 

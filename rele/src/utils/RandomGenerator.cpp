@@ -24,4 +24,5 @@
 #include "RandomGenerator.h"
 #include <ctime>
 
-std::mt19937 ReLe::RandomGenerator::gen(std::time(0));
+//std::mt19937 ReLe::RandomGenerator::gen(std::time(0));
+ReLe::RngGenerators ReLe::RandomGenerator::gen(std::time(0));
