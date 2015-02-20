@@ -36,10 +36,10 @@ ParametricNormal::ParametricNormal(unsigned int support_dim, unsigned int param_
     : DifferentiableDistribution(support_dim, param_size),
       parameters(param_size, fill::zeros),
       mean(support_dim, fill::zeros),
-      Cov(support_dim, support_dim, fill::zeros),
-      invCov(support_dim, support_dim, fill::zeros),
-      detValue(0.0)
-{ }
+      Cov(support_dim, support_dim, fill::eye)
+{
+    UpdateInternalState();
+}
 
 ParametricNormal::ParametricNormal(unsigned int support_dim, vec& params, mat& covariance)
     : ParametricNormal(support_dim, support_dim)
@@ -54,6 +54,9 @@ ParametricNormal::ParametricNormal(unsigned int support_dim, vec& params, mat& c
 
 vec ParametricNormal::operator() ()
 {
+//    cerr << "Mean: " << mean;
+//    cerr << "---------" << endl;
+//    cerr << "Cov: " << Cov << endl;
     return mvnrand(mean, Cov);
 }
 
@@ -134,7 +137,8 @@ ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, doubl
     : ParametricNormal(point_dim, 2*point_dim),
       asVariance(variance_asymptote)
 {
-    //    UpdateInternalState();
+    mean = vec(point_dim,fill::zeros);
+    UpdateInternalState();
 }
 
 ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote, vec& params)
@@ -234,6 +238,7 @@ void ParametricLogisticNormal::ReadFromStream(istream &in)
 
 void ParametricLogisticNormal::UpdateInternalState()
 {
+    cerr << "asVariance: " << asVariance << endl;
     //    Cov.zeros();
     for (unsigned i = 0; i < pointSize; ++i)
     {

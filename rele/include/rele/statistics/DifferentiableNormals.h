@@ -12,8 +12,8 @@ namespace ReLe
  */
 class ParametricNormal : public DifferentiableDistribution
 {
-
 public:
+
     ParametricNormal(unsigned int support_dim,
                      unsigned int param_size);
 
