@@ -61,23 +61,23 @@ template<class ActionC, class StateC>
 class ParametricPolicy: public Policy<ActionC, StateC>
 {
 public:
-    inline virtual const arma::vec& getParameters() const
-    {
-        return w;
-    }
+    virtual const arma::vec& getParameters() const = 0;
+//    {
+//        return w;
+//    }
 
-    inline virtual const unsigned int getParametersSize() const
-    {
-        return w.n_elem;
-    }
+    virtual const unsigned int getParametersSize() const = 0;
+//    {
+//        return w.n_elem;
+//    }
 
-    inline virtual void setParameters(arma::vec& w)
-    {
-        this->w = w;
-    }
+    virtual void setParameters(arma::vec& w) = 0;
+//    {
+//        this->w = w;
+//    }
 
-protected:
-    arma::vec w;
+//protected:
+//    arma::vec w;
 };
 
 template<class ActionC, class StateC>

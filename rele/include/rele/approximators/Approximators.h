@@ -57,8 +57,10 @@ public:
     {
     }
 
+    virtual void setParameters(arma::vec& params) = 0;
     virtual arma::vec& getParameters() = 0;
     virtual arma::vec  diff(const arma::vec& output) = 0;
+
 };
 
 class NonParametricRegressor: public Regressor

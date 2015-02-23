@@ -89,8 +89,8 @@ public:
     {
         //TODO CONTROLLARE ASSEGNAMENTO
         arma::vec output = (*approximator)(state);
-        DenseAction action(output);
-        return action;
+        todoAction.copy_vec(output);
+        return todoAction;
     }
 
     virtual double operator() (
@@ -107,6 +107,21 @@ public:
             return 1.0;
         }
         return 0.0;
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline const arma::vec &getParameters() const
+    {
+        return approximator->getParameters();
+    }
+    virtual inline const unsigned int getParametersSize() const
+    {
+        return approximator->getParameters().n_elem;
+    }
+    virtual inline void setParameters(arma::vec &w)
+    {
+        approximator->setParameters(w);
     }
 
     // DifferentiablePolicy interface
@@ -134,7 +149,7 @@ public:
 protected:
     LinearApproximator* approximator;
     bool clearRegressorOnExit;
-
+    DenseAction todoAction;
 };
 
 #undef DETLINPOL_NAME

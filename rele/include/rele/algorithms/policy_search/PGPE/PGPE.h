@@ -42,7 +42,7 @@ public:
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length)
         : dist(dist), policy(policy),
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
-          epiCount(0), polCount(0), df(1.0), step_length(step_length)
+          epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false)
     {}
 
     virtual ~PGPE()
@@ -68,8 +68,9 @@ public:
     {
         // TODO CONTROLLARE ASSEGNAMENTO
         arma::vec vect = (*policy)(state);
-        for (int i = 0; i < vect.n_elem; ++i)
-            action[i] = vect[i];
+        action.copy_vec(vect);
+//        for (int i = 0; i < vect.n_elem; ++i)
+//            action[i] = vect[i];
     }
 
     void step(const Reward& reward, const StateC& nextState, ActionC& action)
@@ -95,6 +96,9 @@ public:
 
         const arma::vec& theta = policy->getParameters();
         arma::vec dlogdist = dist->difflog(theta); //\nabla \log D(\theta|\rho)
+        std::cerr << diffObjFunc[0] << std::endl;
+        std::cout << "---------" << std::endl;
+        std::cerr << dlogdist << std::endl;
         for (int i = 0; i < Jep.n_elem; ++i)
             diffObjFunc[i] += dlogdist*Jep[i];
 
@@ -124,11 +128,22 @@ public:
         }
     }
 
+    inline void setNormalization(bool flag)
+    {
+        this->useDirection = flag;
+    }
+
+    inline bool isNormalized()
+    {
+        return this->useDirection;
+    }
+
 
 protected:
     void init()
     {
         Jep = arma::vec(Base::task.rewardDim, arma::fill::zeros);
+        std::cerr << policy->getParametersSize() << std::endl;
         for (int i = 0; i < Base::task.rewardDim; ++i)
             diffObjFunc.push_back(arma::vec(policy->getParametersSize(), arma::fill::zeros));
 
@@ -143,6 +158,7 @@ private:
     double df, step_length;
     arma::vec Jep;
     std::vector< arma::vec > diffObjFunc;
+    bool useDirection;
 
 };
 

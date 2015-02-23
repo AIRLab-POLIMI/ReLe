@@ -17,8 +17,7 @@ public:
     ParametricNormal(unsigned int support_dim,
                      unsigned int param_size);
 
-    ParametricNormal(unsigned int support_dim,
-                     arma::vec& params,
+    ParametricNormal(arma::vec& params,
                      arma::mat& covariance);
 
     virtual ~ParametricNormal()

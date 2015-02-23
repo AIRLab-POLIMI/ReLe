@@ -110,6 +110,7 @@ public:
     DenseAction(arma::vec& other) :
         arma::vec(other.n_elem)
     {
+        this->set_size(other.n_elem);
         for (int i = 0; i < other.n_elem; ++i)
             this->at(i) = other[i];
     }

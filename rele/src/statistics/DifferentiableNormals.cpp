@@ -41,8 +41,8 @@ ParametricNormal::ParametricNormal(unsigned int support_dim, unsigned int param_
     UpdateInternalState();
 }
 
-ParametricNormal::ParametricNormal(unsigned int support_dim, vec& params, mat& covariance)
-    : ParametricNormal(support_dim, support_dim)
+ParametricNormal::ParametricNormal(vec& params, mat& covariance)
+    : ParametricNormal(params.n_elem, params.n_elem)
 {
     //    std::cout << "...." << params << std::endl;
     parameters = params;

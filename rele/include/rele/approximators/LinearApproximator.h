@@ -27,6 +27,7 @@
 #include "BasisFunctions.h"
 #include <armadillo>
 #include <vector>
+#include <cassert>
 
 namespace ReLe
 {
@@ -41,14 +42,20 @@ public:
     arma::vec operator()(const arma::vec& input);
     arma::vec diff(const arma::vec& input);
 
-    AbstractBasisVector& getBasis()
+    inline AbstractBasisVector& getBasis()
     {
         return *basis;
     }
 
-    arma::vec& getParameters()
+    inline arma::vec& getParameters()
     {
         return parameters;
+    }
+
+    inline void setParameters(arma::vec& params)
+    {
+        assert(params.n_elem == parameters.n_elem);
+        parameters = params;
     }
 
 private:

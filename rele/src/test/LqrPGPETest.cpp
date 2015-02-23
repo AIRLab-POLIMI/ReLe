@@ -26,8 +26,14 @@
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
+#include "BasisFunctions.h"
 
 #include <iostream>
+#include <iomanip>
+#include <string>
+#include <map>
+#include <random>
+#include <cmath>
 
 using namespace std;
 using namespace ReLe;
@@ -39,28 +45,58 @@ int main(int argc, char *argv[])
     LQR mdp(1,1);
     DenseState s(1);
     mdp.getInitialState(s);
-    cout << s << endl;
 
-    ParametricNormal dist(1,1);
-    vec theta = dist();
-    cout << "Theta: " << theta;
-//    LinearApproximator regressor(mdp.getSettings().continuosStateDim,mdp.getSettings().continuosActionDim);
-//    DetLinearPolicy<DenseState> policy(&regressor);
+    arma::vec mean(2);
+    mean[0] = 10;
+    arma::mat cov(2,2, arma::fill::eye);
 
-//    int nbepperpol = 10, nbpolperupd = 100;
-//    PGPE<DenseAction, DenseState> agent(&dist, &policy, nbepperpol, nbpolperupd,0.01);
+    ParametricNormal dist(mean,cov);
 
-//    ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-
-//    int nbUpdates = 40;
-//    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
-//    for (int i = 0; i < episodes; i++)
-//    {
-//        core.getSettings().episodeLenght = 50;
-//        core.getSettings().logTransitions = false;
-//        cout << "starting episode" << endl;
-//        core.runEpisode();
+//    std::map<int, int> hist;
+//    for(int n=0; n<10000; ++n) {
+//        vec theta = dist();
+//        int id = std::round(theta[0]);
+//        ++hist[id];
 //    }
+//    for(auto p : hist) {
+//        std::cout << std::fixed << std::setprecision(1) << std::setw(2)
+//                  << p.first << ' ' << std::string(p.second/200, '*') << '\n';
+//    }
+
+    DenseBasisVector* basis = new DenseBasisVector();
+    basis->GeneratePolynomialBasisFunctions(1,1);
+    cout << *basis << endl;
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+
+    arma::vec init_params(2);
+    init_params[0] = -0.1;
+    init_params[1] = -0.1;
+
+    regressor.setParameters(init_params);
+    DetLinearPolicy<DenseState> policy(&regressor);
+
+
+    cout << s << endl;
+    DenseAction action = policy(s);
+    cout << "Action: " << policy(s) << endl;
+
+
+    int nbepperpol = 10, nbpolperupd = 100;
+    PGPE<DenseAction, DenseState> agent(&dist, &policy, nbepperpol, nbpolperupd,0.01);
+    agent.setNormalization(true);
+
+    ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+
+    int nbUpdates = 40;
+    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    episodes = 10;
+    for (int i = 0; i < episodes; i++)
+    {
+        core.getSettings().episodeLenght = 50;
+        core.getSettings().logTransitions = false;
+        cout << "starting episode" << endl;
+        core.runEpisode();
+    }
 
     return 0;
 }
