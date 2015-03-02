@@ -34,7 +34,7 @@ Rocky::Rocky() :
 			ContinuousMDP(STATESIZE, 3, 1, false, true), dt(0.2),
 			maxOmega(M_PI), maxV(10)
 {
-	//TODO in the constructor
+	//TODO parameter in the constructor
 	vec2 spot;
 	spot[1] = 5;
 	spot[2] = 0;
@@ -53,9 +53,9 @@ void Rocky::step(const DenseAction& action, DenseState& nextState,
 	vec2 rockyRelPosition = currentState.rows(span(xr, yr));
 
 	//update chicken position
-	double lastTheta = currentState[theta];
-	currentState[x] += v * cos(lastTheta) * dt;
-	currentState[y] += v * sin(lastTheta) * dt;
+	double thetaM = (2 * currentState[theta] + omega*dt) /2;
+	currentState[x] += v * cos(thetaM) * dt;
+	currentState[y] += v * sin(thetaM) * dt;
 	currentState[theta] = utils::normalizeAngle(
 				currentState[theta] + omega * dt);
 
