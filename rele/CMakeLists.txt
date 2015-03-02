@@ -38,9 +38,17 @@ include_directories(include/rele/core
 # ----------------------- LIBRARIES ---------------------------
 
 #find_package(Boost REQUIRED COMPONENTS random)
-find_package(Armadillo REQUIRED)
-find_package(NLopt REQUIRED)
-  
+if(WIN32)
+	find_path(ARMADILLO_INCLUDE_DIR
+		NAMES armadillo
+		PATHS "C:/usr/include"
+	)
+	#include_directories("C:/usr/include")
+else()
+	find_package(Armadillo REQUIRED)
+	find_package(NLopt REQUIRED)
+endif()
+include_directories(${ARMADILLO_INCLUDE_DIR})
 
 # ----------------------- GCC FLAGS ----------------------------
 
@@ -76,8 +84,12 @@ file(GLOB_RECURSE ReLe_INCLUDE
                   include/*.h)
 
 add_library(rele ${ReLe_SOURCE} ${ReLe_INCLUDE})
-target_link_libraries(rele ${ARMADILLO_LIBRARIES}
-                           ${NLOPT_LIBRARY})
+if(WIN32)
+	target_link_libraries(rele -L"C:/usr/bin" -L"C:/usr/lib" -larmadillo -lnlopt -lgfortran)
+else()
+	target_link_libraries(rele ${ARMADILLO_LIBRARIES}
+        	                   ${NLOPT_LIBRARY})
+endif()
 
 add_executable(simple_chain src/test/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)
