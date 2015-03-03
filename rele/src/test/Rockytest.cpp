@@ -31,8 +31,8 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-   ReLe::Rocky rocky;
+    ReLe::Rocky rocky;
 
-   return 0;
+    return 0;
 
 }

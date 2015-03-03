@@ -63,7 +63,7 @@ public:
         inline double operator()(typename state_type<StateC>::type x,
                                  typename action_type<ActionC>::type u)
         {
-            return ndelta[x][u] / static_cast<double>(d[x][u]);
+            return (d[x][u] ==  0) ? 0 : ndelta[x][u] / static_cast<double>(d[x][u]);
         }
 
     private:
