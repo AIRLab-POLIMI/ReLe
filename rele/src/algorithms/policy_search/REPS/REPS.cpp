@@ -24,6 +24,7 @@
 #include "policy_search/REPS/REPS.h"
 
 #include <iostream>
+#include <limits>
 
 using namespace arma;
 
@@ -108,13 +109,13 @@ void TabularREPS::updatePolicy()
 {
     //optimize dual function
     std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
-    parameters.push_back(1.0 / etaOpt);
+    parameters.push_back(etaOpt);
     auto&& newParameters = optimizator.optimize(parameters);
 
     cout << "----------------------------" << endl;
 
     //update parameters
-    etaOpt = 1.0 / newParameters.back();
+    etaOpt = newParameters.back();
     newParameters.pop_back();
     thetaOpt = vec(newParameters);
 
@@ -132,7 +133,7 @@ void TabularREPS::updatePolicy()
         updater.normalize();
     }
 
-    cout << "$policy$";
+    cout << "$policy$" << endl;
     cout << policy(0,0) << ", " << policy(0,1) << endl;
     cout << policy(1,0) << ", " << policy(1,1) << endl;
     cout << policy(2,0) << ", " << policy(2,1) << endl;
@@ -159,8 +160,8 @@ void TabularREPS::resetSamples()
 double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 {
     //Get state parameters
-    const vec theta(const_cast<double*>(x), this->thetaOpt.size(), false); //TODO check this
-    double etaTilde = x[this->thetaOpt.size()];
+    const vec theta(const_cast<double*>(x), this->thetaOpt.size(), false);
+    double eta = x[this->thetaOpt.size()];
 
     auto&& delta = s.getDelta(theta);
 
@@ -171,10 +172,10 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
     for (auto& sample : s)
     {
         double deltaxu = delta(sample.x, sample.u);
-        sum1 += std::exp(eps + deltaxu * etaTilde);
-        sum2 += std::exp(eps + deltaxu * etaTilde) * deltaxu
-                * std::pow(etaTilde, 2);
-        sum3 += std::exp(eps + deltaxu * etaTilde)
+        sum1 += std::exp(eps + deltaxu / eta);
+        sum2 += std::exp(eps + deltaxu / eta) * deltaxu
+                / std::pow(eta, 2);
+        sum3 += std::exp(eps + deltaxu / eta)
                 * s.lambda(sample.x, sample.u);
     }
 
@@ -184,14 +185,14 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 
     //compute theta gradient
     vec dTheta(grad, this->thetaOpt.size(), false);
-    dTheta = sum3 / sum1 / etaTilde;
+    dTheta = eta * sum3 / sum1;
 
     //compute eta gradient
     double& dEta = grad[this->thetaOpt.size()];
-    dEta = (sum2 / sum1 - std::log(sum1)) / std::pow(etaTilde, 2);
+    dEta = std::log(sum1) - sum2 / sum1;
 
     //compute dual function
-    return std::log(sum1 / N) / etaTilde;
+    return eta * std::log(sum1 / N);
 }
 
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
@@ -235,6 +236,11 @@ void TabularREPS::init()
     optimizator.set_min_objective(TabularREPS::wrapper, this);
     optimizator.set_xtol_rel(0.01);
     optimizator.set_ftol_rel(0.01);
+
+    std::vector<double> lowerBounds(thetaOpt.size() +1, -std::numeric_limits<double>::infinity());
+    lowerBounds.back() =  0.1;
+
+    optimizator.set_lower_bounds(lowerBounds);
 }
 
 void TabularREPS::printStatistics()
