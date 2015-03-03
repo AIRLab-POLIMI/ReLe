@@ -101,6 +101,8 @@ public:
         return paramSize;
     }
 
+    virtual arma::vec& getParameters() = 0;
+
     //    virtual arma::vec draw() = 0;
     //    virtual double probability(arma::vec& point) = 0;
     /**

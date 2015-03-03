@@ -30,6 +30,10 @@ public:
 
     // DifferentiableDistribution interface
 public:
+    inline virtual arma::vec& getParameters()
+    {
+        return parameters;
+    }
     virtual void Update(arma::vec &increment);
     virtual arma::vec difflog(const arma::vec &point);
     virtual arma::mat diff2Log(const arma::vec &point);
