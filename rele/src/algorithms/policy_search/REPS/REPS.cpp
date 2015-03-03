@@ -44,6 +44,9 @@ TabularREPS::TabularREPS() :
 
     //sample iteration counter
     currentIteration = 0;
+
+    //TODO levami!
+    iteration = 0;
 }
 
 void TabularREPS::initEpisode(const FiniteState& state, FiniteAction& action)
@@ -107,6 +110,10 @@ TabularREPS::~TabularREPS()
 
 void TabularREPS::updatePolicy()
 {
+
+	//TODO levami!
+	iteration = 0;
+
     //optimize dual function
     std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
     parameters.push_back(etaOpt);
@@ -160,7 +167,7 @@ void TabularREPS::resetSamples()
 double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 {
     //Get state parameters
-    const vec theta(const_cast<double*>(x), this->thetaOpt.size(), false);
+    const vec theta(const_cast<double*>(x), this->thetaOpt.size(), true);
     double eta = x[this->thetaOpt.size()];
 
     auto&& delta = s.getDelta(theta);
@@ -190,6 +197,10 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
     //compute eta gradient
     double& dEta = grad[this->thetaOpt.size()];
     dEta = std::log(sum1) - sum2 / sum1;
+
+    //TODO levami
+    iteration++;
+    cout << "iteration: " << iteration << endl;
 
     //compute dual function
     return eta * std::log(sum1 / N);
@@ -232,13 +243,13 @@ void TabularREPS::init()
     phi.setSize(task.finiteStateDim);
 
     //setup optimization algorithm
-    optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, thetaOpt.size() + 1);
+    optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, thetaOpt.size() + 1);
     optimizator.set_min_objective(TabularREPS::wrapper, this);
-    optimizator.set_xtol_rel(0.01);
-    optimizator.set_ftol_rel(0.01);
+    optimizator.set_xtol_rel(0.1);
+    optimizator.set_ftol_rel(0.1);
 
     std::vector<double> lowerBounds(thetaOpt.size() +1, -std::numeric_limits<double>::infinity());
-    lowerBounds.back() =  0.1;
+    lowerBounds.back() =  std::numeric_limits<double>::epsilon();
 
     optimizator.set_lower_bounds(lowerBounds);
 }
@@ -254,7 +265,6 @@ void TabularREPS::printStatistics()
     cout << "eps: " << eps << endl;
 
     cout << endl << endl << "--- Learning results ---" << endl << endl;
-    cout << "- Policy" << endl;
     cout << policy.printPolicy();
 }
 
