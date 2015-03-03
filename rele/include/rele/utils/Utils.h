@@ -29,33 +29,33 @@
 class utils
 {
 public:
-	static inline double normalizeAnglePositive(double angle)
-	{
-		return fmod(fmod(angle, 2.0 * M_PI) + 2.0 * M_PI, 2.0 * M_PI);
-	}
+    static inline double normalizeAnglePositive(double angle)
+    {
+        return fmod(fmod(angle, 2.0 * M_PI) + 2.0 * M_PI, 2.0 * M_PI);
+    }
 
-	static inline double normalizeAngle(double angle)
-	{
-		angle = normalizeAnglePositive(angle);
+    static inline double normalizeAngle(double angle)
+    {
+        angle = normalizeAnglePositive(angle);
 
-		if (angle > M_PI)
-		{
-			angle -= 2.0 * M_PI;
-		}
+        if (angle > M_PI)
+        {
+            angle -= 2.0 * M_PI;
+        }
 
-		return angle;
-	}
+        return angle;
+    }
 
-	static inline double threshold(double value, double thresholdLow,
-				double thresholdHigh)
-	{
-		return std::max(std::min(value, thresholdHigh), thresholdLow);
-	}
+    static inline double threshold(double value, double thresholdLow,
+                                   double thresholdHigh)
+    {
+        return std::max(std::min(value, thresholdHigh), thresholdLow);
+    }
 
-	static inline double threshold(double value, double threshold)
-	{
-		return utils::threshold(value, threshold, -threshold);
-	}
+    static inline double threshold(double value, double threshold)
+    {
+        return utils::threshold(value, threshold, -threshold);
+    }
 
 };
 

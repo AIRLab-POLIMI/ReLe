@@ -34,34 +34,34 @@ namespace ReLe
 class Rocky : public ContinuousMDP
 {
 public:
-	Rocky();
-	virtual void step(const DenseAction& action, DenseState& nextState,
-	                      Reward& reward);
-	virtual void getInitialState(DenseState& state);
+    Rocky();
+    virtual void step(const DenseAction& action, DenseState& nextState,
+                      Reward& reward);
+    virtual void getInitialState(DenseState& state);
 
 private:
-	enum StateComponents
-	{
-		//robot state
-		x = 0,
-		y,
-		theta,
-		//robot sensors
-		energy,
-		food,
-		//rocky state
-		xr,
-		yr,
-		thetar,
-		//state size
-		STATESIZE
-	};
+    enum StateComponents
+    {
+        //robot state
+        x = 0,
+        y,
+        theta,
+        //robot sensors
+        energy,
+        food,
+        //rocky state
+        xr,
+        yr,
+        thetar,
+        //state size
+        STATESIZE
+    };
 
 private:
-	std::vector<arma::vec2> foodSpots;
-	const double dt;
-	const double maxOmega;
-	const double maxV;
+    std::vector<arma::vec2> foodSpots;
+    const double dt;
+    const double maxOmega;
+    const double maxV;
 
 private:
 

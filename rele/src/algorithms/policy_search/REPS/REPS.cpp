@@ -39,7 +39,7 @@ TabularREPS::TabularREPS() :
     etaOpt = 1;
 
     //default parameters
-    N = 1;
+    N = 100;
     eps = 0.5;
 
     //sample iteration counter
@@ -111,8 +111,8 @@ TabularREPS::~TabularREPS()
 void TabularREPS::updatePolicy()
 {
 
-	//TODO levami!
-	iteration = 0;
+    //TODO levami!
+    iteration = 0;
 
     //optimize dual function
     std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
@@ -141,11 +141,11 @@ void TabularREPS::updatePolicy()
     }
 
     cout << "$policy$" << endl;
-    cout << policy(0,0) << ", " << policy(0,1) << endl;
-    cout << policy(1,0) << ", " << policy(1,1) << endl;
-    cout << policy(2,0) << ", " << policy(2,1) << endl;
-    cout << policy(3,0) << ", " << policy(3,1) << endl;
-    cout << policy(4,0) << ", " << policy(4,1) << endl;
+    cout << policy(0, 0) << ", " << policy(0, 1) << endl;
+    cout << policy(1, 0) << ", " << policy(1, 1) << endl;
+    cout << policy(2, 0) << ", " << policy(2, 1) << endl;
+    cout << policy(3, 0) << ", " << policy(3, 1) << endl;
+    cout << policy(4, 0) << ", " << policy(4, 1) << endl;
     cout << "----------------------------" << endl;
 
 }
@@ -176,19 +176,29 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
     double sum1 = 0;
     double sum2 = 0;
     vec sum3(this->thetaOpt.size(), fill::zeros);
+
     for (auto& sample : s)
     {
         double deltaxu = delta(sample.x, sample.u);
         sum1 += std::exp(eps + deltaxu / eta);
-        sum2 += std::exp(eps + deltaxu / eta) * deltaxu
-                / std::pow(eta, 2);
-        sum3 += std::exp(eps + deltaxu / eta)
-                * s.lambda(sample.x, sample.u);
+        sum2 += std::exp(eps + deltaxu / eta) * deltaxu / std::pow(eta, 2);
+        sum3 += std::exp(eps + deltaxu / eta) * s.lambda(sample.x, sample.u);
     }
 
     cout << "sum1 " << sum1 << endl;
     cout << "sum2 " << sum2 << endl;
     cout << "sum3" << sum3.t();
+
+    //Avoid NaN
+    if(sum1 < std::numeric_limits<double>::epsilon())
+    {
+        for(int i = 0; i < this->thetaOpt.size() + 1; i++)
+        {
+            grad[i] = 0;
+        }
+
+        return -std::numeric_limits<double>::infinity();
+    }
 
     //compute theta gradient
     vec dTheta(grad, this->thetaOpt.size(), false);
@@ -248,8 +258,9 @@ void TabularREPS::init()
     optimizator.set_xtol_rel(0.1);
     optimizator.set_ftol_rel(0.1);
 
-    std::vector<double> lowerBounds(thetaOpt.size() +1, -std::numeric_limits<double>::infinity());
-    lowerBounds.back() =  std::numeric_limits<double>::epsilon();
+    std::vector<double> lowerBounds(thetaOpt.size() + 1,
+                                    -std::numeric_limits<double>::infinity());
+    lowerBounds.back() = std::numeric_limits<double>::epsilon();
 
     optimizator.set_lower_bounds(lowerBounds);
 }

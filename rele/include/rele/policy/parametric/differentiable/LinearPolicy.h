@@ -139,7 +139,7 @@ public:
     {
         //TODO ???
 
-    	return arma::vec();
+        return arma::vec();
     }
 
     inline void clearRegressor(bool clear)
