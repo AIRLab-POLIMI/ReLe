@@ -138,6 +138,8 @@ public:
         typename action_type<DenseAction>::const_type action)
     {
         //TODO ???
+
+    	return arma::vec();
     }
 
     inline void clearRegressor(bool clear)
