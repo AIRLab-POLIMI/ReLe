@@ -38,7 +38,7 @@ class PGPE: public Agent<ActionC, StateC>
 
     typedef Agent<ActionC, StateC> Base;
 public:
-    PGPE(DifferentiableDistribution* dist, ParametricPolicy<DenseAction,DenseState>* policy,
+    PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length)
         : dist(dist), policy(policy),
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
@@ -57,9 +57,9 @@ public:
         if (epiCount == 0)
         {
             //obtain new parameters
-            arma::vec new_params = (*dist)();
+            arma::vec new_params = dist();
             //set to policy
-            policy->setParameters(new_params);
+            policy.setParameters(new_params);
         }
         sampleAction(state, action);
     }
@@ -67,7 +67,7 @@ public:
     void sampleAction(const StateC& state, ActionC& action)
     {
         // TODO CONTROLLARE ASSEGNAMENTO
-        arma::vec vect = (*policy)(state);
+        arma::vec vect = policy(state);
         action.copy_vec(vect);
 //        for (int i = 0; i < vect.n_elem; ++i)
 //            action[i] = vect[i];
@@ -79,7 +79,7 @@ public:
             Jep[i] += df * reward[i];
         df *= Base::task.gamma;
         // TODO CONTROLLARE ASSEGNAMENTO
-        arma::vec vect = (*policy)(nextState);
+        arma::vec vect = policy(nextState);
         for (int i = 0; i < vect.n_elem; ++i)
             action[i] = vect[i];
     }
@@ -94,8 +94,8 @@ public:
     virtual void endEpisode()
     {
 
-        const arma::vec& theta = policy->getParameters();
-        arma::vec dlogdist = dist->difflog(theta); //\nabla \log D(\theta|\rho)
+        const arma::vec& theta = policy.getParameters();
+        arma::vec dlogdist = dist.difflog(theta); //\nabla \log D(\theta|\rho)
         std::cerr << diffObjFunc[0] << std::endl;
         std::cout << "---------" << std::endl;
         std::cerr << dlogdist << std::endl;
@@ -117,7 +117,7 @@ public:
 
             //update meta-distribution
             diffObjFunc[0] *= step_length/polCount;
-            dist->Update(diffObjFunc[0]);
+            dist.update(diffObjFunc[0]);
 
 
             //reset counters and gradient
@@ -143,21 +143,21 @@ protected:
     void init()
     {
         Jep = arma::vec(Base::task.rewardDim, arma::fill::zeros);
-        std::cerr << policy->getParametersSize() << std::endl;
+        std::cerr << policy.getParametersSize() << std::endl;
         for (int i = 0; i < Base::task.rewardDim; ++i)
-            diffObjFunc.push_back(arma::vec(policy->getParametersSize(), arma::fill::zeros));
+            diffObjFunc.push_back(arma::vec(policy.getParametersSize(), arma::fill::zeros));
 
         assert(Base::task.rewardDim == 1);
     }
 
 private:
-    DifferentiableDistribution* dist;
-    ParametricPolicy<ActionC,StateC>* policy;
+    DifferentiableDistribution& dist;
+    ParametricPolicy<ActionC,StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy, nbPoliciesToEvalMetap;
     unsigned int epiCount, polCount;
     double df, step_length;
     arma::vec Jep;
-    std::vector< arma::vec > diffObjFunc;
+    std::vector<arma::vec> diffObjFunc;
     bool useDirection;
 
 };

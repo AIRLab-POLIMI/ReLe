@@ -34,7 +34,7 @@ public:
     {
         return parameters;
     }
-    virtual void Update(arma::vec &increment);
+    virtual void update(arma::vec &increment);
     virtual arma::vec difflog(const arma::vec &point);
     virtual arma::mat diff2Log(const arma::vec &point);
 

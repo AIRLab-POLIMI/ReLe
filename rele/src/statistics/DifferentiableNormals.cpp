@@ -65,7 +65,7 @@ double ParametricNormal::operator() (vec& point)
     return mvnpdfFast(point, mean, invCov, detValue);
 }
 
-void ParametricNormal::Update(vec &increment)
+void ParametricNormal::update(vec &increment)
 {
     parameters += increment;
     this->UpdateInternalState();

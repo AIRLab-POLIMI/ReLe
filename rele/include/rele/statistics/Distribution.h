@@ -96,7 +96,7 @@ public:
      * @brief Parameters size
      * @return The size of the parameters
      */
-    inline unsigned int GetParametersSize()
+    inline unsigned int getParametersSize()
     {
         return paramSize;
     }
@@ -112,7 +112,7 @@ public:
      * @brief Update the parameters
      * @param increment a vector of increment value for each component
      */
-    virtual void Update(arma::vec& increment) = 0;
+    virtual void update(arma::vec& increment) = 0;
 
     /**
      * Compute the gradient of the logarithm of the distribution

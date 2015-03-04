@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
 
     int nbepperpol = 10, nbpolperupd = 100;
-    PGPE<DenseAction, DenseState> agent(&dist, &policy, nbepperpol, nbpolperupd,0.01);
+    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd,0.01);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
