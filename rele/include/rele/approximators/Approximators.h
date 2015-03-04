@@ -45,6 +45,16 @@ public:
     {
     }
 
+    int GetOutputSize()
+    {
+        return outputDimension;
+    }
+
+    int GetInputSize()
+    {
+        return inputDimension;
+    }
+
 protected:
     unsigned int inputDimension, outputDimension;
 };

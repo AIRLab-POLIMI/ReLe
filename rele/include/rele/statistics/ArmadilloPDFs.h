@@ -183,6 +183,14 @@ inline arma::vec mvnrand(arma::vec& mu, arma::mat& sigma)
     return mu + temp.t();
 }
 
+inline arma::vec mvnrandFast(arma::vec& mu, arma::mat& CholSigma)
+{
+    int ncols = mu.n_rows;
+    arma::mat Y = arma::randn(1, ncols);
+    arma::mat temp = Y * CholSigma;
+    return mu + temp.t();
+}
+
 } //end namespace
 
 #endif //ARMADILLOPDFS_H_
