@@ -38,8 +38,8 @@ public:
     double operator() (const arma::vec& input);
 
 
-    virtual void WriteOnStream (std::ostream& out);
-    virtual void ReadFromStream(std::istream& in);
+    virtual void writeOnStream (std::ostream& out);
+    virtual void readFromStream(std::istream& in);
 
 private:
     std::vector<unsigned int> dimension;

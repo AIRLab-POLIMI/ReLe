@@ -57,7 +57,7 @@ double GaussianRbf::operator()(const vec& input)
     return retv;
 }
 
-void GaussianRbf::WriteOnStream(std::ostream &out)
+void GaussianRbf::writeOnStream(std::ostream &out)
 {
     unsigned int dim = mean.n_rows;
     out << "GaussianRbf " << dim << std::endl;
@@ -68,7 +68,7 @@ void GaussianRbf::WriteOnStream(std::ostream &out)
     out << scale;
 }
 
-void GaussianRbf::ReadFromStream(std::istream &in)
+void GaussianRbf::readFromStream(std::istream &in)
 {
     unsigned int dim = mean.n_rows;
     in >> dim;

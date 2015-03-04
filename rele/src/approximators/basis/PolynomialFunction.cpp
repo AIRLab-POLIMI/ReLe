@@ -59,7 +59,7 @@ double PolynomialFunction::operator()(const vec& input)
     return result;
 }
 
-void PolynomialFunction::WriteOnStream(std::ostream &out)
+void PolynomialFunction::writeOnStream(std::ostream &out)
 {
     out << "Polynomial " << dimension.size() << std::endl;
     for (unsigned int i = 0; i < dimension.size(); i++)
@@ -68,7 +68,7 @@ void PolynomialFunction::WriteOnStream(std::ostream &out)
     }
 }
 
-void PolynomialFunction::ReadFromStream(std::istream &in)
+void PolynomialFunction::readFromStream(std::istream &in)
 {
     unsigned int size = 0;
     in >> size;

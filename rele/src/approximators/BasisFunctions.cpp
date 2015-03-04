@@ -78,7 +78,7 @@ double DenseBasisVector::dot(const vec& input, const vec& otherVector)
 }
 
 void
-DenseBasisVector::GeneratePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
+DenseBasisVector::generatePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
 {
     //  AddBasisFunction(new PolynomialFunction(0,0));
     std::vector<unsigned int> dim;
@@ -90,8 +90,8 @@ DenseBasisVector::GeneratePolynomialBasisFunctions(unsigned int degree, unsigned
     {
         std::vector<unsigned int> deg(input_size);
         deg[0] = d;
-        GeneratePolynomialsPermutations(deg, dim);
-        GeneratePolynomials(deg, dim, 1);
+        generatePolynomialsPermutations(deg, dim);
+        generatePolynomials(deg, dim, 1);
     }
     std::cout << size() << " polynomial basis functions added!" << std::endl;
 }
@@ -106,7 +106,7 @@ void DenseBasisVector::display(std::vector<unsigned int> v)
     std::cout << std::endl;
 }
 
-void DenseBasisVector::GeneratePolynomialsPermutations(vector<unsigned int> deg,
+void DenseBasisVector::generatePolynomialsPermutations(vector<unsigned int> deg,
         vector<unsigned int>& dim)
 {
     std::sort(deg.begin(), deg.end());
@@ -119,7 +119,7 @@ void DenseBasisVector::GeneratePolynomialsPermutations(vector<unsigned int> deg,
     while (next_permutation(deg.begin(), deg.end()));
 }
 
-void DenseBasisVector::GeneratePolynomials(vector<unsigned int> deg,
+void DenseBasisVector::generatePolynomials(vector<unsigned int> deg,
         vector<unsigned int>& dim,
         unsigned int place)
 {
@@ -130,11 +130,11 @@ void DenseBasisVector::GeneratePolynomials(vector<unsigned int> deg,
             std::vector<unsigned int> degree = deg;
             degree[0]--;
             degree[place]++;
-            GeneratePolynomialsPermutations(degree, dim);
-            GeneratePolynomials(degree, dim, place);
+            generatePolynomialsPermutations(degree, dim);
+            generatePolynomials(degree, dim, place);
             if (place < deg.size() - 1)
             {
-                GeneratePolynomials(degree, dim, place + 1);
+                generatePolynomials(degree, dim, place + 1);
             }
         }
     }
@@ -145,7 +145,7 @@ std::ostream& operator<< (std::ostream& out, DenseBasisVector& bf)
     out << bf.size() << std::endl;
     for (unsigned int i = 0; i < bf.size(); i++)
     {
-        bf[i]->WriteOnStream(out);
+        bf[i]->writeOnStream(out);
         out << std::endl;
     }
     return out;
@@ -174,7 +174,7 @@ std::istream& operator>> (std::istream& in, DenseBasisVector& bf)
             exit(1);
         }
 //        in >> *function;
-        function->ReadFromStream(in);
+        function->readFromStream(in);
         bf.push_back(function);
     }
     return in;

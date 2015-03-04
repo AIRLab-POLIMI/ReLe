@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
 //    srand(time(0));
 
     ReLe::DenseBasisVector bf;
-    bf.GeneratePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
-    ReLe::LinearApproximator approximator(3, &bf);
+    bf.generatePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
+    ReLe::LinearApproximator approximator(3, bf);
 //    arma::vec& w = approximator.getParameters();
 //    for (int i = 0; i < w.n_elem; i++)
 //        w[i] = rand() / ((double) RAND_MAX);
@@ -60,6 +60,6 @@ int main(int argc, char *argv[])
 
     ReLe::Hashing* hashing = new ReLe::UNH(1000);
     ReLe::TileCoderHashing tiles(hashing, mdp.getSettings().continuosStateDim, 10, 10, false);
-    ReLe::LinearApproximator projector(3, &bf);
+    ReLe::LinearApproximator projector(3, bf);
     delete hashing;
 }

@@ -30,22 +30,15 @@ using namespace arma;
 namespace ReLe
 {
 
-LinearApproximator::LinearApproximator(unsigned int input_dim, unsigned int output_dim)
-    : ParametricRegressor(input_dim, output_dim)
-{
-    assert(output_dim == 1);
-    basis = NULL;
-}
-
-LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisVector* bfs)
+LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisVector& bfs)
     : ParametricRegressor(input_dim, 1), basis(bfs),
-      parameters(bfs->size(), fill::zeros)
+      parameters(bfs.size(), fill::zeros)
 {
 }
 
-LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisMatrix* bfs)
+LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisMatrix& bfs)
     : ParametricRegressor(input_dim, 1), basis(bfs),
-      parameters(bfs->cols(), fill::zeros)
+      parameters(bfs.cols(), fill::zeros)
 {
 }
 
@@ -55,14 +48,14 @@ LinearApproximator::~LinearApproximator()
 
 vec LinearApproximator::operator()(const vec& input)
 {
-    arma::mat features = basis->operator ()(input);
+    arma::mat features = basis(input);
     vec output = features*parameters;
     return output;
 }
 
 arma::vec LinearApproximator::diff(const vec& input)
 {
-    arma::mat features = basis->operator ()(input);
+    arma::mat features = basis(input);
     return vectorise(features);
 }
 

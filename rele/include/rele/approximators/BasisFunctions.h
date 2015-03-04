@@ -40,7 +40,7 @@ public:
      * a stream.
      * @param out the output stream
      */
-    virtual void WriteOnStream(std::ostream& out) = 0;
+    virtual void writeOnStream(std::ostream& out) = 0;
 
     /**
      * @brief Read the description of the basis function from
@@ -48,7 +48,7 @@ public:
      * This function is complementary to WriteOnStream
      * @param in the input stream
      */
-    virtual void ReadFromStream(std::istream& in) = 0;
+    virtual void readFromStream(std::istream& in) = 0;
 
     /**
      * @brief Write the internal state to the stream.
@@ -59,7 +59,7 @@ public:
      */
     friend std::ostream& operator<<(std::ostream& out, BasisFunction& bf)
     {
-        bf.WriteOnStream(out);
+        bf.writeOnStream(out);
         return out;
     }
 
@@ -72,7 +72,7 @@ public:
      */
     friend std::istream& operator>>(std::istream& in, BasisFunction& bf)
     {
-        bf.ReadFromStream(in);
+        bf.readFromStream(in);
         return in;
     }
 
@@ -149,7 +149,7 @@ public:
      * @param  degree The maximum degree of the polynomial
      * @param  input_size Number of input dimensions
      */
-    void GeneratePolynomialBasisFunctions(unsigned int degree,
+    void generatePolynomialBasisFunctions(unsigned int degree,
                                           unsigned int input_size);
 
     /**
@@ -180,7 +180,7 @@ private:
      * @param  dim  Vector that lists dimensions
      * @param  place  position to be modified
      */
-    void GeneratePolynomials(std::vector<unsigned int> deg,
+    void generatePolynomials(std::vector<unsigned int> deg,
                              std::vector<unsigned int>& dim, unsigned int place);
 
     /**
@@ -188,7 +188,7 @@ private:
      * @param  deg  Vector of polynomial degrees
      * @param  dim  Vector that lists dimensions
      */
-    void GeneratePolynomialsPermutations(std::vector<unsigned int> deg,
+    void generatePolynomialsPermutations(std::vector<unsigned int> deg,
                                          std::vector<unsigned int>& dim);
 };
 
