@@ -72,7 +72,7 @@ public:
 public:
     std::string getPolicyName()
     {
-        return std::string(DETLINPOL_NAME);
+        return std::string("RandomPolicy");
     }
 
     std::string getPolicyHyperparameters()
@@ -98,18 +98,15 @@ public:
 
     virtual double operator() (
         typename state_type<StateC>::const_type state,
-        typename action_type<DenseAction>::const_type action)
+        const DenseAction& action)
     {
-        arma::vec output = this->operator ()(state);
-
-        //TODO CONTROLLARE ASSEGNAMENTO
-        DenseAction a;
-        a.copy_vec(output);
-        if (a.isAlmostEqual(action))
+        double prob = 1.0;
+        std::vector<Range>::iterator it;
+        for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
         {
-            return 1.0;
+            prob *= 1.0 / (*it).width();
         }
-        return 0.0;
+        return prob;
     }
 
     /**
@@ -126,21 +123,6 @@ public:
         return prob;
     }
 
-    /**
-     * @copydoc Policy::sampleAction()
-     */
-    const double* sampleAction(const double* state)
-    {
-        for (int i = 0; i < mpRanges->dimension(); ++i)
-        {
-            T a = mpRanges->at(i)->min();
-            T b = mpRanges->at(i)->max();
-            T val = a + (b - a) * PGT::math::Random();
-            mpAction[i] =  val;
-        }
-        return mpAction;
-    }
-
 };
 
 /**
@@ -151,12 +133,11 @@ public:
  * that defines the discrete action probability.
  * @brief Discrete random policy
  */
-template<class T>
-class StochasticDiscretePolicy: public virtual DiscreteActionPolicy
+template<class ActionC, class StateC>
+class StochasticDiscretePolicy: public virtual Policy<ActionC,StateC>
 {
 protected:
-    ActionList* mActions;
-    int mActionDim;
+    std::vector<ActionC> mActions;
     double* distribution;
 public:
 
@@ -168,21 +149,14 @@ public:
      * @param actions a pointer to an action list
      * @param actionDim the dimension of each action
      */
-    StochasticDiscretePolicy(ActionList* actions, int actionDim) :
-        mActions(new ActionList(actions->size())), mActionDim(actionDim), distribution(new double[actions->size()])
+    StochasticDiscretePolicy(std::vector<ActionC> actions) :
+        mActions(actions), distribution(new double[actions->size()])
     {
-        for (int i = 0; i < mActions->size(); ++i)
+        int nbel = mActions.size();
+        double p = 1/nbel;
+        for (int i = 0; i < nbel; ++i)
         {
-            mActions->at(i) = new double[actionDim + 1];
-            //            mActions->at(i) = (double*) realloc(actions->at(i), sizeof(double) * (actionDim + 1));
-            memcpy(mActions->at(i), actions->at(i), sizeof(double)*actionDim);
-            mActions->at(i)[actionDim] = i;
-            distribution[i] = 1.0 / mActions->size();
-            for (int g = 0; g < actionDim + 1; ++g)
-            {
-                std::cout << mActions->at(i)[g] << " ";
-            }
-            std::cout << std::endl;
+            distribution[i] = p;
         }
     }
 
@@ -198,20 +172,16 @@ public:
      * @param actionDim the dimension of each action
      * @param dist an array storing the discrete distribution
      */
-    StochasticDiscretePolicy(ActionList* actions, int actionDim, double* dist) :
-        mActions(new ActionList(actions->size())), mActionDim(actionDim), distribution(new double[mActions->size()])
+    StochasticDiscretePolicy(std::vector<ActionC> actions, double* dist) :
+        mActions(actions), distribution(new double[mActions->size()])
     {
-        T tot = 0.0;
-        for (int i = 0; i < mActions->size(); ++i)
+        double tot = 0.0;
+        for (int i = 0; i < mActions.size(); ++i)
         {
-            mActions->at(i) = new double[actionDim + 1];
-            //            mActions->at(i) = (double*) realloc(actions->at(i), sizeof(double) * (actionDim + 1));
-            memcpy(mActions->at(i), actions->at(i), sizeof(double)*actionDim);
-            mActions->at(i)[actionDim] = i;
             tot += dist[i];
             distribution[i] = dist[i];
         }
-        for (int i = 0; i < mActions->size(); ++i)
+        for (int i = 0; i < mActions.size(); ++i)
         {
             distribution[i] /= tot;
             std::cout << distribution[i] << " ";
@@ -221,100 +191,136 @@ public:
 
     virtual ~StochasticDiscretePolicy()
     {
-        mActions->Clear();
-        delete mActions;
         delete [] distribution;
     }
+
+    std::string getPolicyName()
+    {
+        return std::string("StochasticDiscretePolicy");
+    }
+
+    std::string getPolicyHyperparameters()
+    {
+        return std::string("");
+    }
+
+    std::string printPolicy()
+    {
+        return std::string("");
+    }
+
 
     /**
      * @copydoc DiscreteActionPolicy::pi()
      */
-    double pi(const double* state, const double* action)
+    virtual double operator() (
+        typename state_type<StateC>::const_type state,
+        typename state_type<ActionC>::const_type action)
     {
-        int idx = action[mActionDim];
+        int idx = findAction(action);
         return distribution[idx];
     }
 
     /**
      * @copydoc DiscreteActionPolicy::sampleAction()
      */
-    const double* sampleAction(const double* state)
+    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type state)
     {
-        RLLib::Boundedness::checkDistribution(distribution, mActions->size());
-        int idx = PGT::math::RandInt(mActions->size()+1);
-        return mActions->at(idx);
-        double random = PGT::math::Random();
+        double random = RandomGenerator::sampleUniform(0,1);
         double sum = 0.0;
-        for (typename ActionList::const_iterator a = mActions->begin(); a != mActions->end(); ++a)
+        int i, ie;
+        for (i = 0, ie = mActions.size(); i < ie; ++i)
         {
-            int idx = (*a)[mActionDim];
-            sum += distribution[idx];
+            sum += distribution[i];
             if (sum >= random)
-                return (*a);
+                return mActions[i];
         }
-        return mActions->at(mActions->size() - 1);
+        return mActions[ie-1];
+    }
+
+private:
+    int findAction(ActionC& action)
+    {
+        for (int i = 0, ie = mActions.size(); i < ie; ++i)
+        {
+            if(action.isEqual(mActions[i]))
+            {
+                return i;
+            }
+        }
+        std::cerr << "Error: unknown action" << std::endl;
+        std::cerr << "Action:" << action << std::endl;
+        abort();
+        return;
     }
 };
 
 //TODO
-template<class T>
-class RandomDiscreteBiasPolicy: public StochasticDiscretePolicy<T>
+template<class ActionC, class StateC>
+class RandomDiscreteBiasPolicy: public StochasticDiscretePolicy<ActionC,StateC>
 {
 protected:
-    const double* prev;
-    typedef StochasticDiscretePolicy<T> Base;
+    ActionC& prev;
+    int prevActionId;
+    typedef StochasticDiscretePolicy<ActionC,StateC> Base;
 public:
-    RandomDiscreteBiasPolicy(ActionList* actions, int actionSize) :
-        StochasticDiscretePolicy<T>(actions, actionSize), prev(actions->at(0))
+    RandomDiscreteBiasPolicy(std::vector<ActionC> actions) :
+        StochasticDiscretePolicy<T>(actions), prev(actions[0]), prevActionId(0)
     { }
 
     virtual ~RandomDiscreteBiasPolicy()
     { }
 
-    /**
-     * @copydoc StochasticDiscretePolicy::pi()
-     */
-    double pi(const double* action)
+    std::string getPolicyName()
     {
-        return Base::distribution->at(action[Base::mActionDim]);
+        return std::string("RandomDiscreteBiasPolicy");
+    }
+
+    std::string getPolicyHyperparameters()
+    {
+        return std::string("");
+    }
+
+    std::string printPolicy()
+    {
+        return std::string("");
     }
 
     /**
      * @copydoc StochasticDiscretePolicy::sampleAction()
      */
-    const double* sampleAction(const double* state)
+    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type state)
     {
 
+        int i, ie;
         // 50% prev action
-        if (Base::mActions->size() == 1)
+        if (Base::mActions.size() == 1)
             Base::distribution[0] = 1.0;
         else
         {
-            for (typename ActionList::const_iterator a = Base::mActions->begin(); a != Base::mActions->end(); ++a)
+            for (i = 0, ie = mActions.size(); i < ie; ++i)
             {
-                int id = (*a)[Base::mActionDim];
-                int previd = prev[Base::mActionDim];
                 if (id == previd)
                     Base::distribution[id] = 0.5;
                 else
-                    Base::distribution[id] = 0.5 / (Base::mActions->size() - 1);
+                    Base::distribution[id] = 0.5 / (ie - 1);
             }
         }
         // chose an action
-        double random = PGT::math::Random();
+        double random = RandomGenerator::sampleUniform(0,1);
         double sum = 0.0;
-        for (typename ActionList::const_iterator a = Base::mActions->begin(); a != Base::mActions->end(); ++a)
+        for (i = 0, ie = mActions.size(); i < ie; ++i)
         {
-            int idx = (*a)[Base::mActionDim];
-            sum += Base::distribution[idx];
+            sum += Base::distribution[i];
             if (sum >= random)
             {
-                prev = (*a);
+                prev = Base::mActions[i];
+                prevActionId = i;
                 return prev;
             }
         }
-        prev = Base::mActions->at(Base::mActions->size() - 1);
-
+        prev = Base::mActions[ie - 1];
+        prevActionId = ie - 1;
         return prev;
     }
 

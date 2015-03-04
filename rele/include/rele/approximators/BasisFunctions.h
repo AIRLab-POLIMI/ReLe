@@ -82,14 +82,27 @@ public:
 
 };
 
-class AbstractBasisVector
+class AbstractBasisMatrix
+{
+public:
+    virtual ~AbstractBasisMatrix()
+    {
+    }
+
+    virtual arma::mat operator()(const arma::vec& input) = 0;
+    virtual size_t rows() const = 0;
+    virtual size_t cols() const = 0;
+
+};
+
+class AbstractBasisVector : public AbstractBasisMatrix
 {
 public:
     virtual ~AbstractBasisVector()
     {
     }
 
-    virtual arma::vec operator()(const arma::vec& input) = 0;
+    virtual arma::mat operator()(const arma::vec& input) = 0;
     virtual double dot(const arma::vec& input,
                        const arma::vec& otherVector) = 0;
 
@@ -105,6 +118,16 @@ public:
         throw std::logic_error("This method should be called only by IdentityBasis");
     }
 
+    virtual size_t rows() const
+    {
+        return size();
+    }
+
+    virtual size_t cols() const
+    {
+        return 1;
+    }
+
 };
 
 class DenseBasisVector: public std::vector<BasisFunction*>,
@@ -113,7 +136,7 @@ class DenseBasisVector: public std::vector<BasisFunction*>,
 public:
     DenseBasisVector();
     virtual ~DenseBasisVector();
-    virtual arma::vec operator()(const arma::vec& input);
+    virtual arma::mat operator()(const arma::vec& input);
     virtual double dot(const arma::vec& input, const arma::vec& otherVector);
 
     size_t size() const
@@ -174,7 +197,7 @@ class IdentityBasis: public AbstractBasisVector
 public:
     virtual ~IdentityBasis();
 
-    virtual arma::vec operator()(const arma::vec& input);
+    virtual arma::mat operator()(const arma::vec& input);
     virtual double dot(const arma::vec& input, const arma::vec& otherVector);
     virtual size_t size() const;
     virtual arma::vec operator()(size_t input);

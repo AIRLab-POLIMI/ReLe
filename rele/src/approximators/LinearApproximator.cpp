@@ -43,21 +43,27 @@ LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBas
 {
 }
 
+LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisMatrix* bfs)
+    : ParametricRegressor(input_dim, 1), basis(bfs),
+      parameters(bfs->cols(), fill::zeros)
+{
+}
+
 LinearApproximator::~LinearApproximator()
 {
 }
 
 vec LinearApproximator::operator()(const vec& input)
 {
-    vec output(1);
-    output[0] = basis->dot(input, parameters);
+    arma::mat features = basis->operator ()(input);
+    vec output = features*parameters;
     return output;
 }
 
 arma::vec LinearApproximator::diff(const vec& input)
 {
-    AbstractBasisVector& tmpbasis = *(basis);
-    return tmpbasis(input);
+    arma::mat features = basis->operator ()(input);
+    return vectorise(features);
 }
 
 }

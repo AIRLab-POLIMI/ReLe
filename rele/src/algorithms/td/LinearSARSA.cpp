@@ -7,7 +7,7 @@ namespace ReLe
 {
 
 LinearGradientSARSA::LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, LinearApproximator& la)
-    : LinearTD(policy, la), lambda(0.0), eligibility(la.getBasis().size(), fill::zeros),
+    : LinearTD(policy, la), lambda(0.0), eligibility(la.getParameters().n_elem, fill::zeros),
       useReplacingTraces(false)
 {
 }
@@ -45,8 +45,8 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
 
 
     //Compute gradient dQ(x,u)
-    AbstractBasisVector& basis = Q.getBasis();
-    vec dQxu = basis(regInput);
+    AbstractBasisMatrix& basis = Q.getBasis();
+    mat dQxu = basis(regInput);
 
 
     //Q(xn, un)
@@ -105,8 +105,8 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
 
 
     //Compute gradient dQ(x,u)
-    AbstractBasisVector& basis = Q.getBasis();
-    vec dQxu = basis(regInput);
+    AbstractBasisMatrix& basis = Q.getBasis();
+    vec dQxu = arma::vectorise(basis(regInput));
 
 
     double r = reward[0];

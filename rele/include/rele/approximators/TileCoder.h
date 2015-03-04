@@ -58,7 +58,7 @@ public:
 
     virtual void coder(const arma::vec& x, const bool& useLastAsInt) = 0;
 
-    arma::vec operator()(const arma::vec& input)
+    arma::mat operator()(const arma::vec& input)
     {
         if (includeActiveFeature)
         {

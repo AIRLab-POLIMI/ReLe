@@ -45,7 +45,7 @@ DenseBasisVector::~DenseBasisVector()
     this->clear();
 }
 
-vec DenseBasisVector::operator()(const vec& input)
+mat DenseBasisVector::operator()(const vec& input)
 {
     vec output(this->size());
 
@@ -184,7 +184,7 @@ IdentityBasis::~IdentityBasis()
 {
 }
 
-arma::vec IdentityBasis::operator()(const arma::vec& input)
+arma::mat IdentityBasis::operator()(const arma::vec& input)
 {
     return input;
 }

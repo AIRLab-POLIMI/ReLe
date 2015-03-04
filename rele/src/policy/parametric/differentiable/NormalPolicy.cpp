@@ -10,14 +10,14 @@ namespace ReLe
 /// NORMAL POLICY
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void NormalPolicy::calculateMeanAndStddev(const DenseState &state)
+void NormalPolicy::calculateMeanAndStddev(const DenseState& state)
 {
     // compute mean value
     arma::vec mean = (*approximator)(state);
     mMean = mean[0];
 }
 
-double NormalPolicy::operator()(const DenseState &state, const DenseAction &action)
+double NormalPolicy::operator()(const DenseState& state, const DenseAction& action)
 {
 
     // compute mean value
@@ -43,12 +43,12 @@ DenseAction NormalPolicy::operator() (const DenseState& state)
     return todoAction;
 }
 
-arma::vec NormalPolicy::diff(const DenseState &state, const DenseAction &action)
+arma::vec NormalPolicy::diff(const DenseState& state, const DenseAction& action)
 {
     return (*this)(state,action) * difflog(state,action);
 }
 
-arma::vec NormalPolicy::difflog(const DenseState &state, const DenseAction &action)
+arma::vec NormalPolicy::difflog(const DenseState& state, const DenseAction& action)
 {
     // get scalar action
     double a = action[0];
@@ -57,25 +57,41 @@ arma::vec NormalPolicy::difflog(const DenseState &state, const DenseAction &acti
     calculateMeanAndStddev(state);
 
     // get features
-    AbstractBasisVector& basis = approximator->getBasis();
-    arma::vec features = basis(state);
+    AbstractBasisMatrix& basis = approximator->getBasis();
+    arma::mat features = basis(state);
 
     // compute gradient
     return features.t() * (a - mMean) / (mInitialStddev * mInitialStddev);
 }
 
-arma::mat NormalPolicy::diff2log(const DenseState &state, const DenseAction &action)
+arma::mat NormalPolicy::diff2log(const DenseState& state, const DenseAction& action)
 {
 
     // compute mean value
     calculateMeanAndStddev(state);
 
     // get features
-    AbstractBasisVector& basis = approximator->getBasis();
-    arma::vec features = basis(state);
+    AbstractBasisMatrix& basis = approximator->getBasis();
+    arma::mat features = basis(state);
 
     return -features.t() * features / (mInitialStddev * mInitialStddev);
 
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// NORMAL POLICY WITH STATE DEPENDANT STDDEV (STD is not a parameter to be learned)
+///////////////////////////////////////////////////////////////////////////////////////
+void
+NormalStateDependantStddevPolicy::calculateMeanAndStddev(const DenseState& state)
+{
+    // compute mean value
+    arma::vec mean = (*approximator)(state);
+    mMean = mean[0];
+
+    // compute stddev
+    arma::vec evalstd = (*stdApproximator)(state);
+    mInitialStddev = evalstd[0];
 }
 
 } //end namespace
