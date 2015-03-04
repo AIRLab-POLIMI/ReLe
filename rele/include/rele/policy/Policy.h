@@ -98,6 +98,19 @@ public:
     }
 };
 
+/*
+template<class ActionC, class StateC>
+class StochasticDifferentiablePolicy: public DifferentiablePolicy<ActionC, StateC>
+{
+public:
+	virtual arma::vec wmleUpdate(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
+
+    virtual ~StochasticDifferentiablePolicy()
+    {
+
+    }
+};*/
+
 
 } //end namespace
 

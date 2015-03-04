@@ -10,7 +10,6 @@
 namespace ReLe
 {
 
-
 ///////////////////////////////////////////////////////////////////////////////////////
 /// NORMAL POLICY
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -18,14 +17,14 @@ namespace ReLe
 /**
  * Univariate normal policy with fixed standard deviation
  */
-class NormalPolicy : public DifferentiablePolicy<DenseAction, DenseState>
+class NormalPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
-    NormalPolicy(const double& initialStddev,
-                 LinearApproximator* projector) :
+    NormalPolicy(const double& initialStddev, LinearApproximator* projector) :
         mInitialStddev(initialStddev), mMean(0.0),
-        approximator(projector)
-    { }
+        approximator(projector), clearRegressorOnExit(false)
+    {
+    }
 
     virtual ~NormalPolicy()
     {
@@ -41,9 +40,9 @@ protected:
 
 public:
 
-    virtual double operator() (const arma::vec& state, const arma::vec& action);
+    virtual double operator()(const arma::vec& state, const arma::vec& action);
 
-    virtual arma::vec operator() (const arma::vec& state);
+    virtual arma::vec operator()(const arma::vec& state);
 
     // ParametricPolicy interface
 public:
@@ -62,14 +61,11 @@ public:
 
     // DifferentiablePolicy interface
 public:
-    virtual arma::vec diff(
-        const arma::vec& state, const arma::vec& action);
+    virtual arma::vec diff(const arma::vec& state, const arma::vec& action);
 
-    virtual arma::vec difflog(
-        const arma::vec& state, const arma::vec& action);
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
 
-    virtual arma::mat diff2log(
-        const arma::vec& state, const arma::vec& action);
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
 
     inline void clearRegressor(bool clear)
     {
@@ -82,7 +78,6 @@ protected:
     bool clearRegressorOnExit;
 
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// NORMAL POLICY WITH STATE DEPENDANT STDDEV (STD is not a parameter to be learned)
@@ -100,15 +95,15 @@ protected:
  * \f]
  * where \f$\epsilon \sim N(0, k^{T}\phi(s))\f$.
  */
-class NormalStateDependantStddevPolicy : public NormalPolicy
+class NormalStateDependantStddevPolicy: public NormalPolicy
 {
 
 public:
     NormalStateDependantStddevPolicy(LinearApproximator* projector,
                                      LinearApproximator* stdprojector) :
-        NormalPolicy(1, projector),
-        stdApproximator(stdprojector)
-    { }
+        NormalPolicy(1, projector), stdApproximator(stdprojector)
+    {
+    }
 
     virtual ~NormalStateDependantStddevPolicy()
     {
@@ -142,7 +137,7 @@ protected:
  * where \f$\phi(s)\f$ is an \f$(n_a \times k)\f$ matrix and
  * \f$\theta\f$ is a \f$k\f$-dimensional vector.
  */
-class MVNPolicy : public DifferentiablePolicy<DenseAction, DenseState>
+class MVNPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
 
@@ -156,13 +151,13 @@ public:
      * @brief The constructor.
      * @param projector The linear projector used for mean approximation
      */
-    MVNPolicy(LinearApproximator* projector)
-        : approximator(projector),
-          mMean(projector->GetOutputSize(), arma::fill::zeros),
-          clearRegressorOnExit(false)
+    MVNPolicy(LinearApproximator* projector) :
+        approximator(projector),
+        mMean(projector->GetOutputSize(), arma::fill::zeros),
+        clearRegressorOnExit(false)
     {
         int output_dim = projector->GetOutputSize();
-        mCovariance.eye(output_dim,output_dim);
+        mCovariance.eye(output_dim, output_dim);
         mCinv = arma::inv(mCovariance);
         mCholeskyDec = arma::chol(mCovariance);
         mDeterminant = arma::det(mCovariance);
@@ -182,15 +177,15 @@ public:
      * @param initialCov The covariance matrix (\f$n_a \times n_a\f$).
      */
     MVNPolicy(LinearApproximator* projector,
-              std::initializer_list<double> initialCov)
-        : approximator(projector),
-          mMean(projector->GetOutputSize(), arma::fill::zeros),
-          clearRegressorOnExit(false)
+              std::initializer_list<double> initialCov) :
+        approximator(projector),
+        mMean(projector->GetOutputSize(), arma::fill::zeros),
+        clearRegressorOnExit(false)
     {
         int output_dim = projector->GetOutputSize();
         mCovariance.zeros(output_dim, output_dim);
-        int row = 0, col = 0 ;
-        for (double x: initialCov)
+        int row = 0, col = 0;
+        for (double x : initialCov)
         {
             mCovariance(row, col++) = x;
             if (col == output_dim)
@@ -204,11 +199,10 @@ public:
         mDeterminant = arma::det(mCovariance);
     }
 
-    MVNPolicy(LinearApproximator* projector,
-              double* covariance)
-        : approximator(projector),
-          mMean(projector->GetOutputSize(), arma::fill::zeros),
-          clearRegressorOnExit(false)
+    MVNPolicy(LinearApproximator* projector, double* covariance) :
+        approximator(projector),
+        mMean(projector->GetOutputSize(), arma::fill::zeros),
+        clearRegressorOnExit(false)
     {
         int output_dim = projector->GetOutputSize();
         mCovariance.zeros(output_dim, output_dim);
@@ -216,7 +210,7 @@ public:
         {
             for (int j = 0; j < output_dim; ++j)
             {
-                mCovariance(i,j) = covariance[i+output_dim*j];
+                mCovariance(i, j) = covariance[i + output_dim * j];
             }
         }
 
@@ -233,12 +227,11 @@ public:
         }
     }
 
-
 public:
 
-    virtual double operator() (const arma::vec& state, const arma::vec& action);
+    virtual double operator()(const arma::vec& state, const arma::vec& action);
 
-    virtual arma::vec operator() (const arma::vec& state);
+    virtual arma::vec operator()(const arma::vec& state);
 
     // ParametricPolicy interface
 public:
@@ -257,14 +250,11 @@ public:
 
     // DifferentiablePolicy interface
 public:
-    virtual arma::vec diff(
-        const arma::vec& state, const arma::vec& action);
+    virtual arma::vec diff(const arma::vec& state, const arma::vec& action);
 
-    virtual arma::vec difflog(
-        const arma::vec& state, const arma::vec& action);
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
 
-    virtual arma::mat diff2log(
-        const arma::vec& state, const arma::vec& action);
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
 
     inline void clearRegressor(bool clear)
     {
@@ -306,7 +296,6 @@ protected:
     arma::vec mMean;
     bool clearRegressorOnExit;
 };
-
 
 } // end namespace ReLe
 #endif // NORMALPOLICY_H
