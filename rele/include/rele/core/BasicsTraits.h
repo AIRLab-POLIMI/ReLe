@@ -35,7 +35,9 @@ template<class ActionC>
 struct action_type
 {
     typedef typename std::add_pointer<void>::type type;
-    typedef const std::add_pointer<const void>::type const_type;
+    typedef typename std::add_pointer<const void>::type const_type;
+    typedef typename std::add_pointer<void>::type type_ref;
+    typedef const std::add_pointer<const void>::type const_type_ref;
 };
 
 template<>
@@ -43,20 +45,26 @@ struct action_type<FiniteAction>
 {
     typedef unsigned int type;
     typedef const unsigned int const_type;
+    typedef unsigned int type_ref;
+    typedef const unsigned int const_type_ref;
 };
 
 template<>
 struct action_type<DenseAction>
 {
-    typedef typename std::add_lvalue_reference<arma::vec>::type type;
-    typedef typename std::add_lvalue_reference<const arma::vec>::type const_type;
+    typedef arma::vec type;
+    typedef const arma::vec const_type;
+    typedef typename std::add_lvalue_reference<arma::vec>::type type_ref;
+    typedef typename std::add_lvalue_reference<const arma::vec>::type const_type_ref;
 };
 
 template<class StateC>
 struct state_type
 {
     typedef typename std::add_pointer<void>::type type;
-    typedef const std::add_pointer<const void>::type const_type;
+    typedef typename std::add_pointer<const void>::type const_type;
+    typedef typename std::add_pointer<void>::type type_ref;
+    typedef const std::add_pointer<const void>::type const_type_ref;
 };
 
 template<>
@@ -64,13 +72,17 @@ struct state_type<FiniteState>
 {
     typedef size_t type;
     typedef const size_t const_type;
+    typedef size_t type_ref;
+    typedef const size_t const_type_ref;
 };
 
 template<>
 struct state_type<DenseState>
 {
-    typedef typename std::add_lvalue_reference<arma::vec>::type type;
-    typedef typename std::add_lvalue_reference<const arma::vec>::type const_type;
+    typedef arma::vec type;
+    typedef const arma::vec const_type;
+    typedef typename std::add_lvalue_reference<arma::vec>::type type_ref;
+    typedef typename std::add_lvalue_reference<const arma::vec>::type const_type_ref;
 };
 
 

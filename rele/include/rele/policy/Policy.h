@@ -38,8 +38,8 @@ class Policy
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
 public:
-    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type state) = 0;
-    virtual double operator() (typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
+    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) = 0;
+    virtual double operator() (typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
 
     virtual std::string getPolicyName() = 0;
     virtual std::string getPolicyHyperparameters() = 0;
@@ -76,6 +76,11 @@ public:
 //        this->w = w;
 //    }
 
+    virtual ~ParametricPolicy()
+    {
+
+    }
+
 //protected:
 //    arma::vec w;
 };
@@ -84,8 +89,13 @@ template<class ActionC, class StateC>
 class DifferentiablePolicy: public ParametricPolicy<ActionC, StateC>
 {
 public:
-    virtual arma::vec diff(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
-    virtual arma::vec difflog(typename state_type<StateC>::const_type state, typename action_type<ActionC>::const_type action) = 0;
+    virtual arma::vec diff(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
+    virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
+
+    virtual ~DifferentiablePolicy()
+    {
+
+    }
 };
 
 

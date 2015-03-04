@@ -35,7 +35,9 @@ struct Sample
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
-    Sample(size_t x, unsigned int u, size_t xn, double r) :
+    Sample(typename state_type<StateC>::const_type_ref x,
+           typename action_type<ActionC>::const_type_ref u,
+           typename state_type<StateC>::const_type_ref xn, double r) :
         x(x), u(u), xn(xn), r(r)
     {
 

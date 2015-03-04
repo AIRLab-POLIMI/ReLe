@@ -94,12 +94,14 @@ void TabularREPS::step(const Reward& reward, const FiniteState& nextState,
 
 void TabularREPS::endEpisode(const Reward& reward)
 {
+    updateSamples(x, reward[0]); //TODO check this update
     updatePolicy();
     printStatistics();
 }
 
 void TabularREPS::endEpisode()
 {
+    updatePolicy();
     printStatistics();
 }
 

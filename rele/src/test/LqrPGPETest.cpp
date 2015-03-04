@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
 
 
     cout << s << endl;
-    DenseAction action = policy(s);
     cout << "Action: " << policy(s) << endl;
 
 

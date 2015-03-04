@@ -37,13 +37,13 @@ public:
 
 protected:
 
-    virtual void calculateMeanAndStddev(const DenseState& state);
+    virtual void calculateMeanAndStddev(const arma::vec& state);
 
 public:
 
-    virtual double operator() (const DenseState& state, const DenseAction& action);
+    virtual double operator() (const arma::vec& state, const arma::vec& action);
 
-    virtual DenseAction operator() (const DenseState& state);
+    virtual arma::vec operator() (const arma::vec& state);
 
     // ParametricPolicy interface
 public:
@@ -63,13 +63,13 @@ public:
     // DifferentiablePolicy interface
 public:
     virtual arma::vec diff(
-        const DenseState& state, const DenseAction& action);
+        const arma::vec& state, const arma::vec& action);
 
     virtual arma::vec difflog(
-        const DenseState& state, const DenseAction& action);
+        const arma::vec& state, const arma::vec& action);
 
     virtual arma::mat diff2log(
-        const DenseState& state, const DenseAction& action);
+        const arma::vec& state, const arma::vec& action);
 
     inline void clearRegressor(bool clear)
     {
@@ -80,7 +80,6 @@ protected:
     double mInitialStddev, mMean;
     LinearApproximator* approximator;
     bool clearRegressorOnExit;
-    DenseAction todoAction;
 
 };
 
@@ -122,7 +121,7 @@ public:
 
 protected:
 
-    virtual void calculateMeanAndStddev(const DenseState& state);
+    virtual void calculateMeanAndStddev(const arma::vec& state);
 
 protected:
     LinearApproximator* stdApproximator;
@@ -160,8 +159,7 @@ public:
     MVNPolicy(LinearApproximator* projector)
         : approximator(projector),
           mMean(projector->GetOutputSize(), arma::fill::zeros),
-          clearRegressorOnExit(false),
-          todoAction(projector->GetOutputSize())
+          clearRegressorOnExit(false)
     {
         int output_dim = projector->GetOutputSize();
         mCovariance.eye(output_dim,output_dim);
@@ -187,8 +185,7 @@ public:
               std::initializer_list<double> initialCov)
         : approximator(projector),
           mMean(projector->GetOutputSize(), arma::fill::zeros),
-          clearRegressorOnExit(false),
-          todoAction(projector->GetOutputSize())
+          clearRegressorOnExit(false)
     {
         int output_dim = projector->GetOutputSize();
         mCovariance.zeros(output_dim, output_dim);
@@ -211,8 +208,7 @@ public:
               double* covariance)
         : approximator(projector),
           mMean(projector->GetOutputSize(), arma::fill::zeros),
-          clearRegressorOnExit(false),
-          todoAction(projector->GetOutputSize())
+          clearRegressorOnExit(false)
     {
         int output_dim = projector->GetOutputSize();
         mCovariance.zeros(output_dim, output_dim);
@@ -240,9 +236,9 @@ public:
 
 public:
 
-    virtual double operator() (const DenseState& state, const DenseAction& action);
+    virtual double operator() (const arma::vec& state, const arma::vec& action);
 
-    virtual DenseAction operator() (const DenseState& state);
+    virtual arma::vec operator() (const arma::vec& state);
 
     // ParametricPolicy interface
 public:
@@ -262,13 +258,13 @@ public:
     // DifferentiablePolicy interface
 public:
     virtual arma::vec diff(
-        const DenseState& state, const DenseAction& action);
+        const arma::vec& state, const arma::vec& action);
 
     virtual arma::vec difflog(
-        const DenseState& state, const DenseAction& action);
+        const arma::vec& state, const arma::vec& action);
 
     virtual arma::mat diff2log(
-        const DenseState& state, const DenseAction& action);
+        const arma::vec& state, const arma::vec& action);
 
     inline void clearRegressor(bool clear)
     {
@@ -293,7 +289,7 @@ protected:
      * @param cholesky_dec A flag used to require the Cholesky decomposition of the
      * covariance matrix.
      */
-    void UpdateInternalState(const DenseState& state, bool cholesky_dec = false)
+    void UpdateInternalState(const arma::vec& state, bool cholesky_dec = false)
     {
         //TODO: si potrebbe togliere il flag cholesky_dec e aggiungere un controllo
         // sul puntatore dello stato. Se è uguale al ultimo non ricomputo tutto
@@ -309,7 +305,6 @@ protected:
     LinearApproximator* approximator;
     arma::vec mMean;
     bool clearRegressorOnExit;
-    DenseAction todoAction;
 };
 
 

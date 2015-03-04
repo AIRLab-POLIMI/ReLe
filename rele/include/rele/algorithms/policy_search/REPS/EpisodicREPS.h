@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REPS_H_
-#define REPS_H_
+#ifndef EPISODICREPS_H_
+#define EPISODICREPS_H_
 
 #include "Agent.h"
 #include "SampleManager.h"
@@ -32,27 +32,26 @@
 
 namespace ReLe
 {
-
-class TabularREPS: public Agent<FiniteAction, FiniteState>
+class EpisodicREPS: public Agent<DenseAction, DenseState>
 {
-public:
-    TabularREPS();
 
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
-    virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action);
+public:
+    EpisodicREPS(ParametricPolicy<DenseAction, DenseState>& policy);
+
+    virtual void initEpisode(const DenseState& state, DenseAction& action);
+    virtual void sampleAction(const DenseState& state, DenseAction& action);
+    virtual void step(const Reward& reward, const DenseState& nextState,
+                      DenseAction& action);
     virtual void endEpisode(const Reward& reward);
     virtual void endEpisode();
 
-    virtual ~TabularREPS();
+    virtual ~EpisodicREPS();
 
 private:
+    void updateSamples(const arma::vec& xn, double r);
     void updatePolicy();
-    void updateSamples(size_t xn, double r);
-    void resetSamples();
 
-    double computeObjectiveFunction(const double* x, double* grad);
+    double computeObjectiveFunction(const double& x, double& grad);
 
 private:
     static double wrapper(unsigned int n, const double* x, double* grad,
@@ -63,28 +62,22 @@ protected:
     void printStatistics();
 
 private:
-    TabularPolicy policy;
-    arma::vec thetaOpt;
+    ParametricPolicy<DenseAction, DenseState>& policy;
     double etaOpt;
 
-    int N;
-    int currentIteration;
     double eps;
 
-    //current an previous actions and states
-    size_t x;
-    unsigned int u;
+    //Last state and action
+    arma::vec x;
+    arma::vec u;
 
-    IdentityBasis phi;
-    SampleManager<FiniteAction, FiniteState> s;
+    std::vector<Sample<DenseAction, DenseState>> samples;
+    double maxR;
 
     nlopt::opt optimizator;
-
-    //debug TODO togliere
-    int iteration;
 
 };
 
 }
 
-#endif /* REPS_H_ */
+#endif /* EPISODICREPS_H_ */

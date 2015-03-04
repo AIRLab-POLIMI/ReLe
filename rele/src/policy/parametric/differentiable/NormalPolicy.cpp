@@ -10,14 +10,14 @@ namespace ReLe
 /// NORMAL POLICY
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void NormalPolicy::calculateMeanAndStddev(const DenseState& state)
+void NormalPolicy::calculateMeanAndStddev(const arma::vec& state)
 {
     // compute mean value
     arma::vec mean = (*approximator)(state);
     mMean = mean[0];
 }
 
-double NormalPolicy::operator()(const DenseState& state, const DenseAction& action)
+double NormalPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
 
     // compute mean value
@@ -29,7 +29,7 @@ double NormalPolicy::operator()(const DenseState& state, const DenseAction& acti
     return ReLe::normpdf(scalara, mMean, mInitialStddev*mInitialStddev);
 }
 
-DenseAction NormalPolicy::operator() (const DenseState& state)
+arma::vec NormalPolicy::operator() (const arma::vec& state)
 {
     // compute mean value
     calculateMeanAndStddev(state);
@@ -39,16 +39,17 @@ DenseAction NormalPolicy::operator() (const DenseState& state)
     double normn = RandomGenerator::sampleNormal();
     //        MY_PRINT(normn);
 
-    todoAction[0] = normn * mInitialStddev + mMean;
-    return todoAction;
+    arma::vec output(1);
+    output[0] = normn * mInitialStddev + mMean;
+    return output;
 }
 
-arma::vec NormalPolicy::diff(const DenseState& state, const DenseAction& action)
+arma::vec NormalPolicy::diff(const arma::vec& state, const arma::vec& action)
 {
     return (*this)(state,action) * difflog(state,action);
 }
 
-arma::vec NormalPolicy::difflog(const DenseState& state, const DenseAction& action)
+arma::vec NormalPolicy::difflog(const arma::vec& state, const arma::vec& action)
 {
     // get scalar action
     double a = action[0];
@@ -64,7 +65,7 @@ arma::vec NormalPolicy::difflog(const DenseState& state, const DenseAction& acti
     return features.t() * (a - mMean) / (mInitialStddev * mInitialStddev);
 }
 
-arma::mat NormalPolicy::diff2log(const DenseState& state, const DenseAction& action)
+arma::mat NormalPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
 
     // compute mean value
@@ -83,7 +84,7 @@ arma::mat NormalPolicy::diff2log(const DenseState& state, const DenseAction& act
 /// NORMAL POLICY WITH STATE DEPENDANT STDDEV (STD is not a parameter to be learned)
 ///////////////////////////////////////////////////////////////////////////////////////
 void
-NormalStateDependantStddevPolicy::calculateMeanAndStddev(const DenseState& state)
+NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 {
     // compute mean value
     arma::vec mean = (*approximator)(state);
@@ -99,27 +100,24 @@ NormalStateDependantStddevPolicy::calculateMeanAndStddev(const DenseState& state
 /// MVN POLICY
 ///////////////////////////////////////////////////////////////////////////////////////
 
-double MVNPolicy::operator()(const DenseState& state, const DenseAction& action)
+double MVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
     UpdateInternalState(state);
     return mvnpdfFast(action, mMean, mCinv, mDeterminant);
 }
 
-DenseAction MVNPolicy::operator() (const DenseState& state)
+arma::vec MVNPolicy::operator() (const arma::vec& state)
 {
     UpdateInternalState(state);
-    //TODO controllare assegnamento
-    arma::vec v = mvnrandFast(mMean, mCholeskyDec);
-    todoAction.copy_vec(v);
-    return todoAction;
+    return mvnrandFast(mMean, mCholeskyDec);
 }
 
-arma::vec MVNPolicy::diff(const DenseState &state, const DenseAction &action)
+arma::vec MVNPolicy::diff(const arma::vec &state, const arma::vec &action)
 {
     return (*this)(state,action) * difflog(state,action);
 }
 
-arma::vec MVNPolicy::difflog(const DenseState &state, const DenseAction &action)
+arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
 {
     UpdateInternalState(state);
 
@@ -143,7 +141,7 @@ arma::vec MVNPolicy::difflog(const DenseState &state, const DenseAction &action)
     return 0.5 * features.t() * (mCinv + mCinv.t()) * smdiff;
 }
 
-arma::mat MVNPolicy::diff2log(const DenseState &state, const DenseAction &action)
+arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
     UpdateInternalState(state);
 

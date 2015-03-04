@@ -33,14 +33,13 @@
 namespace ReLe
 {
 
-
 /**
  * @brief Deterministic policy obtained as linear combination of basis functions.
  * This policy is a linear combination of linear/non linear basis functions
  * \f[ \forall s \in S,\qquad \pi(s) = \sum_{i=1}^{n} w_i \phi_i(s)\f]
  * where \f$n\f$ is the number of parameters and basis functions.
  */
-template <class StateC>
+template<class StateC>
 class DetLinearPolicy: public DifferentiablePolicy<DenseAction, StateC>
 {
 
@@ -55,9 +54,10 @@ public:
      * @brief The constructor.
      * @param projector The linear projector
      */
-    DetLinearPolicy(LinearApproximator* projector)
-        : approximator(projector), clearRegressorOnExit(false)
-    { }
+    DetLinearPolicy(LinearApproximator* projector) :
+        approximator(projector), clearRegressorOnExit(false)
+    {
+    }
 
     virtual ~DetLinearPolicy()
     {
@@ -84,18 +84,14 @@ public:
         return std::string("");
     }
 
-    virtual typename action_type<DenseAction>::type operator() (
-        typename state_type<StateC>::const_type state)
+    virtual arma::vec operator()(const arma::vec& state)
     {
         //TODO CONTROLLARE ASSEGNAMENTO
         arma::vec output = (*approximator)(state);
-        todoAction.copy_vec(output);
-        return todoAction;
+        return output;
     }
 
-    virtual double operator() (
-        typename state_type<StateC>::const_type state,
-        typename action_type<DenseAction>::const_type action)
+    virtual double operator()(const arma::vec& state, const arma::vec& action)
     {
         arma::vec output = this->operator ()(state);
 
@@ -126,16 +122,12 @@ public:
 
     // DifferentiablePolicy interface
 public:
-    arma::vec diff(
-        typename state_type<StateC>::const_type state,
-        typename action_type<DenseAction>::const_type action)
+    arma::vec diff(const arma::vec& state, const arma::vec& action)
     {
         return approximator->diff(state);
     }
 
-    arma::vec difflog(
-        typename state_type<StateC>::const_type state,
-        typename action_type<DenseAction>::const_type action)
+    arma::vec difflog(const arma::vec& state, const arma::vec& action)
     {
         //TODO ???
 
@@ -147,15 +139,14 @@ public:
         clearRegressorOnExit = clear;
     }
 
-
 protected:
     LinearApproximator* approximator;
     bool clearRegressorOnExit;
-    DenseAction todoAction;
+
 };
 
 #undef DETLINPOL_NAME
 
-}//end namespace
+} //end namespace
 
 #endif //LINEARPOLICY_H_
