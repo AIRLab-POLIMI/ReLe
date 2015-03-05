@@ -38,7 +38,7 @@ ParametricNormal::ParametricNormal(unsigned int support_dim, unsigned int param_
       mean(support_dim, fill::zeros),
       Cov(support_dim, support_dim, fill::eye)
 {
-    UpdateInternalState();
+    updateInternalState();
 }
 
 ParametricNormal::ParametricNormal(vec& params, mat& covariance)
@@ -49,7 +49,7 @@ ParametricNormal::ParametricNormal(vec& params, mat& covariance)
     Cov        = covariance;
     invCov     = inv(Cov);
     detValue   = det(Cov);
-    UpdateInternalState();
+    updateInternalState();
 }
 
 vec ParametricNormal::operator() ()
@@ -68,7 +68,7 @@ double ParametricNormal::operator() (vec& point)
 void ParametricNormal::update(vec &increment)
 {
     parameters += increment;
-    this->UpdateInternalState();
+    this->updateInternalState();
 }
 
 vec ParametricNormal::difflog(const vec& point)
@@ -81,7 +81,7 @@ mat ParametricNormal::diff2Log(const vec&point)
     return -invCov;
 }
 
-void ParametricNormal::WriteOnStream(ostream& out)
+void ParametricNormal::writeOnStream(ostream& out)
 {
     out << "ParametricNormal " << std::endl;
     out << pointSize << std::endl;
@@ -99,7 +99,7 @@ void ParametricNormal::WriteOnStream(ostream& out)
     }
 }
 
-void ParametricNormal::ReadFromStream(istream& in)
+void ParametricNormal::readFromStream(istream& in)
 {
     double val;
     in >> pointSize;
@@ -122,10 +122,10 @@ void ParametricNormal::ReadFromStream(istream& in)
     invCov = inv(Cov);
     detValue = det(Cov);
 
-    UpdateInternalState();
+    updateInternalState();
 }
 
-void ParametricNormal::UpdateInternalState()
+void ParametricNormal::updateInternalState()
 {
     mean = parameters;
 }
@@ -138,7 +138,7 @@ ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, doubl
       asVariance(variance_asymptote)
 {
     mean = vec(point_dim,fill::zeros);
-    UpdateInternalState();
+    updateInternalState();
 }
 
 ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote, vec& params)
@@ -146,7 +146,7 @@ ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, doubl
       asVariance(variance_asymptote)
 {
     parameters = params;
-    UpdateInternalState();
+    updateInternalState();
 }
 
 vec ParametricLogisticNormal::difflog(const vec& point)
@@ -210,7 +210,7 @@ mat ParametricLogisticNormal::diff2Log(const vec& point)
     }
 }
 
-void ParametricLogisticNormal::WriteOnStream(ostream &out)
+void ParametricLogisticNormal::writeOnStream(ostream &out)
 {
     out << "ParametricLogisticNormal " << std::endl;
     out << pointSize << " " << paramSize << " " << asVariance << std::endl;
@@ -220,7 +220,7 @@ void ParametricLogisticNormal::WriteOnStream(ostream &out)
     }
 }
 
-void ParametricLogisticNormal::ReadFromStream(istream &in)
+void ParametricLogisticNormal::readFromStream(istream &in)
 {
     double val;
     in >> pointSize;
@@ -233,10 +233,10 @@ void ParametricLogisticNormal::ReadFromStream(istream &in)
         parameters(i) = val;
     }
 
-    UpdateInternalState();
+    updateInternalState();
 }
 
-void ParametricLogisticNormal::UpdateInternalState()
+void ParametricLogisticNormal::updateInternalState()
 {
     cerr << "asVariance: " << asVariance << endl;
     //    Cov.zeros();

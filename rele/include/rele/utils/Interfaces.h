@@ -22,7 +22,7 @@ public:
      * @brief Insert formatted output into stream
      * @param out the output stream
      */
-    virtual void WriteOnStream (std::ostream& out) = 0;
+    virtual void writeOnStream (std::ostream& out) = 0;
 
     /**
      * Read the description of the basis function from
@@ -31,7 +31,7 @@ public:
      * @brief Extract formatted input from stream
      * @param in the input stream
      */
-    virtual void ReadFromStream (std::istream& in) = 0;
+    virtual void readFromStream (std::istream& in) = 0;
 };
 
 } //end namespace

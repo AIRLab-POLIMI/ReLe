@@ -103,6 +103,9 @@ target_link_libraries(mountain_car rele)
 add_executable(lqr_pgpe src/test/LqrPGPETest.cpp)
 target_link_libraries(lqr_pgpe rele)
 
+add_executable(lqr_REPS src/test/LqrEpisodicREPSTest.cpp)
+target_link_libraries(lqr_REPS rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

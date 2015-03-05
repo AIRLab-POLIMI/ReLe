@@ -40,9 +40,18 @@ public:
 
     // WritableInterface interface
 public:
-    virtual void WriteOnStream(std::ostream &out);
-    virtual void ReadFromStream(std::istream &in);
+    virtual void writeOnStream(std::ostream &out);
+    virtual void readFromStream(std::istream &in);
 
+
+    // Specific Normal policy interface //TODO check this!!!
+public:
+    inline void setMeanAndCovariance(const arma::vec& mean, const arma::vec cov)
+    {
+    	this->mean = mean;
+    	this->Cov = cov;
+    	updateInternalState();
+    }
 protected:
     /**
      * Compute mean, covariance, inverce covariance and determinat values
@@ -50,7 +59,7 @@ protected:
      *
      * @brief Update internal state
      */
-    virtual void UpdateInternalState();
+    virtual void updateInternalState();
 
 protected:
     arma::vec parameters, mean;
@@ -101,13 +110,13 @@ public:
 
     // WritableInterface interface
 public:
-    void WriteOnStream(std::ostream &out);
-    void ReadFromStream(std::istream &in);
+    void writeOnStream(std::ostream &out);
+    void readFromStream(std::istream &in);
 
 
     // ParametricNormal interface
 protected:
-    void UpdateInternalState();
+    void updateInternalState();
 
 private:
 

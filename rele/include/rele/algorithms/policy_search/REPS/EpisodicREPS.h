@@ -25,7 +25,8 @@
 #define EPISODICREPS_H_
 
 #include "Agent.h"
-#include "SampleManager.h"
+#include "ParameterSample.h"
+#include "DifferentiableNormals.h"
 #include "nonparametric/TabularPolicy.h"
 
 #include <nlopt.hpp>
@@ -36,7 +37,7 @@ class EpisodicREPS: public Agent<DenseAction, DenseState>
 {
 
 public:
-    EpisodicREPS(ParametricPolicy<DenseAction, DenseState>& policy);
+    EpisodicREPS(ParametricNormal& dist, ParametricPolicy<DenseAction, DenseState>& policy);
 
     virtual void initEpisode(const DenseState& state, DenseAction& action);
     virtual void sampleAction(const DenseState& state, DenseAction& action);
@@ -48,7 +49,6 @@ public:
     virtual ~EpisodicREPS();
 
 private:
-    void updateSamples(const arma::vec& xn, double r);
     void updatePolicy();
 
     double computeObjectiveFunction(const double& x, double& grad);
@@ -56,22 +56,23 @@ private:
 private:
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o);
+	void updateSamples(double r);
 
 protected:
     virtual void init();
     void printStatistics();
 
 private:
+    ParametricNormal& dist;
     ParametricPolicy<DenseAction, DenseState>& policy;
     double etaOpt;
 
     double eps;
 
-    //Last state and action
-    arma::vec x;
-    arma::vec u;
+    //Last parameters
+    arma::vec theta;
 
-    std::vector<Sample<DenseAction, DenseState>> samples;
+    std::vector<ParameterSample> samples;
     double maxR;
 
     nlopt::opt optimizator;
