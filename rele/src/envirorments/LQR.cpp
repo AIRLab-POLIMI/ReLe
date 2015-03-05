@@ -57,6 +57,7 @@ void LQR::step(const DenseAction& action,
     x = A*x + B*u;
 
     nextState = currentState;
+    nextState.setAbsorbing(false);
     cout << "action: " << action.t();
     cout << "nextstate: " << nextState.t();
     cout << "reward: " << reward[0] << endl;

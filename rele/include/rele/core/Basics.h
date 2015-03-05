@@ -49,6 +49,24 @@ struct EnvirormentSettings
     unsigned int continuosActionDim;
 
     unsigned int rewardDim;
+
+    inline virtual void WriteToStream(std::ostream& out) const
+    {
+        out << finiteStateDim << " " << finiteActionDim << std::endl;
+        out << continuosStateDim << " " << continuosActionDim << std::endl;
+        out << rewardDim << std::endl;
+        out << gamma << " " << isFiniteHorizon << " " << horizon;
+        out << isEpisodic << " " << isAverageReward << std::endl;
+    }
+
+    inline virtual void ReadFromStream(std::istream& in)
+    {
+        in >> finiteStateDim >> finiteActionDim;
+        in >> continuosStateDim >> continuosActionDim;
+        in >> rewardDim;
+        in >> gamma >> isFiniteHorizon >> horizon;
+        in >> isEpisodic >> isAverageReward;
+    }
 };
 
 class Action
