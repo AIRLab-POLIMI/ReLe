@@ -48,9 +48,9 @@ public:
 public:
     inline void setMeanAndCovariance(const arma::vec& mean, const arma::vec cov)
     {
-    	this->mean = mean;
-    	this->Cov = cov;
-    	updateInternalState();
+        this->mean = mean;
+        this->Cov = cov;
+        updateInternalState();
     }
 protected:
     /**

@@ -56,7 +56,7 @@ private:
 private:
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o);
-	void updateSamples(double r);
+    void updateSamples(double r);
 
 protected:
     virtual void init();

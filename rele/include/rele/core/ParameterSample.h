@@ -31,14 +31,14 @@ namespace ReLe
 
 struct ParameterSample
 {
-	ParameterSample(const arma::vec& theta, double r) :
-				theta(theta), r(r)
-	{
+    ParameterSample(const arma::vec& theta, double r) :
+        theta(theta), r(r)
+    {
 
-	}
+    }
 
-	arma::vec theta;
-	double r;
+    arma::vec theta;
+    double r;
 };
 
 }
