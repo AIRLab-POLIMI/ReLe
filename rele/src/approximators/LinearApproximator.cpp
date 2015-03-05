@@ -49,7 +49,7 @@ LinearApproximator::~LinearApproximator()
 vec LinearApproximator::operator()(const vec& input)
 {
     arma::mat features = basis(input);
-    vec output = features*parameters;
+    vec output = features.t()*parameters;
     return output;
 }
 
