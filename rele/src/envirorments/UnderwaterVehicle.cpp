@@ -26,6 +26,8 @@
 #include <cassert>
 
 using namespace std;
+using namespace boost::numeric::odeint;
+
 
 namespace ReLe
 {
@@ -81,7 +83,8 @@ UnderwaterVehicle::UnderwaterVehicle()
     : uwvConfig(),
       DenseMDP(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
                uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.gamma, uwvConfig.horizon),
-      cState(uwvConfig.continuosStateDim)
+      cState(uwvConfig.continuosStateDim), uwvode(),
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
 }
 
@@ -89,33 +92,39 @@ UnderwaterVehicle::UnderwaterVehicle(UWVSettings &config)
     : uwvConfig(config),
       DenseMDP(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
                uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.gamma, uwvConfig.horizon),
-      cState(uwvConfig.continuosStateDim)
+      cState(uwvConfig.continuosStateDim), uwvode(),
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
 }
 
 void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
 {
-    double** odeTime;
-    double** odeState;
-    unsigned int ndata;
-
     double u = uwvConfig.actionList[action.getActionN()];
 
-    //Runge-Kutta 4/5
-    //REPLACE WITH ODEINT (BOOST 1.53+)
-    ode45(UnderwaterVehicle::ode, &u, 0, uwvConfig.dt,
-          cState.memptr(), cState.n_elem,
-          odeTime, odeState, ndata);
-    nextState[0] = odeState[0][ndata-1];
+    //ODEINT (BOOST 1.53+)
+    uwvode.action = u;
+    double t0 = 0;
+    double t1 = uwvConfig.dt;
+    integrate_adaptive( controlled_stepper , uwvode , cState, t0 , t1 , t1/100.0);
 
-    nextState.setAbsorbing(false);
-    cState = nextState;
+    ////Runge-Kutta 4/5
+    //double** odeTime;
+    //double** odeState;
+    //unsigned int ndata;
+    //ode45(UnderwaterVehicle::ode, &u, 0, uwvConfig.dt,
+    //      cState.memptr(), cState.n_elem,
+    //      odeTime, odeState, ndata);
+    //nextState[0] = odeState[0][ndata-1];
+    //nextState.setAbsorbing(false);
+    //Cstate = nextState;
+    ////free variables
+    //free(odeState);
+    //free(odeTime);
+
+    nextState = cState;
 
     reward[0] = fabs(uwvConfig.setPoint - nextState[0]) < uwvConfig.mu ? 0.0f : -uwvConfig.C;
 
-    //free variables
-    free(odeState);
-    free(odeTime);
 }
 
 void UnderwaterVehicle::getInitialState(DenseState &state)
