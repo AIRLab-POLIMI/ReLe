@@ -1,7 +1,10 @@
 
 %% Pursuer test
  clear
- clf
+ figure(1)
+ clf(1)
+ figure(2)
+ clf(2)
 
 
 %% now start the test
@@ -31,6 +34,8 @@ omega = pi;
 steps = 1000;
 traj = zeros(steps, 3);
 rockytraj = zeros(steps, 3);
+
+%while(true)
 for i=1:steps
     
  %Pursuer dynamics
@@ -69,14 +74,18 @@ for i=1:steps
  
 end
 
-
-figure(1)
-hold on
-plot(traj(:, 1), traj(:, 2), 'b');
-plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
-axis equal
-
 figure(2)
 hold on
 plot(mod(traj(:, 3), 2*pi), 'b');
 plot(mod(rockytraj(:, 3), 2*pi), 'm');
+
+figure(1)
+hold off
+plot(traj(:, 1), traj(:, 2), 'b');
+hold on
+plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
+%axis equal
+axis([-10 10 0 20])
+
+%waitforbuttonpress
+%end
