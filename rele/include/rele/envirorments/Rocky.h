@@ -57,15 +57,39 @@ private:
         STATESIZE
     };
 
+    class Predictor
+    {
+    public:
+    	Predictor(double dt);
+    	void reset();
+    	void saveLastValues(double thetaM, double v);
+    	void predict(double& xhat, double& yhat, double& thetaDirhat);
+
+    private:
+    	const double dt;
+
+        //predictor state
+        double thetaM;
+        double v;
+    };
+
 private:
     std::vector<arma::vec2> foodSpots;
     const double dt;
     const double maxOmega;
     const double maxV;
+    const double maxOmegar;
+    const double maxVr;
 
-private:
+    //Predictor for rocky
+    Predictor predictor;
 
-
+	void computeReward(Reward& reward);
+	void computeSensors(bool eat);
+	void updateChickenPose(double omega, double v);
+	void updateRockyPose(double omegar, double& xrabs, double vr,
+				double& yrabs);
+	void computeRockyControl(double& omegar, double& vr);
 };
 
 
