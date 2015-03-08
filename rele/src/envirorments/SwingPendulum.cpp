@@ -1,5 +1,6 @@
 #include "SwingPendulum.h"
 #include "RandomGenerator.h"
+#include <cassert>
 
 using namespace std;
 
@@ -43,6 +44,7 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
     settings.actionList = {settings.actionRange.Lo(), 0.0,
                            settings.actionRange.Hi()
                           };
+    assert(settings.finiteActionDim == settings.actionList.size());
 }
 
 void SwingUpSettings::WriteToStream(ostream &out) const
@@ -55,12 +57,40 @@ void SwingUpSettings::WriteToStream(ostream &out) const
     out << mass << " " << length << " " << g << std::endl;
     out << requiredUpTime << " " << upRange << " ";
     out << (useOverRotated?1:0) << (random_start?1:0) << std::endl;
+
+    int dima = actionList.size();
+    out << dima;
+    for (int i = 0; i < dima; ++i)
+        out << " " << actionList[i];
 }
 
 void SwingUpSettings::ReadFromStream(istream &in)
 {
+    double lo, hi;
+    int boolval;
     EnvirormentSettings::ReadFromStream(in);
-    //TODO
+    in >> stepTime;
+    in >> lo >> hi;
+    actionRange = Range(lo, hi);
+    in >> lo >> hi;
+    thetaRange = Range(lo, hi);
+    in >> lo >> hi;
+    velocityRange = Range(lo, hi);
+    in >> mass >> length >> g >> requiredUpTime >> upRange;
+    in >> boolval;
+    useOverRotated = boolval==1?true:false;
+    in >> boolval;
+    random_start = boolval==1?true:false;
+
+    int dima;
+    in >> dima;
+    for (int i = 0; i < dima; ++i)
+    {
+        in >> lo;
+        actionList.push_back(lo);
+    }
+
+    assert(finiteActionDim == actionList.size());
 }
 
 
