@@ -89,6 +89,8 @@ public:
     */
     double Mid() const;
 
+    double bound(const double& value) const;
+
     /**
     * Expands this range to include another range.
     *

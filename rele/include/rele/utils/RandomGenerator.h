@@ -33,7 +33,7 @@ namespace ReLe
 class RngGenerators
 {
 public:
-    RngGenerators(long int seed) : gen(std::time(0))
+    RngGenerators(long int seed) : gen(seed)
     {
         srand(seed);
         arma::arma_rng::set_seed(seed);

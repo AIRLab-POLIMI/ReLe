@@ -65,6 +65,11 @@ double Range::Width() const
         return 0.0;
 }
 
+double Range::bound(const double& value) const
+{
+    return std::max(lo, std::min(hi, value));
+}
+
 /**
  * Gets the midpoint of this range.
  */

@@ -32,6 +32,109 @@
 namespace ReLe
 {
 
+class PGPEPolicyIndividual
+{
+public:
+    arma::vec Pparams;  //policy parameters
+    arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
+    arma::mat difflog;
+
+public:
+    PGPEPolicyIndividual(arma::vec& polp, int nbEval)
+        :Pparams(polp), Jvalues(nbEval), difflog(polp.n_elem, nbEval)
+    {}
+
+    friend std::ostream& operator<<(std::ostream& out, PGPEPolicyIndividual& stat)
+    {
+        int nparams = stat.Pparams.n_elem;
+        int nepisodes = stat.Jvalues.n_elem;
+        out << nparams;
+        for (int i = 0; i < nparams; ++i)
+            out << " " << stat.Pparams[i];
+        out << std::endl;
+        out << nepisodes;
+        for (int i = 0; i < nepisodes; ++i)
+            out << " " << stat.Jvalues[i];
+        out << std::endl;
+        for (int i = 0; i < nepisodes; ++i)
+        {
+            for (int j = 0; j < nparams; ++j)
+            {
+                out << stat.difflog(j,i) << " ";
+            }
+            out << std::endl;
+        }
+        return out;
+    }
+
+    friend std::istream& operator>>(std::istream& in, PGPEPolicyIndividual& stat)
+    {
+        int i, nbPolPar, nbEval;
+        in >> nbPolPar;
+        stat.Pparams = arma::vec(nbPolPar);
+        for (i = 0; i < nbPolPar; ++i)
+            in >> stat.Pparams[i];
+        in >> nbEval;
+        stat.Jvalues = arma::vec(nbEval);
+        for (i = 0; i < nbEval; ++i)
+            in >> stat.Jvalues[i];
+        stat.difflog = arma::mat(nbPolPar, nbEval);
+        for (int i = 0; i < nbPolPar; ++i)
+        {
+            for (int j = 0; j < nbEval; ++j)
+            {
+                in >> stat.difflog(i,j);
+            }
+        }
+        return in;
+    }
+};
+
+struct PGPEIterationStats
+{
+    arma::vec metaParams;
+    std::vector<PGPEPolicyIndividual> individuals;
+
+public:
+    friend std::ostream& operator<<(std::ostream& out, PGPEIterationStats& stat)
+    {
+        int i, ie = stat.individuals.size();
+        out << stat.metaParams.n_elem << " ";
+        for (i = 0; i < stat.metaParams.n_elem; ++i)
+        {
+            out << stat.metaParams[i] << " ";
+        }
+        out << std::endl;
+        out << ie << std::endl;
+        for (i = 0; i < ie; ++i)
+        {
+            out << stat.individuals[i];
+        }
+        return out;
+    }
+
+    void addIndividual(PGPEPolicyIndividual& individual)
+    {
+        individuals.push_back(individual);
+    }
+
+};
+
+class PGPEStatistics : public std::vector<PGPEIterationStats>
+{
+public:
+    friend std::ostream& operator<<(std::ostream& out, PGPEStatistics& stat)
+    {
+        int i, ie = stat.size();
+        out << ie << std::endl;
+        for (i = 0; i < ie; ++i)
+        {
+            out << stat[i];
+        }
+        return out;
+    }
+};
+
 template<class ActionC, class StateC>
 class PGPE: public Agent<ActionC, StateC>
 {
@@ -43,7 +146,12 @@ public:
         : dist(dist), policy(policy),
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
           epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false)
-    {}
+    {
+        // create statistic for first iteration
+        PGPEIterationStats trace;
+        trace.metaParams = dist.getParameters();
+        traces.push_back(trace);
+    }
 
     virtual ~PGPE()
     {}
@@ -52,14 +160,19 @@ public:
 public:
     void initEpisode(const StateC& state, ActionC& action)
     {
+        std::cout << "##InitEpisode" << std::endl;
         df = 1.0;    //reset discount factor
-        Jep.zeros(); //reset policy score
         if (epiCount == 0)
         {
             //obtain new parameters
             arma::vec new_params = dist();
             //set to policy
             policy.setParameters(new_params);
+
+            //create new policy individual
+            PGPEPolicyIndividual polind(new_params, nbEpisodesToEvalPolicy);
+            int dim = traces.size() - 1;
+            traces[dim].individuals.push_back(polind);
         }
         sampleAction(state, action);
     }
@@ -86,6 +199,7 @@ public:
 
     virtual void endEpisode(const Reward& reward)
     {
+        std::cout << "###End Episode (reward " << reward[0] << ")" << std::endl;
         for (int i = 0; i < Jep.n_elem; ++i)
             Jep[i] += df * reward[i];
         this->endEpisode();
@@ -94,13 +208,30 @@ public:
     virtual void endEpisode()
     {
 
+
+        std::cout << "###End Episode (no reward)" << std::endl;
+
         const arma::vec& theta = policy.getParameters();
         arma::vec dlogdist = dist.difflog(theta); //\nabla \log D(\theta|\rho)
-        std::cerr << diffObjFunc[0] << std::endl;
-        std::cout << "---------" << std::endl;
-        std::cerr << dlogdist << std::endl;
+        std::cerr << "diffObjFunc: ";
+        std::cerr << diffObjFunc[0].t();
+        std::cout << "DLogDist(rho):";
+        std::cerr << dlogdist.t() << std::endl;
+        std::cout << "Jep:";
+        std::cerr << Jep.t() << std::endl;
+
+        //save actual policy performance
+        int dim = traces.size() - 1;
+        PGPEPolicyIndividual& polind = traces[dim].individuals[polCount];
+        polind.Jvalues[epiCount] = Jep[0];
+
+
         for (int i = 0; i < Jep.n_elem; ++i)
             diffObjFunc[i] += dlogdist*Jep[i];
+
+        std::cerr << "................\n";
+        std::cerr << traces;
+        std::cerr << "................\n";
 
 
         //last episode is the number epiCount+1
@@ -114,10 +245,18 @@ public:
 
         if (polCount == nbPoliciesToEvalMetap)
         {
+            //HERE a new run starts
+
 
             //update meta-distribution
             diffObjFunc[0] *= step_length/polCount;
+            if (useDirection)
+                diffObjFunc[0] = arma::normalise(diffObjFunc[0]);
             dist.update(diffObjFunc[0]);
+
+            std::cout << "diffObj: " << diffObjFunc[0].t();
+            std::cout << "Parameters:\n" << std::endl;
+            std::cout << dist.getParameters() << std::endl;
 
 
             //reset counters and gradient
@@ -125,6 +264,11 @@ public:
             epiCount = 0;
             for (int i = 0; i < Base::task.rewardDim; ++i)
                 diffObjFunc[i].zeros();
+
+            // create statistic for first iteration
+            PGPEIterationStats trace;
+            trace.metaParams = dist.getParameters();
+            traces.push_back(trace);
         }
     }
 
@@ -159,6 +303,7 @@ private:
     arma::vec Jep;
     std::vector<arma::vec> diffObjFunc;
     bool useDirection;
+    PGPEStatistics traces;
 
 };
 

@@ -47,7 +47,7 @@ void NLSSettings::defaultSettings(NLSSettings& settings)
     settings.gamma = 0.95;
     settings.continuosStateDim = 2;
     settings.continuosActionDim = 1;
-    settings.rewardDim = 2;
+    settings.rewardDim = 1;
     settings.finiteStateDim = -1;
     settings.finiteActionDim = -1;
     settings.isFiniteHorizon = false;
@@ -85,7 +85,7 @@ void NLSSettings::ReadFromStream(istream &in)
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
-/// DAM ENVIRONMENTS
+/// NLS ENVIRONMENTS
 ///////////////////////////////////////////////////////////////////////////////////////
 
 NLS::NLS()

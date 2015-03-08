@@ -27,6 +27,7 @@
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
+#include "basis/PolynomialFunction.h"
 
 #include <iostream>
 #include <iomanip>
@@ -46,9 +47,9 @@ int main(int argc, char *argv[])
     DenseState s(1);
     mdp.getInitialState(s);
 
-    arma::vec mean(2);
-    mean[0] = 10;
-    arma::mat cov(2,2, arma::fill::eye);
+    arma::vec mean(1);
+    mean[0] = -0.1;
+    arma::mat cov(1,1, arma::fill::eye);
 
     ParametricNormal dist(mean,cov);
 
@@ -63,14 +64,17 @@ int main(int argc, char *argv[])
 //                  << p.first << ' ' << std::string(p.second/200, '*') << '\n';
 //    }
 
+
+    PolynomialFunction* pf = new PolynomialFunction(1,1);
+    cout << *pf << endl;
     DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1,1);
+//    basis->GeneratePolynomialBasisFunctions(1,1);
+    basis.push_back(pf);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
 
-    arma::vec init_params(2);
+    arma::vec init_params(1);
     init_params[0] = -0.1;
-    init_params[1] = -0.1;
 
     regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
@@ -80,15 +84,14 @@ int main(int argc, char *argv[])
     cout << "Action: " << policy(s) << endl;
 
 
-    int nbepperpol = 10, nbpolperupd = 100;
+    int nbepperpol = 1, nbpolperupd = 3;
     PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd,0.01);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
-    int nbUpdates = 40;
+    int nbUpdates = 2;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
-    episodes = 10;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
