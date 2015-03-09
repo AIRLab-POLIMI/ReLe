@@ -32,7 +32,7 @@ namespace ReLe
 
 Rocky::Rocky() :
     ContinuousMDP(STATESIZE, 3, 1, false, true), dt(0.2),
-    maxOmega(M_PI), maxV(10)
+    maxOmega(M_PI), maxV(10), maxOmegar(M_PI), maxVr(10), predictor(dt)
 {
     //TODO parameter in the constructor
     vec2 spot;
@@ -44,55 +44,32 @@ Rocky::Rocky() :
 void Rocky::step(const DenseAction& action, DenseState& nextState,
                  Reward& reward)
 {
+    //action threshold
     double v = utils::threshold(action[0], maxV);
     double omega = utils::threshold(action[1], maxOmega);
     bool eat = (action[3] > 0 && v == 0 && omega == 0) ? true : false;
 
-    //positions
-    vec2 chickenPosition = currentState.rows(span(x, y));
-    vec2 rockyRelPosition = currentState.rows(span(xr, yr));
+    //Compute rocky control using chicken pose prediction
+    double omegar;
+    double vr;
+    computeRockyControl(omegar, vr);
+
+    //Update rocky state
+    double xrabs, yrabs;
+    updateRockyPose(omegar, xrabs, vr, yrabs);
 
     //update chicken position
-    double thetaM = (2 * currentState[theta] + omega*dt) /2;
-    currentState[x] += v * cos(thetaM) * dt;
-    currentState[y] += v * sin(thetaM) * dt;
-    currentState[theta] = utils::normalizeAngle(
-                              currentState[theta] + omega * dt);
+    updateChickenPose(omega, v);
+
+    //update rocky relative position
+    currentState[xr] = xrabs - currentState[x];
+    currentState[yr] = yrabs - currentState[y];
 
     //Compute sensors
-    currentState[energy] = utils::threshold(currentState[energy] - 1, 0, 100);
-    currentState[food] = 0;
-
-    for (auto& spot : foodSpots)
-    {
-        if (norm(chickenPosition - spot) < 0.5)
-        {
-            currentState[food] = 1;
-
-            if (eat)
-            {
-                currentState[energy] = utils::threshold(currentState[energy] + 5, 0, 100);
-            }
-
-            break;
-        }
-    }
+    computeSensors(eat);
 
     //Compute reward
-    if (norm(rockyRelPosition) < 0.4)
-    {
-        reward[0] = -100;
-        currentState.setAbsorbing(true);
-    }
-    else if (norm(chickenPosition) < 0.4 && currentState[energy] > 0)
-    {
-        reward[0] = currentState[energy];
-        currentState.setAbsorbing(true);
-    }
-    else
-    {
-        reward[0] = 0;
-    }
+    computeReward(reward);
 }
 
 void Rocky::getInitialState(DenseState& state)
@@ -112,6 +89,123 @@ void Rocky::getInitialState(DenseState& state)
     currentState[thetar] = 0;
 
     state = currentState;
+}
+
+void Rocky::computeRockyControl(double& omegar, double& vr)
+{
+    //Predict chicken position
+    double xhat, yhat, thetaDirhat;
+    predictor.predict(xhat, yhat, thetaDirhat);
+
+    //Compute rocky control signals
+    double deltaTheta = utils::normalizeAngle(thetaDirhat - thetar);
+    double omegarOpt = deltaTheta / dt;
+
+    omegar = max(-maxOmegar, min(maxOmegar, omegarOpt));
+
+    if (abs(deltaTheta) > M_PI / 2)
+    {
+        vr = 0;
+    }
+    else if (abs(deltaTheta) > M_PI / 4)
+    {
+        vr = maxV / 2;
+    }
+    else
+    {
+        vr = maxV;
+    }
+}
+
+void Rocky::updateRockyPose(double omegar, double& xrabs, double vr,
+                            double& yrabs)
+{
+    vec2 chickenPosition = currentState.rows(span(x, y));
+    vec2 rockyRelPosition = currentState.rows(span(xr, yr));
+
+    double thetarM = (2 * currentState[thetar] + omegar * dt) / 2;
+    currentState[thetar] = utils::normalizeAngle(
+                               currentState[thetar] + omegar * dt);
+    xrabs = chickenPosition[0] + rockyRelPosition[0] + vr * cos(thetarM) * dt;
+    yrabs = chickenPosition[1] + rockyRelPosition[1] + vr * sin(thetarM) * dt;
+}
+
+void Rocky::updateChickenPose(double omega, double v)
+{
+    double thetaM = (2 * currentState[theta] + omega * dt) / 2;
+    currentState[x] += v * cos(thetaM) * dt;
+    currentState[y] += v * sin(thetaM) * dt;
+    currentState[theta] = utils::normalizeAngle(
+                              currentState[theta] + omega * dt);
+}
+
+void Rocky::computeSensors(bool eat)
+{
+    vec2 chickenPosition = currentState.rows(span(x, y));
+
+    currentState[energy] = utils::threshold(currentState[energy] - 1, 0, 100);
+    currentState[food] = 0;
+
+    for (auto& spot : foodSpots)
+    {
+        if (norm(chickenPosition - spot) < 0.5)
+        {
+            currentState[food] = 1;
+
+            if (eat)
+            {
+                currentState[energy] = utils::threshold(
+                                           currentState[energy] + 5, 0, 100);
+            }
+
+            break;
+        }
+    }
+}
+
+void Rocky::computeReward(Reward& reward)
+{
+    vec2 chickenPosition = currentState.rows(span(x, y));
+    vec2 rockyRelPosition = currentState.rows(span(xr, yr));
+
+    if (norm(rockyRelPosition) < 0.4)
+    {
+        reward[0] = -100;
+        currentState.setAbsorbing(true);
+    }
+    else if (norm(chickenPosition) < 0.4 && currentState[energy] > 0)
+    {
+        reward[0] = currentState[energy];
+        currentState.setAbsorbing(true);
+    }
+    else
+    {
+        reward[0] = 0;
+    }
+}
+
+Rocky::Predictor::Predictor(double dt) :
+    dt(dt)
+{
+    reset();
+}
+void Rocky::Predictor::reset()
+{
+    thetaM = 0;
+    v = 0;
+}
+
+void Rocky::Predictor::saveLastValues(double thetaM, double v)
+{
+    this->thetaM = thetaM;
+    this->v = v;
+}
+
+void Rocky::Predictor::predict(double& xhat, double& yhat, double& thetaDirhat)
+{
+    xhat = x + v * cos(thetaM) * dt;
+    yhat = y + v * sin(thetaM) * dt;
+    thetaDirhat = atan2(yhat - (y + yr), xhat - (x + xr));
 }
 
 }

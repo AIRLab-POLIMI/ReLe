@@ -6,7 +6,6 @@
  figure(2)
  clf(2)
 
-
 %% now start the test
 
 
@@ -21,49 +20,61 @@ yr = 5;
 thetar = 0;
 
 %data for the controller
-xold = 0;
-yold = 0;
+thetaMold = 0;
+vold = 0;
 
 v = 10;
-vrmax = 11;
+vrmax = 10;
 omegarmax = pi;
 
 
-omega = pi;
+omega = 2*pi;
 
-steps = 1000;
+steps = 10000;
 traj = zeros(steps, 3);
 rockytraj = zeros(steps, 3);
+deltatraj = zeros(steps, 1);
 
 %while(true)
-for i=1:steps
-    
- %Pursuer dynamics
+for i=1:steps    
+ %% Pursuer dynamics
  
  %Step 1: pursuer prevision
- xhat = x + (x - xold);
- yhat = y + (y - yold);
- thetaDirhat = atan2(yhat - (y + yr), xhat - (x + xr));
+ xhat = x + vold * cos(thetaMold) * dt;
+ yhat = y + vold * sin(thetaMold) * dt;
+ thetaDirhat = wrapToPi(atan2(yhat - (y + yr), xhat - (x + xr)));
  
  %Step 2: compute the inputs
- omegarOpt = mod(thetaDirhat - thetar, 2*pi)/dt;
+ deltaTheta = wrapToPi(thetaDirhat - thetar); 
+ 
+ omegarOpt = deltaTheta/dt;
  omegar = max(-omegarmax, min(omegarmax, omegarOpt));
+ 
+ if(abs(deltaTheta) > pi/2)
+     vr = 0;
+ else if(abs(deltaTheta) > pi/4)
+        vr = vrmax/2;
+     else
+        vr = vrmax; 
+     end
+ end
  
  %Step 3: update pursuer state
  thetarM = (2*thetar + omegar*dt)/2;
- thetar = thetar + omegar * dt;
- xrabs = x + xr + vrmax * cos(thetarM) * dt;
- yrabs = y + yr + vrmax * sin(thetarM) * dt;
+ thetar = wrapToPi(thetar + omegar * dt);
+ xrabs = x + xr + vr * cos(thetarM) * dt;
+ yrabs = y + yr + vr * sin(thetarM) * dt;
  
- % update old values
- xold = x;
- yold = y;
+omega = pi*sin(i*pi/512);
+%omega = i;
+%omega = 0;
+%omega = log(x^2+y^2 +1 );
     
- %Evader dinamics
+ %% Evader dinamics
  thetaM = (2*theta + omega*dt)/2;
  x = x + v * cos(thetaM) * dt;
  y = y + v * sin(thetaM) * dt;
- theta = theta + omega * dt;
+ theta = wrapToPi(theta + omega * dt);
  
  %Compute pursuer relative position
  xr = xrabs - x;
@@ -71,21 +82,30 @@ for i=1:steps
  
  traj(i,:) = [x, y, theta];
  rockytraj(i, :) = [xrabs, yrabs, thetar];
+ deltatraj(i) = norm([xr, yr]);
+ 
+ %% Pursuer save old values for prediction
+ thetaMold = thetaM;
+ vold = v;
  
 end
 
 figure(2)
 hold on
-plot(mod(traj(:, 3), 2*pi), 'b');
-plot(mod(rockytraj(:, 3), 2*pi), 'm');
+plot(traj(:, 3), 'b');
+plot(rockytraj(:, 3), 'm');
+
+figure(3)
+plot(deltatraj);
 
 figure(1)
 hold off
 plot(traj(:, 1), traj(:, 2), 'b');
 hold on
 plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
-%axis equal
-axis([-10 10 0 20])
+axis equal
+%axis([-10 10 -10 10])
+
 
 %waitforbuttonpress
 %end

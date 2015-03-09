@@ -93,6 +93,7 @@ void EpisodicREPS::updateSamples(double r)
 {
     ParameterSample sample(theta, r);
     samples.push_back(sample);
+    maxR = max(maxR, r);
 }
 
 void EpisodicREPS::updatePolicy()

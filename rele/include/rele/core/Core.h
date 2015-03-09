@@ -28,9 +28,6 @@
 #include "Agent.h"
 #include "Logger.h"
 
-//TODO: move all code in cpp and include at the bottom of the file
-//TODO: or leave the code in this file
-
 namespace ReLe
 {
 

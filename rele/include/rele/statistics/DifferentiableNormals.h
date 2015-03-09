@@ -46,7 +46,7 @@ public:
 
     // Specific Normal policy interface //TODO check this!!!
 public:
-    inline void setMeanAndCovariance(const arma::vec& mean, const arma::vec cov)
+    inline void setMeanAndCovariance(const arma::vec& mean, const arma::mat& cov)
     {
         this->mean = mean;
         this->Cov = cov;
