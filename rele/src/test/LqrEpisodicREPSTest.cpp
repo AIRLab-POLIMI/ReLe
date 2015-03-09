@@ -51,7 +51,6 @@ int main(int argc, char *argv[])
 
     DenseBasisVector basis;
     basis.generatePolynomialBasisFunctions(1,1);
-    cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
 
     arma::vec init_params(2);

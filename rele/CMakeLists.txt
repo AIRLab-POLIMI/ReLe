@@ -115,6 +115,9 @@ target_link_libraries(lqr_PGPE rele)
 add_executable(lqr_REPS src/test/LqrEpisodicREPSTest.cpp)
 target_link_libraries(lqr_REPS rele)
 
+add_executable(rocky_REPS src/test/RockyTest.cpp)
+target_link_libraries(rocky_REPS rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

@@ -21,17 +21,43 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "Rocky.h"
-
+#include "policy_search/REPS/EpisodicREPS.h"
+#include "DifferentiableNormals.h"
+#include "Core.h"
+#include "parametric/differentiable/LinearPolicy.h"
+#include "BasisFunctions.h"
 
 #include <iostream>
 
 using namespace std;
+using namespace ReLe;
+using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    ReLe::Rocky rocky;
+    Rocky rocky;
+
+    arma::vec mean(2);
+    mean[0] = 10;
+    arma::mat cov(2,2, arma::fill::eye);
+
+    ParametricNormal dist(mean,cov);
+
+    DenseBasisVector basis;
+    basis.generatePolynomialBasisFunctions(1,1);
+    LinearApproximator regressor(rocky.getSettings().continuosStateDim, basis);
+
+    arma::vec init_params(2);
+    init_params[0] = -0.1;
+    init_params[1] = -0.1;
+
+    regressor.setParameters(init_params);
+    DetLinearPolicy<DenseState> policy(&regressor);
+
+    EpisodicREPS agent(dist, policy);
+
+    Core<DenseAction, DenseState> core(rocky, agent);
 
     return 0;
 
