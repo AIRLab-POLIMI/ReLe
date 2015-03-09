@@ -27,6 +27,7 @@
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
+#include "basis/PolynomialFunction.h"
 
 #include <iostream>
 #include <iomanip>
@@ -41,22 +42,23 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    LQR mdp(1,1);
+    LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
-    arma::vec mean(2);
-    mean[0] = 10;
-    arma::mat cov(2,2, arma::fill::eye);
+    arma::vec mean(1);
+    mean[0] = -0.1;
+    arma::mat cov(1,1, arma::fill::eye);
 
     ParametricNormal dist(mean,cov);
 
+    PolynomialFunction* pf = new PolynomialFunction(1,1);
+    cout << *pf << endl;
     DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1,1);
+    basis.push_back(pf);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
 
-    arma::vec init_params(2);
+    arma::vec init_params(1);
     init_params[0] = -0.1;
-    init_params[1] = -0.1;
 
     regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);

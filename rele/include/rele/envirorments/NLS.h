@@ -26,6 +26,14 @@
 
 #include "ContinuousMDP.h"
 
+/**
+ * Environment designed according to
+ *
+ * Vlassis, Toussaint, Kontes, Piperidis
+ * Learning Model-free Robot Control by a Monte Carlo EM Algorithm
+ * Autonomous Robots 27(2):123-130, 2009
+ */
+
 namespace ReLe
 {
 
@@ -46,9 +54,6 @@ public:
     virtual void ReadFromStream(std::istream& in);
 };
 
-//Vlassis, Toussaint, Kontes, Piperidis
-//Learning Model-free Robot Control by a Monte Carlo EM Algorithm
-//Autonomous Robots 27(2):123-130, 2009
 class NLS: public ContinuousMDP
 {
 public:

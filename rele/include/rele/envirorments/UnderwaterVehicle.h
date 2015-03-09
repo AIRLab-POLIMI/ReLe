@@ -30,7 +30,7 @@
 
 
 /**
- * Plant designed according to the paper
+ * Environment designed according to the paper
  *
  * Roland Hafner, Martin Riedmiller
  * Reinforcement learning in feedback control

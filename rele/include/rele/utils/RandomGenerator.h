@@ -38,6 +38,14 @@ public:
         srand(seed);
         arma::arma_rng::set_seed(seed);
     }
+
+    void seed(long int seed)
+    {
+        srand(seed);
+        arma::arma_rng::set_seed(seed);
+        gen.seed(seed);
+    }
+
     std::mt19937 gen;
 };
 
@@ -98,6 +106,11 @@ public:
     {
         std::uniform_real_distribution<> dist(0, 1);
         return dist(gen.gen) < prob;
+    }
+
+    inline static void seed(long int seed)
+    {
+        gen.seed(seed);
     }
 
 private:
