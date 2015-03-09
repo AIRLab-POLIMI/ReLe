@@ -141,6 +141,156 @@ private:
 
 };
 
+/*
+template<>
+class Logger<DenseAction, DenseState>
+{
+public:
+
+    Logger(bool logTransitions, std::ostream& out = std::cout)
+        :logTransitions(logTransitions), dynamic(false), out(&out),
+         count(0)
+    {
+    }
+
+    Logger(bool logTransitions, std::string filename)
+        : logTransitions(logTransitions), dynamic(logTransitions),
+          out(nullptr), count(0)
+    {
+        if (logTransitions)
+        {
+            std::ofstream* ofs = new std::ofstream(filename, std::ios_base::out);
+
+            if (!ofs->is_open())
+            {
+                // do errorry things and deallocate ofs if necessary
+                delete ofs;
+            }
+            else
+            {
+                out = ofs;
+            }
+        }
+    }
+
+    virtual ~Logger()
+    {
+        if (dynamic)
+        {
+            std::ofstream* ofs = static_cast<std::ofstream*>(out);
+            ofs->close();
+            delete ofs;
+        }
+    }
+
+    void fopen(std::string filename)
+    {
+        if (logTransitions)
+        {
+            if (dynamic)
+            {
+                std::ofstream* ofs = static_cast<std::ofstream*>(out);
+                ofs->close();
+            }
+            dynamic = true;
+            std::ofstream* ofs = new std::ofstream(filename, std::ios_base::out);
+
+            if (!ofs->is_open())
+            {
+                // do errorry things and deallocate ofs if necessary
+                delete ofs;
+            }
+            else
+            {
+                out = ofs;
+            }
+            count = 0;
+        }
+    }
+
+    void print(std::string str)
+    {
+        if (logTransitions)
+        {
+            (*out) << str;
+        }
+    }
+
+    void log(const DenseState& xn)
+    {
+        cState = xn;
+    }
+
+    void log()
+    {
+        if (logTransitions)
+        {
+            (*out) << "\t" << 1;
+        }
+    }
+
+    void log(const Reward& r)
+    {
+        if (logTransitions)
+        {
+            printVec(r, *out);
+            (*out) << 1 << "\t" << 1;
+        }
+    }
+
+    void log(DenseState& xn, Reward& r)
+    {
+        if (logTransitions)
+        {
+            (*out) << "\t" << 0 << std::endl;
+        }
+    }
+
+    void log(const DenseAction& u, const DenseState& x, const Reward& r, unsigned int t)
+    {
+        if (count && logTransitions)
+            (*out) << "\t"  << 0 << std::endl;
+
+        if (logTransitions)
+        {
+            printVec(cState, *out);
+            printVec(u, *out);
+            printVec(r, *out);
+            if (cState.isAbsorbing())
+                (*out) << 1 << "\t" << 0;
+            else
+                (*out) << 0;
+
+
+        }
+        cState = x;
+        count++;
+    }
+
+    void printStatistics()
+    {
+
+    }
+
+private:
+    void printVec(const arma::vec& v, std::ostream& out)
+    {
+        for (int i = 0, ie = v.n_elem; i < ie; ++i)
+            out << v[i] << "\t";
+    }
+    void printVec(const Reward& v, std::ostream& out)
+    {
+        for (int i = 0, ie = v.size(); i < ie; ++i)
+            out << v[i] << "\t";
+    }
+
+protected:
+    bool logTransitions, dynamic;
+    std::ostream* out;
+    DenseState cState;
+    int count;
+};*/
+
 }
 
 #endif /* INCLUDE_UTILS_LOGGER_H_ */

@@ -51,7 +51,7 @@ void LQR::step(const DenseAction& action,
     const arma::vec& u = action;
     for (unsigned int i = 0, ie = Q.size(); i < ie; ++i)
     {
-        reward[i] = -(x.t()*Q[i]*x + u.t()*R[i]*u)[0];
+        reward[i] = -((x.t()*Q[i]*x + u.t()*R[i]*u)[0]);
     }
     x = A*x + B*u;
 
@@ -84,24 +84,27 @@ void LQR::initialize(unsigned int stateActionSize, unsigned int rewardSize, doub
         R.push_back(IdMtx);
     }
 
-    for (int i = 0, ie = stateActionSize; i < ie; ++i)
+    if (stateActionSize > 1)
     {
-        for (int j = 0, je = stateActionSize; j < je; ++j)
-        {
 
-            if (i == j)
+        for (int i = 0, ie = stateActionSize; i < ie; ++i)
+        {
+            for (int j = 0, je = stateActionSize; j < je; ++j)
             {
-                Q[i](j,j) = 1.0 - e;
-                R[i](j,j) = e;
-            }
-            else
-            {
-                Q[i](j,j) = e;
-                R[i](j,j) = 1.0 - e;
+
+                if (i == j)
+                {
+                    Q[i](j,j) = 1.0 - e;
+                    R[i](j,j) = e;
+                }
+                else
+                {
+                    Q[i](j,j) = e;
+                    R[i](j,j) = 1.0 - e;
+                }
             }
         }
     }
-
 }
 
 }

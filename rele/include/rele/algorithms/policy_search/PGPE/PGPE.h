@@ -27,7 +27,9 @@
 #include "Agent.h"
 #include "Distribution.h"
 #include "Policy.h"
+#include "Logger.h"
 #include <cassert>
+#include <iomanip>
 
 namespace ReLe
 {
@@ -93,6 +95,7 @@ public:
 struct PGPEIterationStats
 {
     arma::vec metaParams;
+    arma::vec metaGradient;
     std::vector<PGPEPolicyIndividual> individuals;
 
 public:
@@ -105,7 +108,11 @@ public:
             out << stat.metaParams[i] << " ";
         }
         out << std::endl;
-        out << ie << std::endl;
+        for (i = 0; i < stat.metaGradient.n_elem; ++i)
+        {
+            out << stat.metaGradient[i] << " ";
+        }
+        out << std::endl << ie << std::endl;
         for (i = 0; i < ie; ++i)
         {
             out << stat.individuals[i];
@@ -145,7 +152,8 @@ public:
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length)
         : dist(dist), policy(policy),
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
-          epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false)
+          runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false)/*,
+          logger(false, "PGPE_tracelog_r0_p0_e0.txt")*/
     {
         // create statistic for first iteration
         PGPEIterationStats trace;
@@ -160,10 +168,12 @@ public:
 public:
     void initEpisode(const StateC& state, ActionC& action)
     {
-        std::cout << "##InitEpisode" << std::endl;
+        //        std::cout << "##InitEpisode" << std::endl;
         df = 1.0;    //reset discount factor
         if (epiCount == 0)
         {
+            Jep.zeros();
+
             //obtain new parameters
             arma::vec new_params = dist();
             //set to policy
@@ -173,8 +183,15 @@ public:
             PGPEPolicyIndividual polind(new_params, nbEpisodesToEvalPolicy);
             int dim = traces.size() - 1;
             traces[dim].individuals.push_back(polind);
+
+            char f[555];
+            sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
+            //logger.fopen(f);
+            //logger.print("1 1 1\n");
         }
         sampleAction(state, action);
+        //logger.log(state);
+        cAction = action;
     }
 
     void sampleAction(const StateC& state, ActionC& action)
@@ -182,12 +199,15 @@ public:
         // TODO CONTROLLARE ASSEGNAMENTO
         arma::vec vect = policy(state);
         action.copy_vec(vect);
-//        for (int i = 0; i < vect.n_elem; ++i)
-//            action[i] = vect[i];
+        //        for (int i = 0; i < vect.n_elem; ++i)
+        //            action[i] = vect[i];
     }
 
     void step(const Reward& reward, const StateC& nextState, ActionC& action)
     {
+        //logger.log(cAction,nextState,reward,0);
+
+
         for (int i = 0; i < Jep.n_elem; ++i)
             Jep[i] += df * reward[i];
         df *= Base::task.gamma;
@@ -195,43 +215,46 @@ public:
         arma::vec vect = policy(nextState);
         for (int i = 0; i < vect.n_elem; ++i)
             action[i] = vect[i];
+
+        cAction = action;
+
     }
 
     virtual void endEpisode(const Reward& reward)
     {
-        std::cout << "###End Episode (reward " << reward[0] << ")" << std::endl;
+        //        std::cout << "###End Episode (reward " << reward[0] << ")" << std::endl;
         for (int i = 0; i < Jep.n_elem; ++i)
             Jep[i] += df * reward[i];
         this->endEpisode();
+
+        //logger.log(reward);
     }
 
     virtual void endEpisode()
     {
 
-
-        std::cout << "###End Episode (no reward)" << std::endl;
+        //logger.log();
+        //        std::cout << "###End Episode (no reward)" << std::endl;
 
         const arma::vec& theta = policy.getParameters();
         arma::vec dlogdist = dist.difflog(theta); //\nabla \log D(\theta|\rho)
-        std::cerr << "diffObjFunc: ";
-        std::cerr << diffObjFunc[0].t();
-        std::cout << "DLogDist(rho):";
-        std::cerr << dlogdist.t() << std::endl;
-        std::cout << "Jep:";
-        std::cerr << Jep.t() << std::endl;
+        //        std::cerr << "diffObjFunc: ";
+        //        std::cerr << diffObjFunc[0].t();
+        //        std::cout << "DLogDist(rho):";
+        //        std::cerr << dlogdist.t();
+        //        std::cout << "Jep:";
+        //        std::cerr << Jep.t() << std::endl;
 
         //save actual policy performance
         int dim = traces.size() - 1;
         PGPEPolicyIndividual& polind = traces[dim].individuals[polCount];
         polind.Jvalues[epiCount] = Jep[0];
+        for (int i = 0, ie = dlogdist.n_elem; i < ie; ++i)
+            polind.difflog(i, epiCount) = dlogdist(i);
 
 
         for (int i = 0; i < Jep.n_elem; ++i)
             diffObjFunc[i] += dlogdist*Jep[i];
-
-        std::cerr << "................\n";
-        std::cerr << traces;
-        std::cerr << "................\n";
 
 
         //last episode is the number epiCount+1
@@ -245,23 +268,33 @@ public:
 
         if (polCount == nbPoliciesToEvalMetap)
         {
-            //HERE a new run starts
-
 
             //update meta-distribution
-            diffObjFunc[0] *= step_length/polCount;
+            diffObjFunc[0] /= polCount;
+            //save gradient
+            //            std::cout << "diffObj: " << diffObjFunc[0].t();
+            traces[dim].metaGradient = diffObjFunc[0];
+
+            //use normalization?
             if (useDirection)
                 diffObjFunc[0] = arma::normalise(diffObjFunc[0]);
+
+            //set step length
+            diffObjFunc[0] *= step_length;
+
+            //update meta distribution
             dist.update(diffObjFunc[0]);
 
-            std::cout << "diffObj: " << diffObjFunc[0].t();
-            std::cout << "Parameters:\n" << std::endl;
-            std::cout << dist.getParameters() << std::endl;
+
+            //            std::cout << "diffObj: " << diffObjFunc[0].t();
+            //            std::cout << "Parameters:\n" << std::endl;
+            //            std::cout << dist.getParameters() << std::endl;
 
 
             //reset counters and gradient
             polCount = 0;
             epiCount = 0;
+            runCount++;
             for (int i = 0; i < Base::task.rewardDim; ++i)
                 diffObjFunc[i].zeros();
 
@@ -282,12 +315,19 @@ public:
         return this->useDirection;
     }
 
+    void printStatistics(std::string filename)
+    {
+        std::ofstream out(filename, std::ios_base::out);
+        out << std::setprecision(10);
+        out << traces;
+        out.close();
+    }
+
 
 protected:
     void init()
     {
         Jep = arma::vec(Base::task.rewardDim, arma::fill::zeros);
-        std::cerr << policy.getParametersSize() << std::endl;
         for (int i = 0; i < Base::task.rewardDim; ++i)
             diffObjFunc.push_back(arma::vec(policy.getParametersSize(), arma::fill::zeros));
 
@@ -298,12 +338,14 @@ private:
     DifferentiableDistribution& dist;
     ParametricPolicy<ActionC,StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy, nbPoliciesToEvalMetap;
-    unsigned int epiCount, polCount;
+    unsigned int runCount, epiCount, polCount;
     double df, step_length;
     arma::vec Jep;
     std::vector<arma::vec> diffObjFunc;
     bool useDirection;
     PGPEStatistics traces;
+    //Logger<ActionC,StateC> logger;
+    ActionC cAction;
 
 };
 
