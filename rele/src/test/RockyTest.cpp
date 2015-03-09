@@ -36,29 +36,34 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    Rocky rocky;
+	Rocky rocky;
 
-    arma::vec mean(2);
-    mean[0] = 10;
-    arma::mat cov(2,2, arma::fill::eye);
+	int dim = rocky.getSettings().continuosStateDim;
 
-    ParametricNormal dist(mean,cov);
+	arma::vec mean(dim);
+	arma::mat cov(dim, dim, arma::fill::eye);
 
-    DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1,1);
-    LinearApproximator regressor(rocky.getSettings().continuosStateDim, basis);
+	ParametricNormal dist(mean, cov);
 
-    arma::vec init_params(2);
-    init_params[0] = -0.1;
-    init_params[1] = -0.1;
+	DenseBasisVector basis;
+	basis.generatePolynomialBasisFunctions(1, dim - 1);
+	LinearApproximator regressor(dim, basis);
 
-    regressor.setParameters(init_params);
-    DetLinearPolicy<DenseState> policy(&regressor);
+	DetLinearPolicy<DenseState> policy(&regressor);
 
-    EpisodicREPS agent(dist, policy);
+	EpisodicREPS agent(dist, policy);
 
-    Core<DenseAction, DenseState> core(rocky, agent);
+	Core<DenseAction, DenseState> core(rocky, agent);
 
-    return 0;
+	int episodes = 40;
+	for (int i = 0; i < episodes; i++)
+	{
+		core.getSettings().episodeLenght = 100000;
+		core.getSettings().logTransitions = true;
+		cout << "starting episode" << endl;
+		core.runEpisode();
+	}
+
+	return 0;
 
 }
