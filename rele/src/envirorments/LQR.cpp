@@ -48,7 +48,6 @@ void LQR::step(const DenseAction& action,
                DenseState& nextState, Reward& reward)
 {
     arma::vec& x = currentState;
-    cout << "state: " << x.t();
     const arma::vec& u = action;
     for (unsigned int i = 0, ie = Q.size(); i < ie; ++i)
     {
@@ -58,9 +57,6 @@ void LQR::step(const DenseAction& action,
 
     nextState = currentState;
     nextState.setAbsorbing(false);
-    cout << "action: " << action.t();
-    cout << "nextstate: " << nextState.t();
-    cout << "reward: " << reward[0] << endl;
 }
 
 void LQR::getInitialState(DenseState& state)
