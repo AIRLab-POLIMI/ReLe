@@ -21,11 +21,11 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NLS.h"
-#include "policy_search/PGPE/PGPE.h"
+#include "LQR.h"
+#include "policy_search/NES/NES.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
+#include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "RandomGenerator.h"
@@ -43,53 +43,41 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    NLS mdp;
-    //with these settings
-    //max in ( -3.58, 10.5 ) -> J = 8.32093
-    //note that there are multiple optimal solutions
-    //TODO: verificare, serve interfaccia core per valutare una politica
+//    int dff = 4;
+//    arma::vec meand(dff,arma::fill::zeros);
+//    arma::mat covd = 12 * arma::eye(dff,dff);
+//    arma::mat cholm = arma::chol(covd);
+//    ParametricCholeskyNormal dd(dff, meand,cholm);
+//    arma::sp_mat fim = dd.FIM();
+//    cout << fim << endl;
+//    arma::sp_mat invfim = dd.inverseFIM();
+//    cout << invfim << endl;
 
-    int dim = mdp.getSettings().continuosStateDim;
-    cout << "dim: " << dim << endl;
+    LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
+
+    arma::vec mean(1);
+    mean[0] = -0.1;
+    arma::mat cov(1,1, arma::fill::eye);
+    cov *= 0.01;
+    ParametricCholeskyNormal dist(1, mean, cov);
 
 
-    //--- define meta distribution (high-level policy)
-    arma::vec mean(dim, arma::fill::zeros);
-    mean[0] = -0.42;
-    mean[1] =  0.42;
-    arma::mat cov(dim, dim, arma::fill::eye);
-    cov *= 0.1;
-    ParametricNormal dist(mean,cov);
-    //---
-
-
-    //--- define policy (low level)
+    PolynomialFunction* pf = new PolynomialFunction(1,1);
+    cout << *pf << endl;
     DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1,dim);
-    delete basis.at(0);
-    basis.erase(basis.begin());
-    cout << "--- Mean regressor ---" << endl;
+    basis.push_back(pf);
     cout << basis << endl;
-    LinearApproximator meanRegressor(dim, basis);
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
 
-    DenseBasisVector stdBasis;
-    stdBasis.generatePolynomialBasisFunctions(1,dim);
-    delete stdBasis.at(0);
-    stdBasis.erase(stdBasis.begin());
-    cout << "--- Standard deviation regressor ---" << endl;
-    cout << stdBasis << endl;
-    LinearApproximator stdRegressor(dim, stdBasis);
-    arma::vec stdWeights(stdRegressor.getParametersSize());
-    stdWeights.fill(0.5);
-    stdRegressor.setParameters(stdWeights);
+    arma::vec init_params(1);
+    init_params[0] = -0.1;
 
-
-    NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
-    //---
+    regressor.setParameters(init_params);
+    DetLinearPolicy<DenseState> policy(&regressor);
 
     int nbepperpol = 1, nbpolperupd = 10;
     bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    xNES<DenseAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
@@ -98,7 +86,7 @@ int main(int argc, char *argv[])
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = mdp.getSettings().horizon;
+        core.getSettings().episodeLenght = 50;
         //        cout << "starting episode" << endl;
         core.runEpisode();
     }

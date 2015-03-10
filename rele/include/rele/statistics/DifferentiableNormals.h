@@ -30,6 +30,12 @@ public:
 
     // DifferentiableDistribution interface
 public:
+
+    inline unsigned int getParametersSize()
+    {
+        return parameters.n_elem;
+    }
+
     inline virtual arma::vec& getParameters()
     {
         return parameters;
@@ -63,7 +69,7 @@ protected:
 
 protected:
     arma::vec parameters, mean;
-    arma::mat Cov, invCov;
+    arma::mat Cov, invCov, cholCov;
     double detValue;
 
 };
@@ -134,6 +140,37 @@ private:
 protected:
     double asVariance; //asymptotic variance
 
+
+};
+
+class ParametricCholeskyNormal : public ParametricNormal
+{
+
+public:
+    ParametricCholeskyNormal(unsigned int point_dim,
+                             arma::vec& initial_mean,
+                             arma::mat& initial_cholA);
+
+    virtual ~ParametricCholeskyNormal()
+    {}
+
+    // DifferentiableDistribution interface
+public:
+    arma::vec difflog(const arma::vec& point);
+    arma::mat diff2Log(const arma::vec& point);
+
+    arma::sp_mat FIM();
+    arma::sp_mat inverseFIM();
+
+    // WritableInterface interface
+public:
+    void writeOnStream(std::ostream &out);
+    void readFromStream(std::istream &in);
+
+
+    // ParametricNormal interface
+protected:
+    void updateInternalState();
 
 };
 

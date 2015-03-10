@@ -95,7 +95,6 @@ int main(int argc, char *argv[])
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = mdp.getSettings().horizon;
-        core.getSettings().logTransitions = true;
         cout << "starting episode" << endl;
         core.runEpisode();
     }

@@ -84,9 +84,8 @@ class DifferentiableDistribution : public Distribution
 
 public:
 
-    DifferentiableDistribution(unsigned int support_size,
-                               unsigned int param_size)
-        : Distribution(support_size), paramSize(param_size)
+    DifferentiableDistribution(unsigned int support_size)
+        : Distribution(support_size)
     { }
 
     virtual ~DifferentiableDistribution()
@@ -96,15 +95,10 @@ public:
      * @brief Parameters size
      * @return The size of the parameters
      */
-    inline unsigned int getParametersSize()
-    {
-        return paramSize;
-    }
+    virtual inline unsigned int getParametersSize() = 0;
 
     virtual arma::vec& getParameters() = 0;
 
-    //    virtual arma::vec draw() = 0;
-    //    virtual double probability(arma::vec& point) = 0;
     /**
      * Update the internal parameters according to the
      * given increment vector.
@@ -133,8 +127,18 @@ public:
      */
     virtual arma::mat diff2Log(const arma::vec& point) = 0;
 
-protected:
-    unsigned int paramSize;
+};
+
+
+class FisherInterface
+{
+public:
+    virtual ~FisherInterface()
+    {
+    }
+
+    virtual arma::sp_mat FIM() = 0;
+    virtual arma::sp_mat inverseFIM() = 0;
 };
 
 } //end namespace
