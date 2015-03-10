@@ -45,7 +45,7 @@ class Logger
 public:
     Logger()
     {
-    	strategy = NULL;
+        strategy = NULL;
     }
 
     void log(StateC& x)
@@ -62,20 +62,20 @@ public:
 
     void printStatistics()
     {
-    	if(!strategy)
-    	{
-    		PrintStrategy<ActionC, StateC> strategy;
-    		strategy.processData(samples);
-    	}
-    	else
-    	{
-    		strategy->processData(samples);
-    	}
+        if(!strategy)
+        {
+            PrintStrategy<ActionC, StateC> strategy;
+            strategy.processData(samples);
+        }
+        else
+        {
+            strategy->processData(samples);
+        }
     }
 
     void setStrategy(LoggerStrategy<ActionC, StateC>* strategy)
     {
-    	this->strategy = strategy;
+        this->strategy = strategy;
     }
 
 

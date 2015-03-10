@@ -27,7 +27,6 @@
 #include "Agent.h"
 #include "Distribution.h"
 #include "Policy.h"
-#include "Logger.h"
 #include <cassert>
 #include <iomanip>
 

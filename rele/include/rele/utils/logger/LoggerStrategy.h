@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_UTILS_LOGGERSTRATEGY_H_
 
 #include <iostream>
+#include "StateStatisticGenerator.h"
 
 namespace ReLe
 {
@@ -33,11 +34,11 @@ template<class ActionC, class StateC>
 class LoggerStrategy
 {
 public:
-	virtual void processData(
-				std::vector<Transition<ActionC, StateC>>& samples) = 0;
-	virtual ~LoggerStrategy()
-	{
-	}
+    virtual void processData(
+        std::vector<Transition<ActionC, StateC>>& samples) = 0;
+    virtual ~LoggerStrategy()
+    {
+    }
 
 };
 
@@ -45,59 +46,62 @@ template<class ActionC, class StateC>
 class PrintStrategy
 {
 public:
-	PrintStrategy(bool logTransitions = true) :
-				logTransitions(logTransitions)
-	{
+    PrintStrategy(bool logTransitions = true) :
+        logTransitions(logTransitions)
+    {
 
-	}
+    }
 
-	void processData(std::vector<Transition<ActionC, StateC>>& samples)
-	{
-		printTransitions(samples);
+    void processData(std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        printTransitions(samples);
 
-		std::cout << std::endl << std::endl << "--- statistics ---" << std::endl
-					<< std::endl;
+        std::cout << std::endl << std::endl << "--- statistics ---" << std::endl
+                  << std::endl;
 
-		//print initial state
-		std::cout << "- Initial State" << std::endl << "x(t0) = ["
-					<< samples[0].x << "]" << std::endl;
+        //print initial state
+        std::cout << "- Initial State" << std::endl << "x(t0) = ["
+                  << samples[0].x << "]" << std::endl;
 
-		printStateStatistics<StateC>();
-	}
-
-private:
-	void printTransitions(std::vector<Transition<ActionC, StateC>>& samples)
-	{
-		if (logTransitions)
-		{
-			std::cout << "- Transitions" << std::endl;
-			int t = 0;
-			for (auto sample : samples)
-			{
-				auto& x = sample.x;
-				auto& u = sample.u;
-				auto& xn = sample.xn;
-				Reward& r = sample.r;
-				std::cout << "t = " << t++ << ": (x = [" << x << "] u = [" << u << "] xn = ["
-							<< xn << "] r = [" << r << "])" << std::endl;
-			}
-		}
-	}
-
-	template<class U>
-	void printStateStatistics()
-	{
-
-	}
-
-	template<>
-	void PrintStrategy::printStateStatistics<FiniteState>()
-	{
-
-	}
+        printStateStatistics(samples);
+    }
 
 private:
-	bool logTransitions;
+    void printTransitions(std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        if (logTransitions)
+        {
+            std::cout << "- Transitions" << std::endl;
+            int t = 0;
+            for (auto sample : samples)
+            {
+                auto& x = sample.x;
+                auto& u = sample.u;
+                auto& xn = sample.xn;
+                Reward& r = sample.r;
+                std::cout << "t = " << t++ << ": x = [" << x << "] u = [" << u
+                          << "] xn = [" << xn << "] r = [" << r << "]"
+                          << std::endl;
+            }
+        }
+    }
+
+    void printStateStatistics(std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        std::cout << "- State Statistics" << std::endl;
+
+        for(auto& transition : samples)
+        {
+            stateStatisticsGenerator.addStateVisit(transition.xn);
+        }
+
+        std::cout << stateStatisticsGenerator.to_str() << std::endl;
+
+    }
+
+private:
+    bool logTransitions;
+    StateStatisticGenerator<StateC> stateStatisticsGenerator;
 
 };
 
@@ -105,21 +109,24 @@ template<class ActionC, class StateC>
 class WriteStrategy
 {
 public:
-	WriteStrategy(const std::string& path) :
-				path(path)
-	{
+    WriteStrategy(const std::string& path) :
+        path(path)
+    {
 
-	}
+    }
 
-	void processData(std::vector<Transition<ActionC, StateC>>& samples)
-	{
-		std::ofstream ofs(path);
+    void processData(std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        std::ofstream ofs(path); //TODO append?
 
-		//TODO print data as matrix
-	}
+        //TODO print data as matrix
+
+
+        ofs.close();
+    }
 
 private:
-	const std::string& path;
+    const std::string& path;
 };
 
 }
