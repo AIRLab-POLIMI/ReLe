@@ -31,12 +31,26 @@
 namespace ReLe
 {
 
+class TerminalCondition
+{
+public:
+    virtual ~TerminalCondition()
+    {
+    }
+
+    virtual bool checkCond() = 0;
+};
+
 template<class ActionC, class StateC>
 class Agent
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
+    Agent() : terminalCond(nullptr)
+    {
+    }
+
     virtual void initEpisode(const StateC& state, ActionC& action) = 0;
     virtual void sampleAction(const StateC& state, ActionC& action) = 0;
     virtual void step(const Reward& reward, const StateC& nextState,
@@ -55,6 +69,14 @@ public:
 
     }
 
+    virtual inline bool isTerminalConditionReached()
+    {
+        if (terminalCond == nullptr)
+            return false;
+        else
+            return terminalCond->checkCond();
+    }
+
 protected:
     virtual void init()
     {
@@ -64,6 +86,7 @@ protected:
 
 protected:
     EnvirormentSettings task;
+    TerminalCondition* terminalCond;
 };
 
 }
