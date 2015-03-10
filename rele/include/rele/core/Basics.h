@@ -103,7 +103,7 @@ public:
 
     inline virtual std::string to_str() const
     {
-        return "u = " + std::to_string(actionN);
+        return std::to_string(actionN);
     }
 
     inline virtual ~FiniteAction()
@@ -137,13 +137,12 @@ public:
     {
         const arma::vec& self = *this;
         std::stringstream ss;
-        ss << "u = [";
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
             ss << self[i] << ", ";
 
-        ss << self[i] << "]";
+        ss << self[i];
 
         return ss.str();
     }
@@ -226,7 +225,7 @@ public:
 
     inline virtual std::string to_str() const
     {
-        return "x = " + std::to_string(stateN);
+        return std::to_string(stateN);
     }
 
     inline virtual ~FiniteState()
@@ -255,13 +254,12 @@ public:
     {
         const arma::vec& self = *this;
         std::stringstream ss;
-        ss << "x = [";
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
             ss << self[i] << ", ";
 
-        ss << self[i] << "]";
+        ss << self[i];
 
         return ss.str();
     }
@@ -289,13 +287,11 @@ inline std::ostream& operator<<(std::ostream& os, const State& state)
 
 inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
-    os << "r = [";
-
     size_t i;
     for (i = 0; i + 1 < reward.size(); i++)
         os << reward[i] << ", ";
 
-    os << reward[i] << "]";
+    os << reward[i];
     return os;
 }
 

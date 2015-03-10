@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 100000;
-        core.getSettings().logTransitions = true;
         cout << "starting episode" << endl;
         core.runEpisode();
     }

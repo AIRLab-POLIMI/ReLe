@@ -26,29 +26,30 @@
 
 #include "Envirorment.h"
 #include "Agent.h"
-#include "Logger.h"
+#include "logger/Logger.h"
 
 namespace ReLe
 {
-
-struct CoreSettings
-{
-    bool logTransitions;
-    unsigned int episodeLenght;
-
-};
 
 template<class ActionC, class StateC>
 class Core
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+
+public:
+    struct CoreSettings
+    {
+        LoggerStrategy<ActionC, StateC>* loggerStrategy;
+        unsigned int episodeLenght;
+
+    };
+
 public:
     Core(Envirorment<ActionC, StateC>& envirorment,
          Agent<ActionC, StateC>& agent) :
         envirorment(envirorment), agent(agent)
     {
-        settings.logTransitions = false;
         agent.setTask(envirorment.getSettings());
     }
 
@@ -59,7 +60,7 @@ public:
 
     void runEpisode()
     {
-        Logger<ActionC, StateC> logger(settings.logTransitions);
+        Logger<ActionC, StateC> logger;
         StateC xn;
         ActionC u;
 
