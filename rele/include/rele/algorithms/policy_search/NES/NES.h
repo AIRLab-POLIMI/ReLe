@@ -88,31 +88,46 @@ public:
 
     void sampleAction(const StateC& state, ActionC& action)
     {
-        // TODO CONTROLLARE ASSEGNAMENTO
-        arma::vec vect = policy(state);
-        action.copy_vec(vect);
-        //        for (int i = 0; i < vect.n_elem; ++i)
-        //            action[i] = vect[i];
+        typename action_type<ActionC>::type_ref u = action;
+        u = policy(state);
+    }
+
+
+    template<class FiniteAction>
+    void sampleAction(const StateC& state, FiniteAction& action)
+    {
+        unsigned int u = policy(state);
+        action.setActionN(u);
     }
 
     void step(const Reward& reward, const StateC& nextState, ActionC& action)
     {
-        //save actual information
-//        logger.log(cAction,nextState,reward,0);
-
-
         //calculate current J value
         Jep += df * reward[rewardId];
         //update discount factor
         df *= Base::task.gamma;
 
-        // TODO CONTROLLARE ASSEGNAMENTO PER RESTITUIRE L'AZIONE
-        arma::vec vect = policy(nextState);
-        for (int i = 0; i < vect.n_elem; ++i)
-            action[i] = vect[i];
+        typename action_type<ActionC>::type_ref u = action;
+        u = policy(nextState);
 
         //save action for logging operations
         cAction = action;
+    }
+
+    template<class FiniteAction>
+    void step(const Reward& reward, const StateC& nextState, FiniteAction& action)
+    {
+        //calculate current J value
+        Jep += df * reward[rewardId];
+        //update discount factor
+        df *= Base::task.gamma;
+
+        unsigned int u = policy(nextState);
+        action.setActionN(u);
+
+        //save action for logging operations
+        cAction = action;
+
     }
 
     virtual void endEpisode(const Reward& reward)
@@ -128,18 +143,9 @@ public:
 
     virtual void endEpisode()
     {
-        //logging operations
-//        logger.log();
 
         Jpol += Jep;
         Jep = 0.0;
-
-        //        std::cerr << "diffObjFunc: ";
-        //        std::cerr << diffObjFunc[0].t();
-        //        std::cout << "DLogDist(rho):";
-        //        std::cerr << dlogdist.t();
-        //        std::cout << "Jep:";
-        //        std::cerr << Jep.t() << std::endl;
 
         //save actual policy performance
         int dim = traces.size() - 1;
@@ -211,14 +217,20 @@ protected:
 
         //compute baseline
         arma::vec baseline = b_num;
-        if (useBaseline) {
+        if (useBaseline)
+        {
             for (int i = 0, ie = baseline.n_elem; i < ie; ++i)
-                if (b_den[i] != 0) {
+                if (b_den[i] != 0)
+                {
                     baseline[i] /= b_den[i];
-                } else {
+                }
+                else
+                {
                     baseline[i] = 0;
                 }
-        } else {
+        }
+        else
+        {
             baseline.zeros();
         }
 
@@ -255,7 +267,9 @@ protected:
         {
             arma::mat H = arma::solve(fisherMtx, diffObjFunc);
             tmp = H;
-        } else {
+        }
+        else
+        {
             std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
             arma::mat H = arma::pinv(fisherMtx);
             tmp = H * diffObjFunc;
