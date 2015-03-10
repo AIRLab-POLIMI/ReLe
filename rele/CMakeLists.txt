@@ -112,6 +112,9 @@ target_link_libraries(mountain_car rele)
 add_executable(lqr_PGPE src/test/LqrPGPETest.cpp)
 target_link_libraries(lqr_PGPE rele)
 
+add_executable(lqr_NES src/test/LqrNESTest.cpp)
+target_link_libraries(lqr_NES rele)
+
 add_executable(lqr_REPS src/test/LqrEpisodicREPSTest.cpp)
 target_link_libraries(lqr_REPS rele)
 

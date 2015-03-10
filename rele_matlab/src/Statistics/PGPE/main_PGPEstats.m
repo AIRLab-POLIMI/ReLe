@@ -1,4 +1,4 @@
-fn = '/home/matteo/Projects/github/ReLe/rele-build/PGPEStats.txt';
+fn = '/home/matteo/Projects/github/ReLe/rele-build/NESStats.txt';
 fp = fopen(fn,'r');
 stats = ReadPGPEStatistics(fp);
 stats
@@ -37,13 +37,14 @@ for i = 1:it
         nbep = length(stats(i).policies(p).J);
         J = zeros(nbep,1);
         for ep = 1:nbep
-            fn1 = ['/home/matteo/Projects/github/ReLe/rele-build/'...
-                'PGPE_tracelog_r' num2str(i-1) '_p' num2str(p-1) ...
-                '_e' num2str(ep-1) '.txt'];
-            A = dlmread(fn1);
-            data = ReadEpisodeBasedDataset(A);
-            J(ep) = sum(data.r .* (0.99*ones(1,length(data.r))).^(0:length(data.r)-1));
-            assert(abs(J(ep)-stats(i).policies(p).J(ep))<=abs(J(ep))*PREC);
+%             fn1 = ['/home/matteo/Projects/github/ReLe/rele-build/'...
+%                 'PGPE_tracelog_r' num2str(i-1) '_p' num2str(p-1) ...
+%                 '_e' num2str(ep-1) '.txt'];
+%             A = dlmread(fn1);
+%             data = ReadEpisodeBasedDataset(A);
+%             J(ep) = sum(data.r .* (0.99*ones(1,length(data.r))).^(0:length(data.r)-1));
+%             assert(abs(J(ep)-stats(i).policies(p).J(ep))<=abs(J(ep))*PREC);
+stats(i).policies(p).J
             J(ep) = stats(i).policies(p).J(ep);
         end
         J = mean(J);
@@ -56,3 +57,11 @@ for i = 1:it
     assert(v<=abs(grad(id))*PREC);
     fprintf('#IT %d: OK!!\n', i); 
 end
+
+%%
+A = rand(3,3);
+b = rand(3,1);
+inv(A)*b
+
+
+

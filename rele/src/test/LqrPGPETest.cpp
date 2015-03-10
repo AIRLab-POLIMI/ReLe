@@ -43,7 +43,6 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
     arma::vec mean(1);
@@ -67,8 +66,9 @@ int main(int argc, char *argv[])
     regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    int nbepperpol = 1, nbpolperupd = 100;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd,0.001);
+    int nbepperpol = 1, nbpolperupd = 10;
+    bool usebaseline = true;
+    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
