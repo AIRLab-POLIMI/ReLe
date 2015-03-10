@@ -89,9 +89,8 @@ void NLSSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 NLS::NLS()
-    : nlsConfig(),
-      ContinuousMDP(nlsConfig.continuosStateDim,nlsConfig.continuosActionDim,nlsConfig.rewardDim,
-                    nlsConfig.isFiniteHorizon, nlsConfig.isEpisodic, nlsConfig.gamma, nlsConfig.horizon),
+    : ContinuousMDP(2, 1, 1, false, false, 0.95, 80),
+      nlsConfig(),
       cState(nlsConfig.continuosStateDim)
 {
 }
@@ -124,10 +123,10 @@ void NLS::step(const DenseAction &action, DenseState &nextState, Reward &reward)
 
 void NLS::getInitialState(DenseState &state)
 {
-    state.setAbsorbing(false);
-    state[0] = RandomGenerator::sampleNormal(nlsConfig.pos0_mean, nlsConfig.pos0_std);
-    state[1] = RandomGenerator::sampleNormal(0.0, 1);
-    cState = state;
+    cState.setAbsorbing(false);
+    cState[0] = RandomGenerator::sampleNormal(nlsConfig.pos0_mean, nlsConfig.pos0_std);
+    cState[1] = RandomGenerator::sampleNormal(0.0, 1);
+    state = cState;
 }
 
 

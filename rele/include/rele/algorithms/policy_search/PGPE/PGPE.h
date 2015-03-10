@@ -167,7 +167,7 @@ public:
 
     // Agent interface
 public:
-    void initEpisode(const StateC& state, ActionC& action)
+    virtual void initEpisode(const StateC& state, ActionC& action)
     {
         df  = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
@@ -186,18 +186,12 @@ public:
             PGPEPolicyIndividual polind(new_params, nbEpisodesToEvalPolicy);
             int dim = traces.size() - 1;
             traces[dim].individuals.push_back(polind);
-
-            char f[555];
-            sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
-            //logger.fopen(f);
-            //logger.print("1 1 1\n");
         }
         sampleAction(state, action);
-        //logger.log(state);
         cAction = action;
     }
 
-    void sampleAction(const StateC& state, ActionC& action)
+    virtual void sampleAction(const StateC& state, ActionC& action)
     {
         typename action_type<ActionC>::type_ref u = action;
         u = policy(state);
@@ -211,7 +205,7 @@ public:
         action.setActionN(u);
     }
 
-    void step(const Reward& reward, const StateC& nextState, ActionC& action)
+    virtual void step(const Reward& reward, const StateC& nextState, ActionC& action)
     {
         //calculate current J value
         Jep += df * reward[rewardId];
@@ -286,17 +280,17 @@ public:
         }
     }
 
-    inline void setNormalization(bool flag)
+    inline virtual void setNormalization(bool flag)
     {
         this->useDirection = flag;
     }
 
-    inline bool isNormalized()
+    inline virtual bool isNormalized()
     {
         return this->useDirection;
     }
 
-    void printStatistics(std::string filename)
+    virtual void printStatistics(std::string filename)
     {
         std::ofstream out(filename, std::ios_base::out);
         out << std::setprecision(10);
@@ -306,7 +300,7 @@ public:
 
 
 protected:
-    void init()
+    virtual void init()
     {
         int dp = policy.getParametersSize();
         diffObjFunc = arma::vec(dp, arma::fill::zeros);
@@ -314,7 +308,7 @@ protected:
         history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
     }
 
-    void afterPolicyEstimate()
+    virtual void afterPolicyEstimate()
     {
         //average over episodes
         Jpol /= nbEpisodesToEvalPolicy;
@@ -343,14 +337,13 @@ protected:
         Jpol = 0.0;
     }
 
-    void afterMetaParamsEstimate()
+    virtual void afterMetaParamsEstimate()
     {
 
         //compute baseline
         double baseline = (b_den != 0 && useBaseline) ? b_num/b_den : 0.0;
 
         diffObjFunc.zeros();
-        fisherMtx.zeros();
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < polCount; ++i)
         {
@@ -391,7 +384,7 @@ protected:
         traces.push_back(trace);
     }
 
-private:
+protected:
     DifferentiableDistribution& dist;
     ParametricPolicy<ActionC,StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy, nbPoliciesToEvalMetap;
@@ -400,8 +393,6 @@ private:
     double Jep, Jpol;
     int rewardId;
     arma::vec diffObjFunc;
-    double b_num, b_den;
-    arma::mat fisherMtx;
     std::vector<arma::vec> history_dlogsist;
     arma::vec history_J;
 
@@ -409,6 +400,9 @@ private:
     bool useDirection, useBaseline;
     PGPEStatistics traces;
     ActionC cAction;
+
+private:
+    double b_num, b_den;
 
 };
 

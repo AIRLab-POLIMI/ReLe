@@ -52,11 +52,11 @@ struct EnvirormentSettings
 
     inline void WriteToStream(std::ostream& out) const
     {
-        out << finiteStateDim << " " << finiteActionDim << std::endl;
-        out << continuosStateDim << " " << continuosActionDim << std::endl;
+        out << finiteStateDim << "\t" << finiteActionDim << std::endl;
+        out << continuosStateDim << "\t" << continuosActionDim << std::endl;
         out << rewardDim << std::endl;
-        out << gamma << " " << isFiniteHorizon << " " << horizon;
-        out << isEpisodic << " " << isAverageReward << std::endl;
+        out << gamma << "\t" << isFiniteHorizon << "\t" << horizon << "\t";
+        out << isEpisodic << "\t" << isAverageReward << std::endl;
     }
 
     inline void ReadFromStream(std::istream& in)

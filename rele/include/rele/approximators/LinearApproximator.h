@@ -58,6 +58,11 @@ public:
         parameters = params;
     }
 
+    inline unsigned int getParametersSize()
+    {
+        return parameters.n_elem;
+    }
+
 private:
     arma::vec parameters;
     AbstractBasisMatrix& basis;
