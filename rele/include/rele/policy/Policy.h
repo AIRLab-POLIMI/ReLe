@@ -62,27 +62,14 @@ class ParametricPolicy: public Policy<ActionC, StateC>
 {
 public:
     virtual const arma::vec& getParameters() const = 0;
-//    {
-//        return w;
-//    }
-
     virtual const unsigned int getParametersSize() const = 0;
-//    {
-//        return w.n_elem;
-//    }
-
     virtual void setParameters(arma::vec& w) = 0;
-//    {
-//        this->w = w;
-//    }
 
     virtual ~ParametricPolicy()
     {
 
     }
 
-//protected:
-//    arma::vec w;
 };
 
 template<class ActionC, class StateC>
@@ -97,20 +84,6 @@ public:
 
     }
 };
-
-/*
-template<class ActionC, class StateC>
-class StochasticDifferentiablePolicy: public DifferentiablePolicy<ActionC, StateC>
-{
-public:
-	virtual arma::vec wmleUpdate(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
-
-    virtual ~StochasticDifferentiablePolicy()
-    {
-
-    }
-};*/
-
 
 } //end namespace
 
