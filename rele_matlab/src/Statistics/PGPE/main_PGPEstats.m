@@ -1,4 +1,4 @@
-fn = '/home/matteo/Projects/github/ReLe/rele-build/NESStats.txt';
+fn = '/home/matteo/Projects/github/ReLe/rele-build/PGPEStats.txt';
 fp = fopen(fn,'r');
 stats = ReadPGPEStatistics(fp);
 stats
@@ -16,6 +16,12 @@ close all
 stats(:).metaParams
 plot(1:length([stats(:).metaParams]), [stats(:).metaParams])
 
+% for i = 1:length(stats)
+%     v = [stats(i).policies(:).J];
+%     if mean(v) > 0
+%         disp(mean(v));
+%     end
+% end
 %%
 clc
 dim = 1;

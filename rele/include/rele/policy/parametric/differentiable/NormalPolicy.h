@@ -44,6 +44,20 @@ public:
 
     virtual arma::vec operator()(const arma::vec& state);
 
+
+    virtual inline std::string getPolicyName()
+    {
+        return "NormalPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy()
+    {
+        return "";
+    }
+
     // ParametricPolicy interface
 public:
     virtual inline const arma::vec &getParameters() const
@@ -76,7 +90,6 @@ protected:
     double mInitialStddev, mMean;
     LinearApproximator* approximator;
     bool clearRegressorOnExit;
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +125,20 @@ public:
 //            delete mpProjector;
             delete stdApproximator;
         }
+    }
+
+
+    virtual inline std::string getPolicyName()
+    {
+        return "NormalStateDependantStddevPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy()
+    {
+        return "";
     }
 
 protected:
