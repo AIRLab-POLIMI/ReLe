@@ -25,6 +25,7 @@
 #define INCLUDE_UTILS_LOGGER_H_
 
 #include "Basics.h"
+#include "Sample.h"
 
 #include <vector>
 #include <iostream>
@@ -38,37 +39,25 @@ class Logger
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
-public:
-    Logger(bool logTransitions)
+    struct Transition
     {
+        StateC x;
+        ActionC u;
+        StateC xn;
+        Reward r;
 
-    }
+        void init(const StateC& x)
+        {
+            this->x = x;
+        }
 
-    void log(StateC& xn)
-    {
-
-    }
-
-    void log(StateC& xn, Reward& r)
-    {
-
-    }
-
-    void log(ActionC& u, StateC& x, Reward& r, unsigned int t)
-    {
-
-    }
-
-    void printStatistics()
-    {
-
-    }
-
-};
-
-template<>
-class Logger<FiniteAction, FiniteState>
-{
+        void update(const ActionC& u, const StateC& xn, const Reward& r)
+        {
+            this->u = u;
+            this->xn = xn;
+            this->r = r;
+        }
+    };
 
 public:
     Logger(bool logTransitions) :
@@ -77,52 +66,82 @@ public:
 
     }
 
-    void log(FiniteState& xn)
+    void log(StateC& x)
     {
-        history.push_back(xn.getStateN());
+        transition.init(x);
     }
 
-    void log(FiniteState& xn, Reward& r)
+    void log(ActionC& u, StateC& xn, Reward& r)
     {
-        history.push_back(xn.getStateN());
-    }
-
-    void log(FiniteAction& u, FiniteState& xn, Reward& r, unsigned int t)
-    {
-        std::size_t x = history.back();
-        history.push_back(xn.getStateN());
-
-        if (logTransitions)
-            std::cout << "t = " << t << ": (x = " << x << ", " << u << ") -> "
-                      << " (" << xn << ", " << r << ")" << std::endl;
-
+        transition.update(u, xn, r);
+        samples.push_back(transition);
+        transition.init(xn);
     }
 
     void printStatistics()
     {
+        printTransitions();
+
         std::cout << std::endl << std::endl << "--- statistics ---" << std::endl
                   << std::endl;
 
-        std::cout << "- State Visits" << std::endl;
-        std::size_t totalVisits = history.size();
-        std::size_t countedVisits = 0;
-        for (std::size_t i = 0; countedVisits < totalVisits; i++)
-        {
-            std::size_t visits = std::count(history.begin(), history.end(), i);
-            std::cout << "x(" << i << ") = " << visits << std::endl;
-            countedVisits += visits;
-        }
-
+        //print initial state
         std::cout << "- Initial State" << std::endl << "x(t = 0): "
-                  << history[0] << std::endl;
+                  << samples[0].x << std::endl;
+
+        //printStateStatistics();
+
     }
 
 private:
+    void printTransitions()
+    {
+        if (logTransitions)
+        {
+            std::cout << "- Transitions" << std::endl;
+            int t = 0;
+            for (auto sample : samples)
+            {
+                auto& x = sample.x;
+                auto& u = sample.u;
+                auto& xn = sample.xn;
+                Reward& r = sample.r;
+                std::cout << "t = " << t++ << ": (" << x << " " << u
+                          << " " << xn << " " << r << ")"
+                          << std::endl;
+            }
+        }
+    }
+
+    /*template<class U>
+    void printStateStatistics()
+    {
+    }
+
+    template<>
+    void printStateStatistics<FiniteState>()
+    {
+        std::cout << "- State Visits" << std::endl;
+        std::size_t totalVisits = samples.size();
+        std::size_t countedVisits = 0;
+        for (std::size_t i = 0; countedVisits < totalVisits; i++)
+        {
+        	auto func = [] (const Transition& t) { return t.x.getStateN() == i; };
+            std::size_t visits = std::count_if(samples.begin(), samples.end(),
+                                               i);
+            std::cout << "x(" << i << ") = " << visits << std::endl;
+            countedVisits += visits;
+        }
+    }*/
+
+private:
     bool logTransitions;
-    std::vector<std::size_t> history;
+    Transition transition;
+    std::vector<Transition> samples;
 
 };
 
+/*
 template<>
 class Logger<DenseAction, DenseState>
 {
@@ -270,7 +289,7 @@ protected:
     std::ostream* out;
     DenseState cState;
     int count;
-};
+};*/
 
 }
 

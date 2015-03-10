@@ -155,8 +155,7 @@ public:
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
           runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false),
           Jep (0.0), Jpol(0.0), rewardId(reward_obj),
-          useBaseline(baseline),
-          logger(false, "PGPE_tracelog_r0_p0_e0.txt")
+          useBaseline(baseline)
     {
         // create statistic for first iteration
         PGPEIterationStats trace;
@@ -191,58 +190,70 @@ public:
 
             char f[555];
             sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
-            logger.fopen(f);
-            logger.print("1 1 1\n");
+            //logger.fopen(f);
+            //logger.print("1 1 1\n");
         }
         sampleAction(state, action);
-        logger.log(state);
+        //logger.log(state);
         cAction = action;
     }
 
     void sampleAction(const StateC& state, ActionC& action)
     {
-        // TODO CONTROLLARE ASSEGNAMENTO
-        arma::vec vect = policy(state);
-        action.copy_vec(vect);
-        //        for (int i = 0; i < vect.n_elem; ++i)
-        //            action[i] = vect[i];
+        typename action_type<ActionC>::type_ref u = action;
+        u = policy(state);
+    }
+
+
+    template<class FiniteAction>
+    void sampleAction(const StateC& state, FiniteAction& action)
+    {
+        unsigned int u = policy(state);
+        action.setActionN(u);
     }
 
     void step(const Reward& reward, const StateC& nextState, ActionC& action)
     {
-        //save actual information
-        logger.log(cAction,nextState,reward,0);
-
-
         //calculate current J value
         Jep += df * reward[rewardId];
         //update discount factor
         df *= Base::task.gamma;
 
-        // TODO CONTROLLARE ASSEGNAMENTO PER RESTITUIRE L'AZIONE
-        arma::vec vect = policy(nextState);
-        for (int i = 0; i < vect.n_elem; ++i)
-            action[i] = vect[i];
+        typename action_type<ActionC>::type_ref u = action;
+        u = policy(nextState);
 
         //save action for logging operations
         cAction = action;
     }
 
+
+    template<class FiniteAction>
+    void step(const Reward& reward, const StateC& nextState, FiniteAction& action)
+    {
+        //calculate current J value
+        Jep += df * reward[rewardId];
+        //update discount factor
+        df *= Base::task.gamma;
+
+        unsigned int u = policy(nextState);
+        action.setActionN(u);
+
+        //save action for logging operations
+        cAction = action;
+
+    }
+
     virtual void endEpisode(const Reward& reward)
     {
-        //log last reward
-        logger.log(reward);
-
         //add last contribute
         Jep += df * reward[rewardId];
         //perform remaining operation
         this->endEpisode();
+
     }
 
     virtual void endEpisode()
     {
-        //logging operations
-        logger.log();
 
         Jpol += Jep;
         Jep = 0.0;
@@ -398,7 +409,6 @@ private:
 
     bool useDirection, useBaseline;
     PGPEStatistics traces;
-    Logger<ActionC,StateC> logger;
     ActionC cAction;
 
 };

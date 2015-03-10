@@ -42,8 +42,8 @@ public:
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
           runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length),
           Jep (0.0), Jpol(0.0), rewardId(reward_obj),
-          useBaseline(baseline),
-          logger(false, "NES_tracelog_r0_p0_e0.txt")
+          useBaseline(baseline)
+//          logger(false, "NES_tracelog_r0_p0_e0.txt")
     {
         // create statistic for first iteration
         PGPEIterationStats trace;
@@ -76,13 +76,13 @@ public:
             int dim = traces.size() - 1;
             traces[dim].individuals.push_back(polind);
 
-            char f[555];
-            sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
-            logger.fopen(f);
-            logger.print("1 1 1\n");
+//            char f[555];
+//            sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
+//            logger.fopen(f);
+//            logger.print("1 1 1\n");
         }
         sampleAction(state, action);
-        logger.log(state);
+//        logger.log(state);
         cAction = action;
     }
 
@@ -98,7 +98,7 @@ public:
     void step(const Reward& reward, const StateC& nextState, ActionC& action)
     {
         //save actual information
-        logger.log(cAction,nextState,reward,0);
+//        logger.log(cAction,nextState,reward,0);
 
 
         //calculate current J value
@@ -118,7 +118,7 @@ public:
     virtual void endEpisode(const Reward& reward)
     {
         //log last reward
-        logger.log(reward);
+//        logger.log(reward);
 
         //add last contribute
         Jep += df * reward[rewardId];
@@ -129,7 +129,7 @@ public:
     virtual void endEpisode()
     {
         //logging operations
-        logger.log();
+//        logger.log();
 
         Jpol += Jep;
         Jep = 0.0;
@@ -311,7 +311,7 @@ private:
 
 
     PGPEStatistics traces;
-    Logger<ActionC,StateC> logger;
+//    Logger<ActionC,StateC> logger;
     ActionC cAction;
 
 

@@ -73,16 +73,15 @@ public:
         {
 
             envirorment.step(u, xn, r);
+            logger.log(u, xn, r);
 
             if(xn.isAbsorbing())
             {
                 agent.endEpisode(r);
-                logger.log(xn, r);
                 break;
             }
 
             agent.step(r, xn, u);
-            logger.log(u, xn, r, i);
         }
 
         if(!xn.isAbsorbing())

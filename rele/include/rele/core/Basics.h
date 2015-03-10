@@ -50,7 +50,7 @@ struct EnvirormentSettings
 
     unsigned int rewardDim;
 
-    inline virtual void WriteToStream(std::ostream& out) const
+    inline void WriteToStream(std::ostream& out) const
     {
         out << finiteStateDim << " " << finiteActionDim << std::endl;
         out << continuosStateDim << " " << continuosActionDim << std::endl;
@@ -59,7 +59,7 @@ struct EnvirormentSettings
         out << isEpisodic << " " << isAverageReward << std::endl;
     }
 
-    inline virtual void ReadFromStream(std::istream& in)
+    inline void ReadFromStream(std::istream& in)
     {
         in >> finiteStateDim >> finiteActionDim;
         in >> continuosStateDim >> continuosActionDim;
@@ -137,7 +137,7 @@ public:
     {
         const arma::vec& self = *this;
         std::stringstream ss;
-        ss << "x = [";
+        ss << "u = [";
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
