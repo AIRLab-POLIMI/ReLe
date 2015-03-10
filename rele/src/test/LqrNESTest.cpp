@@ -22,7 +22,7 @@
  */
 
 #include "LQR.h"
-#include "policy_search/PGPE/PGPE.h"
+#include "policy_search/NES/NES.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
@@ -66,10 +66,9 @@ int main(int argc, char *argv[])
     regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    int nbepperpol = 1, nbpolperupd = 10;
-    bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
-    agent.setNormalization(true);
+    int nbepperpol = 1, nbpolperupd = 40;
+    bool usebaseline = false;
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1e-3, usebaseline);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
@@ -78,10 +77,11 @@ int main(int argc, char *argv[])
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
+        core.getSettings().logTransitions = false;
         //        cout << "starting episode" << endl;
         core.runEpisode();
     }
-    agent.printStatistics("PGPEStats.txt");
+    agent.printStatistics("NESStats.txt");
 
     return 0;
 }

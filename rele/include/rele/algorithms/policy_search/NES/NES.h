@@ -21,141 +21,29 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef PGPE_H_
-#define PGPE_H_
+#ifndef NES_H_
+#define NES_H_
 
-#include "Agent.h"
-#include "Distribution.h"
-#include "Policy.h"
-#include "Logger.h"
-#include <cassert>
-#include <iomanip>
+#include "policy_search/PGPE/PGPE.h"
 
 namespace ReLe
 {
 
-class PGPEPolicyIndividual
-{
-public:
-    arma::vec Pparams;  //policy parameters
-    arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
-    arma::mat difflog;
-
-public:
-    PGPEPolicyIndividual(arma::vec& polp, int nbEval)
-        :Pparams(polp), Jvalues(nbEval), difflog(polp.n_elem, nbEval)
-    {}
-
-    friend std::ostream& operator<<(std::ostream& out, PGPEPolicyIndividual& stat)
-    {
-        int nparams = stat.Pparams.n_elem;
-        int nepisodes = stat.Jvalues.n_elem;
-        out << nparams;
-        for (int i = 0; i < nparams; ++i)
-            out << " " << stat.Pparams[i];
-        out << std::endl;
-        out << nepisodes;
-        for (int i = 0; i < nepisodes; ++i)
-            out << " " << stat.Jvalues[i];
-        out << std::endl;
-        for (int i = 0; i < nepisodes; ++i)
-        {
-            for (int j = 0; j < nparams; ++j)
-            {
-                out << stat.difflog(j,i) << " ";
-            }
-            out << std::endl;
-        }
-        return out;
-    }
-
-    friend std::istream& operator>>(std::istream& in, PGPEPolicyIndividual& stat)
-    {
-        int i, nbPolPar, nbEval;
-        in >> nbPolPar;
-        stat.Pparams = arma::vec(nbPolPar);
-        for (i = 0; i < nbPolPar; ++i)
-            in >> stat.Pparams[i];
-        in >> nbEval;
-        stat.Jvalues = arma::vec(nbEval);
-        for (i = 0; i < nbEval; ++i)
-            in >> stat.Jvalues[i];
-        stat.difflog = arma::mat(nbPolPar, nbEval);
-        for (int i = 0; i < nbPolPar; ++i)
-        {
-            for (int j = 0; j < nbEval; ++j)
-            {
-                in >> stat.difflog(i,j);
-            }
-        }
-        return in;
-    }
-};
-
-struct PGPEIterationStats
-{
-    arma::vec metaParams;
-    arma::vec metaGradient;
-    std::vector<PGPEPolicyIndividual> individuals;
-
-public:
-    friend std::ostream& operator<<(std::ostream& out, PGPEIterationStats& stat)
-    {
-        int i, ie = stat.individuals.size();
-        out << stat.metaParams.n_elem << " ";
-        for (i = 0; i < stat.metaParams.n_elem; ++i)
-        {
-            out << stat.metaParams[i] << " ";
-        }
-        out << std::endl;
-        for (i = 0; i < stat.metaGradient.n_elem; ++i)
-        {
-            out << stat.metaGradient[i] << " ";
-        }
-        out << std::endl << ie << std::endl;
-        for (i = 0; i < ie; ++i)
-        {
-            out << stat.individuals[i];
-        }
-        return out;
-    }
-
-    void addIndividual(PGPEPolicyIndividual& individual)
-    {
-        individuals.push_back(individual);
-    }
-
-};
-
-class PGPEStatistics : public std::vector<PGPEIterationStats>
-{
-public:
-    friend std::ostream& operator<<(std::ostream& out, PGPEStatistics& stat)
-    {
-        int i, ie = stat.size();
-        out << ie << std::endl;
-        for (i = 0; i < ie; ++i)
-        {
-            out << stat[i];
-        }
-        return out;
-    }
-};
-
 template<class ActionC, class StateC>
-class PGPE: public Agent<ActionC, StateC>
+class NES: public Agent<ActionC, StateC>
 {
 
     typedef Agent<ActionC, StateC> Base;
 public:
-    PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies,
-         double step_length, bool baseline = true, int reward_obj = 0)
+    NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
+        unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
+        bool baseline = true, int reward_obj = 0)
         : dist(dist), policy(policy),
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
-          runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false),
+          runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length),
           Jep (0.0), Jpol(0.0), rewardId(reward_obj),
           useBaseline(baseline)
+//          logger(false, "NES_tracelog_r0_p0_e0.txt")
     {
         // create statistic for first iteration
         PGPEIterationStats trace;
@@ -163,7 +51,7 @@ public:
         traces.push_back(trace);
     }
 
-    virtual ~PGPE()
+    virtual ~NES()
     {}
 
     // Agent interface
@@ -188,13 +76,13 @@ public:
             int dim = traces.size() - 1;
             traces[dim].individuals.push_back(polind);
 
-            char f[555];
-            sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
-            //logger.fopen(f);
-            //logger.print("1 1 1\n");
+//            char f[555];
+//            sprintf(f, "PGPE_tracelog_r%d_p%d_e%d.txt", runCount, polCount, epiCount);
+//            logger.fopen(f);
+//            logger.print("1 1 1\n");
         }
         sampleAction(state, action);
-        //logger.log(state);
+//        logger.log(state);
         cAction = action;
     }
 
@@ -226,7 +114,6 @@ public:
         cAction = action;
     }
 
-
     template<class FiniteAction>
     void step(const Reward& reward, const StateC& nextState, FiniteAction& action)
     {
@@ -245,11 +132,13 @@ public:
 
     virtual void endEpisode(const Reward& reward)
     {
+        //log last reward
+//        logger.log(reward);
+
         //add last contribute
         Jep += df * reward[rewardId];
         //perform remaining operation
         this->endEpisode();
-
     }
 
     virtual void endEpisode()
@@ -257,13 +146,6 @@ public:
 
         Jpol += Jep;
         Jep = 0.0;
-
-        //        std::cerr << "diffObjFunc: ";
-        //        std::cerr << diffObjFunc[0].t();
-        //        std::cout << "DLogDist(rho):";
-        //        std::cerr << dlogdist.t();
-        //        std::cout << "Jep:";
-        //        std::cerr << Jep.t() << std::endl;
 
         //save actual policy performance
         int dim = traces.size() - 1;
@@ -287,16 +169,6 @@ public:
         }
     }
 
-    inline void setNormalization(bool flag)
-    {
-        this->useDirection = flag;
-    }
-
-    inline bool isNormalized()
-    {
-        return this->useDirection;
-    }
-
     void printStatistics(std::string filename)
     {
         std::ofstream out(filename, std::ios_base::out);
@@ -311,6 +183,9 @@ protected:
     {
         int dp = policy.getParametersSize();
         diffObjFunc = arma::vec(dp, arma::fill::zeros);
+        b_num = arma::vec(dp, arma::fill::zeros);
+        b_den = arma::vec(dp, arma::fill::zeros);
+        fisherMtx = arma::mat(dp,dp, arma::fill::zeros);
         history_dlogsist.assign(nbPoliciesToEvalMetap, diffObjFunc);
         history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
     }
@@ -326,18 +201,11 @@ protected:
         arma::vec dlogdist = dist.difflog(theta); //\nabla \log D(\theta|\rho)
 
         //compute baseline
-        double norm2G2 = arma::norm(dlogdist,2);
-        norm2G2 *= norm2G2;
         history_dlogsist[polCount] = dlogdist; //save gradients for late processing
-        b_num += Jpol * norm2G2;
-        b_den += norm2G2;
+        arma::vec dlogdist2 = (dlogdist % dlogdist);
+        b_num += Jpol * dlogdist2;
+        b_den += dlogdist2;
 
-
-        //--------- save value of distgrad
-        int dim = traces.size() - 1;
-        PGPEPolicyIndividual& polind = traces[dim].individuals[polCount];
-        polind.difflog = dlogdist;
-        //---------
 
         ++polCount; //until now polCount policies have been analyzed
         epiCount = 0;
@@ -348,43 +216,92 @@ protected:
     {
 
         //compute baseline
-        double baseline = (b_den != 0 && useBaseline) ? b_num/b_den : 0.0;
+        arma::vec baseline = b_num;
+        if (useBaseline)
+        {
+            for (int i = 0, ie = baseline.n_elem; i < ie; ++i)
+                if (b_den[i] != 0)
+                {
+                    baseline[i] /= b_den[i];
+                }
+                else
+                {
+                    baseline[i] = 0;
+                }
+        }
+        else
+        {
+            baseline.zeros();
+        }
 
         diffObjFunc.zeros();
         fisherMtx.zeros();
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < polCount; ++i)
         {
-            diffObjFunc += history_dlogsist[i] * (history_J[i] - baseline);
+            diffObjFunc += (history_dlogsist[i] - baseline) * history_J[i];
+            fisherMtx += history_dlogsist[i] * (history_dlogsist[i].t());
         }
         diffObjFunc /= polCount;
+        fisherMtx /= polCount;
+
+//        arma::mat tmp;
+//        int rnk = arma::rank(fisherMtx);
+//        if (rnk == fisherMtx.n_rows)
+//        {
+//            arma::mat H = arma::solve(fisherMtx, diffObjFunc);
+//            tmp = diffObjFunc.t() * H;
+//        } else {
+//            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
+//            arma::mat H = arma::pinv(fisherMtx);
+//            tmp = diffObjFunc.t() * (H * diffObjFunc);
+//        }
+
+//        double lambda = sqrt(tmp(0,0) / (4 * step_length));
+//        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+//        arma::vec nat_grad = arma::solve(fisherMtx, diffObjFunc) / (2 * lambda);
+
+        arma::mat tmp;
+        int rnk = arma::rank(fisherMtx);
+        if (rnk == fisherMtx.n_rows)
+        {
+            arma::mat H = arma::solve(fisherMtx, diffObjFunc);
+            tmp = H;
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
+            arma::mat H = arma::pinv(fisherMtx);
+            tmp = H * diffObjFunc;
+        }
+
+        arma::vec nat_grad = tmp*step_length;
 
 
         //--------- save value of distgrad
         int dim = traces.size() - 1;
-        traces[dim].metaGradient = diffObjFunc;
+        traces[dim].metaGradient = nat_grad;
         //---------
 
-        if (useDirection)
-            diffObjFunc = arma::normalise(diffObjFunc);
-        diffObjFunc *= step_length;
-
         //update meta distribution
-        dist.update(diffObjFunc);
+        dist.update(nat_grad);
 
 
-        //            std::cout << "diffObj: " << diffObjFunc[0].t();
-        //            std::cout << "Parameters:\n" << std::endl;
-        //            std::cout << dist.getParameters() << std::endl;
+        std::cout << "nat_grad: " << nat_grad.t();
+        std::cout << "Parameters:\n" << std::endl;
+        std::cout << dist.getParameters() << std::endl;
 
 
         //reset counters and gradient
         polCount = 0;
         epiCount = 0;
         runCount++;
-
-        b_num = 0.0;
-        b_den = 0.0;
+        for (int i = 0, ie = diffObjFunc.n_elem; i < ie; ++i)
+        {
+            //diffObjFunc[i] = 0.0;
+            b_num[i] = 0.0;
+            b_den[i] = 0.0;
+        }
 
         // create statistic for first iteration
         PGPEIterationStats trace;
@@ -397,22 +314,23 @@ private:
     ParametricPolicy<ActionC,StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy, nbPoliciesToEvalMetap;
     unsigned int runCount, epiCount, polCount;
-    double df, step_length;
-    double Jep, Jpol;
+    double df, Jep, Jpol, step_length;
     int rewardId;
-    arma::vec diffObjFunc;
-    double b_num, b_den;
+    bool useBaseline;
+    arma::vec diffObjFunc, b_num, b_den;
     arma::mat fisherMtx;
     std::vector<arma::vec> history_dlogsist;
     arma::vec history_J;
 
 
-    bool useDirection, useBaseline;
+
     PGPEStatistics traces;
+//    Logger<ActionC,StateC> logger;
     ActionC cAction;
+
 
 };
 
 } //end namespace
 
-#endif //PGPE_H_
+#endif //NES_H_
