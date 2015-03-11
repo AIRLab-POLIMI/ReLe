@@ -47,7 +47,7 @@ public:
 protected:
     virtual void init()
     {
-        int dp = Base::policy.getParametersSize();
+        int dp = Base::dist.getParametersSize();
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
         b_num = arma::vec(dp, arma::fill::zeros);
         b_den = arma::vec(dp, arma::fill::zeros);
@@ -207,7 +207,7 @@ public:
 protected:
     virtual void init()
     {
-        int dp = Base::policy.getParametersSize();
+        int dp = Base::dist.getParametersSize();
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
         b_num = arma::vec(dp, arma::fill::zeros);
         b_den = arma::vec(dp, arma::fill::zeros);

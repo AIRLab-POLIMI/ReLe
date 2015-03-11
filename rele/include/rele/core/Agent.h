@@ -51,6 +51,7 @@ public:
     {
     }
 
+    virtual void initTestEpisode() {}
     virtual void initEpisode(const StateC& state, ActionC& action) = 0;
     virtual void sampleAction(const StateC& state, ActionC& action) = 0;
     virtual void step(const Reward& reward, const StateC& nextState,
@@ -87,8 +88,6 @@ public:
     {
 
     }
-
-
 
 protected:
     virtual void init()

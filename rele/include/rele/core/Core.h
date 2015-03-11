@@ -105,7 +105,7 @@ public:
         logger.printStatistics();
     }
 
-    void runTest()
+    void runTestEpisode()
     {
         //core setup
         Logger<ActionC, StateC> logger;
@@ -115,6 +115,7 @@ public:
         logger.setStrategy(settings.loggerStrategy);
 
         //Start episode
+        agent.initTestEpisode();
         envirorment.getInitialState(xn);
         logger.log(xn);
 
@@ -128,8 +129,51 @@ public:
             logger.log(u, xn, r);
         }
 
-        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLenght); //TODO serve?
+        //        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLenght); //TODO serve?
         logger.printStatistics();
+    }
+
+    arma::vec runBatchTest(int nbEpisodes)
+    {
+        //core setup
+        StateC xn;
+        ActionC u;
+
+
+
+        Reward r(envirorment.getSettings().rewardDim);
+        arma::vec J_mean(r.size(), arma::fill::zeros);
+        arma::vec J_std;
+
+        for (unsigned int e = 0; e < nbEpisodes; ++e)
+        {
+            Logger<ActionC, StateC> logger;
+            EvaluateStrategy<DenseAction, DenseState> stat_e;
+            logger.setStrategy(&stat_e);
+
+            //Start episode
+            agent.initTestEpisode();
+            envirorment.getInitialState(xn);
+            logger.log(xn);
+
+            for (unsigned int i = 0;
+                    i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+            {
+                agent.sampleAction(xn, u);
+                envirorment.step(u, xn, r);
+                logger.log(u, xn, r);
+            }
+
+            logger.printStatistics();
+
+            J_mean += stat_e.J_mean;
+        }
+
+        J_mean /= nbEpisodes;
+
+        //standard deviation of J
+
+        return J_mean;
     }
 
 private:

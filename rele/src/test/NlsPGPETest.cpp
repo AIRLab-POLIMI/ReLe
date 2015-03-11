@@ -87,14 +87,16 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
     //---
 
-    int nbepperpol = 1, nbpolperupd = 10;
+    int nbepperpol = 1, nbpolperupd = 5;
     bool usebaseline = true;
     PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+    PrintStrategy<DenseAction, DenseState> stat(false);
+    core.getSettings().loggerStrategy = &stat;
 
-    int nbUpdates = 2000;
+    int nbUpdates = 1;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     for (int i = 0; i < episodes; i++)
     {
@@ -103,6 +105,25 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
     agent.printStatistics("PGPEStats.txt");
+
+
+//    EvaluateStrategy<DenseAction, DenseState> stat_e;
+//    core.getSettings().loggerStrategy = &stat_e;
+//    int testEpisodes = 10;
+//    arma::vec Jm(mdp.getSettings().rewardDim, arma::fill::zeros);
+//    for (int i = 0; i < testEpisodes; i++)
+//    {
+//        core.getSettings().episodeLenght = mdp.getSettings().horizon;
+//        //        cout << "starting episode" << endl;
+//        core.runTestEpisode();
+////        cout << "[" << i << "]" << stat_e->J_mean.t();
+//        Jm += stat_e.J_mean;
+//    }
+//    Jm /= testEpisodes;
+//    cout << Jm;
+
+//    cout << "Batch test\n";
+//    cout << core.runBatchTest(testEpisodes);
 
     return 0;
 }
