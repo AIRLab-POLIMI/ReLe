@@ -22,6 +22,7 @@
  */
 
 #include "BasisFunctions.h"
+#include "LinearApproximator.h"
 
 using namespace std;
 using namespace ReLe;
@@ -45,7 +46,15 @@ int main(int argc, char *argv[])
 
     arma::vec pt(1);
     pt[0] = 2;
+    cout << "F(" << pt[0] << ") = " << endl;
     cout << spm(pt) << endl;
+
+    LinearApproximator regressor(dim,spm);
+    arma::vec weights = arma::ones(regressor.getParametersSize());
+    regressor.setParameters(weights);
+
+    cout << "y = F(" << pt[0] << ") * w =" << endl;
+    cout << regressor(pt);
 
     return 0;
 }
