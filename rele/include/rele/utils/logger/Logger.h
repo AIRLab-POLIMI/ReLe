@@ -56,8 +56,17 @@ public:
     void log(ActionC& u, StateC& xn, Reward& r)
     {
         transition.update(u, xn, r);
-        samples.push_back(transition);
+        transitions.push_back(transition);
         transition.init(xn);
+    }
+
+    void log(AgentOutputData* data, unsigned int step)
+    {
+        if(data)
+        {
+            data->setStep(step);
+            outputData.push_back(data);
+        }
     }
 
     void printStatistics()
@@ -65,11 +74,13 @@ public:
         if(!strategy)
         {
             PrintStrategy<ActionC, StateC> strategy;
-            strategy.processData(samples);
+            strategy.processData(transitions);
+            strategy.processData(outputData);
         }
         else
         {
-            strategy->processData(samples);
+            strategy->processData(transitions);
+            strategy->processData(outputData);
         }
     }
 
@@ -81,7 +92,8 @@ public:
 
 private:
     Transition<ActionC, StateC> transition;
-    std::vector<Transition<ActionC, StateC>> samples;
+    std::vector<Transition<ActionC, StateC>> transitions;
+    std::vector<AgentOutputData*> outputData;
 
     LoggerStrategy<ActionC, StateC>* strategy;
 

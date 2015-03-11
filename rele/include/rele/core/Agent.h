@@ -63,6 +63,11 @@ public:
         return nullptr;
     }
 
+    virtual AgentOutputData* getAgentOutputDataEnd()
+    {
+        return nullptr;
+    }
+
     virtual inline bool isTerminalConditionReached()
     {
         if (terminalCond == nullptr)

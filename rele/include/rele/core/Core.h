@@ -73,7 +73,6 @@ public:
 
         logger.setStrategy(settings.loggerStrategy);
 
-
         //Start episode
         envirorment.getInitialState(xn);
         agent.initEpisode(xn, u);
@@ -96,12 +95,13 @@ public:
             }
 
             agent.step(r, xn, u);
+            logger.log(agent.getAgentOutputData(), i);
         }
 
         if (!xn.isAbsorbing())
             agent.endEpisode();
 
-
+        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLenght);
         logger.printStatistics();
     }
 
@@ -120,13 +120,15 @@ public:
 
         Reward r(envirorment.getSettings().rewardDim);
 
-        for (unsigned int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+        for (unsigned int i = 0;
+                i < settings.episodeLenght && !xn.isAbsorbing(); i++)
         {
             agent.sampleAction(xn, u);
             envirorment.step(u, xn, r);
             logger.log(u, xn, r);
         }
 
+        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLenght); //TODO serve?
         logger.printStatistics();
     }
 

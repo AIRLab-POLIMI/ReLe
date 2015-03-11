@@ -63,7 +63,6 @@ int main(int argc, char* argv[])
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(basketBot, agent);
 
     core.getSettings().episodeLenght = 30;
-    core.getSettings().logTransitions = false;
 
     try
     {

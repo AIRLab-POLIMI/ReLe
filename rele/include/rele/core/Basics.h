@@ -73,12 +73,37 @@ struct EnvirormentSettings
 class AgentOutputData
 {
 public:
+    AgentOutputData(bool final = false) : final(final), step(0)
+    {
+
+    }
+
     virtual void writeData(std::ostream& os) = 0;
     virtual void writeDecoratedData(std::ostream& os) = 0;
 
     virtual ~AgentOutputData()
     {
     }
+
+    inline bool isFinal() const
+    {
+        return final;
+    }
+
+    inline unsigned int getStep() const
+    {
+        return step;
+    }
+
+    inline void setStep(unsigned int step)
+    {
+        this->step = step;
+    }
+
+private:
+    unsigned int step;
+    bool final;
+
 };
 
 class Action

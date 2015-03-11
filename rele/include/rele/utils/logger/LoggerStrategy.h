@@ -36,6 +36,8 @@ class LoggerStrategy
 public:
     virtual void processData(
         std::vector<Transition<ActionC, StateC>>& samples) = 0;
+    virtual void processData(std::vector<AgentOutputData*> data) = 0;
+
     virtual ~LoggerStrategy()
     {
     }
@@ -64,6 +66,24 @@ public:
                   << samples[0].x << "]" << std::endl;
 
         printStateStatistics(samples);
+    }
+
+    void processData(std::vector<AgentOutputData*> outputData)
+    {
+        for(auto data : outputData)
+        {
+            if(data->isFinal())
+            {
+                std::cout << "- Agent data at episode end" << std::endl;
+            }
+            else
+            {
+                std::cout << "- Agent data at step " << data->getStep();
+                std::cout << std::endl;
+            }
+
+            data->writeDecoratedData(std::cout);
+        }
     }
 
 private:
@@ -110,23 +130,47 @@ class WriteStrategy
 {
 public:
     WriteStrategy(const std::string& path) :
-        path(path)
+        transitionPath(path), agentDataPath(path)
+    {
+
+    }
+
+    WriteStrategy(const std::string& transitionPath, const std::string& agentDataPath) :
+        transitionPath(transitionPath), agentDataPath(agentDataPath)
     {
 
     }
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
-        std::ofstream ofs(path); //TODO append?
-
+        std::ofstream transitionFS(transitionPath); //TODO append?
         //TODO print data as matrix
+        transitionFS.close();
 
-
-        ofs.close();
+        std::ofstream agentDataoFS(agentDataPath); //TODO append?
+        //TODO print data as matrix
+        agentDataoFS.close();
     }
 
 private:
-    const std::string& path;
+    const std::string& transitionPath;
+    const std::string& agentDataPath;
+};
+
+template<class ActionC, class StateC>
+class EvaluateStrategy
+{
+public:
+    EvaluateStrategy()
+    {
+
+    }
+
+    void processData(std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        //TODO evaluation here or abstract class...
+    }
+
 };
 
 }
