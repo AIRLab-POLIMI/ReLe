@@ -130,6 +130,9 @@ target_link_libraries(nls_PGPE rele)
 add_executable(nls_REPS src/test/NlsEpisodicREPSTest.cpp)
 target_link_libraries(nls_REPS rele)
 
+add_executable(basisMatrixTest src/test/BasisMatrixTest.cpp)
+target_link_libraries(basisMatrixTest rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

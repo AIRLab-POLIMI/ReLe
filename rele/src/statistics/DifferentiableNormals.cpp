@@ -30,7 +30,9 @@ using namespace arma;
 namespace ReLe
 {
 
-////////////// PARAMETRIC NORMAL DISTRIBUTION ///////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/// PARAMETRIC NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
 
 ParametricNormal::ParametricNormal(unsigned int support_dim, unsigned int param_size)
     : DifferentiableDistribution(support_dim),
@@ -139,7 +141,9 @@ void ParametricNormal::updateInternalState()
 }
 
 
-////////////// PARAMETRIC LOGISTIC NORMAL DISTRIBUTION ///////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/// PARAMETRIC LOGISTIC NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
 
 ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote)
     : ParametricNormal(point_dim, 2*point_dim),
@@ -266,8 +270,9 @@ void ParametricLogisticNormal::updateInternalState()
     cholCov = chol(Cov);
 }
 
-
-////////////// PARAMETRIC CHOLESKY NORMAL DISTRIBUTION ///////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/// PARAMETRIC CHOLESKY NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
 
 ParametricCholeskyNormal::ParametricCholeskyNormal(unsigned int point_dim, vec& initial_mean, mat& initial_cholA)
     :ParametricNormal(point_dim, 2*point_dim + (point_dim * point_dim - point_dim) / 2)

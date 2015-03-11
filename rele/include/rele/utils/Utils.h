@@ -31,19 +31,19 @@ class utils
 public:
     static inline double wrapTo2Pi(double angle)
     {
-    	bool positive = angle > 0;
-    	angle = std::fmod(angle, 2*M_PI);
-    	if(angle == 0 && positive)
-    		angle = 2*M_PI;
+        bool positive = angle > 0;
+        angle = std::fmod(angle, 2*M_PI);
+        if(angle == 0 && positive)
+            angle = 2*M_PI;
         return angle;
     }
 
     static inline double wrapToPi(double angle)
     {
-    	if((angle < -M_PI) || (M_PI < angle))
-    		angle = wrapTo2Pi(angle + M_PI) - M_PI;
+        if((angle < -M_PI) || (M_PI < angle))
+            angle = wrapTo2Pi(angle + M_PI) - M_PI;
 
-    	return angle;
+        return angle;
     }
 
     static inline double threshold(double value, double thresholdLow,
