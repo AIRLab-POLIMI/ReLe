@@ -36,16 +36,23 @@ class LoggerStrategy
 public:
     virtual void processData(
         std::vector<Transition<ActionC, StateC>>& samples) = 0;
-    virtual void processData(std::vector<AgentOutputData*> data) = 0;
+    virtual void processData(std::vector<AgentOutputData*>& data) = 0;
 
     virtual ~LoggerStrategy()
     {
     }
 
+protected:
+    void cleanAgentOutputData(std::vector<AgentOutputData*>& data)
+    {
+        for(auto p : data)
+            delete p;
+    }
+
 };
 
 template<class ActionC, class StateC>
-class PrintStrategy
+class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
     PrintStrategy(bool logTransitions = true) :
@@ -68,7 +75,7 @@ public:
         printStateStatistics(samples);
     }
 
-    void processData(std::vector<AgentOutputData*> outputData)
+    void processData(std::vector<AgentOutputData*>& outputData)
     {
         for(auto data : outputData)
         {
@@ -84,6 +91,8 @@ public:
 
             data->writeDecoratedData(std::cout);
         }
+
+        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
 private:
@@ -126,7 +135,7 @@ private:
 };
 
 template<class ActionC, class StateC>
-class WriteStrategy
+class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
     WriteStrategy(const std::string& path) :
@@ -143,13 +152,18 @@ public:
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
-        std::ofstream transitionFS(transitionPath); //TODO append?
+        std::ofstream ofs(transitionPath); //TODO append?
         //TODO print data as matrix
-        transitionFS.close();
+        ofs.close();
+    }
 
-        std::ofstream agentDataoFS(agentDataPath); //TODO append?
+    void processData(std::vector<AgentOutputData*>& outputData)
+    {
+        std::ofstream ofs(agentDataPath); //TODO append?
         //TODO print data as matrix
-        agentDataoFS.close();
+        ofs.close();
+
+        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
 private:
@@ -158,7 +172,7 @@ private:
 };
 
 template<class ActionC, class StateC>
-class EvaluateStrategy
+class EvaluateStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
     EvaluateStrategy()
@@ -169,6 +183,12 @@ public:
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
         //TODO evaluation here or abstract class...
+    }
+
+    void processData(std::vector<AgentOutputData*>& outputData)
+    {
+        //TODO evaluation here or abstract class...
+        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
 };

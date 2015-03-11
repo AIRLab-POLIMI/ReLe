@@ -55,7 +55,7 @@ public:
 };
 
 template<class ActionC, class StateC>
-class BasicOption : AbstractOption<ActionC, StateC>
+class BasicOption : public AbstractOption<ActionC, StateC>
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
@@ -73,7 +73,7 @@ public:
 };
 
 template<class ActionC, class StateC>
-class FixedOption : AbstractOption<ActionC, StateC>
+class FixedOption : public AbstractOption<ActionC, StateC>
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
