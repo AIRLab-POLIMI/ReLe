@@ -34,34 +34,107 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
+namespace ReLe
+{
+class RockyCircularPolicy : public ParametricPolicy<DenseAction, DenseState>
+{
+public:
+
+    RockyCircularPolicy() : v(1)
+    {
+
+    }
+
+    //Policy
+    virtual vec operator() (const vec& state)
+    {
+        vec u(3);
+        u[0] = 10;
+        u[1] = M_PI;
+        u[2] = 0;
+        return u;
+    }
+    virtual double operator() (const vec& state, const vec& action)
+    {
+        return 0;
+    }
+
+    virtual std::string getPolicyName()
+    {
+        return "Circular fake";
+    }
+
+    virtual std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+
+    virtual std::string printPolicy()
+    {
+        return "";
+    }
+
+    //ParametricPolicy
+    virtual const arma::vec& getParameters() const
+    {
+        return v;
+    }
+
+    virtual const unsigned int getParametersSize() const
+    {
+        return 1;
+    }
+
+    virtual void setParameters(arma::vec& w)
+    {
+
+    }
+
+
+private:
+    vec v;
+};
+
+}
+
 int main(int argc, char *argv[])
 {
     Rocky rocky;
 
-    int dim = rocky.getSettings().continuosStateDim;
+    //Low level policy
+    /*int dim = rocky.getSettings().continuosStateDim;
+    DenseBasisVector basis;
+    basis.generatePolynomialBasisFunctions(1, dim);
+    LinearApproximator regressor(dim, basis);
 
-    arma::vec mean(dim);
-    arma::mat cov(dim, dim, arma::fill::eye);
+    DetLinearPolicy<DenseState> policy(&regressor);*/
+    RockyCircularPolicy policy;
+
+
+    //high level policy
+    int dimPolicy = policy.getParametersSize();
+    arma::vec mean(dimPolicy);
+    arma::mat cov(dimPolicy, dimPolicy, arma::fill::eye);
 
     ParametricNormal dist(mean, cov);
 
-    DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1, dim - 1);
-    LinearApproximator regressor(dim, basis);
-
-    DetLinearPolicy<DenseState> policy(&regressor);
 
     EpisodicREPS agent(dist, policy);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 
-    int episodes = 40;
+    /*int episodes = 40;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 100000;
         cout << "starting episode" << endl;
         core.runEpisode();
-    }
+    }*/
+
+    core.getSettings().episodeLenght = 100000;
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
+    cout << "starting episode" << endl;
+    core.runTest();
 
     return 0;
 

@@ -63,7 +63,7 @@ private:
         Predictor(double dt);
         void reset();
         void saveLastValues(double thetaM, double v);
-        void predict(double& xhat, double& yhat, double& thetaDirhat);
+        void predict(const DenseState& state, double& xhat, double& yhat, double& thetaDirhat);
 
     private:
         const double dt;
@@ -71,6 +71,7 @@ private:
         //predictor state
         double thetaM;
         double v;
+
     };
 
 private:
@@ -86,10 +87,10 @@ private:
 
     void computeReward(Reward& reward);
     void computeSensors(bool eat);
-    void updateChickenPose(double omega, double v);
-    void updateRockyPose(double omegar, double& xrabs, double vr,
+    void updateChickenPose(double v, double omega);
+    void updateRockyPose(double vr, double omegar, double& xrabs,
                          double& yrabs);
-    void computeRockyControl(double& omegar, double& vr);
+    void computeRockyControl(double& vr, double& omegar);
 };
 
 
