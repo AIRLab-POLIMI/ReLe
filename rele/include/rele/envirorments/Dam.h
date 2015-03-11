@@ -34,6 +34,7 @@ class DamSettings : public EnvirormentSettings
 public:
     DamSettings();
     static void defaultSettings(DamSettings& settings);
+    virtual ~DamSettings() {}
 
 public:
     double S;                      // reservoir surface

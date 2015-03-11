@@ -28,7 +28,7 @@ vrmax = 10;
 omegarmax = pi;
 
 
-omega = 2*pi;
+omega = pi;
 
 steps = 10000;
 traj = zeros(steps, 3);
@@ -45,17 +45,17 @@ for i=1:steps
  thetaDirhat = wrapToPi(atan2(yhat - (y + yr), xhat - (x + xr)));
  
  %Step 2: compute the inputs
- deltaTheta = wrapToPi(thetaDirhat - thetar); 
+ deltaTheta = wrapToPi(thetaDirhat - thetar)
  
  omegarOpt = deltaTheta/dt;
- omegar = max(-omegarmax, min(omegarmax, omegarOpt));
+ omegar = max(-omegarmax, min(omegarmax, omegarOpt))
  
  if(abs(deltaTheta) > pi/2)
-     vr = 0;
+     vr = 0
  else if(abs(deltaTheta) > pi/4)
-        vr = vrmax/2;
+        vr = vrmax/2
      else
-        vr = vrmax; 
+        vr = vrmax
      end
  end
  
@@ -65,9 +65,9 @@ for i=1:steps
  xrabs = x + xr + vr * cos(thetarM) * dt;
  yrabs = y + yr + vr * sin(thetarM) * dt;
  
-omega = pi*sin(i*pi/512);
+%omega = pi*sin(i*pi/512);
 %omega = i;
-%omega = 0;
+omega = pi;
 %omega = log(x^2+y^2 +1 );
     
  %% Evader dinamics

@@ -153,22 +153,30 @@ public:
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
         std::ofstream ofs(transitionPath); //TODO append?
-        //TODO print data as matrix
+
+        for(auto& sample : samples)
+        {
+            ofs << sample.x  << ", "
+                << sample.u  << ", "
+                << sample.xn << ", "
+                << sample.r  << std::endl;
+        }
+
         ofs.close();
     }
 
     void processData(std::vector<AgentOutputData*>& outputData)
     {
-        std::ofstream ofs(agentDataPath); //TODO append?
+        /*std::ofstream ofs(agentDataPath); //TODO append?
         //TODO print data as matrix
-        ofs.close();
+        ofs.close();*/
 
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
 private:
-    const std::string& transitionPath;
-    const std::string& agentDataPath;
+    const std::string transitionPath;
+    const std::string agentDataPath;
 };
 
 template<class ActionC, class StateC>

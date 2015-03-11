@@ -31,7 +31,7 @@ namespace ReLe
 {
 
 Rocky::Rocky() :
-    ContinuousMDP(STATESIZE, 3, 1, false, true), dt(0.2),
+    ContinuousMDP(STATESIZE, 3, 1, false, true), dt(0.01),
     maxOmega(M_PI), maxV(10), maxOmegar(M_PI), maxVr(10), predictor(dt)
 {
     //TODO parameter in the constructor
@@ -52,14 +52,14 @@ void Rocky::step(const DenseAction& action, DenseState& nextState,
     //Compute rocky control using chicken pose prediction
     double omegar;
     double vr;
-    computeRockyControl(omegar, vr);
+    computeRockyControl(vr, omegar);
 
     //Update rocky state
     double xrabs, yrabs;
-    updateRockyPose(omegar, xrabs, vr, yrabs);
+    updateRockyPose(vr, omegar, xrabs, yrabs);
 
     //update chicken position
-    updateChickenPose(omega, v);
+    updateChickenPose(v, omega);
 
     //update rocky relative position
     currentState[xr] = xrabs - currentState[x];
@@ -70,6 +70,8 @@ void Rocky::step(const DenseAction& action, DenseState& nextState,
 
     //Compute reward
     computeReward(reward);
+
+    nextState = currentState;
 }
 
 void Rocky::getInitialState(DenseState& state)
@@ -88,20 +90,23 @@ void Rocky::getInitialState(DenseState& state)
     currentState[yr] = 5;
     currentState[thetar] = 0;
 
+    //reset predictor state
+    predictor.reset();
+
     state = currentState;
 }
 
-void Rocky::computeRockyControl(double& omegar, double& vr)
+void Rocky::computeRockyControl(double& vr, double& omegar)
 {
     //Predict chicken position
     double xhat, yhat, thetaDirhat;
-    predictor.predict(xhat, yhat, thetaDirhat);
+    predictor.predict(currentState, xhat, yhat, thetaDirhat);
 
     //Compute rocky control signals
-    double deltaTheta = utils::normalizeAngle(thetaDirhat - thetar);
+    double deltaTheta = utils::wrapToPi(thetaDirhat - currentState[thetar]);
     double omegarOpt = deltaTheta / dt;
 
-    omegar = max(-maxOmegar, min(maxOmegar, omegarOpt));
+    omegar = utils::threshold(omegarOpt, maxOmegar);
 
     if (abs(deltaTheta) > M_PI / 2)
     {
@@ -109,34 +114,42 @@ void Rocky::computeRockyControl(double& omegar, double& vr)
     }
     else if (abs(deltaTheta) > M_PI / 4)
     {
-        vr = maxV / 2;
+        vr = maxVr / 2;
     }
     else
     {
-        vr = maxV;
+        vr = maxVr;
     }
+
+    std::cout << "deltaTheta = " << deltaTheta  << std::endl;
+    std::cout << "omegar = " << omegar  << std::endl;
+    std::cout << "vr = " << vr  << std::endl;
+    std::cout << "---------------------------";
+
 }
 
-void Rocky::updateRockyPose(double omegar, double& xrabs, double vr,
+void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
                             double& yrabs)
 {
     vec2 chickenPosition = currentState.rows(span(x, y));
     vec2 rockyRelPosition = currentState.rows(span(xr, yr));
 
     double thetarM = (2 * currentState[thetar] + omegar * dt) / 2;
-    currentState[thetar] = utils::normalizeAngle(
+    currentState[thetar] = utils::wrapToPi(
                                currentState[thetar] + omegar * dt);
     xrabs = chickenPosition[0] + rockyRelPosition[0] + vr * cos(thetarM) * dt;
     yrabs = chickenPosition[1] + rockyRelPosition[1] + vr * sin(thetarM) * dt;
 }
 
-void Rocky::updateChickenPose(double omega, double v)
+void Rocky::updateChickenPose(double v, double omega)
 {
     double thetaM = (2 * currentState[theta] + omega * dt) / 2;
     currentState[x] += v * cos(thetaM) * dt;
     currentState[y] += v * sin(thetaM) * dt;
-    currentState[theta] = utils::normalizeAngle(
+    currentState[theta] = utils::wrapToPi(
                               currentState[theta] + omega * dt);
+
+    predictor.saveLastValues(thetaM, v);
 }
 
 void Rocky::computeSensors(bool eat)
@@ -201,11 +214,11 @@ void Rocky::Predictor::saveLastValues(double thetaM, double v)
     this->v = v;
 }
 
-void Rocky::Predictor::predict(double& xhat, double& yhat, double& thetaDirhat)
+void Rocky::Predictor::predict(const DenseState& state, double& xhat, double& yhat, double& thetaDirhat)
 {
-    xhat = x + v * cos(thetaM) * dt;
-    yhat = y + v * sin(thetaM) * dt;
-    thetaDirhat = atan2(yhat - (y + yr), xhat - (x + xr));
+    xhat = state[x] + v * cos(thetaM) * dt;
+    yhat = state[y] + v * sin(thetaM) * dt;
+    thetaDirhat = atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr]));
 }
 
 }

@@ -29,21 +29,21 @@
 class utils
 {
 public:
-    static inline double normalizeAnglePositive(double angle)
+    static inline double wrapTo2Pi(double angle)
     {
-        return fmod(fmod(angle, 2.0 * M_PI) + 2.0 * M_PI, 2.0 * M_PI);
+    	bool positive = angle > 0;
+    	angle = std::fmod(angle, 2*M_PI);
+    	if(angle == 0 && positive)
+    		angle = 2*M_PI;
+        return angle;
     }
 
-    static inline double normalizeAngle(double angle)
+    static inline double wrapToPi(double angle)
     {
-        angle = normalizeAnglePositive(angle);
+    	if((angle < -M_PI) || (M_PI < angle))
+    		angle = wrapTo2Pi(angle + M_PI) - M_PI;
 
-        if (angle > M_PI)
-        {
-            angle -= 2.0 * M_PI;
-        }
-
-        return angle;
+    	return angle;
     }
 
     static inline double threshold(double value, double thresholdLow,
