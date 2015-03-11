@@ -45,7 +45,7 @@ class Logger
 public:
     Logger()
     {
-        strategy = NULL;
+        strategy = nullptr;
     }
 
     void log(StateC& x)

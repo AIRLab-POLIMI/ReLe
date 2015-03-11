@@ -69,6 +69,18 @@ struct EnvirormentSettings
     }
 };
 
+
+class AgentOutputData
+{
+public:
+    virtual void writeData(std::ostream& os) = 0;
+    virtual void writeDecoratedData(std::ostream& os) = 0;
+
+    virtual ~AgentOutputData()
+    {
+    }
+};
+
 class Action
 {
 public:

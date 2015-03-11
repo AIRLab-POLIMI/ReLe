@@ -49,6 +49,27 @@ struct Sample
     double r;
 };
 
+template<class ActionC, class StateC>
+struct MultiObjectiveSample
+{
+    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
+    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
+
+    MultiObjectiveSample(typename state_type<StateC>::const_type_ref x,
+                         typename action_type<ActionC>::const_type_ref u,
+                         typename state_type<StateC>::const_type_ref xn, Reward& r) :
+        x(x), u(u), xn(xn), r(r)
+    {
+
+    }
+
+    typename state_type<StateC>::type x;
+    typename action_type<ActionC>::type u;
+    typename state_type<StateC>::type xn;
+    Reward& r;
+};
+
+
 }
 
 #endif /* SAMPLE_H_ */

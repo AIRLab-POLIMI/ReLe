@@ -58,15 +58,9 @@ public:
     virtual void endEpisode(const Reward& reward) = 0;
     virtual void endEpisode() = 0;
 
-    void setTask(const EnvirormentSettings& task)
+    virtual AgentOutputData* getAgentOutputData()
     {
-        this->task = task;
-        this->init();
-    }
-
-    virtual ~Agent()
-    {
-
+        return nullptr;
     }
 
     virtual inline bool isTerminalConditionReached()
@@ -76,6 +70,20 @@ public:
         else
             return terminalCond->checkCond();
     }
+
+    void setTask(const EnvirormentSettings& task)
+    {
+        this->task = task;
+        this->init();
+    }
+
+
+    virtual ~Agent()
+    {
+
+    }
+
+
 
 protected:
     virtual void init()

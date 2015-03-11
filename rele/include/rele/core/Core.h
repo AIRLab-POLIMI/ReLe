@@ -40,6 +40,12 @@ class Core
 public:
     struct CoreSettings
     {
+        CoreSettings()
+        {
+            loggerStrategy = nullptr;
+            episodeLenght = 0;
+        }
+
         LoggerStrategy<ActionC, StateC>* loggerStrategy;
         unsigned int episodeLenght;
 
@@ -60,10 +66,15 @@ public:
 
     void runEpisode()
     {
+        //core setup
         Logger<ActionC, StateC> logger;
         StateC xn;
         ActionC u;
 
+        logger.setStrategy(settings.loggerStrategy);
+
+
+        //Start episode
         envirorment.getInitialState(xn);
         agent.initEpisode(xn, u);
         logger.log(xn);
@@ -89,6 +100,32 @@ public:
 
         if (!xn.isAbsorbing())
             agent.endEpisode();
+
+
+        logger.printStatistics();
+    }
+
+    void runTest()
+    {
+        //core setup
+        Logger<ActionC, StateC> logger;
+        StateC xn;
+        ActionC u;
+
+        logger.setStrategy(settings.loggerStrategy);
+
+        //Start episode
+        envirorment.getInitialState(xn);
+        logger.log(xn);
+
+        Reward r(envirorment.getSettings().rewardDim);
+
+        for (unsigned int i = 0; i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+        {
+            agent.sampleAction(xn, u);
+            envirorment.step(u, xn, r);
+            logger.log(u, xn, r);
+        }
 
         logger.printStatistics();
     }

@@ -35,7 +35,7 @@ namespace ReLe
 
 e_Greedy::e_Greedy()
 {
-    Q = NULL;
+    Q = nullptr;
     eps = 0.15;
     nactions = 0;
 }
@@ -96,7 +96,7 @@ string e_Greedy::getPolicyHyperparameters()
 
 e_GreedyApproximate::e_GreedyApproximate()
 {
-    Q = NULL;
+    Q = nullptr;
     nactions = 0;
     eps = 0.15;
 }

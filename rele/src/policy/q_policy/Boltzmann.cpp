@@ -32,7 +32,7 @@ namespace ReLe
 
 Boltzmann::Boltzmann()
 {
-    Q = NULL;
+    Q = nullptr;
     nactions = 0;
 
     tau = 1;
@@ -96,7 +96,7 @@ vec Boltzmann::computeProbabilities(size_t state)
 
 BoltzmannApproximate::BoltzmannApproximate()
 {
-    Q = NULL;
+    Q = nullptr;
     nactions = 0;
 
     //Default parameter
