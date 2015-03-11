@@ -95,7 +95,7 @@ public:
      * @brief Parameters size
      * @return The size of the parameters
      */
-    virtual inline unsigned int getParametersSize() = 0;
+    virtual unsigned int getParametersSize() = 0;
 
     virtual arma::vec& getParameters() = 0;
 
