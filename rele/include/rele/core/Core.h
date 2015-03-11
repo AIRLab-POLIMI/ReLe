@@ -70,13 +70,15 @@ public:
 
         Reward r(envirorment.getSettings().rewardDim);
 
-        for (unsigned int i = 0; i < settings.episodeLenght; i++)
+        for (unsigned int i = 0;
+                i < settings.episodeLenght
+                && !agent.isTerminalConditionReached(); i++)
         {
 
             envirorment.step(u, xn, r);
             logger.log(u, xn, r);
 
-            if(xn.isAbsorbing())
+            if (xn.isAbsorbing())
             {
                 agent.endEpisode(r);
                 break;
@@ -85,7 +87,7 @@ public:
             agent.step(r, xn, u);
         }
 
-        if(!xn.isAbsorbing())
+        if (!xn.isAbsorbing())
             agent.endEpisode();
 
         logger.printStatistics();
