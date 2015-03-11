@@ -52,6 +52,8 @@ public:
 
     virtual void WriteToStream(std::ostream& out) const;
     virtual void ReadFromStream(std::istream& in);
+
+    virtual ~NLSSettings();
 };
 
 class NLS: public ContinuousMDP

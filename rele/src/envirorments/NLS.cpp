@@ -83,6 +83,11 @@ void NLSSettings::ReadFromStream(istream &in)
     in >> this->reward_reg;
 }
 
+NLSSettings::~NLSSettings()
+{
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// NLS ENVIRONMENTS
