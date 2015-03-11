@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLenght = 100000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
     cout << "starting episode" << endl;
-    core.runTest();
+    core.runTestEpisode();
 
     return 0;
 
