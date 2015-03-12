@@ -69,7 +69,6 @@ public:
 
 private:
     NLSSettings nlsConfig;
-    DenseState cState; //current state
 };
 
 }

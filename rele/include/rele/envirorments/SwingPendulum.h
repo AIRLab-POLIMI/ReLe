@@ -83,7 +83,7 @@ private:
     double previousTheta, cumulatedRotation, overRotatedTime;
     bool overRotated;
     int upTime;
-    DenseState cState; //current state [theta, velocity]
+    //current state [theta, velocity]
 };
 
 }//end namespace

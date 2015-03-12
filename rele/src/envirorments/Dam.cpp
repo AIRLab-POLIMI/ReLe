@@ -118,26 +118,23 @@ void DamSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Dam::Dam()
-    : damConfig(),
-      ContinuousMDP(damConfig.continuosStateDim,damConfig.continuosActionDim,damConfig.rewardDim,
-                    damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.gamma, damConfig.horizon),
-      cState(damConfig.continuosStateDim)
+    : damConfig()
 {
 }
 
-Dam::Dam(DamSettings &config)
-    : damConfig(config),
-      ContinuousMDP(damConfig.continuosStateDim,damConfig.continuosActionDim,damConfig.rewardDim,
-                    damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.gamma, damConfig.horizon),
-      cState(damConfig.continuosStateDim)
+Dam::Dam(DamSettings& config)
+    : ContinuousMDP(config.continuosStateDim, config.continuosActionDim, config.rewardDim,
+                    config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
+    damConfig(config)
 {
+    currentState.set_size(damConfig.continuosStateDim);
 }
 
-void Dam::step(const DenseAction &action, DenseState &nextState, Reward &reward)
+void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
     // bound the action
-    double min_action = std::max(cState[0] - damConfig.S_MIN_REL, 0.0);
-    double max_action = cState[0];
+    double min_action = std::max(currentState[0] - damConfig.S_MIN_REL, 0.0);
+    double max_action = currentState[0];
 
     double penalty = 0.0;
 
@@ -159,7 +156,7 @@ void Dam::step(const DenseAction &action, DenseState &nextState, Reward &reward)
     // transition dynamic
     double inflow = RandomGenerator::sampleNormal(damConfig.DAM_INFLOW_MEAN, damConfig.DAM_INFLOW_STD);
     //    std::cout << "inflow: " << inflow << std::endl;
-    nextState[0]  = cState[0] + inflow - curr_action;
+    nextState[0]  = currentState[0] + inflow - curr_action;
 
     // cost due to the excess level w.r.t. a flooding threshold (upstream)
     reward[0] = -std::max(nextState[0]/damConfig.S - damConfig.H_FLO_U, 0.0) + penalty;
@@ -204,10 +201,10 @@ void Dam::step(const DenseAction &action, DenseState &nextState, Reward &reward)
         reward[i] /= damConfig.normalization_factor[i];
     }
 
-    cState = nextState;
+    currentState = nextState;
 }
 
-void Dam::getInitialState(DenseState &state)
+void Dam::getInitialState(DenseState& state)
 {
     state.setAbsorbing(false);
     // initial states
@@ -221,7 +218,7 @@ void Dam::getInitialState(DenseState &state)
     int idx   = RandomGenerator::sampleUniformInt(0,10);
     state[0]  = s_init[idx];
     //    state[0] = RandomGenerator::sampleUniformInt(160);
-    cState[0] = state[0]; //keep info about the current state
+    currentState[0] = state[0]; //keep info about the current state
 }
 
 

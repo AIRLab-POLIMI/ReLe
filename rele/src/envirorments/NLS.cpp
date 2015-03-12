@@ -94,18 +94,20 @@ NLSSettings::~NLSSettings()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 NLS::NLS()
-    : ContinuousMDP(2, 1, 1, false, false, 0.95, 80),
-      nlsConfig(),
-      cState(nlsConfig.continuosStateDim)
+    : ContinuousMDP(),
+      nlsConfig()
 {
+    setupEnvirorment(nlsConfig.continuosStateDim,nlsConfig.continuosActionDim,nlsConfig.rewardDim,
+                     nlsConfig.isFiniteHorizon, nlsConfig.isEpisodic, nlsConfig.gamma, nlsConfig.horizon);
+    currentState.set_size(nlsConfig.continuosStateDim);
 }
 
 NLS::NLS(NLSSettings &config)
-    : nlsConfig(config),
-      ContinuousMDP(nlsConfig.continuosStateDim,nlsConfig.continuosActionDim,nlsConfig.rewardDim,
-                    nlsConfig.isFiniteHorizon, nlsConfig.isEpisodic, nlsConfig.gamma, nlsConfig.horizon),
-      cState(nlsConfig.continuosStateDim)
+    : ContinuousMDP(config.continuosStateDim, config.continuosActionDim, config.rewardDim,
+                    config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
+    nlsConfig(config)
 {
+    currentState.set_size(nlsConfig.continuosStateDim);
 }
 
 void NLS::step(const DenseAction &action, DenseState &nextState, Reward &reward)
@@ -115,23 +117,23 @@ void NLS::step(const DenseAction &action, DenseState &nextState, Reward &reward)
 
     // model transitions
     //s_2(t+1) = s_2(t) + 1/(1+exp(-u(t))) - 0.5 + noise
-    nextState[1] = cState[1] + 1.0/(1 + exp(-a)) - 0.5 + model_noise;
+    nextState[1] = currentState[1] + 1.0/(1 + exp(-a)) - 0.5 + model_noise;
     //s_1(t+1) = s_1(t) - 0.1 x_2(t+1) + noise
-    nextState[0] = cState[0] - 0.1 * nextState[1] + model_noise;
+    nextState[0] = currentState[0] - 0.1 * nextState[1] + model_noise;
 
-    double norm2state = sqrt(cState[0]*cState[0]+cState[1]*cState[1]);
+    double norm2state = sqrt(currentState[0]*currentState[0]+currentState[1]*currentState[1]);
     reward[0] = (norm2state <= nlsConfig.reward_reg) ? 1.0 : 0.0;
 
     nextState.setAbsorbing(false);
-    cState = nextState;
+    currentState = nextState;
 }
 
 void NLS::getInitialState(DenseState &state)
 {
-    cState.setAbsorbing(false);
-    cState[0] = RandomGenerator::sampleNormal(nlsConfig.pos0_mean, nlsConfig.pos0_std);
-    cState[1] = RandomGenerator::sampleNormal(0.0, 1);
-    state = cState;
+    currentState.setAbsorbing(false);
+    currentState[0] = RandomGenerator::sampleNormal(nlsConfig.pos0_mean, nlsConfig.pos0_std);
+    currentState[1] = RandomGenerator::sampleNormal(0.0, 1);
+    state = currentState;
 }
 
 

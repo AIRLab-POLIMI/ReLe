@@ -32,10 +32,14 @@ namespace ReLe
 class ContinuousMDP: public Envirorment<DenseAction, DenseState>
 {
 public:
+    ContinuousMDP()
+    {
+    }
+
     ContinuousMDP(std::size_t stateSize, std::size_t actionSize, std::size_t rewardSize, bool isFiniteHorizon,
                   bool isEpisodic, double gamma = 1.0, unsigned int horizon = 0);
 
-private:
+protected:
     void setupEnvirorment(std::size_t stateSize, std::size_t actionSize, std::size_t rewardSize,
                           bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                           double gamma);

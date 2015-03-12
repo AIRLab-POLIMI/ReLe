@@ -71,7 +71,6 @@ public:
 
 private:
     DamSettings damConfig;
-    DenseState cState; //current state
 };
 
 }

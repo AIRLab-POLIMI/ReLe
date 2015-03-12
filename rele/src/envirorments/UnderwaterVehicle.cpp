@@ -80,21 +80,21 @@ void UWVSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 UnderwaterVehicle::UnderwaterVehicle()
-    : uwvConfig(),
-      DenseMDP(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
-               uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.gamma, uwvConfig.horizon),
-      cState(uwvConfig.continuosStateDim), uwvode(),
+    : uwvConfig(), uwvode(),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
+    setupEnvirorment(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
+                     uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.gamma, uwvConfig.horizon);
+    currentState.set_size(uwvConfig.continuosStateDim);
 }
 
 UnderwaterVehicle::UnderwaterVehicle(UWVSettings &config)
     : uwvConfig(config),
-      DenseMDP(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
-               uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.gamma, uwvConfig.horizon),
-      cState(uwvConfig.continuosStateDim), uwvode(),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      DenseMDP(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
+               config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
+      uwvode(), controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
+    currentState.set_size(uwvConfig.continuosStateDim);
 }
 
 void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
@@ -105,7 +105,7 @@ void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, 
     uwvode.action = u;
     double t0 = 0;
     double t1 = uwvConfig.dt;
-    integrate_adaptive( controlled_stepper , uwvode , cState, t0 , t1 , t1/100.0);
+    integrate_adaptive( controlled_stepper , uwvode , currentState, t0 , t1 , t1/100.0);
 
     ////Runge-Kutta 4/5
     //double** odeTime;
@@ -121,7 +121,7 @@ void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, 
     //free(odeState);
     //free(odeTime);
 
-    nextState = cState;
+    nextState = currentState;
 
     reward[0] = fabs(uwvConfig.setPoint - nextState[0]) < uwvConfig.mu ? 0.0f : -uwvConfig.C;
 
@@ -131,7 +131,7 @@ void UnderwaterVehicle::getInitialState(DenseState &state)
 {
     state[0] = RandomGenerator::sampleUniform(uwvConfig.velocityRange.Lo(),uwvConfig.velocityRange.Hi());
     state.setAbsorbing(false);
-    cState[0] = state[0]; //keep info about the current state
+    currentState[0] = state[0]; //keep info about the current state
 }
 
 

@@ -113,7 +113,6 @@ public:
 
 private:
     UWVSettings uwvConfig;
-    DenseState cState; //current state
     UWVOde uwvode;
 
     //[ define_adapt_stepper

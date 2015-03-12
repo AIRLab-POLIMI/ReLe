@@ -100,26 +100,26 @@ void SwingUpSettings::ReadFromStream(istream &in)
 
 
 DiscreteActionSwingUp::DiscreteActionSwingUp()
-    : config(),
-      DenseMDP(config.continuosStateDim,config.finiteActionDim,config.rewardDim,
-               config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
-      cState(config.continuosStateDim)
+    : config()
 {
+    setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
+                     config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon);
+    currentState.set_size(config.continuosStateDim);
 }
 
 DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config)
-    : config(config),
-      DenseMDP(config.continuosStateDim,config.finiteActionDim,config.rewardDim,
-               config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
-      cState(config.continuosStateDim)
+    : config(config)
 {
+    setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
+                     config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon);
+    currentState.set_size(config.continuosStateDim);
 }
 
 void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
 {
     //get current state
-    double theta = cState[0];
-    double velocity = cState[1];
+    double theta = currentState[0];
+    double velocity = currentState[1];
 
     //std::cout << a.at() << std::endl;
     double torque = config.actionList[action.getActionN()];
@@ -130,8 +130,8 @@ void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextSta
     upTime = fabs(theta) > config.upRange ? 0 : upTime + 1;
 
     //update current state
-    cState[0] = theta;
-    cState[1] = velocity;
+    currentState[0] = theta;
+    currentState[1] = velocity;
 
 
     double signAngleDifference = std::atan2(
@@ -152,8 +152,8 @@ void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextSta
         endepisode = (overRotated && (overRotatedTime > 1.0 / config.stepTime)) ? true : false;
     //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
 
-    cState.setAbsorbing(endepisode);
-    nextState = cState;
+    currentState.setAbsorbing(endepisode);
+    nextState = currentState;
 
     //###################### REWARD ######################
     if (config.useOverRotated)
@@ -178,11 +178,11 @@ void DiscreteActionSwingUp::getInitialState(DenseState& state)
     overRotated = false;
     overRotatedTime = 0;
 
-    cState[0] = theta;
-    cState[1] = 0.0;
-    cState.setAbsorbing(false);
+    currentState[0] = theta;
+    currentState[1] = 0.0;
+    currentState.setAbsorbing(false);
 
-    state = cState;
+    state = currentState;
 }
 
 }
