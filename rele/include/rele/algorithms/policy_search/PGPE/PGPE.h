@@ -332,6 +332,8 @@ public:
           b_num(0.0), b_den(0.0)
     {    }
 
+    virtual ~PGPE() {}
+
 protected:
     virtual void init()
     {

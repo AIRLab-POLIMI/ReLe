@@ -64,34 +64,49 @@ FiniteTDOutput::FiniteTDOutput(double gamma,
 
 }
 
-void FiniteTDOutput::writeData(std::ostream& os)
+void FiniteTDOutput::writeData(ostream& os)
 {
+    os << policyName << endl;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar; //TODO change this
 
+
+    for (unsigned int i = 0; i < Q.n_rows; i++)
+    {
+        unsigned int j;
+        for (j = 0; j < Q.n_cols - 1; j++)
+        {
+            os << Q(i, j) << ", ";
+        }
+
+        os << Q(i, j) << endl;
+    }
 }
 
-void FiniteTDOutput::writeDecoratedData(std::ostream& os)
+void FiniteTDOutput::writeDecoratedData(ostream& os)
 {
-    cout << "Using " << policyName << " policy"
-         << endl << endl;
+    os << "Using " << policyName << " policy"
+       << endl << endl;
 
-    cout << "- Parameters" << endl;
-    cout << "gamma: " << gamma << endl;
-    cout << "alpha: " << alpha << endl;
-    cout << policyHPar;
+    os << "- Parameters" << endl;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar;
 
-    cout << "- Action-value function" << endl;
+    os << "- Action-value function" << endl;
     for (unsigned int i = 0; i < Q.n_rows; i++)
         for (unsigned int j = 0; j < Q.n_cols; j++)
         {
-            cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
+            os << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
         }
 
-    cout << "- Policy" << endl;
+    os << "- Policy" << endl;
     for (unsigned int i = 0; i < Q.n_rows; i++)
     {
         unsigned int policy;
         Q.row(i).max(policy);
-        cout << "policy(" << i << ") = " << policy << endl;
+        os << "policy(" << i << ") = " << policy << endl;
     }
 }
 
@@ -128,23 +143,36 @@ LinearTDOutput::LinearTDOutput(double gamma,
 
 }
 
-void LinearTDOutput::writeData(std::ostream& os)
+void LinearTDOutput::writeData(ostream& os)
 {
+    os << policyName << endl;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar; //TODO change this
+
+
+    unsigned int i;
+    for(i = 0; i < Qw.n_elem -1; i++)
+    {
+        os << Qw[i] << ", ";
+    }
+
+    os << Qw[i] << endl;
 
 }
 
-void LinearTDOutput::writeDecoratedData(std::ostream& os)
+void LinearTDOutput::writeDecoratedData(ostream& os)
 {
-    cout << "Using " << policyName << " policy"
-         << endl << endl;
+    os << "Using " << policyName << " policy"
+       << endl << endl;
 
-    cout << "- Parameters" << endl ;
-    cout << "gamma: " << gamma << endl;
-    cout << "alpha: " << alpha << endl;
-    cout << policyHPar;
+    os << "- Parameters" << endl ;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar;
 
-    cout << "- Action-value function" << endl;
-    cout << Qw.t() << endl;
+    os << "- Action-value function" << endl;
+    os << Qw.t() << endl;
 
 }
 
