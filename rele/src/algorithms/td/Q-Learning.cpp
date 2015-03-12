@@ -69,21 +69,12 @@ void Q_Learning::step(const Reward& reward, const FiniteState& nextState,
     action.setActionN(u);
 }
 
-void Q_Learning::endEpisode()
-{
-    //print statistics
-    printStatistics();
-}
-
 void Q_Learning::endEpisode(const Reward& reward)
 {
     //Last update
     double r = reward[0];
     double delta = r - Q(x, u);
     Q(x, u) = Q(x, u) + alpha * delta;
-
-    //print statistics
-    printStatistics();
 }
 
 Q_Learning::~Q_Learning()
@@ -91,11 +82,6 @@ Q_Learning::~Q_Learning()
 
 }
 
-void Q_Learning::printStatistics()
-{
-    cout << endl << endl << "### Q-Learning ###";
-    FiniteTD::printStatistics();
-}
 
 }
 

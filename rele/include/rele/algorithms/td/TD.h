@@ -32,19 +32,67 @@
 namespace ReLe
 {
 
+class FiniteTDOutput : public AgentOutputData
+{
+public:
+    FiniteTDOutput(double gamma,
+                   double alpha,
+                   std::string policyName,
+                   std::string policyHPar,
+                   arma::mat Q);
+
+    virtual void writeData(std::ostream& os);
+    virtual void writeDecoratedData(std::ostream& os);
+
+private:
+    double gamma;
+    double alpha;
+    std::string policyName;
+    std::string policyHPar;
+    arma::mat Q;
+};
+
+class LinearTDOutput : public AgentOutputData
+{
+public:
+    LinearTDOutput(double gamma,
+                   double alpha,
+                   std::string policyName,
+                   std::string policyHPar,
+                   arma::vec Qw);
+
+    virtual void writeData(std::ostream& os);
+    virtual void writeDecoratedData(std::ostream& os);
+
+private:
+    double gamma;
+    double alpha;
+    std::string policyName;
+    std::string policyHPar;
+    arma::vec Qw;
+};
+
+
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
     FiniteTD(ActionValuePolicy<FiniteState>& policy);
 
-    void setAlpha(double alpha)
+    virtual void endEpisode();
+
+    inline virtual AgentOutputData* getAgentOutputDataEnd()
+    {
+        return new FiniteTDOutput(task.gamma, alpha, policy.getPolicyName(),
+                                  policy.getPolicyHyperparameters(), Q);
+    }
+
+    inline void setAlpha(double alpha)
     {
         this->alpha = alpha;
     }
 
 protected:
     virtual void init();
-    void printStatistics();
 
 protected:
     //Action-value function
@@ -65,20 +113,21 @@ class LinearTD : public Agent<FiniteAction, DenseState>
 public:
     LinearTD(ActionValuePolicy<DenseState>& policy, LinearApproximator& la);
 
-    void setAlpha(double alpha)
+    virtual void endEpisode();
+
+    inline virtual AgentOutputData* getAgentOutputDataEnd()
+    {
+        return new LinearTDOutput(task.gamma, alpha, policy.getPolicyName(),
+                                  policy.getPolicyHyperparameters(), Q.getParameters());
+    }
+
+    inline void setAlpha(double alpha)
     {
         this->alpha = alpha;
     }
 
-//    void setLinearApproximator(LinearApproximator& la)
-//    {
-//        this->Q = la;
-//        e_policy.setRegressor(&Q);
-//    }
-
 protected:
     virtual void init();
-    void printStatistics();
 
 protected:
     //Linear action-value function

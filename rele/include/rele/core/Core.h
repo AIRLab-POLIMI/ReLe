@@ -129,7 +129,6 @@ public:
             logger.log(u, xn, r);
         }
 
-        //        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLenght); //TODO serve?
         logger.printStatistics();
     }
 

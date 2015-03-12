@@ -52,6 +52,7 @@ public:
         u[0] = 10;
         u[1] = M_PI;
         u[2] = 0;
+
         return u;
     }
     virtual double operator() (const vec& state, const vec& action)

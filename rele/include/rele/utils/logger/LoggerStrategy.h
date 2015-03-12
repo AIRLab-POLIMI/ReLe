@@ -81,11 +81,11 @@ public:
         {
             if(data->isFinal())
             {
-                std::cout << "- Agent data at episode end" << std::endl;
+                std::cout << "--- Agent data at episode end ---" << std::endl;
             }
             else
             {
-                std::cout << "- Agent data at step " << data->getStep();
+                std::cout << "--- Agent data at step " << data->getStep() << " ---";
                 std::cout << std::endl;
             }
 
@@ -100,7 +100,7 @@ private:
     {
         if (logTransitions)
         {
-            std::cout << "- Transitions" << std::endl;
+            std::cout << "--- Transitions ---" << std::endl;
             int t = 0;
             for (auto sample : samples)
             {
@@ -152,7 +152,7 @@ public:
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
-        std::ofstream ofs(transitionPath); //TODO append?
+        std::ofstream ofs(transitionPath, std::ios_base::app);
 
         for(auto& sample : samples)
         {
@@ -167,9 +167,15 @@ public:
 
     void processData(std::vector<AgentOutputData*>& outputData)
     {
-        /*std::ofstream ofs(agentDataPath); //TODO append?
-        //TODO print data as matrix
-        ofs.close();*/
+        std::ofstream ofs(agentDataPath, std::ios_base::app);
+
+        for(auto data : outputData)
+        {
+            ofs << data->getStep() << ", " << data->isFinal() << std::endl;
+            data->writeData(ofs);
+        }
+
+        ofs.close();
 
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
@@ -190,7 +196,6 @@ public:
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
-        //TODO evaluation here or abstract class...
         int t = 0;
         for (auto sample : samples)
         {

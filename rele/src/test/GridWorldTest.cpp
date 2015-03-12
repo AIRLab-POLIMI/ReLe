@@ -32,28 +32,31 @@
 
 
 using namespace std;
+using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
     if (argc > 1)
     {
-        ReLe::GridWorldGenerator generator;
+        GridWorldGenerator generator;
         generator.load(argv[1]);
 
-        ReLe::FiniteMDP&& mdp = generator.getMPD(1.0);
+        FiniteMDP&& mdp = generator.getMPD(1.0);
 
-        ReLe::e_Greedy policy;
-        ReLe::SARSA_lambda agent(policy, false);
-        //ReLe::SARSA agent(policy);
-        //ReLe::Q_Learning agent(policy);
+        e_Greedy policy;
+        SARSA_lambda agent(policy, false);
+        //SARSA agent(policy);
+        //Q_Learning agent(policy);
 
-        ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
+        Core<FiniteAction, FiniteState> core(mdp, agent);
 
         core.getSettings().episodeLenght = 100000;
+        //core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, FiniteState>("/home/dave/prova.txt");
+        //core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
 
         for (int i = 0; i < 2000; i++)
         {
-            cout << "starting episode" << endl;
+            cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();
         }
     }

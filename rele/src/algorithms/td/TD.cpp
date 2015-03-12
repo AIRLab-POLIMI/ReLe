@@ -40,6 +40,11 @@ FiniteTD::FiniteTD(ActionValuePolicy<FiniteState>& policy) :
     alpha = 0.2;
 }
 
+void FiniteTD::endEpisode()
+{
+
+}
+
 void FiniteTD::init()
 {
     Q.zeros(task.finiteStateDim, task.finiteActionDim);
@@ -47,30 +52,61 @@ void FiniteTD::init()
     policy.setNactions(task.finiteActionDim);
 }
 
-void FiniteTD::printStatistics()
+
+FiniteTDOutput::FiniteTDOutput(double gamma,
+                               double alpha,
+                               string policyName,
+                               string policyHPar,
+                               mat Q) :
+    AgentOutputData(true),gamma(gamma), alpha(alpha),
+    policyName(policyName),policyHPar(policyHPar), Q(Q)
 {
-    cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
-         << endl << endl;
 
-    cout << "--- Parameters ---" << endl << endl;
-    cout << "gamma: " << gamma << endl;
-    cout << "alpha: " << alpha << endl;
-    cout << policy.getPolicyHyperparameters();
+}
 
-    cout << endl << endl << "--- Learning results ---" << endl << endl;
+void FiniteTDOutput::writeData(ostream& os)
+{
+    os << policyName << endl;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar; //TODO change this
 
-    cout << "- Action-value function" << endl;
+
+    for (unsigned int i = 0; i < Q.n_rows; i++)
+    {
+        unsigned int j;
+        for (j = 0; j < Q.n_cols - 1; j++)
+        {
+            os << Q(i, j) << ", ";
+        }
+
+        os << Q(i, j) << endl;
+    }
+}
+
+void FiniteTDOutput::writeDecoratedData(ostream& os)
+{
+    os << "Using " << policyName << " policy"
+       << endl << endl;
+
+    os << "- Parameters" << endl;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar;
+
+    os << "- Action-value function" << endl;
     for (unsigned int i = 0; i < Q.n_rows; i++)
         for (unsigned int j = 0; j < Q.n_cols; j++)
         {
-            cout << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
+            os << "Q(" << i << ", " << j << ") = " << Q(i, j) << endl;
         }
-    cout << "- Policy" << endl;
+
+    os << "- Policy" << endl;
     for (unsigned int i = 0; i < Q.n_rows; i++)
     {
         unsigned int policy;
         Q.row(i).max(policy);
-        cout << "policy(" << i << ") = " << policy << endl;
+        os << "policy(" << i << ") = " << policy << endl;
     }
 }
 
@@ -84,6 +120,11 @@ LinearTD::LinearTD(ActionValuePolicy<DenseState>& policy,
     alpha = 0.2;
 }
 
+void LinearTD::endEpisode()
+{
+
+}
+
 void LinearTD::init()
 {
     x.zeros(task.continuosStateDim);
@@ -91,18 +132,48 @@ void LinearTD::init()
     policy.setNactions(task.finiteActionDim);
 }
 
-void LinearTD::printStatistics()
+LinearTDOutput::LinearTDOutput(double gamma,
+                               double alpha,
+                               string policyName,
+                               string policyHPar,
+                               vec Qw) :
+    AgentOutputData(true),gamma(gamma), alpha(alpha),
+    policyName(policyName),policyHPar(policyHPar), Qw(Qw)
 {
-    cout << endl << endl << "--- Parameters --" << endl << endl;
-    cout << "gamma: " << gamma << endl;
-    cout << "alpha: " << alpha << endl;
-    cout << policy.getPolicyHyperparameters();
 
-    cout << endl << endl << "--- Learning results ---" << endl << endl;
+}
 
-    cout << "- Action-value function" << endl;
-    cout << Q.getParameters().t() << endl;
-//    cout << "- Policy" << endl; FIXME
+void LinearTDOutput::writeData(ostream& os)
+{
+    os << policyName << endl;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar; //TODO change this
+
+
+    unsigned int i;
+    for(i = 0; i < Qw.n_elem -1; i++)
+    {
+        os << Qw[i] << ", ";
+    }
+
+    os << Qw[i] << endl;
+
+}
+
+void LinearTDOutput::writeDecoratedData(ostream& os)
+{
+    os << "Using " << policyName << " policy"
+       << endl << endl;
+
+    os << "- Parameters" << endl ;
+    os << "gamma: " << gamma << endl;
+    os << "alpha: " << alpha << endl;
+    os << policyHPar;
+
+    os << "- Action-value function" << endl;
+    os << Qw.t() << endl;
+
 }
 
 }
