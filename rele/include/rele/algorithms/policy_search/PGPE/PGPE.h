@@ -191,6 +191,14 @@ public:
         sampleAction(state, action);
     }
 
+    virtual void initTestEpisode()
+    {
+        //obtain new parameters
+        arma::vec new_params = dist();
+        //set to policy
+        policy.setParameters(new_params);
+    }
+
     virtual void sampleAction(const StateC& state, ActionC& action)
     {
         typename action_type<ActionC>::type_ref u = action;
@@ -212,8 +220,7 @@ public:
         //update discount factor
         df *= Base::task.gamma;
 
-        typename action_type<ActionC>::type_ref u = action;
-        u = policy(nextState);
+        sampleAction(nextState, action);
     }
 
 
@@ -225,8 +232,7 @@ public:
         //update discount factor
         df *= Base::task.gamma;
 
-        unsigned int u = policy(nextState);
-        action.setActionN(u);
+        sampleAction(nextState, action);
     }
 
     virtual void endEpisode(const Reward& reward)
@@ -242,7 +248,6 @@ public:
     {
 
         Jpol += Jep;
-        Jep = 0.0;
 
         //        std::cerr << "diffObjFunc: ";
         //        std::cerr << diffObjFunc[0].t();
@@ -294,9 +299,7 @@ public:
 
 protected:
     virtual void init() = 0;
-
     virtual void afterPolicyEstimate() = 0;
-
     virtual void afterMetaParamsEstimate() = 0;
 
 protected:
@@ -315,7 +318,6 @@ protected:
     bool useDirection, useBaseline;
     PGPEStatistics traces;
 
-
 };
 
 template<class ActionC, class StateC>
@@ -326,13 +328,14 @@ public:
     PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
          bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution>(dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution>(dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
+          b_num(0.0), b_den(0.0)
     {    }
 
 protected:
     virtual void init()
     {
-        int dp = Base::policy.getParametersSize();
+        int dp = Base::dist.getParametersSize();
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
         Base::history_dlogsist.assign(Base::nbPoliciesToEvalMetap, Base::diffObjFunc);
         Base::history_J = arma::vec(Base::nbPoliciesToEvalMetap, arma::fill::zeros);
@@ -408,10 +411,11 @@ protected:
         b_num = 0.0;
         b_den = 0.0;
 
-        // create statistic for first iteration
+        //--------- create statistic for first iteration
         PGPEIterationStats trace;
         trace.metaParams = Base::dist.getParameters();
         Base::traces.push_back(trace);
+        //---------
     }
 
 private:

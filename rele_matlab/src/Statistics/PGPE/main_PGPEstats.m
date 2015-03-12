@@ -16,17 +16,21 @@ close all
 stats(:).metaParams
 plot(1:length([stats(:).metaParams]), [stats(:).metaParams])
 
+
+% Jrho = zeros(length(stats),1);
 % for i = 1:length(stats)
 %     v = [stats(i).policies(:).J];
-%     if mean(v) > 0
-%         disp(mean(v));
-%     end
+% %     if mean(v) > 0
+% %         disp(mean(v));
+% %     end
+%     Jrho(i) = mean(v);
 % end
+% plot(1:length(Jrho), Jrho);
 %%
 clc
 dim = 1;
 syms a 
-sigma = sqrt(0.2);
+sigma = sqrt(0.01);
 mu    = sym('w',   [dim,  1]);
 dist = 1/(sqrt(2*pi) * (sigma)) * exp(-0.5*(a-mu)^2/(sigma)^2);
 % pretty(pol)
@@ -50,11 +54,12 @@ for i = 1:it
 %             data = ReadEpisodeBasedDataset(A);
 %             J(ep) = sum(data.r .* (0.99*ones(1,length(data.r))).^(0:length(data.r)-1));
 %             assert(abs(J(ep)-stats(i).policies(p).J(ep))<=abs(J(ep))*PREC);
-stats(i).policies(p).J
             J(ep) = stats(i).policies(p).J(ep);
         end
         J = mean(J);
         diffdist = eval(subs(g, [a, mu], [stats(i).policies(p).policy, stats(i).metaParams]));
+        dl = stats(i).policies(p).difflog;
+        assert(max(abs(diffdist-dl))<=0.1);
         grad(:,i) = grad(:,i) + diffdist * J;
     end
     grad(:,i) = grad(:,i)/nbpol;

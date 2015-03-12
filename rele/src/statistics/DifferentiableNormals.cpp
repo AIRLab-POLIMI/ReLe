@@ -30,14 +30,21 @@ using namespace arma;
 namespace ReLe
 {
 
-////////////// PARAMETRIC NORMAL DISTRIBUTION ///////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/// PARAMETRIC NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
 
 ParametricNormal::ParametricNormal(unsigned int support_dim, unsigned int param_size)
     : DifferentiableDistribution(support_dim),
       parameters(param_size, fill::zeros),
       mean(support_dim, fill::zeros),
       Cov(support_dim, support_dim, fill::eye),
-      cholCov(arma::chol(Cov))
+      cholCov(chol(Cov))
+{
+}
+
+ParametricNormal::ParametricNormal(unsigned int support_dim)
+    : ParametricNormal(support_dim, support_dim)
 {
     updateInternalState();
 }
@@ -50,14 +57,15 @@ ParametricNormal::ParametricNormal(vec& params, mat& covariance)
     Cov        = covariance;
     invCov     = inv(Cov);
     detValue   = det(Cov);
+    cholCov    = chol(Cov);
     updateInternalState();
 }
 
 vec ParametricNormal::operator() ()
 {
-    //    cerr << "Mean: " << mean;
-    //    cerr << "---------" << endl;
-    //    cerr << "Cov: " << Cov << endl;
+    //cerr << "Mean: " << mean;
+    //cerr << "---------" << endl;
+    //cerr << "Cov: " << Cov << endl;
     return mvnrandFast(mean, cholCov);
 }
 
@@ -133,13 +141,14 @@ void ParametricNormal::updateInternalState()
 }
 
 
-////////////// PARAMETRIC LOGISTIC NORMAL DISTRIBUTION ///////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+/// PARAMETRIC LOGISTIC NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
 
 ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote)
     : ParametricNormal(point_dim, 2*point_dim),
       asVariance(variance_asymptote)
 {
-    mean = vec(point_dim,fill::zeros);
     updateInternalState();
 }
 
@@ -256,20 +265,22 @@ void ParametricLogisticNormal::updateInternalState()
         int idx = i - pointSize;
         Cov(idx,idx) = logistic(parameters(i), asVariance);
     }
-    invCov = arma::inv(Cov);
-    detValue = arma::det(Cov);
+    invCov = inv(Cov);
+    detValue = det(Cov);
+    cholCov = chol(Cov);
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// PARAMETRIC CHOLESKY NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
 
-////////////// PARAMETRIC CHOLESKY NORMAL DISTRIBUTION ///////////////////
-
-ParametricCholeskyNormal::ParametricCholeskyNormal(unsigned int point_dim, arma::vec& initial_mean, arma::mat& initial_cholA)
+ParametricCholeskyNormal::ParametricCholeskyNormal(unsigned int point_dim, vec& initial_mean, mat& initial_cholA)
     :ParametricNormal(point_dim, 2*point_dim + (point_dim * point_dim - point_dim) / 2)
 {
-    arma::mat tmp = arma::trimatu(arma::ones(point_dim, point_dim));
-    arma::vec val = initial_cholA.elem( find(tmp == 1.0) );
+    mat tmp = trimatu(ones(point_dim, point_dim));
+    vec val = initial_cholA.elem( find(tmp == 1.0) );
     int dp = 2*point_dim + (point_dim * point_dim - point_dim) / 2;
-    parameters = arma::vec(dp);
+    parameters = vec(dp);
     for (int i = 0; i < point_dim; ++i)
     {
         parameters[i] = initial_mean[i];
@@ -283,7 +294,7 @@ ParametricCholeskyNormal::ParametricCholeskyNormal(unsigned int point_dim, arma:
     this->updateInternalState();
 }
 
-arma::vec ParametricCholeskyNormal::difflog(const arma::vec &point)
+vec ParametricCholeskyNormal::difflog(const vec &point)
 {
     int paramSize = this->getParametersSize();
     vec gradient(paramSize);
@@ -294,17 +305,17 @@ arma::vec ParametricCholeskyNormal::difflog(const arma::vec &point)
     //---
 
     //--- Covariance gradient
-    arma::mat tmp = (point - mean) * (point - mean).t() * invCov;
-    arma::mat R = arma::solve(cholCov.t(), tmp);
-    arma::mat dlogpdt_sigma(pointSize, pointSize, arma::fill::zeros);
+    mat tmp = (point - mean) * (point - mean).t() * invCov;
+    mat R = solve(cholCov.t(), tmp);
+    mat dlogpdt_sigma(pointSize, pointSize, fill::zeros);
     for (int i = 0; i < pointSize; ++i)
         for (int j = 0; j < pointSize; ++j)
             if (i == j)
                 dlogpdt_sigma(i,j) = R(i,j) - 1.0 / cholCov(i,j);
             else
                 dlogpdt_sigma(i,j) = R(i,j);
-    arma::mat idxs = arma::trimatu(arma::ones(pointSize, pointSize));
-    arma::vec vals = dlogpdt_sigma.elem( find(idxs == 1) );
+    mat idxs = trimatu(ones(pointSize, pointSize));
+    vec vals = dlogpdt_sigma.elem( find(idxs == 1) );
     //---
 
 
@@ -316,14 +327,15 @@ arma::vec ParametricCholeskyNormal::difflog(const arma::vec &point)
     {
         gradient[i] = vals[i-pointSize];
     }
+    return gradient;
 }
 
-arma::mat ParametricCholeskyNormal::diff2Log(const arma::vec &point)
+mat ParametricCholeskyNormal::diff2Log(const vec &point)
 {
 
 }
 
-arma::sp_mat ParametricCholeskyNormal::FIM()
+sp_mat ParametricCholeskyNormal::FIM()
 {
     //TODO: make in a more efficient way
     int rows = invCov.n_rows;
@@ -334,17 +346,17 @@ arma::sp_mat ParametricCholeskyNormal::FIM()
     {
         int index = pointSize - k;
         int low_index = pointSize - index;
-        arma::mat tmp = invCov( span(low_index, pointSize-1), span(low_index, pointSize-1) );
+        mat tmp = invCov( span(low_index, pointSize-1), span(low_index, pointSize-1) );
         tmp(0,0) += 1.0 / (cholCov(k,k)*cholCov(k,k));
         rows += tmp.n_rows;
         cols += tmp.n_cols;
         diag_blocks.push_back(tmp);
     }
-    arma::sp_mat fim(rows, cols);
+    sp_mat fim(rows, cols);
     int roffset = 0, coffset = 0;
     for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
     {
-        arma::mat& mtx = diag_blocks[i];
+        mat& mtx = diag_blocks[i];
         for (int r = 0, re = mtx.n_rows; r < re; ++r)
         {
             for (int c = 0, ce = mtx.n_cols; c < ce; ++c)
@@ -358,7 +370,7 @@ arma::sp_mat ParametricCholeskyNormal::FIM()
     return fim;
 }
 
-arma::sp_mat ParametricCholeskyNormal::inverseFIM()
+sp_mat ParametricCholeskyNormal::inverseFIM()
 {
     //TODO: make in a more efficient way
     int rows = Cov.n_rows;
@@ -369,9 +381,9 @@ arma::sp_mat ParametricCholeskyNormal::inverseFIM()
     {
         int index = pointSize - k;
         int low_index = pointSize - index;
-        arma::mat tmp = invCov( span(low_index, pointSize-1), span(low_index, pointSize-1) );
+        mat tmp = invCov( span(low_index, pointSize-1), span(low_index, pointSize-1) );
         tmp(0,0) += 1.0 / (cholCov(k,k)*cholCov(k,k));
-        arma::mat nMtx(tmp.n_rows, tmp.n_cols);
+        mat nMtx(tmp.n_rows, tmp.n_cols);
         for (int r = 0; r < tmp.n_rows; ++r)
         {
             for (int c = 0; c < tmp.n_cols; ++c)
@@ -386,11 +398,11 @@ arma::sp_mat ParametricCholeskyNormal::inverseFIM()
         cols += nMtx.n_cols;
         diag_blocks.push_back(nMtx);
     }
-    arma::sp_mat fim(rows, cols);
+    sp_mat fim(rows, cols);
     int roffset = 0, coffset = 0;
     for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
     {
-        arma::mat& mtx = diag_blocks[i];
+        mat& mtx = diag_blocks[i];
         for (int r = 0, re = mtx.n_rows; r < re; ++r)
         {
             for (int c = 0, ce = mtx.n_cols; c < ce; ++c)
@@ -439,13 +451,13 @@ void ParametricCholeskyNormal::updateInternalState()
         mean(i) = parameters(i);
     }
     //TODO: fare in modo piu' efficiente
-    arma::mat tmp = arma::trimatu(arma::ones(pointSize, pointSize));
+    mat tmp = trimatu(ones(pointSize, pointSize));
     cholCov.elem( find(tmp == 1.0) ) = parameters.rows(pointSize, paramSize-1);
     Cov = cholCov.t() * cholCov;
 
     //TODO: questo si potrebbe fare meglio
-    invCov = arma::inv(Cov);
-    detValue = arma::det(Cov);
+    invCov = inv(Cov);
+    detValue = det(Cov);
 }
 
 } //end namespace

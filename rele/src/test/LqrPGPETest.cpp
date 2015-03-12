@@ -52,28 +52,24 @@ int main(int argc, char *argv[])
 
     ParametricNormal dist(mean,cov);
 
-
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
     DenseBasisVector basis;
     basis.push_back(pf);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-
-    arma::vec init_params(1);
-    init_params[0] = -0.1;
-
-    regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    int nbepperpol = 1, nbpolperupd = 10;
+    int nbepperpol = 1, nbpolperupd = 50;
     bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
+    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.002, usebaseline);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+    PrintStrategy<DenseAction, DenseState> stat(false);
+    core.getSettings().loggerStrategy = &stat;
 
-    int nbUpdates = 2000;
+    int nbUpdates = 4000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     for (int i = 0; i < episodes; i++)
     {
@@ -82,6 +78,8 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
     agent.printStatistics("PGPEStats.txt");
+
+    cout << "Final meta distribution: " << dist.getParameters().t();
 
     return 0;
 }

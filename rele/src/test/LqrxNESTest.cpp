@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
     mean[0] = -0.1;
     arma::mat cov(1,1, arma::fill::eye);
     cov *= 0.01;
-    ParametricCholeskyNormal dist(1, mean, cov);
-
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(1, mean, cholMtx);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;

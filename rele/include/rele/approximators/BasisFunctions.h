@@ -213,6 +213,37 @@ private:
 
 };
 
+class SparseBasisMatrix: public AbstractBasisMatrix
+{
+public:
+    SparseBasisMatrix();
+
+    SparseBasisMatrix(DenseBasisVector& basis,
+                      unsigned int nbReplication = 1,
+                      bool indipendent = true);
+
+    // AbstractBasisMatrix interface
+public:
+    arma::mat operator ()(const arma::vec& input);
+    inline size_t rows() const
+    {
+        return n_rows;
+    }
+
+    size_t cols() const
+    {
+        return n_cols;
+    }
+
+    void addBasis(unsigned int row, unsigned int col, BasisFunction* bfs);
+
+private:
+    //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
+    std::vector<unsigned int> rowsIdxs, colsIdxs;
+    std::vector<BasisFunction*> values;
+    unsigned int n_rows, n_cols;
+};
+
 } //end namespace
 
 #endif //BASISFUNCTIONS_H

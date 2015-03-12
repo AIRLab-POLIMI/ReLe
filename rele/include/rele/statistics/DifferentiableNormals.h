@@ -12,10 +12,13 @@ namespace ReLe
  */
 class ParametricNormal : public DifferentiableDistribution
 {
-public:
-
+protected:
     ParametricNormal(unsigned int support_dim,
                      unsigned int param_size);
+
+public:
+
+    ParametricNormal(unsigned int support_dim);
 
     ParametricNormal(arma::vec& params,
                      arma::mat& covariance);

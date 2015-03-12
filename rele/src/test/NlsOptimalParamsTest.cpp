@@ -21,14 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NLS.h"
-#include "policy_search/PGPE/PGPE.h"
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
-#include "RandomGenerator.h"
 
 #include <iostream>
 #include <iomanip>
@@ -36,6 +28,15 @@
 #include <map>
 #include <random>
 #include <cmath>
+
+#include "NLS.h"
+#include "DifferentiableNormals.h"
+#include "Core.h"
+#include "parametric/differentiable/NormalPolicy.h"
+#include "BasisFunctions.h"
+#include "basis/PolynomialFunction.h"
+#include "RandomGenerator.h"
+#include "PolicyEvalAgent.h"
 
 using namespace std;
 using namespace ReLe;
@@ -51,17 +52,6 @@ int main(int argc, char *argv[])
 
     int dim = mdp.getSettings().continuosStateDim;
     cout << "dim: " << dim << endl;
-
-
-    //--- define meta distribution (high-level policy)
-    arma::vec mean(dim, arma::fill::zeros);
-    mean[0] = -0.42;
-    mean[1] =  0.42;
-    arma::mat cov(dim, dim, arma::fill::eye);
-    cov *= 0.1;
-    ParametricNormal dist(mean,cov);
-    //---
-
 
     //--- define policy (low level)
     DenseBasisVector basis;
@@ -87,43 +77,29 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
     //---
 
-    int nbepperpol = 1, nbpolperupd = 5;
-    bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
-    agent.setNormalization(true);
-
+    PolicyEvalAgent<DenseAction, DenseState, NormalStateDependantStddevPolicy> agent(policy);
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-    PrintStrategy<DenseAction, DenseState> stat(false);
-    core.getSettings().loggerStrategy = &stat;
+    core.getSettings().episodeLenght = mdp.getSettings().horizon;
 
-    int nbUpdates = 1;
-    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
-    for (int i = 0; i < episodes; i++)
+    ofstream out("NLS_OptParamSpace.dat", ios_base::out);
+
+    arma::vec w(2);
+    if (out.is_open())
     {
-        core.getSettings().episodeLenght = mdp.getSettings().horizon;
-        //        cout << "starting episode" << endl;
-        core.runEpisode();
+        for (double p1 = -10; p1 < 0; p1 += 0.1)
+        {
+            w[0] = p1;
+            for (double p2 = 0; p2 < 15; p2 += 0.1)
+            {
+                w[1] = p2;
+                policy.setParameters(w);
+                int testEpisodes = 1000;
+                arma::vec J = core.runBatchTest(testEpisodes);
+                out << p1 << "\t" << p2 <<  "\t" << J[0] << std::endl;
+                cout << p1 << "\t" << p2 <<  "\t" << J[0] << std::endl;
+            }
+        }
+        out.close();
     }
-    agent.printStatistics("PGPEStats.txt");
-
-
-//    EvaluateStrategy<DenseAction, DenseState> stat_e;
-//    core.getSettings().loggerStrategy = &stat_e;
-//    int testEpisodes = 10;
-//    arma::vec Jm(mdp.getSettings().rewardDim, arma::fill::zeros);
-//    for (int i = 0; i < testEpisodes; i++)
-//    {
-//        core.getSettings().episodeLenght = mdp.getSettings().horizon;
-//        //        cout << "starting episode" << endl;
-//        core.runTestEpisode();
-////        cout << "[" << i << "]" << stat_e->J_mean.t();
-//        Jm += stat_e.J_mean;
-//    }
-//    Jm /= testEpisodes;
-//    cout << Jm;
-
-//    cout << "Batch test\n";
-//    cout << core.runBatchTest(testEpisodes);
-
     return 0;
 }
