@@ -45,17 +45,17 @@ for i=1:steps
  thetaDirhat = wrapToPi(atan2(yhat - (y + yr), xhat - (x + xr)));
  
  %Step 2: compute the inputs
- deltaTheta = wrapToPi(thetaDirhat - thetar)
+ deltaTheta = wrapToPi(thetaDirhat - thetar);
  
  omegarOpt = deltaTheta/dt;
- omegar = max(-omegarmax, min(omegarmax, omegarOpt))
+ omegar = max(-omegarmax, min(omegarmax, omegarOpt));
  
  if(abs(deltaTheta) > pi/2)
-     vr = 0
+     vr = 0;
  else if(abs(deltaTheta) > pi/4)
-        vr = vrmax/2
+        vr = vrmax/2;
      else
-        vr = vrmax
+        vr = vrmax;
      end
  end
  

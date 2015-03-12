@@ -120,12 +120,6 @@ void Rocky::computeRockyControl(double& vr, double& omegar)
     {
         vr = maxVr;
     }
-
-    std::cout << "deltaTheta = " << deltaTheta  << std::endl;
-    std::cout << "omegar = " << omegar  << std::endl;
-    std::cout << "vr = " << vr  << std::endl;
-    std::cout << "---------------------------";
-
 }
 
 void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
@@ -202,6 +196,7 @@ Rocky::Predictor::Predictor(double dt) :
 {
     reset();
 }
+
 void Rocky::Predictor::reset()
 {
     thetaM = 0;
@@ -218,7 +213,7 @@ void Rocky::Predictor::predict(const DenseState& state, double& xhat, double& yh
 {
     xhat = state[x] + v * cos(thetaM) * dt;
     yhat = state[y] + v * sin(thetaM) * dt;
-    thetaDirhat = atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr]));
+    thetaDirhat = utils::wrapToPi(atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr])));
 }
 
 }

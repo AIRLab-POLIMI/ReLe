@@ -30,11 +30,13 @@ axis equal
 
 
 for i = 1:10:size(traj, 1)
+   endIndex = min(size(traj, 1), i+10);
    figure(2)
    hold off
-   plot(traj(i:i+10, 1), traj(i:i+10, 2), 'b');
+   plot(traj(i:endIndex, 1), traj(i:endIndex, 2), 'b');
    hold on
-   plot(rockytraj(i:i+10, 1), rockytraj(i:i+10, 2), 'm');
+   plot(rockytraj(i:endIndex, 1), rockytraj(i:endIndex, 2), 'm');
+   axis([-6 7 -1 7])
    waitforbuttonpress
 end
 

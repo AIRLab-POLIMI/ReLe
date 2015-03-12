@@ -54,7 +54,7 @@ public:
 
     static inline double threshold(double value, double threshold)
     {
-        return utils::threshold(value, threshold, -threshold);
+        return utils::threshold(value, -threshold, threshold);
     }
 
 };
