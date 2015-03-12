@@ -1,6 +1,5 @@
 TODO:
 
-0) funzione di simulazione per valutare semplicemente la performance di una politica (J)
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
 3) Interfaccia Matlab?

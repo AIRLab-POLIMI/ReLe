@@ -133,6 +133,8 @@ target_link_libraries(nls_REPS rele)
 add_executable(basisMatrixTest src/test/BasisMatrixTest.cpp)
 target_link_libraries(basisMatrixTest rele)
 
+add_executable(nls_OptParams src/test/NlsOptimalParamsTest.cpp)
+target_link_libraries(nls_OptParams rele)
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

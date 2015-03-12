@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DUMMYAGENT_H_
-#define DUMMYAGENT_H_
+#ifndef POLICYEVALAGENT_H_
+#define POLICYEVALAGENT_H_
 
 #include "Agent.h"
 #include "Policy.h"
@@ -30,11 +30,14 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
-class DummyAgent: public Agent<ActionC, StateC>
+template<class ActionC, class StateC, class PolicyC>
+class PolicyEvalAgent: public Agent<ActionC, StateC>
 {
 public:
-    DummyAgent(Policy& policy): policy(policy)
+    PolicyEvalAgent(PolicyC& policy): policy(policy)
+    {
+    }
+    virtual ~PolicyEvalAgent()
     {
     }
 
@@ -65,10 +68,18 @@ public:
     {
     }
 
+    void endEpisode(const Reward& reward)
+    {
+    }
+
+    void endEpisode()
+    {
+    }
+
 private:
-    Policy policy;
+    PolicyC policy;
 };
 
 } //end namespace
 
-#endif //DUMMYAGENT_H_
+#endif //POLICYEVALAGENT_H_
