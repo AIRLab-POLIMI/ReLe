@@ -26,17 +26,24 @@ plot(traj(:, 1), traj(:, 2), 'b');
 hold on
 plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
 axis equal
+lim = axis;
 
-
+figure(2)
+H = uicontrol('Style', 'PushButton', ...
+                    'String', 'Break', ...
+                    'Callback', 'delete(gcbf)');
 
 for i = 1:10:size(traj, 1)
+    if(~ishandle(H))
+        break
+    end
    endIndex = min(size(traj, 1), i+10);
    figure(2)
    hold off
    plot(traj(i:endIndex, 1), traj(i:endIndex, 2), 'b');
    hold on
    plot(rockytraj(i:endIndex, 1), rockytraj(i:endIndex, 2), 'm');
-   axis([-6 7 -1 7])
-   waitforbuttonpress
+   axis(lim)
+   pause(0.01)
 end
 

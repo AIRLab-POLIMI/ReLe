@@ -32,7 +32,7 @@ namespace ReLe
 
 Rocky::Rocky() :
     ContinuousMDP(STATESIZE, 3, 1, false, true), dt(0.01),
-    maxOmega(M_PI), maxV(10), maxOmegar(M_PI), maxVr(10), predictor(dt)
+    maxOmega(M_PI), maxV(1), maxOmegar(M_PI), maxVr(1), predictor(dt)
 {
     //TODO parameter in the constructor
     vec2 spot;
@@ -92,6 +92,8 @@ void Rocky::getInitialState(DenseState& state)
 
     //reset predictor state
     predictor.reset();
+
+    currentState.setAbsorbing(false);
 
     state = currentState;
 }
@@ -175,7 +177,7 @@ void Rocky::computeReward(Reward& reward)
     vec2 chickenPosition = currentState.rows(span(x, y));
     vec2 rockyRelPosition = currentState.rows(span(xr, yr));
 
-    if (norm(rockyRelPosition) < 0.4)
+    if (norm(rockyRelPosition) < 0.05)
     {
         reward[0] = -100;
         currentState.setAbsorbing(true);
@@ -188,6 +190,7 @@ void Rocky::computeReward(Reward& reward)
     else
     {
         reward[0] = 0;
+        currentState.setAbsorbing(false);
     }
 }
 

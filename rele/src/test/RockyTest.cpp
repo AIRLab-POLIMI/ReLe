@@ -49,8 +49,8 @@ public:
     virtual vec operator() (const vec& state)
     {
         vec u(3);
-        u[0] = 10;
-        u[1] = M_PI;
+        u[0] = 1;
+        u[1] = M_PI/16;
         u[2] = 0;
 
         return u;
@@ -103,18 +103,21 @@ int main(int argc, char *argv[])
     Rocky rocky;
 
     //Low level policy
-    /*int dim = rocky.getSettings().continuosStateDim;
+    int dim = rocky.getSettings().continuosStateDim;
+    int actionDim = rocky.getSettings().continuosActionDim;
     DenseBasisVector basis;
     basis.generatePolynomialBasisFunctions(1, dim);
-    LinearApproximator regressor(dim, basis);
+    SparseBasisMatrix basisMatrix(basis, actionDim);
 
-    DetLinearPolicy<DenseState> policy(&regressor);*/
-    RockyCircularPolicy policy;
+    LinearApproximator regressor(dim, basisMatrix);
+
+    DetLinearPolicy<DenseState> policy(&regressor);
+    //RockyCircularPolicy policy;
 
 
     //high level policy
     int dimPolicy = policy.getParametersSize();
-    arma::vec mean(dimPolicy);
+    arma::vec mean(dimPolicy, fill::randn);
     arma::mat cov(dimPolicy, dimPolicy, arma::fill::eye);
 
     ParametricNormal dist(mean, cov);
@@ -124,17 +127,18 @@ int main(int argc, char *argv[])
 
     Core<DenseAction, DenseState> core(rocky, agent);
 
-    /*int episodes = 40;
+    int episodes = 1000;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 100000;
-        cout << "starting episode" << endl;
+        core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
+        cout << "### starting episode " << i << " ###" << endl;
         core.runEpisode();
-    }*/
+    }
 
     core.getSettings().episodeLenght = 100000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
-    cout << "starting episode" << endl;
+    cout << "### Starting evaluation episode ##" << endl;
     core.runTestEpisode();
 
     return 0;
