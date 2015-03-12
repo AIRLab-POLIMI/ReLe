@@ -42,7 +42,6 @@ public:
     virtual void step(const Reward& reward, const DenseState& nextState,
                       FiniteAction& action);
     virtual void endEpisode(const Reward& reward);
-    virtual void endEpisode();
 
     virtual ~LinearGradientSARSA();
 
@@ -50,9 +49,6 @@ public:
     {
         useReplacingTraces = val;
     }
-
-protected:
-    virtual void printStatistics();
 
 private:
     arma::vec eligibility;

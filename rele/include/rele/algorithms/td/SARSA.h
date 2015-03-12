@@ -39,12 +39,9 @@ public:
     virtual void step(const Reward& reward, const FiniteState& nextState,
                       FiniteAction& action);
     virtual void endEpisode(const Reward& reward);
-    virtual void endEpisode();
 
     virtual ~SARSA();
 
-protected:
-    void printStatistics();
 
 };
 
@@ -57,7 +54,6 @@ public:
     virtual void step(const Reward& reward, const FiniteState& nextState,
                       FiniteAction& action);
     virtual void endEpisode(const Reward& reward);
-    virtual void endEpisode();
 
     virtual ~SARSA_lambda();
 
@@ -68,7 +64,6 @@ public:
 
 protected:
     virtual void init();
-    void printStatistics();
 
 private:
     double lambda;

@@ -118,26 +118,11 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
     //update regressor weights
     vec& regWeights = Q.getParameters();
     regWeights += deltaWeights;
-
-    //print statistics
-    printStatistics();
-}
-
-void LinearGradientSARSA::endEpisode()
-{
-    //print statistics
-    printStatistics();
 }
 
 LinearGradientSARSA::~LinearGradientSARSA()
 {
 
-}
-
-void LinearGradientSARSA::printStatistics()
-{
-    cout << endl << endl << "### LINEAR SARSA ###";
-    LinearTD::printStatistics();
 }
 
 }//end namespace

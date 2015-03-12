@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < 2000; i++)
         {
-            cout << "starting episode" << endl;
+            cout << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();
         }
     }

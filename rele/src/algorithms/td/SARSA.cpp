@@ -65,32 +65,17 @@ void SARSA::step(const Reward& reward, const FiniteState& nextState,
     action.setActionN(u);
 }
 
-void SARSA::endEpisode()
-{
-    //print statistics
-    printStatistics();
-}
-
 void SARSA::endEpisode(const Reward& reward)
 {
     //Last update
     double r = reward[0];
     double delta = r - Q(x, u);
     Q(x, u) = Q(x, u) + alpha * delta;
-
-    //print statistics
-    printStatistics();
 }
 
 SARSA::~SARSA()
 {
 
-}
-
-void SARSA::printStatistics()
-{
-    cout << endl << endl << "### SARSA ###";
-    FiniteTD::printStatistics();
 }
 
 SARSA_lambda::SARSA_lambda(ActionValuePolicy<FiniteState>& policy,
@@ -140,11 +125,6 @@ void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState,
     action.setActionN(u);
 }
 
-void SARSA_lambda::endEpisode()
-{
-    printStatistics();
-}
-
 void SARSA_lambda::endEpisode(const Reward& reward)
 {
     //Last update
@@ -160,7 +140,6 @@ void SARSA_lambda::endEpisode(const Reward& reward)
     //update action value function
     Q = Q + alpha * delta * Z;
 
-    printStatistics();
 }
 
 SARSA_lambda::~SARSA_lambda()
@@ -174,12 +153,5 @@ void SARSA_lambda::init()
     Z.zeros(task.finiteStateDim, task.finiteActionDim);
 }
 
-void SARSA_lambda::printStatistics()
-{
-    cout << endl << endl << "### SARSA(" << lambda << ") - "
-         << (accumulating ? "accumulating" : "replacing")
-         << " trace ###";
-    FiniteTD::printStatistics();
-}
 
 }

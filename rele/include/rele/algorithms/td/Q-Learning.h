@@ -41,13 +41,9 @@ public:
     virtual void step(const Reward& reward, const FiniteState& nextState,
                       FiniteAction& action);
     virtual void endEpisode(const Reward& reward);
-    virtual void endEpisode();
 
 
     virtual ~Q_Learning();
-
-protected:
-    void printStatistics();
 
 };
 
