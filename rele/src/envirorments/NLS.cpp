@@ -97,20 +97,20 @@ NLS::NLS()
     : ContinuousMDP(),
       nlsConfig()
 {
-    setupEnvirorment(nlsConfig.continuosStateDim,nlsConfig.continuosActionDim,nlsConfig.rewardDim,
-                     nlsConfig.isFiniteHorizon, nlsConfig.isEpisodic, nlsConfig.gamma, nlsConfig.horizon);
+    setupEnvirorment(nlsConfig.continuosStateDim, nlsConfig.continuosActionDim, nlsConfig.rewardDim,
+                     nlsConfig.isFiniteHorizon, nlsConfig.isEpisodic, nlsConfig.horizon, nlsConfig.gamma);
     currentState.set_size(nlsConfig.continuosStateDim);
 }
 
-NLS::NLS(NLSSettings &config)
-    : ContinuousMDP(config.continuosStateDim, config.continuosActionDim, config.rewardDim,
-                    config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
-    nlsConfig(config)
+NLS::NLS(NLSSettings& config)
+    : nlsConfig(config)
 {
+    setupEnvirorment(nlsConfig.continuosStateDim, nlsConfig.continuosActionDim, nlsConfig.rewardDim,
+                     nlsConfig.isFiniteHorizon, nlsConfig.isEpisodic, nlsConfig.horizon, nlsConfig.gamma);
     currentState.set_size(nlsConfig.continuosStateDim);
 }
 
-void NLS::step(const DenseAction &action, DenseState &nextState, Reward &reward)
+void NLS::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
     double a           = action[0];
     double model_noise = RandomGenerator::sampleNormal(nlsConfig.noise_mean, nlsConfig.noise_std);
@@ -128,7 +128,7 @@ void NLS::step(const DenseAction &action, DenseState &nextState, Reward &reward)
     currentState = nextState;
 }
 
-void NLS::getInitialState(DenseState &state)
+void NLS::getInitialState(DenseState& state)
 {
     currentState.setAbsorbing(false);
     currentState[0] = RandomGenerator::sampleNormal(nlsConfig.pos0_mean, nlsConfig.pos0_std);

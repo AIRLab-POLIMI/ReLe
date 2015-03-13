@@ -120,6 +120,8 @@ void DamSettings::ReadFromStream(istream &in)
 Dam::Dam()
     : damConfig()
 {
+    setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
+                     damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
 }
 
 Dam::Dam(DamSettings& config)

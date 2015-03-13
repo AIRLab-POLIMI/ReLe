@@ -103,7 +103,7 @@ DiscreteActionSwingUp::DiscreteActionSwingUp()
     : config()
 {
     setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
-                     config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon);
+                     config.isFiniteHorizon, config.isEpisodic, config.horizon, config.gamma);
     currentState.set_size(config.continuosStateDim);
 }
 
@@ -111,7 +111,7 @@ DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config)
     : config(config)
 {
     setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
-                     config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon);
+                     config.isFiniteHorizon, config.isEpisodic, config.horizon, config.gamma);
     currentState.set_size(config.continuosStateDim);
 }
 

@@ -84,7 +84,7 @@ UnderwaterVehicle::UnderwaterVehicle()
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
     setupEnvirorment(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
-                     uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.gamma, uwvConfig.horizon);
+                     uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.horizon, uwvConfig.gamma);
     currentState.set_size(uwvConfig.continuosStateDim);
 }
 
