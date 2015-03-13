@@ -66,8 +66,9 @@ int main(int argc, char *argv[])
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-    PrintStrategy<DenseAction, DenseState> stat(false);
-    core.getSettings().loggerStrategy = &stat;
+//    PrintStrategy<DenseAction, DenseState> stat(false);
+//    core.getSettings().loggerStrategy = &stat;
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("prova.txt", WriteStrategy<DenseAction, DenseState>::AGENT);
 
     int nbUpdates = 4000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;

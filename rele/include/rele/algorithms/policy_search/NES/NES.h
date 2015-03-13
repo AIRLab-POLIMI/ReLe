@@ -145,8 +145,9 @@ protected:
 
 
         //--------- save value of distgrad
-        int dim = Base::traces.size() - 1;
-        Base::traces[dim].metaGradient = nat_grad;
+        // int dim = Base::traces.size() - 1;
+        // Base::traces[dim]->metaGradient = nat_grad;
+        Base::currentItStats->metaGradient = Base::diffObjFunc;
         //---------
 
         //update meta distribution
@@ -170,9 +171,12 @@ protected:
         }
 
         //---------  create statistic for first iteration
-        PGPEIterationStats trace;
-        trace.metaParams = Base::dist.getParameters();
-        Base::traces.push_back(trace);
+        // PGPEIterationStats* trace = new PGPEIterationStats();
+        // trace->metaParams = Base::dist.getParameters();
+        // Base::traces.push_back(trace);
+
+        // Base::currentItStats = new PGPEIterationStats();
+        // Base::currentItStats->metaParams = Base::dist.getParameters();
         //---------
     }
 
@@ -311,11 +315,8 @@ protected:
 
 
 
-
-
         //--------- save value of distgrad
-        int dim = Base::traces.size() - 1;
-        Base::traces[dim].metaGradient = nat_grad;
+        Base::currentItStats->metaGradient = nat_grad;
         //---------
 
         //update meta distribution
@@ -337,12 +338,6 @@ protected:
             b_num[i] = 0.0;
             b_den[i] = 0.0;
         }
-
-        //---------  create statistic for first iteration
-        PGPEIterationStats trace;
-        trace.metaParams = Base::dist.getParameters();
-        Base::traces.push_back(trace);
-        //---------
     }
 
 protected:
