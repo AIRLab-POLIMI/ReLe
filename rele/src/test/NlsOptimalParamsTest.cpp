@@ -82,9 +82,9 @@ int main(int argc, char *argv[])
 
     ofstream out("NLS_OptParamSpace.dat", ios_base::out);
 
-    arma::vec w(2);
     if (out.is_open())
     {
+        arma::vec w(2);
         for (double p1 = -10; p1 < 0; p1 += 0.1)
         {
             w[0] = p1;

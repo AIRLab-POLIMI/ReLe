@@ -27,119 +27,15 @@
 #include "Agent.h"
 #include "Distribution.h"
 #include "Policy.h"
+#include "Basics.h"
 #include <cassert>
 #include <iomanip>
+
+#include "PGPEOutputData.h"
 
 namespace ReLe
 {
 
-class PGPEPolicyIndividual
-{
-public:
-    arma::vec Pparams;  //policy parameters
-    arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
-    arma::mat difflog;
-
-public:
-    PGPEPolicyIndividual(arma::vec& polp, int nbEval)
-        :Pparams(polp), Jvalues(nbEval), difflog(polp.n_elem, nbEval)
-    {}
-
-    friend std::ostream& operator<<(std::ostream& out, PGPEPolicyIndividual& stat)
-    {
-        int nparams = stat.Pparams.n_elem;
-        int nepisodes = stat.Jvalues.n_elem;
-        out << nparams;
-        for (int i = 0; i < nparams; ++i)
-            out << " " << stat.Pparams[i];
-        out << std::endl;
-        out << nepisodes;
-        for (int i = 0; i < nepisodes; ++i)
-            out << " " << stat.Jvalues[i];
-        out << std::endl;
-        for (int i = 0; i < nepisodes; ++i)
-        {
-            for (int j = 0; j < nparams; ++j)
-            {
-                out << stat.difflog(j,i) << " ";
-            }
-            out << std::endl;
-        }
-        return out;
-    }
-
-    friend std::istream& operator>>(std::istream& in, PGPEPolicyIndividual& stat)
-    {
-        int i, nbPolPar, nbEval;
-        in >> nbPolPar;
-        stat.Pparams = arma::vec(nbPolPar);
-        for (i = 0; i < nbPolPar; ++i)
-            in >> stat.Pparams[i];
-        in >> nbEval;
-        stat.Jvalues = arma::vec(nbEval);
-        for (i = 0; i < nbEval; ++i)
-            in >> stat.Jvalues[i];
-        stat.difflog = arma::mat(nbPolPar, nbEval);
-        for (int i = 0; i < nbPolPar; ++i)
-        {
-            for (int j = 0; j < nbEval; ++j)
-            {
-                in >> stat.difflog(i,j);
-            }
-        }
-        return in;
-    }
-};
-
-struct PGPEIterationStats
-{
-    arma::vec metaParams;
-    arma::vec metaGradient;
-    std::vector<PGPEPolicyIndividual> individuals;
-
-public:
-    friend std::ostream& operator<<(std::ostream& out, PGPEIterationStats& stat)
-    {
-        int i, ie = stat.individuals.size();
-        out << stat.metaParams.n_elem << " ";
-        for (i = 0; i < stat.metaParams.n_elem; ++i)
-        {
-            out << stat.metaParams[i] << " ";
-        }
-        out << std::endl;
-        for (i = 0; i < stat.metaGradient.n_elem; ++i)
-        {
-            out << stat.metaGradient[i] << " ";
-        }
-        out << std::endl << ie << std::endl;
-        for (i = 0; i < ie; ++i)
-        {
-            out << stat.individuals[i];
-        }
-        return out;
-    }
-
-    void addIndividual(PGPEPolicyIndividual& individual)
-    {
-        individuals.push_back(individual);
-    }
-
-};
-
-class PGPEStatistics : public std::vector<PGPEIterationStats>
-{
-public:
-    friend std::ostream& operator<<(std::ostream& out, PGPEStatistics& stat)
-    {
-        int i, ie = stat.size();
-        out << ie << std::endl;
-        for (i = 0; i < ie; ++i)
-        {
-            out << stat[i];
-        }
-        return out;
-    }
-};
 
 //TODO: definire questo come PGPE
 template<class ActionC, class StateC, class DistributionC>
@@ -155,7 +51,7 @@ public:
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
           runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false),
           Jep (0.0), Jpol(0.0), rewardId(reward_obj),
-          useBaseline(baseline)
+          useBaseline(baseline), output2LogReady(false)
     {
         // create statistic for first iteration
         PGPEIterationStats trace;
@@ -296,6 +192,18 @@ public:
         out.close();
     }
 
+    virtual AgentOutputData* getAgentOutputData()
+    {
+        if (output2LogReady)
+        {
+            //TODO
+            output2LogReady = false;
+            int dim = traces.size() - 1;
+            PGPEIterationStats* outData = &(traces[dim]);
+            return outData;
+        }
+    }
+
 
 protected:
     virtual void init() = 0;
@@ -315,7 +223,7 @@ protected:
     arma::vec history_J;
 
 
-    bool useDirection, useBaseline;
+    bool useDirection, useBaseline, output2LogReady;
     PGPEStatistics traces;
 
 };
@@ -413,11 +321,13 @@ protected:
         b_num = 0.0;
         b_den = 0.0;
 
-        //--------- create statistic for first iteration
+        //--------- create statistic for next iteration
         PGPEIterationStats trace;
         trace.metaParams = Base::dist.getParameters();
         Base::traces.push_back(trace);
         //---------
+
+        Base::output2LogReady = true;
     }
 
 private:

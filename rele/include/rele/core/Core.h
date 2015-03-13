@@ -165,7 +165,7 @@ public:
 
             logger.printStatistics();
 
-            J_mean += stat_e.J_mean;
+            J_mean += stat_e.J;
         }
 
         J_mean /= nbEpisodes;

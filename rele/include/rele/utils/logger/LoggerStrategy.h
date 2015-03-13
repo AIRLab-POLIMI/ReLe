@@ -196,36 +196,20 @@ public:
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
-        int t = 0;
+        bool first = true;
         for (auto sample : samples)
         {
             Reward& r = sample.r;
-            if (t == 0)
+            if (first)
             {
-                J_mean = arma::vec(r.size(), arma::fill::zeros);
-                J_standarDeviation = arma::vec(r.size(), arma::fill::zeros);
+                J = arma::vec(r.size(), arma::fill::zeros);
+                first = false;
             }
             for (int i = 0, ie = r.size(); i < ie; ++i)
             {
-                J_mean[i] += r[i];
-            }
-            ++t;
-        }
-        for (int i = 0, ie = J_mean.n_elem; i < ie; ++i)
-            J_mean[i] /= t;
-
-        for (auto sample : samples)
-        {
-            Reward& r = sample.r;
-            for (int i = 0, ie = r.size(); i < ie; ++i)
-            {
-                double v = r[i] - J_mean[i];
-                J_standarDeviation[i] += v*v;
+                J[i] += r[i];
             }
         }
-
-        for (int i = 0, ie = J_standarDeviation.n_elem; i < ie; ++i)
-            J_standarDeviation[i] /= t;
     }
 
     void processData(std::vector<AgentOutputData*>& outputData)
@@ -234,8 +218,7 @@ public:
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
-    arma::vec J_mean;
-    arma::vec J_standarDeviation;
+    arma::vec J;
 };
 
 }
