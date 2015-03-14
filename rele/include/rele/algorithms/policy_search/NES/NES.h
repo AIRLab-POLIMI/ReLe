@@ -116,14 +116,19 @@ protected:
         fisherMtx /= Base::polCount;
 
         arma::mat tmp;
+        arma::vec nat_grad;
         int rnk = arma::rank(fisherMtx);
         if (rnk == fisherMtx.n_rows)
         {
             arma::mat H = arma::solve(fisherMtx, Base::diffObjFunc);
 #ifndef SIMONEUPDATE
             tmp = H;
+            nat_grad = tmp*Base::step_length;
 #else
             tmp = Base::diffObjFunc.t() * H;
+            double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
 #endif
         }
         else
@@ -132,18 +137,14 @@ protected:
             arma::mat H = arma::pinv(fisherMtx);
 #ifndef SIMONEUPDATE
             tmp = H * Base::diffObjFunc;
+            nat_grad = tmp*Base::step_length;
 #else
             tmp = Base::diffObjFunc.t() * (H * Base::diffObjFunc);
+            double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
 #endif
         }
-
-#ifndef SIMONEUPDATE
-        arma::vec nat_grad = tmp*Base::step_length;
-#else
-        double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
-        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-        arma::vec nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
-#endif
 
 
         //--------- save value of distgrad
@@ -155,9 +156,9 @@ protected:
         Base::dist.update(nat_grad);
 
 
-        std::cout << "nat_grad: " << nat_grad.t();
-        std::cout << "Parameters:\n" << std::endl;
-        std::cout << Base::dist.getParameters() << std::endl;
+        // std::cout << "nat_grad: " << nat_grad.t();
+        // std::cout << "Parameters:\n" << std::endl;
+        // std::cout << Base::dist.getParameters() << std::endl;
 
 
         //reset counters and gradient
@@ -317,9 +318,9 @@ protected:
         Base::dist.update(nat_grad);
 
 
-        std::cout << "nat_grad: " << nat_grad.t();
-        std::cout << "Parameters:\n" << std::endl;
-        std::cout << Base::dist.getParameters() << std::endl;
+        // std::cout << "nat_grad: " << nat_grad.t();
+        // std::cout << "Parameters:\n" << std::endl;
+        // std::cout << Base::dist.getParameters() << std::endl;
 
 
         //reset counters and gradient

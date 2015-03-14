@@ -45,12 +45,18 @@ int main(int argc, char *argv[])
 {
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
+//    arma::vec mean(1);
+//    mean[0] = -0.1;
+//    arma::mat cov(1,1, arma::fill::eye);
+//    cov *= 0.01;
+//    ParametricNormal dist(mean,cov);
+
     arma::vec mean(1);
     mean[0] = -0.1;
     arma::mat cov(1,1, arma::fill::eye);
     cov *= 0.01;
-
-    ParametricNormal dist(mean,cov);
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(1, mean, cholMtx);
 
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
@@ -63,7 +69,7 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 1, nbpolperupd = 50;
     bool usebaseline = false;
-    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1e-3, usebaseline);
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
     const std::string outfile = "lqrNesAgentOut.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
@@ -77,12 +83,28 @@ int main(int argc, char *argv[])
 
     core.getSettings().episodeLenght = mdp.getSettings().horizon;
 
-    int nbUpdates = 2000;
+    int nbUpdates = 4000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    double every, bevery;
+    every = bevery = 0.05; //10%
+    int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
         //        cout << "starting episode" << endl;
         core.runEpisode();
+
+        int v = nbepperpol*nbpolperupd;
+        if (i % v == 0)
+        {
+            updateCount++;
+            if (updateCount >= nbUpdates*every)
+            {
+                int p = 100 * updateCount/static_cast<double>(nbUpdates);
+                cout << "### " << p << "% ###" << endl;
+                cout << dist.getParameters().t();
+                every += bevery;
+            }
+        }
     }
 
     return 0;
