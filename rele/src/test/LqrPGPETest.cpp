@@ -61,14 +61,18 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> policy(&regressor);
 
     int nbepperpol = 1, nbpolperupd = 50;
-    bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.002, usebaseline);
+    bool usebaseline = false;
+    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 //    PrintStrategy<DenseAction, DenseState> stat(false);
 //    core.getSettings().loggerStrategy = &stat;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("prova.txt", WriteStrategy<DenseAction, DenseState>::AGENT);
+
+
+    std::ofstream ofs("prova.txt", std::ios_base::out);
+    ofs.close();
 
     int nbUpdates = 4000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
@@ -78,7 +82,6 @@ int main(int argc, char *argv[])
         //        cout << "starting episode" << endl;
         core.runEpisode();
     }
-    agent.printStatistics("PGPEStats.txt");
 
     cout << "Final meta distribution: " << dist.getParameters().t();
 

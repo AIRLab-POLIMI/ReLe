@@ -68,29 +68,30 @@ int main(int argc, char *argv[])
     basis.push_back(pf);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-
-    arma::vec init_params(1);
-    init_params[0] = -0.1;
-
-    regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    int nbepperpol = 1, nbpolperupd = 10;
+    int nbepperpol = 1, nbpolperupd = 50;
     bool usebaseline = true;
     xNES<DenseAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
-    agent.setNormalization(true);
 
+    const std::string outfile = "lqrxNesAgentOut.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+        outfile, WriteStrategy<DenseAction, DenseState>::AGENT
+    );
+    //--- delete file
+    std::ofstream ofs(outfile, std::ios_base::out);
+    ofs.close();
+    //---
+
+    core.getSettings().episodeLenght = mdp.getSettings().horizon;
 
     int nbUpdates = 2000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = 50;
-        //        cout << "starting episode" << endl;
         core.runEpisode();
     }
-    agent.printStatistics("PGPEStats.txt");
 
     return 0;
 }

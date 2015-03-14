@@ -6,8 +6,13 @@ using namespace arma;
 namespace ReLe
 {
 
+PGPEPolicyIndividual::PGPEPolicyIndividual(unsigned int nbParams, unsigned int nbEvals)
+    :Pparams(nbParams), Jvalues(nbEvals), diffLogDistr(nbParams, nbEvals)
+{
+}
+
 PGPEPolicyIndividual::PGPEPolicyIndividual(arma::vec& polp, int nbEval)
-    :Pparams(polp), Jvalues(nbEval), difflog(polp.n_elem, nbEval)
+    :Pparams(polp), Jvalues(nbEval), diffLogDistr(polp.n_elem, nbEval)
 {
 }
 
@@ -27,15 +32,17 @@ void PGPEPolicyIndividual::WriteToStream(ostream& os)
     {
         for (int j = 0; j < nparams; ++j)
         {
-            os << difflog(j,i) << "\t";
+            os << diffLogDistr(j,i) << "\t";
         }
         os << std::endl;
     }
 }
 
-PGPEIterationStats::PGPEIterationStats()
+PGPEIterationStats::PGPEIterationStats(unsigned int nbIndividual,
+                                       unsigned int nbParams, unsigned int nbEvals)
     : AgentOutputData(true)
 {
+    individuals.assign(nbIndividual, PGPEPolicyIndividual(nbParams, nbEvals));
 }
 
 void PGPEIterationStats::writeData(ostream &out)

@@ -1,5 +1,7 @@
 function iteration = ReadPGPEIterationStats(fp)
 % Read metaparms
+step = fscanf(fp, '%d', 1);
+term = fscanf(fp, '%d', 1);
 nbmetaparams = fscanf(fp, '%d', 1);
 metaParams = fscanf(fp, '%f', nbmetaparams);
 iteration.metaParams = metaParams;

@@ -11,9 +11,12 @@ class PGPEPolicyIndividual
 public:
     arma::vec Pparams;  //policy parameters
     arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
-    arma::mat difflog;
+    arma::mat diffLogDistr;
 
 public:
+
+    PGPEPolicyIndividual(unsigned int nbParams, unsigned int nbEvals);
+
     PGPEPolicyIndividual(arma::vec& polp, int nbEval);
 
     virtual ~PGPEPolicyIndividual()
@@ -37,12 +40,12 @@ public:
         stat.Jvalues = arma::vec(nbEval);
         for (i = 0; i < nbEval; ++i)
             in >> stat.Jvalues[i];
-        stat.difflog = arma::mat(nbPolPar, nbEval);
+        stat.diffLogDistr = arma::mat(nbPolPar, nbEval);
         for (int i = 0; i < nbPolPar; ++i)
         {
             for (int j = 0; j < nbEval; ++j)
             {
-                in >> stat.difflog(i,j);
+                in >> stat.diffLogDistr(i,j);
             }
         }
         return in;
@@ -55,7 +58,8 @@ class PGPEIterationStats : public AgentOutputData
 
 public:
 
-    PGPEIterationStats();
+    PGPEIterationStats(unsigned int nbIndividual,
+                       unsigned int nbParams, unsigned int nbEvals);
 
     virtual ~PGPEIterationStats()
     {

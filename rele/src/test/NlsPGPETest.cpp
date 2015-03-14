@@ -104,7 +104,6 @@ int main(int argc, char *argv[])
         //        cout << "starting episode" << endl;
         core.runEpisode();
     }
-    agent.printStatistics("PGPEStats.txt");
 
 
 //    EvaluateStrategy<DenseAction, DenseState> stat_e;

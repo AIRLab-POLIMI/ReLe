@@ -25,20 +25,24 @@
 #define NES_H_
 
 #include "policy_search/PGPE/PGPE.h"
+#include "policy_search/NES/NESOutputData.h"
+
+#define SIMONEUPDATE
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NES: public BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution>
+class NES: public BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
 {
 
-    typedef BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution> Base;
+    typedef BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats> Base;
 public:
     NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
         bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution>(dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {    }
 
     virtual ~NES()
@@ -111,43 +115,40 @@ protected:
         Base::diffObjFunc /= Base::polCount;
         fisherMtx /= Base::polCount;
 
-//        arma::mat tmp;
-//        int rnk = arma::rank(fisherMtx);
-//        if (rnk == fisherMtx.n_rows)
-//        {
-//            arma::mat H = arma::solve(fisherMtx, diffObjFunc);
-//            tmp = diffObjFunc.t() * H;
-//        } else {
-//            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
-//            arma::mat H = arma::pinv(fisherMtx);
-//            tmp = diffObjFunc.t() * (H * diffObjFunc);
-//        }
-
-//        double lambda = sqrt(tmp(0,0) / (4 * step_length));
-//        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-//        arma::vec nat_grad = arma::solve(fisherMtx, diffObjFunc) / (2 * lambda);
-
         arma::mat tmp;
         int rnk = arma::rank(fisherMtx);
         if (rnk == fisherMtx.n_rows)
         {
             arma::mat H = arma::solve(fisherMtx, Base::diffObjFunc);
+#ifndef SIMONEUPDATE
             tmp = H;
+#else
+            tmp = Base::diffObjFunc.t() * H;
+#endif
         }
         else
         {
             std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
             arma::mat H = arma::pinv(fisherMtx);
+#ifndef SIMONEUPDATE
             tmp = H * Base::diffObjFunc;
+#else
+            tmp = Base::diffObjFunc.t() * (H * Base::diffObjFunc);
+#endif
         }
 
+#ifndef SIMONEUPDATE
         arma::vec nat_grad = tmp*Base::step_length;
+#else
+        double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
+        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+        arma::vec nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
+#endif
 
 
         //--------- save value of distgrad
-        // int dim = Base::traces.size() - 1;
-        // Base::traces[dim]->metaGradient = nat_grad;
         Base::currentItStats->metaGradient = Base::diffObjFunc;
+        Base::currentItStats->fisherMtx = fisherMtx;
         //---------
 
         //update meta distribution
@@ -169,15 +170,6 @@ protected:
             b_num[i] = 0.0;
             b_den[i] = 0.0;
         }
-
-        //---------  create statistic for first iteration
-        // PGPEIterationStats* trace = new PGPEIterationStats();
-        // trace->metaParams = Base::dist.getParameters();
-        // Base::traces.push_back(trace);
-
-        // Base::currentItStats = new PGPEIterationStats();
-        // Base::currentItStats->metaParams = Base::dist.getParameters();
-        //---------
     }
 
 protected:
@@ -186,21 +178,18 @@ protected:
 
 };
 
-class FisherDistribution : public DifferentiableDistribution, public FisherInterface
-{
-};
-
 
 template<class ActionC, class StateC, class DistributionC>
-class xNES: public BlackBoxAlgorithm<ActionC, StateC, DistributionC>
+class xNES: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
 {
-    typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC> Base;
+    typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
 
 public:
     xNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
          bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DistributionC>(dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
     }
 
@@ -281,42 +270,47 @@ protected:
             if (rnk == fisherMtx.n_rows)
             {
                 arma::mat H = arma::solve(fisherMtx, Base::diffObjFunc);
+#ifndef SIMONEUPDATE
                 tmp = H;
+                nat_grad = tmp*Base::step_length;
+#else
+                tmp = Base::diffObjFunc.t() * H;
+                double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
+                lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+                nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
+#endif
             }
             else
             {
                 std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
                 arma::mat H = arma::pinv(fisherMtx);
+#ifndef SIMONEUPDATE
                 tmp = H * Base::diffObjFunc;
+                nat_grad = tmp*Base::step_length;
+#else
+                tmp = Base::diffObjFunc.t() * (H * Base::diffObjFunc);
+                double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
+                lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+                nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
+#endif
             }
-            nat_grad = tmp*Base::step_length;
         }
         else
         {
+#ifndef SIMONEUPDATE
             nat_grad = invFisherMtx * Base::diffObjFunc * Base::step_length;
+#else
+            arma::mat tmp = Base::diffObjFunc.t() * (invFisherMtx * Base::diffObjFunc);
+            double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            nat_grad = (invFisherMtx*Base::diffObjFunc) / (2 * lambda);
+#endif
         }
-
-
-//        arma::mat tmp;
-//        int rnk = arma::rank(fisherMtx);
-//        if (rnk == fisherMtx.n_rows)
-//        {
-//            arma::mat H = arma::solve(fisherMtx, diffObjFunc);
-//            tmp = diffObjFunc.t() * H;
-//        } else {
-//            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
-//            arma::mat H = arma::pinv(fisherMtx);
-//            tmp = diffObjFunc.t() * (H * diffObjFunc);
-//        }
-
-//        double lambda = sqrt(tmp(0,0) / (4 * step_length));
-//        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-//        arma::vec nat_grad = arma::solve(fisherMtx, diffObjFunc) / (2 * lambda);
-
 
 
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
+        Base::currentItStats->fisherMtx = invFisherMtx;
         //---------
 
         //update meta distribution

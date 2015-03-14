@@ -3,7 +3,7 @@ fp = fopen(fn,'r');
 % stats = ReadPGPEStatistics(fp);
 i = 1;
 while ~feof(fp)
-stats(i) = ReadPGPEIterationStats(fp)
+stats(i) = ReadPGPEIterationStats(fp);
 i = i + 1;
 end
 stats

@@ -38,7 +38,7 @@ namespace ReLe
 
 
 //TODO: definire questo come PGPE
-template<class ActionC, class StateC, class DistributionC>
+template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
 class BlackBoxAlgorithm: public Agent<ActionC, StateC>
 {
 
@@ -67,7 +67,9 @@ public:
 
         if (polCount == 0 && epiCount == 0)
         {
-            currentItStats = new PGPEIterationStats();
+            currentItStats = new AgentOutputC(nbPoliciesToEvalMetap,
+                                              policy.getParametersSize(),
+                                              nbEpisodesToEvalPolicy);
             currentItStats->metaParams = dist.getParameters();
         }
 
@@ -82,8 +84,9 @@ public:
             policy.setParameters(new_params);
 
             //--- create new policy individual
-            currentItStats->individuals.push_back(
-                PGPEPolicyIndividual(new_params, nbEpisodesToEvalPolicy));
+//            currentItStats->individuals.push_back(
+//                PGPEPolicyIndividual(new_params, nbEpisodesToEvalPolicy));
+            currentItStats->individuals[polCount].Pparams = new_params;
             //---
         }
         sampleAction(state, action);
@@ -186,14 +189,6 @@ public:
         return this->useDirection;
     }
 
-    virtual void printStatistics(std::string filename)
-    {
-//        std::ofstream out(filename, std::ios_base::out);
-//        out << std::setprecision(10);
-//        out << traces;
-//        out.close();
-    }
-
     virtual AgentOutputData* getAgentOutputDataEnd()
     {
         if (output2LogReady)
@@ -225,20 +220,21 @@ protected:
 
 
     bool useDirection, useBaseline, output2LogReady;
-    PGPEIterationStats* currentItStats;
+    AgentOutputC* currentItStats;
 
 };
 
 template<class ActionC, class StateC>
-class PGPE: public BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution>
+class PGPE: public BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
 {
-    typedef BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution> Base;
+    typedef BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats> Base;
 public:
     PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
          bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution>(dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
-          b_num(0.0), b_den(0.0)
+        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
+        b_num(0.0), b_den(0.0)
     {
     }
 
@@ -272,7 +268,7 @@ protected:
 
 
         //--------- save value of distgrad
-        Base::currentItStats->individuals[Base::polCount].difflog = dlogdist;
+        Base::currentItStats->individuals[Base::polCount].diffLogDistr = dlogdist;
         //---------
 
         ++Base::polCount; //until now polCount policies have been analyzed

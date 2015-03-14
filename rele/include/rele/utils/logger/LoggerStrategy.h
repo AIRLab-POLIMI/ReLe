@@ -213,7 +213,7 @@ public:
 
             for(auto data : outputData)
             {
-                ofs << data->getStep() << ", " << data->isFinal() << std::endl;
+                ofs << data->getStep() << "\t" << data->isFinal() << std::endl;
                 data->writeData(ofs);
             }
 
