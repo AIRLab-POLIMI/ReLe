@@ -23,6 +23,7 @@
 
 #include "NLS.h"
 #include "policy_search/PGPE/PGPE.h"
+#include "policy_search/NES/NES.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
@@ -91,6 +92,7 @@ int main(int argc, char *argv[])
     bool usebaseline = true;
     PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
     agent.setNormalization(true);
+//    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
     PrintStrategy<DenseAction, DenseState> stat(false);
