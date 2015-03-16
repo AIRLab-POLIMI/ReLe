@@ -19,26 +19,21 @@ absorbingCol = ds+da+ds+dr+1;
 
 episodeN = sum(A(2:end, end));
 
-episodes = cell(episodeN, 5);
+%episodes = zeros(episodeN, 5);
+s1 = struct('x',0,'u',0,'xn',0,'r',0,'absorbing',0);
+episodes = repmat(s1,[episodeN 1]);
 
-
-xC = 1;
-uC = 2;
-xnC = 3;
-rC = 4;
-absorbingC = 5;
-
-episodesIndex = [0; find(A(1:end, end) == 1)];
-episodesIndex = episodesIndex + 1;
+episodesIndex = [0; find(A(2:end, end) == 1)];
+episodesIndex = episodesIndex + 2;
 
 for ep=1:(size(episodesIndex, 1)-1)
     startEpisode = episodesIndex(ep);
     endEpisode = episodesIndex(ep+1)-1;
-    episodes{ep, xC} = A(startEpisode:endEpisode, xStart:xEnd);
-    episodes{ep, uC} = A(startEpisode:endEpisode, uStart:uEnd);
-    episodes{ep, xnC} = A(startEpisode:endEpisode, xnStart:xnEnd);
-    episodes{ep, rC} = A(startEpisode:endEpisode, rStart:rEnd);
-    episodes{ep, absorbingC} = A(startEpisode:endEpisode, absorbingCol);
+    episodes(ep).x = A(startEpisode:endEpisode, xStart:xEnd);
+    episodes(ep).u = A(startEpisode:endEpisode, uStart:uEnd);
+    episodes(ep).xn = A(startEpisode:endEpisode, xnStart:xnEnd);
+    episodes(ep).r = A(startEpisode:endEpisode, rStart:rEnd);
+    episodes(ep).absorbing = A(startEpisode:endEpisode, absorbingCol);
 end
 
 end

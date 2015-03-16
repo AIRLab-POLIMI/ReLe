@@ -22,15 +22,15 @@ csv = csvread('/home/dave/prova.txt');
 disp('Organizing data in episodes...')
 episodes = readDataset(csv);
 
-%% 
+%% Display Data
 
 disp('Plotting trajectories...')
 
 r = zeros(size(episodes, 1), 1);
 for i=1:size(episodes, 1)
-    x = episodes{i, 1};
-    xn = episodes{i, 3};
-    r(i) = sum(episodes{i, 4})/ size(episodes{i, 4}, 1);
+    x = episodes(i).x;
+    xn = episodes(i).xn;
+    r(i) = sum(episodes(i).r)/ size(episodes(i).r, 1);
     
     traj = [x(:, 1:2); xn(end, 1:2)];
     rockytraj = traj + [x(:, 6:7); xn(end, 6:7)];
@@ -53,10 +53,13 @@ axis tight
 disp('Starting visualization...')
 
 figure(3)
+hold on
 plot(traj(:, 1), traj(:, 2), 'b');
 plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
 axis auto;
 lim = axis;
+pause(3)
+clf(3)
 H = uicontrol('Style', 'PushButton', ...
                     'String', 'Break', ...
                     'Callback', 'delete(gcbf)');

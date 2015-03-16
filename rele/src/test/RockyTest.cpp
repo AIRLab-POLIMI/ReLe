@@ -139,10 +139,6 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
 
-    delete core.getSettings().loggerStrategy;
-
-    core.getSettings().episodeLenght = 10000;
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
     cout << "### Starting evaluation episode ##" << endl;
     core.runTestEpisode();
 
