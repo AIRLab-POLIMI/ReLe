@@ -157,11 +157,16 @@ template<class ActionC, class StateC>
 class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+<<<<<<< HEAD
+    WriteStrategy(const std::string& path) :
+        transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
+=======
 
     enum outType {TRANS, AGENT, ALL};
 
     WriteStrategy(const std::string& path, outType outputType = ALL) :
-        transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
+        transitionPath(path), agentDataPath(path)
+>>>>>>> 959e04d852a24c97a3c3fea1347a179147f42dbd
     {
         if (outputType == TRANS)
         {
@@ -181,39 +186,55 @@ public:
     }
 
     WriteStrategy(const std::string& transitionPath, const std::string& agentDataPath) :
-        transitionPath(transitionPath), agentDataPath(agentDataPath), first(true),
+<<<<<<< HEAD
+        transitionPath(transitionPath), agentDataPath(agentDataPath), first(true)
+=======
+        transitionPath(transitionPath), agentDataPath(agentDataPath),
         writeTransitions(true), writeAgentData(true)
+>>>>>>> 959e04d852a24c97a3c3fea1347a179147f42dbd
     {
     }
 
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
+<<<<<<< HEAD
+    	std::ofstream ofs(transitionPath, std::ios_base::app);
+
+        if(first)
+        {
+            Transition<ActionC, StateC>& sample = samples[0];
+            ofs << sample.x.serializedSize()  << ", "
+                << sample.u.serializedSize()  << ", "
+                << sample.r.size()  << std::endl;
+
+            first = false;
+        }
+
+        size_t total = samples.size();
+        size_t index = 0;
+        for(auto& sample : samples)
+        {
+        	index++;
+            ofs << sample.x  << ", "
+                << sample.u  << ", "
+                << sample.xn << ", "
+                << sample.r  << ", "
+                << sample.xn.isAbsorbing() << ", "
+                << (index == total) << std::endl;
+        }
+=======
         if (writeTransitions)
         {
             std::ofstream ofs(transitionPath, std::ios_base::app);
+>>>>>>> 959e04d852a24c97a3c3fea1347a179147f42dbd
 
-            if(first)
-            {
-                Transition<ActionC, StateC>& sample = samples[0];
-                ofs << sample.x.serializedSize()  << ", "
-                    << sample.u.serializedSize()  << ", "
-                    << sample.r.size()  << std::endl;
-
-                first = false;
-            }
-
-            size_t total = samples.size();
-            size_t index = 0;
             for(auto& sample : samples)
             {
-                index++;
                 ofs << sample.x  << ", "
                     << sample.u  << ", "
                     << sample.xn << ", "
-                    << sample.r  << ", "
-                    << sample.xn.isAbsorbing() << ", "
-                    << (index == total) << std::endl;
+                    << sample.r  << std::endl;
             }
 
             ofs.close();
@@ -251,9 +272,12 @@ private:
 private:
     const std::string transitionPath;
     const std::string agentDataPath;
+<<<<<<< HEAD
 
-    bool writeTransitions, writeAgentData;
     bool first;
+=======
+    bool writeTransitions, writeAgentData;
+>>>>>>> 959e04d852a24c97a3c3fea1347a179147f42dbd
 };
 
 template<class ActionC, class StateC>
