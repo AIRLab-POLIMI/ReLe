@@ -1,6 +1,11 @@
-fn = '/home/matteo/Projects/github/ReLe/rele-build/PGPEStats.txt';
+fn = '/home/matteo/Projects/github/ReLe/rele-build/prova.txt';
 fp = fopen(fn,'r');
-stats = ReadPGPEStatistics(fp);
+% stats = ReadPGPEStatistics(fp);
+i = 1;
+while ~feof(fp)
+stats(i) = ReadPGPEIterationStats(fp);
+i = i + 1;
+end
 stats
 fclose(fp);
 

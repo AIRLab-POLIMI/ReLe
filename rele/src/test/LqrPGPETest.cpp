@@ -45,12 +45,18 @@ int main(int argc, char *argv[])
 {
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
+//    arma::vec mean(1);
+//    mean[0] = -0.1;
+//    arma::mat cov(1,1, arma::fill::eye);
+//    cov *= 0.01;
+//    ParametricNormal dist(mean,cov);
+
     arma::vec mean(1);
     mean[0] = -0.1;
     arma::mat cov(1,1, arma::fill::eye);
     cov *= 0.01;
-
-    ParametricNormal dist(mean,cov);
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(1, mean, cholMtx);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
@@ -61,23 +67,45 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> policy(&regressor);
 
     int nbepperpol = 1, nbpolperupd = 50;
-    bool usebaseline = true;
+    bool usebaseline = false;
     PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.002, usebaseline);
     agent.setNormalization(true);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-    PrintStrategy<DenseAction, DenseState> stat(false);
-    core.getSettings().loggerStrategy = &stat;
+//    PrintStrategy<DenseAction, DenseState> stat(false);
+//    core.getSettings().loggerStrategy = &stat;
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("prova.txt", WriteStrategy<DenseAction, DenseState>::AGENT);
+
+
+    std::ofstream ofs("prova.txt", std::ios_base::out);
+    ofs.close();
 
     int nbUpdates = 4000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+
+    double every, bevery = 0.05; //10%
+    every = bevery;
+    int updateCount = 0;
+
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
         //        cout << "starting episode" << endl;
         core.runEpisode();
+
+        int v = nbepperpol*nbpolperupd;
+        if (i % v == 0)
+        {
+            updateCount++;
+            if (updateCount >= nbUpdates*every)
+            {
+                int p = 100 * updateCount/static_cast<double>(nbUpdates);
+                cout << "### " << p << "% ###" << endl;
+                cout << dist.getParameters().t();
+                every += bevery;
+            }
+        }
     }
-    agent.printStatistics("PGPEStats.txt");
 
     cout << "Final meta distribution: " << dist.getParameters().t();
 

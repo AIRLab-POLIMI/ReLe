@@ -132,7 +132,8 @@ void NLS::getInitialState(DenseState& state)
 {
     currentState.setAbsorbing(false);
     currentState[0] = RandomGenerator::sampleNormal(nlsConfig.pos0_mean, nlsConfig.pos0_std);
-    currentState[1] = RandomGenerator::sampleNormal(0.0, 1);
+//    currentState[1] = RandomGenerator::sampleNormal(0.0, 1);
+    currentState[1] = 0.0;
     state = currentState;
 }
 

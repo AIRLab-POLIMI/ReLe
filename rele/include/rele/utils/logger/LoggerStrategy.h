@@ -52,6 +52,25 @@ protected:
 };
 
 template<class ActionC, class StateC>
+class EmptyStrategy : public LoggerStrategy<ActionC, StateC>
+{
+public:
+    virtual void processData(
+        std::vector<Transition<ActionC, StateC>>& samples)
+    {
+    }
+
+    virtual void processData(std::vector<AgentOutputData*>& outputData)
+    {
+        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
+    }
+
+    virtual ~EmptyStrategy()
+    {
+    }
+};
+
+template<class ActionC, class StateC>
 class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
@@ -138,20 +157,40 @@ template<class ActionC, class StateC>
 class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    WriteStrategy(const std::string& path) :
-        transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
-    {
 
+    enum outType {TRANS, AGENT, ALL};
+
+    WriteStrategy(const std::string& path, outType outputType = ALL) :
+        transitionPath(path), agentDataPath(path)
+    {
+        if (outputType == TRANS)
+        {
+            writeTransitions = true;
+            writeAgentData = false;
+        }
+        else if (outputType == AGENT)
+        {
+            writeAgentData = true;
+            writeTransitions = false;
+        }
+        else
+        {
+            writeTransitions = true;
+            writeAgentData = true;
+        }
     }
 
     WriteStrategy(const std::string& transitionPath, const std::string& agentDataPath) :
         transitionPath(transitionPath), agentDataPath(agentDataPath), first(true)
+        writeTransitions(true), writeAgentData(true)
     {
-
     }
+
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
+        if (writeTransitions)
+        {
     	std::ofstream ofs(transitionPath, std::ios_base::app);
 
         if(first)
@@ -166,31 +205,35 @@ public:
 
         size_t total = samples.size();
         size_t index = 0;
-        for(auto& sample : samples)
-        {
+            for(auto& sample : samples)
+            {
         	index++;
-            ofs << sample.x  << ", "
-                << sample.u  << ", "
-                << sample.xn << ", "
+                ofs << sample.x  << ", "
+                    << sample.u  << ", "
+                    << sample.xn << ", "
                 << sample.r  << ", "
                 << sample.xn.isAbsorbing() << ", "
                 << (index == total) << std::endl;
-        }
+            }
 
-        ofs.close();
+            ofs.close();
+        }
     }
 
     void processData(std::vector<AgentOutputData*>& outputData)
     {
-        std::ofstream ofs(agentDataPath, std::ios_base::app);
-
-        for(auto data : outputData)
+        if (writeAgentData)
         {
-            ofs << data->getStep() << ", " << data->isFinal() << std::endl;
-            data->writeData(ofs);
-        }
+            std::ofstream ofs(agentDataPath, std::ios_base::app);
 
-        ofs.close();
+            for(auto data : outputData)
+            {
+                ofs << data->getStep() << "\t" << data->isFinal() << std::endl;
+                data->writeData(ofs);
+            }
+
+            ofs.close();
+        }
 
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
@@ -209,6 +252,7 @@ private:
     const std::string transitionPath;
     const std::string agentDataPath;
 
+    bool writeTransitions, writeAgentData;
     bool first;
 };
 

@@ -11,33 +11,22 @@ class PGPEPolicyIndividual
 public:
     arma::vec Pparams;  //policy parameters
     arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
-    arma::mat difflog;
+    arma::mat diffLogDistr;
 
 public:
+
+    PGPEPolicyIndividual(unsigned int nbParams, unsigned int nbEvals);
+
     PGPEPolicyIndividual(arma::vec& polp, int nbEval);
+
+    virtual ~PGPEPolicyIndividual()
+    {}
 
     void WriteToStream(std::ostream& os);
 
     friend std::ostream& operator<<(std::ostream& out, PGPEPolicyIndividual& stat)
     {
-        int nparams = stat.Pparams.n_elem;
-        int nepisodes = stat.Jvalues.n_elem;
-        out << nparams;
-        for (int i = 0; i < nparams; ++i)
-            out << " " << stat.Pparams[i];
-        out << std::endl;
-        out << nepisodes;
-        for (int i = 0; i < nepisodes; ++i)
-            out << " " << stat.Jvalues[i];
-        out << std::endl;
-        for (int i = 0; i < nepisodes; ++i)
-        {
-            for (int j = 0; j < nparams; ++j)
-            {
-                out << stat.difflog(j,i) << "\t";
-            }
-            out << std::endl;
-        }
+        stat.WriteToStream(out);
         return out;
     }
     friend std::istream& operator>>(std::istream& in, PGPEPolicyIndividual& stat)
@@ -51,12 +40,12 @@ public:
         stat.Jvalues = arma::vec(nbEval);
         for (i = 0; i < nbEval; ++i)
             in >> stat.Jvalues[i];
-        stat.difflog = arma::mat(nbPolPar, nbEval);
+        stat.diffLogDistr = arma::mat(nbPolPar, nbEval);
         for (int i = 0; i < nbPolPar; ++i)
         {
             for (int j = 0; j < nbEval; ++j)
             {
-                in >> stat.difflog(i,j);
+                in >> stat.diffLogDistr(i,j);
             }
         }
         return in;
@@ -69,11 +58,12 @@ class PGPEIterationStats : public AgentOutputData
 
 public:
 
-    PGPEIterationStats();
+    PGPEIterationStats(unsigned int nbIndividual,
+                       unsigned int nbParams, unsigned int nbEvals);
 
-//    virtual ~PGPEIterationStats()
-//    {
-//    }
+    virtual ~PGPEIterationStats()
+    {
+    }
 
     // AgentOutputData interface
 public:
@@ -96,7 +86,7 @@ public:
     std::vector<PGPEPolicyIndividual> individuals;
 };
 
-class PGPEStatistics : public std::vector<PGPEIterationStats>
+class PGPEStatistics : public std::vector<PGPEIterationStats*>
 {
 public:
     friend std::ostream& operator<<(std::ostream& out, PGPEStatistics& stat)

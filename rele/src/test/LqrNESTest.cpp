@@ -45,12 +45,18 @@ int main(int argc, char *argv[])
 {
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
+//    arma::vec mean(1);
+//    mean[0] = -0.1;
+//    arma::mat cov(1,1, arma::fill::eye);
+//    cov *= 0.01;
+//    ParametricNormal dist(mean,cov);
+
     arma::vec mean(1);
     mean[0] = -0.1;
     arma::mat cov(1,1, arma::fill::eye);
     cov *= 0.01;
-
-    ParametricNormal dist(mean,cov);
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(1, mean, cholMtx);
 
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
@@ -59,28 +65,47 @@ int main(int argc, char *argv[])
     basis.push_back(pf);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-
-    arma::vec init_params(1);
-    init_params[0] = -0.1;
-
-    regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    int nbepperpol = 1, nbpolperupd = 40;
+    int nbepperpol = 1, nbpolperupd = 50;
     bool usebaseline = false;
-    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1e-3, usebaseline);
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
+    const std::string outfile = "lqrNesAgentOut.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+        outfile, WriteStrategy<DenseAction, DenseState>::AGENT
+    );
+    //--- delete file
+    std::ofstream ofs(outfile, std::ios_base::out);
+    ofs.close();
+    //---
 
-    int nbUpdates = 2000;
+    core.getSettings().episodeLenght = mdp.getSettings().horizon;
+
+    int nbUpdates = 4000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    double every, bevery;
+    every = bevery = 0.05; //10%
+    int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = 50;
         //        cout << "starting episode" << endl;
         core.runEpisode();
+
+        int v = nbepperpol*nbpolperupd;
+        if (i % v == 0)
+        {
+            updateCount++;
+            if (updateCount >= nbUpdates*every)
+            {
+                int p = 100 * updateCount/static_cast<double>(nbUpdates);
+                cout << "### " << p << "% ###" << endl;
+                cout << dist.getParameters().t();
+                every += bevery;
+            }
+        }
     }
-    agent.printStatistics("NESStats.txt");
 
     return 0;
 }
