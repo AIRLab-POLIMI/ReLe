@@ -37,7 +37,7 @@ class EpisodicREPS: public Agent<DenseAction, DenseState>
 {
 
 public:
-    EpisodicREPS(ParametricNormal& dist, ParametricPolicy<DenseAction, DenseState>& policy);
+    EpisodicREPS(ParametricNormal& dist, ParametricPolicy<DenseAction, DenseState>& policy, bool stepEsploration = true);
 
     virtual void initEpisode(const DenseState& state, DenseAction& action);
     virtual void sampleAction(const DenseState& state, DenseAction& action);
@@ -65,6 +65,7 @@ protected:
 private:
     ParametricNormal& dist;
     ParametricPolicy<DenseAction, DenseState>& policy;
+    const bool stepEsploration;
     double etaOpt;
 
     double eps;

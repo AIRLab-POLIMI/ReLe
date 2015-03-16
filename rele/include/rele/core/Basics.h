@@ -114,6 +114,11 @@ public:
         return "action";
     }
 
+    virtual inline int serializedSize()
+    {
+        return 0;
+    }
+
     inline virtual ~Action()
     {
 
@@ -141,6 +146,11 @@ public:
     inline virtual std::string to_str() const
     {
         return std::to_string(actionN);
+    }
+
+    inline int serializedSize()
+    {
+        return 1;
     }
 
     inline virtual ~FiniteAction()
@@ -182,6 +192,11 @@ public:
         ss << self[i];
 
         return ss.str();
+    }
+
+    inline int serializedSize()
+    {
+        return this->n_elem;
     }
 
     inline virtual ~DenseAction()
@@ -233,6 +248,11 @@ public:
         return "state";
     }
 
+    virtual inline int serializedSize()
+    {
+        return 0;
+    }
+
     inline virtual ~State()
     {
 
@@ -263,6 +283,11 @@ public:
     inline virtual std::string to_str() const
     {
         return std::to_string(stateN);
+    }
+
+    inline int serializedSize()
+    {
+        return 1;
     }
 
     inline virtual ~FiniteState()
@@ -299,6 +324,11 @@ public:
         ss << self[i];
 
         return ss.str();
+    }
+
+    inline int serializedSize()
+    {
+        return this->n_elem;
     }
 
     inline virtual ~DenseState()

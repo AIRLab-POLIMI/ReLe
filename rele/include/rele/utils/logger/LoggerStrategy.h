@@ -139,27 +139,42 @@ class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
     WriteStrategy(const std::string& path) :
-        transitionPath(path), agentDataPath(path)
+        transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
     {
 
     }
 
     WriteStrategy(const std::string& transitionPath, const std::string& agentDataPath) :
-        transitionPath(transitionPath), agentDataPath(agentDataPath)
+        transitionPath(transitionPath), agentDataPath(agentDataPath), first(true)
     {
 
     }
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
-        std::ofstream ofs(transitionPath, std::ios_base::app);
+    	std::ofstream ofs(transitionPath, std::ios_base::app);
 
+        if(first)
+        {
+            Transition<ActionC, StateC>& sample = samples[0];
+            ofs << sample.x.serializedSize()  << ", "
+                << sample.u.serializedSize()  << ", "
+                << sample.r.size()  << std::endl;
+
+            first = false;
+        }
+
+        size_t total = samples.size();
+        size_t index = 0;
         for(auto& sample : samples)
         {
+        	index++;
             ofs << sample.x  << ", "
                 << sample.u  << ", "
                 << sample.xn << ", "
-                << sample.r  << std::endl;
+                << sample.r  << ", "
+                << sample.xn.isAbsorbing() << ", "
+                << (index == total) << std::endl;
         }
 
         ofs.close();
@@ -181,8 +196,20 @@ public:
     }
 
 private:
+    std::string addAgentOutputSuffix(const std::string& path)
+    {
+        std::string newPath;
+        size_t index = path.rfind('.');
+        newPath = path.substr(0, index) + "_agentData" + path.substr(index);
+
+        return newPath;
+    }
+
+private:
     const std::string transitionPath;
     const std::string agentDataPath;
+
+    bool first;
 };
 
 template<class ActionC, class StateC>

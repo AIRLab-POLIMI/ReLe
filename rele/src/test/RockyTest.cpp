@@ -123,23 +123,30 @@ int main(int argc, char *argv[])
     ParametricNormal dist(mean, cov);
 
 
-    EpisodicREPS agent(dist, policy);
+    EpisodicREPS agent(dist, policy, false);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 
+
+
     int episodes = 1000;
+    core.getSettings().episodeLenght = 10000;
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
+
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = 100000;
-        core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
         cout << "### starting episode " << i << " ###" << endl;
         core.runEpisode();
     }
 
-    core.getSettings().episodeLenght = 100000;
+    delete core.getSettings().loggerStrategy;
+
+    core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
     cout << "### Starting evaluation episode ##" << endl;
     core.runTestEpisode();
+
+    delete core.getSettings().loggerStrategy;
 
     return 0;
 

@@ -32,8 +32,8 @@ namespace ReLe
 {
 
 EpisodicREPS::EpisodicREPS(ParametricNormal& dist,
-                           ParametricPolicy<DenseAction, DenseState>& policy) :
-    dist(dist), policy(policy)
+                           ParametricPolicy<DenseAction, DenseState>& policy, bool stepEsploration) :
+    dist(dist), policy(policy), stepEsploration(stepEsploration)
 {
     maxR = -std::numeric_limits<double>::infinity();
     etaOpt = 1;
@@ -64,7 +64,8 @@ void EpisodicREPS::step(const Reward& reward, const DenseState& nextState,
                         DenseAction& action)
 {
     updateSamples(reward[0]);
-    theta = dist();
+    if(stepEsploration)
+        theta = dist();
     policy.setParameters(theta);
     sampleAction(nextState, action);
 }
