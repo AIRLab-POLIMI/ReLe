@@ -128,9 +128,9 @@ public:
 class FiniteAction: public Action
 {
 public:
-    FiniteAction()
+    FiniteAction(unsigned int n = 0)
     {
-        actionN = 0;
+        actionN = n;
     }
 
     inline unsigned int getActionN() const
