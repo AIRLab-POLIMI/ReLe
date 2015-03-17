@@ -22,7 +22,7 @@
  */
 
 #include "td/TD.h"
-#include "RandomGenerator.h"
+#include "CSV.h"
 
 using namespace std;
 using namespace arma;
@@ -71,17 +71,8 @@ void FiniteTDOutput::writeData(ostream& os)
     os << "alpha: " << alpha << endl;
     os << policyHPar; //TODO change this
 
+    CSVutils::matrixToCSV(Q, os);
 
-    for (unsigned int i = 0; i < Q.n_rows; i++)
-    {
-        unsigned int j;
-        for (j = 0; j < Q.n_cols - 1; j++)
-        {
-            os << Q(i, j) << ", ";
-        }
-
-        os << Q(i, j) << endl;
-    }
 }
 
 void FiniteTDOutput::writeDecoratedData(ostream& os)
@@ -150,14 +141,7 @@ void LinearTDOutput::writeData(ostream& os)
     os << "alpha: " << alpha << endl;
     os << policyHPar; //TODO change this
 
-
-    unsigned int i;
-    for(i = 0; i < Qw.n_elem -1; i++)
-    {
-        os << Qw[i] << ", ";
-    }
-
-    os << Qw[i] << endl;
+    CSVutils::vectorToCSV(Qw, os);
 
 }
 

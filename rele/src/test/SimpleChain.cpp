@@ -32,22 +32,23 @@
 #include "SimpleChainGenerator.h"
 
 #include <iostream>
-#include "../../include/rele/algorithms/policy_search/REPS/TabularREPS.h"
+#include "policy_search/REPS/TabularREPS.h"
 
 using namespace std;
+using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    ReLe::SimpleChainGenerator generator;
+    SimpleChainGenerator generator;
     generator.generate(5, 2);
 
-    ReLe::FiniteMDP mdp = generator.getMPD(0.9);
-    //ReLe::e_Greedy policy;
-    //ReLe::Boltzmann policy;
-    //ReLe::SARSA agent(policy);
-    //ReLe::Q_Learning agent(policy);
-    ReLe::TabularREPS agent;
-    ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(mdp, agent);
+    FiniteMDP mdp = generator.getMPD(0.9);
+    //e_Greedy policy;
+    //Boltzmann policy;
+    //SARSA agent(policy);
+    //Q_Learning agent(policy);
+    TabularREPS agent;
+    Core<FiniteAction, FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;
     cout << "starting episode" << endl;

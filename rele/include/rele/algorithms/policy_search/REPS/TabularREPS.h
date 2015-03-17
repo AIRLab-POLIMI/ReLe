@@ -45,6 +45,9 @@ public:
     virtual void endEpisode(const Reward& reward);
     virtual void endEpisode();
 
+    virtual AgentOutputData* getAgentOutputData();
+    virtual AgentOutputData* getAgentOutputDataEnd();
+
     virtual ~TabularREPS();
 
 private:
@@ -60,7 +63,6 @@ private:
 
 protected:
     virtual void init();
-    void printStatistics();
 
 private:
     TabularPolicy policy;

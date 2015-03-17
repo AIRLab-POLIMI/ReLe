@@ -61,6 +61,17 @@ public:
         this->Cov = cov;
         updateInternalState();
     }
+
+    inline arma::vec getMean() const
+    {
+        return mean;
+    }
+
+    inline arma::mat getCovariance() const
+    {
+        return Cov;
+    }
+
 protected:
     /**
      * Compute mean, covariance, inverce covariance and determinat values

@@ -22,6 +22,7 @@
  */
 
 #include "policy_search/REPS/EpisodicREPS.h"
+#include "policy_search/REPS/REPSOutputData.h"
 
 #include <iostream>
 
@@ -76,13 +77,17 @@ void EpisodicREPS::endEpisode(const Reward& reward)
 
     updateSamples(r);
     updatePolicy();
-    printStatistics();
 }
 
 void EpisodicREPS::endEpisode()
 {
     updatePolicy();
-    printStatistics();
+}
+
+AgentOutputData* EpisodicREPS::getAgentOutputDataEnd()
+{
+    return new EpisodicREPSOutputData(eps, policy.getPolicyName(),
+                                      dist.getMean(), dist.getCovariance());
 }
 
 EpisodicREPS::~EpisodicREPS()
@@ -190,19 +195,6 @@ void EpisodicREPS::init()
 
     std::vector<double> lowerBounds(1, std::numeric_limits<double>::epsilon());
     optimizator.set_lower_bounds(lowerBounds);
-}
-
-void EpisodicREPS::printStatistics()
-{
-    cout << endl << endl << "### Episodic REPS ###";
-    cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
-         << endl << endl;
-
-    cout << "--- Parameters ---" << endl << endl;
-    cout << "eps: " << eps << endl;
-
-    cout << endl << endl << "--- Learning results ---" << endl << endl;
-    cout << policy.printPolicy();
 }
 
 }

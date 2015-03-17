@@ -23,9 +23,12 @@
 
 #include <iostream>
 #include <limits>
-#include "../../../../include/rele/algorithms/policy_search/REPS/TabularREPS.h"
+#include "policy_search/REPS/TabularREPS.h"
+#include "policy_search/REPS/REPSOutputData.h"
 
 using namespace arma;
+
+//#define DEBUG_REPS
 
 namespace ReLe
 {
@@ -95,13 +98,28 @@ void TabularREPS::endEpisode(const Reward& reward)
 {
     updateSamples(x, reward[0]); //TODO check this update
     updatePolicy();
-    printStatistics();
 }
 
 void TabularREPS::endEpisode()
 {
     updatePolicy();
-    printStatistics();
+}
+
+AgentOutputData* TabularREPS::getAgentOutputData()
+{
+    if(currentIteration == 0)
+    {
+        return new TabularREPSOutputData(N, eps, policy.printPolicy(), false);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+AgentOutputData* TabularREPS::getAgentOutputDataEnd()
+{
+    return new TabularREPSOutputData(N, eps, policy.printPolicy(), true);
 }
 
 TabularREPS::~TabularREPS()
@@ -120,7 +138,9 @@ void TabularREPS::updatePolicy()
     parameters.push_back(etaOpt);
     auto&& newParameters = optimizator.optimize(parameters);
 
+#ifdef DEBUG_REPS
     cout << "----------------------------" << endl;
+#endif
 
     //update parameters
     etaOpt = newParameters.back();
@@ -178,9 +198,11 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
         sum3 += std::exp(eps + deltaxu / eta) * s.lambda(sample.x, sample.u);
     }
 
+#ifdef DEBUG_REPS
     cout << "sum1 " << sum1 << endl;
     cout << "sum2 " << sum2 << endl;
     cout << "sum3" << sum3.t();
+#endif
 
     //Avoid NaN
     if(sum1 < std::numeric_limits<double>::epsilon())
@@ -201,9 +223,11 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
     double& dEta = grad[this->thetaOpt.size()];
     dEta = std::log(sum1) - sum2 / sum1;
 
+#ifdef DEBUG_REPS
     //TODO levami
     iteration++;
     cout << "iteration: " << iteration << endl;
+#endif
 
     //compute dual function
     return eta * std::log(sum1 / N);
@@ -212,16 +236,19 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
                             void* o)
 {
+#ifdef DEBUG_REPS
     cout << "x = [" << x[0];
     for (int i = 1; i < n; i++)
     {
         cout << "," << x[i];
     }
     cout << "]" << endl;
+#endif
 
     double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(
                        x, grad);
 
+#ifdef DEBUG_REPS
     cout << "grad = [" << grad[0];
     for (int i = 1; i < n; i++)
     {
@@ -231,6 +258,7 @@ double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
     cout << "value " << value << endl;
 
     cout << "---" << endl;
+#endif
 
     return value;
 }
@@ -256,20 +284,6 @@ void TabularREPS::init()
     lowerBounds.back() = std::numeric_limits<double>::epsilon();
 
     optimizator.set_lower_bounds(lowerBounds);
-}
-
-void TabularREPS::printStatistics()
-{
-    cout << endl << endl << "### Tabular REPS ###";
-    cout << endl << endl << "Using " << policy.getPolicyName() << " policy"
-         << endl << endl;
-
-    cout << "--- Parameters ---" << endl << endl;
-    cout << "N: " << N << endl;
-    cout << "eps: " << eps << endl;
-
-    cout << endl << endl << "--- Learning results ---" << endl << endl;
-    cout << policy.printPolicy();
 }
 
 }

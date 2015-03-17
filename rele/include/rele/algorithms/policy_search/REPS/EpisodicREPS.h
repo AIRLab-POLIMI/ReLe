@@ -46,6 +46,8 @@ public:
     virtual void endEpisode(const Reward& reward);
     virtual void endEpisode();
 
+    virtual AgentOutputData* getAgentOutputDataEnd();
+
     virtual ~EpisodicREPS();
 
 private:
@@ -60,7 +62,6 @@ private:
 
 protected:
     virtual void init();
-    void printStatistics();
 
 private:
     ParametricNormal& dist;
