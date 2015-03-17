@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     ParametricNormal dist(mean, cov);
 
 
-    EpisodicREPS agent(dist, policy, false);
+    EpisodicREPS agent(dist, policy);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 

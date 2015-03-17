@@ -150,7 +150,6 @@ void EpisodicREPS::updatePolicy()
     //Update high level policy
     dist.setMeanAndCovariance(mean, cov);
 
-
 }
 
 double EpisodicREPS::computeObjectiveFunction(const double& eta, double& grad)

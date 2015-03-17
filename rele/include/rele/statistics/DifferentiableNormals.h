@@ -43,6 +43,7 @@ public:
     {
         return parameters;
     }
+
     virtual void update(arma::vec &increment);
     virtual arma::vec difflog(const arma::vec &point);
     virtual arma::mat diff2Log(const arma::vec &point);
@@ -55,13 +56,6 @@ public:
 
     // Specific Normal policy interface //TODO check this!!!
 public:
-    inline void setMeanAndCovariance(const arma::vec& mean, const arma::mat& cov)
-    {
-        this->mean = mean;
-        this->Cov = cov;
-        updateInternalState();
-    }
-
     inline arma::vec getMean() const
     {
         return mean;
@@ -85,6 +79,18 @@ protected:
     arma::vec parameters, mean;
     arma::mat Cov, invCov, cholCov;
     double detValue;
+
+    //FIXME LEVARE! workaround per reps!
+public:
+    inline void setMeanAndCovariance(const arma::vec& mean, const arma::mat& cov)
+    {
+        this->mean = mean;
+        this->Cov = cov;
+
+        this->invCov = inv(this->Cov);
+        this->cholCov = chol(this->Cov);
+        this->detValue = det(this->Cov);
+    }
 
 };
 
@@ -185,6 +191,7 @@ public:
     // ParametricNormal interface
 protected:
     void updateInternalState();
+
 
 };
 
