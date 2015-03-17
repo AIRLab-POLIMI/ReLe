@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     //high level policy
     int dimPolicy = policy.getParametersSize();
     arma::vec mean(dimPolicy, fill::randn);
-    arma::mat cov(dimPolicy, dimPolicy, arma::fill::eye);
+    arma::mat cov(dimPolicy, dimPolicy, fill::eye);
 
     ParametricNormal dist(mean, cov);
 

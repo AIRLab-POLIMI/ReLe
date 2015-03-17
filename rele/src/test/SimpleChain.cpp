@@ -24,7 +24,6 @@
 #include "FiniteMDP.h"
 #include "td/SARSA.h"
 #include "td/Q-Learning.h"
-#include "policy_search/REPS/REPS.h"
 #include "Core.h"
 
 #include "q_policy/e_Greedy.h"
@@ -33,6 +32,7 @@
 #include "SimpleChainGenerator.h"
 
 #include <iostream>
+#include "../../include/rele/algorithms/policy_search/REPS/TabularREPS.h"
 
 using namespace std;
 

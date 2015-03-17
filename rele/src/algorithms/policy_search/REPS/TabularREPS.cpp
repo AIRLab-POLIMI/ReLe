@@ -21,10 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/REPS/REPS.h"
-
 #include <iostream>
 #include <limits>
+#include "../../../../include/rele/algorithms/policy_search/REPS/TabularREPS.h"
 
 using namespace arma;
 
@@ -141,14 +140,6 @@ void TabularREPS::updatePolicy()
 
         updater.normalize();
     }
-
-    cout << "$policy$" << endl;
-    cout << policy(0, 0) << ", " << policy(0, 1) << endl;
-    cout << policy(1, 0) << ", " << policy(1, 1) << endl;
-    cout << policy(2, 0) << ", " << policy(2, 1) << endl;
-    cout << policy(3, 0) << ", " << policy(3, 1) << endl;
-    cout << policy(4, 0) << ", " << policy(4, 1) << endl;
-    cout << "----------------------------" << endl;
 
 }
 
