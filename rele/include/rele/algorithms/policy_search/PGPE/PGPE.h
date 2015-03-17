@@ -37,6 +37,22 @@ namespace ReLe
 {
 
 
+//Templates needed to handle different action types
+template<class StateC>
+void sampleActionWorker(const StateC& state, FiniteAction& action, ParametricPolicy<FiniteAction,StateC>& policy)
+{
+    unsigned int u = policy(state);
+    action.setActionN(u);
+}
+
+template<class StateC, class ActionC>
+void sampleActionWorker(const StateC& state, ActionC& action, ParametricPolicy<ActionC,StateC>& policy)
+{
+    typename action_type<ActionC>::type_ref u = action;
+    u = policy(state);
+}
+
+
 //TODO: definire questo come PGPE
 template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
 class BlackBoxAlgorithm: public Agent<ActionC, StateC>
@@ -102,16 +118,7 @@ public:
 
     virtual void sampleAction(const StateC& state, ActionC& action)
     {
-        typename action_type<ActionC>::type_ref u = action;
-        u = policy(state);
-    }
-
-
-    template<class FiniteAction>
-    void sampleAction(const StateC& state, FiniteAction& action)
-    {
-        unsigned int u = policy(state);
-        action.setActionN(u);
+        sampleActionWorker(state, action, policy);
     }
 
     virtual void step(const Reward& reward, const StateC& nextState, ActionC& action)

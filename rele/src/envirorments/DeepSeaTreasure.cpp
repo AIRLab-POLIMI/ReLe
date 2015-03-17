@@ -47,7 +47,8 @@ void DeepSeaTreasure::step(const FiniteAction& action, DenseState& nextState, Re
     int i = currentState[0], j = currentState[1];
     int j1, j2, i3, i4;
 
-    switch (a) {
+    switch (a)
+    {
     //left
     case 0:
         j1 = max(1,j-1);
@@ -56,21 +57,21 @@ void DeepSeaTreasure::step(const FiniteAction& action, DenseState& nextState, Re
         currentState[0] = i;
         currentState[1] = j1;
         break;
-        // right
+    // right
     case 1:
         j2 = min(static_cast<int>(ydim),j+1);
         if (!deep_check_black(i,j2))
             j2 = j;
         currentState[0] = i;
         currentState[1] = j2;
-        // up
+    // up
     case 2:
         i3 = max(1,i-1);
         if (!deep_check_black(i3,j))
             i3 = i;
         currentState[0] = i3;
         currentState[1] = j;
-        // down
+    // down
     case 3:
         i4 = min(static_cast<int>(xdim),i+1);
         if (!deep_check_black(i4,j))

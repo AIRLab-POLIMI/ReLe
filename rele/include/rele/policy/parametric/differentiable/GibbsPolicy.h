@@ -5,7 +5,8 @@
 #include "LinearApproximator.h"
 #include "RandomGenerator.h"
 
-namespace ReLe {
+namespace ReLe
+{
 
 
 template<class StateC>
@@ -49,7 +50,8 @@ public:
     {
         int statesize = state.size(), nactions = mActions.size();
         arma::vec tuple(1+statesize);
-        for (unsigned int i = 0; i < statesize; ++i) {
+        for (unsigned int i = 0; i < statesize; ++i)
+        {
             tuple[i] = state[i];
         }
         double den = 1.0;
@@ -79,7 +81,8 @@ public:
 
         int statesize = state.size();
         arma::vec tuple(1+statesize);
-        for (unsigned int i = 0; i < statesize; ++i) {
+        for (unsigned int i = 0; i < statesize; ++i)
+        {
             tuple[i] = state[i];
         }
 
@@ -98,7 +101,8 @@ public:
         for (unsigned int i = 0, ie = nactions; i < ie; ++i)
         {
             sum += distribution[i];
-            if (sum >= pval) {
+            if (sum >= pval)
+            {
                 return mActions.at(i).getActionN();
             }
         }
@@ -140,7 +144,8 @@ public:
 
         int statesize = state.size();
         arma::vec tuple(1+statesize);
-        for (unsigned int i = 0; i < statesize; ++i) {
+        for (unsigned int i = 0; i < statesize; ++i)
+        {
             tuple[i] = state[i];
         }
 
@@ -161,7 +166,8 @@ public:
         arma::vec gradient;
         if (action == mActions[mActions.size()-1].getActionN())
             gradient = -sumpref;
-        else {
+        else
+        {
             tuple[statesize] = action;
             arma::mat loc_phi = basis(tuple);
             gradient = IT*loc_phi - sumpref;
