@@ -29,9 +29,7 @@
 /**
  * Environment designed according to
  *
- * Vlassis, Toussaint, Kontes, Piperidis
- * Learning Model-free Robot Control by a Monte Carlo EM Algorithm
- * Autonomous Robots 27(2):123-130, 2009
+ * TODO
  */
 
 namespace ReLe

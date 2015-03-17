@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 1, nbpolperupd = 50;
     bool usebaseline = false;
-    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
     const std::string outfile = "lqrNesAgentOut.txt";
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);

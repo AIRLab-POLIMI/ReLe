@@ -35,19 +35,9 @@ namespace ReLe
 ///////////////////////////////////////////////////////////////////////////////////////
 
 DeepSeaTreasure::DeepSeaTreasure()
+    : xdim(11), ydim(10)
 {
-    EnvirormentSettings& settings = getWritableSettings();
-    //Environment Parameters
-    settings.gamma = 1.0;
-    settings.continuosStateDim = 2;
-    settings.continuosActionDim = -1;
-    settings.rewardDim = 2;
-    settings.finiteStateDim = -1;
-    settings.finiteActionDim = 4;
-    settings.isFiniteHorizon = false;
-    settings.isAverageReward = false;
-    settings.isEpisodic = true;
-    settings.horizon = 50;
+    setupEnvirorment(2,4,2,false,true,50,1.0);
 }
 
 
