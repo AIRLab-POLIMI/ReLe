@@ -131,18 +131,6 @@ public:
         sampleAction(nextState, action);
     }
 
-
-    template<class FiniteAction>
-    void step(const Reward& reward, const StateC& nextState, FiniteAction& action)
-    {
-        //calculate current J value
-        Jep += df * reward[rewardId];
-        //update discount factor
-        df *= Base::task.gamma;
-
-        sampleAction(nextState, action);
-    }
-
     virtual void endEpisode(const Reward& reward)
     {
         //add last contribute

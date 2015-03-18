@@ -23,6 +23,7 @@
 
 #include "DifferentiableNormals.h"
 #include "ArmadilloPDFs.h"
+#include <cassert>
 
 using namespace std;
 using namespace arma;
@@ -138,6 +139,98 @@ void ParametricNormal::readFromStream(istream& in)
 void ParametricNormal::updateInternalState()
 {
     mean = parameters;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// DIAGONAL COVARIANCE NORMAL DISTRIBUTION
+///////////////////////////////////////////////////////////////////////////////////////
+ParametricDiagonalNormal::ParametricDiagonalNormal(arma::vec mean, arma::vec standardeviation)
+    : ParametricNormal(mean.n_elem, 2*mean.n_elem)
+{
+    assert(mean.n_elem == standardeviation.n_elem);
+    int i, ie = mean.n_elem;
+    for (i = 0; i < ie; ++i)
+    {
+        parameters[i] = mean[i];
+    }
+    for (i = 0; i < ie; ++i)
+    {
+        parameters[i+ie] = standardeviation[i];
+    }
+    updateInternalState();
+}
+
+arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
+{
+    int paramSize = this->getParametersSize();
+//    vec diff(pointSize);
+//    for (unsigned int i = 0; i < pointSize; ++i)
+//    {
+//        diff[i] = point[i] - parameters[i];
+//    }
+//    vec mean_grad = invCov * diff;
+    vec gradient(paramSize);
+
+    for (unsigned int i = 0; i < pointSize; ++i)
+    {
+        gradient[i] = (point[i] - parameters[i])/(parameters[i+pointSize] * parameters[i+pointSize]);
+        //        std::cout << "p(" << i << "): " << mParameters(i) << std::endl;
+    }
+    for (unsigned int i = pointSize, ie = paramSize; i < ie; ++i)
+    {
+        int idx    = i - pointSize;
+        double val = point[idx] - parameters[idx];
+        //        std::cout << idx << std::endl;
+        gradient[i] = -1 / parameters[i] + (val * val) /  (parameters[i]*parameters[i]*parameters[i]);
+    }
+    return gradient;
+}
+
+arma::mat ParametricDiagonalNormal::diff2Log(const arma::vec& point)
+{
+
+}
+
+void ParametricDiagonalNormal::writeOnStream(ostream& out)
+{
+    int paramSize = this->getParametersSize();
+    out << "ParametricDiagonalNormal " << std::endl;
+    out << pointSize << std::endl;
+    for (unsigned i = 0; i < paramSize; ++i)
+    {
+        out << parameters(i) << " ";
+    }
+    out << std::endl;
+}
+
+void ParametricDiagonalNormal::readFromStream(istream& in)
+{
+    double val;
+    in >> pointSize;
+    int paramSize  = 2*pointSize;
+    parameters = zeros<vec>(paramSize);
+    for (unsigned i = 0; i < paramSize; ++i)
+    {
+        in >> val;
+        parameters(i) = val;
+    }
+    updateInternalState();
+}
+
+void ParametricDiagonalNormal::updateInternalState()
+{
+    int paramSize = this->getParametersSize();
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        mean(i) = parameters(i);
+    }
+    for (int i = pointSize, ie = paramSize; i < ie; ++i)
+    {
+        int idx = i - pointSize;
+        Cov(idx,idx) = parameters(i)*parameters(i);
+        invCov(idx,idx) = 1/(parameters(i)*parameters(i));
+        cholCov(idx,idx) = parameters(i);
+    }
 }
 
 

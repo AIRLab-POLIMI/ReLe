@@ -37,6 +37,7 @@ namespace ReLe
 DeepSeaTreasure::DeepSeaTreasure()
     : xdim(11), ydim(10)
 {
+    currentState.set_size(2);
     setupEnvirorment(2,4,2,false,true,50,1.0);
 }
 
@@ -64,6 +65,7 @@ void DeepSeaTreasure::step(const FiniteAction& action, DenseState& nextState, Re
             j2 = j;
         currentState[0] = i;
         currentState[1] = j2;
+        break;
     // up
     case 2:
         i3 = max(1,i-1);
@@ -71,6 +73,7 @@ void DeepSeaTreasure::step(const FiniteAction& action, DenseState& nextState, Re
             i3 = i;
         currentState[0] = i3;
         currentState[1] = j;
+        break;
     // down
     case 3:
         i4 = min(static_cast<int>(xdim),i+1);
@@ -78,6 +81,7 @@ void DeepSeaTreasure::step(const FiniteAction& action, DenseState& nextState, Re
             i4 = i;
         currentState[0] = i4;
         currentState[1] = j;
+        break;
     default:
         cerr << "DEEPSEATR: Unknown action" << endl;
         abort();
