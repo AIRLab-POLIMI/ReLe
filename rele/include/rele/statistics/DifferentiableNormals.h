@@ -95,6 +95,35 @@ public:
 };
 
 /**
+ * Gaussian with mean and diagonal covariance.
+ * Both mean and variance are learned.
+ */
+class ParametricDiagonalNormal : public ParametricNormal
+{
+public:
+    ParametricDiagonalNormal(arma::vec mean, arma::vec covariance);
+
+    virtual ~ParametricDiagonalNormal()
+    {}
+
+    // DifferentiableDistribution interface
+public:
+    arma::vec difflog(const arma::vec& point);
+    arma::mat diff2Log(const arma::vec& point);
+
+    // WritableInterface interface
+public:
+    void writeOnStream(std::ostream &out);
+    void readFromStream(std::istream &in);
+
+
+    // ParametricNormal interface
+protected:
+    void updateInternalState();
+};
+
+
+/**
  * @brief Parametric normal distribution with logistic diagonal variance
  *
  * This class represents a parametric Gaussian distribution with parameters \f$\rho\f$:
