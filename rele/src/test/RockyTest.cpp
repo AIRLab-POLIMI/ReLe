@@ -117,19 +117,20 @@ int main(int argc, char *argv[])
 
     //high level policy
     int dimPolicy = policy.getParametersSize();
-    arma::vec mean(dimPolicy, fill::randn);
+    arma::vec mean(dimPolicy, fill::zeros);
     arma::mat cov(dimPolicy, dimPolicy, fill::eye);
 
     ParametricNormal dist(mean, cov);
 
 
     EpisodicREPS agent(dist, policy);
+    agent.setEps(0.05);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 
 
 
-    int episodes = 1000;
+    int episodes = 3000;
     core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
 

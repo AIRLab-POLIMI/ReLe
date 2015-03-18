@@ -65,16 +65,19 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> policy(&regressor);
 
     EpisodicREPS agent(dist, policy, true);
+    agent.setEps(1);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
-    int episodes  = 10;
+    //core.getSettings().loggerStrategy = new EmptyStrategy<DenseAction, DenseState>();
+    int episodes = 1000;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
         cout << "starting episode" << endl;
         core.runEpisode();
     }
+    //delete core.getSettings().loggerStrategy;
 
     return 0;
 }

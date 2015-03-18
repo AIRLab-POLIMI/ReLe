@@ -48,6 +48,11 @@ public:
 
     virtual AgentOutputData* getAgentOutputDataEnd();
 
+    inline void setEps(double eps)
+    {
+    	this->eps = eps;
+    }
+
     virtual ~EpisodicREPS();
 
 private:
