@@ -113,9 +113,6 @@ public:
     arma::vec difflog(const arma::vec& point);
     arma::mat diff2Log(const arma::vec& point);
 
-    arma::sp_mat FIM();
-    arma::sp_mat inverseFIM();
-
     // WritableInterface interface
 public:
     void writeOnStream(std::ostream &out);

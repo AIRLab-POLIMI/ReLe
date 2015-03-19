@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < episodes; i++)
     {
-    	console.printProgress(i);
+        console.printProgress(i);
         core.runEpisode();
     }
 
