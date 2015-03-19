@@ -57,7 +57,7 @@ double AndConditionBasisFunction::operator()(const arma::vec &input)
     unsigned int i, nbcond = idxs.size();
     for (i = 0; i < nbcond; ++i)
     {
-        if (input[idxs[i]] != values[idxs[i]])
+        if (input[idxs[i]] != values[i])
             return 0.0;
     }
     return (*basis)(input);
