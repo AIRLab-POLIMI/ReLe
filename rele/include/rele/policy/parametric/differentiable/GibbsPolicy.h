@@ -15,15 +15,15 @@ class ParametricGibbsPolicy : public DifferentiablePolicy<FiniteAction, StateC>
 public:
 
     ParametricGibbsPolicy(std::vector<FiniteAction> actions,
-                          LinearApproximator* projector) :
-        mActions(actions), distribution(new double[actions.size()]),
-        approximator(projector), clearRegressorOnExit(false)
+                          LinearApproximator* projector, double inverseTemp) :
+        mActions(actions), distribution(actions.size(),0),
+        approximator(projector), clearRegressorOnExit(false),
+        inverseTemperature(inverseTemp)
     {
     }
 
     virtual ~ParametricGibbsPolicy()
     {
-        delete [] distribution;
     }
 
 
@@ -89,24 +89,35 @@ public:
         for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
         {
             tuple[statesize] = mActions[k].getActionN();
+//            AbstractBasisMatrix& basis = approximator->getBasis();
+//            std::cout << basis(tuple).t();
+
             arma::vec preference = (*approximator)(tuple);
+//            std::cout << preference << std::endl;
             double val = exp(inverseTemperature*preference[0]);
+//            std::cout << val << std::endl;
             den += val;
             distribution[count++] = val;
         }
         distribution[nactions-1] = 1.0;
 
-        double random = RandomGenerator::sampleUniform(0,1);
-        double sum = 0.0, pval = random*den;
-        for (unsigned int i = 0, ie = nactions; i < ie; ++i)
+
+        for (unsigned int k = 0, ke = nactions; k < ke; ++k)
         {
-            sum += distribution[i];
-            if (sum >= pval)
+            if ((isnan(distribution[k]))||isinf(distribution[k]))
             {
-                return mActions.at(i).getActionN();
+                distribution[k] = 1;
             }
+            else
+            {
+                distribution[k] /= den;
+            }
+//            std::cout << distribution[k] << " ";
         }
-        return mActions.at(nactions - 1).getActionN();
+//        std::cout << std::endl;
+
+        unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
+        return mActions.at(idx).getActionN();
     }
 
     // ParametricPolicy interface
@@ -177,7 +188,8 @@ public:
 
 protected:
     std::vector<FiniteAction> mActions;
-    double* distribution, inverseTemperature;
+    std::vector<double> distribution;
+    double inverseTemperature;
     LinearApproximator* approximator;
     bool clearRegressorOnExit;
 };

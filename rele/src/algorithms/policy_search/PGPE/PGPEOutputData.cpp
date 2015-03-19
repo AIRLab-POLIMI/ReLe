@@ -1,4 +1,5 @@
 #include "policy_search/PGPE/PGPEOutputData.h"
+#include <iomanip>      // std::setprecision
 
 using namespace std;
 using namespace arma;
@@ -18,6 +19,7 @@ PGPEPolicyIndividual::PGPEPolicyIndividual(arma::vec& polp, int nbEval)
 
 void PGPEPolicyIndividual::WriteToStream(ostream& os)
 {
+    os << std::setprecision(9);
     int nparams = Pparams.n_elem;
     int nepisodes = Jvalues.n_elem;
     os << nparams;
@@ -28,9 +30,10 @@ void PGPEPolicyIndividual::WriteToStream(ostream& os)
     for (int i = 0; i < nepisodes; ++i)
         os << " " << Jvalues[i];
     os << std::endl;
-    for (int i = 0; i < nepisodes; ++i)
+    os << diffLogDistr.n_rows << std::endl;
+    for (int i = 0; i < diffLogDistr.n_cols; ++i)
     {
-        for (int j = 0; j < nparams; ++j)
+        for (int j = 0; j < diffLogDistr.n_rows; ++j)
         {
             os << diffLogDistr(j,i) << "\t";
         }

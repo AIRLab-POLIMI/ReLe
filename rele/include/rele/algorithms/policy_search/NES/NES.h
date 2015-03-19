@@ -69,17 +69,15 @@ protected:
         //compute gradient log distribution
         const arma::vec& theta = Base::policy.getParameters();
         arma::vec dlogdist = Base::dist.difflog(theta); //\nabla \log D(\theta|\rho)
+        //--------- save value of distgrad
+        Base::currentItStats->individuals[Base::polCount].diffLogDistr = dlogdist;
+        //---------
 
         //compute baseline
         Base::history_dlogsist[Base::polCount] = dlogdist; //save gradients for late processing
         arma::vec dlogdist2 = (dlogdist % dlogdist);
         b_num += Base::Jpol * dlogdist2;
         b_den += dlogdist2;
-
-
-        ++(Base::polCount); //until now polCount policies have been analyzed
-        Base::epiCount = 0;
-        Base::Jpol = 0.0;
     }
 
     virtual void afterMetaParamsEstimate()
@@ -109,7 +107,8 @@ protected:
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < Base::polCount; ++i)
         {
-            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
+//            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
+            Base::diffObjFunc += (Base::history_dlogsist[i]) % (Base::history_J[i]- baseline);
             fisherMtx += Base::history_dlogsist[i] * (Base::history_dlogsist[i].t());
         }
         Base::diffObjFunc /= Base::polCount;
@@ -148,7 +147,7 @@ protected:
 
 
         //--------- save value of distgrad
-        Base::currentItStats->metaGradient = Base::diffObjFunc;
+        Base::currentItStats->metaGradient = nat_grad;
         Base::currentItStats->fisherMtx = fisherMtx;
         //---------
 
@@ -160,11 +159,6 @@ protected:
         // std::cout << "Parameters:\n" << std::endl;
         // std::cout << Base::dist.getParameters() << std::endl;
 
-
-        //reset counters and gradient
-        Base::polCount = 0;
-        Base::epiCount = 0;
-        Base::runCount++;
         for (int i = 0, ie = Base::diffObjFunc.n_elem; i < ie; ++i)
         {
             //diffObjFunc[i] = 0.0;
@@ -218,17 +212,15 @@ protected:
         //compute gradient log distribution
         const arma::vec& theta = Base::policy.getParameters();
         arma::vec dlogdist = Base::dist.difflog(theta); //\nabla \log D(\theta|\rho)
+        //--------- save value of distgrad
+        Base::currentItStats->individuals[Base::polCount].diffLogDistr = dlogdist;
+        //---------
 
         //compute baseline
         Base::history_dlogsist[Base::polCount] = dlogdist; //save gradients for late processing
         arma::vec dlogdist2 = (dlogdist % dlogdist);
         b_num += Base::Jpol * dlogdist2;
         b_den += dlogdist2;
-
-
-        ++(Base::polCount); //until now polCount policies have been analyzed
-        Base::epiCount = 0;
-        Base::Jpol = 0.0;
     }
 
     virtual void afterMetaParamsEstimate()
@@ -257,7 +249,8 @@ protected:
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < Base::polCount; ++i)
         {
-            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
+//            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
+            Base::diffObjFunc += (Base::history_dlogsist[i]) % (Base::history_J[i] - baseline);
         }
         Base::diffObjFunc /= Base::polCount;
 
@@ -308,6 +301,7 @@ protected:
 #endif
         }
 
+        std::cout << nat_grad.t();
 
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
@@ -323,10 +317,6 @@ protected:
         // std::cout << Base::dist.getParameters() << std::endl;
 
 
-        //reset counters and gradient
-        Base::polCount = 0;
-        Base::epiCount = 0;
-        Base::runCount++;
         for (int i = 0, ie = Base::diffObjFunc.n_elem; i < ie; ++i)
         {
             //diffObjFunc[i] = 0.0;

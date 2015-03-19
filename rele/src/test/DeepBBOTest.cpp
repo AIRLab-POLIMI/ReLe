@@ -28,6 +28,7 @@
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
+#include "basis/ConditionBasedFunction.h"
 #include "RandomGenerator.h"
 
 #include <iostream>
@@ -40,6 +41,34 @@
 using namespace std;
 using namespace ReLe;
 using namespace arma;
+
+
+//class ConditionBasisFunction: public BasisFunction {
+//public:
+//    ConditionBasisFunction(BasisFunction* bfs, int condition_val)
+//        :bfs(bfs), val(condition_val)
+//    {
+//    }
+
+//    double operator()(const arma::vec& input)
+//    {
+//        int tmp = (input[2] == val)?1:0;
+//        if (tmp == 0)
+//        {
+//            return 0;
+//        }
+//        return (*bfs)(input);
+//    }
+//    void writeOnStream(std::ostream& out)
+//    {
+//        out << "condition_bfs " << val << endl;
+//    }
+//    void readFromStream(std::istream& in) {}
+
+//    private:
+//        BasisFunction* bfs;
+//        int val;
+//};
 
 class deep_2state_identity: public BasisFunction
 {
@@ -81,53 +110,74 @@ int main(int argc, char *argv[])
     PolynomialFunction* pfs1 = new PolynomialFunction(dim,deg);
     deg = {0,1};
     PolynomialFunction* pfs2 = new PolynomialFunction(dim,deg);
-    PolynomialFunction* pfs1s2 = new PolynomialFunction(2,1);
+    deg = {1,1};
+    PolynomialFunction* pfs1s2 = new PolynomialFunction(dim, deg);
+    cout << *pfs1s2 << endl;
     deep_2state_identity* d2si = new deep_2state_identity();
     deep_state_identity* dsi = new deep_state_identity();
 
     DenseBasisVector basis;
     for (int i = 0; i < actions.size() -1; ++i)
     {
-        basis.push_back(pf0);
-        basis.push_back(pfs1);
-        basis.push_back(pfs2);
-        basis.push_back(pfs1s2);
-        basis.push_back(d2si);
-        basis.push_back(dsi);
+        basis.push_back(new AndConditionBasisFunction(pf0,2,i));
+        basis.push_back(new AndConditionBasisFunction(pfs1,2,i));
+        basis.push_back(new AndConditionBasisFunction(pfs2,2,i));
+        basis.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
+        basis.push_back(new AndConditionBasisFunction(d2si,2,i));
+        basis.push_back(new AndConditionBasisFunction(dsi,2,i));
     }
     cout << basis << endl;
     cout << "basis length: " << basis.size() << endl;
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-    ParametricGibbsPolicy<DenseState> policy(actions, &regressor);
-    //---
+//    arma::vec input(3);
+//    input(0) = 1;
+//    input(1) = 1;
+//    input(2) = 1;
+
+//    cout << basis(input) << endl;
+
+//    exit(5);
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
+//    arma::vec prova;
+//    prova.load("/tmp/prova.dat");
+//    cout << prova << endl;
+//    regressor.setParameters(prova);
+
+    ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1e8);
+//    DenseState state(2);
+//    state[0] = 1;
+//    state[1] = 1;
+//    cout << policy(state) << endl;
+//    //---
+
+//    exit(8);
 
     int nparams = basis.size();
     arma::vec mean(nparams, fill::zeros);
     arma::mat cov(nparams, nparams, arma::fill::eye);
-    cov *= 10;
     mat cholMtx = chol(cov);
     ParametricCholeskyNormal dist(mean.n_elem, mean, cholMtx);
 
+//    vec mean(nparams, fill::zeros);
+//    vec sigmas(nparams, fill::ones);
+//    ParametricDiagonalNormal dist(mean, sigmas);
 
 
-
-    int nbepperpol = 1, nbpolperupd = 50;
+    int nbepperpol = 1, nbpolperupd = 300;
     bool usebaseline = true;
 //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 //    agent.setNormalization(true);
-    xNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+//    xNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
-    const std::string outfile = "lqrNesAgentOut.txt";
+    const std::string outfile = "deepNesAgentOut.txt";
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        outfile, WriteStrategy<FiniteAction, DenseState>::AGENT
+        outfile, WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
     );
-    //--- delete file
-    std::ofstream ofs(outfile, std::ios_base::out);
-    ofs.close();
-    //---
 
-    core.getSettings().episodeLenght = mdp.getSettings().horizon;
+    int horiz = mdp.getSettings().horizon;
+    core.getSettings().episodeLenght = horiz;
 
     int nbUpdates = 100;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
@@ -146,7 +196,7 @@ int main(int argc, char *argv[])
             if (updateCount >= nbUpdates*every)
             {
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
-//                cout << "### " << p << "% ###" << endl;
+                cout << "### " << p << "% ###" << endl;
 //                cout << dist.getParameters().t();
                 arma::vec J = core.runBatchTest(100);
                 cout << "mean score: " << J(0) << endl;
@@ -156,7 +206,9 @@ int main(int argc, char *argv[])
     }
 
 
-    cout << core.runBatchTest(10) << endl;
+    int nbTestEpisodes = 1000;
+    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
+    cout << core.runBatchTest(1000) << endl;
 
     return 0;
 }

@@ -136,8 +136,8 @@ target_link_libraries(basisMatrixTest rele)
 add_executable(nls_OptParams src/test/NlsOptimalParamsTest.cpp)
 target_link_libraries(nls_OptParams rele)
 
-add_executable(deep_NES src/test/DeepNESTest.cpp)
-target_link_libraries(deep_NES rele)
+add_executable(deep_BBO src/test/DeepBBOTest.cpp)
+target_link_libraries(deep_BBO rele)
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

@@ -21,6 +21,7 @@ void xNESIterationStats::writeData(ostream &out)
     for (i = 0, ie = fisherMtx.n_rows; i < ie; ++i)
         for (j = 0, je = fisherMtx.n_cols; j < je; ++j)
             out << fisherMtx(i,j) << "\t";
+    out << endl;
 }
 
 }

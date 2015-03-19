@@ -160,7 +160,7 @@ public:
 
     enum outType {TRANS, AGENT, ALL};
 
-    WriteStrategy(const std::string& path, outType outputType = ALL) :
+    WriteStrategy(const std::string& path, outType outputType = ALL, bool clean = false) :
         transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
     {
         if (outputType == TRANS)
@@ -177,6 +177,13 @@ public:
         {
             writeTransitions = true;
             writeAgentData = true;
+        }
+        if (clean == true)
+        {
+            std::ofstream os(transitionPath, std::ios_base::out);
+            os.close();
+            os.open(agentDataPath, std::ios_base::out);
+            os.close();
         }
     }
 

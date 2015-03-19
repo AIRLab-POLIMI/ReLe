@@ -163,6 +163,9 @@ public:
         if (epiCount == nbEpisodesToEvalPolicy)
         {
             afterPolicyEstimate();
+            epiCount = 0; //reset episode counter
+            Jpol = 0.0; //reset policy value
+            polCount++; //until now polCount policies have been analyzed
         }
 
 
@@ -171,6 +174,12 @@ public:
             //all policies have been evaluated
             //conclude gradient estimate and update the distribution
             afterMetaParamsEstimate();
+
+            //reset counters and gradient
+            polCount = 0; //reset policy counter
+            epiCount = 0; //reset episode counter
+            runCount++; //update run counter
+            output2LogReady = true; //output must be ready for log
         }
     }
 
@@ -265,10 +274,6 @@ protected:
         //--------- save value of distgrad
         Base::currentItStats->individuals[Base::polCount].diffLogDistr = dlogdist;
         //---------
-
-        ++Base::polCount; //until now polCount policies have been analyzed
-        Base::epiCount = 0;
-        Base::Jpol = 0.0;
     }
 
     virtual void afterMetaParamsEstimate()
@@ -302,16 +307,8 @@ protected:
         //            std::cout << "Parameters:\n" << std::endl;
         //            std::cout << dist.getParameters() << std::endl;
 
-
-        //reset counters and gradient
-        Base::polCount = 0;
-        Base::epiCount = 0;
-        Base::runCount++;
-
         b_num = 0.0;
         b_den = 0.0;
-
-        Base::output2LogReady = true;
     }
 
 private:

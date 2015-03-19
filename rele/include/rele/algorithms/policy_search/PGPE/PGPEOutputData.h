@@ -40,12 +40,14 @@ public:
         stat.Jvalues = arma::vec(nbEval);
         for (i = 0; i < nbEval; ++i)
             in >> stat.Jvalues[i];
-        stat.diffLogDistr = arma::mat(nbPolPar, nbEval);
-        for (int i = 0; i < nbPolPar; ++i)
+        int nmetadist;
+        in >> nmetadist;
+        stat.diffLogDistr = arma::mat(nmetadist, nbEval);
+        for (int i = 0; i < nbEval; ++i)
         {
-            for (int j = 0; j < nbEval; ++j)
+            for (int j = 0; j < nmetadist; ++j)
             {
-                in >> stat.diffLogDistr(i,j);
+                in >> stat.diffLogDistr(j,i);
             }
         }
         return in;
