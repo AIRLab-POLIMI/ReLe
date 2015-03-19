@@ -125,12 +125,12 @@ int main(int argc, char *argv[])
         basis.push_back(new AndConditionBasisFunction(d2si,2,i));
         basis.push_back(new AndConditionBasisFunction(dsi,2,i));
 
-//        basis.push_back(new ConditionBasisFunction(pf0,i));
-//        basis.push_back(new ConditionBasisFunction(pfs1,i));
-//        basis.push_back(new ConditionBasisFunction(pfs2,i));
-//        basis.push_back(new ConditionBasisFunction(pfs1s2,i));
-//        basis.push_back(new ConditionBasisFunction(d2si,i));
-//        basis.push_back(new ConditionBasisFunction(dsi,i));
+        //        basis.push_back(new ConditionBasisFunction(pf0,i));
+        //        basis.push_back(new ConditionBasisFunction(pfs1,i));
+        //        basis.push_back(new ConditionBasisFunction(pfs2,i));
+        //        basis.push_back(new ConditionBasisFunction(pfs1s2,i));
+        //        basis.push_back(new ConditionBasisFunction(d2si,i));
+        //        basis.push_back(new ConditionBasisFunction(dsi,i));
     }
     //    cout << basis << endl;
     //    cout << "basis length: " << basis.size() << endl;
@@ -204,10 +204,11 @@ int main(int argc, char *argv[])
     //--- collect some trajectories
     const std::string testOutfile = "deep_bbo_final_trajectories.csv";
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-                    testOutfile, WriteStrategy<FiniteAction, DenseState>::TRANS,
-                    true /*delete file*/
-                    );
-    core.runTestEpisode();
+                testOutfile, WriteStrategy<FiniteAction, DenseState>::TRANS,
+                true /*delete file*/
+                );
+    for (int n = 0; n < 100; ++n)
+        core.runTestEpisode();
     //---
 
     return 0;
