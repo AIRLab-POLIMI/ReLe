@@ -33,8 +33,8 @@ namespace ReLe
 {
 
 EpisodicREPS::EpisodicREPS(ParametricNormal& dist,
-                           ParametricPolicy<DenseAction, DenseState>& policy, bool stepEsploration) :
-    dist(dist), policy(policy), stepEsploration(stepEsploration)
+                           ParametricPolicy<DenseAction, DenseState>& policy) :
+    dist(dist), policy(policy)
 {
     maxR = -std::numeric_limits<double>::infinity();
     etaOpt = 1;
@@ -55,6 +55,14 @@ void EpisodicREPS::initEpisode(const DenseState& state, DenseAction& action)
     sampleAction(state, action);
 }
 
+void EpisodicREPS::initTestEpisode()
+{
+    //obtain new parameters
+    arma::vec new_params = dist();
+    //set to policy
+    policy.setParameters(new_params);
+}
+
 void EpisodicREPS::sampleAction(const DenseState& state, DenseAction& action)
 {
     vec& u = action;
@@ -65,8 +73,7 @@ void EpisodicREPS::step(const Reward& reward, const DenseState& nextState,
                         DenseAction& action)
 {
     updateSamples(reward[0]);
-    if(stepEsploration)
-        theta = dist();
+    theta = dist();
     policy.setParameters(theta);
     sampleAction(nextState, action);
 }

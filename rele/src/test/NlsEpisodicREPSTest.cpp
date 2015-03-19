@@ -88,16 +88,20 @@ int main(int argc, char *argv[])
     //---
 
     EpisodicREPS agent(dist, policy);
+    agent.setEps(0.005);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
-    int episodes  = 10;
+    int episodes  = 10000;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = mdp.getSettings().horizon;
         cout << "starting episode" << endl;
         core.runEpisode();
     }
+
+    //cout << dist.getMean().t() << endl;
+    //cout << dist.getCovariance() << endl;
 
     return 0;
 }

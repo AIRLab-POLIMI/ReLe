@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 
     EpisodicREPS agent(dist, policy);
-    agent.setEps(0.05);
+    agent.setEps(0.1);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 

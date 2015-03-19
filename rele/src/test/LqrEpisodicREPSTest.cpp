@@ -64,20 +64,23 @@ int main(int argc, char *argv[])
     regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    EpisodicREPS agent(dist, policy, true);
-    agent.setEps(1);
+    EpisodicREPS agent(dist, policy);
+    agent.setEps(0.001);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
-    //core.getSettings().loggerStrategy = new EmptyStrategy<DenseAction, DenseState>();
-    int episodes = 1000;
+    core.getSettings().loggerStrategy = new EmptyStrategy<DenseAction, DenseState>();
+    int episodes = 100000;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
-        cout << "starting episode" << endl;
+        //cout << "starting episode" << endl;
         core.runEpisode();
     }
-    //delete core.getSettings().loggerStrategy;
+    delete core.getSettings().loggerStrategy;
+
+    cout << dist.getMean().t() << endl;
+    cout << dist.getCovariance() << endl;
 
     return 0;
 }
