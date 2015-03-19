@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     arma::vec mean(dimPolicy, fill::zeros);
     arma::mat cov(dimPolicy, dimPolicy, fill::eye);
 
-    cov *= 100;
+    cov *= 1000;
 
     ParametricNormal dist(mean, cov);
 

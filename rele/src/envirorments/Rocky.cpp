@@ -86,8 +86,8 @@ void Rocky::getInitialState(DenseState& state)
     currentState[food] = 0;
 
     //rocky state
-    currentState[xr] = 5;
-    currentState[yr] = 5;
+    currentState[xr] = 1;
+    currentState[yr] = 1;
     currentState[thetar] = 0;
 
     //reset predictor state

@@ -52,6 +52,7 @@ end
 
 figure(2)
 plot(r);
+
 axis tight
 
 disp('Starting visualization...')
