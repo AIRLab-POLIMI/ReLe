@@ -3,6 +3,8 @@
 
 #include "Distribution.h"
 
+#include "Utils.h"
+
 namespace ReLe
 {
 
@@ -88,7 +90,7 @@ public:
         this->Cov = cov;
 
         this->invCov = inv(this->Cov);
-        this->cholCov = chol(this->Cov);
+        this->cholCov = utils::chol(this->Cov);
         this->detValue = det(this->Cov);
     }
 

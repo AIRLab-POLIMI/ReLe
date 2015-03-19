@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_UTILS_UTILS_H_
 
 #include <cmath>
+#include <armadillo>
 
 class utils
 {
@@ -55,6 +56,56 @@ public:
     static inline double threshold(double value, double threshold)
     {
         return utils::threshold(value, -threshold, threshold);
+    }
+
+    /**
+     * @brief Cholesky safe decomposidion using nearestSPD
+     */
+    static inline arma::mat chol(arma::mat& M)
+    {
+        if(M.n_elem == 1 && M(0) <= 0)
+        {
+            arma::mat C(1, 1, arma::fill::randn);
+            C(0) = std::numeric_limits<double>::epsilon();
+            return C;
+        }
+
+        try
+        {
+            return arma::chol(M);
+        }
+        catch(std::runtime_error& e)
+        {
+            arma::mat B = (M + M.t())/2;
+
+            arma::mat U, V;
+            arma::vec s;
+            arma::svd(U, s, V, M);
+
+            arma::mat H = V*arma::diagmat(s)*V.t();
+
+            arma::mat C = (B+H)/2;
+            C = (C + C.t())/2;
+
+            int k = 0;
+            while(true)
+            {
+                try
+                {
+                    return arma::chol(C);
+                }
+                catch(std::runtime_error& e)
+                {
+                    k++;
+                    double k2 = k*k;
+                    double mineig = arma::min(arma::eig_sym(C));
+                    double relEps = std::nextafter(mineig, std::numeric_limits<double>::infinity()) - mineig;
+                    C += (-mineig*k2 + relEps)*arma::eye(C.n_rows, C.n_cols);
+                }
+            }
+
+        }
+
     }
 
 };

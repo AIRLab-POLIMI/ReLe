@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     arma::vec mean(1);
     mean[0] = -0.1;
     arma::mat cov(1,1, arma::fill::eye);
-    cov *= 0.01;
+    cov *= 0.1;
 
     ParametricNormal dist(mean,cov);
 
@@ -64,17 +64,23 @@ int main(int argc, char *argv[])
     regressor.setParameters(init_params);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    EpisodicREPS agent(dist, policy, true);
+    EpisodicREPS agent(dist, policy);
+    agent.setEps(0.05);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
-    int episodes  = 10;
+    core.getSettings().loggerStrategy = new EmptyStrategy<DenseAction, DenseState>();
+    int episodes = 100000;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
-        cout << "starting episode" << endl;
+        cout << "#" << i << endl;
         core.runEpisode();
     }
+    delete core.getSettings().loggerStrategy;
+
+    cout << dist.getMean().t() << endl;
+    cout << dist.getCovariance() << endl;
 
     return 0;
 }

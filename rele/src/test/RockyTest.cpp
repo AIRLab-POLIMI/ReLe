@@ -21,18 +21,23 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define ARMA_DONT_PRINT_ERRORS
+
 #include "Rocky.h"
 #include "policy_search/REPS/EpisodicREPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
+#include "ConsoleManager.h"
 
 #include <iostream>
 
 using namespace std;
 using namespace ReLe;
 using namespace arma;
+
+
 
 namespace ReLe
 {
@@ -117,25 +122,31 @@ int main(int argc, char *argv[])
 
     //high level policy
     int dimPolicy = policy.getParametersSize();
-    arma::vec mean(dimPolicy, fill::randn);
+    arma::vec mean(dimPolicy, fill::zeros);
     arma::mat cov(dimPolicy, dimPolicy, fill::eye);
+
+    cov *= 1000;
 
     ParametricNormal dist(mean, cov);
 
 
     EpisodicREPS agent(dist, policy);
+    agent.setEps(0.1);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 
 
 
-    int episodes = 1000;
+    int episodes = 3000;
     core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
 
+    cout << "### starting learning ###" << endl;
+    ConsoleManager console(episodes, 100);
+
     for (int i = 0; i < episodes; i++)
     {
-        cout << "### starting episode " << i << " ###" << endl;
+    	console.printProgress(i);
         core.runEpisode();
     }
 
