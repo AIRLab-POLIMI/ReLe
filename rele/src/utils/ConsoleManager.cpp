@@ -32,9 +32,14 @@ namespace ReLe
 {
 
 ConsoleManager::ConsoleManager(unsigned int max, unsigned int step, bool percentage) :
-    max(max), step(step), percentage(percentage), lastPrintSize(0)
+    max(max), step(step), percentage(percentage)
 {
 
+}
+
+void ConsoleManager::printInfo(const string& info)
+{
+	cout << "# " << info << endl;
 }
 
 void ConsoleManager::printProgress(unsigned int progress)
@@ -46,20 +51,21 @@ void ConsoleManager::printProgress(unsigned int progress)
 
         if(percentage)
         {
-            double pValue = static_cast<double>(progress)/static_cast<double>(max);
+            double pValue = static_cast<double>(progress + 1)/static_cast<double>(max);
 
             ss << "# " << pValue << "% ";
         }
         else
         {
-            ss << "# " << progress << "/" << max << " ";
+            ss << "# " << progress + 1 << "/" << max << " ";
         }
 
-        if(lastPrintSize != 0)
-            cout << string('\b', lastPrintSize) << string(' ', lastPrintSize) << '\r';
-        lastPrintSize = ss.str().size();
+        cout << '\r';
         cout << ss.str();
         cout.flush();
+
+        if(progress + 1 == max)
+        	cout << endl;
     }
 }
 

@@ -70,6 +70,8 @@ else()
 	set(BUILD_TYPE_MSG "Release")
 endif()
 
+add_definitions( -DARMA_DONT_PRINT_ERRORS )
+
 # ------------------------ MESSAGES ----------------------------
 
 message(STATUS "Using catkin?    : " ${CATKIN_MSG})

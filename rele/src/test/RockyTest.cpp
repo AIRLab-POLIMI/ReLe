@@ -21,8 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#define ARMA_DONT_PRINT_ERRORS
-
 #include "Rocky.h"
 #include "policy_search/REPS/EpisodicREPS.h"
 #include "DifferentiableNormals.h"
@@ -125,13 +123,13 @@ int main(int argc, char *argv[])
     arma::vec mean(dimPolicy, fill::zeros);
     arma::mat cov(dimPolicy, dimPolicy, fill::eye);
 
-    cov *= 1000;
+    cov *= 10;
 
     ParametricNormal dist(mean, cov);
 
 
     EpisodicREPS agent(dist, policy);
-    agent.setEps(0.1);
+    agent.setEps(0.01);
 
     Core<DenseAction, DenseState> core(rocky, agent);
 
@@ -141,19 +139,20 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
 
-    cout << "### starting learning ###" << endl;
-    ConsoleManager console(episodes, 100);
 
+    ConsoleManager console(episodes, 1);
+    console.printInfo("starting learning");
     for (int i = 0; i < episodes; i++)
     {
         console.printProgress(i);
         core.runEpisode();
     }
 
-    cout << "### Starting evaluation episode ##" << endl;
+    console.printInfo("Starting evaluation episode");
     core.runTestEpisode();
 
     delete core.getSettings().loggerStrategy;
+
 
     return 0;
 

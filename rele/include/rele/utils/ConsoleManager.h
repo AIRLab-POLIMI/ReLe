@@ -24,6 +24,8 @@
 #ifndef INCLUDE_RELE_UTILS_CONSOLEMANAGER_H_
 #define INCLUDE_RELE_UTILS_CONSOLEMANAGER_H_
 
+#include <string>
+
 namespace ReLe
 {
 
@@ -32,9 +34,9 @@ class ConsoleManager
 public:
     ConsoleManager(unsigned int max, unsigned int step, bool percentage = false);
     void printProgress(unsigned int progress);
+    void printInfo(const std::string& info);
 
 private:
-    unsigned int lastPrintSize;
     unsigned int max;
     unsigned int step;
     bool percentage;
