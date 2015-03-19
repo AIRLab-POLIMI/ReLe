@@ -64,9 +64,10 @@ axis auto;
 lim = axis;
 pause(3)
 clf(3)
+figure(3)
 H = uicontrol('Style', 'PushButton', ...
                     'String', 'Break', ...
-                    'Callback', 'delete\gcbf)');
+                    'Callback', 'delete(gcbf)');
 
 historyToShow = 100;
 for i = 1:size(traj, 1)
