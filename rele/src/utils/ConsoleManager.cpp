@@ -39,7 +39,7 @@ ConsoleManager::ConsoleManager(unsigned int max, unsigned int step, bool percent
 
 void ConsoleManager::printInfo(const string& info)
 {
-	cout << "# " << info << endl;
+    cout << "# " << info << endl;
 }
 
 void ConsoleManager::printProgress(unsigned int progress)
@@ -51,7 +51,7 @@ void ConsoleManager::printProgress(unsigned int progress)
 
         if(percentage)
         {
-            double pValue = static_cast<double>(progress + 1)/static_cast<double>(max);
+            double pValue = static_cast<double>(progress + 1)/static_cast<double>(max)*100.0;
 
             ss << "# " << pValue << "% ";
         }
@@ -65,7 +65,7 @@ void ConsoleManager::printProgress(unsigned int progress)
         cout.flush();
 
         if(progress + 1 == max)
-        	cout << endl;
+            cout << endl;
     }
 }
 
