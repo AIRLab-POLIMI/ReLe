@@ -126,8 +126,8 @@ target_link_libraries(lqr_REPS rele)
 add_executable(rocky_REPS src/test/RockyTest.cpp)
 target_link_libraries(rocky_REPS rele)
 
-add_executable(nls_PGPE src/test/NlsPGPETest.cpp)
-target_link_libraries(nls_PGPE rele)
+add_executable(nls_BBO src/test/NlsBBOTest.cpp)
+target_link_libraries(nls_BBO rele)
 
 add_executable(nls_REPS src/test/NlsEpisodicREPSTest.cpp)
 target_link_libraries(nls_REPS rele)

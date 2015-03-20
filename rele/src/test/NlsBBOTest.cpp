@@ -46,9 +46,20 @@ int main(int argc, char *argv[])
 {
     NLS mdp;
     //with these settings
-    //max in ( -3.58, 10.5 ) -> J = 8.32093
+    //max in ( many optimal points ) -> J = 8.5
     //note that there are multiple optimal solutions
-    //TODO: verificare, serve interfaccia core per valutare una politica
+    //e.g.
+    //-3.2000    8.8000    8.4893
+    //-3.2000    9.3000    8.4959
+    //-3.2000    9.5000    8.4961
+    //-3.4000   10.0000    8.5007
+    //-3.2000    9.4000    8.5020
+    //-3.1000    8.8000    8.5028
+    //-3.4000    9.7000    8.5041
+    //-3.0000    8.1000    8.5205
+    //-2.9000    7.7000    8.5230
+    //-3.1000    9.1000    8.5243
+    //-2.8000    7.3000    8.5247
 
     int dim = mdp.getSettings().continuosStateDim;
     cout << "dim: " << dim << endl;
@@ -90,11 +101,11 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
     //---
 
-    int nbepperpol = 1, nbpolperupd = 20;
+    int nbepperpol = 1, nbpolperupd = 40;
     bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
     agent.setNormalization(true);
-//    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+//    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
 
     const std::string outfile = "nls_bbo_out.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
@@ -106,10 +117,10 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 600;
+    int nbUpdates = 2000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
-    every = bevery = 0.1; //%
+    every = bevery = 0.05; //%
     int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {

@@ -44,10 +44,6 @@ using namespace arma;
 int main(int argc, char *argv[])
 {
     NLS mdp;
-    //with these settings
-    //max in ( -3.58, 10.5 ) -> J = 8.32093
-    //note that there are multiple optimal solutions
-    //TODO: verificare, serve interfaccia core per valutare una politica
 
     int dim = mdp.getSettings().continuosStateDim;
     cout << "dim: " << dim << endl;

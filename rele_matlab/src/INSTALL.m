@@ -2,4 +2,4 @@ disp('Installing directories...')
 
 addpath(genpath('.'))
 
-disp('Done!');
+disp('Done!')
