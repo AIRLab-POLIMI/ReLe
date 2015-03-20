@@ -29,6 +29,8 @@
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 
+#include "ConsoleManager.h"
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -69,12 +71,16 @@ int main(int argc, char *argv[])
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
+
+
     core.getSettings().loggerStrategy = new EmptyStrategy<DenseAction, DenseState>();
     int episodes = 100000;
+
+    ConsoleManager console(episodes, 1);
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = 50;
-        cout << "#" << i << endl;
+        console.printProgress(i);
         core.runEpisode();
     }
     delete core.getSettings().loggerStrategy;

@@ -164,9 +164,9 @@ int main(int argc, char *argv[])
     const std::string outfile = "deep_bbo_out.txt";
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-                outfile, WriteStrategy<FiniteAction, DenseState>::AGENT,
-                true /*delete file*/
-                );
+        outfile, WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
@@ -204,9 +204,9 @@ int main(int argc, char *argv[])
     //--- collect some trajectories
     const std::string testOutfile = "deep_bbo_final_trajectories.csv";
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-                testOutfile, WriteStrategy<FiniteAction, DenseState>::TRANS,
-                true /*delete file*/
-                );
+        testOutfile, WriteStrategy<FiniteAction, DenseState>::TRANS,
+        true /*delete file*/
+    );
     for (int n = 0; n < 100; ++n)
         core.runTestEpisode();
     //---
