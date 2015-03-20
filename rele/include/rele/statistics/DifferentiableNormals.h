@@ -46,6 +46,11 @@ public:
         return parameters;
     }
 
+    inline virtual void setParameters(arma::vec& newval)
+    {
+        parameters = newval;
+    }
+
     virtual void update(arma::vec &increment);
     virtual arma::vec difflog(const arma::vec &point);
     virtual arma::mat diff2Log(const arma::vec &point);
@@ -212,6 +217,9 @@ public:
 
     arma::sp_mat FIM();
     arma::sp_mat inverseFIM();
+
+    arma::mat getCholeskyDec();
+    arma::vec getMean();
 
     // WritableInterface interface
 public:

@@ -140,6 +140,9 @@ target_link_libraries(nls_OptParams rele)
 
 add_executable(deep_BBO src/test/DeepBBOTest.cpp)
 target_link_libraries(deep_BBO rele)
+
+add_executable(chol_FIM src/test/CholeskyFIMTest.cpp)
+target_link_libraries(chol_FIM rele)
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

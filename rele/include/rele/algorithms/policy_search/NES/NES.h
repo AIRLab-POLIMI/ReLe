@@ -26,6 +26,8 @@
 
 #include "policy_search/PGPE/PGPE.h"
 #include "policy_search/NES/NESOutputData.h"
+#include "DifferentiableNormals.h"
+#include "ArmadilloPDFs.h"
 
 #define SIMONEUPDATE
 
@@ -42,7 +44,7 @@ public:
         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
         bool baseline = true, int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {    }
 
     virtual ~NES()
@@ -107,7 +109,7 @@ protected:
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < Base::polCount; ++i)
         {
-//            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
+            //            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
             Base::diffObjFunc += (Base::history_dlogsist[i]) % (Base::history_J[i]- baseline);
             fisherMtx += Base::history_dlogsist[i] * (Base::history_dlogsist[i].t());
         }
@@ -174,21 +176,24 @@ protected:
 };
 
 
+/**
+ * Exact NES (NES with closed-form FIM)
+ */
 template<class ActionC, class StateC, class DistributionC>
-class xNES: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+class eNES: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
 {
     typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
 
 public:
-    xNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
+    eNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
          bool baseline = true, int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
     }
 
-    virtual ~xNES()
+    virtual ~eNES()
     {
     }
 
@@ -249,7 +254,7 @@ protected:
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < Base::polCount; ++i)
         {
-//            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
+            //            Base::diffObjFunc += (Base::history_dlogsist[i] - baseline) * Base::history_J[i];
             Base::diffObjFunc += (Base::history_dlogsist[i]) % (Base::history_J[i] - baseline);
         }
         Base::diffObjFunc /= Base::polCount;
@@ -301,7 +306,7 @@ protected:
 #endif
         }
 
-        std::cout << nat_grad.t();
+        //        std::cout << nat_grad.t();
 
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
@@ -327,6 +332,182 @@ protected:
 
 protected:
     arma::vec b_num, b_den;
+};
+
+/**
+ * Exact NES (NES with closed-form FIM)
+ */
+template<class ActionC, class StateC>
+class xNES: public BlackBoxAlgorithm<ActionC, StateC, ParametricCholeskyNormal, xNESIterationStats>
+{
+    typedef BlackBoxAlgorithm<ActionC, StateC, ParametricCholeskyNormal, xNESIterationStats> Base;
+
+public:
+    xNES(ParametricCholeskyNormal& dist, ParametricPolicy<ActionC, StateC>& policy,
+         unsigned int nbEpisodes, unsigned int nbPolicies,
+         double step_mu, double step_sigma, double step_b,
+         int reward_obj = 0)
+        : BlackBoxAlgorithm<ActionC, StateC, ParametricCholeskyNormal, xNESIterationStats>
+          (dist, policy, nbEpisodes, nbPolicies, 0.0, false, reward_obj),
+          stepmu(step_mu), stepsigma(step_sigma), stepb(step_b)
+    {
+
+        arma::mat A = dist.getCholeskyDec();
+        double det = arma::det(A);
+        double exponent = 1.0 / A.n_rows;
+//        std::cout << A << std::endl;
+//        std::cout << exponent << std::endl;
+        sigma = std::pow(fabs(det), exponent);
+//        std::cout << sigma << std::endl;
+        B = A/sigma;
+        mu = dist.getMean();
+
+//        std::cout << mu.t() << std::endl;
+    }
+
+    virtual ~xNES()
+    {
+    }
+
+protected:
+    virtual void initEpisode(const StateC& state, ActionC& action)
+    {
+        Base::df  = 1.0;    //reset discount factor
+        Base::Jep = 0.0;    //reset J of current episode
+
+        if (Base::polCount == 0 && Base::epiCount == 0)
+        {
+            Base::currentItStats = new xNESIterationStats(Base::nbPoliciesToEvalMetap,
+                                                          Base::policy.getParametersSize(),
+                                                          Base::nbEpisodesToEvalPolicy);
+            Base::currentItStats->metaParams = Base::dist.getParameters();
+        }
+
+        if (Base::epiCount == 0)
+        {
+            //a new policy is considered
+            Base::Jpol = 0.0;
+
+            //obtain new parameters
+            arma::vec ones = arma::ones<arma::vec>(B.n_rows);
+            arma::mat I(B.n_rows,B.n_rows, arma::fill::eye);
+            arma::vec zi = mvnrandFast(ones,I);
+//            std::cout << zi.t();
+            arma::vec xi = mu + sigma*B*zi;
+
+            z_individuals[Base::polCount] = zi;
+            x_individuals[Base::polCount] = xi;
+
+            //set to policy
+            Base::policy.setParameters(xi);
+
+            //--- create new policy individual
+            //            currentItStats->individuals.push_back(
+            //                PGPEPolicyIndividual(new_params, nbEpisodesToEvalPolicy));
+            Base::currentItStats->individuals[Base::polCount].Pparams = xi;
+            //---
+        }
+        Base::sampleAction(state, action);
+    }
+
+    virtual void init()
+    {
+        int dp = Base::dist.getParametersSize();
+        Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
+        Base::history_dlogsist.assign(Base::nbPoliciesToEvalMetap, Base::diffObjFunc);
+        Base::history_J = arma::vec(Base::nbPoliciesToEvalMetap, arma::fill::zeros);
+        z_individuals.assign(Base::nbPoliciesToEvalMetap, arma::vec(Base::policy.getParametersSize()));
+        x_individuals.assign(Base::nbPoliciesToEvalMetap, arma::vec(Base::policy.getParametersSize()));
+        indicies.assign(Base::nbPoliciesToEvalMetap,0);
+    }
+
+    virtual void afterPolicyEstimate()
+    {
+        //average over episodes
+        Base::Jpol /= Base::nbEpisodesToEvalPolicy;
+        Base::history_J[Base::polCount] = Base::Jpol;
+    }
+
+    virtual void afterMetaParamsEstimate()
+    {
+
+        double den_ui = 0.0;
+        for (unsigned int i = 0; i < Base::nbPoliciesToEvalMetap; ++i)
+        {
+            indicies[i] = i;
+            //--- compute den of wi
+            double A = log(Base::nbPoliciesToEvalMetap/2.0 + 1.0);
+            double B = log(1.0*(i+1));
+            double C = std::max(0.0, A-B);
+            den_ui += C;
+            //---
+        }
+        for (unsigned int i = 0; i < Base::nbPoliciesToEvalMetap - 1; ++i)
+        {
+            for (unsigned int j = i+1; j < Base::nbPoliciesToEvalMetap; ++j)
+            {
+                if (Base::history_J[indicies[i]] < Base::history_J[indicies[j]])
+                {
+                    unsigned int tmp = indicies[i];
+                    indicies[i] = indicies[j];
+                    indicies[j] = tmp;
+                }
+            }
+        }
+
+        unsigned int d = Base::policy.getParametersSize();
+        arma::mat I(d, d, arma::fill::eye), GM(d,d,arma::fill::zeros);
+        arma::vec Gdelta(mu.n_elem, arma::fill::zeros);
+
+        double ninv = 1.0 / Base::nbPoliciesToEvalMetap;
+
+        for (unsigned int i = 0; i < Base::nbPoliciesToEvalMetap; ++i)
+        {
+            //--- compute weight ui
+            double A = log(Base::nbPoliciesToEvalMetap/2.0 + 1.0);
+            double B = log(1.0*(i+1));
+            double C = std::max(0.0, A-B);
+            double ui = C/den_ui - ninv;
+//            ui = Base::history_J[indicies[i]];
+            //---
+
+            unsigned int idx = indicies[i];
+            arma::vec& zi = z_individuals[idx];
+            Gdelta += ui * zi;
+            GM += ui * (zi*zi.t() - I);
+        }
+
+        double Gsigma = arma::trace(GM) / d;
+        arma::mat GB = GM - Gsigma * I;
+
+        mu += stepmu * sigma * B * Gdelta;
+        sigma = sigma * std::exp(stepsigma*Gsigma/2.0);
+        B = B * arma::expmat(stepb*GB/2.0);
+
+//        std::cout << mu << std::endl;
+//        std::cout << B << std::endl;
+
+        arma::mat tmp = arma::trimatu(arma::ones(d, d));
+        arma::vec new_val =  arma::join_vert(mu, sigma*B.elem( arma::find(tmp == 1.0) ));
+
+//        std::cout << new_val.t();
+        //update meta distribution
+        Base::dist.setParameters(new_val);
+
+
+        // std::cout << "nat_grad: " << nat_grad.t();
+        // std::cout << "Parameters:\n" << std::endl;
+        // std::cout << Base::dist.getParameters() << std::endl;
+
+    }
+
+protected:
+    arma::mat B;
+    arma::vec mu;
+    std::vector<arma::vec> z_individuals, x_individuals;
+    std::vector<int> indicies;
+    double sigma;
+    double stepmu, stepsigma, stepb;
 };
 
 } //end namespace

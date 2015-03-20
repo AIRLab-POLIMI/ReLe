@@ -510,6 +510,23 @@ sp_mat ParametricCholeskyNormal::inverseFIM()
     return fim;
 }
 
+arma::mat ParametricCholeskyNormal::getCholeskyDec()
+{
+    int paramSize = this->getParametersSize();
+    mat tmp = trimatu(ones(pointSize, pointSize));
+    cholCov.elem( find(tmp == 1.0) ) = parameters.rows(pointSize, paramSize-1);
+    return cholCov;
+}
+
+arma::vec ParametricCholeskyNormal::getMean()
+{
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        mean(i) = parameters(i);
+    }
+    return mean;
+}
+
 void ParametricCholeskyNormal::writeOnStream(ostream &out)
 {
     int paramSize = this->getParametersSize();
