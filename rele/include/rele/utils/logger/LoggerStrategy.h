@@ -267,13 +267,14 @@ template<class ActionC, class StateC>
 class EvaluateStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    EvaluateStrategy()
+    EvaluateStrategy(double gamma)
+        : gamma(gamma)
     {
-
     }
 
     void processData(std::vector<Transition<ActionC, StateC>>& samples)
     {
+        double df = 1.0;
         bool first = true;
         for (auto sample : samples)
         {
@@ -285,8 +286,9 @@ public:
             }
             for (int i = 0, ie = r.size(); i < ie; ++i)
             {
-                J[i] += r[i];
+                J[i] += df * r[i];
             }
+            df *= gamma;
         }
     }
 
@@ -297,6 +299,7 @@ public:
     }
 
     arma::vec J;
+    double gamma;
 };
 
 }

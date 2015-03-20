@@ -156,9 +156,9 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 1, nbpolperupd = 300;
     bool usebaseline = true;
-    //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
-    //    agent.setNormalization(true);
-    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
+    agent.setNormalization(true);
+//    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
     //    xNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
     const std::string outfile = "deep_bbo_out.txt";
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 50;
+    int nbUpdates = 1000;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
     every = bevery = 0.01; //%

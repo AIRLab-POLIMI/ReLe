@@ -58,9 +58,11 @@ int main(int argc, char *argv[])
     arma::vec mean(dim, arma::fill::zeros);
     mean[0] = -0.42;
     mean[1] =  0.42;
-    arma::mat cov(dim, dim, arma::fill::eye);
-    cov *= 0.1;
-    ParametricNormal dist(mean,cov);
+//    arma::mat cov(dim, dim, arma::fill::eye);
+//    cov *= 0.1;
+//    ParametricNormal dist(mean,cov);
+    vec sigmas(dim, fill::ones);
+    ParametricDiagonalNormal dist(mean, sigmas);
     //---
 
 
@@ -88,43 +90,60 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
     //---
 
-    int nbepperpol = 1, nbpolperupd = 5;
+    int nbepperpol = 1, nbpolperupd = 20;
     bool usebaseline = true;
     PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
     agent.setNormalization(true);
 //    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
+    const std::string outfile = "nls_bbo_out.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-    PrintStrategy<DenseAction, DenseState> stat(false);
-    core.getSettings().loggerStrategy = &stat;
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+        outfile, WriteStrategy<DenseAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
 
-    int nbUpdates = 1;
+    int horiz = mdp.getSettings().horizon;
+    core.getSettings().episodeLenght = horiz;
+
+    int nbUpdates = 600;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    double every, bevery;
+    every = bevery = 0.1; //%
+    int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = mdp.getSettings().horizon;
-        //        cout << "starting episode" << endl;
         core.runEpisode();
+
+        int v = nbepperpol*nbpolperupd;
+        if (i % v == 0)
+        {
+            updateCount++;
+            if ((updateCount >= nbUpdates*every) || (updateCount == 1))
+            {
+                int p = 100 * updateCount/static_cast<double>(nbUpdates);
+                cout << "### " << p << "% ###" << endl;
+                cout << dist.getParameters().t();
+                arma::vec J = core.runBatchTest(100);
+                cout << "mean score: " << J(0) << endl;
+                every += bevery;
+            }
+        }
     }
 
+    int nbTestEpisodes = 1000;
+    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
+    cout << core.runBatchTest(1000) << endl;
 
-//    EvaluateStrategy<DenseAction, DenseState> stat_e;
-//    core.getSettings().loggerStrategy = &stat_e;
-//    int testEpisodes = 10;
-//    arma::vec Jm(mdp.getSettings().rewardDim, arma::fill::zeros);
-//    for (int i = 0; i < testEpisodes; i++)
-//    {
-//        core.getSettings().episodeLenght = mdp.getSettings().horizon;
-//        //        cout << "starting episode" << endl;
-//        core.runTestEpisode();
-////        cout << "[" << i << "]" << stat_e->J_mean.t();
-//        Jm += stat_e.J_mean;
-//    }
-//    Jm /= testEpisodes;
-//    cout << Jm;
-
-//    cout << "Batch test\n";
-//    cout << core.runBatchTest(testEpisodes);
+    //--- collect some trajectories
+    const std::string testOutfile = "nls_bbo_final_trajectories.csv";
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+        testOutfile, WriteStrategy<DenseAction, DenseState>::TRANS,
+        true /*delete file*/
+    );
+    for (int n = 0; n < 100; ++n)
+        core.runTestEpisode();
+    //---
 
     return 0;
 }

@@ -147,7 +147,7 @@ public:
         for (unsigned int e = 0; e < nbEpisodes; ++e)
         {
             Logger<ActionC, StateC> logger;
-            EvaluateStrategy<ActionC, StateC> stat_e;
+            EvaluateStrategy<ActionC, StateC> stat_e(envirorment.getSettings().gamma);
             logger.setStrategy(&stat_e);
 
             //Start episode
