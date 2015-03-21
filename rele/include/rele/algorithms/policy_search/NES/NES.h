@@ -44,7 +44,7 @@ public:
         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
         bool baseline = true, int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
-          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {    }
 
     virtual ~NES()
@@ -189,7 +189,7 @@ public:
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
          bool baseline = true, int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
-          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
     }
 
@@ -348,8 +348,8 @@ public:
          double step_mu, double step_sigma, double step_b,
          int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, ParametricCholeskyNormal, xNESIterationStats>
-          (dist, policy, nbEpisodes, nbPolicies, 0.0, false, reward_obj),
-          stepmu(step_mu), stepsigma(step_sigma), stepb(step_b)
+        (dist, policy, nbEpisodes, nbPolicies, 0.0, false, reward_obj),
+        stepmu(step_mu), stepsigma(step_sigma), stepb(step_b)
     {
 
         arma::mat A = dist.getCholeskyDec();
@@ -378,8 +378,8 @@ protected:
         if (Base::polCount == 0 && Base::epiCount == 0)
         {
             Base::currentItStats = new xNESIterationStats(Base::nbPoliciesToEvalMetap,
-                                                          Base::policy.getParametersSize(),
-                                                          Base::nbEpisodesToEvalPolicy);
+                    Base::policy.getParametersSize(),
+                    Base::nbEpisodesToEvalPolicy);
             Base::currentItStats->metaParams = Base::dist.getParameters();
         }
 

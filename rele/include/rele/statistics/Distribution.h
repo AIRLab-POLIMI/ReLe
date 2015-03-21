@@ -97,7 +97,7 @@ public:
      */
     virtual unsigned int getParametersSize() = 0;
 
-    virtual arma::vec& getParameters() = 0;
+    virtual arma::vec getParameters() = 0;
 
     /**
      * Update the internal parameters according to the

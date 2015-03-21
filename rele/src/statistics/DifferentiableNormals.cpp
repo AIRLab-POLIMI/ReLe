@@ -35,32 +35,24 @@ namespace ReLe
 /// PARAMETRIC NORMAL DISTRIBUTION
 ///////////////////////////////////////////////////////////////////////////////////////
 
-ParametricNormal::ParametricNormal(unsigned int support_dim, unsigned int param_size)
+ParametricNormal::ParametricNormal(unsigned int support_dim)
     : DifferentiableDistribution(support_dim),
-      parameters(param_size, fill::zeros),
       mean(support_dim, fill::zeros),
       Cov(support_dim, support_dim, fill::eye),
       invCov(support_dim, support_dim, fill::eye),
-      cholCov(chol(Cov))
+      cholCov(support_dim, support_dim, fill::eye)
 {
-}
-
-ParametricNormal::ParametricNormal(unsigned int support_dim)
-    : ParametricNormal(support_dim, support_dim)
-{
-    updateInternalState();
 }
 
 ParametricNormal::ParametricNormal(vec& params, mat& covariance)
-    : ParametricNormal(params.n_elem, params.n_elem)
+    : ParametricNormal(params.n_elem)
 {
     //    std::cout << "...." << params << std::endl;
-    parameters = params;
+    mean       = params;
     Cov        = covariance;
     invCov     = inv(Cov);
     detValue   = det(Cov);
     cholCov    = chol(Cov);
-    updateInternalState();
 }
 
 vec ParametricNormal::operator() ()
@@ -78,13 +70,13 @@ double ParametricNormal::operator() (vec& point)
 
 void ParametricNormal::update(vec &increment)
 {
-    parameters += increment;
+    mean += increment;
     this->updateInternalState();
 }
 
 vec ParametricNormal::difflog(const vec& point)
 {
-    return invCov * (point - parameters);
+    return invCov * (point - mean);
 }
 
 mat ParametricNormal::diff2Log(const vec&point)
@@ -94,17 +86,16 @@ mat ParametricNormal::diff2Log(const vec&point)
 
 void ParametricNormal::writeOnStream(ostream& out)
 {
-    int paramSize = this->getParametersSize();
     out << "ParametricNormal " << std::endl;
     out << pointSize << std::endl;
-    for (unsigned i = 0; i < paramSize; ++i)
+    for (unsigned i = 0; i < pointSize; ++i)
     {
-        out << parameters(i) << " ";
+        out << mean(i) << " ";
     }
     out << std::endl;
-    for (unsigned i = 0; i < paramSize; ++i)
+    for (unsigned i = 0; i < pointSize; ++i)
     {
-        for (unsigned j = 0; j < paramSize; ++j)
+        for (unsigned j = 0; j < pointSize; ++j)
         {
             out << Cov(i,j) << " ";
         }
@@ -116,11 +107,11 @@ void ParametricNormal::readFromStream(istream& in)
     double val;
     in >> pointSize;
     int paramSize  = pointSize;
-    parameters = zeros<vec>(paramSize);
+    mean = zeros<vec>(paramSize);
     for (unsigned i = 0; i < paramSize; ++i)
     {
         in >> val;
-        parameters(i) = val;
+        mean(i) = val;
     }
     Cov = zeros<mat>(paramSize, paramSize);
     for (unsigned i = 0; i < paramSize; ++i)
@@ -133,56 +124,37 @@ void ParametricNormal::readFromStream(istream& in)
     }
     invCov = inv(Cov);
     detValue = det(Cov);
-
-    updateInternalState();
 }
 
 void ParametricNormal::updateInternalState()
 {
-    mean = parameters;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// DIAGONAL COVARIANCE NORMAL DISTRIBUTION
 ///////////////////////////////////////////////////////////////////////////////////////
 ParametricDiagonalNormal::ParametricDiagonalNormal(arma::vec mean, arma::vec standardeviation)
-    : ParametricNormal(mean.n_elem, 2*mean.n_elem)
+    : ParametricNormal(mean.n_elem), diagStdDev(standardeviation)
 {
     assert(mean.n_elem == standardeviation.n_elem);
-    int i, ie = mean.n_elem;
-    for (i = 0; i < ie; ++i)
-    {
-        parameters[i] = mean[i];
-    }
-    for (i = 0; i < ie; ++i)
-    {
-        parameters[i+ie] = standardeviation[i];
-    }
+    this->mean = mean;
     updateInternalState();
 }
 
 arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
 {
-    int paramSize = this->getParametersSize();
-//    vec diff(pointSize);
-//    for (unsigned int i = 0; i < pointSize; ++i)
-//    {
-//        diff[i] = point[i] - parameters[i];
-//    }
-//    vec mean_grad = invCov * diff;
-    vec gradient(paramSize);
+    vec gradient(pointSize*2);
 
     for (unsigned int i = 0; i < pointSize; ++i)
     {
-        gradient[i] = (point[i] - parameters[i])/(parameters[i+pointSize] * parameters[i+pointSize]);
+        gradient[i] = (point[i] - mean[i])/(diagStdDev(i) * diagStdDev(i));
         //        std::cout << "p(" << i << "): " << mParameters(i) << std::endl;
     }
-    for (unsigned int i = pointSize, ie = paramSize; i < ie; ++i)
+    for (unsigned int i = 0, ie = pointSize; i < ie; ++i)
     {
-        int idx    = i - pointSize;
-        double val = point[idx] - parameters[idx];
+        double val = point[i] - mean[i];
         //        std::cout << idx << std::endl;
-        gradient[i] = -1 / parameters[i] + (val * val) /  (parameters[i]*parameters[i]*parameters[i]);
+        gradient[i+pointSize] = - 1.0 / diagStdDev(i) + (val * val) /  (diagStdDev(i) * diagStdDev(i) * diagStdDev(i));
     }
     return gradient;
 }
@@ -194,12 +166,15 @@ arma::mat ParametricDiagonalNormal::diff2Log(const arma::vec& point)
 
 void ParametricDiagonalNormal::writeOnStream(ostream& out)
 {
-    int paramSize = this->getParametersSize();
     out << "ParametricDiagonalNormal " << std::endl;
     out << pointSize << std::endl;
-    for (unsigned i = 0; i < paramSize; ++i)
+    for (unsigned i = 0; i < pointSize; ++i)
     {
-        out << parameters(i) << " ";
+        out << mean(i) << " ";
+    }
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        out << diagStdDev(i) << " ";
     }
     out << std::endl;
 }
@@ -208,29 +183,74 @@ void ParametricDiagonalNormal::readFromStream(istream& in)
 {
     double val;
     in >> pointSize;
-    int paramSize  = 2*pointSize;
-    parameters = zeros<vec>(paramSize);
-    for (unsigned i = 0; i < paramSize; ++i)
+
+    // allocate space
+    mean.set_size(pointSize);
+    diagStdDev.set_size(pointSize);
+    Cov.eye(pointSize,pointSize);
+    invCov.eye(pointSize,pointSize);
+    cholCov.eye(pointSize,pointSize);
+
+    for (unsigned i = 0; i < pointSize; ++i)
     {
         in >> val;
-        parameters(i) = val;
+        mean(i) = val;
+    }
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        in >> val;
+        diagStdDev(i) = val;
+    }
+    updateInternalState();
+}
+
+unsigned int ParametricDiagonalNormal::getParametersSize()
+{
+    return 2*mean.n_elem;
+}
+
+arma::vec ParametricDiagonalNormal::getParameters()
+{
+    return arma::join_vert(mean, diagStdDev);
+}
+
+void ParametricDiagonalNormal::setParameters(arma::vec& newval)
+{
+    assert(newval.n_elem == 2*mean.n_elem);
+    int i, nb = mean.n_elem;
+    for (i = 0; i < nb; ++i)
+    {
+        mean[i] = newval[i];
+    }
+    for (i = 0; i < nb; ++i)
+    {
+        diagStdDev[i] = newval[i+nb];
+    }
+    updateInternalState();
+}
+
+void ParametricDiagonalNormal::update(arma::vec& increment)
+{
+    assert(increment.n_elem == 2*mean.n_elem);
+    int i, nb = mean.n_elem;
+    for (i = 0; i < nb; ++i)
+    {
+        mean[i] += increment[i];
+    }
+    for (i = 0; i < nb; ++i)
+    {
+        diagStdDev[i] += increment[i+nb];
     }
     updateInternalState();
 }
 
 void ParametricDiagonalNormal::updateInternalState()
 {
-    int paramSize = this->getParametersSize();
-    for (unsigned i = 0; i < pointSize; ++i)
+    for (int i = 0, ie = pointSize; i < ie; ++i)
     {
-        mean(i) = parameters(i);
-    }
-    for (int i = pointSize, ie = paramSize; i < ie; ++i)
-    {
-        int idx = i - pointSize;
-        Cov(idx,idx) = parameters(i)*parameters(i);
-        invCov(idx,idx) = 1/(parameters(i)*parameters(i));
-        cholCov(idx,idx) = parameters(i);
+        Cov(i,i) = diagStdDev(i)*diagStdDev(i);
+        invCov(i,i) = 1/Cov(i,i);
+        cholCov(i,i) = diagStdDev(i);
     }
 }
 
@@ -240,47 +260,42 @@ void ParametricDiagonalNormal::updateInternalState()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote)
-    : ParametricNormal(point_dim, 2*point_dim),
-      asVariance(variance_asymptote)
+    : ParametricNormal(point_dim),
+      asVariance(variance_asymptote), logisticWeights(point_dim, fill::zeros)
 {
     updateInternalState();
 }
 
-ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote, vec& params)
-    : ParametricNormal(point_dim, 2*point_dim),
-      asVariance(variance_asymptote)
+ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec logWeights, double variance_asymptote)
+    : ParametricNormal(mean.n_elem),
+      asVariance(variance_asymptote), logisticWeights(logWeights)
 {
-    parameters = params;
+    assert(mean.n_elem == logWeights.n_elem);
+    this->mean = mean;
     updateInternalState();
 }
 
 vec ParametricLogisticNormal::difflog(const vec& point)
 {
-    int paramSize = this->getParametersSize();
-    vec diff(pointSize);
-    for (unsigned int i = 0; i < pointSize; ++i)
-    {
-        diff[i] = point[i] - parameters[i];
-    }
+    vec diff = point - mean;
     vec mean_grad = invCov * diff;
-    vec gradient(paramSize);
+    vec gradient(2*pointSize);
 
     for (unsigned int i = 0; i < pointSize; ++i)
     {
         gradient[i] = mean_grad(i);
         //        std::cout << "p(" << i << "): " << mParameters(i) << std::endl;
     }
-    for (unsigned int i = pointSize, ie = paramSize; i < ie; ++i)
+    for (unsigned int i = 0, ie = pointSize; i < ie; ++i)
     {
-        int idx    = i - pointSize;
-        double val = parameters[i];
+        double val = mean[i];
         //        std::cout << idx << std::endl;
         //        std::cout << "p(" << i << "): " << val << std::endl;
         //        double logisticVal = logistic(val, mAsVariance);
         //        std::cout << logisticVal << std::endl;
         double A = - 0.5 * exp(-val) / (1 + exp(-val));
-        double B = 0.5 * exp(-val) * diff[idx] * diff[idx] / asVariance;
-        gradient[i] = A + B;
+        double B = 0.5 * exp(-val) * diff[i] * diff[i] / asVariance;
+        gradient[i+pointSize] = A + B;
     }
     return gradient;
 }
@@ -298,8 +313,8 @@ mat ParametricLogisticNormal::diff2Log(const vec& point)
 
 
         int idx = pointSize + i;
-        double val = parameters(idx);
-        double diff = point[i] - parameters[i];
+        double val = logisticWeights(i);
+        double diff = point[i] - mean[i];
 
         // consider only the components different from zero
         // obtained from the derivative of the gradient w.r.t. the covariance parameters
@@ -319,76 +334,110 @@ mat ParametricLogisticNormal::diff2Log(const vec& point)
 
 void ParametricLogisticNormal::writeOnStream(ostream &out)
 {
-    int paramSize = this->getParametersSize();
     out << "ParametricLogisticNormal " << std::endl;
-    out << pointSize << " " << paramSize << " " << asVariance << std::endl;
-    for (unsigned i = 0; i < paramSize; ++i)
+    out << pointSize << " " << asVariance << std::endl;
+    for (unsigned i = 0; i < pointSize; ++i)
     {
-        out << parameters(i) << " ";
+        out << mean(i) << " ";
+    }
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        out << logisticWeights(i) << " ";
     }
 }
 
 void ParametricLogisticNormal::readFromStream(istream &in)
 {
-    int paramSize;
     double val;
     in >> pointSize;
-    in >> paramSize;
     in >> asVariance;
-    parameters = vec(paramSize);
-    for (unsigned i = 0; i < paramSize; ++i)
+
+    // allocate space
+    mean.set_size(pointSize);
+    logisticWeights.set_size(pointSize);
+    Cov.eye(pointSize,pointSize);
+    invCov.eye(pointSize,pointSize);
+    cholCov.eye(pointSize,pointSize);
+
+    for (unsigned i = 0; i < pointSize; ++i)
     {
         in >> val;
-        parameters(i) = val;
+        mean(i) = val;
+    }
+
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        in >> val;
+        logisticWeights(i) = val;
     }
 
     updateInternalState();
 }
 
+unsigned int ParametricLogisticNormal::getParametersSize()
+{
+    return 2*mean.n_elem;
+}
+
+arma::vec ParametricLogisticNormal::getParameters()
+{
+    return arma::join_vert(mean, logisticWeights);
+}
+
+void ParametricLogisticNormal::setParameters(arma::vec& newval)
+{
+    assert(newval.n_elem == 2*mean.n_elem);
+    int i, nb = mean.n_elem;
+    for (i = 0; i < nb; ++i)
+    {
+        mean[i] = newval[i];
+    }
+    for (i = 0; i < nb; ++i)
+    {
+        logisticWeights[i] = newval[i+nb];
+    }
+    updateInternalState();
+}
+
+void ParametricLogisticNormal::update(arma::vec& increment)
+{
+    assert(increment.n_elem == 2*mean.n_elem);
+    int i, nb = mean.n_elem;
+    for (i = 0; i < nb; ++i)
+    {
+        mean[i] += increment[i];
+    }
+    for (i = 0; i < nb; ++i)
+    {
+        logisticWeights[i] += increment[i+nb];
+    }
+    updateInternalState();
+}
+
 void ParametricLogisticNormal::updateInternalState()
 {
-    int paramSize = this->getParametersSize();
-    cerr << "asVariance: " << asVariance << endl;
-    //    Cov.zeros();
-    for (unsigned i = 0; i < pointSize; ++i)
+    for (int i = 0, ie = pointSize; i < ie; ++i)
     {
-        mean(i) = parameters(i);
+        Cov(i,i) = std::max(1e-6, logistic(logisticWeights(i), asVariance)); //to avoid numerical problems
+        invCov(i,i) = 1.0/Cov(i,i);
+        cholCov(i,i) = sqrt(Cov(i,i));
     }
-    for (int i = pointSize, ie = paramSize; i < ie; ++i)
-    {
-        int idx = i - pointSize;
-        Cov(idx,idx) = logistic(parameters(i), asVariance);
-    }
-    invCov = inv(Cov);
     detValue = det(Cov);
-    cholCov = chol(Cov);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// PARAMETRIC CHOLESKY NORMAL DISTRIBUTION
 ///////////////////////////////////////////////////////////////////////////////////////
 
-ParametricCholeskyNormal::ParametricCholeskyNormal(unsigned int point_dim, vec& initial_mean, mat& initial_cholA)
-    :ParametricNormal(point_dim, 2*point_dim + (point_dim * point_dim - point_dim) / 2)
+ParametricCholeskyNormal::ParametricCholeskyNormal(vec& initial_mean, mat& initial_cholA)
+    : ParametricNormal(initial_mean.n_elem)
 {
-    mat tmp = trimatu(ones(point_dim, point_dim));
-    vec val = initial_cholA.elem( find(tmp == 1.0) );
-    int dp = 2*point_dim + (point_dim * point_dim - point_dim) / 2;
-    parameters = vec(dp);
-    for (int i = 0; i < point_dim; ++i)
-    {
-        parameters[i] = initial_mean[i];
-    }
-    for (int i = point_dim; i < dp; ++i)
-    {
-        parameters[i] = val[i-point_dim];
-    }
-
-//    cout << parameters << endl;
+    mean = initial_mean;
+    cholCov = initial_cholA;
     this->updateInternalState();
 }
 
-vec ParametricCholeskyNormal::difflog(const vec &point)
+vec ParametricCholeskyNormal::difflog(const vec& point)
 {
     int paramSize = this->getParametersSize();
     vec gradient(paramSize);
@@ -408,18 +457,31 @@ vec ParametricCholeskyNormal::difflog(const vec &point)
                 dlogpdt_sigma(i,j) = R(i,j) - 1.0 / cholCov(i,j);
             else
                 dlogpdt_sigma(i,j) = R(i,j);
-    mat idxs = trimatu(ones(pointSize, pointSize));
-    vec vals = dlogpdt_sigma.elem( find(idxs == 1) );
-    //---
+
+//    //TODO fare meglio
+//    mat idxs = trimatu(ones(pointSize, pointSize));
+//    vec vals = dlogpdt_sigma.elem( find(idxs == 1) );
+//    //---
 
 
     for (unsigned int i = 0; i < pointSize; ++i)
     {
         gradient[i] = mean_grad(i);
     }
-    for (int i = pointSize; i < paramSize; ++i)
+//    for (int i = pointSize; i < paramSize; ++i)
+//    {
+//        gradient[i] = vals[i-pointSize];
+//    }
+    int rowi = 0, coli = 0;
+    for (unsigned i = pointSize; i < paramSize; ++i)
     {
-        gradient[i] = vals[i-pointSize];
+        gradient[i] = dlogpdt_sigma(rowi,coli);
+        rowi++;
+        if (rowi > coli)
+        {
+            coli++;
+            rowi = 0;
+        }
     }
     return gradient;
 }
@@ -510,23 +572,6 @@ sp_mat ParametricCholeskyNormal::inverseFIM()
     return fim;
 }
 
-arma::mat ParametricCholeskyNormal::getCholeskyDec()
-{
-    int paramSize = this->getParametersSize();
-    mat tmp = trimatu(ones(pointSize, pointSize));
-    cholCov.elem( find(tmp == 1.0) ) = parameters.rows(pointSize, paramSize-1);
-    return cholCov;
-}
-
-arma::vec ParametricCholeskyNormal::getMean()
-{
-    for (unsigned i = 0; i < pointSize; ++i)
-    {
-        mean(i) = parameters(i);
-    }
-    return mean;
-}
-
 void ParametricCholeskyNormal::writeOnStream(ostream &out)
 {
     int paramSize = this->getParametersSize();
@@ -535,8 +580,18 @@ void ParametricCholeskyNormal::writeOnStream(ostream &out)
     out << paramSize << std::endl;
     for (unsigned i = 0; i < paramSize; ++i)
     {
-        out << parameters(i) << "\t";
+        out << mean(i) << "\t";
     }
+
+    //TODO fare meglio
+    mat tmp = trimatu(ones(pointSize, pointSize));
+    vec tmpv = cholCov.elem( find(tmp == 1.0) );
+
+    for (unsigned i = 0, ie = tmp.n_elem; i < ie; ++i)
+    {
+        out << tmpv(i) << "\t";
+    }
+
     out << std::endl;
 }
 
@@ -546,26 +601,109 @@ void ParametricCholeskyNormal::readFromStream(istream &in)
     in >> pointSize;
     int paramSize;
     in >> paramSize;
-    parameters = zeros<vec>(paramSize);
-    for (unsigned i = 0; i < paramSize; ++i)
+
+    // allocate space
+    mean.set_size(pointSize);
+    Cov.eye(pointSize,pointSize);
+    invCov.eye(pointSize,pointSize);
+    cholCov.zeros(pointSize,pointSize);
+
+    for (unsigned i = 0; i < pointSize; ++i)
     {
         in >> val;
-        parameters[i] = val;
+        mean(i) = val;
     }
+    int rowi = 0, coli = 0;
+    int cc = 0;
+    for (unsigned i = 0; i < paramSize-pointSize; ++i)
+    {
+        in >> val;
+        cholCov(rowi,coli) = val;
+        cc++;
+        rowi++;
+        if (cc > coli)
+        {
+            coli++;
+            rowi = 0;
+            cc=0;
+        }
+    }
+    this->updateInternalState();
+}
+
+unsigned int ParametricCholeskyNormal::getParametersSize()
+{
+    return 2*pointSize + (pointSize * pointSize - pointSize) / 2;
+}
+
+arma::vec ParametricCholeskyNormal::getParameters()
+{
+    int dim = getParametersSize();
+    vec params(dim);
+    for (int i = 0; i < pointSize; ++i)
+        params[i] = mean[i];
+
+
+    int rowi = 0, coli = 0;
+    for (unsigned i = 0; i < dim-pointSize; ++i)
+    {
+        params(pointSize+1) = cholCov(rowi,coli);
+        rowi++;
+        if (rowi > coli)
+        {
+            coli++;
+            rowi = 0;
+        }
+    }
+    return params;
+}
+
+void ParametricCholeskyNormal::setParameters(arma::vec& newval)
+{
+    int dim = getParametersSize();
+    for (int i = 0; i < pointSize; ++i)
+        mean[i] = newval[i];
+
+
+    int rowi = 0, coli = 0;
+    for (unsigned i = 0; i < dim-pointSize; ++i)
+    {
+        cholCov(rowi,coli) = newval(pointSize+i);
+        rowi++;
+        if (rowi > coli)
+        {
+            coli++;
+            rowi = 0;
+        }
+    }
+    updateInternalState();
+}
+
+void ParametricCholeskyNormal::update(arma::vec &increment)
+{
+    int dim = getParametersSize();
+    for (int i = 0; i < pointSize; ++i)
+        mean[i] += increment[i];
+
+
+    int rowi = 0, coli = 0;
+    for (unsigned i = 0; i < dim-pointSize; ++i)
+    {
+        cholCov(rowi,coli) += increment(pointSize+i);
+//        std::cout << "(" << rowi << ", " << coli << ") - " << i << endl;
+        rowi++;
+        if (rowi > coli)
+        {
+            coli++;
+            rowi = 0;
+        }
+    }
+    updateInternalState();
 }
 
 void ParametricCholeskyNormal::updateInternalState()
 {
-    int paramSize = this->getParametersSize();
-    for (unsigned i = 0; i < pointSize; ++i)
-    {
-        mean(i) = parameters(i);
-    }
-    //TODO: fare in modo piu' efficiente
-    mat tmp = trimatu(ones(pointSize, pointSize));
-    cholCov.elem( find(tmp == 1.0) ) = parameters.rows(pointSize, paramSize-1);
     Cov = cholCov.t() * cholCov;
-
     //TODO: questo si potrebbe fare meglio
     invCov = inv(Cov);
     detValue = det(Cov);

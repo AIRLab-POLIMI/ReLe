@@ -140,26 +140,36 @@ int main(int argc, char *argv[])
     //---
 
     //--- distribution setup
-    //----- ParametricCholeskyNormal
     int nparams = basis.size();
+    //----- ParametricNormal
+    //    arma::vec mean(nparams, fill::zeros);
+    //    arma::mat cov(nparams, nparams, arma::fill::eye);
+    //    ParametricNormal dist(mean, cov);
+    //----- ParametricLogisticNormal
+    //    ParametricLogisticNormal dist(nparams, 1);
+    //----- ParametricCholeskyNormal
     arma::vec mean(nparams, fill::zeros);
     arma::mat cov(nparams, nparams, arma::fill::eye);
     mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(mean.n_elem, mean, cholMtx);
+    ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-    //    vec mean(nparams, fill::zeros);
-    //    vec sigmas(nparams, fill::ones);
-    //    ParametricDiagonalNormal dist(mean, sigmas);
+//    vec mean(nparams, fill::zeros);
+//    vec sigmas(nparams, fill::ones);
+//    ParametricDiagonalNormal dist(mean, sigmas);
     //-----
     //---
 
 
     int nbepperpol = 1, nbpolperupd = 300;
     bool usebaseline = true;
-    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
-    agent.setNormalization(true);
-//    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
-    //    xNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
+    //    agent.setNormalization(true);
+    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    //    eNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+
+
+    //    double stepnb = (3.0/5.0)*(3+log(nparams))/(nparams*sqrt(nparams));
+    //    xNES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
 
     const std::string outfile = "deep_bbo_out.txt";
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     arma::vec mean(nparams, fill::zeros);
     arma::mat cov(nparams, nparams, arma::fill::eye);
     mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(mean.n_elem, mean, cholMtx);
+    ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
     //    vec mean(nparams, fill::zeros);
     //    vec sigmas(nparams, fill::ones);

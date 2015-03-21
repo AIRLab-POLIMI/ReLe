@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     arma::mat cov(1,1, arma::fill::eye);
     cov *= 0.01;
     mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(1, mean, cholMtx);
+    ParametricCholeskyNormal dist(mean, cholMtx);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 1, nbpolperupd = 50;
     bool usebaseline = true;
-    xNES<DenseAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
+    eNES<DenseAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.001, usebaseline);
 
     const std::string outfile = "lqrxNesAgentOut.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);

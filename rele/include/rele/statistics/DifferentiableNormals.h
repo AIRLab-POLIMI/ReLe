@@ -14,10 +14,6 @@ namespace ReLe
  */
 class ParametricNormal : public DifferentiableDistribution
 {
-protected:
-    ParametricNormal(unsigned int support_dim,
-                     unsigned int param_size);
-
 public:
 
     ParametricNormal(unsigned int support_dim);
@@ -38,17 +34,17 @@ public:
 
     inline unsigned int getParametersSize()
     {
-        return parameters.n_elem;
+        return mean.n_elem;
     }
 
-    inline virtual arma::vec& getParameters()
+    inline virtual arma::vec getParameters()
     {
-        return parameters;
+        return mean;
     }
 
     inline virtual void setParameters(arma::vec& newval)
     {
-        parameters = newval;
+        mean = newval;
     }
 
     virtual void update(arma::vec &increment);
@@ -83,7 +79,7 @@ protected:
     virtual void updateInternalState();
 
 protected:
-    arma::vec parameters, mean;
+    arma::vec mean;
     arma::mat Cov, invCov, cholCov;
     double detValue;
 
@@ -123,10 +119,19 @@ public:
     void writeOnStream(std::ostream &out);
     void readFromStream(std::istream &in);
 
+public:
+    unsigned int getParametersSize();
+    virtual arma::vec getParameters();
+    virtual void setParameters(arma::vec& newval);
+    virtual void update(arma::vec &increment);
+
 
     // ParametricNormal interface
 protected:
     void updateInternalState();
+
+private:
+    arma::vec diagStdDev;
 };
 
 
@@ -158,9 +163,8 @@ public:
     ParametricLogisticNormal(unsigned int point_dim,
                              double variance_asymptote);
 
-    ParametricLogisticNormal(unsigned int point_dim,
-                             double variance_asymptote,
-                             arma::vec& params);
+    ParametricLogisticNormal(arma::vec mean, arma::vec logWeights,
+                             double variance_asymptote);
 
     virtual ~ParametricLogisticNormal()
     {}
@@ -174,6 +178,12 @@ public:
 public:
     void writeOnStream(std::ostream &out);
     void readFromStream(std::istream &in);
+
+public:
+    unsigned int getParametersSize();
+    virtual arma::vec getParameters();
+    virtual void setParameters(arma::vec& newval);
+    virtual void update(arma::vec &increment);
 
 
     // ParametricNormal interface
@@ -194,7 +204,8 @@ private:
     }
 
 protected:
-    double asVariance; //asymptotic variance
+    double asVariance; //asymptotic varianceprivate:
+    arma::vec logisticWeights; //weights used for the logistic function
 
 
 };
@@ -203,8 +214,7 @@ class ParametricCholeskyNormal : public ParametricNormal
 {
 
 public:
-    ParametricCholeskyNormal(unsigned int point_dim,
-                             arma::vec& initial_mean,
+    ParametricCholeskyNormal(arma::vec& initial_mean,
                              arma::mat& initial_cholA);
 
     virtual ~ParametricCholeskyNormal()
@@ -218,19 +228,32 @@ public:
     arma::sp_mat FIM();
     arma::sp_mat inverseFIM();
 
-    arma::mat getCholeskyDec();
-    arma::vec getMean();
+    inline arma::mat getCholeskyDec()
+    {
+        return cholCov;
+    }
+
+    inline void setCholeskyDec(arma::mat& A)
+    {
+        cholCov = A;
+        updateInternalState();
+    }
 
     // WritableInterface interface
 public:
     void writeOnStream(std::ostream &out);
     void readFromStream(std::istream &in);
 
+public:
+    unsigned int getParametersSize();
+    virtual arma::vec getParameters();
+    virtual void setParameters(arma::vec& newval);
+    virtual void update(arma::vec &increment);
+
 
     // ParametricNormal interface
 protected:
     void updateInternalState();
-
 
 };
 

@@ -73,7 +73,9 @@ int main(int argc, char *argv[])
 //    cov *= 0.1;
 //    ParametricNormal dist(mean,cov);
     vec sigmas(dim, fill::ones);
-    ParametricDiagonalNormal dist(mean, sigmas);
+//    ParametricDiagonalNormal dist(mean, sigmas);
+    mat cholMtx = chol(eye(dim,dim));
+    ParametricCholeskyNormal dist(mean, cholMtx);
     //---
 
 
@@ -103,9 +105,13 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 1, nbpolperupd = 40;
     bool usebaseline = true;
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
-    agent.setNormalization(true);
+//    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
+//    agent.setNormalization(true);
 //    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
+
+
+    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
+    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
 
     const std::string outfile = "nls_bbo_out.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
@@ -117,10 +123,10 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 2000;
+    int nbUpdates = 100;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
-    every = bevery = 0.05; //%
+    every = bevery = 0.01; //%
     int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
