@@ -37,20 +37,20 @@ namespace ReLe
 {
 
 
-//Templates needed to handle different action types
-template<class StateC>
-void sampleActionWorker(const StateC& state, FiniteAction& action, ParametricPolicy<FiniteAction,StateC>& policy)
-{
-    unsigned int u = policy(state);
-    action.setActionN(u);
-}
+////Templates needed to handle different action types
+//template<class StateC>
+//void sampleActionWorker(const StateC& state, FiniteAction& action, ParametricPolicy<FiniteAction,StateC>& policy)
+//{
+//    unsigned int u = policy(state);
+//    action.setActionN(u);
+//}
 
-template<class StateC, class ActionC>
-void sampleActionWorker(const StateC& state, ActionC& action, ParametricPolicy<ActionC,StateC>& policy)
-{
-    typename action_type<ActionC>::type_ref u = action;
-    u = policy(state);
-}
+//template<class StateC, class ActionC>
+//void sampleActionWorker(const StateC& state, ActionC& action, ParametricPolicy<ActionC,StateC>& policy)
+//{
+//    typename action_type<ActionC>::type_ref u = action;
+//    u = policy(state);
+//}
 
 
 //TODO: definire questo come PGPE

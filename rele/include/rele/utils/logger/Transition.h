@@ -24,6 +24,9 @@
 #ifndef INCLUDE_RELE_UTILS_LOGGER_TRANSITION_H_
 #define INCLUDE_RELE_UTILS_LOGGER_TRANSITION_H_
 
+#include <vector>
+#include <fstream>
+
 namespace ReLe
 {
 template<class ActionC, class StateC>
@@ -49,6 +52,46 @@ struct Transition
         this->r = r;
     }
 };
+
+template <class ActionC, class StateC>
+using Episode = std::vector< Transition<ActionC,StateC> >;
+
+template<class ActionC, class StateC>
+class TrajectoryData : public std::vector< Episode<ActionC,StateC> >
+{
+public:
+    void WriteToStream(std::ostream& out)
+    {
+        int i, nbep = this->size();
+
+        if (nbep > 0)
+        {
+
+            Transition<ActionC, StateC>& sample = (*this)[0][0];
+            out << sample.x.serializedSize()  << ","
+                << sample.u.serializedSize()  << ","
+                << sample.r.size()  << std::endl;
+
+            for (i = 0; i < nbep; ++i)
+            {
+                Episode<ActionC,StateC>& samples = this->at(i);
+                size_t total = samples.size();
+                size_t index = 0;
+                for(auto& sample : samples)
+                {
+                    index++;
+                    out << sample.x  << ","
+                        << sample.u  << ","
+                        << sample.xn << ","
+                        << sample.r  << ","
+                        << sample.xn.isAbsorbing() << ","
+                        << (index == total) << std::endl;
+                }
+            }
+        }
+    }
+};
+
 
 }
 

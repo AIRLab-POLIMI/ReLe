@@ -146,6 +146,9 @@ target_link_libraries(chol_FIM rele)
 
 add_executable(dist2mat src/test/Distribution2MatlabTest.cpp)
 target_link_libraries(dist2mat rele)
+
+add_executable(offpol_data src/test/OffPolicyTest.cpp)
+target_link_libraries(offpol_data rele)
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

@@ -86,6 +86,20 @@ struct state_type<DenseState>
 };
 
 
+//Templates needed to handle different action types
+template<class StateC, class PolicyC>
+void sampleActionWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
+{
+    unsigned int u = policy(state);
+    action.setActionN(u);
+}
+
+template<class StateC, class ActionC, class PolicyC>
+void sampleActionWorker(const StateC& state, ActionC& action, PolicyC& policy)
+{
+    typename action_type<ActionC>::type_ref u = action;
+    u = policy(state);
+}
 
 }
 

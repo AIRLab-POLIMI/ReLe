@@ -26,6 +26,7 @@
 
 #include "Agent.h"
 #include "Policy.h"
+#include "BasicsTraits.h"
 
 namespace ReLe
 {
@@ -53,15 +54,7 @@ public:
 
     void sampleAction(const StateC &state, ActionC &action)
     {
-        typename action_type<ActionC>::type_ref u = action;
-        u = policy(state);
-    }
-
-    template<class FiniteAction>
-    void sampleAction(const StateC& state, FiniteAction& action)
-    {
-        unsigned int u = policy(state);
-        action.setActionN(u);
+        sampleActionWorker(state, action, policy);
     }
 
     void step(const Reward &reward, const StateC &nextState, ActionC &action)

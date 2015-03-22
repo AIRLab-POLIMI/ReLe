@@ -302,6 +302,29 @@ public:
     double gamma;
 };
 
+template<class ActionC, class StateC>
+class CollectorStrategy : public LoggerStrategy<ActionC, StateC>
+{
+public:
+    virtual void processData(
+        std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        data.push_back(samples);
+    }
+
+    virtual void processData(std::vector<AgentOutputData*>& data)
+    {
+        //TODO evaluation here or abstract class...
+        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
+    }
+
+    virtual ~CollectorStrategy()
+    {
+    }
+
+    TrajectoryData<ActionC, StateC> data;
+};
+
 }
 
 #endif /* INCLUDE_RELE_UTILS_LOGGERSTRATEGY_H_ */
