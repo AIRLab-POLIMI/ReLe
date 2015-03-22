@@ -29,6 +29,7 @@
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 
+#include "FileManager.h"
 #include "ConsoleManager.h"
 
 #include <iostream>
@@ -44,12 +45,9 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    string outDir = "/tmp/rele/LQR/REPS/";
-    string createCommand = "mkdir -p " + outDir;
-    string cleanOldCommand = "rm -f " + outDir + "*.log";
-    system(createCommand.c_str());
-    system(cleanOldCommand.c_str());
-
+	FileManager fm("LQR", "REPS");
+	fm.createDir();
+	fm.cleanDir();
 
     LQR mdp(1, 1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
@@ -73,7 +71,7 @@ int main(int argc, char *argv[])
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction,
-    DenseState>(outDir + "agent.log",
+    DenseState>(fm.addPath("agent.log"),
                 WriteStrategy<DenseAction, DenseState>::AGENT);
 
     int episodes = 2000;
