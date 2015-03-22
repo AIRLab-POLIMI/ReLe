@@ -17,7 +17,7 @@ clf(3)
 %% Read data
 
 disp('Reading data trajectories...')
-csv = csvread('/home/dave/prova.txt');
+csv = csvread('/tmp/ReLe/Rocky/REPS/Rocky.log');
 
 disp('Organizing data in episodes...')
 episodes = readDataset(csv);

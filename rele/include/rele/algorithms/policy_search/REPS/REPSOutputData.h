@@ -90,10 +90,10 @@ private:
 
 };*/
 
-class EpisodicREPSOutputData : public BlackBoxOutputData<BlackBoxPolicyIndividual>
+class REPSOutputData : public BlackBoxOutputData<BlackBoxPolicyIndividual>
 {
 public:
-	EpisodicREPSOutputData(unsigned int nbIndividual, unsigned int nbParams,
+	REPSOutputData(unsigned int nbIndividual, unsigned int nbParams,
 					unsigned int nbEvals);
 	virtual void writeData(std::ostream& os);
 	virtual void writeDecoratedData(std::ostream& os);

@@ -27,6 +27,8 @@
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
+
+#include "FileManager.h"
 #include "ConsoleManager.h"
 
 #include <iostream>
@@ -103,9 +105,13 @@ private:
 
 int main(int argc, char *argv[])
 {
+	FileManager fm("Rocky", "REPS");
+	fm.createDir();
+	fm.cleanDir();
+
     Rocky rocky;
 
-    //Low level policy
+    //-- Low level policy
     int dim = rocky.getSettings().continuosStateDim;
     int actionDim = rocky.getSettings().continuosActionDim;
     DenseBasisVector basis;
@@ -116,28 +122,31 @@ int main(int argc, char *argv[])
 
     DetLinearPolicy<DenseState> policy(&regressor);
     //RockyCircularPolicy policy;
+    //--
 
-
-    //high level policy
+    //-- high level policy
     int dimPolicy = policy.getParametersSize();
     arma::vec mean(dimPolicy, fill::zeros);
     arma::mat cov(dimPolicy, dimPolicy, fill::eye);
 
     cov *= 10;
 
-    ParametricNormal dist(mean, cov);
 
-    int nbepperpol = 1, nbpolperupd = 300;
+    ParametricNormal dist(mean, cov);
+    //--
+
+    //-- REPS agent
+    int nbepperpol = 1, nbpolperupd = 50;
     REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    agent.setEps(0.01);
+    agent.setEps(0.5);
 
     Core<DenseAction, DenseState> core(rocky, agent);
+    //--
 
 
-
-    int episodes = 3000;
+    int episodes = nbepperpol*nbpolperupd*60;
     core.getSettings().episodeLenght = 10000;
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>("/home/dave/prova.txt");
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"));
 
 
     ConsoleManager console(episodes, 1);
@@ -153,6 +162,8 @@ int main(int argc, char *argv[])
 
     delete core.getSettings().loggerStrategy;
 
+    cout << dist.getMean().t() << endl;
+    cout << dist.getCovariance() << endl;
 
     return 0;
 

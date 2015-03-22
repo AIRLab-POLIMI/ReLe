@@ -132,21 +132,30 @@ TabularREPSOutputData::~TabularREPSOutputData()
  }
  */
 
-EpisodicREPSOutputData::EpisodicREPSOutputData(unsigned int nbIndividual,
+REPSOutputData::REPSOutputData(unsigned int nbIndividual,
 			unsigned int nbParams, unsigned int nbEvals) :
 			BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
 {
 
 }
 
-void EpisodicREPSOutputData::writeData(ostream& os)
+void REPSOutputData::writeData(ostream& os)
 {
+	    CSVutils::vectorToCSV(metaParams, os);
 
+	    os << individuals.size() << endl;
+
+	    for (auto& individual : individuals)
+	    {
+	    	CSVutils::vectorToCSV(individual.Pparams, os);
+	    	CSVutils::vectorToCSV(individual.Jvalues, os);
+	    }
 }
 
-void EpisodicREPSOutputData::writeDecoratedData(ostream& os)
+void REPSOutputData::writeDecoratedData(ostream& os)
 {
-
+	//TODO implement
+	writeData(os);
 }
 
 }

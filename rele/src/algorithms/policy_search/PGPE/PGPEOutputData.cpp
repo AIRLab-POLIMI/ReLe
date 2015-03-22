@@ -12,7 +12,7 @@ PGPEPolicyIndividual::PGPEPolicyIndividual(unsigned int nbParams, unsigned int n
 {
 }
 
-void PGPEPolicyIndividual::WriteToStream(ostream& os)
+void PGPEPolicyIndividual::writeToStream(ostream& os)
 {
     os << std::setprecision(9);
     int nparams = Pparams.n_elem;
@@ -38,9 +38,9 @@ void PGPEPolicyIndividual::WriteToStream(ostream& os)
 
 PGPEIterationStats::PGPEIterationStats(unsigned int nbIndividual,
                                        unsigned int nbParams, unsigned int nbEvals)
-    : AgentOutputData(true)
+    : BlackBoxOutputData<PGPEPolicyIndividual>(nbIndividual, nbParams, nbEvals)
 {
-    individuals.assign(nbIndividual, PGPEPolicyIndividual(nbParams, nbEvals));
+
 }
 
 void PGPEIterationStats::writeData(ostream &out)

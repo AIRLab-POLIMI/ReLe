@@ -39,7 +39,6 @@ template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
 class BlackBoxAlgorithm: public Agent<ActionC, StateC>
 {
 
-	typedef Agent<ActionC, StateC> Base;
 public:
 	BlackBoxAlgorithm(DistributionC& dist,
 				ParametricPolicy<ActionC, StateC>& policy,
@@ -108,7 +107,7 @@ public:
 		//calculate current J value
 		Jep += df * reward[rewardId];
 		//update discount factor
-		df *= Base::task.gamma;
+		df *= this->task.gamma;
 
 		sampleAction(nextState, action);
 	}
@@ -189,7 +188,7 @@ protected:
 	int rewardId;
 	arma::vec history_J;
 
-	bool useBaseline, output2LogReady;
+	bool useBaseline, output2LogReady; //TODO levare baseline
 	AgentOutputC* currentItStats;
 };
 
@@ -220,7 +219,7 @@ protected:
 	std::vector<arma::vec> history_dlogsist;
 };
 
-#define USE_BBO_MEMBERS(AgentOutputClass)                                             \
+#define USE_BBA_MEMBERS(AgentOutputClass)                                             \
 	typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputClass> Base; \
     using Base::dist;                                                                 \
     using Base::policy;                                                               \

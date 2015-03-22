@@ -43,6 +43,10 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
+	/*FileManager fm("NLS", "REPS");
+	fm.createDir();
+	fm.cleanDir();*/
+
     NLS mdp;
     //with these settings
     //max in ( -3.58, 10.5 ) -> J = 8.32093
@@ -101,8 +105,8 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
 
-    //cout << dist.getMean().t() << endl;
-    //cout << dist.getCovariance() << endl;
+    cout << dist.getMean().t() << endl;
+    cout << dist.getCovariance() << endl;
 
     return 0;
 }

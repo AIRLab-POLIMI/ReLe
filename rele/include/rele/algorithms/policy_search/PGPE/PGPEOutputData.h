@@ -19,11 +19,11 @@ public:
     virtual ~PGPEPolicyIndividual()
     {}
 
-    void WriteToStream(std::ostream& os);
+    void writeToStream(std::ostream& os);
 
     friend std::ostream& operator<<(std::ostream& out, PGPEPolicyIndividual& stat)
     {
-        stat.WriteToStream(out);
+        stat.writeToStream(out);
         return out;
     }
     friend std::istream& operator>>(std::istream& in, PGPEPolicyIndividual& stat)
@@ -52,7 +52,7 @@ public:
 
 };
 
-class PGPEIterationStats : public AgentOutputData
+class PGPEIterationStats : public BlackBoxOutputData<PGPEPolicyIndividual>
 {
 
 public:
@@ -73,32 +73,11 @@ public:
         writeData(os);
     }
 
-    friend std::ostream& operator<<(std::ostream& out, PGPEIterationStats& stat)
-    {
-        stat.writeData(out);
-        return out;
-    }
-
 public:
-    arma::vec metaParams;
     arma::vec metaGradient;
-    std::vector<PGPEPolicyIndividual> individuals;
+
 };
 
-class PGPEStatistics : public std::vector<PGPEIterationStats*>
-{
-public:
-    friend std::ostream& operator<<(std::ostream& out, PGPEStatistics& stat)
-    {
-        int i, ie = stat.size();
-        out << ie << std::endl;
-        for (i = 0; i < ie; ++i)
-        {
-            out << stat[i];
-        }
-        return out;
-    }
-};
 
 }//end namespace
 

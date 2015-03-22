@@ -54,18 +54,17 @@ int main(int argc, char *argv[])
     arma::vec mean(1);
     mean[0] = -0.1;
     arma::mat cov(1, 1, arma::fill::eye);
+    cov *= 0.01;
 
     ParametricNormal dist(mean, cov);
 
     PolynomialFunction* pf = new PolynomialFunction(1, 1);
-    cout << *pf << endl;
     DenseBasisVector basis;
     basis.push_back(pf);
-    cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    int nbepperpol = 1, nbpolperupd = 300;
+    int nbepperpol = 1, nbpolperupd = 250;
     REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
     agent.setEps(0.5);
 
@@ -75,7 +74,9 @@ int main(int argc, char *argv[])
     DenseState>(fm.addPath("agent.log"),
                 WriteStrategy<DenseAction, DenseState>::AGENT);
 
-    int episodes = 2000;
+    int nbUpdates = 800;
+    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+
     ConsoleManager console(episodes, 1);
     for (int i = 0; i < episodes; i++)
     {

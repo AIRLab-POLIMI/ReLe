@@ -35,16 +35,16 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC, class DistributionC>
-class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, EpisodicREPSOutputData>
+class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
 {
 
-	USE_BBO_MEMBERS(EpisodicREPSOutputData);
+	USE_BBA_MEMBERS(REPSOutputData);
 
 public:
     REPS(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies,
          bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, EpisodicREPSOutputData>
+        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
         (dist, policy, nbEpisodes, nbPolicies, baseline, reward_obj)
     {
         etaOpt = 1;
@@ -142,7 +142,7 @@ protected:
         arma::vec d(history_J.size());
         for (unsigned int i = 0; i < history_J.size(); i++)
         {
-            double r = history_J[i];
+            double r = history_J[i] - maxJ; //TODO check this
             d[i] = exp(r / etaOpt);
         }
 
