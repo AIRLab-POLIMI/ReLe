@@ -85,9 +85,10 @@ TabularREPSOutputData::~TabularREPSOutputData()
 EpisodicREPSOutputData::EpisodicREPSOutputData(double eps,
         const string& policyName,
         const vec& policyParameters,
-        const mat& policyVariance) :
+        const mat& policyVariance,
+        std::vector<ParameterSample>& samples) :
     AgentOutputData(true), eps(eps), policyName(policyName),
-    policyParameters(policyParameters), policyVariance(policyVariance)
+    policyParameters(policyParameters), policyVariance(policyVariance), samples(samples)
 {
 
 }
@@ -95,12 +96,21 @@ EpisodicREPSOutputData::EpisodicREPSOutputData(double eps,
 void EpisodicREPSOutputData::writeData(ostream& os)
 {
 
-    os << "eps: " << eps << endl;
+    /*os << "eps: " << eps << endl;
     os << policyName << endl;
 
     CSVutils::vectorToCSV(policyParameters, os);
-    CSVutils::matrixToCSV(policyVariance, os);
+    CSVutils::matrixToCSV(policyVariance, os);*/
 
+    //TODO temporary debug hack, choose a good agent data format
+    ParameterSample& sample0 = samples[0];
+    os << "1," << sample0.theta.n_elem << endl;
+
+    for(auto& sample : samples)
+    {
+        os << sample.r << ",";
+        CSVutils::vectorToCSV(sample.theta, os);
+    }
 }
 
 void EpisodicREPSOutputData::writeDecoratedData(ostream& os)

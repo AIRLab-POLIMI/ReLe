@@ -215,11 +215,11 @@ public:
             for(auto& sample : samples)
             {
                 index++;
-                ofs << sample.x  << ", "
-                    << sample.u  << ", "
-                    << sample.xn << ", "
-                    << sample.r  << ", "
-                    << sample.xn.isAbsorbing() << ", "
+                ofs << sample.x  << ","
+                    << sample.u  << ","
+                    << sample.xn << ","
+                    << sample.r  << ","
+                    << sample.xn.isAbsorbing() << ","
                     << (index == total) << std::endl;
             }
 
@@ -235,7 +235,7 @@ public:
 
             for(auto data : outputData)
             {
-                ofs << data->getStep() << ", " << data->isFinal() << std::endl;
+                ofs << data->getStep() << "," << data->isFinal() << std::endl;
                 data->writeData(ofs);
             }
 

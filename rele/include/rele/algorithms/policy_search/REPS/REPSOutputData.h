@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_REPS_REPSOUTPUTDATA_H_
 
 #include "Basics.h"
+#include "ParameterSample.h"
 
 namespace ReLe
 {
@@ -69,7 +70,8 @@ class EpisodicREPSOutputData: public AgentOutputData
 public:
     EpisodicREPSOutputData(double eps, const std::string& policyName,
                            const arma::vec& policyParameters,
-                           const arma::mat& policyVariance);
+                           const arma::mat& policyVariance,
+                           std::vector<ParameterSample>& samples);
 
     virtual void writeData(std::ostream& os);
     virtual void writeDecoratedData(std::ostream& os);
@@ -81,6 +83,8 @@ private:
     std::string policyName;
     arma::vec policyParameters;
     arma::mat policyVariance;
+
+    std::vector<ParameterSample> samples;
 
 };
 
