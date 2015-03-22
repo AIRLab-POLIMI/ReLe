@@ -93,8 +93,9 @@ void EpisodicREPS::endEpisode()
 
 AgentOutputData* EpisodicREPS::getAgentOutputDataEnd()
 {
-    return new EpisodicREPSOutputData(eps, policy.getPolicyName(),
-                                      dist.getMean(), dist.getCovariance(), samples);
+    /*return new EpisodicREPSOutputData(eps, policy.getPolicyName(),
+                                      dist.getMean(), dist.getCovariance(), samples);*/
+	return nullptr;
 }
 
 EpisodicREPS::~EpisodicREPS()

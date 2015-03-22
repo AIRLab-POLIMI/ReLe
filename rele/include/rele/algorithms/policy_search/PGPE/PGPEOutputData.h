@@ -2,22 +2,19 @@
 #define PGPEOUTPUTDATA_H_
 
 #include "Basics.h"
+#include "policy_search/BBO.h"
 
 namespace ReLe
 {
 
-class PGPEPolicyIndividual
+class PGPEPolicyIndividual : public BBPolicyIndividual
 {
 public:
-    arma::vec Pparams;  //policy parameters
-    arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
     arma::mat diffLogDistr;
 
 public:
 
     PGPEPolicyIndividual(unsigned int nbParams, unsigned int nbEvals);
-
-    PGPEPolicyIndividual(arma::vec& polp, int nbEval);
 
     virtual ~PGPEPolicyIndividual()
     {}

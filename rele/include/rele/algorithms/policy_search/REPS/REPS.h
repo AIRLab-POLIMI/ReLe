@@ -24,8 +24,7 @@
 #ifndef REPS_H_
 #define REPS_H_
 
-#include "policy_search/PGPE/PGPE.h"
-#include "policy_search/NES/NESOutputData.h"
+#include "policy_search/BBO.h"
 #include "DifferentiableNormals.h"
 #include "ArmadilloPDFs.h"
 
@@ -34,21 +33,26 @@
 namespace ReLe
 {
 
+typedef BBOutputData<BBPolicyIndividual> EpisodicREPSOutputData;
+
 template<class ActionC, class StateC, class DistributionC>
-class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, EpisodicREPSOutputData>
 {
 
-    typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
+	USE_BBO_MEMBERS(EpisodicREPSOutputData);
+
 public:
     REPS(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies,
          bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, EpisodicREPSOutputData>
         (dist, policy, nbEpisodes, nbPolicies, baseline, reward_obj)
     {
         etaOpt = 1;
         //default parameters
         eps = 0.5;
+
+        maxJ = -std::numeric_limits<double>::infinity();
     }
 
     virtual ~REPS()
@@ -62,8 +66,8 @@ public:
 protected:
     virtual void init()
     {
-        history_theta.assign(Base::nbPoliciesToEvalMetap, arma::vec(Base::policy.getParametersSize()));
-        Base::history_J = arma::vec(Base::nbPoliciesToEvalMetap, arma::fill::zeros);
+        history_theta.assign(nbPoliciesToEvalMetap, arma::vec(policy.getParametersSize()));
+        history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
         maxJ = -std::numeric_limits<double>::infinity();
 
         //Init policy and parameters
@@ -82,22 +86,20 @@ protected:
     virtual void afterPolicyEstimate()
     {
         //average over episodes
-        Base::Jpol /= Base::nbEpisodesToEvalPolicy;
-        Base::history_J[Base::polCount] = Base::Jpol;
-        if (maxJ < Base::Jpol)
-            maxJ = Base::Jpol;
-        history_theta[Base::polCount] = Base::policy.getParameters();
+        Jpol /= nbEpisodesToEvalPolicy;
+        history_J[polCount] = Jpol;
+        if (maxJ < Jpol)
+            maxJ = Jpol;
+        history_theta[polCount] = policy.getParameters();
     }
 
     virtual void afterMetaParamsEstimate()
     {
-
         //optimize function
         updatePolicy();
 
-        //update meta distribution
+        //reset maximum value
         maxJ = -std::numeric_limits<double>::infinity();
-
     }
 
     double dualFunction(const double& eta, double& grad)
@@ -106,9 +108,9 @@ protected:
         double sum1 = 0;
         double sum2 = 0;
 
-        double N = Base::history_J.size();
+        double N = history_J.size();
 
-        for (auto& sample : Base::history_J)
+        for (auto& sample : history_J)
         {
             double r = sample - maxJ; //numeric trick
             sum1 += exp(r / eta);
@@ -138,10 +140,10 @@ protected:
         etaOpt = newParameters.back();
 
         //Compute weights
-        arma::vec d(Base::history_J.size());
-        for (unsigned int i = 0; i < Base::history_J.size(); i++)
+        arma::vec d(history_J.size());
+        for (unsigned int i = 0; i < history_J.size(); i++)
         {
-            double r = Base::history_J[i];
+            double r = history_J[i];
             d[i] = exp(r / etaOpt);
         }
 
@@ -150,7 +152,7 @@ protected:
         double d2Sum = sum(square(d));
         double Z = (dSum*dSum - d2Sum) / dSum;
 
-        unsigned int thethaSize = Base::policy.getParametersSize();
+        unsigned int thethaSize = policy.getParametersSize();
 
         //Compute mean
         arma::vec mean(thethaSize, arma::fill::zeros);
@@ -174,7 +176,7 @@ protected:
         cov /= Z;
 
         //Update high level policy
-        Base::dist.setMeanAndCovariance(mean, cov);
+        dist.setMeanAndCovariance(mean, cov);
 
     }
 

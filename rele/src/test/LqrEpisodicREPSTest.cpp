@@ -66,10 +66,9 @@ int main(int argc, char *argv[])
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
     DetLinearPolicy<DenseState> policy(&regressor);
 
-    EpisodicREPS agent(dist, policy);
-//    int nbepperpol = 1, nbpolperupd = 300;
-//    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-//    agent.setEps(0.01);
+    int nbepperpol = 1, nbpolperupd = 300;
+    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+    agent.setEps(0.5);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 

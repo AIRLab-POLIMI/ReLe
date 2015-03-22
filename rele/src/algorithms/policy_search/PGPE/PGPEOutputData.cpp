@@ -8,12 +8,7 @@ namespace ReLe
 {
 
 PGPEPolicyIndividual::PGPEPolicyIndividual(unsigned int nbParams, unsigned int nbEvals)
-    :Pparams(nbParams), Jvalues(nbEvals), diffLogDistr(nbParams, nbEvals)
-{
-}
-
-PGPEPolicyIndividual::PGPEPolicyIndividual(arma::vec& polp, int nbEval)
-    :Pparams(polp), Jvalues(nbEval), diffLogDistr(polp.n_elem, nbEval)
+    : BBPolicyIndividual(nbParams, nbEvals), diffLogDistr(nbParams, nbEvals)
 {
 }
 

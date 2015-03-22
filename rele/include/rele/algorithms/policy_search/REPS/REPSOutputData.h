@@ -65,6 +65,7 @@ private:
     std::string policyPrinted;
 };
 
+/*
 class EpisodicREPSOutputData: public AgentOutputData
 {
 public:
@@ -86,7 +87,7 @@ private:
 
     std::vector<ParameterSample> samples;
 
-};
+};*/
 
 
 }

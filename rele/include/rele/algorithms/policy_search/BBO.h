@@ -31,9 +31,49 @@
 #include <cassert>
 #include <iomanip>
 
-
 namespace ReLe
 {
+
+class BBPolicyIndividual
+{
+public:
+    arma::vec Pparams;  //policy parameters
+    arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
+
+public:
+    BBPolicyIndividual(unsigned int nbParams, unsigned int nbEvals)
+		:Pparams(nbParams), Jvalues(nbEvals)
+	{
+	}
+};
+
+template<class IndividualsClass>
+class BBOutputData : public AgentOutputData
+{
+
+public:
+	BBOutputData(unsigned int nbIndividual,
+	                                       unsigned int nbParams, unsigned int nbEvals)
+	    : AgentOutputData(true)
+	{
+	    individuals.assign(nbIndividual, IndividualsClass(nbParams, nbEvals));
+	}
+
+	 virtual void writeData(std::ostream& os)
+	 {
+		 //TODO make pure virtual
+	 }
+
+	 virtual void writeDecoratedData(std::ostream& os)
+	 {
+		 //TODO make pure virtual
+	 }
+
+public:
+	arma::vec metaParams;
+	std::vector<IndividualsClass> individuals;
+
+};
 
 template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
 class BlackBoxAlgorithm: public Agent<ActionC, StateC>
@@ -48,7 +88,7 @@ public:
           nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
           runCount(0), epiCount(0), polCount(0), df(1.0),
           Jep (0.0), Jpol(0.0), rewardId(reward_obj),
-          useBaseline(baseline), output2LogReady(false)
+          useBaseline(baseline), output2LogReady(false), currentItStats(nullptr)
     {
     }
 
@@ -220,6 +260,24 @@ protected:
     arma::vec diffObjFunc;
     std::vector<arma::vec> history_dlogsist;
 };
+
+#define USE_BBO_MEMBERS(AgentOutputClass)                                             \
+	typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputClass> Base; \
+    using Base::dist;                                                                 \
+    using Base::policy;                                                               \
+    using Base::nbEpisodesToEvalPolicy;                                               \
+    using Base::nbPoliciesToEvalMetap;                                                \
+    using Base::runCount;                                                             \
+    using Base::epiCount;                                                             \
+	using Base::polCount;                                                             \
+    using Base::df;                                                                   \
+    using Base::Jep;                                                                  \
+    using Base::Jpol;                                                                 \
+    using Base::rewardId;                                                             \
+    using Base::history_J;                                                            \
+    using Base::useBaseline;                                                          \
+    using Base::output2LogReady;                                                      \
+    using Base::currentItStats;
 
 } //end namespace
 
