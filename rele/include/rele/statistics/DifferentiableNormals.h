@@ -166,6 +166,11 @@ public:
     ParametricLogisticNormal(arma::vec mean, arma::vec logWeights,
                              double variance_asymptote);
 
+    ParametricLogisticNormal(arma::vec variance_asymptote);
+
+    ParametricLogisticNormal(arma::vec mean, arma::vec logWeights,
+                             arma::vec variance_asymptote);
+
     virtual ~ParametricLogisticNormal()
     {}
 
@@ -204,7 +209,7 @@ private:
     }
 
 protected:
-    double asVariance; //asymptotic varianceprivate:
+    arma::vec asVariance; //asymptotic varianceprivate:
     arma::vec logisticWeights; //weights used for the logistic function
 
 

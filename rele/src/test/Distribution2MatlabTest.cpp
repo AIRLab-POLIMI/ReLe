@@ -36,7 +36,7 @@ using namespace arma;
 
 void help(char* argv[])
 {
-    cout << "." << argv[0] <<  "" << endl;
+    cout << "### Distribution Test ###" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 
     if ((argc == 0) || (argc < 5))
     {
+        cout << argc << endl;
         help(argv);
         return 0;
     }
@@ -52,9 +53,9 @@ int main(int argc, char *argv[])
     DifferentiableDistribution* dist;
 
     arma::vec p1;
-    p1.load(argv[2]);
+    p1.load(argv[2], raw_ascii);
     arma::mat p2;
-    p2.load(argv[3]);
+    p2.load(argv[3], raw_ascii);
 
 
     arma::mat point;
@@ -62,29 +63,30 @@ int main(int argc, char *argv[])
     {
         //----- ParametricNormal
         dist = new ParametricNormal(p1, p2);
-        point.load(argv[4]);
+        point.load(argv[4], raw_ascii);
     }
     else if (strcmp(argv[1], "log") == 0)
     {
         //----- ParametricLogisticNormal
-        double varas = atof(argv[4]);
+        vec varas;
+        varas.load(argv[4], raw_ascii);
         dist = new ParametricLogisticNormal(p1,p2,varas);
-        point.load(argv[5]);
+        point.load(argv[5], raw_ascii);
     }
     else if (strcmp(argv[1], "chol") == 0)
     {
         //----- ParametricCholeskyNormal
         dist = new ParametricCholeskyNormal(p1, p2);
-        point.load(argv[4]);
+        point.load(argv[4], raw_ascii);
     }
     else if (strcmp(argv[1], "diag") == 0)
     {
         //----- ParametricDiagonalNormal
         dist = new ParametricDiagonalNormal(p1, p2);
-        point.load(argv[4]);
+        point.load(argv[4], raw_ascii);
     }
 
-    int dim = point.n_elem, nbs = 10000;
+    int dim = point.n_elem, nbs = 50000;
 
     //draw random points
     mat P(dim,nbs);
@@ -96,15 +98,15 @@ int main(int argc, char *argv[])
             P(j,i) = sample(j);
         }
     }
-    P.save("/tmp/dist2matlab/samples.dat");
+    P.save("/tmp/dist2matlab/samples.dat", raw_ascii);
 
     //compute gradient
     vec grad = dist->difflog(point);
-    grad.save("/tmp/dist2matlab/grad.dat");
+    grad.save("/tmp/dist2matlab/grad.dat", raw_ascii);
 
     //compute hessian
     mat hess = dist->diff2Log(point);
-    hess.save("/tmp/dist2matlab/hess.dat");
+    hess.save("/tmp/dist2matlab/hess.dat", raw_ascii);
 
     return 0;
 }

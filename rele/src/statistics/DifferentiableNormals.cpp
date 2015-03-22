@@ -161,7 +161,32 @@ arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
 
 arma::mat ParametricDiagonalNormal::diff2Log(const arma::vec& point)
 {
+    //TODO controllare implementazione
+    int paramSize = this->getParametersSize();
+    mat hessian(paramSize,paramSize,fill::zeros);
 
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        // d2 logp / dmdm
+        hessian(i,i) = -invCov(i,i);
+
+        int idx = pointSize + i;
+        double diff = point[i] - mean[i];
+
+        // consider only the components different from zero
+        // obtained from the derivative of the gradient w.r.t. the covariance parameters
+        // these terms are only mSupportSize
+        // d2 logp / dpdp
+        double sigma2 = diagStdDev(i) * diagStdDev(i);
+        hessian(idx,idx) = 1.0 / (sigma2) - 3.0 * (diff * diff) /  (sigma2 * sigma2);;
+
+        // d2 logp / dpdm
+        hessian(i, pointSize+i) = - 2.0 * diff / (sigma2 * diagStdDev(i));
+
+        // d2 logp / dmdp
+        hessian(pointSize+i, i) = hessian(i, pointSize+i);
+    }
+    return hessian;
 }
 
 void ParametricDiagonalNormal::writeOnStream(ostream& out)
@@ -261,16 +286,33 @@ void ParametricDiagonalNormal::updateInternalState()
 
 ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, double variance_asymptote)
     : ParametricNormal(point_dim),
-      asVariance(variance_asymptote), logisticWeights(point_dim, fill::zeros)
+      asVariance(variance_asymptote*ones<vec>(point_dim)), logisticWeights(point_dim, fill::zeros)
 {
     updateInternalState();
 }
 
 ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec logWeights, double variance_asymptote)
     : ParametricNormal(mean.n_elem),
+      asVariance(variance_asymptote*ones<vec>(mean.n_elem)), logisticWeights(logWeights)
+{
+    assert(mean.n_elem == logWeights.n_elem);
+    this->mean = mean;
+    updateInternalState();
+}
+
+ParametricLogisticNormal::ParametricLogisticNormal(arma::vec variance_asymptote)
+    : ParametricNormal(variance_asymptote.n_elem),
+      asVariance(variance_asymptote), logisticWeights(variance_asymptote.n_elem, fill::zeros)
+{
+    updateInternalState();
+}
+
+ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec logWeights, arma::vec variance_asymptote)
+    : ParametricNormal(mean.n_elem),
       asVariance(variance_asymptote), logisticWeights(logWeights)
 {
     assert(mean.n_elem == logWeights.n_elem);
+    assert(mean.n_elem == variance_asymptote.n_elem);
     this->mean = mean;
     updateInternalState();
 }
@@ -281,20 +323,12 @@ vec ParametricLogisticNormal::difflog(const vec& point)
     vec mean_grad = invCov * diff;
     vec gradient(2*pointSize);
 
-    for (unsigned int i = 0; i < pointSize; ++i)
-    {
-        gradient[i] = mean_grad(i);
-        //        std::cout << "p(" << i << "): " << mParameters(i) << std::endl;
-    }
     for (unsigned int i = 0, ie = pointSize; i < ie; ++i)
     {
-        double val = mean[i];
-        //        std::cout << idx << std::endl;
-        //        std::cout << "p(" << i << "): " << val << std::endl;
-        //        double logisticVal = logistic(val, mAsVariance);
-        //        std::cout << logisticVal << std::endl;
+        gradient[i] = mean_grad(i);
+        double val = logisticWeights[i];
         double A = - 0.5 * exp(-val) / (1 + exp(-val));
-        double B = 0.5 * exp(-val) * diff[i] * diff[i] / asVariance;
+        double B = 0.5 * exp(-val) * diff[i] * diff[i] / asVariance[i];
         gradient[i+pointSize] = A + B;
     }
     return gradient;
@@ -321,21 +355,27 @@ mat ParametricLogisticNormal::diff2Log(const vec& point)
         // these terms are only mSupportSize
         // d2 logp / dpdp
         double A = 0.5 * exp(-val) / ((1+exp(-val))*(1+exp(-val)));
-        double B = - 0.5 * exp(-val) * diff * diff / asVariance;
+        double B = - 0.5 * exp(-val) * diff * diff / asVariance[i];
         hessian(idx,idx) = A + B;
 
         // d2 logp / dpdm
-        hessian(i, pointSize+i) = - diff * exp(-val) / asVariance;
+        hessian(i, pointSize+i) = - diff * exp(-val) / asVariance[i];
 
         // d2 logp / dmdp
         hessian(pointSize+i, i) = hessian(i, pointSize+i);
     }
+    return hessian;
 }
 
 void ParametricLogisticNormal::writeOnStream(ostream &out)
 {
     out << "ParametricLogisticNormal " << std::endl;
-    out << pointSize << " " << asVariance << std::endl;
+    out << pointSize << std::endl;
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        out << asVariance[i] << "\t";
+    }
+    out << std::endl;
     for (unsigned i = 0; i < pointSize; ++i)
     {
         out << mean(i) << " ";
@@ -350,15 +390,20 @@ void ParametricLogisticNormal::readFromStream(istream &in)
 {
     double val;
     in >> pointSize;
-    in >> asVariance;
 
     // allocate space
+    asVariance.set_size(pointSize);
     mean.set_size(pointSize);
     logisticWeights.set_size(pointSize);
     Cov.eye(pointSize,pointSize);
     invCov.eye(pointSize,pointSize);
     cholCov.eye(pointSize,pointSize);
 
+
+    for (unsigned i = 0; i < pointSize; ++i)
+    {
+        in >> asVariance[i];
+    }
     for (unsigned i = 0; i < pointSize; ++i)
     {
         in >> val;
@@ -418,7 +463,7 @@ void ParametricLogisticNormal::updateInternalState()
 {
     for (int i = 0, ie = pointSize; i < ie; ++i)
     {
-        Cov(i,i) = std::max(1e-6, logistic(logisticWeights(i), asVariance)); //to avoid numerical problems
+        Cov(i,i) = std::max(1e-6, logistic(logisticWeights(i), asVariance[i])); //to avoid numerical problems
         invCov(i,i) = 1.0/Cov(i,i);
         cholCov(i,i) = sqrt(Cov(i,i));
     }
