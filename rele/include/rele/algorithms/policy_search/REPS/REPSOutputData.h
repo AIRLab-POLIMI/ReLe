@@ -25,7 +25,8 @@
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_REPS_REPSOUTPUTDATA_H_
 
 #include "Basics.h"
-#include "ParameterSample.h"
+
+#include "policy_search/BlackBoxOutputData.h"
 
 namespace ReLe
 {
@@ -88,6 +89,19 @@ private:
     std::vector<ParameterSample> samples;
 
 };*/
+
+class EpisodicREPSOutputData : public BlackBoxOutputData<BlackBoxPolicyIndividual>
+{
+public:
+	EpisodicREPSOutputData(unsigned int nbIndividual, unsigned int nbParams,
+					unsigned int nbEvals);
+	virtual void writeData(std::ostream& os);
+	virtual void writeDecoratedData(std::ostream& os);
+
+private:
+
+};
+
 
 
 }

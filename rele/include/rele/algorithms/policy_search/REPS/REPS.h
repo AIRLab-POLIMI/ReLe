@@ -24,16 +24,15 @@
 #ifndef REPS_H_
 #define REPS_H_
 
-#include "policy_search/BBO.h"
 #include "DifferentiableNormals.h"
 #include "ArmadilloPDFs.h"
+#include "REPSOutputData.h"
 
 #include <nlopt.hpp>
+#include "policy_search/BlackBoxAlgorithm.h"
 
 namespace ReLe
 {
-
-typedef BBOutputData<BBPolicyIndividual> EpisodicREPSOutputData;
 
 template<class ActionC, class StateC, class DistributionC>
 class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, EpisodicREPSOutputData>

@@ -1,13 +1,13 @@
 #ifndef PGPEOUTPUTDATA_H_
 #define PGPEOUTPUTDATA_H_
 
+#include "policy_search/BlackBoxOutputData.h"
 #include "Basics.h"
-#include "policy_search/BBO.h"
 
 namespace ReLe
 {
 
-class PGPEPolicyIndividual : public BBPolicyIndividual
+class PGPEPolicyIndividual : public BlackBoxPolicyIndividual
 {
 public:
     arma::mat diffLogDistr;

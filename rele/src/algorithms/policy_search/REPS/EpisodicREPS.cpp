@@ -29,7 +29,7 @@
 using namespace arma;
 using namespace std;
 
-namespace ReLe
+/*namespace ReLe
 {
 
 EpisodicREPS::EpisodicREPS(ParametricNormal& dist,
@@ -93,8 +93,8 @@ void EpisodicREPS::endEpisode()
 
 AgentOutputData* EpisodicREPS::getAgentOutputDataEnd()
 {
-    /*return new EpisodicREPSOutputData(eps, policy.getPolicyName(),
-                                      dist.getMean(), dist.getCovariance(), samples);*/
+    return new EpisodicREPSOutputData(eps, policy.getPolicyName(),
+                                      dist.getMean(), dist.getCovariance(), samples);
 	return nullptr;
 }
 
@@ -204,5 +204,5 @@ void EpisodicREPS::init()
     optimizator.set_lower_bounds(lowerBounds);
 }
 
-}
+}*/
 

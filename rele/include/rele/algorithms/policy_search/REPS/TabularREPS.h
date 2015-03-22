@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REPS_H_
-#define REPS_H_
+#ifndef TABULARREPS_H_
+#define TABULARREPS_H_
 
 #include "Agent.h"
 #include "SampleManager.h"
@@ -89,4 +89,4 @@ private:
 
 }
 
-#endif /* REPS_H_ */
+#endif /* TABULARREPS_H_ */

@@ -8,7 +8,7 @@ namespace ReLe
 {
 
 PGPEPolicyIndividual::PGPEPolicyIndividual(unsigned int nbParams, unsigned int nbEvals)
-    : BBPolicyIndividual(nbParams, nbEvals), diffLogDistr(nbParams, nbEvals)
+    : BlackBoxPolicyIndividual(nbParams, nbEvals), diffLogDistr(nbParams, nbEvals)
 {
 }
 

@@ -25,13 +25,12 @@
 #define EPISODICREPS_H_
 
 #include "Agent.h"
-#include "ParameterSample.h"
 #include "DifferentiableNormals.h"
 #include "nonparametric/TabularPolicy.h"
 
 #include <nlopt.hpp>
 
-namespace ReLe
+/*namespace ReLe
 {
 class EpisodicREPS: public Agent<DenseAction, DenseState>
 {
@@ -87,6 +86,6 @@ private:
 
 };
 
-}
+}*/
 
 #endif /* EPISODICREPS_H_ */

@@ -120,7 +120,7 @@ target_link_libraries(lqr_NES rele)
 add_executable(lqr_xNES src/test/LqrxNESTest.cpp)
 target_link_libraries(lqr_xNES rele)
 
-add_executable(lqr_REPS src/test/LqrEpisodicREPSTest.cpp)
+add_executable(lqr_REPS src/test/LqrREPSTest.cpp)
 target_link_libraries(lqr_REPS rele)
 
 add_executable(rocky_REPS src/test/RockyTest.cpp)
@@ -129,7 +129,7 @@ target_link_libraries(rocky_REPS rele)
 add_executable(nls_BBO src/test/NlsBBOTest.cpp)
 target_link_libraries(nls_BBO rele)
 
-add_executable(nls_REPS src/test/NlsEpisodicREPSTest.cpp)
+add_executable(nls_REPS src/test/NlsREPSTest.cpp)
 target_link_libraries(nls_REPS rele)
 
 add_executable(basisMatrixTest src/test/BasisMatrixTest.cpp)

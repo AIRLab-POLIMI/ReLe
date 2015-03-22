@@ -21,17 +21,14 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LQR.h"
-#include "policy_search/REPS/EpisodicREPS.h"
+#include "NLS.h"
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
-#include "parametric/differentiable/LinearPolicy.h"
+#include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
-
-#include "FileManager.h"
-#include "ConsoleManager.h"
+#include "RandomGenerator.h"
 
 #include <iostream>
 #include <iomanip>
@@ -46,25 +43,49 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("LQR", "REPS");
-    fm.createDir();
-    fm.cleanDir();
+    NLS mdp;
+    //with these settings
+    //max in ( -3.58, 10.5 ) -> J = 8.32093
+    //note that there are multiple optimal solutions
+    //TODO: verificare, serve interfaccia core per valutare una politica
 
-    LQR mdp(1, 1); //with these settings the optimal value is -0.6180 (for the linear policy)
+    int dim = mdp.getSettings().continuosStateDim;
+    cout << "dim: " << dim << endl;
 
-    arma::vec mean(1);
-    mean[0] = -0.1;
-    arma::mat cov(1, 1, arma::fill::eye);
 
-    ParametricNormal dist(mean, cov);
+    //--- define meta distribution (high-level policy)
+    arma::vec mean(dim, arma::fill::zeros);
+    mean[0] = -0.42;
+    mean[1] =  0.42;
+    arma::mat cov(dim, dim, arma::fill::eye);
+    cov *= 0.1;
+    ParametricNormal dist(mean,cov);
+    //---
 
-    PolynomialFunction* pf = new PolynomialFunction(1, 1);
-    cout << *pf << endl;
+
+    //--- define policy (low level)
     DenseBasisVector basis;
-    basis.push_back(pf);
+    basis.generatePolynomialBasisFunctions(1,dim);
+    delete basis.at(0);
+    basis.erase(basis.begin());
+    cout << "--- Mean regressor ---" << endl;
     cout << basis << endl;
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-    DetLinearPolicy<DenseState> policy(&regressor);
+    LinearApproximator meanRegressor(dim, basis);
+
+    DenseBasisVector stdBasis;
+    stdBasis.generatePolynomialBasisFunctions(1,dim);
+    delete stdBasis.at(0);
+    stdBasis.erase(stdBasis.begin());
+    cout << "--- Standard deviation regressor ---" << endl;
+    cout << stdBasis << endl;
+    LinearApproximator stdRegressor(dim, stdBasis);
+    arma::vec stdWeights(stdRegressor.getParametersSize());
+    stdWeights.fill(0.5);
+    stdRegressor.setParameters(stdWeights);
+
+
+    NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
+    //---
 
     int nbepperpol = 1, nbpolperupd = 300;
     REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
@@ -72,23 +93,16 @@ int main(int argc, char *argv[])
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction,
-    DenseState>(fm.addPath("agent.log"),
-                WriteStrategy<DenseAction, DenseState>::AGENT);
-
-    int episodes = 2000;
-    ConsoleManager console(episodes, 1);
+    int episodes  = 10000;
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLenght = mdp.getSettings().horizon;
-        console.printProgress(i);
+        cout << "starting episode" << endl;
         core.runEpisode();
     }
 
-    delete core.getSettings().loggerStrategy;
-
-    cout << dist.getMean().t() << endl;
-    cout << dist.getCovariance() << endl;
+    //cout << dist.getMean().t() << endl;
+    //cout << dist.getCovariance() << endl;
 
     return 0;
 }

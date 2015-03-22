@@ -30,8 +30,9 @@ using namespace arma;
 namespace ReLe
 {
 
-AbstractREPSOutputData::AbstractREPSOutputData(int N, double eps, const string& policyName, bool final) :
-    AgentOutputData(final), N(N), eps(eps), policyName(policyName)
+AbstractREPSOutputData::AbstractREPSOutputData(int N, double eps,
+			const string& policyName, bool final) :
+			AgentOutputData(final), N(N), eps(eps), policyName(policyName)
 {
 
 }
@@ -43,37 +44,38 @@ AbstractREPSOutputData::~AbstractREPSOutputData()
 
 void AbstractREPSOutputData::writeInfo(ostream& os)
 {
-    os << "eps: " << eps << endl;
-    os << "N: " << N << endl;
-    os << policyName << endl;
+	os << "eps: " << eps << endl;
+	os << "N: " << N << endl;
+	os << policyName << endl;
 }
 
 void AbstractREPSOutputData::writeDecoratedInfo(ostream& os)
 {
-    os << "- Parameters" << endl;
-    os << "eps: " << eps << endl;
-    os << "N: " << N << endl;
-    os << "- Policy" << endl;
-    os << "Using " << policyName << " policy"
-       << endl << endl;
+	os << "- Parameters" << endl;
+	os << "eps: " << eps << endl;
+	os << "N: " << N << endl;
+	os << "- Policy" << endl;
+	os << "Using " << policyName << " policy" << endl << endl;
 }
 
-TabularREPSOutputData::TabularREPSOutputData(int N, double eps, const string& policyPrinted,
-        bool final) : AbstractREPSOutputData(N, eps, "Tabular", final), policyPrinted(policyPrinted)
+TabularREPSOutputData::TabularREPSOutputData(int N, double eps,
+			const string& policyPrinted, bool final) :
+			AbstractREPSOutputData(N, eps, "Tabular", final),
+			policyPrinted(policyPrinted)
 {
 
 }
 
 void TabularREPSOutputData::writeData(ostream& os)
 {
-    writeInfo(os);
-    os << policyPrinted << endl; //TODO change this
+	writeInfo(os);
+	os << policyPrinted << endl; //TODO change this
 }
 
 void TabularREPSOutputData::writeDecoratedData(ostream& os)
 {
-    writeDecoratedInfo(os);
-    os << policyPrinted << endl;
+	writeDecoratedInfo(os);
+	os << policyPrinted << endl;
 }
 
 TabularREPSOutputData::~TabularREPSOutputData()
@@ -82,13 +84,57 @@ TabularREPSOutputData::~TabularREPSOutputData()
 }
 
 /*
-EpisodicREPSOutputData::EpisodicREPSOutputData(double eps,
-        const string& policyName,
-        const vec& policyParameters,
-        const mat& policyVariance,
-        std::vector<ParameterSample>& samples) :
-    AgentOutputData(true), eps(eps), policyName(policyName),
-    policyParameters(policyParameters), policyVariance(policyVariance), samples(samples)
+ EpisodicREPSOutputData::EpisodicREPSOutputData(double eps,
+ const string& policyName,
+ const vec& policyParameters,
+ const mat& policyVariance,
+ std::vector<ParameterSample>& samples) :
+ AgentOutputData(true), eps(eps), policyName(policyName),
+ policyParameters(policyParameters), policyVariance(policyVariance), samples(samples)
+ {
+
+ }
+
+ void EpisodicREPSOutputData::writeData(ostream& os)
+ {
+
+ os << "eps: " << eps << endl;
+ os << policyName << endl;
+
+ CSVutils::vectorToCSV(policyParameters, os);
+ CSVutils::matrixToCSV(policyVariance, os);
+
+ //TODO temporary debug hack, choose a good agent data format
+ ParameterSample& sample0 = samples[0];
+ os << "1," << sample0.theta.n_elem << endl;
+
+ for(auto& sample : samples)
+ {
+ os << sample.r << ",";
+ CSVutils::vectorToCSV(sample.theta, os);
+ }
+ }
+
+ void EpisodicREPSOutputData::writeDecoratedData(ostream& os)
+ {
+ os << "- Parameters" << endl;
+ os << "eps: " << eps << endl;
+ os << "- Policy" << endl;
+ os << "Using " << policyName << " policy"
+ << endl << endl;
+ os << "Policy parameters mean: " << policyParameters.t() << endl;
+ os << "Policy parameters variance:" << endl << policyVariance << endl;
+ }
+
+ EpisodicREPSOutputData::~EpisodicREPSOutputData()
+ {
+
+ }
+ */
+
+EpisodicREPSOutputData::EpisodicREPSOutputData(unsigned int nbIndividual,
+			unsigned int nbParams, unsigned int nbEvals) :
+			BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
 {
 
 }
@@ -96,38 +142,11 @@ EpisodicREPSOutputData::EpisodicREPSOutputData(double eps,
 void EpisodicREPSOutputData::writeData(ostream& os)
 {
 
-    os << "eps: " << eps << endl;
-    os << policyName << endl;
-
-    CSVutils::vectorToCSV(policyParameters, os);
-    CSVutils::matrixToCSV(policyVariance, os);
-
-    //TODO temporary debug hack, choose a good agent data format
-    ParameterSample& sample0 = samples[0];
-    os << "1," << sample0.theta.n_elem << endl;
-
-    for(auto& sample : samples)
-    {
-        os << sample.r << ",";
-        CSVutils::vectorToCSV(sample.theta, os);
-    }
 }
 
 void EpisodicREPSOutputData::writeDecoratedData(ostream& os)
 {
-    os << "- Parameters" << endl;
-    os << "eps: " << eps << endl;
-    os << "- Policy" << endl;
-    os << "Using " << policyName << " policy"
-       << endl << endl;
-    os << "Policy parameters mean: " << policyParameters.t() << endl;
-    os << "Policy parameters variance:" << endl << policyVariance << endl;
-}
-
-EpisodicREPSOutputData::~EpisodicREPSOutputData()
-{
 
 }
-*/
 
 }

@@ -25,7 +25,7 @@
 #define PGPE_H_
 
 #include "Distribution.h"
-#include "policy_search/BBO.h"
+#include "policy_search/BlackBoxAlgorithm.h"
 #include "Policy.h"
 #include "Basics.h"
 #include <cassert>
