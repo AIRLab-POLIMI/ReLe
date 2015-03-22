@@ -334,8 +334,9 @@ protected:
     arma::vec b_num, b_den;
 };
 
+#if 0
 /**
- * Exact NES (NES with closed-form FIM)
+ * Exponential NES
  */
 template<class ActionC, class StateC>
 class xNES: public BlackBoxAlgorithm<ActionC, StateC, ParametricCholeskyNormal, xNESIterationStats>
@@ -509,6 +510,8 @@ protected:
     double sigma;
     double stepmu, stepsigma, stepb;
 };
+
+#endif
 
 } //end namespace
 

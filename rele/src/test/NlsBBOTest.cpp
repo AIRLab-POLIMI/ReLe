@@ -107,11 +107,11 @@ int main(int argc, char *argv[])
     bool usebaseline = true;
 //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
 //    agent.setNormalization(true);
-//    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
 
 
-    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
-    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
+//    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
+//    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
 
     const std::string outfile = "nls_bbo_out.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
