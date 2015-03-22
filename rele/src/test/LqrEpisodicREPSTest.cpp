@@ -23,6 +23,7 @@
 
 #include "LQR.h"
 #include "policy_search/REPS/EpisodicREPS.h"
+#include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
@@ -45,9 +46,9 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	FileManager fm("LQR", "REPS");
-	fm.createDir();
-	fm.cleanDir();
+    FileManager fm("LQR", "REPS");
+    fm.createDir();
+    fm.cleanDir();
 
     LQR mdp(1, 1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
@@ -66,7 +67,9 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> policy(&regressor);
 
     EpisodicREPS agent(dist, policy);
-    agent.setEps(0.01);
+//    int nbepperpol = 1, nbpolperupd = 300;
+//    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+//    agent.setEps(0.01);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
@@ -78,7 +81,7 @@ int main(int argc, char *argv[])
     ConsoleManager console(episodes, 1);
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = 1000;
+        core.getSettings().episodeLenght = mdp.getSettings().horizon;
         console.printProgress(i);
         core.runEpisode();
     }

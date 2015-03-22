@@ -29,28 +29,28 @@ namespace ReLe
 {
 
 FileManager::FileManager(const string& envirorment,
-			const string& algorithm)
+                         const string& algorithm)
 {
-	outputDir = "/tmp/ReLe/" + envirorment + "/" + algorithm + "/";
+    outputDir = "/tmp/ReLe/" + envirorment + "/" + algorithm + "/";
 }
 
 void FileManager::createDir()
 {
-	//TODO windows command also
-	string createCommand = "mkdir -p " + outputDir;
-	system(createCommand.c_str());
+    //TODO windows command also
+    string createCommand = "mkdir -p " + outputDir;
+    system(createCommand.c_str());
 }
 
 void FileManager::cleanDir()
 {
-	//TODO windows command also
-	string cleanOldCommand = "rm -f " + outputDir + "*.log";
-	system(cleanOldCommand.c_str());
+    //TODO windows command also
+    string cleanOldCommand = "rm -f " + outputDir + "*.log";
+    system(cleanOldCommand.c_str());
 }
 
 string FileManager::addPath(const string& fileName)
 {
-	return outputDir + fileName;
+    return outputDir + fileName;
 }
 
 }

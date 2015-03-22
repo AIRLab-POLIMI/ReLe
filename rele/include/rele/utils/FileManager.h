@@ -32,13 +32,13 @@ namespace ReLe
 class FileManager
 {
 public:
-	FileManager(const std::string& envirorment, const std::string& algorithm);
-	void createDir();
-	void cleanDir();
-	std::string addPath(const std::string& fileName);
+    FileManager(const std::string& envirorment, const std::string& algorithm);
+    void createDir();
+    void cleanDir();
+    std::string addPath(const std::string& fileName);
 
 private:
-	std::string outputDir;
+    std::string outputDir;
 
 };
 

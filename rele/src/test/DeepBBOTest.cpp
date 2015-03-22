@@ -23,6 +23,7 @@
 
 #include "DeepSeaTreasure.h"
 #include "policy_search/NES/NES.h"
+#include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/GibbsPolicy.h"
@@ -142,11 +143,11 @@ int main(int argc, char *argv[])
     //--- distribution setup
     int nparams = basis.size();
     //----- ParametricNormal
-    //        arma::vec mean(nparams, fill::zeros);
-    //        arma::mat cov(nparams, nparams, arma::fill::eye);
-    //        ParametricNormal dist(mean, cov);
+    arma::vec mean(nparams, fill::zeros);
+    arma::mat cov(nparams, nparams, arma::fill::eye);
+    ParametricNormal dist(mean, cov);
     //----- ParametricLogisticNormal
-    ParametricLogisticNormal dist(nparams, 1);
+    //    ParametricLogisticNormal dist(nparams, 1);
     //----- ParametricCholeskyNormal
     //    arma::vec mean(nparams, fill::zeros);
     //    arma::mat cov(nparams, nparams, arma::fill::eye);
@@ -166,8 +167,11 @@ int main(int argc, char *argv[])
     bool usebaseline = true;
     //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
     //    agent.setNormalization(true);
-    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    //    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
     //    eNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+
+    REPS<FiniteAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+    agent.setEps(0.9);
 
 
     //    double stepnb = (3.0/5.0)*(3+log(nparams))/(nparams*sqrt(nparams));

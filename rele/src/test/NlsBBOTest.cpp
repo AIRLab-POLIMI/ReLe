@@ -62,22 +62,6 @@ int main(int argc, char *argv[])
     //-2.8000    7.3000    8.5247
 
     int dim = mdp.getSettings().continuosStateDim;
-    cout << "dim: " << dim << endl;
-
-
-    //--- define meta distribution (high-level policy)
-    arma::vec mean(dim, arma::fill::zeros);
-    mean[0] = -0.42;
-    mean[1] =  0.42;
-//    arma::mat cov(dim, dim, arma::fill::eye);
-//    cov *= 0.1;
-//    ParametricNormal dist(mean,cov);
-    vec sigmas(dim, fill::ones);
-//    ParametricDiagonalNormal dist(mean, sigmas);
-    mat cholMtx = chol(eye(dim,dim));
-    ParametricCholeskyNormal dist(mean, cholMtx);
-    //---
-
 
     //--- define policy (low level)
     DenseBasisVector basis;
@@ -101,6 +85,28 @@ int main(int argc, char *argv[])
 
 
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
+    //---
+
+    //--- distribution setup
+    int nparams = basis.size();
+    arma::vec mean(nparams, fill::zeros);
+    mean[0] = -0.42;
+    mean[1] =  0.42;
+
+    //----- ParametricNormal
+    //    arma::mat cov(nparams, nparams, arma::fill::eye);
+    //    ParametricNormal dist(mean, cov);
+    //----- ParametricLogisticNormal
+    ParametricLogisticNormal dist(mean, zeros(nparams), 1);
+    //----- ParametricCholeskyNormal
+    //    arma::mat cov(nparams, nparams, arma::fill::eye);
+    //    mat cholMtx = chol(cov);
+    //    ParametricCholeskyNormal dist(mean, cholMtx);
+    //----- ParametricDiagonalNormal
+    //    vec mean(nparams, fill::zeros);
+    //    vec sigmas(nparams, fill::ones);
+    //    ParametricDiagonalNormal dist(mean, sigmas);
+    //-----
     //---
 
     int nbepperpol = 1, nbpolperupd = 40;

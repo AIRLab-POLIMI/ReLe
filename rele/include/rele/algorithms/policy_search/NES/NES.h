@@ -35,15 +35,15 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NES: public BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
 {
 
-    typedef BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats> Base;
 public:
     NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
         bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {    }
 
@@ -180,15 +180,15 @@ protected:
  * Exact NES (NES with closed-form FIM)
  */
 template<class ActionC, class StateC, class DistributionC>
-class eNES: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
 {
-    typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
 
 public:
     eNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
          bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
     }

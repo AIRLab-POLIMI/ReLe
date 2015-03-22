@@ -24,8 +24,8 @@
 #ifndef PGPE_H_
 #define PGPE_H_
 
-#include "Agent.h"
 #include "Distribution.h"
+#include "policy_search/BBO.h"
 #include "Policy.h"
 #include "Basics.h"
 #include <cassert>
@@ -36,152 +36,21 @@
 namespace ReLe
 {
 
-
-////Templates needed to handle different action types
-//template<class StateC>
-//void sampleActionWorker(const StateC& state, FiniteAction& action, ParametricPolicy<FiniteAction,StateC>& policy)
-//{
-//    unsigned int u = policy(state);
-//    action.setActionN(u);
-//}
-
-//template<class StateC, class ActionC>
-//void sampleActionWorker(const StateC& state, ActionC& action, ParametricPolicy<ActionC,StateC>& policy)
-//{
-//    typename action_type<ActionC>::type_ref u = action;
-//    u = policy(state);
-//}
-
-
-//TODO: definire questo come PGPE
-template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
-class BlackBoxAlgorithm: public Agent<ActionC, StateC>
+template<class ActionC, class StateC>
+class PGPE: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
 {
-
-    typedef Agent<ActionC, StateC> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats> Base;
 public:
-    BlackBoxAlgorithm(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
-                      unsigned int nbEpisodes, unsigned int nbPolicies,
-                      double step_length, bool baseline = true, int reward_obj = 0)
-        : dist(dist), policy(policy),
-          nbEpisodesToEvalPolicy(nbEpisodes), nbPoliciesToEvalMetap(nbPolicies),
-          runCount(0), epiCount(0), polCount(0), df(1.0), step_length(step_length), useDirection(false),
-          Jep (0.0), Jpol(0.0), rewardId(reward_obj),
-          useBaseline(baseline), output2LogReady(false)
+    PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
+         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
+         bool baseline = true, int reward_obj = 0)
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
+        b_num(0.0), b_den(0.0), useDirection(false)
     {
     }
 
-    virtual ~BlackBoxAlgorithm()
-    {}
-
-    // Agent interface
-public:
-    virtual void initEpisode(const StateC& state, ActionC& action)
-    {
-        df  = 1.0;    //reset discount factor
-        Jep = 0.0;    //reset J of current episode
-
-        if (polCount == 0 && epiCount == 0)
-        {
-            currentItStats = new AgentOutputC(nbPoliciesToEvalMetap,
-                                              policy.getParametersSize(),
-                                              nbEpisodesToEvalPolicy);
-            currentItStats->metaParams = dist.getParameters();
-        }
-
-        if (epiCount == 0)
-        {
-            //a new policy is considered
-            Jpol = 0.0;
-
-            //obtain new parameters
-            arma::vec new_params = dist();
-            //set to policy
-            policy.setParameters(new_params);
-
-            //--- create new policy individual
-//            currentItStats->individuals.push_back(
-//                PGPEPolicyIndividual(new_params, nbEpisodesToEvalPolicy));
-            currentItStats->individuals[polCount].Pparams = new_params;
-            //---
-        }
-        sampleAction(state, action);
-    }
-
-    virtual void initTestEpisode()
-    {
-        //obtain new parameters
-        arma::vec new_params = dist();
-        //set to policy
-        policy.setParameters(new_params);
-    }
-
-    virtual void sampleAction(const StateC& state, ActionC& action)
-    {
-        sampleActionWorker(state, action, policy);
-    }
-
-    virtual void step(const Reward& reward, const StateC& nextState, ActionC& action)
-    {
-        //calculate current J value
-        Jep += df * reward[rewardId];
-        //update discount factor
-        df *= Base::task.gamma;
-
-        sampleAction(nextState, action);
-    }
-
-    virtual void endEpisode(const Reward& reward)
-    {
-        //add last contribute
-        Jep += df * reward[rewardId];
-        //perform remaining operation
-        this->endEpisode();
-
-    }
-
-    virtual void endEpisode()
-    {
-
-        Jpol += Jep;
-
-        //        std::cerr << "diffObjFunc: ";
-        //        std::cerr << diffObjFunc[0].t();
-        //        std::cout << "DLogDist(rho):";
-        //        std::cerr << dlogdist.t();
-        //        std::cout << "Jep:";
-        //        std::cerr << Jep.t() << std::endl;
-
-        //--- save actual policy performance
-        currentItStats->individuals[polCount].Jvalues[epiCount] = Jep;
-        //---
-
-
-        //last episode is the number epiCount+1
-        epiCount++;
-        //check evaluation of actual policy
-        if (epiCount == nbEpisodesToEvalPolicy)
-        {
-            afterPolicyEstimate();
-            epiCount = 0; //reset episode counter
-            Jpol = 0.0; //reset policy value
-            polCount++; //until now polCount policies have been analyzed
-        }
-
-
-        if (polCount == nbPoliciesToEvalMetap)
-        {
-            //all policies have been evaluated
-            //conclude gradient estimate and update the distribution
-            afterMetaParamsEstimate();
-
-            //reset counters and gradient
-            polCount = 0; //reset policy counter
-            epiCount = 0; //reset episode counter
-            runCount++; //update run counter
-            output2LogReady = true; //output must be ready for log
-        }
-    }
+    virtual ~PGPE() {}
 
     inline virtual void setNormalization(bool flag)
     {
@@ -192,57 +61,6 @@ public:
     {
         return this->useDirection;
     }
-
-    virtual AgentOutputData* getAgentOutputDataEnd()
-    {
-        if (output2LogReady)
-        {
-            //output is ready, activate flag
-            output2LogReady = false;
-            return currentItStats;
-        }
-        return nullptr;
-    }
-
-
-protected:
-    virtual void init() = 0;
-    virtual void afterPolicyEstimate() = 0;
-    virtual void afterMetaParamsEstimate() = 0;
-
-protected:
-    DistributionC& dist;
-    ParametricPolicy<ActionC,StateC>& policy;
-    unsigned int nbEpisodesToEvalPolicy, nbPoliciesToEvalMetap;
-    unsigned int runCount, epiCount, polCount;
-    double df, step_length;
-    double Jep, Jpol;
-    int rewardId;
-    arma::vec diffObjFunc;
-    std::vector<arma::vec> history_dlogsist;
-    arma::vec history_J;
-
-
-    bool useDirection, useBaseline, output2LogReady;
-    AgentOutputC* currentItStats;
-
-};
-
-template<class ActionC, class StateC>
-class PGPE: public BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
-{
-    typedef BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats> Base;
-public:
-    PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
-         bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
-        b_num(0.0), b_den(0.0)
-    {
-    }
-
-    virtual ~PGPE() {}
 
 protected:
     virtual void init()
@@ -295,7 +113,7 @@ protected:
         Base::currentItStats->metaGradient = Base::diffObjFunc;
         //---------
 
-        if (Base::useDirection)
+        if (useDirection)
             Base::diffObjFunc = arma::normalise(Base::diffObjFunc);
         Base::diffObjFunc *= Base::step_length;
 
@@ -313,6 +131,7 @@ protected:
 
 private:
     double b_num, b_den;
+    bool useDirection;
 };
 
 } //end namespace
