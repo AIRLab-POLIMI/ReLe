@@ -142,22 +142,24 @@ int main(int argc, char *argv[])
     //--- distribution setup
     int nparams = basis.size();
     //----- ParametricNormal
+    //        arma::vec mean(nparams, fill::zeros);
+    //        arma::mat cov(nparams, nparams, arma::fill::eye);
+    //        ParametricNormal dist(mean, cov);
+    //----- ParametricLogisticNormal
+    ParametricLogisticNormal dist(nparams, 1);
+    //----- ParametricCholeskyNormal
     //    arma::vec mean(nparams, fill::zeros);
     //    arma::mat cov(nparams, nparams, arma::fill::eye);
-    //    ParametricNormal dist(mean, cov);
-    //----- ParametricLogisticNormal
-    //    ParametricLogisticNormal dist(nparams, 1);
-    //----- ParametricCholeskyNormal
-    arma::vec mean(nparams, fill::zeros);
-    arma::mat cov(nparams, nparams, arma::fill::eye);
-    mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(mean, cholMtx);
+    //    mat cholMtx = chol(cov);
+    //    ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-//    vec mean(nparams, fill::zeros);
-//    vec sigmas(nparams, fill::ones);
-//    ParametricDiagonalNormal dist(mean, sigmas);
+    //    vec mean(nparams, fill::zeros);
+    //    vec sigmas(nparams, fill::ones);
+    //    ParametricDiagonalNormal dist(mean, sigmas);
     //-----
     //---
+
+    cout << "## MetaDistribution: " << dist.getDistributionName() << endl;
 
 
     int nbepperpol = 1, nbpolperupd = 300;

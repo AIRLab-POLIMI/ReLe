@@ -29,6 +29,11 @@ public:
     virtual arma::vec operator() ();
     virtual double operator() (arma::vec &point);
 
+    virtual inline std::string getDistributionName()
+    {
+        return "ParametricNormal";
+    }
+
     // DifferentiableDistribution interface
 public:
 
@@ -109,6 +114,11 @@ public:
     virtual ~ParametricDiagonalNormal()
     {}
 
+    virtual inline std::string getDistributionName()
+    {
+        return "ParametricDiagonalNormal";
+    }
+
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
@@ -174,6 +184,11 @@ public:
     virtual ~ParametricLogisticNormal()
     {}
 
+    virtual inline std::string getDistributionName()
+    {
+        return "ParametricLogisticNormal";
+    }
+
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
@@ -224,6 +239,11 @@ public:
 
     virtual ~ParametricCholeskyNormal()
     {}
+
+    virtual inline std::string getDistributionName()
+    {
+        return "ParametricCholeskyNormal";
+    }
 
     // DifferentiableDistribution interface
 public:

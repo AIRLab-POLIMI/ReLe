@@ -67,6 +67,8 @@ public:
         return pointSize;
     }
 
+    virtual std::string getDistributionName() = 0;
+
 protected:
     unsigned int pointSize;
 
