@@ -184,9 +184,9 @@ int main(int argc, char *argv[])
 
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-                fm.addPath("Deep.log"),
-                WriteStrategy<FiniteAction, DenseState>::AGENT,
-                true /*delete file*/
+        fm.addPath("Deep.log"),
+        WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
     );
 
     int horiz = mdp.getSettings().horizon;
