@@ -93,10 +93,10 @@ private:
 class REPSOutputData : public BlackBoxOutputData<BlackBoxPolicyIndividual>
 {
 public:
-	REPSOutputData(unsigned int nbIndividual, unsigned int nbParams,
-					unsigned int nbEvals);
-	virtual void writeData(std::ostream& os);
-	virtual void writeDecoratedData(std::ostream& os);
+    REPSOutputData(unsigned int nbIndividual, unsigned int nbParams,
+                   unsigned int nbEvals);
+    virtual void writeData(std::ostream& os);
+    virtual void writeDecoratedData(std::ostream& os);
 
 private:
 

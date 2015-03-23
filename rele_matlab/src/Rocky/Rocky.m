@@ -30,10 +30,9 @@ disp('Plotting trajectories...')
 
 for i=1:100:size(episodes, 1)
     x = episodes(i).x;
-    xn = episodes(i).xn;
     
-    traj = [x(:, 1:2); xn(end, 1:2)];
-    rockytraj = traj + [x(:, 6:7); xn(end, 6:7)];
+    traj = x(:, 1:2);
+    rockytraj = traj + x(:, 6:7);
 
     figure(1)
     hold on;

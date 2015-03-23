@@ -38,7 +38,7 @@ template<class ActionC, class StateC, class DistributionC>
 class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
 {
 
-	USE_BBA_MEMBERS(REPSOutputData);
+    USE_BBA_MEMBERS(REPSOutputData);
 
 public:
     REPS(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
