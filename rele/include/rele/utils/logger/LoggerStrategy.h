@@ -203,8 +203,8 @@ public:
             if(first)
             {
                 Transition<ActionC, StateC>& sample = samples[0];
-                ofs << sample.x.serializedSize()  << ", "
-                    << sample.u.serializedSize()  << ", "
+                ofs << sample.x.serializedSize()  << ","
+                    << sample.u.serializedSize()  << ","
                     << sample.r.size()  << std::endl;
 
                 first = false;
@@ -214,13 +214,18 @@ public:
             size_t index = 0;
             for(auto& sample : samples)
             {
-                index++;
                 ofs << sample.x  << ","
+                    << "0,0,"
                     << sample.u  << ","
-                    << sample.xn << ","
-                    << sample.r  << ","
-                    << sample.xn.isAbsorbing() << ","
-                    << (index == total) << std::endl;
+                    << sample.r  << std::endl;
+
+                index++;
+                if(index == total)
+                {
+                    ofs  << sample.xn << ","
+                         << sample.xn.isAbsorbing() << ","
+                         << (index == total) << std::endl;
+                }
             }
 
             ofs.close();

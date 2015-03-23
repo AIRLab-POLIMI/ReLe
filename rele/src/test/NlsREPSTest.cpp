@@ -43,9 +43,9 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	/*FileManager fm("NLS", "REPS");
-	fm.createDir();
-	fm.cleanDir();*/
+    /*FileManager fm("NLS", "REPS");
+    fm.createDir();
+    fm.cleanDir();*/
 
     NLS mdp;
     //with these settings

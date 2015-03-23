@@ -31,8 +31,8 @@ namespace ReLe
 {
 
 AbstractREPSOutputData::AbstractREPSOutputData(int N, double eps,
-			const string& policyName, bool final) :
-			AgentOutputData(final), N(N), eps(eps), policyName(policyName)
+        const string& policyName, bool final) :
+    AgentOutputData(final), N(N), eps(eps), policyName(policyName)
 {
 
 }
@@ -44,38 +44,38 @@ AbstractREPSOutputData::~AbstractREPSOutputData()
 
 void AbstractREPSOutputData::writeInfo(ostream& os)
 {
-	os << "eps: " << eps << endl;
-	os << "N: " << N << endl;
-	os << policyName << endl;
+    os << "eps: " << eps << endl;
+    os << "N: " << N << endl;
+    os << policyName << endl;
 }
 
 void AbstractREPSOutputData::writeDecoratedInfo(ostream& os)
 {
-	os << "- Parameters" << endl;
-	os << "eps: " << eps << endl;
-	os << "N: " << N << endl;
-	os << "- Policy" << endl;
-	os << "Using " << policyName << " policy" << endl << endl;
+    os << "- Parameters" << endl;
+    os << "eps: " << eps << endl;
+    os << "N: " << N << endl;
+    os << "- Policy" << endl;
+    os << "Using " << policyName << " policy" << endl << endl;
 }
 
 TabularREPSOutputData::TabularREPSOutputData(int N, double eps,
-			const string& policyPrinted, bool final) :
-			AbstractREPSOutputData(N, eps, "Tabular", final),
-			policyPrinted(policyPrinted)
+        const string& policyPrinted, bool final) :
+    AbstractREPSOutputData(N, eps, "Tabular", final),
+    policyPrinted(policyPrinted)
 {
 
 }
 
 void TabularREPSOutputData::writeData(ostream& os)
 {
-	writeInfo(os);
-	os << policyPrinted << endl; //TODO change this
+    writeInfo(os);
+    os << policyPrinted << endl; //TODO change this
 }
 
 void TabularREPSOutputData::writeDecoratedData(ostream& os)
 {
-	writeDecoratedInfo(os);
-	os << policyPrinted << endl;
+    writeDecoratedInfo(os);
+    os << policyPrinted << endl;
 }
 
 TabularREPSOutputData::~TabularREPSOutputData()
@@ -133,29 +133,29 @@ TabularREPSOutputData::~TabularREPSOutputData()
  */
 
 REPSOutputData::REPSOutputData(unsigned int nbIndividual,
-			unsigned int nbParams, unsigned int nbEvals) :
-			BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
+                               unsigned int nbParams, unsigned int nbEvals) :
+    BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
 {
 
 }
 
 void REPSOutputData::writeData(ostream& os)
 {
-	    CSVutils::vectorToCSV(metaParams, os);
+    CSVutils::vectorToCSV(metaParams, os);
 
-	    os << individuals.size() << endl;
+    os << individuals.size() << endl;
 
-	    for (auto& individual : individuals)
-	    {
-	    	CSVutils::vectorToCSV(individual.Pparams, os);
-	    	CSVutils::vectorToCSV(individual.Jvalues, os);
-	    }
+    for (auto& individual : individuals)
+    {
+        CSVutils::vectorToCSV(individual.Pparams, os);
+        CSVutils::vectorToCSV(individual.Jvalues, os);
+    }
 }
 
 void REPSOutputData::writeDecoratedData(ostream& os)
 {
-	//TODO implement
-	writeData(os);
+    //TODO implement
+    writeData(os);
 }
 
 }

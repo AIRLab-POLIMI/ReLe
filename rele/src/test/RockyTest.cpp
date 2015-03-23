@@ -105,9 +105,9 @@ private:
 
 int main(int argc, char *argv[])
 {
-	FileManager fm("Rocky", "REPS");
-	fm.createDir();
-	fm.cleanDir();
+    FileManager fm("Rocky", "REPS");
+    fm.createDir();
+    fm.cleanDir();
 
     Rocky rocky;
 
@@ -161,9 +161,6 @@ int main(int argc, char *argv[])
     core.runTestEpisode();
 
     delete core.getSettings().loggerStrategy;
-
-    cout << dist.getMean().t() << endl;
-    cout << dist.getCovariance() << endl;
 
     return 0;
 

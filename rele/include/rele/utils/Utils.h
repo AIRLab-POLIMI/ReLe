@@ -83,7 +83,7 @@ public:
             bool ok = arma::svd(U, s, V, M);
 
             if(!ok)
-            	throw std::runtime_error("Bad Covariance Matrix, SVD failed");
+                throw std::runtime_error("Bad Covariance Matrix, SVD failed");
 
             arma::mat H = V*arma::diagmat(s)*V.t();
 

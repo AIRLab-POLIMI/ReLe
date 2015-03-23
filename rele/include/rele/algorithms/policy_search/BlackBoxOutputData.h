@@ -34,13 +34,13 @@ namespace ReLe
 
 struct BlackBoxPolicyIndividual
 {
-	BlackBoxPolicyIndividual(unsigned int nbParams, unsigned int nbEvals) :
-				Pparams(nbParams), Jvalues(nbEvals)
-	{
-	}
+    BlackBoxPolicyIndividual(unsigned int nbParams, unsigned int nbEvals) :
+        Pparams(nbParams), Jvalues(nbEvals)
+    {
+    }
 
-	arma::vec Pparams;  //policy parameters
-	arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
+    arma::vec Pparams;  //policy parameters
+    arma::vec Jvalues;  //policy evaluation (n evaluations for each policy)
 };
 
 template<class IndividualsClass>
@@ -48,16 +48,16 @@ class BlackBoxOutputData: public AgentOutputData
 {
 
 public:
-	BlackBoxOutputData(unsigned int nbIndividual, unsigned int nbParams,
-				unsigned int nbEvals) :
-				AgentOutputData(true)
-	{
-		individuals.assign(nbIndividual, IndividualsClass(nbParams, nbEvals));
-	}
+    BlackBoxOutputData(unsigned int nbIndividual, unsigned int nbParams,
+                       unsigned int nbEvals) :
+        AgentOutputData(true)
+    {
+        individuals.assign(nbIndividual, IndividualsClass(nbParams, nbEvals));
+    }
 
 public:
-	arma::vec metaParams;
-	std::vector<IndividualsClass> individuals;
+    arma::vec metaParams;
+    std::vector<IndividualsClass> individuals;
 
 };
 
