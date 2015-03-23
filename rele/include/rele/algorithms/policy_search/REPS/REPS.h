@@ -75,8 +75,9 @@ protected:
         //setup optimization algorithm
         optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, 1);
         optimizator.set_min_objective(REPS::wrapper, this);
-        optimizator.set_xtol_rel(0.1);
-        optimizator.set_ftol_rel(0.1);
+        optimizator.set_xtol_rel(1e-8);
+        optimizator.set_ftol_rel(1e-12);
+        optimizator.set_maxeval(300 * 10);
 
         std::vector<double> lowerBounds(1, std::numeric_limits<double>::epsilon());
         optimizator.set_lower_bounds(lowerBounds);
@@ -94,6 +95,10 @@ protected:
 
     virtual void afterMetaParamsEstimate()
     {
+        //--- Update current data
+        currentItStats->covariance = dist.getCovariance();
+        //---
+
         //optimize function
         updatePolicy();
 
@@ -137,14 +142,24 @@ protected:
 
         //update parameters
         etaOpt = newParameters.back();
+//        std::cout << etaOpt << std::endl;
+//        std::cout << optimizator.last_optimum_value() << std::endl;
+
+        //--- save eta value
+        currentItStats->eta = etaOpt;
+        //---
 
         //Compute weights
         arma::vec d(history_J.size());
         for (unsigned int i = 0; i < history_J.size(); i++)
         {
-            double r = history_J[i] - maxJ; //TODO check this
+            double r = history_J[i] - maxJ;
             d[i] = exp(r / etaOpt);
         }
+
+        char ddd[455];
+        sprintf(ddd,"/tmp/d%d.dat",runCount);
+        d.save(ddd, arma::raw_ascii);
 
         //Compute weights sums
         double dSum = sum(d);

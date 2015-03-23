@@ -31,7 +31,7 @@ classdef REPS_Solver < handle
             update(obj, d, Delta);
         end
         
-        function [d, divKL] = optimize(obj, J)
+        function [d, divKL,eta] = optimize(obj, J)
             % Optimization problem settings
             options = optimset('GradObj', 'on', ...
                 'Display', 'off', ...

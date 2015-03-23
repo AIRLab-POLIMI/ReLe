@@ -14,7 +14,13 @@ for i=1:individualsN
     iteration.policies(i).J = csv(index, 1);
 end
 
-index = index + 1; %go to next episode
+index = index + 1;
+iteration.eta = csv(index, 1);
+
+index = index + 1;
+iteration.covariance = csv(index:index+length(iteration.metaParams)-1, :);
+
+index = index + length(iteration.metaParams); %go to next episode
 
 
 end

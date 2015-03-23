@@ -150,6 +150,9 @@ void REPSOutputData::writeData(ostream& os)
         CSVutils::vectorToCSV(individual.Pparams, os);
         CSVutils::vectorToCSV(individual.Jvalues, os);
     }
+
+    os << eta << std::endl;
+    CSVutils::matrixToCSV(covariance, os);
 }
 
 void REPSOutputData::writeDecoratedData(ostream& os)

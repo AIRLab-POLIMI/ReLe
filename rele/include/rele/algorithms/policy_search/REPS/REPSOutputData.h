@@ -98,8 +98,9 @@ public:
     virtual void writeData(std::ostream& os);
     virtual void writeDecoratedData(std::ostream& os);
 
-private:
-
+public:
+    double eta;
+    arma::mat covariance;
 };
 
 
