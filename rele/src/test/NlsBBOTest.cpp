@@ -24,12 +24,14 @@
 #include "NLS.h"
 #include "policy_search/PGPE/PGPE.h"
 #include "policy_search/NES/NES.h"
+#include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "RandomGenerator.h"
+#include "FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -44,6 +46,10 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
+    FileManager fm("Nls", "BBO");
+    fm.createDir();
+    fm.cleanDir();
+
     NLS mdp;
     //with these settings
     //max in ( many optimal points ) -> J = 8.5
@@ -97,13 +103,12 @@ int main(int argc, char *argv[])
     //    arma::mat cov(nparams, nparams, arma::fill::eye);
     //    ParametricNormal dist(mean, cov);
     //----- ParametricLogisticNormal
-    ParametricLogisticNormal dist(mean, zeros(nparams), 1);
+    //    ParametricLogisticNormal dist(mean, zeros(nparams), 1);
     //----- ParametricCholeskyNormal
-    //    arma::mat cov(nparams, nparams, arma::fill::eye);
-    //    mat cholMtx = chol(cov);
-    //    ParametricCholeskyNormal dist(mean, cholMtx);
+    arma::mat cov(nparams, nparams, arma::fill::eye);
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-    //    vec mean(nparams, fill::zeros);
     //    vec sigmas(nparams, fill::ones);
     //    ParametricDiagonalNormal dist(mean, sigmas);
     //-----
@@ -111,28 +116,30 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 1, nbpolperupd = 40;
     bool usebaseline = true;
-//    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
-//    agent.setNormalization(true);
-    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
+    //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
+    //    agent.setNormalization(true);
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    //    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+    //    agent.setEps(0.3);
 
 
-//    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
-//    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
+    //    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
+    //    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
 
-    const std::string outfile = "nls_bbo_out.txt";
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        outfile, WriteStrategy<DenseAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
+                fm.addPath("Nls.log"),
+                WriteStrategy<DenseAction, DenseState>::AGENT,
+                true /*delete file*/
+                );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 100;
+    int nbUpdates = 400;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
-    every = bevery = 0.01; //%
+    every = bevery = 0.1; //%
     int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
@@ -161,9 +168,9 @@ int main(int argc, char *argv[])
     //--- collect some trajectories
     const std::string testOutfile = "nls_bbo_final_trajectories.csv";
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        testOutfile, WriteStrategy<DenseAction, DenseState>::TRANS,
-        true /*delete file*/
-    );
+                testOutfile, WriteStrategy<DenseAction, DenseState>::TRANS,
+                true /*delete file*/
+                );
     for (int n = 0; n < 100; ++n)
         core.runTestEpisode();
     //---
