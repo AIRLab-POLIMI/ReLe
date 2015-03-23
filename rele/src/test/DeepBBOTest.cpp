@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 2;
+    int nbUpdates = 40;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
     every = bevery = 0.01; //%

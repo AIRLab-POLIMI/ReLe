@@ -157,9 +157,9 @@ protected:
             d[i] = exp(r / etaOpt);
         }
 
-        char ddd[455];
-        sprintf(ddd,"/tmp/d%d.dat",runCount);
-        d.save(ddd, arma::raw_ascii);
+//        char ddd[455];
+//        sprintf(ddd,"/tmp/d%d.dat",runCount);
+//        d.save(ddd, arma::raw_ascii);
 
         //Compute weights sums
         double dSum = sum(d);
