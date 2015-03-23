@@ -31,6 +31,7 @@
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
 #include "RandomGenerator.h"
+#include "FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -99,6 +100,10 @@ class deep_state_identity: public BasisFunction
 
 int main(int argc, char *argv[])
 {
+    FileManager fm("Deep", "BBO");
+    fm.createDir();
+    fm.cleanDir();
+
     DeepSeaTreasure mdp;
     vector<FiniteAction> actions;
     for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
@@ -177,17 +182,17 @@ int main(int argc, char *argv[])
     //    double stepnb = (3.0/5.0)*(3+log(nparams))/(nparams*sqrt(nparams));
     //    xNES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
 
-    const std::string outfile = "deep_bbo_out.txt";
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        outfile, WriteStrategy<FiniteAction, DenseState>::AGENT,
-        true /*delete file*/
+                fm.addPath("Deep.log"),
+                WriteStrategy<FiniteAction, DenseState>::AGENT,
+                true /*delete file*/
     );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 1000;
+    int nbUpdates = 1;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
     every = bevery = 0.01; //%
