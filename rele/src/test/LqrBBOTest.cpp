@@ -21,13 +21,13 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NLS.h"
+#include "LQR.h"
 #include "policy_search/PGPE/PGPE.h"
 #include "policy_search/NES/NES.h"
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
+#include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "RandomGenerator.h"
@@ -46,89 +46,52 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("Nls", "BBO");
+    FileManager fm("LQR", "BBO");
     fm.createDir();
     fm.cleanDir();
 
-    NLS mdp;
-    //with these settings
-    //max in ( many optimal points ) -> J = 8.5
-    //note that there are multiple optimal solutions
-    //e.g.
-    //-3.2000    8.8000    8.4893
-    //-3.2000    9.3000    8.4959
-    //-3.2000    9.5000    8.4961
-    //-3.4000   10.0000    8.5007
-    //-3.2000    9.4000    8.5020
-    //-3.1000    8.8000    8.5028
-    //-3.4000    9.7000    8.5041
-    //-3.0000    8.1000    8.5205
-    //-2.9000    7.7000    8.5230
-    //-3.1000    9.1000    8.5243
-    //-2.8000    7.3000    8.5247
+    LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
-    int dim = mdp.getSettings().continuosStateDim;
-
-    //--- define policy (low level)
+    PolynomialFunction* pf = new PolynomialFunction(1,1);
+    cout << *pf << endl;
     DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1,dim);
-    delete basis.at(0);
-    basis.erase(basis.begin());
-    cout << "--- Mean regressor ---" << endl;
+    basis.push_back(pf);
     cout << basis << endl;
-    LinearApproximator meanRegressor(dim, basis);
-
-    DenseBasisVector stdBasis;
-    stdBasis.generatePolynomialBasisFunctions(1,dim);
-    delete stdBasis.at(0);
-    stdBasis.erase(stdBasis.begin());
-    cout << "--- Standard deviation regressor ---" << endl;
-    cout << stdBasis << endl;
-    LinearApproximator stdRegressor(dim, stdBasis);
-    arma::vec stdWeights(stdRegressor.getParametersSize());
-    stdWeights.fill(0.5);
-    stdRegressor.setParameters(stdWeights);
-
-
-    NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
-    //---
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+    DetLinearPolicy<DenseState> policy(&regressor);
 
     //--- distribution setup
     int nparams = basis.size();
     arma::vec mean(nparams, fill::zeros);
-    mean[0] = -0.42;
-    mean[1] =  0.42;
+    mean[0] = -0.1;
 
     //----- ParametricNormal
     //    arma::mat cov(nparams, nparams, arma::fill::eye);
+    //    cov *= 0.1;
     //    ParametricNormal dist(mean, cov);
     //----- ParametricLogisticNormal
     //    ParametricLogisticNormal dist(mean, zeros(nparams), 1);
     //----- ParametricCholeskyNormal
-    arma::mat cov(nparams, nparams, arma::fill::eye);
-    mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(mean, cholMtx);
+    //    arma::mat cov(nparams, nparams, arma::fill::eye);
+    //    mat cholMtx = chol(cov);
+    //    ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-    //    vec sigmas(nparams, fill::ones);
-    //    ParametricDiagonalNormal dist(mean, sigmas);
+    vec sigmas(nparams, fill::ones);
+    ParametricDiagonalNormal dist(mean, sigmas);
     //-----
     //---
 
-    int nbepperpol = 1, nbpolperupd = 40;
-    bool usebaseline = true;
-    //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
+    int nbepperpol = 1, nbpolperupd = 100;
+    bool usebaseline = false;
+    //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.002, usebaseline);
     //    agent.setNormalization(true);
-    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
-    //    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    //    agent.setEps(0.3);
-
-
-    //    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
-    //    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.5, usebaseline);
+    //        REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+    //        agent.setEps(0.5);
 
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath("Nls.log"),
+        fm.addPath("LQR.log"),
         WriteStrategy<DenseAction, DenseState>::AGENT,
         true /*delete file*/
     );
@@ -136,7 +99,7 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 400;
+    int nbUpdates = 600;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
     every = bevery = 0.1; //%
@@ -167,13 +130,12 @@ int main(int argc, char *argv[])
 
     //--- collect some trajectories
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath("NlsFinal.log"),
+        fm.addPath("LQRFinal.log"),
         WriteStrategy<DenseAction, DenseState>::TRANS,
         true /*delete file*/
     );
     for (int n = 0; n < 100; ++n)
         core.runTestEpisode();
     //---
-
     return 0;
 }

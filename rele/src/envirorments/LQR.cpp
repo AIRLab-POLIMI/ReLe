@@ -63,7 +63,7 @@ void LQR::getInitialState(DenseState& state)
 {
     for (unsigned int i = 0, ie = Q.size(); i < ie; ++i)
     {
-        currentState[i] = RandomGenerator::sampleUniform(-20,20);
+        currentState[i] = -10;//RandomGenerator::sampleUniform(-20,20);
     }
     currentState.setAbsorbing(false);
 

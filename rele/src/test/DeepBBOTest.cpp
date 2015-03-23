@@ -223,9 +223,9 @@ int main(int argc, char *argv[])
     cout << core.runBatchTest(1000) << endl;
 
     //--- collect some trajectories
-    const std::string testOutfile = "deep_bbo_final_trajectories.csv";
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        testOutfile, WriteStrategy<FiniteAction, DenseState>::TRANS,
+        fm.addPath("DeepFinal.log"),
+        WriteStrategy<FiniteAction, DenseState>::TRANS,
         true /*delete file*/
     );
     for (int n = 0; n < 100; ++n)

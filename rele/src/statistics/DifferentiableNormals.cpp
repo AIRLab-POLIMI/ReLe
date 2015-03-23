@@ -692,7 +692,7 @@ arma::vec ParametricCholeskyNormal::getParameters()
     int rowi = 0, coli = 0;
     for (unsigned i = 0; i < dim-pointSize; ++i)
     {
-        params(pointSize+1) = cholCov(rowi,coli);
+        params(pointSize+i) = cholCov(rowi,coli);
         rowi++;
         if (rowi > coli)
         {
