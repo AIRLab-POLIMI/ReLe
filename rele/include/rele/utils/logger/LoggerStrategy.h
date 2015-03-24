@@ -223,8 +223,8 @@ public:
                 if(index == total)
                 {
                     ofs  << "1,"
-						 << sample.xn.isAbsorbing() << ","
-                         << sample.xn << "," << std::endl;
+                         << sample.xn.isAbsorbing() << ","
+                         << sample.xn << std::endl;
                 }
             }
 
