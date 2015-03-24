@@ -3,16 +3,17 @@ function [ episodes ] = readDataset(A)
 %   This function takes in input a CSV dataset, and format it as a cell
 %   array containing (x, u, xn, r, absorbing, last) for each episode
 
+
 ds = A(1,1);
 da = A(1,2);
 dr = A(1,3);
 
-xStart = 1;
-xEnd = ds;
-absorbingCol = ds+1;
-finalCol = ds+2;
-uStart = finalCol+1;
-uEnd = finalCol+da;
+finalCol = 1;
+absorbingCol = 2;
+xStart = absorbingCol+1;
+xEnd = absorbingCol+ds;
+uStart = xEnd+1;
+uEnd = xEnd+da;
 rStart = uEnd+1;
 rEnd = uEnd+dr;
 

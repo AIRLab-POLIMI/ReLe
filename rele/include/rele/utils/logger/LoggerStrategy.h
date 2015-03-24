@@ -214,17 +214,17 @@ public:
             size_t index = 0;
             for(auto& sample : samples)
             {
-                ofs << sample.x  << ","
-                    << "0,0,"
+                ofs << "0,0,"
+                    << sample.x  << ","
                     << sample.u  << ","
                     << sample.r  << std::endl;
 
                 index++;
                 if(index == total)
                 {
-                    ofs  << sample.xn << ","
-                         << sample.xn.isAbsorbing() << ","
-                         << (index == total) << std::endl;
+                    ofs  << "1,"
+						 << sample.xn.isAbsorbing() << ","
+                         << sample.xn << "," << std::endl;
                 }
             }
 
