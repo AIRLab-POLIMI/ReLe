@@ -276,8 +276,9 @@ void TabularREPS::init()
     //setup optimization algorithm
     optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, thetaOpt.size() + 1);
     optimizator.set_min_objective(TabularREPS::wrapper, this);
-    optimizator.set_xtol_rel(0.1);
-    optimizator.set_ftol_rel(0.1);
+    optimizator.set_xtol_rel(1e-8);
+    optimizator.set_ftol_rel(1e-12);
+    optimizator.set_maxeval(300 * 10);
 
     std::vector<double> lowerBounds(thetaOpt.size() + 1,
                                     -std::numeric_limits<double>::infinity());

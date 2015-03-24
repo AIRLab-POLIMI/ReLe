@@ -74,8 +74,8 @@ template<class ActionC, class StateC>
 class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    PrintStrategy(bool logTransitions = true) :
-        logTransitions(logTransitions)
+    PrintStrategy(bool logTransitions = true, bool logAgent = true) :
+        logTransitions(logTransitions), logAgent(logAgent)
     {
 
     }
@@ -96,19 +96,22 @@ public:
 
     void processData(std::vector<AgentOutputData*>& outputData)
     {
-        for(auto data : outputData)
+        if(logAgent)
         {
-            if(data->isFinal())
+            for(auto data : outputData)
             {
-                std::cout << "--- Agent data at episode end ---" << std::endl;
-            }
-            else
-            {
-                std::cout << "--- Agent data at step " << data->getStep() << " ---";
-                std::cout << std::endl;
-            }
+                if(data->isFinal())
+                {
+                    std::cout << "--- Agent data at episode end ---" << std::endl;
+                }
+                else
+                {
+                    std::cout << "--- Agent data at step " << data->getStep() << " ---";
+                    std::cout << std::endl;
+                }
 
-            data->writeDecoratedData(std::cout);
+                data->writeDecoratedData(std::cout);
+            }
         }
 
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
@@ -149,6 +152,7 @@ private:
 
 private:
     bool logTransitions;
+    bool logAgent;
     StateStatisticGenerator<StateC> stateStatisticsGenerator;
 
 };

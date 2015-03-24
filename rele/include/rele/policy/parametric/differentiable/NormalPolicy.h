@@ -180,10 +180,10 @@ public:
      */
     MVNPolicy(LinearApproximator* projector) :
         approximator(projector),
-        mMean(projector->GetOutputSize(), arma::fill::zeros),
+        mMean(projector->getOutputSize(), arma::fill::zeros),
         clearRegressorOnExit(false)
     {
-        int output_dim = projector->GetOutputSize();
+        int output_dim = projector->getOutputSize();
         mCovariance.eye(output_dim, output_dim);
         mCinv = arma::inv(mCovariance);
         mCholeskyDec = arma::chol(mCovariance);
@@ -206,10 +206,10 @@ public:
     MVNPolicy(LinearApproximator* projector,
               std::initializer_list<double> initialCov) :
         approximator(projector),
-        mMean(projector->GetOutputSize(), arma::fill::zeros),
+        mMean(projector->getOutputSize(), arma::fill::zeros),
         clearRegressorOnExit(false)
     {
-        int output_dim = projector->GetOutputSize();
+        int output_dim = projector->getOutputSize();
         mCovariance.zeros(output_dim, output_dim);
         int row = 0, col = 0;
         for (double x : initialCov)
@@ -228,10 +228,10 @@ public:
 
     MVNPolicy(LinearApproximator* projector, double* covariance) :
         approximator(projector),
-        mMean(projector->GetOutputSize(), arma::fill::zeros),
+        mMean(projector->getOutputSize(), arma::fill::zeros),
         clearRegressorOnExit(false)
     {
-        int output_dim = projector->GetOutputSize();
+        int output_dim = projector->getOutputSize();
         mCovariance.zeros(output_dim, output_dim);
         for (int i = 0; i < output_dim; ++i)
         {

@@ -51,7 +51,9 @@ int main(int argc, char *argv[])
     Core<FiniteAction, FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;
+    core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(true, false);
     cout << "starting episode" << endl;
     core.runEpisode();
+    delete core.getSettings().loggerStrategy;
 
 }

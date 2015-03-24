@@ -14,6 +14,7 @@ if(catkin_FOUND)
                                 include/rele/envirorments
                                 include/rele/approximators
                                 include/rele/statistics
+                                include/rele/IRL
 	               LIBRARIES rele)
 	set(CATKIN_MSG TRUE)
 else()
@@ -33,7 +34,8 @@ include_directories(include/rele/core
                     include/rele/algorithms
                     include/rele/envirorments
                     include/rele/approximators
-                    include/rele/statistics)
+                    include/rele/statistics
+                    include/rele/IRL)
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -143,6 +145,9 @@ target_link_libraries(dist2mat rele)
 
 add_executable(offpol_data src/test/OffPolicyTest.cpp)
 target_link_libraries(offpol_data rele)
+
+add_executable(pr_mdp src/test/ParametricRewardMDPTest.cpp)
+target_link_libraries(pr_mdp rele)
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

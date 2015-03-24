@@ -45,12 +45,12 @@ public:
     {
     }
 
-    int GetOutputSize()
+    int getOutputSize()
     {
         return outputDimension;
     }
 
-    int GetInputSize()
+    int getInputSize()
     {
         return inputDimension;
     }
