@@ -334,6 +334,79 @@ public:
     TrajectoryData<ActionC, StateC> data;
 };
 
+template<class ActionC, class StateC>
+class MatlabCollectorStrategy : public LoggerStrategy<ActionC, StateC>
+{
+public:
+
+    struct MatlabEpisode
+    {
+        double* states, actions, nextstates, rewards;
+        signed char* absorb;
+        int dx,du,dr,steps;
+    };
+
+    virtual void processData(
+        std::vector<Transition<ActionC, StateC>>& samples)
+    {
+        int ds = samples[0].x.n_elem;
+        int da = samples[0].u.n_elem;
+        int dr = samples[0].r.size();
+        int nsteps = samples.size();
+        double* states     = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
+        double* nextstates = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
+        double* actions    = static_cast<double*>(malloc(da*nsteps*sizeof(double)));
+        double* rewards    = static_cast<double*>(malloc(dr*nsteps*sizeof(double)));
+        int* absorb        = static_cast<int*>(calloc(nsteps, sizeof(signed char)));
+        int count = 0;
+        for (auto sample : samples)
+        {
+            for (int i = 0; i < ds; ++i)
+            {
+                states[count*ds+i] = sample.x[i];
+                nextstates[count*ds+i] = sample.xn[i];
+            }
+            for (int i = 0; i < da; ++i)
+            {
+                actions[count*da+i] = sample.u[i];
+            }
+            for (int i = 0; i < dr; ++i)
+            {
+                rewards[count*dr+i] = sample.r[i];
+            }
+            count++;
+        }
+        if (samples[nsteps-1].xn.isAbsorbing())
+        {
+            absorb[nsteps-1] = 1;
+        }
+
+        MatlabEpisode ep;
+        ep.states = states;
+        ep.actions = actions;
+        ep.nextstates = nextstates;
+        ep.absorb = absorb;
+        ep.dx = ds;
+        ep.du = da;
+        ep.dr = dr;
+        ep.steps = nsteps;
+
+        data.push_back(ep);
+    }
+
+    virtual void processData(std::vector<AgentOutputData*>& data)
+    {
+        //TODO evaluation here or abstract class...
+        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
+    }
+
+    virtual ~MatlabCollectorStrategy()
+    {
+    }
+
+    std::vector<MatlabEpisode> data;
+};
+
 }
 
 #endif /* INCLUDE_RELE_UTILS_LOGGERSTRATEGY_H_ */
