@@ -101,6 +101,9 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     // return samples
     SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);
 
+	cout << "PROVAAAA" << endl;
+	return;
+
     for (int i = 0, ie = data.size(); i < ie; ++i)
     {
 	int steps = data[i].steps;
