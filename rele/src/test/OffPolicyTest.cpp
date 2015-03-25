@@ -22,15 +22,16 @@
  */
 
 #include "DeepSeaTreasure.h"
-#include "policy_search/NES/NES.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 #include "parametric/differentiable/GibbsPolicy.h"
+#include "policy_search/offpolicy/OffAlgorithm.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
 #include "RandomGenerator.h"
+#include "FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -72,6 +73,10 @@ class deep_state_identity: public BasisFunction
 
 int main(int argc, char *argv[])
 {
+    FileManager fm("Offpolicy", "Deep");
+    fm.createDir();
+    fm.cleanDir();
+
     DeepSeaTreasure mdp;
     vector<FiniteAction> actions;
     for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
@@ -109,27 +114,60 @@ int main(int argc, char *argv[])
     //    cout << basis << endl;
     //    cout << "basis length: " << basis.size() << endl;
 
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
-    ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1e8);
+    LinearApproximator behav_regressor(mdp.getSettings().continuosStateDim + 1, basis);
+    ParametricGibbsPolicy<DenseState> behavioral(actions, &behav_regressor, 1);
+
+    LinearApproximator target_regressor(mdp.getSettings().continuosStateDim + 1, basis);
+    ParametricGibbsPolicy<DenseState> target(actions, &target_regressor, 1);
     //---
 
     PolicyEvalAgent
-    <FiniteAction,DenseState,ParametricGibbsPolicy<DenseState> >
-    agent(policy);
+    <FiniteAction,DenseState,ParametricGibbsPolicy<DenseState> > agent(behavioral);
 
-    const std::string outfile = "deep_bbo_out.txt";
-    ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
+    ReLe::Core<FiniteAction, DenseState> oncore(mdp, agent);
     CollectorStrategy<FiniteAction, DenseState>* strat = new CollectorStrategy<FiniteAction, DenseState>();
-    core.getSettings().loggerStrategy = strat;
+    oncore.getSettings().loggerStrategy = strat;
 
     int horiz = mdp.getSettings().horizon;
-    core.getSettings().episodeLenght = horiz;
+    oncore.getSettings().episodeLenght = horiz;
 
-    for (int n = 0; n < 10; ++n)
-        core.runTestEpisode();
+    int nbTrajectories = 1e6;
+    for (int n = 0; n < nbTrajectories; ++n)
+        oncore.runTestEpisode();
 
     TrajectoryData<FiniteAction, DenseState>& data = strat->data;
-    data.WriteToStream(cout);
+    ofstream out(fm.addPath("Dataset.csv"), ios_base::out);
+    if (out.is_open())
+        data.WriteToStream(out);
+    out.close();
 
+    cout << "# Ended data collection" << endl;
+
+
+    PureOffAlgorithm<FiniteAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
+    DataBasedCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
+    offcore.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
+        fm.addPath("Deep.log"),
+        WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
+    offcore.getSettings().episodeLenght = horiz;
+
+    int nbUpdates = 10;
+    double every, bevery;
+    every = bevery = 0.1; //%
+    for (int i = 0; i < nbUpdates; i++)
+    {
+        offcore.processBatchData();
+
+        int p = 100 * i/static_cast<double>(nbUpdates);
+        cout << "### " << p << "% ###" << endl;
+        //                cout << dist.getParameters().t();
+        arma::vec J = offcore.runBatchTest(100);
+        cout << "mean score: " << J(0) << endl;
+        every += bevery;
+    }
+
+    delete strat;
     return 0;
 }

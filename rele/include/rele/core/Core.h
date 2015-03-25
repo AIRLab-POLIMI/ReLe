@@ -175,11 +175,116 @@ public:
         return J_mean;
     }
 
-private:
+protected:
     Envirorment<ActionC, StateC>& envirorment;
     Agent<ActionC, StateC>& agent;
     CoreSettings settings;
 
+};
+
+template<class ActionC, class StateC>
+class DataBasedCore : protected Core<ActionC, StateC>
+{
+
+    typedef Core<ActionC, StateC> Base;
+    using typename Base::CoreSettings;
+    using Base::settings;
+    using Base::envirorment;
+    using Base::agent;
+
+public:
+    DataBasedCore(Envirorment<ActionC, StateC>& envirorment,
+                  Agent<ActionC, StateC>& agent) :
+        Core<ActionC, StateC>(envirorment,agent)
+    {
+        agent.setTask(envirorment.getSettings());
+    }
+
+    DataBasedCore(Envirorment<ActionC, StateC>& envirorment,
+                  Agent<ActionC, StateC>& agent,
+                  TrajectoryData<ActionC, StateC>& data) :
+        Core<ActionC, StateC>(envirorment, agent), data(data)
+    {
+        agent.setTask(envirorment.getSettings());
+    }
+
+    CoreSettings& getSettings()
+    {
+        return settings;
+    }
+
+    void processBatchEpisode()
+    {
+        //get current episode
+        Episode<ActionC, StateC>& ep = data[nbCurrentEpisode];
+
+        //core setup
+        Logger<ActionC, StateC> logger;
+        StateC xn;
+        ActionC u;
+        Reward r(envirorment.getSettings().rewardDim);
+
+        logger.setStrategy(settings.loggerStrategy);
+
+        //Start episode
+        Transition<ActionC, StateC>& sample = ep[0];
+        xn = sample.x;
+        u = sample.u;
+        agent.initEpisode(xn, u);
+        logger.log(xn);
+
+        int episodeLength = ep.size();
+
+        for (unsigned int i = 0;
+                i < episodeLength
+                && !agent.isTerminalConditionReached(); i++)
+        {
+            sample = ep[i];
+
+            //--- make a step with the model
+            xn = sample.xn;
+            r = sample.r;
+            logger.log(u, xn, r);
+            //---
+
+            if (xn.isAbsorbing())
+            {
+                agent.endEpisode(r);
+                break;
+            }
+
+            u = ep[i+1].u;
+            agent.step(r, xn, u);
+            logger.log(agent.getAgentOutputData(), i);
+        }
+
+        if (!xn.isAbsorbing())
+            agent.endEpisode();
+
+        logger.log(agent.getAgentOutputDataEnd(), episodeLength);
+        logger.printStatistics();
+
+        nbCurrentEpisode = (nbCurrentEpisode+1<data.size()) ? nbCurrentEpisode+1 : 0;
+    }
+
+    void processBatchData()
+    {
+        int nbEpisodes = data.size();
+        nbCurrentEpisode = 0;
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            processBatchEpisode();
+        }
+    }
+
+    arma::vec runBatchTest(int nbEpisodes)
+    {
+        return Base::runBatchTest(nbEpisodes);
+    }
+
+private:
+    TrajectoryData<ActionC, StateC>& data;
+    unsigned int nbCurrentEpisode;
 };
 
 }

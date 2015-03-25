@@ -35,6 +35,7 @@ class CSVutils
 public:
     static void matrixToCSV(const arma::mat& M, std::ostream& os);
     static void vectorToCSV(const arma::vec& v, std::ostream& os);
+    static void vectorToCSV(const std::vector<double>& v, std::ostream& os);
 
 };
 

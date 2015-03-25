@@ -33,10 +33,10 @@ void CSVutils::matrixToCSV(const mat& M, ostream& os)
 {
     for (unsigned int i = 0; i < M.n_rows; i++)
     {
-        unsigned int j;
-        for (j = 0; j < M.n_cols - 1; j++)
+        int j, je = M.n_cols - 1;
+        for (j = 0; j < je; j++)
         {
-            os << M(i, j) << ", ";
+            os << M(i, j) << ",";
         }
 
         os << M(i, j) << endl;
@@ -45,10 +45,21 @@ void CSVutils::matrixToCSV(const mat& M, ostream& os)
 
 void CSVutils::vectorToCSV(const vec& v, ostream& os)
 {
-    unsigned int i;
-    for(i = 0; i < v.n_elem -1; i++)
+    int i, ie = v.n_elem - 1;
+    for(i = 0; i < ie; i++)
     {
-        os << v[i] << ", ";
+        os << v[i] << ",";
+    }
+
+    os << v[i] << endl;
+}
+
+void CSVutils::vectorToCSV(const std::vector<double> &v, ostream &os)
+{
+    int i, ie = v.size() - 1;
+    for(i = 0; i < ie; i++)
+    {
+        os << v[i] << ",";
     }
 
     os << v[i] << endl;

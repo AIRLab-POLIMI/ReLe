@@ -60,6 +60,7 @@ template<class ActionC, class StateC>
 class TrajectoryData : public std::vector< Episode<ActionC,StateC> >
 {
 public:
+
     void WriteToStream(std::ostream& out)
     {
         int i, nbep = this->size();
@@ -90,6 +91,9 @@ public:
             }
         }
     }
+
+public:
+    bool isEpisodic;
 };
 
 

@@ -21,24 +21,39 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_EXPERTDATASET_H_
-#define INCLUDE_RELE_IRL_EXPERTDATASET_H_
+#include "policy_search/onpolicy/GradientOutputData.h"
+#include "CSV.h"
+
+using namespace std;
+using namespace arma;
 
 namespace ReLe
 {
 
-template<class StateC>
-class ExpertDataset
+
+GradientIndividual::GradientIndividual()
+    : AgentOutputData(true)
 {
-public:
-    ExpertDataset();
-    arma::mat computefeatureExpectation(AbstractBasisMatrix& basis, double gamma = 1);
-
-private:
-
-};
 
 }
 
+void GradientIndividual::writeData(ostream &os)
+{
+    os << estimated_gradient.n_elem << endl;
+    int dim = history_J.size();
+    os << dim << endl;
+    CSVutils::vectorToCSV(history_J, os);
+    for (int i = 0; i < dim; ++i)
+    {
+        CSVutils::vectorToCSV(history_gradients[i], os);
+    }
+    CSVutils::vectorToCSV(estimated_gradient, os);
+    CSVutils::vectorToCSV(stepLength, os);
+}
 
-#endif /* INCLUDE_RELE_IRL_EXPERTDATASET_H_ */
+void GradientIndividual::writeDecoratedData(ostream &os)
+{
+    this->writeData(os);
+}
+
+}
