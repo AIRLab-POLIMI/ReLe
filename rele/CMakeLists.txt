@@ -143,8 +143,8 @@ target_link_libraries(chol_FIM rele)
 add_executable(dist2mat src/test/Distribution2MatlabTest.cpp)
 target_link_libraries(dist2mat rele)
 
-add_executable(offpol_data src/test/OffPolicyTest.cpp)
-target_link_libraries(offpol_data rele)
+add_executable(deep_off src/test/DeepBatchTest.cpp)
+target_link_libraries(deep_off rele)
 
 add_executable(pr_mdp src/test/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
