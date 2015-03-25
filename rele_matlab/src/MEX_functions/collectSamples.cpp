@@ -1,16 +1,16 @@
 #include "mex.h" /* Always include this */
 
-#include "DeepSeaTreasure.h"
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "PolicyEvalAgent.h"
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "policy_search/offpolicy/OffAlgorithm.h"
-#include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/ConditionBasedFunction.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include <NLS.h>
+#include <DifferentiableNormals.h>
+#include <Core.h>
+#include <PolicyEvalAgent.h>
+#include <parametric/differentiable/NormalPolicy.h>
+#include <policy_search/offpolicy/OffAlgorithm.h>
+#include <BasisFunctions.h>
+#include <basis/PolynomialFunction.h>
+#include <basis/ConditionBasedFunction.h>
+#include <RandomGenerator.h>
+#include <FileManager.h>
 
 #include <iostream>
 #include <iomanip>
@@ -18,6 +18,10 @@
 #include <map>
 #include <random>
 #include <cmath>
+
+using namespace std;
+using namespace arma;
+using namespace ReLe;
 
 
 #define MEX_DATA_FIELDS(F) \
@@ -74,10 +78,10 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     //---
 
     PolicyEvalAgent
-    <FiniteAction,DenseState,ParametricGibbsPolicy<DenseState> > agent(policy);
+    <DenseAction,DenseState,NormalStateDependantStddevPolicy > agent(policy);
 
-    ReLe::Core<FiniteAction, DenseState> oncore(mdp, agent);
-    MatlabCollectorStrategy<FiniteAction, DenseState> strat = MatlabCollectorStrategy<FiniteAction, DenseState>();
+    ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
+    MatlabCollectorStrategy<DenseAction, DenseState> strat = MatlabCollectorStrategy<DenseAction, DenseState>();
     oncore.getSettings().loggerStrategy = &strat;
 
     int horiz = mdp.getSettings().horizon;
@@ -87,10 +91,10 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     for (int n = 0; n < nbTrajectories; ++n)
         oncore.runTestEpisode();
 
-    std::vector<MatlabCollectorStrategy::MatlabEpisode>& data = strat.data;
+    std::vector<MatlabCollectorStrategy<DenseAction,DenseState>::MatlabEpisode>& data = strat.data;
     
     int ds = data[0].dx;
-    int da = data[0].da;
+    int da = data[0].du;
     int dr = data[0].dr;
     
     MEX_DATA_FIELDS(fieldnames);
@@ -99,12 +103,11 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
 
     for (int i = 0, ie = data.size(); i < ie; ++i)
     {
-	int step = data[i].steps;
+	int steps = data[i].steps;
 
         mxArray* state_vector      = mxCreateDoubleMatrix(0, 0, mxREAL);
         mxSetM(state_vector, ds);
         mxSetN(state_vector, steps);
-        mxRealloc(state_data,  sizeof(double) * config->stateSize * steps);
         mxSetData(state_vector, data[i].states);
 
 
@@ -119,7 +122,7 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
         mxSetData(action_vector, data[i].actions);
 
         mxArray* reward_vector     = mxCreateDoubleMatrix(0, 0, mxREAL);
-        mxSetM(reward_vector, config->rewardSize);
+        mxSetM(reward_vector, dr);
         mxSetN(reward_vector, steps);
         mxSetData(reward_vector, data[i].rewards);
 
@@ -130,11 +133,11 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
         mxSetData(absorb_vector, data[i].absorb);
 
 
-        mxSetFieldByNumber(SAMPLES, episode_idx, 0, state_vector);
-        mxSetFieldByNumber(SAMPLES, episode_idx, 1, action_vector);
-        mxSetFieldByNumber(SAMPLES, episode_idx, 2, reward_vector);
-        mxSetFieldByNumber(SAMPLES, episode_idx, 3, nextstate_vector);
-        mxSetFieldByNumber(SAMPLES, episode_idx, 4, absorb_vector);
+        mxSetFieldByNumber(SAMPLES, i, 0, state_vector);
+        mxSetFieldByNumber(SAMPLES, i, 1, action_vector);
+        mxSetFieldByNumber(SAMPLES, i, 2, reward_vector);
+        mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);
+        mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);
 
     }
 

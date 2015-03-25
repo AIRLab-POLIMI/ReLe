@@ -341,7 +341,7 @@ public:
 
     struct MatlabEpisode
     {
-        double* states, actions, nextstates, rewards;
+        double *states, *actions, *nextstates, *rewards;
         signed char* absorb;
         int dx,du,dr,steps;
     };
@@ -353,11 +353,11 @@ public:
         int da = samples[0].u.n_elem;
         int dr = samples[0].r.size();
         int nsteps = samples.size();
-        double* states     = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
-        double* nextstates = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
-        double* actions    = static_cast<double*>(malloc(da*nsteps*sizeof(double)));
-        double* rewards    = static_cast<double*>(malloc(dr*nsteps*sizeof(double)));
-        int* absorb        = static_cast<int*>(calloc(nsteps, sizeof(signed char)));
+        double* states      = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
+        double* nextstates  = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
+        double* actions     = static_cast<double*>(malloc(da*nsteps*sizeof(double)));
+        double* rewards     = static_cast<double*>(malloc(dr*nsteps*sizeof(double)));
+        signed char* absorb = static_cast<signed char*>(calloc(nsteps, sizeof(signed char)));
         int count = 0;
         for (auto sample : samples)
         {

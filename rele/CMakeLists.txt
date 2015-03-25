@@ -62,7 +62,7 @@ include_directories(${ARMADILLO_INCLUDE_DIR})
 
 # ----------------------- GCC FLAGS ----------------------------
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)	
@@ -72,6 +72,14 @@ else()
 	set(BUILD_TYPE_MSG "Release")
 endif()
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7")
+                message(FATAL_ERROR "Unsupported GCC/G++ version (>=4.7, it is better >=4.8)")
+        elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8")
+                message(STATUS "C++11 is partially supported in this version, deactiving C++11 for armadillo")
+                add_definitions(-DARMA_DONT_USE_CXX11)
+        endif()
+endif()
 add_definitions( -DARMA_DONT_PRINT_ERRORS )
 
 # ------------------------ MESSAGES ----------------------------
