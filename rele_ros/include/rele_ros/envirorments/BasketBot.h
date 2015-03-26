@@ -26,7 +26,7 @@
 
 #include <rele/core/Basics.h>
 
-#include "RosEnvirorment.h"
+#include "../core/RosEnvironment.h"
 #include "SimulatedEnvirorment.h"
 
 namespace ReLe_ROS

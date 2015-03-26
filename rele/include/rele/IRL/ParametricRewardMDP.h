@@ -24,10 +24,10 @@
 #ifndef INCLUDE_RELE_IRL_PARAMETRICREWARDMDP_H_
 #define INCLUDE_RELE_IRL_PARAMETRICREWARDMDP_H_
 
-#include "Envirorment.h"
 #include "Approximators.h"
 
 #include <armadillo>
+#include "../core/Environment.h"
 
 namespace ReLe
 {
@@ -48,11 +48,11 @@ arma::vec computeRewardWorker<FiniteState>(const FiniteState& state, ParametricR
 }
 
 template<class ActionC, class StateC>
-class ParametricRewardMDP : public Envirorment<ActionC, StateC>
+class ParametricRewardMDP : public Environment<ActionC, StateC>
 {
 
 public:
-    ParametricRewardMDP(Envirorment<ActionC, StateC>& envirorment,
+    ParametricRewardMDP(Environment<ActionC, StateC>& envirorment,
                         ParametricRegressor& regressor) :
         envirorment(envirorment), regressor(regressor)
     {
@@ -88,7 +88,7 @@ private:
     }
 
 private:
-    Envirorment<ActionC, StateC>& envirorment;
+    Environment<ActionC, StateC>& envirorment;
     ParametricRegressor& regressor;
 };
 

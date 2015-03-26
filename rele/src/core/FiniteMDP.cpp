@@ -33,7 +33,7 @@ namespace ReLe
 
 FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
                      bool isFiniteHorizon, double gamma, unsigned int horizon) :
-    Envirorment(), P(P), R(R), Rsigma(Rsigma)
+    Environment(), P(P), R(R), Rsigma(Rsigma)
 {
     chekMatricesDimensions(P, R, Rsigma);
     setupEnvirorment(isFiniteHorizon, horizon, gamma, P);

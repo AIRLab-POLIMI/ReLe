@@ -24,8 +24,6 @@
 #ifndef INCLUDE_RELE_ROS_SIMULATEDENVIRORMENT_H_
 #define INCLUDE_RELE_ROS_SIMULATEDENVIRORMENT_H_
 
-#include "RosEnvirorment.h"
-
 #include <stdexcept>
 
 #include "v_repConst.h"
@@ -36,6 +34,7 @@
 #include <vrep_common/simRosEnableSubscriber.h>
 
 #include <vrep_common/VrepInfo.h>
+#include "RosEnvironment.h"
 
 namespace ReLe_ROS
 {

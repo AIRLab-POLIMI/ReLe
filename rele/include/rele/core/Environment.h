@@ -32,7 +32,7 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class Envirorment
+class Environment
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
@@ -46,7 +46,7 @@ public:
         return settings;
     }
 
-    virtual ~Envirorment()
+    virtual ~Environment()
     {
     }
 

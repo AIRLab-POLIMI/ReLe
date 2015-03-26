@@ -24,8 +24,8 @@
 #ifndef CORE_H_
 #define CORE_H_
 
-#include "Envirorment.h"
 #include "Agent.h"
+#include "Environment.h"
 #include "logger/Logger.h"
 
 namespace ReLe
@@ -52,7 +52,7 @@ public:
     };
 
 public:
-    Core(Envirorment<ActionC, StateC>& envirorment,
+    Core(Environment<ActionC, StateC>& envirorment,
          Agent<ActionC, StateC>& agent) :
         envirorment(envirorment), agent(agent)
     {
@@ -176,7 +176,7 @@ public:
     }
 
 protected:
-    Envirorment<ActionC, StateC>& envirorment;
+    Environment<ActionC, StateC>& envirorment;
     Agent<ActionC, StateC>& agent;
     CoreSettings settings;
 
@@ -193,14 +193,14 @@ class DataBasedCore : protected Core<ActionC, StateC>
     using Base::agent;
 
 public:
-    DataBasedCore(Envirorment<ActionC, StateC>& envirorment,
+    DataBasedCore(Environment<ActionC, StateC>& envirorment,
                   Agent<ActionC, StateC>& agent) :
         Core<ActionC, StateC>(envirorment,agent)
     {
         agent.setTask(envirorment.getSettings());
     }
 
-    DataBasedCore(Envirorment<ActionC, StateC>& envirorment,
+    DataBasedCore(Environment<ActionC, StateC>& envirorment,
                   Agent<ActionC, StateC>& agent,
                   TrajectoryData<ActionC, StateC>& data) :
         Core<ActionC, StateC>(envirorment, agent), data(data)

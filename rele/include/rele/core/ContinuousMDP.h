@@ -24,12 +24,12 @@
 #ifndef CONTINUOUSMDP_H_
 #define CONTINUOUSMDP_H_
 
-#include "Envirorment.h"
+#include "Environment.h"
 
 namespace ReLe
 {
 
-class ContinuousMDP: public Envirorment<DenseAction, DenseState>
+class ContinuousMDP: public Environment<DenseAction, DenseState>
 {
 public:
     ContinuousMDP()

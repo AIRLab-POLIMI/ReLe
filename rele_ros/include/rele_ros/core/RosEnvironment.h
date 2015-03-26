@@ -24,7 +24,7 @@
 #ifndef INCLUDE_ROSENVIRORMENT_H_
 #define INCLUDE_ROSENVIRORMENT_H_
 
-#include <rele/core/Envirorment.h>
+#include <rele/core/Environment.h>
 #include <ros/ros.h>
 
 #include <iostream>
@@ -39,7 +39,7 @@ namespace ReLe_ROS
 {
 
 template<class ActionC, class StateC>
-class RosEnvirorment: public ReLe::Envirorment<ActionC, StateC>
+class RosEnvirorment: public ReLe::Environment<ActionC, StateC>
 {
 public:
     RosEnvirorment(double controlFrequency) :

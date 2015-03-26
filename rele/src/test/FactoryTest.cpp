@@ -33,46 +33,59 @@
 #include "basis/ConditionBasedFunction.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
-#include "Envirorment.h"
-
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <map>
 #include <random>
 #include <cmath>
+#include "../../include/rele/core/Environment.h"
 
 using namespace std;
 using namespace ReLe;
 using namespace arma;
 
+
+#define CREATE_MDP(ActionC, StateC, environment) \
+Environment<ActionC, StateC>* mdp = \
+static_cast<Environment<ActionC, StateC>*>(MDPFactory::init(environment));
+
 class MDPFactory
 {
 public:
 
-    template<class ActionC, class StateC>
-    static Envirorment<ActionC, StateC>* init(const std::string prova)
+    static void* init(const std::string prova)
     {
-        if (strcmp(prova.c_str(), "deep") == 0)
-        {
-            return new NLS();
-        }
-        else if(strcmp(prova.c_str(), "nls") == 0)
-        {
-            return new DeepSeaTreasure();
-
-        }
-        else
-        {
-            abort();
-        }
+    	if(prova == "deep")
+    	{
+    		return new DeepSeaTreasure();
+    	}
+    	else
+    	{
+    		return nullptr;
+    	}
 
     }
+
 };
 
 int main(int argc, char *argv[])
 {
+    std::string environment = "deep";
+    //Environment<FiniteAction, DenseState>* mdp = static_cast<Environment<FiniteAction, DenseState>*>(MDPFactory::init(environment));
+    CREATE_MDP(FiniteAction, DenseState, environment)
 
+    FiniteAction a;
+    DenseState s;
+    Reward r(1);
+
+    a.setActionN(0);
+
+    mdp->getInitialState(s);
+    cout << "s: " << s << endl;
+
+    mdp->step(a, s, r);
+    cout << "s: " << s << " r: " << r << endl;
 
     return 0;
 }

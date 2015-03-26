@@ -25,16 +25,15 @@
 #define FINITEMDP_H_
 
 #include "Basics.h"
-#include "Envirorment.h"
-
 #include <set>
 
 #include <armadillo>
+#include "Environment.h"
 
 namespace ReLe
 {
 
-class FiniteMDP: public Envirorment<FiniteAction, FiniteState>
+class FiniteMDP: public Environment<FiniteAction, FiniteState>
 {
 public:
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,

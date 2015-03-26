@@ -24,12 +24,12 @@
 #ifndef DENSEMDP_H_
 #define DENSEMDP_H_
 
-#include "Envirorment.h"
+#include "Environment.h"
 
 namespace ReLe
 {
 
-class DenseMDP: public Envirorment<FiniteAction, DenseState>
+class DenseMDP: public Environment<FiniteAction, DenseState>
 {
 public:
     DenseMDP()
