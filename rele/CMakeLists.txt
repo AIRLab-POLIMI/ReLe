@@ -78,6 +78,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         elseif(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.8")
                 message(STATUS "C++11 is partially supported in this version, deactiving C++11 for armadillo")
                 add_definitions(-DARMA_DONT_USE_CXX11)
+                add_definitions(-DARMA_BLAS_LONG) #required for matlab compatibility
+                message(STATUS "Added defs: -DARMA_DONT_USE_CXX11 -DARMA_BLAS_LONG")
         endif()
 endif()
 add_definitions( -DARMA_DONT_PRINT_ERRORS )
@@ -156,6 +158,9 @@ target_link_libraries(deep_off rele)
 
 add_executable(pr_mdp src/test/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
+
+add_executable(factory src/test/FactoryTest.cpp)
+target_link_libraries(factory rele)
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)

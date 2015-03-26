@@ -102,11 +102,11 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);
 
 	cout << "PROVAAAA" << endl;
-	return;
 
     for (int i = 0, ie = data.size(); i < ie; ++i)
     {
-	int steps = data[i].steps;
+        int steps = data[i].steps;
+        cout << steps << endl;
 
         mxArray* state_vector      = mxCreateDoubleMatrix(0, 0, mxREAL);
         mxSetM(state_vector, ds);
