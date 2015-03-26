@@ -27,12 +27,12 @@
 #include <rele/core/Basics.h>
 
 #include "../core/RosEnvironment.h"
-#include "SimulatedEnvirorment.h"
+#include "../core/SimulatedEnvironment.h"
 
 namespace ReLe_ROS
 {
 
-class SimulatedBasketBot : public SimulatedEnvirorment<ReLe::FiniteAction,
+class SimulatedBasketBot : public SimulatedEnvironment<ReLe::FiniteAction,
     ReLe::FiniteState>
 {
 public:

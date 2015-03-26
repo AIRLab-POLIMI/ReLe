@@ -45,16 +45,16 @@ enum JointMode
 };
 
 template<class ActionC, class StateC>
-class SimulatedEnvirorment: public RosEnvirorment<ActionC, StateC>
+class SimulatedEnvironment: public RosEnvirorment<ActionC, StateC>
 {
     using RosEnvirorment<ActionC, StateC>::n;
 
 public:
-    SimulatedEnvirorment(const std::string& name, double controlFrequency) :
+    SimulatedEnvironment(const std::string& name, double controlFrequency) :
         RosEnvirorment<ActionC, StateC>(controlFrequency), name(name)
     {
         infoSubscriber = n.subscribe("/vrep/info", 1,
-                                     &SimulatedEnvirorment::infoCallback, this);
+                                     &SimulatedEnvironment::infoCallback, this);
         simulationRunning = false;
     }
 
@@ -75,7 +75,7 @@ public:
         }
     }
 
-    virtual ~SimulatedEnvirorment()
+    virtual ~SimulatedEnvironment()
     {
     }
 
