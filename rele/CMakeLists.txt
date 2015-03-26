@@ -11,7 +11,7 @@ if(catkin_FOUND)
                                 include/rele/utils
                                 include/rele/generators
                                 include/rele/algorithms
-                                include/rele/envirorments
+                                include/rele/environments
                                 include/rele/approximators
                                 include/rele/statistics
                                 include/rele/IRL
@@ -32,7 +32,7 @@ include_directories(include/rele/core
                     include/rele/utils
                     include/rele/generators
                     include/rele/algorithms
-                    include/rele/envirorments
+                    include/rele/environments
                     include/rele/approximators
                     include/rele/statistics
                     include/rele/IRL)
@@ -96,7 +96,7 @@ file(GLOB_RECURSE ReLe_SOURCE
                   src/core/*.cpp 
                   src/policy/*.cpp
                   src/algorithms/*.cpp
-                  src/envirorments/*.cpp  
+                  src/environments/*.cpp  
                   src/utils/*.cpp
                   src/generators/*.cpp
                   src/approximators/*.cpp

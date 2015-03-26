@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MountainCar.h"
+#include "../../include/rele/environments/MountainCar.h"
 
 using namespace std;
 

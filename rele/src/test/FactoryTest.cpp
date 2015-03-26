@@ -21,8 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DeepSeaTreasure.h"
-#include "NLS.h"
 #include "policy_search/NES/NES.h"
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
@@ -40,6 +38,8 @@
 #include <random>
 #include <cmath>
 #include "../../include/rele/core/Environment.h"
+#include "../../include/rele/environments/DeepSeaTreasure.h"
+#include "../../include/rele/environments/NLS.h"
 
 using namespace std;
 using namespace ReLe;

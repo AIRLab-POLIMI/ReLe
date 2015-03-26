@@ -21,7 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NLS.h"
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
@@ -36,6 +35,7 @@
 #include <map>
 #include <random>
 #include <cmath>
+#include "../../include/rele/environments/NLS.h"
 
 using namespace std;
 using namespace ReLe;

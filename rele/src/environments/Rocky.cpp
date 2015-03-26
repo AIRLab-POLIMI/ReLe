@@ -21,7 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Rocky.h"
+#include "../../include/rele/environments/Rocky.h"
+
 #include "Utils.h"
 
 using namespace arma;

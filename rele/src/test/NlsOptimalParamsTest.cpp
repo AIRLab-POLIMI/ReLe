@@ -28,7 +28,7 @@
 #include <random>
 #include <cmath>
 
-#include "NLS.h"
+#include "../../include/rele/environments/NLS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"

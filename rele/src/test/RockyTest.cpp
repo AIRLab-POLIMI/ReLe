@@ -21,7 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Rocky.h"
+#include "../../include/rele/environments/Rocky.h"
+
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"

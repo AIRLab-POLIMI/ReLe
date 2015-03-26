@@ -27,7 +27,7 @@
 namespace ReLe_ROS
 {
 
-SimulatedBasketBot::SimulatedBasketBot(double controlFrequency) : SimulatedEnvirorment("basketbot", controlFrequency)
+SimulatedBasketBot::SimulatedBasketBot(double controlFrequency) : SimulatedEnvironment("basketbot", controlFrequency)
 {
     stateReady = true; //FIXME LEVARE!!!
 }

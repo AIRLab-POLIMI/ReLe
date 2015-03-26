@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ENVIRORMENTS_ROCKY_H_
-#define INCLUDE_RELE_ENVIRORMENTS_ROCKY_H_
+#ifndef INCLUDE_RELE_ENVIRONMENTS_ROCKY_H_
+#define INCLUDE_RELE_ENVIRONMENTS_ROCKY_H_
 
 #include "ContinuousMDP.h"
 
@@ -96,4 +96,4 @@ private:
 
 }
 
-#endif /* INCLUDE_RELE_ENVIRORMENTS_ROCKY_H_ */
+#endif /* INCLUDE_RELE_ENVIRONMENTS_ROCKY_H_ */

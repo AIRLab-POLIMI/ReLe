@@ -21,8 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "../../include/rele/environments/MountainCar.h"
+
 #include "Core.h"
-#include "MountainCar.h"
 #include "td/LinearSARSA.h"
 #include "basis/GaussianRBF.h"
 #include "Hashing.h"

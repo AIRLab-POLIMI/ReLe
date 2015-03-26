@@ -21,8 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LQR.h"
-#include "DeepSeaTreasure.h"
 #include "Core.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
@@ -38,6 +36,8 @@
 #include <map>
 #include <random>
 #include <cmath>
+#include "../../include/rele/environments/DeepSeaTreasure.h"
+#include "../../include/rele/environments/LQR.h"
 
 using namespace std;
 using namespace ReLe;
