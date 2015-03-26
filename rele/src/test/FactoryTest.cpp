@@ -37,9 +37,9 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "../../include/rele/core/Environment.h"
-#include "../../include/rele/environments/DeepSeaTreasure.h"
-#include "../../include/rele/environments/NLS.h"
+#include "Environment.h"
+#include "DeepSeaTreasure.h"
+#include "NLS.h"
 
 using namespace std;
 using namespace ReLe;
@@ -56,14 +56,14 @@ public:
 
     static void* init(const std::string prova)
     {
-    	if(prova == "deep")
-    	{
-    		return new DeepSeaTreasure();
-    	}
-    	else
-    	{
-    		return nullptr;
-    	}
+        if(prova == "deep")
+        {
+            return new DeepSeaTreasure();
+        }
+        else
+        {
+            return nullptr;
+        }
 
     }
 
