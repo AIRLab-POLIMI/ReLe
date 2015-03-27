@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include "StateStatisticGenerator.h"
+#include "Transition.h"
 
 namespace ReLe
 {

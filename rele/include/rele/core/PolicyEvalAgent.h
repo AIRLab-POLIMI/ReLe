@@ -26,7 +26,7 @@
 
 #include "Agent.h"
 #include "Policy.h"
-#include "BasicsTraits.h"
+#include "BasicFunctions.h"
 
 namespace ReLe
 {
