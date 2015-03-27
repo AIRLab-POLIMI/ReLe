@@ -27,14 +27,54 @@
 namespace ReLe
 {
 
-template<class StateC>
+template<class ActionC, class StateC>
 class ExpertDataset
 {
 public:
-    ExpertDataset();
-    arma::mat computefeatureExpectation(AbstractBasisMatrix& basis, double gamma = 1);
+    ExpertDataset()
+	{
+
+	}
+
+    arma::mat computefeatureExpectation(AbstractBasisMatrix& basis, double gamma = 1)
+    {
+    	size_t episodes = data.size();
+    	arma::mat featureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);
+
+    	for(auto& episode : data)
+    	{
+    		arma::mat episodefeatureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);;
+
+    		for(unsigned int t = 0; t < episode.size(); t++)
+    		{
+    			Transition<ActionC, StateC>& transition = episode[t];
+    			episodefeatureExpectation += std::pow(gamma, t) * basis(transition.x);
+    		}
+
+    		Transition<ActionC, StateC>& transition = episode.back();
+    		episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);
+
+
+    		featureExpectation += episodefeatureExpectation;
+    	}
+
+    	featureExpectation /= episodes;
+
+    	return featureExpectation;
+    }
+
+    void addData(TrajectoryData<ActionC, StateC>& data)
+    {
+    	this->data.insert(this->data.end(), data.begin(), data.end());
+    }
+
+    void setData(TrajectoryData<ActionC, StateC>& data)
+    {
+    	this->data(data);
+    }
 
 private:
+    TrajectoryData<ActionC, StateC> data;
 
 };
 

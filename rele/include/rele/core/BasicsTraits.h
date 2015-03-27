@@ -85,22 +85,6 @@ struct state_type<DenseState>
     typedef typename std::add_lvalue_reference<const arma::vec>::type const_type_ref;
 };
 
-
-//Templates needed to handle different action types
-template<class StateC, class PolicyC>
-void sampleActionWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
-{
-    unsigned int u = policy(state);
-    action.setActionN(u);
-}
-
-template<class StateC, class ActionC, class PolicyC>
-void sampleActionWorker(const StateC& state, ActionC& action, PolicyC& policy)
-{
-    typename action_type<ActionC>::type_ref u = action;
-    u = policy(state);
-}
-
 }
 
 #endif /* BASICSTRAITS_H_ */

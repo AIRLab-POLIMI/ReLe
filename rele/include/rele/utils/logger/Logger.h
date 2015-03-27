@@ -25,13 +25,13 @@
 #define INCLUDE_UTILS_LOGGER_H_
 
 #include "Basics.h"
-#include "Transition.h"
 #include "LoggerStrategy.h"
 
 
 #include <vector>
 #include <iostream>
 #include <memory>
+#include "Transition.h"
 
 namespace ReLe
 {

@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_UTILS_LOGGER_TRANSITION_H_
-#define INCLUDE_RELE_UTILS_LOGGER_TRANSITION_H_
+#ifndef INCLUDE_RELE_CORE_TRANSITION_H_
+#define INCLUDE_RELE_CORE_TRANSITION_H_
 
 #include <vector>
 #include <fstream>
@@ -61,7 +61,7 @@ class TrajectoryData : public std::vector< Episode<ActionC,StateC> >
 {
 public:
 
-    void WriteToStream(std::ostream& out)
+    void writeToStream(std::ostream& out)
     {
         int i, nbep = this->size();
 
@@ -99,4 +99,4 @@ public:
 
 }
 
-#endif /* INCLUDE_RELE_UTILS_LOGGER_TRANSITION_H_ */
+#endif /* INCLUDE_RELE_CORE_TRANSITION_H_ */

@@ -28,6 +28,7 @@
 #include "Distribution.h"
 #include "Policy.h"
 #include "Basics.h"
+#include "BasicFunctions.h"
 #include <cassert>
 #include <iomanip>
 #include "policy_search/offpolicy/OffGradientOutputData.h"
