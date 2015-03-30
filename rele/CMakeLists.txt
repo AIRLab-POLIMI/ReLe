@@ -161,6 +161,10 @@ target_link_libraries(pr_mdp rele)
 
 add_executable(factory src/test/FactoryTest.cpp)
 target_link_libraries(factory rele)
+
+add_executable(lqr_MWAL src/test/LQRMWAL.cpp)
+target_link_libraries(lqr_MWAL rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)
