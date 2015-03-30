@@ -38,12 +38,26 @@ namespace ReLe
 
 //Templates needed to handle different action types
 template<class StateC, class PolicyC, class PolicyC2>
-void PureOffAlgorithmInitEpisodeWorker(const StateC& state, FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-                                       double& iw, arma::vec& grad)
+double PureOffAlgorithmComputeIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav)
+{
+    typename action_type<FiniteAction>::type_ref u = action.getActionN();
+    return policy(state,u) / behav(state,u);
+}
+
+template<class StateC, class ActionC, class PolicyC, class PolicyC2>
+double PureOffAlgorithmComputeIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav)
+{
+    return policy(state,action) / behav(state,action);
+}
+
+template<class StateC, class PolicyC, class PolicyC2>
+double PureOffAlgorithmStepWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
+                                  double& iw, arma::vec& grad)
 {
     typename action_type<FiniteAction>::type_ref u = action.getActionN();
 
-    iw *= policy(state,u) / behav(state,u);
+    double val = policy(state,u) / behav(state,u);
+    iw *= val;
 
     //init the sum of the gradient of the policy logarithm
     arma::vec logGradient = policy.difflog(state, u);
@@ -52,19 +66,22 @@ void PureOffAlgorithmInitEpisodeWorker(const StateC& state, FiniteAction& action
 }
 
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
-void PureOffAlgorithmInitEpisodeWorker(const StateC& state, ActionC& action, PolicyC& policy, PolicyC2& behav,
-                                       double& iw, arma::vec& grad)
+double PureOffAlgorithmStepWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
+                                  double& iw, arma::vec& grad)
 {
-    iw *= policy(state,action) / behav(state,action);
+    double val = policy(state,action) / behav(state,action);
+    iw *= val;
 
     //init the sum of the gradient of the policy logarithm
     arma::vec logGradient = policy.difflog(state, action);
     grad += logGradient;
+
+    return val;
 }
 
 
 template<class ActionC, class StateC>
-class PureOffAlgorithm: public Agent<ActionC, StateC>
+class PureOffAlgorithm: public BatchAgent<ActionC, StateC>
 {
 
 public:
@@ -108,7 +125,7 @@ public:
 
     // Agent interface
 public:
-    virtual void initEpisode(const StateC& state, ActionC& action)
+    virtual void initEpisode(const StateC& state, const ActionC& action)
     {
         df  = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
@@ -125,7 +142,7 @@ public:
 
         prodImpWeight = 1.0;
         sumdlogpi.zeros(target.getParametersSize());
-        PureOffAlgorithmInitEpisodeWorker(state,action, target, behavioral, prodImpWeight, sumdlogpi);
+        currentIW = PureOffAlgorithmStepWorker(state,action, target, behavioral, prodImpWeight, sumdlogpi);
     }
 
     virtual void initTestEpisode()
@@ -138,10 +155,10 @@ public:
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      ActionC& action)
+                      const ActionC& action)
     {
         //calculate current J value
-        Jep += df * reward[rewardId];
+        Jep += df * currentIW * reward[rewardId];
         //update discount factor
         df *= this->task.gamma;
 
@@ -153,13 +170,13 @@ public:
         //        arma::vec logGradient = policy.difflog(nextState, action);
         //        sumdlogpi += logGradient;
 
-        PureOffAlgorithmInitEpisodeWorker(nextState, action, target, behavioral, prodImpWeight, sumdlogpi);
+        currentIW = PureOffAlgorithmStepWorker(nextState, action, target, behavioral, prodImpWeight, sumdlogpi);
     }
 
     virtual void endEpisode(const Reward& reward)
     {
         //add last contribute
-        Jep += df * reward[rewardId];
+        Jep += df * currentIW * reward[rewardId];
         //perform remaining operation
         this->endEpisode();
 
@@ -344,7 +361,7 @@ protected:
     double df, Jep, stepLength, penal_factor;
     int rewardId;
 
-    double prodImpWeight;
+    double prodImpWeight, currentIW;
     arma::vec sumdlogpi, bJ_num, bJ_den, bM_num, bM_den;
 
     std::vector<double> history_J;

@@ -38,7 +38,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "../../include/rele/environments/DeepSeaTreasure.h"
+#include "DeepSeaTreasure.h"
 
 using namespace std;
 using namespace ReLe;

@@ -203,7 +203,7 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class DataBasedCore : protected Core<ActionC, StateC>
+class BatchCore : protected Core<ActionC, StateC>
 {
 
     typedef Core<ActionC, StateC> Base;
@@ -213,9 +213,10 @@ class DataBasedCore : protected Core<ActionC, StateC>
     using Base::agent;
 
 public:
-    DataBasedCore(Environment<ActionC, StateC>& envirorment,
-                  Agent<ActionC, StateC>& agent,
-                  Dataset<ActionC, StateC>& data) :
+
+    BatchCore(Environment<ActionC, StateC>& envirorment,
+              Agent<ActionC, StateC>& agent,
+              Dataset<ActionC, StateC>& data) :
         Core<ActionC, StateC>(envirorment, agent), data(data)
     {
         agent.setTask(envirorment.getSettings());

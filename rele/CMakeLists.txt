@@ -156,6 +156,9 @@ target_link_libraries(dist2mat rele)
 add_executable(deep_off src/test/DeepBatchTest.cpp)
 target_link_libraries(deep_off rele)
 
+add_executable(nls_off src/test/NlsBatchTest.cpp)
+target_link_libraries(nls_off rele)
+
 add_executable(pr_mdp src/test/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 

@@ -101,6 +101,31 @@ protected:
     TerminalCondition* terminalCond;
 };
 
+
+template<class ActionC, class StateC>
+class BatchAgent : public Agent<ActionC, StateC>
+{
+public:
+
+    void initEpisode(const StateC& state, ActionC& action)
+    {
+        const ActionC& constref = action;
+        this->initEpisode(state, constref);
+    }
+
+    void step(const Reward& reward, const StateC& nextState,
+              ActionC& action)
+    {
+        const ActionC& constref = action;
+        this->step(reward, nextState, constref);
+    }
+
+    virtual void initEpisode(const StateC& state, const ActionC& action) = 0;
+    virtual void step(const Reward& reward, const StateC& nextState,
+                      const ActionC& action) = 0;
+
+};
+
 }
 
 #endif /* AGENT_H_ */

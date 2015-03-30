@@ -38,7 +38,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "../../include/rele/environments/DeepSeaTreasure.h"
+#include "DeepSeaTreasure.h"
 
 using namespace std;
 using namespace ReLe;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     oncore.getSettings().episodeLenght = horiz;
 
-    int nbTrajectories = 1e6;
+    int nbTrajectories = 1e4;
     for (int n = 0; n < nbTrajectories; ++n)
         oncore.runTestEpisode();
 
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
 
     PureOffAlgorithm<FiniteAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
-    DataBasedCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
+    BatchCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
         fm.addPath("Deep.log"),
         WriteStrategy<FiniteAction, DenseState>::AGENT,
