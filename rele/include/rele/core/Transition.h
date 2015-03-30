@@ -54,6 +54,13 @@ struct Transition
         this->r = r;
     }
 
+    void printHeader(std::ostream& os)
+    {
+        os << x.serializedSize()  << ","
+           << u.serializedSize()  << ","
+           << r.size()  << std::endl;
+    }
+
 
     void print(std::ostream& os)
     {
@@ -76,6 +83,13 @@ class Episode : public std::vector<Transition<ActionC,StateC>>
 {
 
 public:
+    void printHeader(std::ostream& os)
+    {
+        if(this->size() > 0)
+            this->back().printHeader(os);
+    }
+
+
     void print(std::ostream& os)
     {
         for(auto& sample : *this)
@@ -133,22 +147,15 @@ public:
 
 
 public:
-    void writeToStream(std::ostream& os) //FIXME change this with new file format
+    void writeToStream(std::ostream& os)
     {
-        int i, nbep = this->size();
-
-        if (nbep > 0)
+        if (this->size() > 0)
         {
+            this->back().printHeader(os);
 
-            Transition<ActionC, StateC>& sample = (*this)[0][0];
-            os << sample.x.serializedSize()  << ","
-               << sample.u.serializedSize()  << ","
-               << sample.r.size()  << std::endl;
-
-            for (i = 0; i < nbep; ++i)
+            for (auto& episode : *this)
             {
-                Episode<ActionC,StateC>& samples = this->at(i);
-                samples.print(os);
+                episode.print(os);
             }
         }
     }

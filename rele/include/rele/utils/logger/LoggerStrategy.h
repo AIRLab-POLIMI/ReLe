@@ -205,11 +205,7 @@ public:
 
             if(first)
             {
-                Transition<ActionC, StateC>& sample = samples[0];
-                ofs << sample.x.serializedSize()  << ","
-                    << sample.u.serializedSize()  << ","
-                    << sample.r.size()  << std::endl;
-
+                samples.printHeader(ofs);
                 first = false;
             }
 
