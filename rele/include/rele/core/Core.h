@@ -162,7 +162,6 @@ public:
 
         Reward r(envirorment.getSettings().rewardDim);
         arma::vec J_mean(r.size(), arma::fill::zeros);
-        arma::vec J_std;
 
         for (unsigned int e = 0; e < settings.testEpisodeN; ++e)
         {
