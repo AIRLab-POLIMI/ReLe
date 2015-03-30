@@ -27,6 +27,8 @@
 #include <vector>
 #include <fstream>
 
+#include "BasisFunctions.h"
+
 namespace ReLe
 {
 template<class ActionC, class StateC>
@@ -51,17 +53,87 @@ struct Transition
         this->xn = xn;
         this->r = r;
     }
+
+
+    void print(std::ostream& os)
+    {
+        os << "0,0,"
+           << x  << ","
+           << u  << ","
+           << r  << std::endl;
+    }
+
+    void printLast(std::ostream& os)
+    {
+        os  << "1,"
+            << xn.isAbsorbing() << ","
+            << xn << std::endl;
+    }
 };
 
 template <class ActionC, class StateC>
-using Episode = std::vector< Transition<ActionC,StateC> >;
+class Episode : public std::vector<Transition<ActionC,StateC>>
+{
+
+public:
+    void print(std::ostream& os)
+    {
+        for(auto& sample : *this)
+        {
+            sample.print(os);
+        }
+
+        this->back().printLast(os);
+    }
+
+};
 
 template<class ActionC, class StateC>
-class TrajectoryData : public std::vector< Episode<ActionC,StateC> >
+class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
-public:
 
-    void writeToStream(std::ostream& out)
+public:
+    arma::mat computefeatureExpectation(AbstractBasisMatrix& basis, double gamma = 1)
+    {
+        size_t episodes = this->size();
+        arma::mat featureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);
+
+        for(auto& episode : *this)
+        {
+            arma::mat episodefeatureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);;
+
+            for(unsigned int t = 0; t < episode.size(); t++)
+            {
+                Transition<ActionC, StateC>& transition = episode[t];
+                episodefeatureExpectation += std::pow(gamma, t) * basis(transition.x);
+            }
+
+            Transition<ActionC, StateC>& transition = episode.back();
+            episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);
+
+
+            featureExpectation += episodefeatureExpectation;
+        }
+
+        featureExpectation /= episodes;
+
+        return featureExpectation;
+    }
+
+    void addData(Dataset<ActionC, StateC>& data)
+    {
+        this->insert(this->data.end(), data.begin(), data.end());
+    }
+
+    void setData(Dataset<ActionC, StateC>& data)
+    {
+        this->erase();
+        addData(data);
+    }
+
+
+public:
+    void writeToStream(std::ostream& os) //FIXME change this with new file format
     {
         int i, nbep = this->size();
 
@@ -69,31 +141,19 @@ public:
         {
 
             Transition<ActionC, StateC>& sample = (*this)[0][0];
-            out << sample.x.serializedSize()  << ","
-                << sample.u.serializedSize()  << ","
-                << sample.r.size()  << std::endl;
+            os << sample.x.serializedSize()  << ","
+               << sample.u.serializedSize()  << ","
+               << sample.r.size()  << std::endl;
 
             for (i = 0; i < nbep; ++i)
             {
                 Episode<ActionC,StateC>& samples = this->at(i);
-                size_t total = samples.size();
-                size_t index = 0;
-                for(auto& sample : samples)
-                {
-                    index++;
-                    out << sample.x  << ","
-                        << sample.u  << ","
-                        << sample.xn << ","
-                        << sample.r  << ","
-                        << sample.xn.isAbsorbing() << ","
-                        << (index == total) << std::endl;
-                }
+                samples.print(os);
             }
         }
     }
 
-public:
-    bool isEpisodic;
+
 };
 
 

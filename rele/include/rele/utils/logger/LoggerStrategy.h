@@ -35,8 +35,7 @@ template<class ActionC, class StateC>
 class LoggerStrategy
 {
 public:
-    virtual void processData(
-        std::vector<Transition<ActionC, StateC>>& samples) = 0;
+    virtual void processData(Episode<ActionC, StateC>& samples) = 0;
     virtual void processData(std::vector<AgentOutputData*>& data) = 0;
 
     virtual ~LoggerStrategy()
@@ -56,8 +55,7 @@ template<class ActionC, class StateC>
 class EmptyStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    virtual void processData(
-        std::vector<Transition<ActionC, StateC>>& samples)
+    virtual void processData(Episode<ActionC, StateC>& samples)
     {
     }
 
@@ -81,7 +79,7 @@ public:
 
     }
 
-    void processData(std::vector<Transition<ActionC, StateC>>& samples)
+    void processData(Episode<ActionC, StateC>& samples)
     {
         printTransitions(samples);
 
@@ -138,7 +136,7 @@ private:
         }
     }
 
-    void printStateStatistics(std::vector<Transition<ActionC, StateC>>& samples)
+    void printStateStatistics(Episode<ActionC, StateC>& samples)
     {
         std::cout << "- State Statistics" << std::endl;
 
@@ -199,7 +197,7 @@ public:
     }
 
 
-    void processData(std::vector<Transition<ActionC, StateC>>& samples)
+    void processData(Episode<ActionC, StateC>& samples)
     {
         if (writeTransitions)
         {
@@ -215,23 +213,12 @@ public:
                 first = false;
             }
 
-            size_t total = samples.size();
-            size_t index = 0;
             for(auto& sample : samples)
             {
-                ofs << "0,0,"
-                    << sample.x  << ","
-                    << sample.u  << ","
-                    << sample.r  << std::endl;
-
-                index++;
-                if(index == total)
-                {
-                    ofs  << "1,"
-                         << sample.xn.isAbsorbing() << ","
-                         << sample.xn << std::endl;
-                }
+                sample.print(ofs);
             }
+
+            samples.back().printLast(ofs);
 
             ofs.close();
         }
@@ -282,7 +269,7 @@ public:
     {
     }
 
-    void processData(std::vector<Transition<ActionC, StateC>>& samples)
+    void processData(Episode<ActionC, StateC>& samples)
     {
         double df = 1.0;
         bool first = true;
@@ -316,8 +303,7 @@ template<class ActionC, class StateC>
 class CollectorStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    virtual void processData(
-        std::vector<Transition<ActionC, StateC>>& samples)
+    virtual void processData(Episode<ActionC, StateC>& samples)
     {
         data.push_back(samples);
     }
@@ -332,7 +318,7 @@ public:
     {
     }
 
-    TrajectoryData<ActionC, StateC> data;
+    Dataset<ActionC, StateC> data;
 };
 
 template<class ActionC, class StateC>
@@ -347,8 +333,7 @@ public:
         int dx,du,dr,steps;
     };
 
-    virtual void processData(
-        std::vector<Transition<ActionC, StateC>>& samples)
+    virtual void processData(Episode<ActionC, StateC>& samples)
     {
         int ds = samples[0].x.n_elem;
         int da = samples[0].u.n_elem;

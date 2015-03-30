@@ -194,18 +194,12 @@ class DataBasedCore : protected Core<ActionC, StateC>
 
 public:
     DataBasedCore(Environment<ActionC, StateC>& envirorment,
-                  Agent<ActionC, StateC>& agent) :
-        Core<ActionC, StateC>(envirorment,agent)
-    {
-        agent.setTask(envirorment.getSettings());
-    }
-
-    DataBasedCore(Environment<ActionC, StateC>& envirorment,
                   Agent<ActionC, StateC>& agent,
-                  TrajectoryData<ActionC, StateC>& data) :
+                  Dataset<ActionC, StateC>& data) :
         Core<ActionC, StateC>(envirorment, agent), data(data)
     {
         agent.setTask(envirorment.getSettings());
+        nbCurrentEpisode = 0;
     }
 
     CoreSettings& getSettings()
@@ -283,7 +277,7 @@ public:
     }
 
 private:
-    TrajectoryData<ActionC, StateC>& data;
+    Dataset<ActionC, StateC>& data;
     unsigned int nbCurrentEpisode;
 };
 

@@ -135,10 +135,10 @@ int main(int argc, char *argv[])
     for (int n = 0; n < nbTrajectories; ++n)
         oncore.runTestEpisode();
 
-    TrajectoryData<FiniteAction, DenseState>& data = strat->data;
+    Dataset<FiniteAction, DenseState>& data = strat->data;
     ofstream out(fm.addPath("Dataset.csv"), ios_base::out);
     if (out.is_open())
-        data.WriteToStream(out);
+        data.writeToStream(out);
     out.close();
 
     cout << "# Ended data collection" << endl;

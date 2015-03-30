@@ -56,14 +56,14 @@ public:
 
     static void* init(const std::string prova)
     {
-    	if(prova == "deep")
-    	{
-    		return new DeepSeaTreasure();
-    	}
-    	else
-    	{
-    		return nullptr;
-    	}
+        if(prova == "deep")
+        {
+            return new DeepSeaTreasure();
+        }
+        else
+        {
+            return nullptr;
+        }
 
     }
 
