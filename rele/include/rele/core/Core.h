@@ -44,10 +44,14 @@ public:
         {
             loggerStrategy = nullptr;
             episodeLenght = 0;
+            episodeN = 0;
+            testEpisodeN = 0;
         }
 
         LoggerStrategy<ActionC, StateC>* loggerStrategy;
         unsigned int episodeLenght;
+        unsigned int episodeN;
+        unsigned int testEpisodeN;
 
     };
 
@@ -105,6 +109,14 @@ public:
         logger.printStatistics();
     }
 
+    void runEpisodes()
+    {
+        for(unsigned int i = 0; i < settings.episodeN; i++)
+        {
+            runEpisode();
+        }
+    }
+
     void runTestEpisode()
     {
         //core setup
@@ -132,7 +144,15 @@ public:
         logger.printStatistics();
     }
 
-    arma::vec runBatchTest(int nbEpisodes)
+    void runTestEpisodes()
+    {
+        for(unsigned int i = 0; i < settings.testEpisodeN; i++)
+        {
+            runTestEpisode();
+        }
+    }
+
+    arma::vec runBatchTest()
     {
         //core setup
         StateC xn;
@@ -144,7 +164,7 @@ public:
         arma::vec J_mean(r.size(), arma::fill::zeros);
         arma::vec J_std;
 
-        for (unsigned int e = 0; e < nbEpisodes; ++e)
+        for (unsigned int e = 0; e < settings.testEpisodeN; ++e)
         {
             Logger<ActionC, StateC> logger;
             EvaluateStrategy<ActionC, StateC> stat_e(envirorment.getSettings().gamma);
@@ -168,7 +188,7 @@ public:
             J_mean += stat_e.J;
         }
 
-        J_mean /= nbEpisodes;
+        J_mean /= settings.testEpisodeN;
 
         //standard deviation of J
 
@@ -275,9 +295,9 @@ public:
         }
     }
 
-    arma::vec runBatchTest(int nbEpisodes)
+    arma::vec runBatchTest()
     {
-        return Base::runBatchTest(nbEpisodes);
+        return Base::runBatchTest();
     }
 
 private:

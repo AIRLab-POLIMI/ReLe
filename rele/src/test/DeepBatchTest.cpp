@@ -163,7 +163,8 @@ int main(int argc, char *argv[])
         int p = 100 * i/static_cast<double>(nbUpdates);
         cout << "### " << p << "% ###" << endl;
         //                cout << dist.getParameters().t();
-        arma::vec J = offcore.runBatchTest(100);
+        offcore.getSettings().testEpisodeN = 100;
+        arma::vec J = offcore.runBatchTest();
         cout << "mean score: " << J(0) << endl;
         every += bevery;
     }

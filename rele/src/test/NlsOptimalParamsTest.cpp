@@ -89,7 +89,8 @@ int main(int argc, char *argv[])
                 w[1] = p2;
                 policy.setParameters(w);
                 int testEpisodes = 1000;
-                arma::vec J = core.runBatchTest(testEpisodes);
+                core.getSettings().testEpisodeN = testEpisodes;
+                arma::vec J = core.runBatchTest();
                 out << p1 << "\t" << p2 <<  "\t" << J[0] << std::endl;
                 cout << p1 << "\t" << p2 <<  "\t" << J[0] << std::endl;
             }
