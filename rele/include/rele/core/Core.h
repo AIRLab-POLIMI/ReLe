@@ -248,7 +248,10 @@ public:
                 break;
             }
 
-            u = ep[i+1].u;
+            //if last state, next action does not exists
+            if (i < episodeLength - 1)
+                u = ep[i+1].u;
+
             agent.step(r, xn, u);
             logger.log(agent.getAgentOutputData(), i);
         }

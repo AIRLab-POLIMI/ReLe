@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     cout << "# Ended data collection" << endl;
 
 
-    PureOffAlgorithm<DenseAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
+    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size());
     BatchCore<DenseAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath("Deep.log"),
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     );
     offcore.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 10;
+    int nbUpdates = 2;
     double every, bevery;
     every = bevery = 0.1; //%
     for (int i = 0; i < nbUpdates; i++)

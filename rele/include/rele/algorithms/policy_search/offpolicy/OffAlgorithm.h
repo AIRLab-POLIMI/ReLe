@@ -142,7 +142,8 @@ public:
 
         prodImpWeight = 1.0;
         sumdlogpi.zeros(target.getParametersSize());
-        currentIW = PureOffAlgorithmStepWorker(state,action, target, behavioral, prodImpWeight, sumdlogpi);
+        currentState  = state;
+        currentAction = action;
     }
 
     virtual void initTestEpisode()
@@ -155,8 +156,11 @@ public:
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      const ActionC& action)
+                      const ActionC& nextAction)
     {
+
+        currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
+
         //calculate current J value
         Jep += df * currentIW * reward[rewardId];
         //update discount factor
@@ -169,12 +173,15 @@ public:
         //        //update sum of the gradient of the policy logarithm
         //        arma::vec logGradient = policy.difflog(nextState, action);
         //        sumdlogpi += logGradient;
-
-        currentIW = PureOffAlgorithmStepWorker(nextState, action, target, behavioral, prodImpWeight, sumdlogpi);
+        currentState  = nextState;
+        currentAction = nextAction;
     }
 
     virtual void endEpisode(const Reward& reward)
     {
+
+        currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
+
         //add last contribute
         Jep += df * currentIW * reward[rewardId];
         //perform remaining operation
@@ -340,6 +347,7 @@ protected:
 
         arma::vec newvalues = target.getParameters() + gradient * step_size;
         target.setParameters(newvalues);
+        std::cout << newvalues.t();
 
 
         //TODO ciclo unico
@@ -372,6 +380,8 @@ protected:
     OffGradientIndividual* currentItStats;
 
     unsigned int nbIndipendentSamples;
+    ActionC currentAction;
+    StateC currentState;
 };
 
 

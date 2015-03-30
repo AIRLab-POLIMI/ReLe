@@ -62,7 +62,7 @@ arma::vec NormalPolicy::difflog(const arma::vec& state, const arma::vec& action)
     arma::mat features = basis(state);
 
     // compute gradient
-    return features.t() * (a - mMean) / (mInitialStddev * mInitialStddev);
+    return features * (a - mMean) / (mInitialStddev * mInitialStddev);
 }
 
 arma::mat NormalPolicy::diff2log(const arma::vec& state, const arma::vec& action)
@@ -75,7 +75,7 @@ arma::mat NormalPolicy::diff2log(const arma::vec& state, const arma::vec& action
     AbstractBasisMatrix& basis = approximator->getBasis();
     arma::mat features = basis(state);
 
-    return -features.t() * features / (mInitialStddev * mInitialStddev);
+    return -features * features.t() / (mInitialStddev * mInitialStddev);
 
 }
 
@@ -138,7 +138,7 @@ arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
     //        MY_PRINT(mCinv);
 
     // compute gradient
-    return 0.5 * features.t() * (mCinv + mCinv.t()) * smdiff;
+    return 0.5 * features * (mCinv + mCinv.t()) * smdiff;
 }
 
 arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
@@ -149,7 +149,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
     arma::mat features = basis(state);
 
     // compute gradient
-    return - 0.5 * features.t() * (mCinv + mCinv.t()) * features;
+    return - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 }
 
 
