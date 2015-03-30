@@ -195,8 +195,8 @@ class BatchCore : protected Core<ActionC, StateC>
 public:
 
     BatchCore(Environment<ActionC, StateC>& envirorment,
-                  Agent<ActionC, StateC>& agent,
-                  Dataset<ActionC, StateC>& data) :
+              Agent<ActionC, StateC>& agent,
+              Dataset<ActionC, StateC>& data) :
         Core<ActionC, StateC>(envirorment, agent), data(data)
     {
         agent.setTask(envirorment.getSettings());
