@@ -140,7 +140,8 @@ public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
                            typename action_type<FiniteAction>::const_type_ref action)
     {
-
+        //TODO Implement this method
+        return arma::vec();
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,

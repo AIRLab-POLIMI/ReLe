@@ -96,6 +96,7 @@ public:
         currentItStats(nullptr), stepLength(stepL), penal_factor(penalization),
         nbIndipendentSamples(std::min(std::max(1,static_cast<int>(nbSamplesForJandVar)), static_cast<int>(nbPolicies*0.5)))
     {
+        prodImpWeight = 1.0;
     }
 
     virtual ~PureOffAlgorithm()

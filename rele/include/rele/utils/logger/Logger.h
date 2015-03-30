@@ -56,7 +56,7 @@ public:
     void log(ActionC& u, StateC& xn, Reward& r)
     {
         transition.update(u, xn, r);
-        transitions.push_back(transition);
+        episode.push_back(transition);
         transition.init(xn);
     }
 
@@ -74,12 +74,12 @@ public:
         if(!strategy)
         {
             PrintStrategy<ActionC, StateC> strategy;
-            strategy.processData(transitions);
+            strategy.processData(episode);
             strategy.processData(outputData);
         }
         else
         {
-            strategy->processData(transitions);
+            strategy->processData(episode);
             strategy->processData(outputData);
         }
     }
@@ -92,7 +92,7 @@ public:
 
 private:
     Transition<ActionC, StateC> transition;
-    std::vector<Transition<ActionC, StateC>> transitions;
+    Episode<ActionC, StateC> episode;
     std::vector<AgentOutputData*> outputData;
 
     LoggerStrategy<ActionC, StateC>* strategy;

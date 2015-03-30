@@ -193,19 +193,14 @@ class BatchCore : protected Core<ActionC, StateC>
     using Base::agent;
 
 public:
-    BatchCore(Environment<ActionC, StateC>& envirorment,
-              Agent<ActionC, StateC>& agent) :
-        Core<ActionC, StateC>(envirorment,agent)
-    {
-        agent.setTask(envirorment.getSettings());
-    }
 
     BatchCore(Environment<ActionC, StateC>& envirorment,
-              Agent<ActionC, StateC>& agent,
-              TrajectoryData<ActionC, StateC>& data) :
+                  Agent<ActionC, StateC>& agent,
+                  Dataset<ActionC, StateC>& data) :
         Core<ActionC, StateC>(envirorment, agent), data(data)
     {
         agent.setTask(envirorment.getSettings());
+        nbCurrentEpisode = 0;
     }
 
     CoreSettings& getSettings()
@@ -283,7 +278,7 @@ public:
     }
 
 private:
-    TrajectoryData<ActionC, StateC>& data;
+    Dataset<ActionC, StateC>& data;
     unsigned int nbCurrentEpisode;
 };
 
