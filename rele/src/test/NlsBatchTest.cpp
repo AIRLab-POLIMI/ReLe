@@ -88,21 +88,21 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     oncore.getSettings().episodeLenght = horiz;
 
-    int nbTrajectories = 1e6;
+    int nbTrajectories = 1e3;
     for (int n = 0; n < nbTrajectories; ++n)
         oncore.runTestEpisode();
 
     TrajectoryData<DenseAction, DenseState>& data = strat->data;
     ofstream out(fm.addPath("Dataset.csv"), ios_base::out);
     if (out.is_open())
-        data.WriteToStream(out);
+        data.writeToStream(out);
     out.close();
 
     cout << "# Ended data collection" << endl;
 
 
     PureOffAlgorithm<DenseAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
-    DataBasedCore<DenseAction, DenseState> offcore(mdp, offagent, data);
+    BatchCore<DenseAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath("Deep.log"),
         WriteStrategy<DenseAction, DenseState>::AGENT,

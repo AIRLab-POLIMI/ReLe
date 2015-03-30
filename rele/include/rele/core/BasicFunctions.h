@@ -53,25 +53,25 @@ arma::vec vectorize(const StateC& state, const ActionC& action)
 template<class ActionC>
 arma::vec vectorize(const FiniteState& state, const ActionC& action)
 {
-	arma::vec aux(1);
-	aux[0] = state.getStateN();
+    arma::vec aux(1);
+    aux[0] = state.getStateN();
     return arma::join_vert(aux, action);
 }
 
 template<class StateC>
 arma::vec vectorize(const StateC& state, const FiniteAction& action)
 {
-	arma::vec aux(1);
-	aux[0] = action.getActionN();
+    arma::vec aux(1);
+    aux[0] = action.getActionN();
     return arma::join_vert(state, aux);
 }
 
 inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
 {
-	arma::vec vec(2);
-	vec[0] = state.getStateN();
-	vec[1] = action.getActionN();
-	return vec;
+    arma::vec vec(2);
+    vec[0] = state.getStateN();
+    vec[1] = action.getActionN();
+    return vec;
 }
 
 }
