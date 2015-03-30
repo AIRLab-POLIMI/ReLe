@@ -36,7 +36,7 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	/* Learn lqr correct policy */
+    /* Learn lqr correct policy */
 
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
