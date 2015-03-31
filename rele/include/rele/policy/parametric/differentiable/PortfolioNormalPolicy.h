@@ -19,7 +19,7 @@ class PortfolioNormalPolicy: public DifferentiablePolicy<FiniteAction, DenseStat
 {
 public:
     PortfolioNormalPolicy(const double& epsilon, LinearApproximator* projector) :
-        epsilon(epsilon), mMean(0.0),
+        epsilon(epsilon),
         approximator(projector), clearRegressorOnExit(false)
     {
     }
@@ -85,7 +85,7 @@ public:
     }
 
 protected:
-    double epsilon, mMean;
+    double epsilon;
     LinearApproximator* approximator;
     bool clearRegressorOnExit;
 };

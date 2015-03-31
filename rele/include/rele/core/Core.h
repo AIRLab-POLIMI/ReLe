@@ -162,7 +162,6 @@ public:
 
         Reward r(envirorment.getSettings().rewardDim);
         arma::vec J_mean(r.size(), arma::fill::zeros);
-        arma::vec J_std;
 
         for (unsigned int e = 0; e < settings.testEpisodeN; ++e)
         {
@@ -268,7 +267,10 @@ public:
                 break;
             }
 
-            u = ep[i+1].u;
+            //if last state, next action does not exists
+            if (i < episodeLength - 1)
+                u = ep[i+1].u;
+
             agent.step(r, xn, u);
             logger.log(agent.getAgentOutputData(), i);
         }
