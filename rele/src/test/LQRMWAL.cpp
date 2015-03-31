@@ -81,12 +81,12 @@ int main(int argc, char *argv[])
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     DenseBasisVector basis;
     basis.push_back(pf);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-    DetLinearPolicy<DenseState> policy(&regressor);
+    LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, basis);
+    DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
     vec param(1);
     param[0] = -0.6180;
-    policy.setParameters(param);
-    PolicyEvalAgent<DenseAction, DenseState, DetLinearPolicy<DenseState>> expert(policy);
+    expertPolicy.setParameters(param);
+    PolicyEvalAgent<DenseAction, DenseState, DetLinearPolicy<DenseState>> expert(expertPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -126,9 +126,11 @@ int main(int argc, char *argv[])
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
 
     //Create an agent to solve the mdp direct problem
-    int nparams = basis.size();
-    arma::vec mean(nparams, fill::zeros);
-    mean[0] = 1;
+
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, rewardBasis);
+    DetLinearPolicy<DenseState> policy(&regressor);
+    int nparams = rewardBasis.size();
+    arma::vec mean(nparams, fill::ones);
 
     int nbepperpol = 1, nbpolperupd = 100;
     arma::mat cov(nparams, nparams, arma::fill::eye);
@@ -152,9 +154,9 @@ int main(int argc, char *argv[])
     MWAL<DenseAction, DenseState> irlAlg(rewardBasis, rewardRegressor, core, T, gamma, muE);
     irlAlg.run();
     arma::vec w = irlAlg.getWeights();
+
     cout << "Computed weights: " << endl << w.t() << endl;
     arma::vec meanFinal = dist.getMean();
-
     cout <<  "Policy learned" << endl << meanFinal.t() << endl;
 
 
