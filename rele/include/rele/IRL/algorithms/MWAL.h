@@ -47,7 +47,7 @@ public:
         W.ones(k);
     }
 
-    void run()
+    virtual void run()
     {
         for(int i = 0; i <= T; i++)
         {
@@ -73,14 +73,19 @@ public:
         }
     }
 
-    arma::vec getWeights()
+    virtual arma::vec getWeights()
     {
         return W / arma::sum(W);
     }
 
-    Policy<ActionC, StateC>* getPolicy()
+    virtual Policy<ActionC, StateC>* getPolicy()
     {
         return nullptr;
+    }
+
+    virtual ~MWAL()
+    {
+
     }
 
 private:
@@ -97,7 +102,7 @@ private:
     const arma::vec& muE;
 
     //Data needed to compute policy and feature expectation
-    DenseBasisVector& basis;
+    AbstractBasisVector& basis;
     LinearApproximator& regressor;
     Core<ActionC, StateC>& core;
 

@@ -31,9 +31,10 @@ template<class ActionC, class StateC>
 class IRLAlgorithm
 {
 public:
-    void run() = 0;
-    arma::vec getWeights() = 0;
-    Policy<ActionC, StateC>* getPolicy() = 0;
+    virtual void run() = 0;
+    virtual arma::vec getWeights() = 0;
+    virtual Policy<ActionC, StateC>* getPolicy() = 0;
+    virtual ~IRLAlgorithm() { }
 
 
 };
