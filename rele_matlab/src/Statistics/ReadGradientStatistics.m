@@ -15,6 +15,8 @@ for i=1:nbepisode
 end
 
 index = index + 1;
+iteration.params = csv(index, 1:nbparameters);
+index = index + 1;
 iteration.gradient = csv(index, 1:nbparameters);
 index = index + 1;
 iteration.stepLength = csv(index, 1);

@@ -21,6 +21,7 @@ public:
 
     std::vector<double> history_J;
     std::vector<arma::vec> history_gradients;
+    arma::vec policy_parameters;
     arma::vec estimated_gradient;
     arma::vec stepLength;
 };

@@ -150,6 +150,10 @@ target_link_libraries(deep_BBO rele)
 add_executable(portfolio_BBO src/test/PortfolioBBOTest.cpp)
 target_link_libraries(portfolio_BBO rele)
 
+
+add_executable(portfolio_PG src/test/PortfolioPGTest.cpp)
+target_link_libraries(portfolio_PG rele)
+
 add_executable(chol_FIM src/test/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
 

@@ -48,7 +48,7 @@ void PortfolioSettings::defaultSettings(PortfolioSettings& settings)
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = false;
-    settings.horizon = 100;
+    settings.horizon = T_STEPS;
 
     //Portfolio Parameters
     // time dependent variables
@@ -94,6 +94,7 @@ Portfolio::Portfolio()
 {
     setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
                      config.isFiniteHorizon, config.isEpisodic, config.horizon, config.gamma);
+    currentState.set_size(config.continuosStateDim);
 }
 
 Portfolio::Portfolio(PortfolioSettings& config)
@@ -156,6 +157,7 @@ void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& 
         nextState[i] = currentState[i + 1];
 
     unsigned int u = action.getActionN();
+    assert(u == 0 || u == 1);
 
 
     // if the action is "invest" and the L capital is enough then ALPHA can be invested in NL
@@ -200,9 +202,10 @@ void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& 
 
 void Portfolio::getInitialState(DenseState& state)
 {
-    state.setAbsorbing(false);
-    state[0]  = config.initial_state;
-    currentState[0] = state[0]; //keep info about the current state
+    currentState.zeros();
+    currentState[0] = config.initial_state;
+    currentState.setAbsorbing(false);
+    state = currentState;
 }
 
 void Portfolio::defaultValues()

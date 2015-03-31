@@ -187,7 +187,7 @@ public:
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
-            ss << self[i] << ", ";
+            ss << self[i] << ",";
 
         ss << self[i];
 
@@ -319,7 +319,7 @@ public:
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
-            ss << self[i] << ", ";
+            ss << self[i] << ",";
 
         ss << self[i];
 
@@ -356,7 +356,7 @@ inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
     size_t i;
     for (i = 0; i + 1 < reward.size(); i++)
-        os << reward[i] << ", ";
+        os << reward[i] << ",";
 
     os << reward[i];
     return os;
