@@ -42,32 +42,35 @@ class MWALBasis : public BasisFunction
 {
 
 public:
-	MWALBasis(unsigned int index, double max, double min) :
-		index(index), max(max), min(min)
-	{
+    MWALBasis(unsigned int index, double max, double min) :
+        index(index), min(min), max(max)
+    {
 
-	}
+    }
 
-	virtual double operator()(const arma::vec& input)
-	{
-		double value = input[index];
-		return abs(value - min) / (max - min);
-	}
+    virtual double operator()(const arma::vec& input)
+    {
+        double value = input[index];
+        if(value > min && value < max)
+            return 1;
+        else
+            return 0;
+    }
 
-	virtual void writeOnStream(std::ostream& out)
-	{
+    virtual void writeOnStream(std::ostream& out)
+    {
 
-	}
+    }
 
-	virtual void readFromStream(std::istream& in)
-	{
+    virtual void readFromStream(std::istream& in)
+    {
 
-	}
+    }
 
 private:
-	unsigned int index;
-	double max;
-	double min;
+    unsigned int index;
+    double min;
+    double max;
 };
 
 int main(int argc, char *argv[])
@@ -96,20 +99,36 @@ int main(int argc, char *argv[])
 
     /* Learn weight with MWAL */
 
+    //Create features vector
+    DenseBasisVector rewardBasis;
+    for(int i = 0; i < 10; i++)
+    {
+        double mean = i;
+        double delta = 0.5;
+        double min = mean + delta;
+        double max = mean - delta;
+        MWALBasis* bfP = new MWALBasis(0, min, max);
+        rewardBasis.push_back(bfP);
+
+        if(i != 0)
+        {
+            MWALBasis* bfN = new MWALBasis(0, -max, -min);
+            rewardBasis.push_back(bfN);
+        }
+    }
+
+
     //Compute expert feature expectations
-    arma::vec muE = collection.data.computefeatureExpectation(basis, mdp.getSettings().gamma);
+    arma::vec muE = collection.data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
 
     // Create a parametric MDP
-    DenseBasisVector rewardBasis;
-    MWALBasis* bf = new MWALBasis(-1, +20, -20);
-    rewardBasis.push_back(bf);
     LinearApproximator rewardRegressor(1, rewardBasis);
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
 
     //Create an agent to solve the mdp direct problem
     int nparams = basis.size();
     arma::vec mean(nparams, fill::zeros);
-    mean[0] = -0.1;
+    mean[0] = 1;
 
     int nbepperpol = 1, nbpolperupd = 100;
     arma::mat cov(nparams, nparams, arma::fill::eye);
@@ -122,15 +141,21 @@ int main(int argc, char *argv[])
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
 
     Core<DenseAction, DenseState> core(prMdp, agent);
+    core.getSettings().episodeLenght = 50;
+    core.getSettings().episodeN = episodes;
+    core.getSettings().testEpisodeN = 1000;
 
     //Run MWAL
-    unsigned int T = 100;
+    unsigned int T = 10;
     double gamma = prMdp.getSettings().gamma;
 
     MWAL<DenseAction, DenseState> irlAlg(rewardBasis, rewardRegressor, core, T, gamma, muE);
     irlAlg.run();
     arma::vec w = irlAlg.getWeights();
-    cout << w << endl;
+    cout << "Computed weights: " << endl << w.t() << endl;
+    arma::vec meanFinal = dist.getMean();
+
+    cout <<  "Policy learned" << endl << meanFinal.t() << endl;
 
 
     return 0;

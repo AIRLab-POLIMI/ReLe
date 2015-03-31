@@ -124,6 +124,8 @@ public:
     virtual void step(const Reward& reward, const StateC& nextState,
                       const ActionC& action) = 0;
 
+    virtual ~BatchAgent() {}
+
 };
 
 }
