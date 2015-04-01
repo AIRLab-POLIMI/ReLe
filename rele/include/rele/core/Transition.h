@@ -114,7 +114,7 @@ public:
 
         for(auto& episode : *this)
         {
-            arma::mat episodefeatureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);;
+            arma::mat episodefeatureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);
 
             for(unsigned int t = 0; t < episode.size(); t++)
             {
@@ -124,7 +124,6 @@ public:
 
             Transition<ActionC, StateC>& transition = episode.back();
             episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);
-
 
             featureExpectation += episodefeatureExpectation;
         }

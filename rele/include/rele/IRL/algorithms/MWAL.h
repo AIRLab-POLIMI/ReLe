@@ -73,6 +73,7 @@ public:
             core.runTestEpisodes();
 
             const arma::vec& mu = strategy.data.computefeatureExpectation(basis, gamma);
+            //strategy.data.writeToStream(std::cout);
             std::cout << "mu: "<< std::endl << mu.t() << std::endl;
             std::cout << "muE: "<< std::endl << muE.t() << std::endl;
             std::cout << "deltaMuNorm: " << arma::norm(mu - muE) << std::endl;

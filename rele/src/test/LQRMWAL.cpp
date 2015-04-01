@@ -52,7 +52,7 @@ public:
     {
         double value = input[index];
         if(value > min && value < max)
-            return 1;
+            return -abs(value);
         else
             return 0;
     }
@@ -73,10 +73,43 @@ private:
     double max;
 };
 
+class KillerBasis : public BasisFunction
+{
+public:
+    KillerBasis(double limit) : limit(limit)
+    {
+
+    }
+
+    virtual double operator()(const arma::vec& input)
+    {
+        if(abs(input[0]) < limit)
+            return -abs(input[0]);
+        else
+        	return 0;
+    }
+
+    virtual void writeOnStream(std::ostream& out)
+    {
+
+    }
+
+    virtual void readFromStream(std::istream& in)
+    {
+
+    }
+
+private:
+    double limit;
+};
+
 int main(int argc, char *argv[])
 {
     /* Learn lqr correct policy */
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
+    vec initialState(1);
+    initialState[0] = -5;
+    mdp.setInitialState(initialState);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     DenseBasisVector basis;
@@ -101,7 +134,7 @@ int main(int argc, char *argv[])
 
     //Create features vector
     DenseBasisVector rewardBasis;
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < 10; i++)
     {
         double mean = i;
         double delta = 0.5;
@@ -116,6 +149,8 @@ int main(int argc, char *argv[])
             rewardBasis.push_back(bfN);
         }
     }
+    KillerBasis* killerBasis = new KillerBasis(5.0);
+    rewardBasis.push_back(killerBasis);
 
 
     //Compute expert feature expectations
@@ -126,7 +161,6 @@ int main(int argc, char *argv[])
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
 
     //Create an agent to solve the mdp direct problem
-
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, rewardBasis);
     DetLinearPolicy<DenseState> policy(&regressor);
     int nparams = rewardBasis.size();
@@ -149,7 +183,7 @@ int main(int argc, char *argv[])
     core.getSettings().testEpisodeN = 1000;
 
     //Run MWAL
-    unsigned int T = 10;
+    unsigned int T = 30;
     double gamma = prMdp.getSettings().gamma;
 
     MWAL<DenseAction, DenseState> irlAlg(rewardBasis, rewardRegressor, core, T, gamma, muE);

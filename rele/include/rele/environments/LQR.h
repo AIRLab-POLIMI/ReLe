@@ -40,12 +40,21 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
+public:
+    void setInitialState(arma::vec& initialState)
+    {
+        this->initialState = initialState;
+    }
+
 private:
     void initialize(unsigned int stateActionSize, unsigned int rewardSize, double e);
+    void setInitialState();
 
 private:
     arma::mat A, B;
     std::vector<arma::mat> Q, R;
+
+    arma::vec initialState;
 
 };
 
