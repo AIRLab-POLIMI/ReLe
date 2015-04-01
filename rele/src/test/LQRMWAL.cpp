@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 
     //Create features vector
     DenseBasisVector rewardBasis;
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 20; i++)
     {
         double mean = i;
         double delta = 0.5;
@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> policy(&regressor);
     int nparams = rewardBasis.size();
     arma::vec mean(nparams, fill::ones);
+    mean *= -0.1;
 
     int nbepperpol = 1, nbpolperupd = 100;
     arma::mat cov(nparams, nparams, arma::fill::eye);

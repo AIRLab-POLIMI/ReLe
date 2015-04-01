@@ -32,7 +32,7 @@ namespace ReLe
 {
 
 Rocky::Rocky() :
-    ContinuousMDP(STATESIZE, 3, 1, false, true), dt(0.01),
+    ContinuousMDP(STATESIZE, 3, 1, false, true, 0.99), dt(0.01),
     maxOmega(M_PI), maxV(1), maxOmegar(M_PI-M_PI/12), maxVr(1), predictor(dt)
 {
     //TODO parameter in the constructor
