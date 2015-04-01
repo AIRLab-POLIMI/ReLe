@@ -45,42 +45,59 @@ public:
 
         //initialize W(i) = 1 forall i
         W.ones(k);
+        std::cout << "W: "<< std::endl << W.t() << std::endl;
     }
 
-    void run()
+    virtual void run()
     {
         for(int i = 0; i <= T; i++)
         {
+            std::cout << "T = " << i << std::endl;
+
             //Compute current iteration weights
+            std::cout << "Computing weights..."<< std::endl;
             arma::vec w = W / arma::sum(W);
             regressor.setParameters(w);
+            std::cout << "w: "<< std::endl << w.t() << std::endl;
 
             //compute optimal policy
+            std::cout << "Computing optimal policy..."<< std::endl;
             EmptyStrategy<ActionC, StateC> emptyStrategy;
             core.getSettings().loggerStrategy = &emptyStrategy;
             core.runEpisodes();
 
             //compute feature expectations
+            std::cout << "Computing features expectations..."<< std::endl;
             CollectorStrategy<ActionC, StateC> strategy;
             core.getSettings().loggerStrategy = &strategy;
             core.runTestEpisodes();
 
             const arma::vec& mu = strategy.data.computefeatureExpectation(basis, gamma);
+            std::cout << "mu: "<< std::endl << mu.t() << std::endl;
+            std::cout << "muE: "<< std::endl << muE.t() << std::endl;
+            std::cout << "deltaMuNorm: " << arma::norm(mu - muE) << std::endl;
 
             //update W
-            W = W * arma::exp(logBeta * G(mu));
+            std::cout << "Updating W..."<< std::endl;
+            W = W % arma::exp(logBeta * G(mu));
+            std::cout << "W: "<< std::endl << W.t() << std::endl;
 
         }
     }
 
-    arma::vec getWeights()
+    virtual arma::vec getWeights()
     {
         return W / arma::sum(W);
     }
 
-    Policy<ActionC, StateC>* getPolicy()
+    virtual Policy<ActionC, StateC>* getPolicy()
     {
         return nullptr;
+    }
+
+    virtual ~MWAL()
+    {
+
     }
 
 private:
@@ -97,7 +114,7 @@ private:
     const arma::vec& muE;
 
     //Data needed to compute policy and feature expectation
-    DenseBasisVector& basis;
+    AbstractBasisVector& basis;
     LinearApproximator& regressor;
     Core<ActionC, StateC>& core;
 

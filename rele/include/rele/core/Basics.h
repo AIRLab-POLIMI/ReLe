@@ -119,7 +119,7 @@ public:
         return 0;
     }
 
-    inline virtual ~Action()
+    virtual ~Action()
     {
 
     }
@@ -153,7 +153,7 @@ public:
         return 1;
     }
 
-    inline virtual ~FiniteAction()
+    virtual ~FiniteAction()
     {
 
     }
@@ -199,7 +199,7 @@ public:
         return this->n_elem;
     }
 
-    inline virtual ~DenseAction()
+    virtual ~DenseAction()
     {
 
     }
@@ -253,7 +253,7 @@ public:
         return 0;
     }
 
-    inline virtual ~State()
+    virtual ~State()
     {
 
     }
@@ -290,7 +290,7 @@ public:
         return 1;
     }
 
-    inline virtual ~FiniteState()
+    virtual ~FiniteState()
     {
 
     }
@@ -331,7 +331,7 @@ public:
         return this->n_elem;
     }
 
-    inline virtual ~DenseState()
+    virtual ~DenseState()
     {
 
     }
