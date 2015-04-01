@@ -21,9 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/PGPE/PGPE.h"
-#include "policy_search/NES/NES.h"
-#include "policy_search/REPS/REPS.h"
+#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
@@ -46,7 +44,7 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("Portfolio", "BBO");
+    FileManager fm("Portfolio", "PG");
     fm.createDir();
     fm.cleanDir();
 
@@ -73,36 +71,9 @@ int main(int argc, char *argv[])
     PortfolioNormalPolicy policy(epsilon, &meanRegressor);
     //---
 
-    //--- distribution setup
-    int nparams = basis.size();
-    arma::vec mean(nparams, fill::zeros);
-
-    //----- ParametricNormal
-    //    arma::mat cov(nparams, nparams, arma::fill::eye);
-    //    ParametricNormal dist(mean, cov);
-    //----- ParametricLogisticNormal
-    //    ParametricLogisticNormal dist(mean, zeros(nparams), 1);
-    //----- ParametricCholeskyNormal
-//    arma::mat cov(nparams, nparams, arma::fill::eye);
-//    mat cholMtx = chol(cov);
-//    ParametricCholeskyNormal dist(mean, cholMtx);
-    //----- ParametricDiagonalNormal
-    vec sigmas(nparams, fill::ones);
-    ParametricDiagonalNormal dist(mean, sigmas);
-    //-----
-    //---
-
-    int nbepperpol = 1, nbpolperupd = 100;
+    int nbepperpol = 100;
     bool usebaseline = true;
-    //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
-    //    agent.setNormalization(true);
-    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
-    //    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    //    agent.setEps(0.3);
-
-
-    //    double stepnb = (3.0/5.0)*(3+log(dim))/(dim*sqrt(dim));
-    //    xNES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
+    PolicyGradientAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, 0.01, usebaseline);
 
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
@@ -115,7 +86,7 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLenght = horiz;
 
     int nbUpdates = 1000;
-    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    int episodes  = nbUpdates*nbepperpol;
     double every, bevery;
     every = bevery = 0.1; //%
     int updateCount = 0;
@@ -123,7 +94,7 @@ int main(int argc, char *argv[])
     {
         core.runEpisode();
 
-        int v = nbepperpol*nbpolperupd;
+        int v = nbepperpol;
         if (i % v == 0)
         {
             updateCount++;
@@ -131,8 +102,8 @@ int main(int argc, char *argv[])
             {
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
                 cout << "### " << p << "% ###" << endl;
-                cout << dist.getParameters().t();
-                core.getSettings().testEpisodeN = 100;
+                cout << policy.getParameters().t();
+                core.getSettings().testEpisodeN = 1000;
                 arma::vec J = core.runBatchTest();
                 cout << "mean score: " << J(0) << endl;
                 every += bevery;

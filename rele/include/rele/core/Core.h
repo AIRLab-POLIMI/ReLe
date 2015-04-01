@@ -227,61 +227,50 @@ public:
         return settings;
     }
 
-    void processBatchEpisode()
+    void processBatchEpisode2()
     {
-        //get current episode
-        Episode<ActionC, StateC>& ep = data[nbCurrentEpisode];
-
         //core setup
         Logger<ActionC, StateC> logger;
-        StateC xn;
-        ActionC u;
-        Reward r(envirorment.getSettings().rewardDim);
+        ActionC un;
+        int nbSteps = data[nbCurrentEpisode].size();
 
+        //set logger strategy
         logger.setStrategy(settings.loggerStrategy);
 
-        //Start episode
-        Transition<ActionC, StateC>& sample = ep[0];
-        xn = sample.x;
-        u = sample.u;
-        agent.initEpisode(xn, u);
-        logger.log(xn);
-
-        int episodeLength = ep.size();
-
-        for (unsigned int i = 0;
-                i < episodeLength
-                && !agent.isTerminalConditionReached(); i++)
+        //iterate the episode
+        for (int t = 0; t < nbSteps
+                && !agent.isTerminalConditionReached(); ++t)
         {
-            sample = ep[i];
-
-            //--- make a step with the model
-            xn = sample.xn;
-            r = sample.r;
-            logger.log(u, xn, r);
-            //---
-
-            if (xn.isAbsorbing())
+            Transition<ActionC, StateC>& tr = data[nbCurrentEpisode][t];
+//            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+            if (t == 0)
             {
-                agent.endEpisode(r);
-                break;
+                agent.initEpisode(tr.x, tr.u);
+                logger.log(tr.xn);
             }
 
-            //if last state, next action does not exists
-            if (i < episodeLength - 1)
-                u = ep[i+1].u;
+            logger.log(tr.u, tr.xn, tr.r);
 
-            agent.step(r, xn, u);
-            logger.log(agent.getAgentOutputData(), i);
+            if (tr.xn.isAbsorbing())
+            {
+                agent.endEpisode(tr.r);
+                break;
+            }
+            if (t < nbSteps - 1)
+            {
+                un = data[nbCurrentEpisode][t+1].u;
+            }
+            agent.step(tr.r, tr.xn, un);
+            logger.log(agent.getAgentOutputData(), t);
         }
-
-        if (!xn.isAbsorbing())
+        if (!data[nbCurrentEpisode][nbSteps-1].xn.isAbsorbing())
             agent.endEpisode();
-
-        logger.log(agent.getAgentOutputDataEnd(), episodeLength);
+        logger.log(agent.getAgentOutputDataEnd(), nbSteps);
         logger.printStatistics();
+//        std::cout << std::endl;
 
         nbCurrentEpisode = (nbCurrentEpisode+1<data.size()) ? nbCurrentEpisode+1 : 0;
+
     }
 
     void processBatchData()
@@ -290,7 +279,7 @@ public:
         nbCurrentEpisode = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
-            processBatchEpisode();
+            processBatchEpisode2();
         }
     }
 

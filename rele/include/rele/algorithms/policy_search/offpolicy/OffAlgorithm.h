@@ -130,20 +130,20 @@ public:
         df  = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
 
-        //        prodImpWeight = policy(state,action) / behavioral(state,action);
-
-        //        //init the sum of the gradient of the policy logarithm
-        //        arma::vec logGradient = policy.difflog(state, action);
-        //        sumdlogpi = logGradient;
-
         //--- set up agent output
-        currentItStats = new OffGradientIndividual();
+        if (epCounter == 0)
+        {
+            currentItStats = new OffGradientIndividual();
+            currentItStats->policy_parameters = target.getParameters();
+        }
         //---
 
         prodImpWeight = 1.0;
         sumdlogpi.zeros(target.getParametersSize());
         currentState  = state;
         currentAction = action;
+
+//        std::cout << std::endl;
     }
 
     virtual void initTestEpisode()
@@ -159,6 +159,9 @@ public:
                       const ActionC& nextAction)
     {
 
+
+//        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
+
         currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
 
         //calculate current J value
@@ -166,19 +169,15 @@ public:
         //update discount factor
         df *= this->task.gamma;
 
-        //        //update importance sampling
-        //        double ival = policy(nextState,action) / behavioral(nextState,action);
-        //        prodImpWeight *= ival;
-
-        //        //update sum of the gradient of the policy logarithm
-        //        arma::vec logGradient = policy.difflog(nextState, action);
-        //        sumdlogpi += logGradient;
         currentState  = nextState;
         currentAction = nextAction;
     }
 
     virtual void endEpisode(const Reward& reward)
     {
+
+
+//        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
 
         currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
 
@@ -319,7 +318,7 @@ protected:
         Jvar /= nbIndipendentSamples;
         double stddevJ = std::max(1e-8,sqrt(Jvar)); // to avoid numerical problems
 
-        std::cerr << gradientJ.t();
+        std::cerr << "gradJ: " << gradientJ.t();
 
         arma::vec gradient  = gradientJ
                               + penal_factor * (
@@ -333,7 +332,7 @@ protected:
         lambda = sqrt(lambda);
         lambda = std::max(lambda, 1e-8); // to avoid numerical problems
         double step_size = 1.0 / (2 * lambda);
-        std::cout << step_size << std::endl;
+        std::cout << "step_size: " << step_size << std::endl;
         //---
 
         //--- save actual policy performance
@@ -347,10 +346,8 @@ protected:
 
         arma::vec newvalues = target.getParameters() + gradient * step_size;
         target.setParameters(newvalues);
-        std::cout << newvalues.t();
+        std::cout << "new_params: "  << newvalues.t();
 
-
-        //TODO ciclo unico
         for (int i = 0, ie = target.getParametersSize(); i < ie; ++i)
         {
             bJ_num[i] = 0;

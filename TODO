@@ -1,6 +1,7 @@
 TODO:
 
-0) controllare derivate politiche
+00) controllare derivate politiche
+0) controllare gradienti con implementazione matlab
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
 3) Interfaccia Matlab?
