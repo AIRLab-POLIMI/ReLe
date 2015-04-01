@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 
     int nbepperpol = 100;
     bool usebaseline = true;
-    PolicyGradientAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, 1.0, usebaseline);
+    PolicyGradientAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, 0.01, usebaseline);
 
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
                 cout << "### " << p << "% ###" << endl;
                 cout << policy.getParameters().t();
-                core.getSettings().testEpisodeN = 100;
+                core.getSettings().testEpisodeN = 1000;
                 arma::vec J = core.runBatchTest();
                 cout << "mean score: " << J(0) << endl;
                 every += bevery;
