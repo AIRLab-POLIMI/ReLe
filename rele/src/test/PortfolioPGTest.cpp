@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     //max in ( many optimal points ) -> J = 8.5
     //note that there are multiple optimal solutions
     //e.g.
-    //10, 10, 10, 10, .... (guardare documenti)
+    //x, 10, 10, 10, 10, .... (guardare documenti)
 
     int dim = mdp.getSettings().continuosStateDim;
 

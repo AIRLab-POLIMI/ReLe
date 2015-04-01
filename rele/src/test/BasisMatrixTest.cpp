@@ -30,6 +30,8 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
+    cout << "## Matrix Test ##" << endl;
+
     int dim = 1;
     int deg = 5;
     DenseBasisVector basis;
@@ -52,9 +54,16 @@ int main(int argc, char *argv[])
     LinearApproximator regressor(dim,spm);
     arma::vec weights = arma::ones(regressor.getParametersSize());
     regressor.setParameters(weights);
+    cout << "W = " << endl << weights << endl;
 
     cout << "y = F(" << pt[0] << ") * w =" << endl;
     cout << regressor(pt);
+
+
+    cout << endl << "## Matrix Test ##" << endl;
+    mat evalBasis = basis(pt);
+    cout << evalBasis << endl;
+    cout << "You see, it is a column vector!!" << endl;
 
     return 0;
 }
