@@ -46,6 +46,8 @@ protected:
 
     const arma::cube& P;
     const arma::cube& R;
+
+    arma::vec policy;
 };
 
 class PolicyIteration : public DynamicProgrammingAlgorithm
@@ -55,7 +57,7 @@ public:
 
     virtual void solve();
     virtual Dataset<FiniteAction, FiniteState> test();
-    virtual std::string printPolicy();
+    virtual void printPolicy(std::ostream& os);
 
     virtual ~PolicyIteration();
 
@@ -68,10 +70,13 @@ public:
 
     virtual void solve();
     virtual Dataset<FiniteAction, FiniteState> test();
-    virtual std::string printPolicy();
+    virtual void printPolicy(std::ostream& os);
 
     virtual ~ValueIteration();
 
+private:
+    void computeValueFunction();
+    void computePolicy();
 
 private:
     double eps;

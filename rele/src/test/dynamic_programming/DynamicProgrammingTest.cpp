@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
 
     cout << "Completed!" << endl;
-
+    solver.printPolicy(cout);
 
     return 0;
 }

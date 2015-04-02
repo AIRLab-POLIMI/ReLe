@@ -22,6 +22,7 @@
  */
 
 #include "BasicDynamicProgramming.h"
+#include "CSV.h"
 
 using namespace std;
 using namespace arma;
@@ -35,6 +36,7 @@ DynamicProgrammingAlgorithm::DynamicProgrammingAlgorithm(FiniteMDP& mdp) : mdp(m
     stateN = settings.finiteStateDim;
     actionN = settings.finiteActionDim;
     gamma = settings.gamma;
+    policy.zeros(stateN);
 }
 
 ValueIteration::ValueIteration(FiniteMDP& mdp, double eps) : DynamicProgrammingAlgorithm(mdp), eps(eps)
@@ -42,29 +44,53 @@ ValueIteration::ValueIteration(FiniteMDP& mdp, double eps) : DynamicProgrammingA
     V.zeros(stateN);
 }
 
-void ValueIteration::solve()
+void ValueIteration::computeValueFunction()
 {
     do
     {
         Vold = V;
 
-        for(size_t s = 0; s < stateN; s++)
+        for (size_t s = 0; s < stateN; s++)
         {
             double vmax = -numeric_limits<double>::infinity();
-
-            for(unsigned int a = 0; a < actionN; a++)
+            for (unsigned int a = 0; a < actionN; a++)
             {
                 arma::vec Psa = P.tube(a, s);
                 arma::vec Rsa = R.tube(a, s);
-                arma::vec va = Psa.t()*(Rsa+gamma*Vold);
+                arma::vec va = Psa.t() * (Rsa + gamma * Vold);
                 vmax = max(va[0], vmax);
             }
 
             V[s] = vmax;
         }
     }
-    while(norm(V-Vold) < eps);
+    while (norm(V - Vold) < eps);
+}
 
+void ValueIteration::computePolicy()
+{
+    for (size_t s = 0; s < stateN; s++)
+    {
+        double vmax = -numeric_limits<double>::infinity();
+        for (unsigned int a = 0; a < actionN; a++)
+        {
+            arma::vec Psa = P.tube(a, s);
+            arma::vec Rsa = R.tube(a, s);
+            arma::vec va = Psa.t() * (Rsa + gamma * V);
+            if (va[0] > vmax)
+            {
+                vmax = va[0];
+                policy[s] = a;
+            }
+        }
+    }
+}
+
+void ValueIteration::solve()
+{
+    computeValueFunction();
+
+    computePolicy();
 }
 
 Dataset<FiniteAction, FiniteState> ValueIteration::test()
@@ -72,9 +98,9 @@ Dataset<FiniteAction, FiniteState> ValueIteration::test()
 
 }
 
-string ValueIteration::printPolicy()
+void ValueIteration::printPolicy(std::ostream& os)
 {
-
+    CSVutils::vectorToCSV(policy, os);
 }
 
 ValueIteration::~ValueIteration()

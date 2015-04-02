@@ -26,7 +26,7 @@
 
 #include "Transition.h"
 
-#include <string>
+#include <iostream>
 
 namespace ReLe
 {
@@ -37,7 +37,7 @@ class Solver
 public:
     virtual void solve() = 0;
     virtual Dataset<ActionC, StateC> test() = 0;
-    virtual std::string printPolicy() = 0;
+    virtual void printPolicy(std::ostream& os) = 0;
 
     virtual~Solver() { }
 
