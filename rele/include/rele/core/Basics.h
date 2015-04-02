@@ -29,6 +29,7 @@
 #include <string>
 #include <sstream>
 #include <armadillo>
+#include <iomanip>
 
 namespace ReLe
 {
@@ -316,6 +317,7 @@ public:
     {
         const arma::vec& self = *this;
         std::stringstream ss;
+        ss << std::setprecision(10) << std::fixed;
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
@@ -356,7 +358,7 @@ inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
     size_t i;
     for (i = 0; i + 1 < reward.size(); i++)
-        os << reward[i] << ",";
+        os << std::setprecision(10) << std::fixed << reward[i] << ",";
 
     os << reward[i];
     return os;

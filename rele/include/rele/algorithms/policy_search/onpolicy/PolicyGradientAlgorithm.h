@@ -87,7 +87,7 @@ public:
         if (epiCount == 0)
         {
             currentItStats = new GradientIndividual();
-            currentItStats->policy_parameters = policy.getParametersSize();
+            currentItStats->policy_parameters = policy.getParameters();
         }
         //---
 
@@ -157,6 +157,17 @@ public:
             runCount++; //update run counter
             output2LogReady = true; //output must be ready for log
         }
+    }
+
+    virtual AgentOutputData* getAgentOutputDataEnd()
+    {
+        if (output2LogReady)
+        {
+            //output is ready, activate flag
+            output2LogReady = false;
+            return currentItStats;
+        }
+        return nullptr;
     }
 
 protected:
@@ -266,10 +277,13 @@ protected:
         {
             for (int p = 0; p < nbParams; ++p)
             {
-                double base_el = (baseline_den[p] == 0.0 || useBaseline == false) ? 0 : baseline_num[p]/baseline_den[p];
+                double base_el = (useBaseline == false || baseline_den[p] == 0.0) ? 0 : baseline_num[p]/baseline_den[p];
                 gradient[p] += history_sumdlogpi[ep][p] * (history_J[ep] - base_el);
             }
         }
+
+        // compute mean value
+        gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
         //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf

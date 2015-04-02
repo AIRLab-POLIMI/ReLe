@@ -153,6 +153,9 @@ target_link_libraries(portfolio_BBO rele)
 add_executable(nls_PG src/test/NlsPGTest.cpp)
 target_link_libraries(nls_PG rele)
 
+add_executable(lqr_PG src/test/LqrPGTest.cpp)
+target_link_libraries(lqr_PG rele)
+
 add_executable(portfolio_PG src/test/PortfolioPGTest.cpp)
 target_link_libraries(portfolio_PG rele)
 
