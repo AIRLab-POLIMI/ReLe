@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     grad.save("/tmp/dist2matlab/grad.dat", raw_ascii);
 
     //compute hessian
-    mat hess = dist->diff2Log(point);
+    mat hess = dist->diff2log(point);
     hess.save("/tmp/dist2matlab/hess.dat", raw_ascii);
 
     return 0;

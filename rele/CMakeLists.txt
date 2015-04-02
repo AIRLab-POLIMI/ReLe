@@ -147,6 +147,11 @@ target_link_libraries(deep_BBO rele)
 add_executable(portfolio_BBO src/test/PortfolioBBOTest.cpp)
 target_link_libraries(portfolio_BBO rele)
 
+add_executable(nls_PG src/test/NlsPGTest.cpp)
+target_link_libraries(nls_PG rele)
+
+add_executable(lqr_PG src/test/LqrPGTest.cpp)
+target_link_libraries(lqr_PG rele)
 
 add_executable(portfolio_PG src/test/PortfolioPGTest.cpp)
 target_link_libraries(portfolio_PG rele)
@@ -156,6 +161,9 @@ target_link_libraries(chol_FIM rele)
 
 add_executable(dist2mat src/test/Distribution2MatlabTest.cpp)
 target_link_libraries(dist2mat rele)
+
+add_executable(pol2mat src/test/Policy2MatlabTest.cpp)
+target_link_libraries(pol2mat rele)
 
 add_executable(deep_off src/test/DeepBatchTest.cpp)
 target_link_libraries(deep_off rele)

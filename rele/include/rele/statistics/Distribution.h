@@ -127,7 +127,7 @@ public:
      * @param point the point where the gradient is evaluated
      * @param hessian The hessian matrix (out)
      */
-    virtual arma::mat diff2Log(const arma::vec& point) = 0;
+    virtual arma::mat diff2log(const arma::vec& point) = 0;
 
 };
 

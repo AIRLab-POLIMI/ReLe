@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     //max in ( many optimal points ) -> J = 8.5
     //note that there are multiple optimal solutions
     //e.g.
-    //10, 10, 10, 10, .... (guardare documenti)
+    //x, 10, 10, 10, 10, .... (guardare documenti)
 
     int dim = mdp.getSettings().continuosStateDim;
 
@@ -71,9 +71,10 @@ int main(int argc, char *argv[])
     PortfolioNormalPolicy policy(epsilon, &meanRegressor);
     //---
 
-    int nbepperpol = 100;
-    bool usebaseline = true;
-    PolicyGradientAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, 0.01, usebaseline);
+    int nbepperpol = 50;
+    bool usebaseline = false;
+//    REINFORCEAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, 0.01, usebaseline);
+    GPOMDPAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, mdp.getSettings().horizon, 0.01, usebaseline);
 
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
@@ -85,7 +86,7 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 1000;
+    int nbUpdates = 2000;
     int episodes  = nbUpdates*nbepperpol;
     double every, bevery;
     every = bevery = 0.1; //%

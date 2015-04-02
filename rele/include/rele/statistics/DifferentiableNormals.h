@@ -54,7 +54,7 @@ public:
 
     virtual void update(arma::vec &increment);
     virtual arma::vec difflog(const arma::vec &point);
-    virtual arma::mat diff2Log(const arma::vec &point);
+    virtual arma::mat diff2log(const arma::vec &point);
 
     // WritableInterface interface
 public:
@@ -122,7 +122,7 @@ public:
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
-    arma::mat diff2Log(const arma::vec& point);
+    arma::mat diff2log(const arma::vec& point);
 
     // WritableInterface interface
 public:
@@ -192,7 +192,7 @@ public:
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
-    arma::mat diff2Log(const arma::vec& point);
+    arma::mat diff2log(const arma::vec& point);
 
     // WritableInterface interface
 public:
@@ -248,7 +248,7 @@ public:
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
-    arma::mat diff2Log(const arma::vec& point);
+    arma::mat diff2log(const arma::vec& point);
 
     arma::sp_mat FIM();
     arma::sp_mat inverseFIM();
