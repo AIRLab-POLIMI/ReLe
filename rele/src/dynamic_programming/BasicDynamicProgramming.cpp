@@ -36,13 +36,45 @@ DynamicProgrammingAlgorithm::DynamicProgrammingAlgorithm(FiniteMDP& mdp) : mdp(m
     stateN = settings.finiteStateDim;
     actionN = settings.finiteActionDim;
     gamma = settings.gamma;
-    policy.zeros(stateN);
+    pi.zeros(stateN);
 }
 
 ValueIteration::ValueIteration(FiniteMDP& mdp, double eps) : DynamicProgrammingAlgorithm(mdp), eps(eps)
 {
     V.zeros(stateN);
 }
+
+void ValueIteration::solve()
+{
+    computeValueFunction();
+
+    computePolicy();
+}
+
+Dataset<FiniteAction, FiniteState> ValueIteration::test()
+{
+    bool changed;
+    do
+    {
+        changed = false;
+
+
+
+
+    }
+    while(changed);
+}
+
+void ValueIteration::printPolicy(std::ostream& os)
+{
+    os << pi;
+}
+
+ValueIteration::~ValueIteration()
+{
+
+}
+
 
 void ValueIteration::computeValueFunction()
 {
@@ -64,7 +96,7 @@ void ValueIteration::computeValueFunction()
             V[s] = vmax;
         }
     }
-    while (norm(V - Vold) < eps);
+    while (norm(V - Vold) > eps);
 }
 
 void ValueIteration::computePolicy()
@@ -80,33 +112,87 @@ void ValueIteration::computePolicy()
             if (va[0] > vmax)
             {
                 vmax = va[0];
-                policy[s] = a;
+                pi[s] = a;
             }
         }
     }
 }
 
-void ValueIteration::solve()
+PolicyIteration::PolicyIteration(FiniteMDP& mdp) : DynamicProgrammingAlgorithm(mdp)
 {
-    computeValueFunction();
-
-    computePolicy();
+	changed = false;
 }
 
-Dataset<FiniteAction, FiniteState> ValueIteration::test()
+void PolicyIteration::solve()
+{
+    bool changed;
+
+    do
+    {
+        computeValueFunction();
+		computePolicy();
+    }
+    while(changed);
+}
+
+Dataset<FiniteAction, FiniteState> PolicyIteration::test()
 {
 
 }
 
-void ValueIteration::printPolicy(std::ostream& os)
+void PolicyIteration::printPolicy(std::ostream& os)
 {
-    CSVutils::vectorToCSV(policy, os);
+	os << pi;
 }
 
-ValueIteration::~ValueIteration()
+PolicyIteration::~PolicyIteration()
 {
 
 }
 
+void PolicyIteration::computeValueFunction()
+{
+    mat Ppi(stateN, stateN);
+    mat Rpi(stateN, stateN);
+    mat I(stateN, stateN, fill::eye);
+
+    for(size_t s = 0; s < stateN; s++)
+    {
+        vec PpiS = P.tube(span(pi(s)), span(s));
+        vec RpiS = R.tube(span(pi(s)), span(s));
+
+        Ppi.row(s) = PpiS.t();
+        Rpi.row(s) = RpiS.t();
+    }
+
+    V = sum(arma::solve(Ppi, Rpi), 1);
+}
+
+
+void PolicyIteration::computePolicy()
+{
+	changed = false;
+
+	for (size_t s = 0; s < stateN; s++)
+	{
+		double vmax = V[s];
+		for (unsigned int a = 0; a < actionN; a++)
+		{
+			if (a != pi(s))
+			{
+				arma::vec Psa = P.tube(a, s);
+				arma::vec Rsa = R.tube(a, s);
+				arma::vec va = Psa.t() * (Rsa + gamma * V);
+				if (va[0] > vmax)
+				{
+					pi[s] = a;
+					vmax = va[0];
+					changed = true;
+				}
+			}
+		}
+	}
+
+}
 
 }

@@ -39,13 +39,18 @@ int main(int argc, char *argv[])
 
     FiniteMDP mdp = generator.getMPD(0.9);
 
-    ValueIteration solver(mdp, 0.01);
+    ValueIteration solver1(mdp, 0.01);
+    PolicyIteration solver2(mdp);
 
-    solver.solve();
+    solver1.solve();
+    solver2.solve();
 
 
-    cout << "Completed!" << endl;
-    solver.printPolicy(cout);
+    cout << "Value iteration results:" << endl;
+    solver1.printPolicy(cout);
+
+    cout << "Policy iteration results:" << endl;
+    solver2.printPolicy(cout);
 
     return 0;
 }

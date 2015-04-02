@@ -47,7 +47,8 @@ protected:
     const arma::cube& P;
     const arma::cube& R;
 
-    arma::vec policy;
+    arma::uvec pi;
+    arma::vec V;
 };
 
 class PolicyIteration : public DynamicProgrammingAlgorithm
@@ -61,6 +62,12 @@ public:
 
     virtual ~PolicyIteration();
 
+private:
+    void computeValueFunction();
+	void computePolicy();
+
+private:
+	bool changed;
 };
 
 class ValueIteration : public DynamicProgrammingAlgorithm
@@ -82,7 +89,6 @@ private:
     double eps;
 
     arma::vec Vold;
-    arma::vec V;
 };
 
 
