@@ -25,10 +25,19 @@
 #define INCLUDE_RELE_CORE_BASICFUNCTIONS_H_
 
 #include "Basics.h"
+#include "BasicsTraits.h"
 
 namespace ReLe
 {
 //Templates needed to sample different action types
+template<class PolicyC>
+void sampleActionWorker(const FiniteState& state, FiniteAction& action, PolicyC& policy)
+{
+    unsigned int u = policy(state.getStateN());
+    action.setActionN(u);
+}
+
+
 template<class StateC, class PolicyC>
 void sampleActionWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
 {

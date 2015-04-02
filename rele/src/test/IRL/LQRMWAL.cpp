@@ -86,7 +86,7 @@ public:
         if(abs(input[0]) < limit)
             return -abs(input[0]);
         else
-        	return 0;
+            return 0;
     }
 
     virtual void writeOnStream(std::ostream& out)
@@ -134,10 +134,10 @@ int main(int argc, char *argv[])
 
     //Create features vector
     DenseBasisVector rewardBasis;
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 3; i++)
     {
-        double mean = i;
-        double delta = 0.5;
+        double mean = 2.5*i;
+        double delta = 1.25;
         double min = mean + delta;
         double max = mean - delta;
         MWALBasis* bfP = new MWALBasis(0, min, max);
@@ -149,8 +149,6 @@ int main(int argc, char *argv[])
             rewardBasis.push_back(bfN);
         }
     }
-    KillerBasis* killerBasis = new KillerBasis(5.0);
-    rewardBasis.push_back(killerBasis);
 
 
     //Compute expert feature expectations
@@ -162,8 +160,8 @@ int main(int argc, char *argv[])
 
     //Create an agent to solve the mdp direct problem
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, rewardBasis);
-    DetLinearPolicy<DenseState> policy(&regressor);
-    int nparams = rewardBasis.size();
+    DetLinearPolicy<DenseState> policy(&expertRegressor);
+    int nparams = basis.size();
     arma::vec mean(nparams, fill::ones);
     mean *= -0.1;
 

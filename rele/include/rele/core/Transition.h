@@ -27,7 +27,9 @@
 #include <vector>
 #include <fstream>
 
+#include "BasicFunctions.h"
 #include "BasisFunctions.h"
+
 
 namespace ReLe
 {
@@ -119,11 +121,11 @@ public:
             for(unsigned int t = 0; t < episode.size(); t++)
             {
                 Transition<ActionC, StateC>& transition = episode[t];
-                episodefeatureExpectation += std::pow(gamma, t) * basis(transition.x);
+                episodefeatureExpectation += std::pow(gamma, t) * basis(vectorize(transition.x, transition.u));
             }
 
-            Transition<ActionC, StateC>& transition = episode.back();
-            episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);
+            /*Transition<ActionC, StateC>& transition = episode.back();
+            episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);*/
 
             featureExpectation += episodefeatureExpectation;
         }

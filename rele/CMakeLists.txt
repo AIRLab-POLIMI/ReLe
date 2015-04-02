@@ -114,12 +114,6 @@ else()
                                    ${Boost_LIBRARIES})
 endif()
 
-add_executable(simple_chain src/test/SimpleChain.cpp)
-target_link_libraries(simple_chain rele)
-
-add_executable(grid_world src/test/GridWorldTest.cpp)
-target_link_libraries(grid_world rele)
-
 add_executable(mountain_car src/test/MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
 
@@ -172,8 +166,20 @@ target_link_libraries(pr_mdp rele)
 add_executable(factory src/test/FactoryTest.cpp)
 target_link_libraries(factory rele)
 
-add_executable(lqr_MWAL src/test/LQRMWAL.cpp)
+#TD tests
+add_executable(simple_chain src/test/TD/SimpleChain.cpp)
+target_link_libraries(simple_chain rele)
+
+add_executable(grid_world src/test/TD/GridWorldTest.cpp)
+target_link_libraries(grid_world rele)
+
+#IRL Tests
+add_executable(lqr_MWAL src/test/IRL/LQRMWAL.cpp)
 target_link_libraries(lqr_MWAL rele)
+
+add_executable(simple_chain_MWAL src/test/IRL/SimpleChainMWAL.cpp)
+target_link_libraries(simple_chain_MWAL rele)
+
 
 # ------------------------ INSTALLATION ------------------------
 
