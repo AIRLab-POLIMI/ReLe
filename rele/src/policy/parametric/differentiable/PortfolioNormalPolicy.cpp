@@ -62,7 +62,8 @@ arma::vec PortfolioNormalPolicy::difflog(const arma::vec& state,
 arma::mat PortfolioNormalPolicy::diff2log(const arma::vec& state,
         typename action_type<FiniteAction>::const_type_ref action)
 {
-
+//TODO
+    return arma::mat();
 }
 
 } //end namespace

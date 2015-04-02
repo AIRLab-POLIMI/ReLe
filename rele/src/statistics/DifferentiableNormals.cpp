@@ -79,7 +79,7 @@ vec ParametricNormal::difflog(const vec& point)
     return invCov * (point - mean);
 }
 
-mat ParametricNormal::diff2Log(const vec&point)
+mat ParametricNormal::diff2log(const vec&point)
 {
     return -invCov;
 }
@@ -159,7 +159,7 @@ arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
     return gradient;
 }
 
-arma::mat ParametricDiagonalNormal::diff2Log(const arma::vec& point)
+arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point)
 {
     //TODO controllare implementazione
     int paramSize = this->getParametersSize();
@@ -334,7 +334,7 @@ vec ParametricLogisticNormal::difflog(const vec& point)
     return gradient;
 }
 
-mat ParametricLogisticNormal::diff2Log(const vec& point)
+mat ParametricLogisticNormal::diff2log(const vec& point)
 {
     int paramSize = this->getParametersSize();
     mat hessian(paramSize,paramSize,fill::zeros);
@@ -531,7 +531,7 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
     return gradient;
 }
 
-mat ParametricCholeskyNormal::diff2Log(const vec &point)
+mat ParametricCholeskyNormal::diff2log(const vec &point)
 {
 
 }
