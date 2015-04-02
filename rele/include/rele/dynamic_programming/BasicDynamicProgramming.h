@@ -64,10 +64,10 @@ public:
 
 private:
     void computeValueFunction();
-	void computePolicy();
+    void computePolicy();
 
 private:
-	bool changed;
+    bool changed;
 };
 
 class ValueIteration : public DynamicProgrammingAlgorithm

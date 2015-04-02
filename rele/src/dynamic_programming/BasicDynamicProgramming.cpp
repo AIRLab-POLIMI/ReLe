@@ -120,7 +120,7 @@ void ValueIteration::computePolicy()
 
 PolicyIteration::PolicyIteration(FiniteMDP& mdp) : DynamicProgrammingAlgorithm(mdp)
 {
-	changed = false;
+    changed = false;
 }
 
 void PolicyIteration::solve()
@@ -130,7 +130,7 @@ void PolicyIteration::solve()
     do
     {
         computeValueFunction();
-		computePolicy();
+        computePolicy();
     }
     while(changed);
 }
@@ -142,7 +142,7 @@ Dataset<FiniteAction, FiniteState> PolicyIteration::test()
 
 void PolicyIteration::printPolicy(std::ostream& os)
 {
-	os << pi;
+    os << pi;
 }
 
 PolicyIteration::~PolicyIteration()
@@ -171,27 +171,27 @@ void PolicyIteration::computeValueFunction()
 
 void PolicyIteration::computePolicy()
 {
-	changed = false;
+    changed = false;
 
-	for (size_t s = 0; s < stateN; s++)
-	{
-		double vmax = V[s];
-		for (unsigned int a = 0; a < actionN; a++)
-		{
-			if (a != pi(s))
-			{
-				arma::vec Psa = P.tube(a, s);
-				arma::vec Rsa = R.tube(a, s);
-				arma::vec va = Psa.t() * (Rsa + gamma * V);
-				if (va[0] > vmax)
-				{
-					pi[s] = a;
-					vmax = va[0];
-					changed = true;
-				}
-			}
-		}
-	}
+    for (size_t s = 0; s < stateN; s++)
+    {
+        double vmax = V[s];
+        for (unsigned int a = 0; a < actionN; a++)
+        {
+            if (a != pi(s))
+            {
+                arma::vec Psa = P.tube(a, s);
+                arma::vec Rsa = R.tube(a, s);
+                arma::vec va = Psa.t() * (Rsa + gamma * V);
+                if (va[0] > vmax)
+                {
+                    pi[s] = a;
+                    vmax = va[0];
+                    changed = true;
+                }
+            }
+        }
+    }
 
 }
 
