@@ -49,7 +49,7 @@ public:
 
     virtual double operator()(size_t state, unsigned int action)
     {
-    	return 0;
+        return 0;
     }
 
     inline virtual std::string getPolicyName()

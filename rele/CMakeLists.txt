@@ -15,6 +15,7 @@ if(catkin_FOUND)
                                 include/rele/approximators
                                 include/rele/statistics
                                 include/rele/IRL
+                                include/rele/dynamic_programming
 	               LIBRARIES rele)
 	set(CATKIN_MSG TRUE)
 else()
@@ -35,7 +36,8 @@ include_directories(include/rele/core
                     include/rele/environments
                     include/rele/approximators
                     include/rele/statistics
-                    include/rele/IRL)
+                    include/rele/IRL
+                    include/rele/dynamic_programming)
 
 # ----------------------- LIBRARIES ---------------------------
 
@@ -100,7 +102,8 @@ file(GLOB_RECURSE ReLe_SOURCE
                   src/utils/*.cpp
                   src/generators/*.cpp
                   src/approximators/*.cpp
-                  src/statistics/*.cpp)
+                  src/statistics/*.cpp
+                  src/dynamic_programming/*.cpp)
 
 file(GLOB_RECURSE ReLe_INCLUDE
                   include/*.h)
@@ -173,12 +176,16 @@ target_link_libraries(simple_chain rele)
 add_executable(grid_world src/test/TD/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
 
-#IRL Tests
+#IRL tests
 add_executable(lqr_MWAL src/test/IRL/LQRMWAL.cpp)
 target_link_libraries(lqr_MWAL rele)
 
 add_executable(simple_chain_MWAL src/test/IRL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
+
+#DP tests
+add_executable(dynamic_programming_test src/test/dynamic_programming/DynamicProgrammingTest.cpp)
+target_link_libraries(dynamic_programming_test rele)
 
 
 # ------------------------ INSTALLATION ------------------------

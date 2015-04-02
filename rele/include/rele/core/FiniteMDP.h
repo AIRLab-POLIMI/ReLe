@@ -35,6 +35,7 @@ namespace ReLe
 
 class FiniteMDP: public Environment<FiniteAction, FiniteState>
 {
+    friend class DynamicProgrammingAlgorithm;
 public:
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
               bool isFiniteHorizon, double gamma = 1.0, unsigned int horizon =
