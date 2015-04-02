@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
 
     ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath("Nls.log"),
+        fm.addPath(outputname),
         WriteStrategy<DenseAction, DenseState>::AGENT,
         true /*delete file*/
     );
