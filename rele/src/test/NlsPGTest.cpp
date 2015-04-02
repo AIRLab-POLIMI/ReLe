@@ -51,7 +51,7 @@ struct gradConfig
 void help()
 {
     cout << "nls_PG algorithm #Updates #Episodes stepLength" << endl;
-    cout << " - algorithm: r, rb, g, gb" << endl;
+    cout << " - algorithm: r, rb, g, gb, ng" << endl;
 }
 
 bool InputValidation(int argc, char *argv[], gradConfig& config)
@@ -174,13 +174,14 @@ int main(int argc, char *argv[])
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
     int nbepperpol = config.nbEpisodes;
+    unsigned int rewardId = 0;
     char outputname[100];
     if (strcmp(alg, "r"  ) == 0)
     {
         cout << "REINFORCEAlgorithm" << endl;
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, 0);
+                config.stepLength, usebaseline, rewardId);
         sprintf(outputname, "Nls_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
@@ -188,7 +189,7 @@ int main(int argc, char *argv[])
         cout << "GPOMDPAlgorithm" << endl;
         bool usebaseline = false;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline);
+                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
         sprintf(outputname, "Nls_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
@@ -196,7 +197,7 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, 0);
+                config.stepLength, usebaseline, rewardId);
         sprintf(outputname, "Nls_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
@@ -204,11 +205,19 @@ int main(int argc, char *argv[])
         cout << "GPOMDPAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline);
+                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
         sprintf(outputname, "Nls_gb.log");
     }
     else if (strcmp(alg, "gsb") == 0)
     {
+    }
+    else if (strcmp(alg, "ng") == 0)
+    {
+        cout << "NaturalPGAlgorithm BASELINE" << endl;
+        bool usebaseline = false;
+        agent = new NaturalPGAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "Nls_ng.log");
     }
     else
     {

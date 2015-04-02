@@ -143,7 +143,7 @@ protected:
             tmp = Base::diffObjFunc.t() * (H * Base::diffObjFunc);
             double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
             lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
+            nat_grad = H * Base::diffObjFunc / (2 * lambda);
 #endif
         }
 

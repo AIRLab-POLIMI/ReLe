@@ -466,6 +466,187 @@ protected:
     arma::mat baseline_num, baseline_den;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// NATURAL GRADIENT ALGORITHM
+///////////////////////////////////////////////////////////////////////////////////////
+/**
+ * A Natural Policy Gradient
+ * Sham Kakade
+ * NIPS
+ * http://research.microsoft.com/en-us/um/people/skakade/papers/rl/natural.pdf
+ */
+template<class ActionC, class StateC>
+class NaturalPGAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
+{
+    USE_PGA_MEMBERS
+
+public:
+    NaturalPGAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                       unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
+                       bool baseline = true, int reward_obj = 0) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj),
+        maxStepsPerEpisode(nbSteps)
+    {
+    }
+
+    virtual ~NaturalPGAlgorithm()
+    {
+    }
+
+    // Agent interface
+protected:
+    virtual void init()
+    {
+        unsigned int dp = policy.getParametersSize();
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
+        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
+        sumdlogpi.set_size(dp);
+
+        // variables for baseline settings
+        baseline_num.zeros(dp,maxStepsPerEpisode);
+        baseline_den.zeros(dp,maxStepsPerEpisode);
+        reward_EpStep.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode);
+        sumGradLog_CompEpStep.zeros(dp,nbEpisodesToEvalPolicy,maxStepsPerEpisode);
+        maxsteps_Ep.zeros(nbEpisodesToEvalPolicy);
+        fisher.zeros(dp,dp);
+        fisherEp.zeros(dp,dp);
+    }
+
+    virtual void initializeVariables()
+    {
+        sumdlogpi.zeros();
+        stepCount = 0;
+        fisherEp.zeros();
+    }
+
+    virtual void updateStep(const Reward& reward)
+    {
+
+        int dp = policy.getParametersSize();
+
+        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        sumdlogpi += grad;
+
+        fisherEp += grad * grad.t();
+
+        // store the basic elements used to compute the gradient
+        reward_EpStep(epiCount, stepCount) = df * reward[rewardId];
+
+        for (int p = 0; p < dp; ++p)
+        {
+            sumGradLog_CompEpStep(p,epiCount,stepCount) = sumdlogpi(p);
+        }
+
+        // compute the baseline
+
+        for (int p = 0; p < dp; ++p)
+        {
+            baseline_num(p,stepCount) += df * reward[rewardId] * sumdlogpi(p) * sumdlogpi(p);
+        }
+
+        for (int p = 0; p < dp; ++p)
+        {
+            baseline_den(p,stepCount) += sumdlogpi(p) * sumdlogpi(p);
+        }
+
+        stepCount++;
+    }
+
+    virtual void updateAtEpisodeEnd()
+    {
+        maxsteps_Ep(epiCount) = stepCount;
+        fisherEp /= stepCount;
+        fisher += fisherEp;
+    }
+
+    virtual void updatePolicy()
+    {
+        int nbParams = policy.getParametersSize();
+        arma::vec gradient(nbParams, arma::fill::zeros);
+        // compute the gradient (the gradient is estimated like GPOMDP)
+        for (int p = 0; p < nbParams; ++p)
+        {
+            for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+            {
+                for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
+                {
+
+                    double baseline = (useBaseline == true && baseline_den(p,t) != 0) ? baseline_num(p,t) / baseline_den(p,t) : 0;
+
+                    gradient[p] += (reward_EpStep(ep,t) - baseline) * sumGradLog_CompEpStep(p,ep,t);
+                }
+            }
+        }
+
+
+        // compute mean value
+        gradient /= nbEpisodesToEvalPolicy;
+        fisher /= nbEpisodesToEvalPolicy;
+
+        //--- Compute learning step
+        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
+        arma::mat tmp;
+        arma::vec nat_grad;
+        double lambda, step_length;
+        int rnk = arma::rank(fisher);
+        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            arma::mat H = arma::solve(fisher, gradient);
+            tmp = gradient.t() * H;
+            lambda = sqrt(tmp(0,0) / (4 * stepLength));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            step_length = 1 / (2 * lambda);
+            nat_grad = H;
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+            arma::mat H = arma::pinv(fisher);
+            tmp = gradient.t() * (H * gradient);
+            lambda = sqrt(tmp(0,0) / (4 * stepLength));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            step_length = 1 / (2 * lambda);
+            nat_grad = H * gradient;
+        }
+        //---
+
+        //--- save actual policy performance
+        currentItStats->history_J = history_J;
+        currentItStats->history_gradients = history_sumdlogpi;
+        currentItStats->estimated_gradient = nat_grad;
+        currentItStats->stepLength = step_length;
+        //---
+
+
+        arma::vec newvalues = policy.getParameters() + step_length * nat_grad;
+        policy.setParameters(newvalues);
+        //        std::cout << "new_params: "  << newvalues.t();
+
+        for (int p = 0; p < nbParams; ++p)
+        {
+            for (int t = 0; t < maxStepsPerEpisode; ++t)
+            {
+                baseline_den(p,t) = 0;
+                baseline_num(p,t) = 0;
+            }
+        }
+        fisher.zeros();
+    }
+
+protected:
+    std::vector<arma::vec> history_sumdlogpi;
+    arma::vec sumdlogpi;
+    arma::mat reward_EpStep;
+    arma::cube sumGradLog_CompEpStep;
+    arma::ivec maxsteps_Ep;
+
+    unsigned int maxStepsPerEpisode, stepCount;
+
+    arma::mat baseline_num, baseline_den, fisher, fisherEp;
+};
+
 }// end namespace ReLe
 
 #endif //POLICYGRADIENTALGORITHM_H_
