@@ -112,9 +112,9 @@ int main(int argc, char *argv[])
     {
         // default configuration if no arguments are specified
         strcpy(alg, "r");
-        config.nbRuns      = 1000;
+        config.nbRuns      = 400;
         config.nbEpisodes  = 100;
-        config.stepLength  = 0.1;
+        config.stepLength  = 0.01;
     }
     //---
 
@@ -166,10 +166,10 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
     //    NormalPolicy policy(0.2, &meanRegressor); // used for testing algorithm through matlab
 
-    //    arma::vec pp(2);
-    //    pp(0) = -0.5;
-    //    pp(1) = 0.5;
-    //    meanRegressor.setParameters(pp);
+    arma::vec pp(2);
+    pp(0) = -0.4;
+    pp(1) = 0.4;
+    meanRegressor.setParameters(pp);
     //---
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
     ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath("Nls.log"),
-        WriteStrategy<DenseAction, DenseState>::ALL,
+        WriteStrategy<DenseAction, DenseState>::AGENT,
         true /*delete file*/
     );
 
@@ -240,13 +240,14 @@ int main(int argc, char *argv[])
             updateCount++;
             if ((updateCount >= nbUpdates*every) || (updateCount == 1))
             {
-                int p = 100 * updateCount/static_cast<double>(nbUpdates);
+                int p = std::floor(100 * (updateCount/static_cast<double>(nbUpdates)));
                 cout << "### " << p << "% ###" << endl;
                 cout << policy.getParameters().t();
                 core.getSettings().testEpisodeN = 1000;
                 arma::vec J = core.runBatchTest();
                 cout << "mean score: " << J(0) << endl;
-                every += bevery;
+                if (updateCount != 1)
+                    every += bevery;
             }
         }
 
