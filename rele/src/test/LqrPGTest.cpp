@@ -49,7 +49,7 @@ struct gradConfig
 
 void help()
 {
-    cout << "nls_PG algorithm #Updates #Episodes stepLength" << endl;
+    cout << "lqr_PG algorithm #Updates #Episodes stepLength" << endl;
     cout << " - algorithm: r, rb, g, gb" << endl;
 }
 
@@ -67,7 +67,7 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
     double step_length = atof(argv[4]);
 
     // check arguments
-    if (nbRuns < 1 || nbEpisodes < 1 || step_length <= 0 || step_length > 10)
+    if (nbRuns < 1 || nbEpisodes < 1 || step_length <= 0)
     {
         std::cout << "ERROR: Arguments not valid\n";
         return false;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     }
     //---
 
-    FileManager fm("LQR", "PG");
+    FileManager fm("lqr", "PG");
     fm.createDir();
     fm.cleanDir();
 
@@ -125,41 +125,64 @@ int main(int argc, char *argv[])
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
     int nbepperpol = config.nbEpisodes;
+    unsigned int rewardId = 0;
     char outputname[100];
     if (strcmp(alg, "r"  ) == 0)
     {
         cout << "REINFORCEAlgorithm" << endl;
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, 0);
-        sprintf(outputname, "Nls_r.log");
+                config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "lqr_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
-        bool usebaseline = false;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline);
-        sprintf(outputname, "Nls_g.log");
+                mdp.getSettings().horizon, config.stepLength, rewardId);
+        sprintf(outputname, "lqr_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
     {
         cout << "REINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, 0);
-        sprintf(outputname, "Nls_rb.log");
+                config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "lqr_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
         cout << "GPOMDPAlgorithm BASELINE" << endl;
-        bool usebaseline = true;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline);
-        sprintf(outputname, "Nls_gb.log");
+                mdp.getSettings().horizon, config.stepLength,
+                GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
+                rewardId);
+        sprintf(outputname, "lqr_gb.log");
     }
     else if (strcmp(alg, "gsb") == 0)
     {
+        cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
+        agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                mdp.getSettings().horizon, config.stepLength,
+                GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
+                rewardId);
+        sprintf(outputname, "lqr_gsb.log");
+    }
+    else if (strcmp(alg, "ng") == 0)
+    {
+        cout << "NaturalPGAlgorithm BASELINE" << endl;
+        bool usebaseline = false;
+        agent = new NaturalPGAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "lqr_ng.log");
+    }
+    else if (strcmp(alg, "enac") == 0)
+    {
+        cout << "eNAC BASELINE" << endl;
+        bool usebaseline = true;
+        agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "lqr_enac.log");
     }
     else
     {

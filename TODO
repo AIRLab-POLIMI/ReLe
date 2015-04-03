@@ -1,8 +1,10 @@
 TODO:
 
-00) controllare derivate politiche
-0) controllare gradienti con implementazione matlab
+0a) controllare derivate politiche
+0b) definire classe per aggiornamento del gradiente (step length)
+0c) fissare precisione in tutti i file di output
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
-3) Interfaccia Matlab?
+3) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
 4) Cambiare nota di copyright: mettere tutti gli autori, e soprattutto mettere politecnico di milano
+5) Interfaccia Matlab?

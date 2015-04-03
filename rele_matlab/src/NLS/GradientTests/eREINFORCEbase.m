@@ -10,7 +10,9 @@ w      = sym('w',   [dim,  1]);
 s      = sym('s',   [sdim, 1]);
 phi    = [s(end:-1:1)];
 
-pol = 1/(sqrt(2*pi) * (sigma)) * exp(-0.5*(a-w'*phi)^2/(sigma)^2);
+varsigma = sigma * sum(phi);
+pol = 1/(sqrt(2*pi) * (varsigma)) * exp(-0.5*(a-w'*phi)^2/(varsigma)^2);
+% pol = 1/(sqrt(2*pi) * (sigma)) * exp(-0.5*(a-w'*phi)^2/(sigma)^2);
 % pretty(pol)
 % eval(subs(pol, [w; k; phi; a], [wnum; knum; state; action]))
 
@@ -45,7 +47,8 @@ for trial = 1 : num_trials
     bnum = bnum + sumdlogPi * sumrew;
     bden = bden + sumdlogPi;
 end
-b = bnum ./ bden;
+b = zeros(size(bnum));
+b(bden~=0) = bnum(bden~=0) ./ bden(bden~=0);
 
 %%% Compute gradient
 j = 0;

@@ -329,12 +329,26 @@ class GPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 {
     USE_PGA_MEMBERS
 
+
 public:
+    enum BaseLineType { MULTI, SINGLE };
+
+
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
                     unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
-                    bool baseline = true, int reward_obj = 0) :
-        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj),
-        maxStepsPerEpisode(nbSteps)
+                    BaseLineType btype, int reward_obj = 0) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, true, reward_obj),
+        maxStepsPerEpisode(nbSteps),
+        bType(btype)
+    {
+    }
+
+    GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                    unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
+                    int reward_obj = 0) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, false, reward_obj),
+        maxStepsPerEpisode(nbSteps),
+        bType(BaseLineType::SINGLE)
     {
     }
 
@@ -354,6 +368,10 @@ protected:
         // variables for baseline settings
         baseline_num.zeros(dp,maxStepsPerEpisode);
         baseline_den.zeros(dp,maxStepsPerEpisode);
+        baseline_num_single.zeros(dp);
+        baseline_den_single.zeros(dp);
+        baseline_num1_single.zeros(dp);
+        baseline_num2_single.zeros(dp);
         reward_EpStep.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode);
         sumGradLog_CompEpStep.zeros(dp,nbEpisodesToEvalPolicy,maxStepsPerEpisode);
         maxsteps_Ep.zeros(nbEpisodesToEvalPolicy);
@@ -363,6 +381,8 @@ protected:
     {
         sumdlogpi.zeros();
         stepCount = 0;
+        baseline_num1_single.zeros();
+        baseline_num2_single.zeros();
     }
 
     virtual void updateStep(const Reward& reward)
@@ -383,14 +403,25 @@ protected:
 
         // compute the baseline
 
-        for (int p = 0; p < dp; ++p)
+        if (useBaseline && bType == BaseLineType::MULTI)
         {
-            baseline_num(p,stepCount) += df * reward[rewardId] * sumdlogpi(p) * sumdlogpi(p);
-        }
+            for (int p = 0; p < dp; ++p)
+            {
+                baseline_num(p,stepCount) += df * reward[rewardId] * sumdlogpi(p) * sumdlogpi(p);
+            }
 
-        for (int p = 0; p < dp; ++p)
+            for (int p = 0; p < dp; ++p)
+            {
+                baseline_den(p,stepCount) += sumdlogpi(p) * sumdlogpi(p);
+            }
+        }
+        else if (useBaseline && bType == BaseLineType::SINGLE)
         {
-            baseline_den(p,stepCount) += sumdlogpi(p) * sumdlogpi(p);
+            for (int p = 0; p < dp; ++p)
+            {
+                baseline_num1_single(p) += df * reward[rewardId] * sumdlogpi(p);
+                baseline_num2_single(p) += sumdlogpi(p);
+            }
         }
 
         stepCount++;
@@ -399,6 +430,15 @@ protected:
     virtual void updateAtEpisodeEnd()
     {
         maxsteps_Ep(epiCount) = stepCount;
+
+        // compute the baseline
+
+        int nbParams = policy.getParametersSize();
+        for (int p = 0; p < nbParams; ++p)
+        {
+            baseline_num_single(p) += baseline_num1_single(p) * baseline_num2_single(p);
+            baseline_den_single(p) += baseline_num2_single(p) * baseline_num2_single(p);
+        }
     }
 
     virtual void updatePolicy()
@@ -406,16 +446,36 @@ protected:
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
         // compute the gradient
-        for (int p = 0; p < nbParams; ++p)
+
+        if (bType == BaseLineType::MULTI)
         {
-            for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+            for (int p = 0; p < nbParams; ++p)
             {
-                for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
+                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
                 {
+                    for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
+                    {
 
-                    double baseline = (useBaseline == true && baseline_den(p,t) != 0) ? baseline_num(p,t) / baseline_den(p,t) : 0;
+                        double baseline = (useBaseline == true && baseline_den(p,t) != 0) ? baseline_num(p,t) / baseline_den(p,t) : 0;
 
-                    gradient[p] += (reward_EpStep(ep,t) - baseline) * sumGradLog_CompEpStep(p,ep,t);
+                        gradient[p] += (reward_EpStep(ep,t) - baseline) * sumGradLog_CompEpStep(p,ep,t);
+                    }
+                }
+            }
+        }
+        else
+        {
+            // compute the gradient
+            for (int p = 0; p < nbParams; ++p)
+            {
+                double baseline =  (useBaseline == true && baseline_den_single(p) != 0) ? baseline_num_single(p) / baseline_den_single(p) : 0;
+
+                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+                {
+                    for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
+                    {
+                        gradient[p] += (reward_EpStep(ep,t) - baseline) * sumGradLog_CompEpStep(p,ep,t);
+                    }
                 }
             }
         }
@@ -446,6 +506,10 @@ protected:
 
         for (int p = 0; p < nbParams; ++p)
         {
+            baseline_num_single(p) = 0.0;
+            baseline_den_single(p) = 0.0;
+            baseline_num1_single(p) = 0.0;
+            baseline_num2_single(p) = 0.0;
             for (int t = 0; t < maxStepsPerEpisode; ++t)
             {
                 baseline_den(p,t) = 0;
@@ -464,6 +528,8 @@ protected:
     unsigned int maxStepsPerEpisode, stepCount;
 
     arma::mat baseline_num, baseline_den;
+    arma::vec baseline_num1_single, baseline_num2_single, baseline_num_single, baseline_den_single;
+    BaseLineType bType;
 };
 
 
@@ -590,7 +656,7 @@ protected:
         arma::vec nat_grad;
         double lambda, step_length;
         int rnk = arma::rank(fisher);
-        std::cout << rnk << " " << fisher << std::endl;
+        //        std::cout << rnk << " " << fisher << std::endl;
         if (rnk == fisher.n_rows)
         {
             arma::mat H = arma::solve(fisher, gradient);
@@ -619,6 +685,8 @@ protected:
         currentItStats->stepLength = step_length;
         //---
 
+        //        std::cout << step_length << std::endl;
+        //        std::cout << nat_grad.t();
 
         arma::vec newvalues = policy.getParameters() + step_length * nat_grad;
         policy.setParameters(newvalues);
@@ -645,6 +713,185 @@ protected:
     unsigned int maxStepsPerEpisode, stepCount;
 
     arma::mat baseline_num, baseline_den, fisher, fisherEp;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// eNAC GRADIENT ALGORITHM
+///////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Policy Gradient Methods for Robotics
+ * Jan Peters, Stefan Schaal
+ * IROS 2006
+ * http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/IROS2006-Peters_%5b0%5d.pdf
+ */
+
+#define AUGMENTED
+
+template<class ActionC, class StateC>
+class eNACAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
+{
+    USE_PGA_MEMBERS
+
+public:
+    eNACAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                  unsigned int nbEpisodes, double stepL,
+                  bool baseline = true, int reward_obj = 0) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
+    {
+    }
+
+    virtual ~eNACAlgorithm()
+    {
+    }
+
+    // Agent interface
+protected:
+    virtual void init()
+    {
+        unsigned int dp = policy.getParametersSize();
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
+        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
+#ifdef AUGMENTED
+        fisher.zeros(dp+1,dp+1);
+        g.zeros(dp+1);
+        eligibility.zeros(dp+1);
+        phi.zeros(dp+1);
+#else
+        fisher.zeros(dp,dp);
+        g.zeros(dp);
+        eligibility.zeros(dp);
+        phi.zeros(dp);
+#endif
+        Jpol = 0.0;
+    }
+
+    virtual void initializeVariables()
+    {
+        phi.zeros();
+#ifdef AUGMENTED
+        phi(policy.getParametersSize()) = 1.0;
+#endif
+    }
+
+    virtual void updateStep(const Reward& reward)
+    {
+        // get number of parameters
+        int dp = policy.getParametersSize();
+
+        // Compute the derivative of the logarithm of the policy and
+        // Evaluate it in (s_t, a_t)
+        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+
+        //Construct basis functions
+        for (unsigned int i = 0; i < dp; ++i)
+            phi[i] += df * grad[i];
+    }
+
+    virtual void updateAtEpisodeEnd()
+    {
+        Jpol += Jep;
+        fisher += phi * phi.t();
+        g += Jep * phi;
+        eligibility += phi;
+    }
+
+    virtual void updatePolicy()
+    {
+        // get number of parameters
+        int dp = policy.getParametersSize();
+
+        // compute mean value
+        fisher /= nbEpisodesToEvalPolicy;
+        g /= nbEpisodesToEvalPolicy;
+        eligibility /= nbEpisodesToEvalPolicy;
+        Jpol /= nbEpisodesToEvalPolicy;
+        int nbParams = policy.getParametersSize();
+
+        //--- Compute learning step
+        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
+        arma::vec nat_grad;
+        double lambda, step_length;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            arma::vec grad;
+            if (useBaseline == true)
+            {
+                arma::mat tmp = arma::solve(nbEpisodesToEvalPolicy * fisher - eligibility * eligibility.t(), eligibility);
+                arma::mat Q = (1 + eligibility.t() * tmp) / nbEpisodesToEvalPolicy;
+                arma::mat b = Q * (Jpol - eligibility.t() * arma::solve(fisher, g));
+                grad = g - eligibility * b;
+                nat_grad = arma::solve(fisher, grad);
+            }
+            else
+            {
+                grad = g;
+                nat_grad = arma::solve(fisher, grad);
+            }
+
+            arma::mat H = arma::solve(fisher, grad);
+            arma::mat tmp = grad.t() * H;
+            lambda = sqrt(tmp(0,0) / (4 * stepLength));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            step_length = 1.0 / (2 * lambda);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            arma::vec grad;
+            if (useBaseline == true)
+            {
+                arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodesToEvalPolicy * fisher - eligibility * eligibility.t()) * eligibility)
+                              * (Jpol - eligibility.t() * H * g)/ nbEpisodesToEvalPolicy;
+                grad = g - eligibility * b;
+                nat_grad = H * (grad);
+            }
+            else
+            {
+                grad = g;
+                nat_grad = H * grad;
+            }
+
+            arma::mat tmp = grad.t() * (H * grad);
+            lambda = sqrt(tmp(0,0) / (4 * stepLength));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            step_length = 1.0 / (2 * lambda);
+        }
+        //---
+
+        //--- save actual policy performance
+        currentItStats->history_J = history_J;
+        currentItStats->history_gradients = history_sumdlogpi;
+        currentItStats->estimated_gradient = nat_grad.rows(0,dp-1);
+        currentItStats->stepLength = step_length;
+        //---
+
+        //        std::cout << stepLength <<std::endl;
+        //        std::cout << nat_grad.t();
+
+        arma::vec newvalues = policy.getParameters() + step_length * nat_grad.rows(0,dp-1);
+        policy.setParameters(newvalues);
+        //        std::cout << "new_params: "  << newvalues.t();
+
+        for (int p = 0; p < nbParams; ++p)
+        {
+            eligibility[p] = 0.0;
+            g[p] = 0.0;
+        }
+        fisher.zeros();
+        Jpol = 0.0;
+    }
+
+protected:
+    std::vector<arma::vec> history_sumdlogpi;
+    arma::vec g, eligibility, phi;
+
+    arma::mat fisher;
+    double Jpol;
 };
 
 }// end namespace ReLe
