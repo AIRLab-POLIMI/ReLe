@@ -866,7 +866,7 @@ protected:
         //--- save actual policy performance
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
-        currentItStats->estimated_gradient = nat_grad;
+        currentItStats->estimated_gradient = nat_grad.rows(0,dp-1);
         currentItStats->stepLength = step_length;
         //---
 

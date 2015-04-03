@@ -47,7 +47,8 @@ for trial = 1 : num_trials
     bnum = bnum + sumdlogPi * sumrew;
     bden = bden + sumdlogPi;
 end
-b = bnum ./ bden;
+b = zeros(size(bnum));
+b(bden~=0) = bnum(bden~=0) ./ bden(bden~=0);
 
 %%% Compute gradient
 j = 0;

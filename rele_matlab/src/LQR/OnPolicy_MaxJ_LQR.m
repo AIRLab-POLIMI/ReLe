@@ -11,8 +11,9 @@ algorithms{1} = 'r';
 algorithms{2} = 'g';
 algorithms{3} = 'rb';
 algorithms{4} = 'gb';
-algorithms{5} = 'ng';
-algorithms{6} = 'enac';
+algorithms{5} = 'gsb';
+algorithms{6} = 'ng';
+algorithms{7} = 'enac';
 
 nbEpisodes = 50;
 nbUpdates  = 150;
@@ -23,8 +24,8 @@ domain = 'lqr';
 prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_PG'];
 
 
-figure(1);
-hold on;
+% figure(1);
+% hold on;
 J = zeros(nbUpdates,length(algorithms));
 for i = 1 : length(algorithms)
     
@@ -72,7 +73,7 @@ for i = 1 : length(algorithms)
 %         {'LineWidth', 2'}, 1);
 %     legend(algorithms{i});
 end
-hold off;
+% hold off;
 %%
 figure(2);
 hold on;

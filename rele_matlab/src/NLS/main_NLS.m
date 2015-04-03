@@ -9,7 +9,7 @@ clc;
 nbEpisodes = 40;
 nbUpdates  = 1;
 stepLength = 0.001;
-algorithm = 'enac';
+algorithm = 'gsb';
 
 prog = '/home/matteo/Projects/github/ReLe/rele-build/nls_PG';
 args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
@@ -21,7 +21,7 @@ status = system(toExe);
 %% Read data
 
 disp('Reading data trajectories...')
-csv = csvread(['/tmp/ReLe/Nls/PG/Nls_',algorithm,'.log']);
+csv = csvread(['/tmp/ReLe/nls/PG/nls_',algorithm,'.log']);
 
 disp('Organizing data in episodes...')
 episodes = readDataset(csv);
@@ -32,7 +32,7 @@ clearvars csv
 clear data
 
 disp('Reading agent data...')
-csv = csvread(['/tmp/ReLe/Nls/PG/Nls_',algorithm,'_agentData.log']);
+csv = csvread(['/tmp/ReLe/nls/PG/nls_',algorithm,'_agentData.log']);
 
 disp('Organizing data...')
 
@@ -59,7 +59,7 @@ for i = 1:length(data)
     %     else
     policy.weights = data(i).params';
     %     end
-    policy.stddev = 0.2;
+    %     policy.stddev = 0.2;
     policy.stddev = 0.5;
     gamma = 0.95;
     obj = 1;
@@ -71,6 +71,8 @@ for i = 1:length(data)
         dJdtheta = gGPOMDP(policy, episodes(start:start+step-1), gamma, obj);
     elseif strcmp(algorithm, 'gb')
         dJdtheta = gGPOMDPbase(policy, episodes(start:start+step-1), gamma, obj);
+    elseif strcmp(algorithm, 'gsb')
+        dJdtheta = gGPOMDPsinglebase(policy, episodes(start:start+step-1), gamma, obj);
     elseif strcmp(algorithm, 'enac')
         dJdtheta = eNACbase1(policy, episodes(start:start+step-1), gamma, obj);
     end
