@@ -15,10 +15,10 @@ algorithms{5} = 'ng';
 algorithms{6} = 'enac';
 
 nbEpisodes = 50;
-nbUpdates  = 400;
-stepLength = 0.001;
+nbUpdates  = 150;
+stepLength = 0.00001;
 
-domain = 'nls';
+domain = 'lqr';
 
 prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_PG'];
 
@@ -31,6 +31,9 @@ for i = 1 : length(algorithms)
     if strcmp(algorithms{i}, 'ng')
         args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
             ' ', '0.1'];
+    elseif strcmp(algorithms{i}, 'enac')
+        args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
+            ' ', '11000'];
     else
         args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
             ' ', num2str(stepLength)];
@@ -78,7 +81,8 @@ for i = 1:length(algorithms)
 %     disp(algorithms{i})
 %     pause
 end
-legend(algorithms, 'location', 'northwest');
+grid on;
+legend(algorithms, 'location', 'southeast');
 hold off;
 
 %% Plot results

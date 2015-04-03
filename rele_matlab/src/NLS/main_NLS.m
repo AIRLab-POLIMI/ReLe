@@ -9,7 +9,7 @@ clc;
 nbEpisodes = 40;
 nbUpdates  = 1;
 stepLength = 0.001;
-algorithm = 'gb';
+algorithm = 'enac';
 
 prog = '/home/matteo/Projects/github/ReLe/rele-build/nls_PG';
 args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
@@ -28,6 +28,8 @@ episodes = readDataset(csv);
 clearvars csv
 
 %% Read agent data
+
+clear data
 
 disp('Reading agent data...')
 csv = csvread(['/tmp/ReLe/Nls/PG/Nls_',algorithm,'_agentData.log']);

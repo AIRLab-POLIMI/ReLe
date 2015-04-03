@@ -14,7 +14,9 @@ w      = sym('w',   [dim,  1]);
 s      = sym('s',   [sdim, 1]);
 phii    = [s(end:-1:1)];
 
-pol = 1/(sqrt(2*pi) * (sigma)) * exp(-0.5*(a-w'*phii)^2/(sigma)^2);
+varsigma = sigma * sum(phii);
+pol = 1/(sqrt(2*pi) * (varsigma)) * exp(-0.5*(a-w'*phii)^2/(varsigma)^2);
+% pol = 1/(sqrt(2*pi) * (sigma)) * exp(-0.5*(a-w'*phii)^2/(sigma)^2);
 % pretty(pol)
 % eval(subs(pol, [w; k; phi; a], [wnum; knum; state; action]))
 

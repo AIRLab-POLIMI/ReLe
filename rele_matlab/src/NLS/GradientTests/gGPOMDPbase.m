@@ -14,6 +14,7 @@ phi    = [s(end:-1:1)];
 
 varsigma = sigma * sum(phi);
 pol = 1/(sqrt(2*pi) * (varsigma)) * exp(-0.5*(a-w'*phi)^2/(varsigma)^2);
+% pol = 1/(sqrt(2*pi) * (sigma)) * exp(-0.5*(a-w'*phii)^2/(sigma)^2);
 % pretty(pol)
 % eval(subs(pol, [w; k; phi; a], [wnum; knum; state; action]))
 

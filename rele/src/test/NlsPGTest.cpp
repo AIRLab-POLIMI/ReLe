@@ -68,7 +68,7 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
     double step_length = atof(argv[4]);
 
     // check arguments
-    if (nbRuns < 1 || nbEpisodes < 1 || step_length <= 0 || step_length > 10)
+    if (nbRuns < 1 || nbEpisodes < 1 || step_length <= 0)
     {
         std::cout << "ERROR: Arguments not valid\n";
         return false;
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     //---
 
 
-    FileManager fm("Nls", "PG");
+    FileManager fm("nls", "PG");
     fm.createDir();
     fm.cleanDir();
 
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
-//        NormalPolicy policy(0.2, &meanRegressor); // used for testing algorithm through matlab
+//  NormalPolicy policy(0.2, &meanRegressor); // used for testing algorithm through matlab
 
     arma::vec pp(2);
     pp(0) = -0.4;
@@ -182,15 +182,14 @@ int main(int argc, char *argv[])
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "Nls_r.log");
+        sprintf(outputname, "nls_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
-        bool usebaseline = false;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "Nls_g.log");
+                mdp.getSettings().horizon, config.stepLength, rewardId);
+        sprintf(outputname, "nls_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
     {
@@ -198,18 +197,25 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "Nls_rb.log");
+        sprintf(outputname, "nls_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
         cout << "GPOMDPAlgorithm BASELINE" << endl;
-        bool usebaseline = true;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "Nls_gb.log");
+                mdp.getSettings().horizon, config.stepLength,
+                GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
+                rewardId);
+        sprintf(outputname, "nls_gb.log");
     }
     else if (strcmp(alg, "gsb") == 0)
     {
+        cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
+        agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                mdp.getSettings().horizon, config.stepLength,
+                GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
+                rewardId);
+        sprintf(outputname, "nls_gsb.log");
     }
     else if (strcmp(alg, "ng") == 0)
     {
@@ -217,15 +223,15 @@ int main(int argc, char *argv[])
         bool usebaseline = false;
         agent = new NaturalPGAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "Nls_ng.log");
+        sprintf(outputname, "nls_ng.log");
     }
     else if (strcmp(alg, "enac") == 0)
     {
         cout << "eNAC BASELINE" << endl;
-        bool usebaseline = false;
+        bool usebaseline = true;
         agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, usebaseline, rewardId);
-        sprintf(outputname, "Nls_enac.log");
+                config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "nls_enac.log");
     }
     else
     {
