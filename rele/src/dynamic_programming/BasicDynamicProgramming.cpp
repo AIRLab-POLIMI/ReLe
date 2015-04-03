@@ -53,16 +53,7 @@ void ValueIteration::solve()
 
 Dataset<FiniteAction, FiniteState> ValueIteration::test()
 {
-    bool changed;
-    do
-    {
-        changed = false;
 
-
-
-
-    }
-    while(changed);
 }
 
 void ValueIteration::printPolicy(std::ostream& os)
@@ -125,8 +116,6 @@ PolicyIteration::PolicyIteration(FiniteMDP& mdp) : DynamicProgrammingAlgorithm(m
 
 void PolicyIteration::solve()
 {
-    bool changed;
-
     do
     {
         computeValueFunction();
@@ -153,19 +142,20 @@ PolicyIteration::~PolicyIteration()
 void PolicyIteration::computeValueFunction()
 {
     mat Ppi(stateN, stateN);
-    mat Rpi(stateN, stateN);
+    vec Rpi(stateN);
     mat I(stateN, stateN, fill::eye);
 
     for(size_t s = 0; s < stateN; s++)
     {
-        vec PpiS = P.tube(span(pi(s)), span(s));
-        vec RpiS = R.tube(span(pi(s)), span(s));
+    	unsigned int a = pi(s);
+        vec PpiS = P.tube(a, s);
+        vec RpiS = R.tube(a, s);
 
         Ppi.row(s) = PpiS.t();
-        Rpi.row(s) = RpiS.t();
+        Rpi.row(s) = PpiS.t()*RpiS;
     }
 
-    V = sum(arma::solve(Ppi, Rpi), 1);
+    V = inv(I - gamma*Ppi)*Rpi;
 }
 
 
