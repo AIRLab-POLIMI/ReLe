@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
-    //    NormalPolicy policy(0.2, &meanRegressor); // used for testing algorithm through matlab
+//        NormalPolicy policy(0.2, &meanRegressor); // used for testing algorithm through matlab
 
     arma::vec pp(2);
     pp(0) = -0.4;
@@ -219,6 +219,14 @@ int main(int argc, char *argv[])
                 mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
         sprintf(outputname, "Nls_ng.log");
     }
+    else if (strcmp(alg, "enac") == 0)
+    {
+        cout << "eNAC BASELINE" << endl;
+        bool usebaseline = false;
+        agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                mdp.getSettings().horizon, usebaseline, rewardId);
+        sprintf(outputname, "Nls_enac.log");
+    }
     else
     {
         std::cout << "ERROR: Algorithm " << alg << " not found in (r, g, rb, gb, gsb, n, nb)\n";
@@ -230,7 +238,7 @@ int main(int argc, char *argv[])
     ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath(outputname),
-        WriteStrategy<DenseAction, DenseState>::AGENT,
+        WriteStrategy<DenseAction, DenseState>::ALL,
         true /*delete file*/
     );
 
