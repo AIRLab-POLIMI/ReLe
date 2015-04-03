@@ -5,5 +5,6 @@ TODO:
 0c) fissare precisione in tutti i file di output
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
-3) Interfaccia Matlab?
+3) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
 4) Cambiare nota di copyright: mettere tutti gli autori, e soprattutto mettere politecnico di milano
+5) Interfaccia Matlab?
