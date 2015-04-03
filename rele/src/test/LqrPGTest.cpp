@@ -168,13 +168,21 @@ int main(int argc, char *argv[])
                 rewardId);
         sprintf(outputname, "lqr_gsb.log");
     }
-    else if (strcmp(alg, "ng") == 0)
+    else if (strcmp(alg, "natg") == 0)
     {
-        cout << "NaturalPGAlgorithm BASELINE" << endl;
-        bool usebaseline = false;
-        agent = new NaturalPGAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        cout << "NaturalGPOMDPAlgorithm BASELINE" << endl;
+        bool usebaseline = true;
+        agent = new NaturalGPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "lqr_ng.log");
+        sprintf(outputname, "lqr_natg.log");
+    }
+    else if (strcmp(alg, "natr") == 0)
+    {
+        cout << "NaturalREINFORCEAlgorithm BASELINE" << endl;
+        bool usebaseline = true;
+        agent = new NaturalREINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                config.stepLength, usebaseline, rewardId);
+        sprintf(outputname, "lqr_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
     {

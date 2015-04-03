@@ -6,20 +6,22 @@ addpath('../');
 %clear old data
 clear all;
 clc;
+close all;
 
 algorithms{1} = 'r';
 algorithms{2} = 'g';
 algorithms{3} = 'rb';
 algorithms{4} = 'gb';
 algorithms{5} = 'gsb';
-algorithms{6} = 'ng';
-algorithms{7} = 'enac';
+algorithms{6} = 'natg';
+algorithms{7} = 'natr';
+algorithms{8} = 'enac';
 
 nbEpisodes = 50;
-nbUpdates  = 400;
-stepLength = 0.001;
+nbUpdates  = 150;
+stepLength = 0.00001;
 
-domain = 'nls';
+domain = 'lqr';
 
 prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_PG'];
 
@@ -29,9 +31,12 @@ prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_PG'];
 J = zeros(nbUpdates,length(algorithms));
 for i = 1 : length(algorithms)
     
-    if strcmp(algorithms{i}, 'ng')
+    if strcmp(algorithms{i}, 'natg') || strcmp(algorithms{i}, 'natr')
         args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
             ' ', '0.1'];
+    elseif strcmp(algorithms{i}, 'enac')
+        args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
+            ' ', '11000'];
     else
         args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
             ' ', num2str(stepLength)];
@@ -75,11 +80,14 @@ end
 figure(2);
 hold on;
 for i = 1:length(algorithms)
-    plot(J(:,i), 'Linewidth', 1.5)
+    plot(smooth(J(:,i)), 'Linewidth', 1.5)
+%     plot(J(:,i), 'Linewidth', 1.5)
 %     disp(algorithms{i})
 %     pause
 end
-legend(algorithms, 'location', 'northwest');
+grid on;
+title(['LQR, episodes:' num2str(nbEpisodes),', iter:',num2str(nbUpdates)]);
+legend(algorithms, 'location', 'southeast');
 hold off;
 
 %% Plot results

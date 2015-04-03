@@ -400,6 +400,7 @@ protected:
         {
             sumGradLog_CompEpStep(p,epiCount,stepCount) = sumdlogpi(p);
         }
+//        std::cout << sumdlogpi.t();
 
         // compute the baseline
 
@@ -534,7 +535,7 @@ protected:
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
-/// NATURAL GRADIENT ALGORITHM
+/// NATURAL GPOMDP ALGORITHM
 ///////////////////////////////////////////////////////////////////////////////////////
 /**
  * A Natural Policy Gradient
@@ -543,20 +544,20 @@ protected:
  * http://research.microsoft.com/en-us/um/people/skakade/papers/rl/natural.pdf
  */
 template<class ActionC, class StateC>
-class NaturalPGAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
+class NaturalGPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 {
     USE_PGA_MEMBERS
 
 public:
-    NaturalPGAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                       unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
-                       bool baseline = true, int reward_obj = 0) :
+    NaturalGPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                           unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
+                           bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj),
         maxStepsPerEpisode(nbSteps)
     {
     }
 
-    virtual ~NaturalPGAlgorithm()
+    virtual ~NaturalGPOMDPAlgorithm()
     {
     }
 
@@ -714,6 +715,150 @@ protected:
 
     arma::mat baseline_num, baseline_den, fisher, fisherEp;
 };
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// NATURAL REINFORCE ALGORITHM
+///////////////////////////////////////////////////////////////////////////////////////
+template<class ActionC, class StateC>
+class NaturalREINFORCEAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
+{
+
+    USE_PGA_MEMBERS
+
+public:
+    NaturalREINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                              unsigned int nbEpisodes, double stepL,
+                              bool baseline = true, int reward_obj = 0) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
+    {
+    }
+
+    virtual ~NaturalREINFORCEAlgorithm()
+    {
+    }
+
+    // Agent interface
+protected:
+    virtual void init()
+    {
+        unsigned int dp = policy.getParametersSize();
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
+        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(policy.getParametersSize()));
+
+        baseline_den.zeros(dp);
+        baseline_num.zeros(dp);
+
+        sumdlogpi.set_size(dp);
+        fisher.zeros(dp,dp);
+        fisherEp.zeros(dp,dp);
+    }
+
+    virtual void initializeVariables()
+    {
+        sumdlogpi.zeros();
+        fisherEp.zeros();
+        stepCount = 0;
+    }
+
+    virtual void updateStep(const Reward& reward)
+    {
+        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        sumdlogpi += grad;
+
+        fisherEp += grad * grad.t();
+        stepCount++;
+    }
+
+    virtual void updateAtEpisodeEnd()
+    {
+        for (int p = 0; p < baseline_num.n_elem; ++p)
+        {
+            baseline_num[p] += Jep * sumdlogpi[p] * sumdlogpi[p];
+            baseline_den[p] += sumdlogpi[p] * sumdlogpi[p];
+            history_sumdlogpi[epiCount][p] = sumdlogpi[p];
+        }
+        fisherEp /= stepCount;
+        fisher += fisherEp;
+    }
+
+    virtual void updatePolicy()
+    {
+        int nbParams = policy.getParametersSize();
+        arma::vec gradient(nbParams, arma::fill::zeros);
+        // In the previous loop I have computed the baseline
+        for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+        {
+            for (int p = 0; p < nbParams; ++p)
+            {
+                double base_el = (useBaseline == false || baseline_den[p] == 0.0) ? 0 : baseline_num[p]/baseline_den[p];
+                gradient[p] += history_sumdlogpi[ep][p] * (history_J[ep] - base_el);
+            }
+        }
+
+        // compute mean value
+        gradient /= nbEpisodesToEvalPolicy;
+        fisher /= nbEpisodesToEvalPolicy;
+
+        //--- Compute learning step
+        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
+        arma::mat tmp;
+        arma::vec nat_grad;
+        double lambda, step_length;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            arma::mat H = arma::solve(fisher, gradient);
+            tmp = gradient.t() * H;
+            lambda = sqrt(tmp(0,0) / (4 * stepLength));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            step_length = 1 / (2 * lambda);
+            nat_grad = H;
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+            arma::mat H = arma::pinv(fisher);
+            tmp = gradient.t() * (H * gradient);
+            lambda = sqrt(tmp(0,0) / (4 * stepLength));
+            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+            step_length = 1 / (2 * lambda);
+            nat_grad = H * gradient;
+        }
+        //---
+
+        //--- save actual policy performance
+        currentItStats->history_J = history_J;
+        currentItStats->history_gradients = history_sumdlogpi;
+        currentItStats->estimated_gradient = nat_grad;
+        currentItStats->stepLength = step_length;
+        //---
+
+        //        std::cout << step_length << std::endl;
+        //        std::cout << nat_grad.t();
+
+        arma::vec newvalues = policy.getParameters() + step_length * nat_grad;
+        policy.setParameters(newvalues);
+        //        std::cout << "new_params: "  << newvalues.t();
+
+        for (int i = 0; i < nbParams; ++i)
+        {
+            baseline_den[i] = 0;
+            baseline_num[i] = 0;
+        }
+        fisher.zeros();
+    }
+
+protected:
+
+    arma::vec sumdlogpi, baseline_den, baseline_num;
+    std::vector<arma::vec> history_sumdlogpi;
+    arma::mat fisher, fisherEp;
+    unsigned int stepCount;
+};
+
 
 
 ///////////////////////////////////////////////////////////////////////////////////////
