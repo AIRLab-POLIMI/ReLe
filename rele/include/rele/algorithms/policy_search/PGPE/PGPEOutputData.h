@@ -10,7 +10,7 @@ namespace ReLe
 class PGPEPolicyIndividual : public BlackBoxPolicyIndividual
 {
 public:
-    arma::mat diffLogDistr;
+    arma::vec diffLogDistr;
 
 public:
 

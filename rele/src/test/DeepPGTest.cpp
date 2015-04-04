@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
 
     ReLe::Core<FiniteAction, DenseState> core(mdp, *agent);
     WriteStrategy<FiniteAction, DenseState> wStrategy(
-                fm.addPath("Deep.log"),
+                fm.addPath(outputname),
                 WriteStrategy<FiniteAction, DenseState>::AGENT,
                 true /*delete file*/
                 );

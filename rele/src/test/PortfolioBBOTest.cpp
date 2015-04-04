@@ -243,6 +243,7 @@ int main(int argc, char *argv[])
     cout << "## MetaDistribution: " << dist->getDistributionName() << endl;
 
     int nbepperpol = 1, nbpolperupd = config.nbPolicies;
+    char outputname[100];
     ReLe::Core<FiniteAction, DenseState>* core;
     if (strcmp(alg, "pgpe") == 0)
     {
@@ -250,6 +251,7 @@ int main(int argc, char *argv[])
         PGPE<FiniteAction, DenseState>* agent = new PGPE<FiniteAction, DenseState>
                 (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_pgpe_%s.log", polType);
     }
     else if (strcmp(alg, "nes") == 0)
     {
@@ -257,6 +259,7 @@ int main(int argc, char *argv[])
         NES<FiniteAction, DenseState>* agent = new NES<FiniteAction, DenseState>
                 (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_nes_%s.log", polType);
     }
     else if (strcmp(alg, "enes") == 0)
     {
@@ -268,6 +271,7 @@ int main(int argc, char *argv[])
         eNES<FiniteAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<FiniteAction, DenseState, ParametricCholeskyNormal>
                 (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_enes.log");
     }
     else if (strcmp(alg, "reps") == 0)
     {
@@ -278,6 +282,7 @@ int main(int argc, char *argv[])
                 (distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_reps.log");
     }
     else
     {
@@ -286,7 +291,7 @@ int main(int argc, char *argv[])
     }
 
     WriteStrategy<FiniteAction, DenseState> wStrategy(
-                fm.addPath("portfolio.log"),
+                fm.addPath(outputname),
                 WriteStrategy<FiniteAction, DenseState>::AGENT,
                 true /*delete file*/
                 );

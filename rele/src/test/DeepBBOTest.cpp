@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("deep", "BBO");
     fm.createDir();
-    fm.cleanDir();
+//    fm.cleanDir();
 
     DeepSeaTreasure mdp;
     vector<FiniteAction> actions;
@@ -289,6 +289,7 @@ int main(int argc, char *argv[])
     cout << "## MetaDistribution: " << dist->getDistributionName() << endl;
 
     int nbepperpol = 1, nbpolperupd = config.nbPolicies;
+    char outputname[100];
     ReLe::Core<FiniteAction, DenseState>* core;
     if (strcmp(alg, "pgpe") == 0)
     {
@@ -296,6 +297,7 @@ int main(int argc, char *argv[])
         PGPE<FiniteAction, DenseState>* agent = new PGPE<FiniteAction, DenseState>
                 (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "deep_pgpe_%s.log", polType);
     }
     else if (strcmp(alg, "nes") == 0)
     {
@@ -303,6 +305,7 @@ int main(int argc, char *argv[])
         NES<FiniteAction, DenseState>* agent = new NES<FiniteAction, DenseState>
                 (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "deep_nes_%s.log", polType);
     }
     else if (strcmp(alg, "enes") == 0)
     {
@@ -310,20 +313,22 @@ int main(int argc, char *argv[])
         arma::vec mean(nparams, fill::zeros);
         arma::mat cov(nparams, nparams, arma::fill::eye);
         mat cholMtx = chol(cov);
-        ParametricCholeskyNormal distr(mean, cholMtx);
+        ParametricCholeskyNormal* distr = new ParametricCholeskyNormal(mean, cholMtx);
         eNES<FiniteAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<FiniteAction, DenseState, ParametricCholeskyNormal>
-                (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+                (*distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "deep_enes.log");
     }
     else if (strcmp(alg, "reps") == 0)
     {
         arma::vec mean(nparams, fill::zeros);
         arma::mat cov(nparams, nparams, arma::fill::eye);
-        ParametricNormal distr(mean, cov);
+        ParametricNormal* distr= new ParametricNormal(mean, cov);
         REPS<FiniteAction, DenseState, ParametricNormal>* agent = new REPS<FiniteAction, DenseState, ParametricNormal>
-                (distr,policy,nbepperpol,nbpolperupd);
+                (*distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "deep_reps.log");
     }
     else
     {
@@ -332,7 +337,7 @@ int main(int argc, char *argv[])
     }
 
     WriteStrategy<FiniteAction, DenseState> wStrategy(
-                fm.addPath("deep.log"),
+                fm.addPath(outputname),
                 WriteStrategy<FiniteAction, DenseState>::AGENT,
                 true /*delete file*/
                 );

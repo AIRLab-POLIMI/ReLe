@@ -257,6 +257,7 @@ int main(int argc, char *argv[])
     //---
 
     int nbepperpol = 1, nbpolperupd = config.nbPolicies;
+    char outputname[100];
     ReLe::Core<DenseAction, DenseState>* core;
     if (strcmp(alg, "pgpe") == 0)
     {
@@ -264,6 +265,7 @@ int main(int argc, char *argv[])
         PGPE<DenseAction, DenseState>* agent = new PGPE<DenseAction, DenseState>
                 (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_pgpe_%s.log", polType);
     }
     else if (strcmp(alg, "nes") == 0)
     {
@@ -271,6 +273,7 @@ int main(int argc, char *argv[])
         NES<DenseAction, DenseState>* agent = new NES<DenseAction, DenseState>
                 (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_nes_%s.log", polType);
     }
     else if (strcmp(alg, "enes") == 0)
     {
@@ -282,6 +285,7 @@ int main(int argc, char *argv[])
         eNES<DenseAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<DenseAction, DenseState, ParametricCholeskyNormal>
                 (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_enes.log");
     }
     else if (strcmp(alg, "reps") == 0)
     {
@@ -292,6 +296,7 @@ int main(int argc, char *argv[])
                 (distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_reps.log");
     }
     else
     {
@@ -300,7 +305,7 @@ int main(int argc, char *argv[])
     }
 
     WriteStrategy<DenseAction, DenseState> wStrategy(
-                fm.addPath("nls.log"),
+                fm.addPath(outputname),
                 WriteStrategy<DenseAction, DenseState>::AGENT,
                 true /*delete file*/
                 );

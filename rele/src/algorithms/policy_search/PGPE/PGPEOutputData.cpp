@@ -17,7 +17,7 @@ void PGPEPolicyIndividual::writeToStream(ostream& os)
     os << std::setprecision(OS_PRECISION);
     CSVutils::vectorToCSV(Pparams, os);
     CSVutils::vectorToCSV(Jvalues, os);
-    CSVutils::matrixToCSV(diffLogDistr, os);
+    CSVutils::vectorToCSV(diffLogDistr, os);
 }
 
 PGPEIterationStats::PGPEIterationStats(unsigned int nbIndividual,
@@ -30,6 +30,8 @@ void PGPEIterationStats::writeData(ostream &os)
 {
     os << metaParams.n_elem << endl;
     CSVutils::vectorToCSV(metaParams, os);
+    os << individuals[0].Pparams.n_elem << endl;
+    os << individuals[0].Jvalues.n_elem << endl;
     os << individuals.size() << endl;
     for (auto& individual : individuals)
     {
