@@ -56,6 +56,13 @@ void LQRsolver::solve()
 
     cout << "Optimal Control matrix" << endl;
     cout << K << endl;
+
+    arma::vec w = vectorise(K);
+
+    cout << "Optimal Control vector" << endl;
+    cout << w << endl;
+
+    pi.setParameters(w);
 }
 
 Dataset<DenseAction, DenseState> LQRsolver::test()
