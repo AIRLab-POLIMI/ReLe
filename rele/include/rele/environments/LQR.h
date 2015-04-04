@@ -31,6 +31,7 @@ namespace ReLe
 
 class LQR: public ContinuousMDP
 {
+    friend class LQRsolver;
 public:
     LQR(unsigned int dimension, unsigned int reward_dimension,
         double eps = 0.1, double gamma = 0.99, unsigned int horizon = 50);

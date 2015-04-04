@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     FiniteMDP mdp = generator.getMPD(0.9);
 
     SimpleChainOptimalPolicy expertPolicy;
-    PolicyEvalAgent<FiniteAction, FiniteState, SimpleChainOptimalPolicy> expert(expertPolicy);
+    PolicyEvalAgent<FiniteAction, FiniteState> expert(expertPolicy);
 
     /* Generate expert dataset */
     Core<FiniteAction, FiniteState> expertCore(mdp, expert);

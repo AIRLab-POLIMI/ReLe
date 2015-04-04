@@ -25,6 +25,8 @@
 #define INCLUDE_RELE_CORE_SOLVER_H_
 
 #include "Transition.h"
+#include "Core.h"
+#include "PolicyEvalAgent.h"
 
 #include <iostream>
 
@@ -37,23 +39,43 @@ template<class ActionC, class StateC>
 class Solver
 {
 public:
-	Solver()
-	{
-		testEpisodeLength = 100;
-		testEpisodes = 1;
-	}
+    Solver()
+    {
+        testEpisodeLength = 100;
+        testEpisodes = 1;
+    }
 
     virtual void solve() = 0;
     virtual Dataset<ActionC, StateC> test() = 0;
     virtual Policy<ActionC, StateC>& getPolicy() = 0;
 
-    inline void setTestParams(unsigned int testEpisodes, unsigned int testEpisodeLength)
+    inline void setTestParams(unsigned int testEpisodes,
+                              unsigned int testEpisodeLength)
     {
-    	this->testEpisodeLength = testEpisodeLength;
-    	this->testEpisodes = testEpisodes;
+        this->testEpisodeLength = testEpisodeLength;
+        this->testEpisodes = testEpisodes;
     }
 
-    virtual~Solver() { }
+    virtual ~Solver()
+    {
+    }
+
+protected:
+    virtual Dataset<ActionC, StateC> test(Environment<ActionC, StateC>& env,
+                                          Policy<ActionC, StateC>& pi)
+    {
+        PolicyEvalAgent<ActionC, StateC> agent(pi);
+        Core<ActionC, StateC> core(env, agent);
+
+        CollectorStrategy<ActionC, StateC> strategy;
+        core.getSettings().loggerStrategy = &strategy;
+        core.getSettings().episodeLenght = testEpisodeLength;
+        core.getSettings().episodeN = testEpisodes;
+
+        core.runTestEpisodes();
+
+        return strategy.data;
+    }
 
 protected:
     unsigned int testEpisodeLength;
@@ -62,7 +84,5 @@ protected:
 };
 
 }
-
-
 
 #endif /* INCLUDE_RELE_CORE_SOLVER_H_ */

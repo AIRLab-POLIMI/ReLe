@@ -121,8 +121,7 @@ int main(int argc, char *argv[])
     ParametricGibbsPolicy<DenseState> target(actions, &target_regressor, 1);
     //---
 
-    PolicyEvalAgent
-    <FiniteAction,DenseState,ParametricGibbsPolicy<DenseState> > agent(behavioral);
+    PolicyEvalAgent<FiniteAction,DenseState> agent(behavioral);
 
     ReLe::Core<FiniteAction, DenseState> oncore(mdp, agent);
     CollectorStrategy<FiniteAction, DenseState>* strat = new CollectorStrategy<FiniteAction, DenseState>();

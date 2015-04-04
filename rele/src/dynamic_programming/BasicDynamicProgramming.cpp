@@ -24,7 +24,6 @@
 #include "BasicDynamicProgramming.h"
 #include "CSV.h"
 #include "Core.h"
-#include "PolicyEvalAgent.h"
 
 using namespace std;
 using namespace arma;
@@ -48,17 +47,7 @@ Policy<FiniteAction, FiniteState>& DynamicProgrammingAlgorithm::getPolicy()
 
 Dataset<FiniteAction, FiniteState> DynamicProgrammingAlgorithm::test()
 {
-	PolicyEvalAgent<FiniteAction, FiniteState, DeterministicPolicy> agent(pi);
-	Core<FiniteAction, FiniteState> core(mdp, agent);
-
-	CollectorStrategy<FiniteAction, FiniteState> strategy;
-	core.getSettings().loggerStrategy = &strategy;
-	core.getSettings().episodeLenght = testEpisodeLength;
-	core.getSettings().episodeN = testEpisodes;
-
-	core.runTestEpisodes();
-
-	return strategy.data;
+    return Solver<FiniteAction, FiniteState>::test(mdp, pi);
 }
 
 ValueIteration::ValueIteration(FiniteMDP& mdp, double eps) : DynamicProgrammingAlgorithm(mdp), eps(eps)

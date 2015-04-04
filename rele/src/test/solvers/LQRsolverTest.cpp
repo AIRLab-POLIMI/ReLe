@@ -21,38 +21,21 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nonparametric/DeterministicPolicy.h"
+#include "LQRsolver.h"
+#include "basis/PolynomialFunction.h"
 
-#include <sstream>
+using namespace ReLe;
 
-namespace ReLe
+int main(int argc, char *argv[])
 {
+    LQR lqr(1,1);
 
-unsigned int DeterministicPolicy::operator()(size_t state)
-{
-    return pi(state);
-}
+    PolynomialFunction* bf = new PolynomialFunction(0, 1);
+    DenseBasisVector basis;
+    basis.push_back(bf);
+    LinearApproximator regressor(basis.size(), basis);
 
-double DeterministicPolicy::operator()(size_t state, unsigned int action)
-{
-    if(action == pi(state))
-        return 1.0;
-    else
-        return 0.0;
-}
+    LQRsolver solver(lqr, regressor);
 
-std::string DeterministicPolicy::printPolicy()
-{
-    //TODO choose policy format
-    std::stringstream ss;
-    ss << "- Policy" << std::endl;
-    for (unsigned int i = 0; i < pi.n_elem; i++)
-    {
-        ss << "policy(" << i << ") = " << pi(i) << std::endl;
-    }
-
-    return ss.str();
-}
-
-
+    solver.solve();
 }

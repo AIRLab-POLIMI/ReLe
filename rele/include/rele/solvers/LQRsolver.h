@@ -21,38 +21,38 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nonparametric/DeterministicPolicy.h"
+#ifndef INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_
+#define INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_
 
-#include <sstream>
+#include "Solver.h"
+#include "LQR.h"
+#include "parametric/differentiable/LinearPolicy.h"
 
 namespace ReLe
 {
 
-unsigned int DeterministicPolicy::operator()(size_t state)
+class LQRsolver: public Solver<DenseAction, DenseState>
 {
-    return pi(state);
-}
+public:
+    LQRsolver(LQR& lqr, LinearApproximator& approximator);
+    virtual void solve();
+    virtual Dataset<DenseAction, DenseState> test();
+    virtual Policy<DenseAction, DenseState>& getPolicy();
 
-double DeterministicPolicy::operator()(size_t state, unsigned int action)
-{
-    if(action == pi(state))
-        return 1.0;
-    else
-        return 0.0;
-}
-
-std::string DeterministicPolicy::printPolicy()
-{
-    //TODO choose policy format
-    std::stringstream ss;
-    ss << "- Policy" << std::endl;
-    for (unsigned int i = 0; i < pi.n_elem; i++)
+    inline void setRewardIndex(unsigned int rewardIndex)
     {
-        ss << "policy(" << i << ") = " << pi(i) << std::endl;
+        this->rewardIndex = rewardIndex;
     }
 
-    return ss.str();
+private:
+    LQR& lqr;
+    DetLinearPolicy<DenseState> pi;
+
+    double gamma;
+
+    unsigned int rewardIndex;
+};
+
 }
 
-
-}
+#endif /* INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_ */
