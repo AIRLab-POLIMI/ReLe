@@ -41,9 +41,9 @@ DynamicProgrammingAlgorithm::DynamicProgrammingAlgorithm(FiniteMDP& mdp) : mdp(m
     pi.init(stateN);
 }
 
-void DynamicProgrammingAlgorithm::printPolicy(std::ostream& os)
+Policy<FiniteAction, FiniteState>& DynamicProgrammingAlgorithm::getPolicy()
 {
-    os << pi.printPolicy();
+    return pi;
 }
 
 Dataset<FiniteAction, FiniteState> DynamicProgrammingAlgorithm::test()

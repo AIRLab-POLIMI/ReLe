@@ -47,10 +47,10 @@ int main(int argc, char *argv[])
 
 
     cout << "Value iteration results:" << endl;
-    solver1.printPolicy(cout);
+    cout << solver1.getPolicy().printPolicy();
 
     cout << "Policy iteration results:" << endl;
-    solver2.printPolicy(cout);
+    cout << solver2.getPolicy().printPolicy();
 
     return 0;
 }

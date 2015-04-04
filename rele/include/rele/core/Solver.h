@@ -28,6 +28,8 @@
 
 #include <iostream>
 
+#include "Policy.h"
+
 namespace ReLe
 {
 
@@ -43,7 +45,7 @@ public:
 
     virtual void solve() = 0;
     virtual Dataset<ActionC, StateC> test() = 0;
-    virtual void printPolicy(std::ostream& os) = 0;
+    virtual Policy<ActionC, StateC>& getPolicy() = 0;
 
     inline void setTestParams(unsigned int testEpisodes, unsigned int testEpisodeLength)
     {

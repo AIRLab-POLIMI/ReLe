@@ -38,7 +38,7 @@ class DynamicProgrammingAlgorithm : Solver<FiniteAction, FiniteState>
 {
 public:
     DynamicProgrammingAlgorithm(FiniteMDP& mdp);
-    virtual void printPolicy(std::ostream& os);
+    virtual Policy<FiniteAction, FiniteState>& getPolicy();
     virtual Dataset<FiniteAction, FiniteState> test();
 
 protected:
