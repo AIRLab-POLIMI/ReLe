@@ -148,35 +148,36 @@ int main(int argc, char *argv[])
     //--- distribution setup
     int nparams = basis.size();
     //----- ParametricNormal
-    arma::vec mean(nparams, fill::zeros);
-    arma::mat cov(nparams, nparams, arma::fill::eye);
-    ParametricNormal dist(mean, cov);
+    //    arma::vec mean(nparams, fill::zeros);
+    //    arma::mat cov(nparams, nparams, arma::fill::eye);
+    //    ParametricNormal dist(mean, cov);
     //----- ParametricLogisticNormal
     //    ParametricLogisticNormal dist(nparams, 1);
     //----- ParametricCholeskyNormal
-    //    arma::vec mean(nparams, fill::zeros);
-    //    arma::mat cov(nparams, nparams, arma::fill::eye);
-    //    mat cholMtx = chol(cov);
-    //    ParametricCholeskyNormal dist(mean, cholMtx);
+    arma::vec mean(nparams, fill::zeros);
+    arma::mat cov(nparams, nparams, arma::fill::eye);
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-    //    vec mean(nparams, fill::zeros);
-    //    vec sigmas(nparams, fill::ones);
-    //    ParametricDiagonalNormal dist(mean, sigmas);
+//    vec mean(nparams, fill::zeros);
+//    vec sigmas(nparams, fill::ones);
+//    ParametricDiagonalNormal dist(mean, sigmas);
     //-----
     //---
 
     cout << "## MetaDistribution: " << dist.getDistributionName() << endl;
 
+    AdaptiveStep steprule(0.1);
 
-    int nbepperpol = 1, nbpolperupd = 300;
+    int nbepperpol = 1, nbpolperupd = 250;
     bool usebaseline = true;
-    //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.01, usebaseline);
+    //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, usebaseline);
     //    agent.setNormalization(true);
-    //    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, usebaseline);
     //    eNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
 
-    REPS<FiniteAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    agent.setEps(0.9);
+    //    REPS<FiniteAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+    //    agent.setEps(0.9);
 
 
     //    double stepnb = (3.0/5.0)*(3+log(nparams))/(nparams*sqrt(nparams));
@@ -192,10 +193,10 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 40;
+    int nbUpdates = 150;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
-    every = bevery = 0.01; //%
+    every = bevery = 0.1; //%
     int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {

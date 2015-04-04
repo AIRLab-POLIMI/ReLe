@@ -113,12 +113,13 @@ int main(int argc, char *argv[])
     //    ParametricDiagonalNormal dist(mean, sigmas);
     //-----
     //---
+    AdaptiveStep steprule(0.1);
 
     int nbepperpol = 1, nbpolperupd = 40;
     bool usebaseline = true;
-    //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.05, usebaseline);
+    //    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, usebaseline);
     //    agent.setNormalization(true);
-    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
+    NES<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, usebaseline);
     //    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
     //    agent.setEps(0.3);
 

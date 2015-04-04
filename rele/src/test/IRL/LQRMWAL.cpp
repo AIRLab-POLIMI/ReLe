@@ -169,7 +169,8 @@ int main(int argc, char *argv[])
     arma::mat cov(nparams, nparams, arma::fill::eye);
     cov *= 0.1;
     ParametricNormal dist(mean, cov);
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 0.002, false);
+    AdaptiveStep steprule(0.1);
+    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, true);
 
     //Setup the solver
     int nbUpdates = 600;
