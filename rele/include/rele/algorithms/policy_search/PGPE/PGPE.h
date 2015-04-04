@@ -109,10 +109,6 @@ protected:
         Base::diffObjFunc /= Base::polCount;
 
 
-        //--------- save value of distgrad
-        Base::currentItStats->metaGradient = Base::diffObjFunc;
-        //---------
-
         if (useDirection)
             Base::diffObjFunc = arma::normalise(Base::diffObjFunc);
         //--- Compute learning step
@@ -120,6 +116,13 @@ protected:
         arma::mat eMetric = arma::eye(nbParams,nbParams);
         arma::vec step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, eMetric);
         //---
+
+        //--------- save value of distgrad
+        Base::currentItStats->metaGradient = Base::diffObjFunc;
+        Base::currentItStats->stepLength   = step_size;
+        //---------
+
+
         Base::diffObjFunc *= step_size;
 
         //update meta distribution

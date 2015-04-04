@@ -33,15 +33,15 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
 {
 
-    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats> Base;
 public:
     NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
         bool baseline = true, int reward_obj = 0)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {    }
 
@@ -138,6 +138,7 @@ protected:
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
         Base::currentItStats->fisherMtx = fisherMtx;
+        Base::currentItStats->stepLength   = step_size;
         //---------
 
         //update meta distribution
@@ -168,15 +169,15 @@ protected:
  * Exact NES (NES with closed-form FIM)
  */
 template<class ActionC, class StateC, class DistributionC>
-class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
 {
-    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats> Base;
 
 public:
     eNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
          bool baseline = true, int reward_obj = 0)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
     }
@@ -281,6 +282,7 @@ protected:
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
         Base::currentItStats->fisherMtx = invFisherMtx;
+        Base::currentItStats->stepLength   = step_size;
         //---------
 
         //update meta distribution
