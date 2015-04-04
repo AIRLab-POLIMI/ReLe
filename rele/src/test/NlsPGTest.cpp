@@ -46,12 +46,19 @@ struct gradConfig
 {
     unsigned int nbRuns, nbEpisodes;
     double stepLength;
+    StepRule* steprule;
+
+    virtual ~gradConfig()
+    {
+        delete steprule;
+    }
 };
 
 void help()
 {
-    cout << "nls_PG algorithm #Updates #Episodes stepLength" << endl;
-    cout << " - algorithm: r, rb, g, gb, ng" << endl;
+    cout << "lqr_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
+    cout << " - algorithm: r, rb, g, gb" << endl;
+    cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
 }
 
 bool InputValidation(int argc, char *argv[], gradConfig& config)
@@ -74,6 +81,28 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
         return false;
     }
 
+
+    if (argc == 6)
+    {
+        if (strcmp(argv[5], "constant") == 0)
+        {
+            config.steprule = new ConstantStep(step_length);
+        }
+        else if (strcmp(argv[5], "adaptive") == 0)
+        {
+            config.steprule = new AdaptiveStep(step_length);
+        }
+        else
+        {
+            std::cout << "ERROR: Arguments not valid\n";
+            return false;
+        }
+    }
+    else
+    {
+        config.steprule = new AdaptiveStep(step_length);
+    }
+
     // load valid arguments in the configuration
     config.nbRuns      = nbRuns;
     config.nbEpisodes  = nbEpisodes;
@@ -88,6 +117,7 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
  * argv[2] # updates
  * argv[3] # episodes per update
  * argv[4] learning rate for updates
+ * argv[5] stepType ("constant", "adaptive")
  *
  */
 int main(int argc, char *argv[])
@@ -122,6 +152,7 @@ int main(int argc, char *argv[])
     FileManager fm("nls", "PG");
     fm.createDir();
     fm.cleanDir();
+    std::cout << std::setprecision(OS_PRECISION);
 
     NLS mdp;
     //with these settings
@@ -181,14 +212,14 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm" << endl;
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "nls_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, rewardId);
+                mdp.getSettings().horizon, *(config.steprule), rewardId);
         sprintf(outputname, "nls_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
@@ -196,14 +227,14 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "nls_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
         cout << "GPOMDPAlgorithm BASELINE" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength,
+                mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
                 rewardId);
         sprintf(outputname, "nls_gb.log");
@@ -212,25 +243,33 @@ int main(int argc, char *argv[])
     {
         cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength,
+                mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
                 rewardId);
         sprintf(outputname, "nls_gsb.log");
     }
-    else if (strcmp(alg, "ng") == 0)
+    else if (strcmp(alg, "natg") == 0)
     {
-        cout << "NaturalPGAlgorithm BASELINE" << endl;
-        bool usebaseline = false;
-        agent = new NaturalPGAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
-        sprintf(outputname, "nls_ng.log");
+        cout << "NaturalGPOMDPAlgorithm BASELINE" << endl;
+        bool usebaseline = true;
+        agent = new NaturalGPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                mdp.getSettings().horizon, *(config.steprule), usebaseline, rewardId);
+        sprintf(outputname, "nls_natg.log");
+    }
+    else if (strcmp(alg, "natr") == 0)
+    {
+        cout << "NaturalREINFORCEAlgorithm BASELINE" << endl;
+        bool usebaseline = true;
+        agent = new NaturalREINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+                *(config.steprule), usebaseline, rewardId);
+        sprintf(outputname, "nls_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
     {
         cout << "eNAC BASELINE" << endl;
         bool usebaseline = true;
         agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "nls_enac.log");
     }
     else
@@ -244,7 +283,7 @@ int main(int argc, char *argv[])
     ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath(outputname),
-        WriteStrategy<DenseAction, DenseState>::ALL,
+        WriteStrategy<DenseAction, DenseState>::AGENT,
         true /*delete file*/
     );
 

@@ -149,7 +149,7 @@ void PolicyIteration::computeValueFunction()
 
     for(size_t s = 0; s < stateN; s++)
     {
-    	unsigned int a = pi(s);
+        unsigned int a = pi(s);
         vec PpiS = P.tube(a, s);
         vec RpiS = R.tube(a, s);
 

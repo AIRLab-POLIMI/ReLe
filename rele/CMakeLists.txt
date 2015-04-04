@@ -156,6 +156,9 @@ target_link_libraries(lqr_PG rele)
 add_executable(portfolio_PG src/test/PortfolioPGTest.cpp)
 target_link_libraries(portfolio_PG rele)
 
+add_executable(deep_PG src/test/DeepPGTest.cpp)
+target_link_libraries(deep_PG rele)
+
 add_executable(chol_FIM src/test/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
 

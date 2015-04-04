@@ -169,7 +169,15 @@ public:
             arma::mat loc_phi = basis(tuple);
             double val = exp(IT*pref[0]);
             distribution[k] = val;
-            sumexp = sumexp + val;
+//            if ((isnan(val))||isinf(val))
+//            {
+//                distribution[k] = 1;
+//            }
+//            else
+//            {
+//                distribution[k] = val;
+//            }
+            sumexp = sumexp + distribution[k];
             sumpref = sumpref + IT*loc_phi*distribution[k];
         }
         sumexp = sumexp + 1;

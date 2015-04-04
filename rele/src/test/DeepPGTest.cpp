@@ -23,11 +23,13 @@
 
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 #include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
+#include "parametric/differentiable/GibbsPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
+#include "basis/ConditionBasedFunction.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
+#include "DeepSeaTreasure.h"
 
 #include <iostream>
 #include <iomanip>
@@ -35,11 +37,11 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "../../include/rele/environments/LQR.h"
 
 using namespace std;
 using namespace ReLe;
 using namespace arma;
+
 
 struct gradConfig
 {
@@ -110,6 +112,36 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
     return true;
 }
 
+
+/////////////////////////////////////////////////////////////
+
+class deep_2state_identity: public BasisFunction
+{
+    double operator()(const arma::vec& input)
+    {
+        return ((input[0] == 1) && (input[1] == 1))?1:0;
+    }
+    void writeOnStream(std::ostream& out)
+    {
+        out << "deep_2state" << endl;
+    }
+    void readFromStream(std::istream& in) {}
+};
+
+class deep_state_identity: public BasisFunction
+{
+    double operator()(const arma::vec& input)
+    {
+        return (input[0] == 1)?1:0;
+    }
+    void writeOnStream(std::ostream& out)
+    {
+        out << "deep_state" << endl;
+    }
+    void readFromStream(std::istream& in) {}
+};
+/////////////////////////////////////////////////////////////
+
 /**
  *
  * argv[1] learning algorithm name (r,g,rb,gb,gsb,n,nb)
@@ -121,6 +153,7 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
  */
 int main(int argc, char *argv[])
 {
+
     gradConfig config;
 
     //--- INPUT VALIDATION
@@ -146,23 +179,53 @@ int main(int argc, char *argv[])
     }
     //---
 
-    FileManager fm("lqr", "PG");
+    FileManager fm("deep", "PG");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
+    DeepSeaTreasure mdp;
+    vector<FiniteAction> actions;
+    for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
+        actions.push_back(FiniteAction(i));
 
-    PolynomialFunction* pf = new PolynomialFunction(1,1);
-    cout << *pf << endl;
+    //--- policy setup
+    PolynomialFunction* pf0 = new PolynomialFunction(2,0);
+    vector<unsigned int> dim = {0,1};
+    vector<unsigned int> deg = {1,0};
+    PolynomialFunction* pfs1 = new PolynomialFunction(dim,deg);
+    deg = {0,1};
+    PolynomialFunction* pfs2 = new PolynomialFunction(dim,deg);
+    deg = {1,1};
+    PolynomialFunction* pfs1s2 = new PolynomialFunction(dim, deg);
+    deep_2state_identity* d2si = new deep_2state_identity();
+    deep_state_identity* dsi = new deep_state_identity();
+
     DenseBasisVector basis;
-    basis.push_back(pf);
-    cout << basis << endl;
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-    NormalPolicy policy(0.1, &regressor);
+    for (int i = 0; i < actions.size() -1; ++i)
+    {
+        basis.push_back(new AndConditionBasisFunction(pf0,2,i));
+        basis.push_back(new AndConditionBasisFunction(pfs1,2,i));
+        basis.push_back(new AndConditionBasisFunction(pfs2,2,i));
+        basis.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
+        basis.push_back(new AndConditionBasisFunction(d2si,2,i));
+        basis.push_back(new AndConditionBasisFunction(dsi,2,i));
 
+        //        basis.push_back(new ConditionBasisFunction(pf0,i));
+        //        basis.push_back(new ConditionBasisFunction(pfs1,i));
+        //        basis.push_back(new ConditionBasisFunction(pfs2,i));
+        //        basis.push_back(new ConditionBasisFunction(pfs1s2,i));
+        //        basis.push_back(new ConditionBasisFunction(d2si,i));
+        //        basis.push_back(new ConditionBasisFunction(dsi,i));
+    }
+    //    cout << basis << endl;
+    //    cout << "basis length: " << basis.size() << endl;
 
-    AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
+    ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);
+    //---
+
+    AbstractPolicyGradientAlgorithm<FiniteAction, DenseState>* agent;
     int nbepperpol = config.nbEpisodes;
     unsigned int rewardId = 0;
     char outputname[100];
@@ -170,66 +233,66 @@ int main(int argc, char *argv[])
     {
         cout << "REINFORCEAlgorithm" << endl;
         bool usebaseline = false;
-        agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new REINFORCEAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "lqr_r.log");
+        sprintf(outputname, "deep_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
-        agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new GPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule), rewardId);
-        sprintf(outputname, "lqr_g.log");
+        sprintf(outputname, "deep_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
     {
         cout << "REINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
-        agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new REINFORCEAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "lqr_rb.log");
+        sprintf(outputname, "deep_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
         cout << "GPOMDPAlgorithm BASELINE" << endl;
-        agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new GPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule),
-                GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
+                GPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI,
                 rewardId);
-        sprintf(outputname, "lqr_gb.log");
+        sprintf(outputname, "deep_gb.log");
     }
     else if (strcmp(alg, "gsb") == 0)
     {
         cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
-        agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new GPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule),
-                GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
+                GPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::SINGLE,
                 rewardId);
-        sprintf(outputname, "lqr_gsb.log");
+        sprintf(outputname, "deep_gsb.log");
     }
     else if (strcmp(alg, "natg") == 0)
     {
         cout << "NaturalGPOMDPAlgorithm BASELINE" << endl;
         bool usebaseline = true;
-        agent = new NaturalGPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new NaturalGPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "lqr_natg.log");
+        sprintf(outputname, "deep_natg.log");
     }
     else if (strcmp(alg, "natr") == 0)
     {
         cout << "NaturalREINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
-        agent = new NaturalREINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new NaturalREINFORCEAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "lqr_natr.log");
+        sprintf(outputname, "deep_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
     {
         cout << "eNAC BASELINE" << endl;
         bool usebaseline = true;
-        agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
+        agent = new eNACAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "lqr_enac.log");
+        sprintf(outputname, "deep_enac.log");
     }
     else
     {
@@ -238,10 +301,11 @@ int main(int argc, char *argv[])
     }
 
 
-    ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+
+    ReLe::Core<FiniteAction, DenseState> core(mdp, *agent);
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
         fm.addPath(outputname),
-        WriteStrategy<DenseAction, DenseState>::AGENT,
+        WriteStrategy<FiniteAction, DenseState>::ALL,
         true /*delete file*/
     );
 
@@ -280,9 +344,9 @@ int main(int argc, char *argv[])
     //    cout << core.runBatchTest() << endl;
 
     //    //--- collect some trajectories
-    //    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-    //        fm.addPath("NlsFinal.log"),
-    //        WriteStrategy<DenseAction, DenseState>::TRANS,
+    //    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
+    //        fm.addPath("deepFinal.log"),
+    //        WriteStrategy<FiniteAction, DenseState>::TRANS,
     //        true /*delete file*/
     //    );
     //    for (int n = 0; n < 100; ++n)
