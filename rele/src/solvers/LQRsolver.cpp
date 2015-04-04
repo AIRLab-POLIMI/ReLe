@@ -46,22 +46,17 @@ void LQRsolver::solve()
 
     mat P(Q.n_rows, Q.n_cols, fill::eye);
     mat K;
+
     for(unsigned int j = 0; j < 100; j++)
     {
         K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
-        P = Q + gamma*A.t()*P*A + gamma*K.t()*B.t()*P*A + gamma*A.t()*P*B*K + gamma*K.t()*B.t()*P*B*K + K.t()*R*K;
+        P = Q + gamma*A.t()*P*A + gamma*K.t()*B.t()*P*A
+            + gamma*A.t()*P*B*K + gamma*K.t()*B.t()*P*B*K + K.t()*R*K;
     }
 
     K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
 
-    cout << "Optimal Control matrix" << endl;
-    cout << K << endl;
-
     arma::vec w = vectorise(K);
-
-    cout << "Optimal Control vector" << endl;
-    cout << w << endl;
-
     pi.setParameters(w);
 }
 

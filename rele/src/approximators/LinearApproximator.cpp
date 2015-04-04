@@ -37,7 +37,7 @@ LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBas
 }
 
 LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisMatrix& bfs)
-    : ParametricRegressor(input_dim, 1), basis(bfs),
+    : ParametricRegressor(input_dim, bfs.cols()), basis(bfs),
       parameters(bfs.rows(), fill::zeros)
 {
 }

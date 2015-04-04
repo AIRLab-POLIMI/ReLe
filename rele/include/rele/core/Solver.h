@@ -70,7 +70,7 @@ protected:
         CollectorStrategy<ActionC, StateC> strategy;
         core.getSettings().loggerStrategy = &strategy;
         core.getSettings().episodeLenght = testEpisodeLength;
-        core.getSettings().episodeN = testEpisodes;
+        core.getSettings().testEpisodeN = testEpisodes;
 
         core.runTestEpisodes();
 

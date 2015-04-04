@@ -184,34 +184,34 @@ std::istream& operator>> (std::istream& in, DenseBasisVector& bf)
 /// IDENTITY BASIS
 ///////////////////////////////////////////////////////////////////////////////////////
 
-IdentityBasis::~IdentityBasis()
+IdentityBasisVector::~IdentityBasisVector()
 {
 }
 
-arma::mat IdentityBasis::operator()(const arma::vec& input)
+arma::mat IdentityBasisVector::operator()(const arma::vec& input)
 {
     return input;
 }
 
-double IdentityBasis::dot(const arma::vec& input, const arma::vec& otherVector)
+double IdentityBasisVector::dot(const arma::vec& input, const arma::vec& otherVector)
 {
     arma::vec res = input.t() * otherVector;
     return res(0);
 }
 
-size_t IdentityBasis::size() const
+size_t IdentityBasisVector::size() const
 {
     return stateSize;
 }
 
-arma::vec IdentityBasis::operator()(size_t input)
+arma::vec IdentityBasisVector::operator()(size_t input)
 {
     arma::vec phi(stateSize, arma::fill::zeros);
     phi(input) = 1;
     return phi;
 }
 
-double IdentityBasis::dot(size_t input, const arma::vec& otherVector)
+double IdentityBasisVector::dot(size_t input, const arma::vec& otherVector)
 {
     return otherVector[input];
 }

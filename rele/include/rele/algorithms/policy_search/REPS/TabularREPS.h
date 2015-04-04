@@ -77,7 +77,7 @@ private:
     size_t x;
     unsigned int u;
 
-    IdentityBasis phi;
+    IdentityBasisVector phi;
     SampleManager<FiniteAction, FiniteState> s;
 
     nlopt::opt optimizator;

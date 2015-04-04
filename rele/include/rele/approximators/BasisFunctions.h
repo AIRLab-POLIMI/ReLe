@@ -192,10 +192,10 @@ private:
                                          std::vector<unsigned int>& dim);
 };
 
-class IdentityBasis: public AbstractBasisVector
+class IdentityBasisVector: public AbstractBasisVector
 {
 public:
-    virtual ~IdentityBasis();
+    virtual ~IdentityBasisVector();
 
     virtual arma::mat operator()(const arma::vec& input);
     virtual double dot(const arma::vec& input, const arma::vec& otherVector);

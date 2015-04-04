@@ -21,40 +21,40 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LQRsolver.h"
 #include "basis/IdentityBasis.h"
 
-using namespace ReLe;
-using namespace std;
+using namespace arma;
 
-int main(int argc, char *argv[])
+namespace ReLe
 {
-    LQR lqr(2,1);
 
-    DenseBasisVector basis;
-    IdentityBasis* bf1 = new IdentityBasis(0);
-    IdentityBasis* bf2 = new IdentityBasis(1);
-    basis.push_back(bf1);
-    basis.push_back(bf2);
-
-    SparseBasisMatrix basisMatrix(basis, 2);
-    LinearApproximator regressor(basis.size(), basisMatrix);
-
-    LQRsolver solver(lqr, regressor);
-
-    solver.solve();
-
-
-    DetLinearPolicy<DenseState>& policy = static_cast<DetLinearPolicy<DenseState>&>(solver.getPolicy());
-
-    cout << "Optimal Policy:" << endl;
-    cout << policy.getParameters() << endl;
-
-
-    auto&& data = solver.test();
-
-    cout << "Final state:" << endl;
-    cout << data.back().back().xn << endl;
+IdentityBasis::IdentityBasis(unsigned int index)
+    : index(index)
+{
 
 }
 
+
+
+IdentityBasis::~IdentityBasis()
+{
+
+}
+
+double IdentityBasis::operator()(const vec& input)
+{
+    return input[index];
+}
+
+void IdentityBasis::writeOnStream(std::ostream &out)
+{
+    out << "Identity" << std::endl;
+    out << index <<endl;
+}
+
+void IdentityBasis::readFromStream(std::istream &in)
+{
+    //TODO
+}
+
+}//end namespace
