@@ -202,6 +202,7 @@ public:
         if (writeTransitions)
         {
             std::ofstream ofs(transitionPath, std::ios_base::app);
+            ofs << std::setprecision(OS_PRECISION);
 
             if(first)
             {
@@ -225,6 +226,7 @@ public:
         if (writeAgentData)
         {
             std::ofstream ofs(agentDataPath, std::ios_base::app);
+            ofs << std::setprecision(OS_PRECISION);
 
             for(auto data : outputData)
             {

@@ -31,6 +31,8 @@
 #include <armadillo>
 #include <iomanip>
 
+#define OS_PRECISION 6
+
 namespace ReLe
 {
 
@@ -53,6 +55,7 @@ struct EnvirormentSettings
 
     inline void WriteToStream(std::ostream& out) const
     {
+        out << std::setprecision(OS_PRECISION);
         out << finiteStateDim << "\t" << finiteActionDim << std::endl;
         out << continuosStateDim << "\t" << continuosActionDim << std::endl;
         out << rewardDim << std::endl;
@@ -185,6 +188,7 @@ public:
     {
         const arma::vec& self = *this;
         std::stringstream ss;
+        ss << std::setprecision(OS_PRECISION);
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
@@ -317,7 +321,7 @@ public:
     {
         const arma::vec& self = *this;
         std::stringstream ss;
-        ss << std::setprecision(10) << std::fixed;
+        ss << std::setprecision(OS_PRECISION);
 
         size_t i;
         for (i = 0; i + 1 < self.n_elem; i++)
@@ -358,7 +362,7 @@ inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
     size_t i;
     for (i = 0; i + 1 < reward.size(); i++)
-        os << std::setprecision(10) << std::fixed << reward[i] << ",";
+        os << reward[i] << ",";
 
     os << reward[i];
     return os;

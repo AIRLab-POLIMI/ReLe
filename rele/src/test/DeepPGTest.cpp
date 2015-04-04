@@ -47,12 +47,19 @@ struct gradConfig
 {
     unsigned int nbRuns, nbEpisodes;
     double stepLength;
+    StepRule* steprule;
+
+    virtual ~gradConfig()
+    {
+        delete steprule;
+    }
 };
 
 void help()
 {
-    cout << "deep_PG algorithm #Updates #Episodes stepLength" << endl;
-    cout << " - algorithm: r, rb, g, gb, ng" << endl;
+    cout << "lqr_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
+    cout << " - algorithm: r, rb, g, gb" << endl;
+    cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
 }
 
 bool InputValidation(int argc, char *argv[], gradConfig& config)
@@ -75,6 +82,28 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
         return false;
     }
 
+
+    if (argc == 6)
+    {
+        if (strcmp(argv[5], "constant") == 0)
+        {
+            config.steprule = new ConstantStep(step_length);
+        }
+        else if (strcmp(argv[5], "adaptive") == 0)
+        {
+            config.steprule = new AdaptiveStep(step_length);
+        }
+        else
+        {
+            std::cout << "ERROR: Arguments not valid\n";
+            return false;
+        }
+    }
+    else
+    {
+        config.steprule = new AdaptiveStep(step_length);
+    }
+
     // load valid arguments in the configuration
     config.nbRuns      = nbRuns;
     config.nbEpisodes  = nbEpisodes;
@@ -82,6 +111,9 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
 
     return true;
 }
+
+
+/////////////////////////////////////////////////////////////
 
 class deep_2state_identity: public BasisFunction
 {
@@ -108,7 +140,7 @@ class deep_state_identity: public BasisFunction
     }
     void readFromStream(std::istream& in) {}
 };
-
+/////////////////////////////////////////////////////////////
 
 /**
  *
@@ -116,6 +148,7 @@ class deep_state_identity: public BasisFunction
  * argv[2] # updates
  * argv[3] # episodes per update
  * argv[4] learning rate for updates
+ * argv[5] stepType ("constant", "adaptive")
  *
  */
 int main(int argc, char *argv[])
@@ -149,6 +182,7 @@ int main(int argc, char *argv[])
     FileManager fm("deep", "PG");
     fm.createDir();
     fm.cleanDir();
+    std::cout << std::setprecision(OS_PRECISION);
 
     DeepSeaTreasure mdp;
     vector<FiniteAction> actions;
@@ -200,14 +234,14 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm" << endl;
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "deep_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
         agent = new GPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, rewardId);
+                mdp.getSettings().horizon, *(config.steprule), rewardId);
         sprintf(outputname, "deep_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
@@ -215,14 +249,14 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "deep_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
         cout << "GPOMDPAlgorithm BASELINE" << endl;
         agent = new GPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength,
+                mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI,
                 rewardId);
         sprintf(outputname, "deep_gb.log");
@@ -231,7 +265,7 @@ int main(int argc, char *argv[])
     {
         cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
         agent = new GPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength,
+                mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::SINGLE,
                 rewardId);
         sprintf(outputname, "deep_gsb.log");
@@ -241,7 +275,7 @@ int main(int argc, char *argv[])
         cout << "NaturalGPOMDPAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new NaturalGPOMDPAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
+                mdp.getSettings().horizon, *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "deep_natg.log");
     }
     else if (strcmp(alg, "natr") == 0)
@@ -249,7 +283,7 @@ int main(int argc, char *argv[])
         cout << "NaturalREINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new NaturalREINFORCEAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "deep_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
@@ -257,7 +291,7 @@ int main(int argc, char *argv[])
         cout << "eNAC BASELINE" << endl;
         bool usebaseline = true;
         agent = new eNACAlgorithm<FiniteAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "deep_enac.log");
     }
     else

@@ -29,6 +29,7 @@
 #include "Basics.h"
 #include "BasicFunctions.h"
 #include "policy_search/onpolicy/GradientOutputData.h"
+#include "policy_search/step_rules/StepRules.h"
 #include <cassert>
 #include <iomanip>
 
@@ -50,7 +51,6 @@ arma::vec diffLogWorker(const StateC& state, ActionC& action, PolicyC& policy)
 }
 
 
-
 ///////////////////////////////////////////////////////////////////////////////////////
 /// ABSTRACT GRADIENT ALGORITHM
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -60,7 +60,7 @@ class AbstractPolicyGradientAlgorithm: public Agent<ActionC, StateC>
 
 public:
     AbstractPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                                    unsigned int nbEpisodes, double stepL,
+                                    unsigned int nbEpisodes, StepRule& stepL,
                                     bool baseline = true, int reward_obj = 0) :
         policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
         runCount(0), epiCount(0), df(1.0), Jep(0.0), rewardId(reward_obj),
@@ -185,7 +185,8 @@ protected:
     DifferentiablePolicy<ActionC, StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy;
     unsigned int runCount, epiCount;
-    double df, Jep, stepLength;
+    double df, Jep;
+    StepRule& stepLength;
     int rewardId;
 
     std::vector<double> history_J;
@@ -224,7 +225,7 @@ class REINFORCEAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC
 
 public:
     REINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                       unsigned int nbEpisodes, double stepL,
+                       unsigned int nbEpisodes, StepRule& stepL,
                        bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
@@ -286,12 +287,8 @@ protected:
         gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
-        double lambda = arma::dot(gradient,gradient) / (4*stepLength);
-        lambda = sqrt(lambda);
-        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-        double step_size = 1.0 / (2 * lambda);
-        //        std::cout << "step_size: " << step_size << std::endl;
+        arma::mat eMetric = arma::eye(nbParams,nbParams);
+        arma::vec step_size = stepLength.stepLength(gradient, eMetric);
         //---
 
         //--- save actual policy performance
@@ -335,7 +332,7 @@ public:
 
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                    unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
+                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
                     BaseLineType btype, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, true, reward_obj),
         maxStepsPerEpisode(nbSteps),
@@ -344,7 +341,7 @@ public:
     }
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                    unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
+                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
                     int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, false, reward_obj),
         maxStepsPerEpisode(nbSteps),
@@ -485,12 +482,8 @@ protected:
         gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
-        double lambda = arma::dot(gradient,gradient) / (4*stepLength);
-        lambda = sqrt(lambda);
-        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-        double step_size = 1.0 / (2 * lambda);
-        //        std::cout << "step_size: " << step_size << std::endl;
+        arma::mat eMetric = arma::eye(nbParams,nbParams);
+        arma::vec step_size = stepLength.stepLength(gradient, eMetric);
         //---
 
         //--- save actual policy performance
@@ -499,7 +492,6 @@ protected:
         currentItStats->estimated_gradient = gradient;
         currentItStats->stepLength = step_size;
         //---
-
 
         arma::vec newvalues = policy.getParameters() + gradient * step_size;
         policy.setParameters(newvalues);
@@ -550,7 +542,7 @@ class NaturalGPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, St
 
 public:
     NaturalGPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                           unsigned int nbEpisodes, unsigned int nbSteps, double stepL,
+                           unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
                            bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj),
         maxStepsPerEpisode(nbSteps)
@@ -652,29 +644,21 @@ protected:
         fisher /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
-        arma::mat tmp;
+
+        arma::vec step_size = stepLength.stepLength(gradient, fisher);
+
         arma::vec nat_grad;
-        double lambda, step_length;
         int rnk = arma::rank(fisher);
         //        std::cout << rnk << " " << fisher << std::endl;
         if (rnk == fisher.n_rows)
         {
             arma::mat H = arma::solve(fisher, gradient);
-            tmp = gradient.t() * H;
-            lambda = sqrt(tmp(0,0) / (4 * stepLength));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1 / (2 * lambda);
             nat_grad = H;
         }
         else
         {
             std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
             arma::mat H = arma::pinv(fisher);
-            tmp = gradient.t() * (H * gradient);
-            lambda = sqrt(tmp(0,0) / (4 * stepLength));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1 / (2 * lambda);
             nat_grad = H * gradient;
         }
         //---
@@ -683,13 +667,13 @@ protected:
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad;
-        currentItStats->stepLength = step_length;
+        currentItStats->stepLength = step_size;
         //---
 
         //        std::cout << step_length << std::endl;
         //        std::cout << nat_grad.t();
 
-        arma::vec newvalues = policy.getParameters() + step_length * nat_grad;
+        arma::vec newvalues = policy.getParameters() + step_size * nat_grad;
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
@@ -729,7 +713,7 @@ class NaturalREINFORCEAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC,
 
 public:
     NaturalREINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                              unsigned int nbEpisodes, double stepL,
+                              unsigned int nbEpisodes, StepRule& stepL,
                               bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
@@ -802,29 +786,21 @@ protected:
         fisher /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
-        arma::mat tmp;
+
+        arma::vec step_size = stepLength.stepLength(gradient, fisher);
+
         arma::vec nat_grad;
-        double lambda, step_length;
         int rnk = arma::rank(fisher);
         //        std::cout << rnk << " " << fisher << std::endl;
         if (rnk == fisher.n_rows)
         {
             arma::mat H = arma::solve(fisher, gradient);
-            tmp = gradient.t() * H;
-            lambda = sqrt(tmp(0,0) / (4 * stepLength));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1 / (2 * lambda);
             nat_grad = H;
         }
         else
         {
             std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
             arma::mat H = arma::pinv(fisher);
-            tmp = gradient.t() * (H * gradient);
-            lambda = sqrt(tmp(0,0) / (4 * stepLength));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1 / (2 * lambda);
             nat_grad = H * gradient;
         }
         //---
@@ -833,13 +809,13 @@ protected:
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad;
-        currentItStats->stepLength = step_length;
+        currentItStats->stepLength = step_size;
         //---
 
         //        std::cout << step_length << std::endl;
         //        std::cout << nat_grad.t();
 
-        arma::vec newvalues = policy.getParameters() + step_length * nat_grad;
+        arma::vec newvalues = policy.getParameters() + step_size * nat_grad;
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
@@ -880,7 +856,7 @@ class eNACAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 
 public:
     eNACAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                  unsigned int nbEpisodes, double stepL,
+                  unsigned int nbEpisodes, StepRule& stepL,
                   bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
@@ -954,9 +930,9 @@ protected:
         int nbParams = policy.getParametersSize();
 
         //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
+
+        arma::vec step_size;
         arma::vec nat_grad;
-        double lambda, step_length;
         int rnk = arma::rank(fisher);
         //        std::cout << rnk << " " << fisher << std::endl;
         if (rnk == fisher.n_rows)
@@ -976,11 +952,7 @@ protected:
                 nat_grad = arma::solve(fisher, grad);
             }
 
-            arma::mat H = arma::solve(fisher, grad);
-            arma::mat tmp = grad.t() * H;
-            lambda = sqrt(tmp(0,0) / (4 * stepLength));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1.0 / (2 * lambda);
+            step_size = stepLength.stepLength(grad, fisher);
         }
         else
         {
@@ -1000,11 +972,7 @@ protected:
                 grad = g;
                 nat_grad = H * grad;
             }
-
-            arma::mat tmp = grad.t() * (H * grad);
-            lambda = sqrt(tmp(0,0) / (4 * stepLength));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1.0 / (2 * lambda);
+            step_size = stepLength.stepLength(grad, fisher);
         }
         //---
 
@@ -1012,13 +980,13 @@ protected:
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad.rows(0,dp-1);
-        currentItStats->stepLength = step_length;
+        currentItStats->stepLength = step_size;
         //---
 
         //        std::cout << stepLength <<std::endl;
         //        std::cout << nat_grad.t();
 
-        arma::vec newvalues = policy.getParameters() + step_length * nat_grad.rows(0,dp-1);
+        arma::vec newvalues = policy.getParameters() + step_size * nat_grad.rows(0,dp-1);
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 

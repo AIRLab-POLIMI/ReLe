@@ -1,4 +1,4 @@
-%% NLS gradient test
+%% DEEP gradient test
 addpath(genpath('../Statistics'));
 addpath(genpath('./GradientTests'));
 addpath('../');

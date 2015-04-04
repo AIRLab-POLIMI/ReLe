@@ -58,6 +58,7 @@ struct Transition
 
     void printHeader(std::ostream& os)
     {
+        os << std::setprecision(OS_PRECISION);
         os << x.serializedSize()  << ","
            << u.serializedSize()  << ","
            << r.size()  << std::endl;
@@ -66,6 +67,7 @@ struct Transition
 
     void print(std::ostream& os)
     {
+        os << std::setprecision(OS_PRECISION);
         os << "0,0,"
            << x  << ","
            << u  << ","
@@ -74,6 +76,7 @@ struct Transition
 
     void printLast(std::ostream& os)
     {
+        os << std::setprecision(OS_PRECISION);
         os  << "1,"
             << xn.isAbsorbing() << ","
             << xn << std::endl;
@@ -87,6 +90,7 @@ class Episode : public std::vector<Transition<ActionC,StateC>>
 public:
     void printHeader(std::ostream& os)
     {
+        os << std::setprecision(OS_PRECISION);
         if(this->size() > 0)
             this->back().printHeader(os);
     }
@@ -94,6 +98,7 @@ public:
 
     void print(std::ostream& os)
     {
+        os << std::setprecision(OS_PRECISION);
         for(auto& sample : *this)
         {
             sample.print(os);
@@ -118,10 +123,13 @@ public:
         {
             arma::mat episodefeatureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);
 
+            double df = 1;
+
             for(unsigned int t = 0; t < episode.size(); t++)
             {
                 Transition<ActionC, StateC>& transition = episode[t];
-                episodefeatureExpectation += std::pow(gamma, t) * basis(vectorize(transition.x, transition.u));
+                episodefeatureExpectation += df * basis(vectorize(transition.x, transition.u));
+                df *= gamma;
             }
 
             /*Transition<ActionC, StateC>& transition = episode.back();
@@ -150,6 +158,7 @@ public:
 public:
     void writeToStream(std::ostream& os)
     {
+        os << std::setprecision(OS_PRECISION);
         if (this->size() > 0)
         {
             this->back().printHeader(os);

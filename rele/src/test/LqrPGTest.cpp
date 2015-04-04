@@ -45,12 +45,19 @@ struct gradConfig
 {
     unsigned int nbRuns, nbEpisodes;
     double stepLength;
+    StepRule* steprule;
+
+    virtual ~gradConfig()
+    {
+        delete steprule;
+    }
 };
 
 void help()
 {
-    cout << "lqr_PG algorithm #Updates #Episodes stepLength" << endl;
+    cout << "lqr_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
     cout << " - algorithm: r, rb, g, gb" << endl;
+    cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
 }
 
 bool InputValidation(int argc, char *argv[], gradConfig& config)
@@ -73,6 +80,28 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
         return false;
     }
 
+
+    if (argc == 6)
+    {
+        if (strcmp(argv[5], "constant") == 0)
+        {
+            config.steprule = new ConstantStep(step_length);
+        }
+        else if (strcmp(argv[5], "adaptive") == 0)
+        {
+            config.steprule = new AdaptiveStep(step_length);
+        }
+        else
+        {
+            std::cout << "ERROR: Arguments not valid\n";
+            return false;
+        }
+    }
+    else
+    {
+        config.steprule = new AdaptiveStep(step_length);
+    }
+
     // load valid arguments in the configuration
     config.nbRuns      = nbRuns;
     config.nbEpisodes  = nbEpisodes;
@@ -81,6 +110,15 @@ bool InputValidation(int argc, char *argv[], gradConfig& config)
     return true;
 }
 
+/**
+ *
+ * argv[1] learning algorithm name (r,g,rb,gb,gsb,n,nb)
+ * argv[2] # updates
+ * argv[3] # episodes per update
+ * argv[4] learning rate for updates
+ * argv[5] stepType ("constant", "adaptive")
+ *
+ */
 int main(int argc, char *argv[])
 {
     gradConfig config;
@@ -111,6 +149,7 @@ int main(int argc, char *argv[])
     FileManager fm("lqr", "PG");
     fm.createDir();
     fm.cleanDir();
+    std::cout << std::setprecision(OS_PRECISION);
 
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
@@ -132,14 +171,14 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm" << endl;
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "lqr_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, rewardId);
+                mdp.getSettings().horizon, *(config.steprule), rewardId);
         sprintf(outputname, "lqr_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
@@ -147,14 +186,14 @@ int main(int argc, char *argv[])
         cout << "REINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "lqr_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
         cout << "GPOMDPAlgorithm BASELINE" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength,
+                mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
                 rewardId);
         sprintf(outputname, "lqr_gb.log");
@@ -163,7 +202,7 @@ int main(int argc, char *argv[])
     {
         cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength,
+                mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
                 rewardId);
         sprintf(outputname, "lqr_gsb.log");
@@ -173,7 +212,7 @@ int main(int argc, char *argv[])
         cout << "NaturalGPOMDPAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new NaturalGPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                mdp.getSettings().horizon, config.stepLength, usebaseline, rewardId);
+                mdp.getSettings().horizon, *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "lqr_natg.log");
     }
     else if (strcmp(alg, "natr") == 0)
@@ -181,7 +220,7 @@ int main(int argc, char *argv[])
         cout << "NaturalREINFORCEAlgorithm BASELINE" << endl;
         bool usebaseline = true;
         agent = new NaturalREINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "lqr_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
@@ -189,7 +228,7 @@ int main(int argc, char *argv[])
         cout << "eNAC BASELINE" << endl;
         bool usebaseline = true;
         agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
-                config.stepLength, usebaseline, rewardId);
+                *(config.steprule), usebaseline, rewardId);
         sprintf(outputname, "lqr_enac.log");
     }
     else
@@ -202,7 +241,7 @@ int main(int argc, char *argv[])
     ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath(outputname),
-        WriteStrategy<DenseAction, DenseState>::ALL,
+        WriteStrategy<DenseAction, DenseState>::AGENT,
         true /*delete file*/
     );
 
