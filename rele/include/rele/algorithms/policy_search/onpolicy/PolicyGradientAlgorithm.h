@@ -816,7 +816,7 @@ protected:
         //        std::cout << step_length << std::endl;
         //        std::cout << nat_grad.t();
 
-        arma::vec newvalues = policy.getParameters() + nat_grad * step_size;
+        arma::vec newvalues = policy.getParameters() + step_size * nat_grad;
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
@@ -987,7 +987,7 @@ protected:
         //        std::cout << stepLength <<std::endl;
         //        std::cout << nat_grad.t();
 
-        arma::vec newvalues = policy.getParameters() + nat_grad.rows(0,dp-1) * step_size;
+        arma::vec newvalues = policy.getParameters() + step_size * nat_grad.rows(0,dp-1);
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
