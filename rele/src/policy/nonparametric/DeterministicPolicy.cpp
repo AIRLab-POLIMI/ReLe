@@ -21,46 +21,38 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_CORE_SOLVER_H_
-#define INCLUDE_RELE_CORE_SOLVER_H_
+#include "nonparametric/DeterministicPolicy.h"
 
-#include "Transition.h"
-
-#include <iostream>
+#include <sstream>
 
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
-class Solver
+unsigned int DeterministicPolicy::operator()(size_t state)
 {
-public:
-	Solver()
-	{
-		testEpisodeLength = 100;
-		testEpisodes = 1;
-	}
+	return pi(state);
+}
 
-    virtual void solve() = 0;
-    virtual Dataset<ActionC, StateC> test() = 0;
-    virtual void printPolicy(std::ostream& os) = 0;
+double DeterministicPolicy::operator()(size_t state, unsigned int action)
+{
+	if(action == pi(state))
+		return 1.0;
+	else
+		return 0.0;
+}
 
-    inline void setTestParams(unsigned int testEpisodes, unsigned int testEpisodeLength)
+std::string DeterministicPolicy::printPolicy()
+{
+    //TODO choose policy format
+    std::stringstream ss;
+    ss << "- Policy" << std::endl;
+    for (unsigned int i = 0; i < pi.n_elem; i++)
     {
-    	this->testEpisodeLength = testEpisodeLength;
-    	this->testEpisodes = testEpisodes;
+        ss << "policy(" << i << ") = " << pi(i) << std::endl;
     }
 
-    virtual~Solver() { }
-
-protected:
-    unsigned int testEpisodeLength;
-    unsigned int testEpisodes;
-
-};
-
+    return ss.str();
 }
 
 
-
-#endif /* INCLUDE_RELE_CORE_SOLVER_H_ */
+}

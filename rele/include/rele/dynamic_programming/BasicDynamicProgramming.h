@@ -26,6 +26,7 @@
 
 #include "Solver.h"
 #include "FiniteMDP.h"
+#include "nonparametric/DeterministicPolicy.h"
 
 #include <armadillo>
 
@@ -37,6 +38,8 @@ class DynamicProgrammingAlgorithm : Solver<FiniteAction, FiniteState>
 {
 public:
     DynamicProgrammingAlgorithm(FiniteMDP& mdp);
+    virtual void printPolicy(std::ostream& os);
+    virtual Dataset<FiniteAction, FiniteState> test();
 
 protected:
     FiniteMDP& mdp;
@@ -47,7 +50,7 @@ protected:
     const arma::cube& P;
     const arma::cube& R;
 
-    arma::uvec pi;
+    DeterministicPolicy pi;
     arma::vec V;
 };
 
@@ -57,8 +60,6 @@ public:
     PolicyIteration(FiniteMDP& mdp);
 
     virtual void solve();
-    virtual Dataset<FiniteAction, FiniteState> test();
-    virtual void printPolicy(std::ostream& os);
 
     virtual ~PolicyIteration();
 
@@ -76,8 +77,6 @@ public:
     ValueIteration(FiniteMDP& mdp, double eps);
 
     virtual void solve();
-    virtual Dataset<FiniteAction, FiniteState> test();
-    virtual void printPolicy(std::ostream& os);
 
     virtual ~ValueIteration();
 
