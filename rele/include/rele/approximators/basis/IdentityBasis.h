@@ -32,7 +32,7 @@ namespace ReLe
 class IdentityBasis : public BasisFunction
 {
 public:
-	IdentityBasis(unsigned int index);
+    IdentityBasis(unsigned int index);
     virtual ~IdentityBasis();
     double operator() (const arma::vec& input);
 
