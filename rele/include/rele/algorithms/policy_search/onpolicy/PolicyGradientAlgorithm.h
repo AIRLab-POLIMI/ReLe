@@ -397,7 +397,7 @@ protected:
         {
             sumGradLog_CompEpStep(p,epiCount,stepCount) = sumdlogpi(p);
         }
-//        std::cout << sumdlogpi.t();
+        //        std::cout << sumdlogpi.t();
 
         // compute the baseline
 
@@ -672,8 +672,9 @@ protected:
 
         //        std::cout << step_length << std::endl;
         //        std::cout << nat_grad.t();
+        //        std::cerr <<"---" << policy.getParameters().t();
 
-        arma::vec newvalues = policy.getParameters() + step_size * nat_grad;
+        arma::vec newvalues = policy.getParameters() + nat_grad * step_size;
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
