@@ -274,7 +274,8 @@ protected:
         else
         {
             nat_grad = invFisherMtx*Base::diffObjFunc;
-            step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, arma::mat(invFisherMtx), true);
+            arma::mat ffull(invFisherMtx);
+            step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, ffull, true);
         }
 
         //        std::cout << nat_grad.t();

@@ -45,32 +45,79 @@ using namespace ReLe;
 using namespace arma;
 
 
-//class ConditionBasisFunction: public BasisFunction {
-//public:
-//    ConditionBasisFunction(BasisFunction* bfs, int condition_val)
-//        :bfs(bfs), val(condition_val)
-//    {
-//    }
+struct bboConfig
+{
+    unsigned int nbRuns, nbPolicies;
+    double stepLength;
+    StepRule* steprule = nullptr;
 
-//    double operator()(const arma::vec& input)
-//    {
-//        int tmp = (input[2] == val)?1:0;
-//        if (tmp == 0)
-//        {
-//            return 0;
-//        }
-//        return (*bfs)(input);
-//    }
-//    void writeOnStream(std::ostream& out)
-//    {
-//        out << "condition_bfs " << val << endl;
-//    }
-//    void readFromStream(std::istream& in) {}
+    virtual ~bboConfig()
+    {
+        if (steprule != nullptr)
+            delete steprule;
+    }
+};
 
-//    private:
-//        BasisFunction* bfs;
-//        int val;
-//};
+void help()
+{
+    cout << "deep_BBO algorithm [] #Updates #Policies stepLength [updaterule]" << endl;
+    cout << " - algorithm: pgpe, nes, enes, reps" << endl;
+    cout << "   * notes that pgpe and nes requires and additional paramiter" << endl;
+    cout << "   * distribution: gauss, log, chol, diag" << endl;
+    cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
+}
+
+bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
+{
+    if (argc < 5+offset)
+    {
+        std::cout << "ERROR: Too few arguments." << endl;
+        help();
+        return false;
+    }
+
+    int nbRuns         = atoi(argv[2+offset]);
+    int nbPolicies     = atoi(argv[3+offset]);
+    double step_length = atof(argv[4+offset]);
+
+    // check arguments
+    if (nbRuns < 1 || nbPolicies < 1 || step_length <= 0)
+    {
+        std::cout << "ERROR: Arguments not valid\n";
+        return false;
+    }
+
+
+    if (argc == 6+offset)
+    {
+        if (strcmp(argv[5+offset], "constant") == 0)
+        {
+            config.steprule = new ConstantStep(step_length);
+        }
+        else if (strcmp(argv[5+offset], "adaptive") == 0)
+        {
+            config.steprule = new AdaptiveStep(step_length);
+        }
+        else
+        {
+            std::cout << "ERROR: Arguments not valid\n";
+            return false;
+        }
+    }
+    else
+    {
+        config.steprule = new AdaptiveStep(step_length);
+    }
+
+    // load valid arguments in the configuration
+    config.nbRuns      = nbRuns;
+    config.nbPolicies  = nbPolicies;
+    config.stepLength  = step_length;
+
+    return true;
+}
+
+/////////////////////////////////////////////////////////////
 
 class deep_2state_identity: public BasisFunction
 {
@@ -97,10 +144,68 @@ class deep_state_identity: public BasisFunction
     }
     void readFromStream(std::istream& in) {}
 };
+/////////////////////////////////////////////////////////////
 
+/**
+ *
+ * argv[1] learning algorithm name (pgpe, nes, enes, reps) -> pgpe and nes requires the distribution type
+ * argv[2] distribution type (gauss, chol, diag, log)
+ * argv[2/3] # updates
+ * argv[3/4] # policies per update
+ * argv[4/5] learning rate for updates
+ * argv[5/6] stepType ("constant", "adaptive")
+ *
+ */
 int main(int argc, char *argv[])
 {
-    FileManager fm("Deep", "BBO");
+    bboConfig config;
+
+    //--- INPUT VALIDATION
+    char alg[10], polType[10];
+    if (argc > 1)
+    {
+        strncpy(alg, argv[1], 10);
+        int offset = 0;
+        if ((strcmp(alg,"pgpe") == 0) || (strcmp(alg,"nes") == 0))
+        {
+            strncpy(polType, argv[2], 10);
+            offset = 1;
+        }
+        else if (strcmp(alg,"reps") == 0)
+        {
+            strcpy(polType, "gauss");
+        }
+        else if (strcmp(alg,"enes") == 0)
+        {
+            strcpy(polType, "chol");
+        }
+        else
+        {
+            cout << "Unknown algorithm!!" << endl;
+            help();
+            exit(1);
+        }
+
+        // load the arguments in the configuration
+        if ( ! InputValidation(argc, argv, config, offset) )
+        {
+            // if the arguments are not valid then the application ends
+            return -1;
+        }
+    }
+    else
+    {
+        // default configuration if no arguments are specified
+        strcpy(alg, "nes");
+        strcpy(polType, "diag");
+        config.nbRuns      = 400;
+        config.nbPolicies  = 100;
+        config.stepLength  = 0.01;
+        config.steprule = new AdaptiveStep(config.stepLength);
+    }
+    //---
+
+    FileManager fm("deep", "BBO");
     fm.createDir();
     fm.cleanDir();
 
@@ -119,7 +224,7 @@ int main(int argc, char *argv[])
     deg = {1,1};
     PolynomialFunction* pfs1s2 = new PolynomialFunction(dim, deg);
     deep_2state_identity* d2si = new deep_2state_identity();
-    deep_state_identity* dsi = new deep_state_identity();
+    deep_state_identity* dsi   = new deep_state_identity();
 
     DenseBasisVector basis;
     for (int i = 0; i < actions.size() -1; ++i)
@@ -147,60 +252,103 @@ int main(int argc, char *argv[])
 
     //--- distribution setup
     int nparams = basis.size();
-    //----- ParametricNormal
-    //    arma::vec mean(nparams, fill::zeros);
-    //    arma::mat cov(nparams, nparams, arma::fill::eye);
-    //    ParametricNormal dist(mean, cov);
-    //----- ParametricLogisticNormal
-    //    ParametricLogisticNormal dist(nparams, 1);
-    //----- ParametricCholeskyNormal
-    arma::vec mean(nparams, fill::zeros);
-    arma::mat cov(nparams, nparams, arma::fill::eye);
-    mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(mean, cholMtx);
-    //----- ParametricDiagonalNormal
-//    vec mean(nparams, fill::zeros);
-//    vec sigmas(nparams, fill::ones);
-//    ParametricDiagonalNormal dist(mean, sigmas);
-    //-----
+    DifferentiableDistribution* dist;
+
+    if (strcmp(polType, "gauss") == 0)
+    {
+        //----- ParametricNormal
+        arma::vec mean(nparams, fill::zeros);
+        arma::mat cov(nparams, nparams, arma::fill::eye);
+        dist = new ParametricNormal(mean, cov);
+    }
+    else if (strcmp(polType, "log") == 0)
+    {
+        //----- ParametricLogisticNormal
+        dist = new ParametricLogisticNormal(nparams, 1);
+    }
+    else if (strcmp(polType, "chol") == 0)
+    {
+        //----- ParametricCholeskyNormal
+        arma::vec mean(nparams, fill::zeros);
+        arma::mat cov(nparams, nparams, arma::fill::eye);
+        mat cholMtx = chol(cov);
+        dist = new ParametricCholeskyNormal(mean, cholMtx);
+    }
+    else if (strcmp(polType, "diag") == 0)
+    {
+        //----- ParametricDiagonalNormal
+        vec mean(nparams, fill::zeros);
+        vec sigmas(nparams, fill::ones);
+        dist = new ParametricDiagonalNormal(mean, sigmas);
+        //-----
+    }
     //---
 
-    cout << "## MetaDistribution: " << dist.getDistributionName() << endl;
-
-    AdaptiveStep steprule(0.1);
-
-    int nbepperpol = 1, nbpolperupd = 250;
-    bool usebaseline = true;
-    //    PGPE<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, usebaseline);
-    //    agent.setNormalization(true);
-    NES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, usebaseline);
-    //    eNES<FiniteAction, DenseState, ParametricCholeskyNormal> agent(dist, policy, nbepperpol, nbpolperupd, 0.1, usebaseline);
-
-    //    REPS<FiniteAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    //    agent.setEps(0.9);
 
 
-    //    double stepnb = (3.0/5.0)*(3+log(nparams))/(nparams*sqrt(nparams));
-    //    xNES<FiniteAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, 1.0, stepnb, stepnb);
+    cout << "## MetaDistribution: " << dist->getDistributionName() << endl;
 
-    ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        fm.addPath("Deep.log"),
-        WriteStrategy<FiniteAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
+    int nbepperpol = 1, nbpolperupd = config.nbPolicies;
+    ReLe::Core<FiniteAction, DenseState>* core;
+    if (strcmp(alg, "pgpe") == 0)
+    {
+        bool usebaseline = true;
+        PGPE<FiniteAction, DenseState>* agent = new PGPE<FiniteAction, DenseState>
+                (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+    }
+    else if (strcmp(alg, "nes") == 0)
+    {
+        bool usebaseline = true;
+        NES<FiniteAction, DenseState>* agent = new NES<FiniteAction, DenseState>
+                (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+    }
+    else if (strcmp(alg, "enes") == 0)
+    {
+        bool usebaseline = true;
+        arma::vec mean(nparams, fill::zeros);
+        arma::mat cov(nparams, nparams, arma::fill::eye);
+        mat cholMtx = chol(cov);
+        ParametricCholeskyNormal distr(mean, cholMtx);
+        eNES<FiniteAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<FiniteAction, DenseState, ParametricCholeskyNormal>
+                (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+    }
+    else if (strcmp(alg, "reps") == 0)
+    {
+        arma::vec mean(nparams, fill::zeros);
+        arma::mat cov(nparams, nparams, arma::fill::eye);
+        ParametricNormal distr(mean, cov);
+        REPS<FiniteAction, DenseState, ParametricNormal>* agent = new REPS<FiniteAction, DenseState, ParametricNormal>
+                (distr,policy,nbepperpol,nbpolperupd);
+        agent->setEps(0.9);
+        core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
+    }
+    else
+    {
+        std::cout << "ERROR: Algorithm " << alg << " not found in (pgpe, nes, enes, reps)\n";
+        abort();
+    }
+
+    WriteStrategy<FiniteAction, DenseState> wStrategy(
+                fm.addPath("deep.log"),
+                WriteStrategy<FiniteAction, DenseState>::AGENT,
+                true /*delete file*/
+                );
+    core->getSettings().loggerStrategy = &wStrategy;
 
     int horiz = mdp.getSettings().horizon;
-    core.getSettings().episodeLenght = horiz;
+    core->getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 150;
+    int nbUpdates = config.nbRuns;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
     double every, bevery;
     every = bevery = 0.1; //%
     int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
-        core.runEpisode();
+        core->runEpisode();
 
         int v = nbepperpol*nbpolperupd;
         if (i % v == 0)
@@ -210,9 +358,8 @@ int main(int argc, char *argv[])
             {
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
                 cout << "### " << p << "% ###" << endl;
-                //                cout << dist.getParameters().t();
-                core.getSettings().testEpisodeN = 100;
-                arma::vec J = core.runBatchTest();
+                core->getSettings().testEpisodeN = 100;
+                arma::vec J = core->runBatchTest();
                 cout << "mean score: " << J(0) << endl;
                 every += bevery;
             }
@@ -220,20 +367,28 @@ int main(int argc, char *argv[])
     }
 
 
-    int nbTestEpisodes = 1000;
-    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
-    core.getSettings().testEpisodeN = 1000;
-    cout << core.runBatchTest() << endl;
+    //    int nbTestEpisodes = 1000;
+    //    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
+    //    core->getSettings().testEpisodeN = nbTestEpisodes;
+    //    cout << core->runBatchTest() << endl;
 
-    //--- collect some trajectories
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        fm.addPath("DeepFinal.log"),
-        WriteStrategy<FiniteAction, DenseState>::TRANS,
-        true /*delete file*/
-    );
-    for (int n = 0; n < 100; ++n)
-        core.runTestEpisode();
-    //---
+    //    //--- collect some trajectories
+    //    core->getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
+    //                fm.addPath("DeepFinal.log"),
+    //                WriteStrategy<FiniteAction, DenseState>::TRANS,
+    //                true /*delete file*/
+    //                );
+    //    for (int n = 0; n < 100; ++n)
+    //        core->runTestEpisode();
+    //    //---
 
+    delete dist;
+    delete core;
+    delete pf0;
+    delete pfs1;
+    delete pfs2;
+    delete pfs1s2;
+    delete d2si;
+    delete dsi;
     return 0;
 }
