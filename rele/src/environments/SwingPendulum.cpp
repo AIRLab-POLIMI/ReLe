@@ -50,7 +50,7 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
 
 void SwingUpSettings::WriteToStream(ostream &out) const
 {
-    EnvirormentSettings::WriteToStream(out);
+    EnvironmentSettings::WriteToStream(out);
     out << stepTime << std::endl;
     out << actionRange.Lo() << " " << actionRange.Hi() << std::endl;
     out << thetaRange.Lo() << " " << thetaRange.Hi() << std::endl;
@@ -69,7 +69,7 @@ void SwingUpSettings::ReadFromStream(istream &in)
 {
     double lo, hi;
     int boolval;
-    EnvirormentSettings::ReadFromStream(in);
+    EnvironmentSettings::ReadFromStream(in);
     in >> stepTime;
     in >> lo >> hi;
     actionRange = Range(lo, hi);

@@ -37,7 +37,7 @@
 namespace ReLe
 {
 
-class NLSSettings : public EnvirormentSettings
+class NLSSettings : public EnvironmentSettings
 {
 public:
     NLSSettings();

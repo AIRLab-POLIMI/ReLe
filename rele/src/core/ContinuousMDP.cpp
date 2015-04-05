@@ -40,7 +40,7 @@ void ContinuousMDP::setupEnvirorment(size_t stateSize, size_t actionSize, size_t
                                      bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                                      double gamma)
 {
-    EnvirormentSettings& task = getWritableSettings();
+    EnvironmentSettings& task = getWritableSettings();
     task.isFiniteHorizon = isFiniteHorizon;
     task.horizon = horizon;
     task.gamma = gamma;

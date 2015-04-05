@@ -75,13 +75,13 @@ void PortfolioSettings::defaultSettings(PortfolioSettings& settings)
 
 void PortfolioSettings::WriteToStream(ostream &out) const
 {
-    EnvirormentSettings::WriteToStream(out);
+    EnvironmentSettings::WriteToStream(out);
     out << std::endl;
 }
 
 void PortfolioSettings::ReadFromStream(istream &in)
 {
-    EnvirormentSettings::ReadFromStream(in);
+    EnvironmentSettings::ReadFromStream(in);
 }
 
 

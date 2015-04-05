@@ -36,7 +36,7 @@
 namespace ReLe
 {
 
-struct EnvirormentSettings
+struct EnvironmentSettings
 {
     bool isFiniteHorizon;
     double gamma;

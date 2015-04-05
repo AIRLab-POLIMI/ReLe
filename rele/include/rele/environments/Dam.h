@@ -29,7 +29,7 @@
 namespace ReLe
 {
 
-class DamSettings : public EnvirormentSettings
+class DamSettings : public EnvironmentSettings
 {
 public:
     DamSettings();

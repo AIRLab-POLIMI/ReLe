@@ -77,7 +77,7 @@ public:
             return terminalCond->checkCond();
     }
 
-    void setTask(const EnvirormentSettings& task)
+    void setTask(const EnvironmentSettings& task)
     {
         this->task = task;
         this->init();
@@ -97,7 +97,7 @@ protected:
 
 
 protected:
-    EnvirormentSettings task;
+    EnvironmentSettings task;
     TerminalCondition* terminalCond;
 };
 

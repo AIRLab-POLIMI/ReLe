@@ -42,7 +42,7 @@
 namespace ReLe
 {
 
-class UWVSettings : public EnvirormentSettings
+class UWVSettings : public EnvironmentSettings
 {
 public:
     UWVSettings();
