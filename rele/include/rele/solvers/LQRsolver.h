@@ -21,36 +21,38 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_
+#define INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_
 
-#include "FiniteMDP.h"
-#include "SimpleChainGenerator.h"
+#include "Solver.h"
+#include "LQR.h"
+#include "parametric/differentiable/LinearPolicy.h"
 
-#include "BasicDynamicProgramming.h"
-
-
-using namespace ReLe;
-using namespace std;
-
-int main(int argc, char *argv[])
+namespace ReLe
 {
-    /* Create simple chain and optimal policy */
-    SimpleChainGenerator generator;
-    generator.generate(5, 2);
 
-    FiniteMDP mdp = generator.getMPD(0.9);
+class LQRsolver: public Solver<DenseAction, DenseState>
+{
+public:
+    LQRsolver(LQR& lqr, LinearApproximator& approximator);
+    virtual void solve();
+    virtual Dataset<DenseAction, DenseState> test();
+    virtual Policy<DenseAction, DenseState>& getPolicy();
 
-    ValueIteration solver1(mdp, 0.01);
-    PolicyIteration solver2(mdp);
+    inline void setRewardIndex(unsigned int rewardIndex)
+    {
+        this->rewardIndex = rewardIndex;
+    }
 
-    solver1.solve();
-    solver2.solve();
+private:
+    LQR& lqr;
+    DetLinearPolicy<DenseState> pi;
 
+    double gamma;
 
-    cout << "Value iteration results:" << endl;
-    cout << solver1.getPolicy().printPolicy();
+    unsigned int rewardIndex;
+};
 
-    cout << "Policy iteration results:" << endl;
-    cout << solver2.getPolicy().printPolicy();
-
-    return 0;
 }
+
+#endif /* INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_ */

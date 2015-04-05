@@ -80,26 +80,25 @@ void LQR::setInitialState()
     }
 }
 
-void LQR::initialize(unsigned int stateActionSize, unsigned int rewardSize, double e)
+void LQR::initialize(unsigned int dimensions, unsigned int rewardSize, double e)
 {
-    A.eye();
-    B.eye();
+    A.eye(dimensions, dimensions);
+    B.eye(dimensions, dimensions);
 
-    arma::mat IdMtx(stateActionSize, stateActionSize);
-    IdMtx.eye();
+    arma::mat IdMtx(dimensions, dimensions, arma::fill::eye);
 
-    for (int i = 0, ie = rewardSize; i < ie; ++i)
+    for (int i = 0; i < rewardSize; i++)
     {
         Q.push_back(IdMtx);
         R.push_back(IdMtx);
     }
 
-    if (stateActionSize > 1)
+    if (dimensions > 1)
     {
 
-        for (int i = 0, ie = stateActionSize; i < ie; ++i)
+        for (int i = 0; i < rewardSize; i++)
         {
-            for (int j = 0, je = stateActionSize; j < je; ++j)
+            for (int j = 0; j < dimensions; j++)
             {
 
                 if (i == j)

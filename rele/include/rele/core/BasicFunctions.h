@@ -26,27 +26,27 @@
 
 #include "Basics.h"
 #include "BasicsTraits.h"
+#include "Policy.h"
 
 namespace ReLe
 {
 //Templates needed to sample different action types
-template<class PolicyC>
-void sampleActionWorker(const FiniteState& state, FiniteAction& action, PolicyC& policy)
+inline void sampleActionWorker(const FiniteState& state, FiniteAction& action, Policy<FiniteAction, FiniteState>& policy)
 {
     unsigned int u = policy(state.getStateN());
     action.setActionN(u);
 }
 
 
-template<class StateC, class PolicyC>
-void sampleActionWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
+template<class StateC>
+void sampleActionWorker(const StateC& state, FiniteAction& action, Policy<FiniteAction, StateC>& policy)
 {
     unsigned int u = policy(state);
     action.setActionN(u);
 }
 
-template<class StateC, class ActionC, class PolicyC>
-void sampleActionWorker(const StateC& state, ActionC& action, PolicyC& policy)
+template<class StateC, class ActionC>
+void sampleActionWorker(const StateC& state, ActionC& action, Policy<ActionC, StateC>& policy)
 {
     typename action_type<ActionC>::type_ref u = action;
     u = policy(state);

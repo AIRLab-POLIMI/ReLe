@@ -21,36 +21,38 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "nonparametric/DeterministicPolicy.h"
 
-#include "FiniteMDP.h"
-#include "SimpleChainGenerator.h"
+#include <sstream>
 
-#include "BasicDynamicProgramming.h"
-
-
-using namespace ReLe;
-using namespace std;
-
-int main(int argc, char *argv[])
+namespace ReLe
 {
-    /* Create simple chain and optimal policy */
-    SimpleChainGenerator generator;
-    generator.generate(5, 2);
 
-    FiniteMDP mdp = generator.getMPD(0.9);
+unsigned int DeterministicPolicy::operator()(size_t state)
+{
+    return pi(state);
+}
 
-    ValueIteration solver1(mdp, 0.01);
-    PolicyIteration solver2(mdp);
+double DeterministicPolicy::operator()(size_t state, unsigned int action)
+{
+    if(action == pi(state))
+        return 1.0;
+    else
+        return 0.0;
+}
 
-    solver1.solve();
-    solver2.solve();
+std::string DeterministicPolicy::printPolicy()
+{
+    //TODO choose policy format
+    std::stringstream ss;
+    ss << "- Policy" << std::endl;
+    for (unsigned int i = 0; i < pi.n_elem; i++)
+    {
+        ss << "policy(" << i << ") = " << pi(i) << std::endl;
+    }
+
+    return ss.str();
+}
 
 
-    cout << "Value iteration results:" << endl;
-    cout << solver1.getPolicy().printPolicy();
-
-    cout << "Policy iteration results:" << endl;
-    cout << solver2.getPolicy().printPolicy();
-
-    return 0;
 }

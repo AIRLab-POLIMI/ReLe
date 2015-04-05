@@ -31,11 +31,11 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC, class PolicyC>
+template<class ActionC, class StateC>
 class PolicyEvalAgent: public Agent<ActionC, StateC>
 {
 public:
-    PolicyEvalAgent(PolicyC& policy): policy(policy)
+    PolicyEvalAgent(Policy<ActionC, StateC>& policy): policy(policy)
     {
     }
     virtual ~PolicyEvalAgent()
@@ -70,7 +70,7 @@ public:
     }
 
 private:
-    PolicyC policy;
+    Policy<ActionC, StateC>& policy;
 };
 
 } //end namespace

@@ -23,6 +23,7 @@
 
 #include "BasicDynamicProgramming.h"
 #include "CSV.h"
+#include "Core.h"
 
 using namespace std;
 using namespace arma;
@@ -36,7 +37,17 @@ DynamicProgrammingAlgorithm::DynamicProgrammingAlgorithm(FiniteMDP& mdp) : mdp(m
     stateN = settings.finiteStateDim;
     actionN = settings.finiteActionDim;
     gamma = settings.gamma;
-    pi.zeros(stateN);
+    pi.init(stateN);
+}
+
+Policy<FiniteAction, FiniteState>& DynamicProgrammingAlgorithm::getPolicy()
+{
+    return pi;
+}
+
+Dataset<FiniteAction, FiniteState> DynamicProgrammingAlgorithm::test()
+{
+    return Solver<FiniteAction, FiniteState>::test(mdp, pi);
 }
 
 ValueIteration::ValueIteration(FiniteMDP& mdp, double eps) : DynamicProgrammingAlgorithm(mdp), eps(eps)
@@ -49,16 +60,6 @@ void ValueIteration::solve()
     computeValueFunction();
 
     computePolicy();
-}
-
-Dataset<FiniteAction, FiniteState> ValueIteration::test()
-{
-
-}
-
-void ValueIteration::printPolicy(std::ostream& os)
-{
-    os << pi;
 }
 
 ValueIteration::~ValueIteration()
@@ -103,7 +104,7 @@ void ValueIteration::computePolicy()
             if (va[0] > vmax)
             {
                 vmax = va[0];
-                pi[s] = a;
+                pi.update(s, a);
             }
         }
     }
@@ -122,16 +123,6 @@ void PolicyIteration::solve()
         computePolicy();
     }
     while(changed);
-}
-
-Dataset<FiniteAction, FiniteState> PolicyIteration::test()
-{
-
-}
-
-void PolicyIteration::printPolicy(std::ostream& os)
-{
-    os << pi;
 }
 
 PolicyIteration::~PolicyIteration()
@@ -175,7 +166,7 @@ void PolicyIteration::computePolicy()
                 arma::vec va = Psa.t() * (Rsa + gamma * V);
                 if (va[0] > vmax)
                 {
-                    pi[s] = a;
+                    pi.update(s,a);
                     vmax = va[0];
                     changed = true;
                 }

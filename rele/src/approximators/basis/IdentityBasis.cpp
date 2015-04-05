@@ -21,42 +21,40 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LinearApproximator.h"
-#include <cassert>
+#include "basis/IdentityBasis.h"
 
-using namespace std;
 using namespace arma;
 
 namespace ReLe
 {
 
-LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisVector& bfs)
-    : ParametricRegressor(input_dim, 1), basis(bfs),
-      parameters(bfs.size(), fill::zeros)
+IdentityBasis::IdentityBasis(unsigned int index)
+    : index(index)
 {
-}
-
-LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisMatrix& bfs)
-    : ParametricRegressor(input_dim, bfs.cols()), basis(bfs),
-      parameters(bfs.rows(), fill::zeros)
-{
-}
-
-LinearApproximator::~LinearApproximator()
-{
-}
-
-vec LinearApproximator::operator()(const vec& input)
-{
-    arma::mat features = basis(input);
-    vec output = features.t()*parameters;
-    return output;
-}
-
-arma::vec LinearApproximator::diff(const vec& input)
-{
-    arma::mat features = basis(input);
-    return vectorise(features);
-}
 
 }
+
+
+
+IdentityBasis::~IdentityBasis()
+{
+
+}
+
+double IdentityBasis::operator()(const vec& input)
+{
+    return input[index];
+}
+
+void IdentityBasis::writeOnStream(std::ostream &out)
+{
+    out << "Identity" << std::endl;
+    out << index <<endl;
+}
+
+void IdentityBasis::readFromStream(std::istream &in)
+{
+    //TODO
+}
+
+}//end namespace

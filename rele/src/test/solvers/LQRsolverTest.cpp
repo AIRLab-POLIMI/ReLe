@@ -21,36 +21,40 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-#include "FiniteMDP.h"
-#include "SimpleChainGenerator.h"
-
-#include "BasicDynamicProgramming.h"
-
+#include "LQRsolver.h"
+#include "basis/IdentityBasis.h"
 
 using namespace ReLe;
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-    /* Create simple chain and optimal policy */
-    SimpleChainGenerator generator;
-    generator.generate(5, 2);
+    LQR lqr(2,1);
 
-    FiniteMDP mdp = generator.getMPD(0.9);
+    DenseBasisVector basis;
+    IdentityBasis* bf1 = new IdentityBasis(0);
+    IdentityBasis* bf2 = new IdentityBasis(1);
+    basis.push_back(bf1);
+    basis.push_back(bf2);
 
-    ValueIteration solver1(mdp, 0.01);
-    PolicyIteration solver2(mdp);
+    SparseBasisMatrix basisMatrix(basis, 2);
+    LinearApproximator regressor(basis.size(), basisMatrix);
 
-    solver1.solve();
-    solver2.solve();
+    LQRsolver solver(lqr, regressor);
+
+    solver.solve();
 
 
-    cout << "Value iteration results:" << endl;
-    cout << solver1.getPolicy().printPolicy();
+    DetLinearPolicy<DenseState>& policy = static_cast<DetLinearPolicy<DenseState>&>(solver.getPolicy());
 
-    cout << "Policy iteration results:" << endl;
-    cout << solver2.getPolicy().printPolicy();
+    cout << "Optimal Policy:" << endl;
+    cout << policy.getParameters() << endl;
 
-    return 0;
+
+    auto&& data = solver.test();
+
+    cout << "Final state:" << endl;
+    cout << data.back().back().xn << endl;
+
 }
+

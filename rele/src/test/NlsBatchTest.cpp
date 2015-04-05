@@ -98,8 +98,7 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy target(&target_meanRegressor, &stdRegressor);
     //---
 
-    PolicyEvalAgent
-    <DenseAction,DenseState,NormalStateDependantStddevPolicy > agent(behavioral);
+    PolicyEvalAgent<DenseAction,DenseState> agent(behavioral);
 
     ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
     CollectorStrategy<DenseAction, DenseState>* strat = new CollectorStrategy<DenseAction, DenseState>();

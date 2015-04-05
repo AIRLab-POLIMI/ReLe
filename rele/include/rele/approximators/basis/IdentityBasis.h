@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,36 +21,30 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_IDENTITYBASIS_H_
+#define INCLUDE_RELE_APPROXIMATORS_BASIS_IDENTITYBASIS_H_
 
-#include "FiniteMDP.h"
-#include "SimpleChainGenerator.h"
+#include "BasisFunctions.h"
 
-#include "BasicDynamicProgramming.h"
-
-
-using namespace ReLe;
-using namespace std;
-
-int main(int argc, char *argv[])
+namespace ReLe
 {
-    /* Create simple chain and optimal policy */
-    SimpleChainGenerator generator;
-    generator.generate(5, 2);
 
-    FiniteMDP mdp = generator.getMPD(0.9);
-
-    ValueIteration solver1(mdp, 0.01);
-    PolicyIteration solver2(mdp);
-
-    solver1.solve();
-    solver2.solve();
+class IdentityBasis : public BasisFunction
+{
+public:
+    IdentityBasis(unsigned int index);
+    virtual ~IdentityBasis();
+    double operator() (const arma::vec& input);
 
 
-    cout << "Value iteration results:" << endl;
-    cout << solver1.getPolicy().printPolicy();
+    virtual void writeOnStream (std::ostream& out);
+    virtual void readFromStream(std::istream& in);
 
-    cout << "Policy iteration results:" << endl;
-    cout << solver2.getPolicy().printPolicy();
+private:
+    unsigned int index;
+};
 
-    return 0;
 }
+
+
+#endif /* INCLUDE_RELE_APPROXIMATORS_BASIS_IDENTITYBASIS_H_ */

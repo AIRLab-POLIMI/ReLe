@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
     //---
 
-    PolicyEvalAgent<DenseAction, DenseState, NormalStateDependantStddevPolicy> agent(policy);
+    PolicyEvalAgent<DenseAction, DenseState> agent(policy);
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
     core.getSettings().episodeLenght = mdp.getSettings().horizon;
 

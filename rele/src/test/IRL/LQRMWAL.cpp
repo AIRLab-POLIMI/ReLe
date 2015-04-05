@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     vec param(1);
     param[0] = -0.6180;
     expertPolicy.setParameters(param);
-    PolicyEvalAgent<DenseAction, DenseState, DetLinearPolicy<DenseState>> expert(expertPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
