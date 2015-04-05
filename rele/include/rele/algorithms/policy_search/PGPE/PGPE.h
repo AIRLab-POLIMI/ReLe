@@ -42,7 +42,7 @@ class PGPE: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDist
     typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats> Base;
 public:
     PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
+         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
          bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
@@ -109,13 +109,21 @@ protected:
         Base::diffObjFunc /= Base::polCount;
 
 
-        //--------- save value of distgrad
-        Base::currentItStats->metaGradient = Base::diffObjFunc;
-        //---------
-
         if (useDirection)
             Base::diffObjFunc = arma::normalise(Base::diffObjFunc);
-        Base::diffObjFunc *= Base::step_length;
+        //--- Compute learning step
+        unsigned int nbParams = Base::dist.getParametersSize();
+        arma::mat eMetric = arma::eye(nbParams,nbParams);
+        arma::vec step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, eMetric);
+        //---
+
+        //--------- save value of distgrad
+        Base::currentItStats->metaGradient = Base::diffObjFunc;
+        Base::currentItStats->stepLength   = step_size;
+        //---------
+
+
+        Base::diffObjFunc *= step_size;
 
         //update meta distribution
         Base::dist.update(Base::diffObjFunc);

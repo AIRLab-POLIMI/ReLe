@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("portfolio", "PG");
     fm.createDir();
-    fm.cleanDir();
+//    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     Portfolio mdp;

@@ -141,8 +141,11 @@ REPSOutputData::REPSOutputData(unsigned int nbIndividual,
 
 void REPSOutputData::writeData(ostream& os)
 {
+    os << metaParams.n_elem << endl;
     CSVutils::vectorToCSV(metaParams, os);
 
+    os << individuals[0].Pparams.n_elem << endl;
+    os << individuals[0].Jvalues.n_elem << endl;
     os << individuals.size() << endl;
 
     for (auto& individual : individuals)

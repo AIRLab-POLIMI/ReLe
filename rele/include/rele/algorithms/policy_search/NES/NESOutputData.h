@@ -6,15 +6,15 @@
 namespace ReLe
 {
 
-class xNESIterationStats : public PGPEIterationStats
+class NESIterationStats : public PGPEIterationStats
 {
 
 public:
 
-    xNESIterationStats(unsigned int nbIndividual,
-                       unsigned int nbParams, unsigned int nbEvals);
+    NESIterationStats(unsigned int nbIndividual,
+                      unsigned int nbParams, unsigned int nbEvals);
 
-    virtual ~xNESIterationStats()
+    virtual ~NESIterationStats()
     {
     }
 

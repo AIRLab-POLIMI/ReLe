@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("lqr", "PG");
     fm.createDir();
-    fm.cleanDir();
+//    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)

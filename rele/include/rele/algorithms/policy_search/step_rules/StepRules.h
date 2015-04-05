@@ -39,7 +39,7 @@ public:
      * @param metric a predefined space metric
      * @return
      */
-    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric) = 0;
+    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false) = 0;
 
     /**
      * This function is called in order to reset the internal state of the class
@@ -59,7 +59,7 @@ public:
     {
     }
 
-    inline arma::vec stepLength(arma::vec& gradient, arma::mat& metric)
+    inline arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
     {
         return stepDirection;
     }
@@ -79,31 +79,41 @@ public:
     {
     }
 
-    inline arma::vec stepLength(arma::vec& gradient, arma::mat& metric)
+    inline arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
     {
-        //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
-        arma::mat tmp;
         double lambda, step_length;
-        int rnk = arma::rank(metric);
-        //        std::cout << rnk << " " << fisher << std::endl;
-        if (rnk == metric.n_rows)
+        if (inverse == true)
         {
-            arma::mat H = arma::solve(metric, gradient);
-            tmp = gradient.t() * H;
+            arma::mat tmp = gradient.t() * (metric * gradient);
             lambda = sqrt(tmp(0,0) / (4 * stepValue));
             lambda = std::max(lambda, 1e-8); // to avoid numerical problems
             step_length = 1.0 / (2.0 * lambda);
         }
         else
         {
-            arma::mat H = arma::pinv(metric);
-            tmp = gradient.t() * (H * gradient);
-            lambda = sqrt(tmp(0,0) / (4 * stepValue));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            step_length = 1.0 / (2.0 * lambda);
+            //--- Compute learning step
+            //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
+            arma::mat tmp;
+            int rnk = arma::rank(metric);
+            //        std::cout << rnk << " " << fisher << std::endl;
+            if (rnk == metric.n_rows)
+            {
+                arma::mat H = arma::solve(metric, gradient);
+                tmp = gradient.t() * H;
+                lambda = sqrt(tmp(0,0) / (4 * stepValue));
+                lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+                step_length = 1.0 / (2.0 * lambda);
+            }
+            else
+            {
+                arma::mat H = arma::pinv(metric);
+                tmp = gradient.t() * (H * gradient);
+                lambda = sqrt(tmp(0,0) / (4 * stepValue));
+                lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+                step_length = 1.0 / (2.0 * lambda);
+            }
+            //---
         }
-        //---
         arma::vec output(1);
         output(0) = step_length;
         return output;
