@@ -4,6 +4,9 @@ TODO:
 0b) definire classe per aggiornamento del gradiente (step length)
 0c) fissare precisione in tutti i file di output
 0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
+0e) aggiungere condizione di termine agli algoritmi
+0f) REPS con portfolio va in segmentation fault, come mai?
+
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
 3) interfaccia ALE (http://www.arcadelearningenvironment.org/) 

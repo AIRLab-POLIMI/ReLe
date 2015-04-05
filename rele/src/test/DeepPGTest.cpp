@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("deep", "PG");
     fm.createDir();
-    fm.cleanDir();
+//    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     DeepSeaTreasure mdp;

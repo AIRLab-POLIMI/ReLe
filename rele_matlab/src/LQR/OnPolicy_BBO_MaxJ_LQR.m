@@ -18,8 +18,8 @@ distributions{2} = 'chol';
 distributions{3} = 'diag';
 distributions{4} = 'log';
 
-nbEpisodes = 250;
-nbUpdates  = 100;
+nbEpisodes = 50;
+nbUpdates  = 200;
 stepLength = 0.01;
 
 domain = 'lqr';
@@ -87,53 +87,56 @@ for i = 3 : 4
     cmd = [prog, ' ', algorithms{i}, ' ', args];
     status = system(cmd);
     
-    %% show results
-    disp('Reading agent data...')
-    csv = csvread(['/tmp/ReLe/',domain,'/BBO/',domain,'_',algorithms{i},'_agentData.log']);
-    
-    disp('Organizing data...')
-    
-    index = 1;
-    ep = 1;
-    
-    clear data
-    
-    if strcmp(algorithms{i},'nes') || strcmp(algorithms{i},'enes')
-        while(index < size(csv, 1))
-            [data(ep), index] = ReadNESStatistics(csv, index);
-            ep = ep + 1;
-        end
-    elseif strcmp(algorithms{i},'reps')
-        while(index < size(csv, 1))
-            [data(ep), index] = ReadREPSStatistics(csv, index);
-            ep = ep + 1;
+    if (status==0)
+        %% show results
+        disp('Reading agent data...')
+        csv = csvread(['/tmp/ReLe/',domain,'/BBO/',domain,'_',algorithms{i},'_agentData.log']);
+        
+        disp('Organizing data...')
+        
+        index = 1;
+        ep = 1;
+        
+        clear data
+        
+        if strcmp(algorithms{i},'nes') || strcmp(algorithms{i},'enes')
+            while(index < size(csv, 1))
+                [data(ep), index] = ReadNESStatistics(csv, index);
+                ep = ep + 1;
+            end
+        elseif strcmp(algorithms{i},'reps')
+            while(index < size(csv, 1))
+                [data(ep), index] = ReadREPSStatistics(csv, index);
+                ep = ep + 1;
+            end
+            
         end
         
+        clearvars csv
+        
+        
+        J_history = [];
+        for o = 1:length(data)
+            J(o,count) = mean([data(o).policies.J]);
+            %             J_history = [J_history, data(k).J'];
+        end
+        testname{count} = [algorithms{i}];
+        count = count + 1;
     end
-    
-    clearvars csv
-    
-    
-    J_history = [];
-    for o = 1:length(data)
-        J(o,count) = mean([data(o).policies.J]);
-        %             J_history = [J_history, data(k).J'];
-    end
-    testname{count} = [algorithms{i}];
-    count = count + 1;
 end
 % hold off;
 %%
 figure(2);
 hold on;
-for i = 1:nbtests
+for i = 1:length(testname)
     plot(smooth(J(:,i)), 'Linewidth', 1.5)
     %     plot(J(:,i), 'Linewidth', 1.5)
-    %     disp(algorithms{i})
+    %     disp(testname{i})
+    %     axis([0,nbUpdates,-400,-100])
     %     pause
 end
 grid on;
-title(['LQR, episodes:' num2str(nbEpisodes),', iter:',num2str(nbUpdates)]);
+title([domain,', episodes:' num2str(nbEpisodes),', iter:',num2str(nbUpdates)]);
 legend(testname, 'location', 'southeast');
 hold off;
 

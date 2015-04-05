@@ -177,7 +177,8 @@ int main(int argc, char *argv[])
 
     FileManager fm("nls", "BBO");
     fm.createDir();
-    fm.cleanDir();
+    //    fm.cleanDir();
+    std::cout << std::setprecision(OS_PRECISION);
 
     NLS mdp;
     //with these settings
@@ -265,7 +266,7 @@ int main(int argc, char *argv[])
         PGPE<DenseAction, DenseState>* agent = new PGPE<DenseAction, DenseState>
         (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "lqr_pgpe_%s.log", polType);
+        sprintf(outputname, "nls_pgpe_%s.log", polType);
     }
     else if (strcmp(alg, "nes") == 0)
     {
@@ -273,7 +274,7 @@ int main(int argc, char *argv[])
         NES<DenseAction, DenseState>* agent = new NES<DenseAction, DenseState>
         (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "lqr_nes_%s.log", polType);
+        sprintf(outputname, "nls_nes_%s.log", polType);
     }
     else if (strcmp(alg, "enes") == 0)
     {
@@ -281,22 +282,22 @@ int main(int argc, char *argv[])
         arma::vec mean(nparams, fill::zeros);
         arma::mat cov(nparams, nparams, arma::fill::eye);
         mat cholMtx = chol(cov);
-        ParametricCholeskyNormal distr(mean, cholMtx);
+        ParametricCholeskyNormal* distr = new ParametricCholeskyNormal(mean, cholMtx);
         eNES<DenseAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<DenseAction, DenseState, ParametricCholeskyNormal>
-        (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        (*distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "lqr_enes.log");
+        sprintf(outputname, "nls_enes.log");
     }
     else if (strcmp(alg, "reps") == 0)
     {
         arma::vec mean(nparams, fill::zeros);
         arma::mat cov(nparams, nparams, arma::fill::eye);
-        ParametricNormal distr(mean, cov);
+        ParametricNormal* distr= new ParametricNormal(mean, cov);
         REPS<DenseAction, DenseState, ParametricNormal>* agent = new REPS<DenseAction, DenseState, ParametricNormal>
-        (distr,policy,nbepperpol,nbpolperupd);
+        (*distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "lqr_reps.log");
+        sprintf(outputname, "nls_reps.log");
     }
     else
     {
@@ -331,7 +332,7 @@ int main(int argc, char *argv[])
             {
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
                 cout << "### " << p << "% ###" << endl;
-//                cout << dist->getParameters().t();
+                //                cout << dist->getParameters().t();
                 core->getSettings().testEpisodeN = 100;
                 arma::vec J = core->runBatchTest();
                 cout << "mean score: " << J(0) << endl;
@@ -340,20 +341,20 @@ int main(int argc, char *argv[])
         }
     }
 
-//    int nbTestEpisodes = 1000;
-//    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
-//    core->getSettings().testEpisodeN = nbTestEpisodes;
-//    cout << core->runBatchTest() << endl;
+    //    int nbTestEpisodes = 1000;
+    //    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
+    //    core->getSettings().testEpisodeN = nbTestEpisodes;
+    //    cout << core->runBatchTest() << endl;
 
-//    //--- collect some trajectories
-//    core->getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-//        fm.addPath("NlsFinal.log"),
-//        WriteStrategy<DenseAction, DenseState>::TRANS,
-//        true /*delete file*/
-//    );
-//    for (int n = 0; n < 100; ++n)
-//        core->runTestEpisode();
-//    //---
+    //    //--- collect some trajectories
+    //    core->getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+    //        fm.addPath("NlsFinal.log"),
+    //        WriteStrategy<DenseAction, DenseState>::TRANS,
+    //        true /*delete file*/
+    //    );
+    //    for (int n = 0; n < 100; ++n)
+    //        core->runTestEpisode();
+    //    //---
 
     delete dist;
     return 0;
