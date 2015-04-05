@@ -38,7 +38,7 @@
 namespace ReLe
 {
 
-class PortfolioSettings : public EnvirormentSettings
+class PortfolioSettings : public EnvironmentSettings
 {
 public:
     PortfolioSettings();

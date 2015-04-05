@@ -39,7 +39,7 @@
 namespace ReLe
 {
 
-class SwingUpSettings : public EnvirormentSettings
+class SwingUpSettings : public EnvironmentSettings
 {
 public:
     SwingUpSettings();

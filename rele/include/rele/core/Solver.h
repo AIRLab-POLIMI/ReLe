@@ -28,8 +28,6 @@
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 
-#include <iostream>
-
 #include "Policy.h"
 
 namespace ReLe

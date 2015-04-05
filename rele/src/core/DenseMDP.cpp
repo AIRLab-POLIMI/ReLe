@@ -40,7 +40,7 @@ void DenseMDP::setupEnvirorment(size_t stateSize, unsigned int actionN, size_t r
                                 bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                                 double gamma)
 {
-    EnvirormentSettings& task = getWritableSettings();
+    EnvironmentSettings& task = getWritableSettings();
     task.isFiniteHorizon = isFiniteHorizon;
     task.horizon = horizon;
     task.gamma = gamma;

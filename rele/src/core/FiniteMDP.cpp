@@ -89,7 +89,7 @@ void FiniteMDP::chekMatricesDimensions(const arma::cube& P, const arma::cube& R,
 void FiniteMDP::setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
                                  double gamma, const arma::cube& P)
 {
-    EnvirormentSettings& task = getWritableSettings();
+    EnvironmentSettings& task = getWritableSettings();
     task.isFiniteHorizon = isFiniteHorizon;
     task.horizon = horizon;
     task.gamma = gamma;
