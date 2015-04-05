@@ -276,13 +276,18 @@ protected:
             nat_grad = invFisherMtx*Base::diffObjFunc;
             arma::mat ffull(invFisherMtx);
             step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, ffull, true);
+            if (std::isnan(step_size(0)))
+            {
+                std::cerr << "Something has gone wrong in eNES" << std::endl;
+                abort();
+            }
         }
 
         //        std::cout << nat_grad.t();
 
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
-        Base::currentItStats->fisherMtx = invFisherMtx;
+        Base::currentItStats->fisherMtx    = invFisherMtx;
         Base::currentItStats->stepLength   = step_size;
         //---------
 

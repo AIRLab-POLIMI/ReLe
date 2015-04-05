@@ -302,10 +302,10 @@ int main(int argc, char *argv[])
 
     ReLe::Core<FiniteAction, DenseState> core(mdp, *agent);
     WriteStrategy<FiniteAction, DenseState> wStrategy(
-                fm.addPath(outputname),
-                WriteStrategy<FiniteAction, DenseState>::AGENT,
-                true /*delete file*/
-                );
+        fm.addPath(outputname),
+        WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
     core.getSettings().loggerStrategy = &wStrategy;
 
     int horiz = mdp.getSettings().horizon;

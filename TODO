@@ -3,6 +3,7 @@ TODO:
 0a) controllare derivate politiche
 0b) definire classe per aggiornamento del gradiente (step length)
 0c) fissare precisione in tutti i file di output
+0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
 3) interfaccia ALE (http://www.arcadelearningenvironment.org/) 

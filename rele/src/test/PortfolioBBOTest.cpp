@@ -249,7 +249,7 @@ int main(int argc, char *argv[])
     {
         bool usebaseline = true;
         PGPE<FiniteAction, DenseState>* agent = new PGPE<FiniteAction, DenseState>
-                (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "lqr_pgpe_%s.log", polType);
     }
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
     {
         bool usebaseline = true;
         NES<FiniteAction, DenseState>* agent = new NES<FiniteAction, DenseState>
-                (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "lqr_nes_%s.log", polType);
     }
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
         mat cholMtx = chol(cov);
         ParametricCholeskyNormal distr(mean, cholMtx);
         eNES<FiniteAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<FiniteAction, DenseState, ParametricCholeskyNormal>
-                (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
+        (distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "lqr_enes.log");
     }
@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
         arma::mat cov(nparams, nparams, arma::fill::eye);
         ParametricNormal distr(mean, cov);
         REPS<FiniteAction, DenseState, ParametricNormal>* agent = new REPS<FiniteAction, DenseState, ParametricNormal>
-                (distr,policy,nbepperpol,nbpolperupd);
+        (distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "lqr_reps.log");
@@ -291,10 +291,10 @@ int main(int argc, char *argv[])
     }
 
     WriteStrategy<FiniteAction, DenseState> wStrategy(
-                fm.addPath(outputname),
-                WriteStrategy<FiniteAction, DenseState>::AGENT,
-                true /*delete file*/
-                );
+        fm.addPath(outputname),
+        WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
     core->getSettings().loggerStrategy = &wStrategy;
 
     int horiz = mdp.getSettings().horizon;
