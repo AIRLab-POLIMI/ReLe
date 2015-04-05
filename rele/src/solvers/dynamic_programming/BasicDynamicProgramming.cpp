@@ -21,7 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BasicDynamicProgramming.h"
+#include "dynamic_programming/BasicDynamicProgramming.h"
+
 #include "CSV.h"
 #include "Core.h"
 

@@ -73,36 +73,6 @@ private:
     double max;
 };
 
-class KillerBasis : public BasisFunction
-{
-public:
-    KillerBasis(double limit) : limit(limit)
-    {
-
-    }
-
-    virtual double operator()(const arma::vec& input)
-    {
-        if(abs(input[0]) < limit)
-            return -abs(input[0]);
-        else
-            return 0;
-    }
-
-    virtual void writeOnStream(std::ostream& out)
-    {
-
-    }
-
-    virtual void readFromStream(std::istream& in)
-    {
-
-    }
-
-private:
-    double limit;
-};
-
 int main(int argc, char *argv[])
 {
     /* Learn lqr correct policy */

@@ -22,10 +22,10 @@
  */
 
 
+#include "dynamic_programming/BasicDynamicProgramming.h"
 #include "FiniteMDP.h"
 #include "SimpleChainGenerator.h"
 
-#include "BasicDynamicProgramming.h"
 
 
 using namespace ReLe;
