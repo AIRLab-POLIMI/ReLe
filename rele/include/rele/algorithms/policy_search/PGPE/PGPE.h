@@ -33,6 +33,7 @@
 
 #include "PGPEOutputData.h"
 
+//#define PGPE_SINGLE_BASELINE
 namespace ReLe
 {
 
