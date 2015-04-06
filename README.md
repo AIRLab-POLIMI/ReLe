@@ -7,6 +7,7 @@ External dependencies
 To properly compile the ReLe library you must install
 - [Armadillo](http://arma.sourceforge.net/)
 - [NLopt](http://ab-initio.mit.edu/wiki/index.php/NLopt)
+- [Boost](http://www.boost.org/) (>= 1.53)
 
 COMPILING
 ---------
