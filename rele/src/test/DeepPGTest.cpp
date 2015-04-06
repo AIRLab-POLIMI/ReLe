@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("deep", "PG");
     fm.createDir();
-    fm.cleanDir();
+//    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     DeepSeaTreasure mdp;
@@ -300,14 +300,13 @@ int main(int argc, char *argv[])
         abort();
     }
 
-
-
     ReLe::Core<FiniteAction, DenseState> core(mdp, *agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
+    WriteStrategy<FiniteAction, DenseState> wStrategy(
         fm.addPath(outputname),
-        WriteStrategy<FiniteAction, DenseState>::ALL,
+        WriteStrategy<FiniteAction, DenseState>::AGENT,
         true /*delete file*/
     );
+    core.getSettings().loggerStrategy = &wStrategy;
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
@@ -353,5 +352,12 @@ int main(int argc, char *argv[])
     //        core.runTestEpisode();
     //    //---
 
+    delete agent;
+    delete pf0;
+    delete pfs1;
+    delete pfs2;
+    delete pfs1s2;
+    delete d2si;
+    delete dsi;
     return 0;
 }

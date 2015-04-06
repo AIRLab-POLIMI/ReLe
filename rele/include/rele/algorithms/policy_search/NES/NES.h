@@ -29,21 +29,19 @@
 #include "DifferentiableNormals.h"
 #include "ArmadilloPDFs.h"
 
-#define SIMONEUPDATE
-
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
 {
 
-    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats> Base;
 public:
     NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-        unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
+        unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
         bool baseline = true, int reward_obj = 0)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, xNESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {    }
 
@@ -116,45 +114,36 @@ protected:
         Base::diffObjFunc /= Base::polCount;
         fisherMtx /= Base::polCount;
 
+
+        //--- Compute learning step
+
+        arma::vec step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, fisherMtx);
+
         arma::mat tmp;
         arma::vec nat_grad;
         int rnk = arma::rank(fisherMtx);
         if (rnk == fisherMtx.n_rows)
         {
             arma::mat H = arma::solve(fisherMtx, Base::diffObjFunc);
-#ifndef SIMONEUPDATE
-            tmp = H;
-            nat_grad = tmp*Base::step_length;
-#else
-            tmp = Base::diffObjFunc.t() * H;
-            double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
-#endif
+            nat_grad = arma::solve(fisherMtx, Base::diffObjFunc);
         }
         else
         {
             std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
             arma::mat H = arma::pinv(fisherMtx);
-#ifndef SIMONEUPDATE
-            tmp = H * Base::diffObjFunc;
-            nat_grad = tmp*Base::step_length;
-#else
-            tmp = Base::diffObjFunc.t() * (H * Base::diffObjFunc);
-            double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            nat_grad = H * Base::diffObjFunc / (2 * lambda);
-#endif
+            nat_grad = H * Base::diffObjFunc;
         }
 
 
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
         Base::currentItStats->fisherMtx = fisherMtx;
+        Base::currentItStats->stepLength   = step_size;
         //---------
 
         //update meta distribution
-        Base::dist.update(nat_grad);
+        arma::vec newvalues = nat_grad * step_size;
+        Base::dist.update(newvalues);
 
 
         // std::cout << "nat_grad: " << nat_grad.t();
@@ -180,15 +169,15 @@ protected:
  * Exact NES (NES with closed-form FIM)
  */
 template<class ActionC, class StateC, class DistributionC>
-class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
 {
-    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats> Base;
 
 public:
     eNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies, double step_length,
+         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
          bool baseline = true, int reward_obj = 0)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, xNESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
     }
@@ -259,62 +248,52 @@ protected:
         }
         Base::diffObjFunc /= Base::polCount;
 
+
+        //--- Compute learning step
+
+        arma::vec step_size;
         arma::vec nat_grad;
         arma::sp_mat invFisherMtx = Base::dist.inverseFIM();
         if (invFisherMtx.n_elem == 0)
         {
             arma::sp_mat spFisherMtx = Base::dist.FIM();
-            arma::mat tmp, fisherMtx(spFisherMtx);
+            arma::mat fisherMtx(spFisherMtx);
             int rnk = arma::rank(fisherMtx);
             if (rnk == fisherMtx.n_rows)
             {
-                arma::mat H = arma::solve(fisherMtx, Base::diffObjFunc);
-#ifndef SIMONEUPDATE
-                tmp = H;
-                nat_grad = tmp*Base::step_length;
-#else
-                tmp = Base::diffObjFunc.t() * H;
-                double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
-                lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-                nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
-#endif
+                nat_grad = arma::solve(fisherMtx, Base::diffObjFunc);
             }
             else
             {
                 std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisherMtx.n_rows << std::endl;
                 arma::mat H = arma::pinv(fisherMtx);
-#ifndef SIMONEUPDATE
-                tmp = H * Base::diffObjFunc;
-                nat_grad = tmp*Base::step_length;
-#else
-                tmp = Base::diffObjFunc.t() * (H * Base::diffObjFunc);
-                double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
-                lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-                nat_grad = arma::solve(fisherMtx, Base::diffObjFunc) / (2 * lambda);
-#endif
+                nat_grad = H * Base::diffObjFunc;
             }
+            step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, fisherMtx);
         }
         else
         {
-#ifndef SIMONEUPDATE
-            nat_grad = invFisherMtx * Base::diffObjFunc * Base::step_length;
-#else
-            arma::mat tmp = Base::diffObjFunc.t() * (invFisherMtx * Base::diffObjFunc);
-            double lambda = sqrt(tmp(0,0) / (4 * Base::step_length));
-            lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-            nat_grad = (invFisherMtx*Base::diffObjFunc) / (2 * lambda);
-#endif
+            nat_grad = invFisherMtx*Base::diffObjFunc;
+            arma::mat ffull(invFisherMtx);
+            step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, ffull, true);
         }
 
         //        std::cout << nat_grad.t();
+        if (std::isnan(nat_grad(0)) || std::isnan(step_size(0)))
+        {
+            std::cerr << "Something has gone wrong in eNES" << std::endl;
+            abort();
+        }
 
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
-        Base::currentItStats->fisherMtx = invFisherMtx;
+        Base::currentItStats->fisherMtx    = invFisherMtx;
+        Base::currentItStats->stepLength   = step_size;
         //---------
 
         //update meta distribution
-        Base::dist.update(nat_grad);
+        arma::vec newvalues = nat_grad * step_size;
+        Base::dist.update(newvalues);
 
 
         // std::cout << "nat_grad: " << nat_grad.t();

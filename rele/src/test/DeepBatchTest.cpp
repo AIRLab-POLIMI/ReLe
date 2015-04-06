@@ -169,5 +169,11 @@ int main(int argc, char *argv[])
     }
 
     delete strat;
+    delete pf0;
+    delete pfs1;
+    delete pfs2;
+    delete pfs1s2;
+    delete d2si;
+    delete dsi;
     return 0;
 }

@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("nls", "PG");
     fm.createDir();
-    fm.cleanDir();
+//    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     NLS mdp;

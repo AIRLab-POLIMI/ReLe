@@ -10,7 +10,7 @@ namespace ReLe
 class PGPEPolicyIndividual : public BlackBoxPolicyIndividual
 {
 public:
-    arma::mat diffLogDistr;
+    arma::vec diffLogDistr;
 
 public:
 
@@ -26,30 +26,6 @@ public:
         stat.writeToStream(out);
         return out;
     }
-    friend std::istream& operator>>(std::istream& in, PGPEPolicyIndividual& stat)
-    {
-        int i, nbPolPar, nbEval;
-        in >> nbPolPar;
-        stat.Pparams = arma::vec(nbPolPar);
-        for (i = 0; i < nbPolPar; ++i)
-            in >> stat.Pparams[i];
-        in >> nbEval;
-        stat.Jvalues = arma::vec(nbEval);
-        for (i = 0; i < nbEval; ++i)
-            in >> stat.Jvalues[i];
-        int nmetadist;
-        in >> nmetadist;
-        stat.diffLogDistr = arma::mat(nmetadist, nbEval);
-        for (int i = 0; i < nbEval; ++i)
-        {
-            for (int j = 0; j < nmetadist; ++j)
-            {
-                in >> stat.diffLogDistr(j,i);
-            }
-        }
-        return in;
-    }
-
 };
 
 class PGPEIterationStats : public BlackBoxOutputData<PGPEPolicyIndividual>
@@ -75,6 +51,7 @@ public:
 
 public:
     arma::vec metaGradient;
+    arma::vec stepLength;
 
 };
 

@@ -30,6 +30,7 @@
 #include "Basics.h"
 #include "BasicFunctions.h"
 #include "policy_search/BlackBoxOutputData.h"
+#include "policy_search/step_rules/StepRules.h"
 #include <cassert>
 #include <iomanip>
 
@@ -201,11 +202,11 @@ public:
     GradientBlackBoxAlgorithm(DistributionC& dist,
                               ParametricPolicy<ActionC, StateC>& policy,
                               unsigned int nbEpisodes, unsigned int nbPolicies,
-                              double step_length, bool baseline = true, int reward_obj = 0) :
+                              StepRule& step_length, bool baseline = true, int reward_obj = 0) :
         BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
             dist, policy, nbEpisodes, nbPolicies, baseline,
             reward_obj),
-        step_length(step_length)
+        stepLengthRule(step_length)
     {
     }
 
@@ -215,7 +216,7 @@ public:
 
 protected:
 
-    double step_length;
+    StepRule& stepLengthRule;
     arma::vec diffObjFunc;
     std::vector<arma::vec> history_dlogsist;
 };
