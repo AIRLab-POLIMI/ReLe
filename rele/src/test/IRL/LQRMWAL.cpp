@@ -120,16 +120,13 @@ int main(int argc, char *argv[])
         }
     }
 
+    LinearApproximator rewardRegressor(mdp.getSettings().continuosStateDim, rewardBasis);
+
 
     //Compute expert feature expectations
     arma::vec muE = collection.data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
 
-    // Create a parametric MDP
-    LinearApproximator rewardRegressor(1, rewardBasis);
-    ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
-
     //Create an agent to solve the mdp direct problem
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, rewardBasis);
     DetLinearPolicy<DenseState> policy(&expertRegressor);
     int nparams = basis.size();
     arma::vec mean(nparams, fill::ones);
@@ -145,16 +142,14 @@ int main(int argc, char *argv[])
     int nbUpdates = 600;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
 
-    Core<DenseAction, DenseState> core(prMdp, agent);
-    core.getSettings().episodeLenght = 50;
-    core.getSettings().episodeN = episodes;
-    core.getSettings().testEpisodeN = 1000;
+    IRLAgentSolver<DenseAction, DenseState> solver(agent, mdp, policy, rewardBasis, rewardRegressor);
+    solver.setLearningParams(episodes, 50);
+    solver.setTestParams(1000, 50);
 
     //Run MWAL
     unsigned int T = 30;
-    double gamma = prMdp.getSettings().gamma;
 
-    MWAL<DenseAction, DenseState> irlAlg(rewardBasis, rewardRegressor, core, T, gamma, muE);
+    MWAL<DenseAction, DenseState> irlAlg(T, muE, solver);
     irlAlg.run();
     arma::vec w = irlAlg.getWeights();
 
