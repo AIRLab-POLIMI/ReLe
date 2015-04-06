@@ -34,7 +34,7 @@ namespace ReLe
 {
 
 
-class DynamicProgrammingAlgorithm : Solver<FiniteAction, FiniteState>
+class DynamicProgrammingAlgorithm : public Solver<FiniteAction, FiniteState>
 {
 public:
     DynamicProgrammingAlgorithm(FiniteMDP& mdp);

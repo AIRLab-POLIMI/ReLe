@@ -26,6 +26,7 @@
 
 #include "FiniteMDP.h"
 #include "SimpleChainGenerator.h"
+#include "dynamic_programming/BasicDynamicProgramming.h"
 
 #include "td/SARSA.h"
 #include "q_policy/e_Greedy.h"
@@ -35,40 +36,6 @@
 #include "algorithms/MWAL.h"
 
 using namespace ReLe;
-
-class SimpleChainOptimalPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
-{
-public:
-    virtual unsigned int operator()(size_t state)
-    {
-        if(state > 1)
-            return 1;
-        else
-            return 0;
-    }
-
-    virtual double operator()(size_t state, unsigned int action)
-    {
-        return 0;
-    }
-
-    inline virtual std::string getPolicyName()
-    {
-        return "Simple chain optimal";
-    }
-
-    virtual std::string getPolicyHyperparameters()
-    {
-        return "";
-    }
-
-    virtual std::string printPolicy()
-    {
-        return "";
-    }
-
-    virtual ~SimpleChainOptimalPolicy() {}
-};
 
 class SimpleChainBasis : public BasisFunction
 {
@@ -112,16 +79,13 @@ int main(int argc, char *argv[])
 
     FiniteMDP mdp = generator.getMPD(0.9);
 
-    SimpleChainOptimalPolicy expertPolicy;
-    PolicyEvalAgent<FiniteAction, FiniteState> expert(expertPolicy);
+    PolicyIteration expertSolver(mdp);
+    expertSolver.solve();
+    PolicyEvalAgent<FiniteAction, FiniteState> expert(expertSolver.getPolicy());
 
     /* Generate expert dataset */
-    Core<FiniteAction, FiniteState> expertCore(mdp, expert);
-    CollectorStrategy<FiniteAction, FiniteState> collection;
-    expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = 50;
-    expertCore.getSettings().testEpisodeN = 1000;
-    expertCore.runTestEpisodes();
+    expertSolver.setTestParams(1000, 50);
+    Dataset<FiniteAction, FiniteState>&& data = expertSolver.test();
 
 
     /* Learn weight with MWAL */
@@ -137,7 +101,7 @@ int main(int argc, char *argv[])
     LinearApproximator rewardRegressor(1, rewardBasis);
 
     //Compute expert feature expectations
-    arma::vec muE = collection.data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
+    arma::vec muE = data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
 
     //Create an agent to solve the mdp direct problem
     e_Greedy policy;
