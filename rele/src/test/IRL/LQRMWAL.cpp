@@ -52,7 +52,7 @@ public:
     {
         double value = input[index];
         if(value > min && value < max)
-            return -abs(value);
+            return +1.0;
         else
             return 0;
     }
@@ -129,8 +129,8 @@ int main(int argc, char *argv[])
     //Create an agent to solve the mdp direct problem
     DetLinearPolicy<DenseState> policy(&expertRegressor);
     int nparams = basis.size();
-    arma::vec mean(nparams, fill::ones);
-    mean *= -0.1;
+    arma::vec mean(nparams, fill::zeros);
+    expertRegressor.setParameters(mean);
 
     int nbepperpol = 1, nbpolperupd = 100;
     arma::mat cov(nparams, nparams, arma::fill::eye);
