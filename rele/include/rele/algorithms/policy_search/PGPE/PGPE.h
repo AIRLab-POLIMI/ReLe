@@ -46,7 +46,7 @@ public:
          bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
-        b_num(0.0), b_den(0.0), useDirection(false)
+        useDirection(false)
     {
     }
 
@@ -69,6 +69,14 @@ protected:
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
         Base::history_dlogsist.assign(Base::nbPoliciesToEvalMetap, Base::diffObjFunc);
         Base::history_J = arma::vec(Base::nbPoliciesToEvalMetap, arma::fill::zeros);
+
+#ifdef PGPE_SINGLE_BASELINE
+        b_num = 0.0;
+        b_den = 0.0;
+#else
+        bm_num = arma::vec(dp, arma::fill::zeros);
+        bm_den = arma::vec(dp, arma::fill::zeros);
+#endif
     }
 
     virtual void afterPolicyEstimate()
@@ -82,12 +90,19 @@ protected:
         arma::vec dlogdist = Base::dist.difflog(theta); //\nabla \log D(\theta|\rho)
 
         //compute baseline
+        Base::history_dlogsist[Base::polCount] = dlogdist; //save gradients for late processing
+
+#ifdef PGPE_SINGLE_BASELINE
         double norm2G2 = arma::norm(dlogdist,2);
         norm2G2 *= norm2G2;
-        Base::history_dlogsist[Base::polCount] = dlogdist; //save gradients for late processing
         b_num += Base::Jpol * norm2G2;
         b_den += norm2G2;
-
+#else
+        //multi-baseline
+        arma::vec dlogdist2 = (dlogdist % dlogdist);
+        bm_num += Base::Jpol * dlogdist2;
+        bm_den += dlogdist2;
+#endif
 
         //--------- save value of distgrad
         Base::currentItStats->individuals[Base::polCount].diffLogDistr = dlogdist;
@@ -98,13 +113,38 @@ protected:
     {
 
         //compute baseline
+#ifdef PGPE_SINGLE_BASELINE
         double baseline = (b_den != 0 && Base::useBaseline) ? b_num/b_den : 0.0;
+#else
+        //compute baseline
+        arma::vec baseline = bm_num;
+        if (Base::useBaseline)
+        {
+            for (int i = 0, ie = baseline.n_elem; i < ie; ++i)
+                if (bm_den[i] != 0)
+                {
+                    baseline[i] /= bm_den[i];
+                }
+                else
+                {
+                    baseline[i] = 0;
+                }
+        }
+        else
+        {
+            baseline.zeros();
+        }
+#endif
 
         Base::diffObjFunc.zeros();
         //Estimate gradient and Fisher information matrix
         for (int i = 0; i < Base::polCount; ++i)
         {
+#ifdef PGPE_SINGLE_BASELINE
             Base::diffObjFunc += Base::history_dlogsist[i] * (Base::history_J[i] - baseline);
+#else
+            Base::diffObjFunc += (Base::history_dlogsist[i]) % (Base::history_J[i] - baseline);
+#endif
         }
         Base::diffObjFunc /= Base::polCount;
 
@@ -133,12 +173,25 @@ protected:
         //            std::cout << "Parameters:\n" << std::endl;
         //            std::cout << dist.getParameters() << std::endl;
 
+#ifdef PGPE_SINGLE_BASELINE
         b_num = 0.0;
         b_den = 0.0;
+#else
+        for (int i = 0, ie = baseline.n_elem; i < ie; ++i)
+        {
+            bm_num(i) = 0.0;
+            bm_den(i) = 0.0;
+        }
+#endif
     }
 
 private:
+
+#ifdef PGPE_SINGLE_BASELINE
     double b_num, b_den;
+#else
+    arma::vec bm_num, bm_den;
+#endif
     bool useDirection;
 };
 
