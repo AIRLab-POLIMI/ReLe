@@ -27,6 +27,7 @@
 #include "BasisFunctions.h"
 #include "LinearApproximator.h"
 #include "IRLAlgorithm.h"
+#include "IRLSolver.h"
 
 namespace ReLe
 {
@@ -35,12 +36,11 @@ template<class ActionC, class StateC>
 class MWAL : public IRLAlgorithm<ActionC, StateC>
 {
 public:
-    MWAL(AbstractBasisVector& basis, LinearApproximator& regressor, Core<ActionC, StateC>& core,
-         unsigned int T, double gamma, arma::vec& muE)
-        : basis(basis), regressor(regressor), core(core), T(T), gamma(gamma), muE(muE)
+    MWAL(unsigned int T, arma::vec& muE, IRLSolver<ActionC, StateC>& solver)
+        : solver(solver), T(T), gamma(solver.getGamma()), muE(muE)
     {
         //Compute beta parameter
-        unsigned int k = basis.size();
+        unsigned int k = solver.getBasisSize();
         logBeta = std::log(1.0 / (1 + std::sqrt(2.0*std::log(k)/T)));
 
         //initialize W(i) = 1 forall i
@@ -57,30 +57,26 @@ public:
             //Compute current iteration weights
             std::cout << "Computing weights..."<< std::endl;
             arma::vec w = W / arma::sum(W);
-            regressor.setParameters(w);
+            solver.setWeights(w);
+
             std::cout << "w: "<< std::endl << w.t() << std::endl;
 
             //compute optimal policy
-            std::cout << "Computing optimal policy..."<< std::endl;
-            EmptyStrategy<ActionC, StateC> emptyStrategy;
-            core.getSettings().loggerStrategy = &emptyStrategy;
-            core.runEpisodes();
+            solver.solve();
 
             //compute feature expectations
             std::cout << "Computing features expectations..."<< std::endl;
-            CollectorStrategy<ActionC, StateC> strategy;
-            core.getSettings().loggerStrategy = &strategy;
-            core.runTestEpisodes();
+            const arma::vec& mu = solver.computeFeaturesExpectations();
 
-            const arma::vec& mu = strategy.data.computefeatureExpectation(basis, gamma);
-            //strategy.data.writeToStream(std::cout);
             std::cout << "mu: "<< std::endl << mu.t() << std::endl;
             std::cout << "muE: "<< std::endl << muE.t() << std::endl;
             std::cout << "deltaMuNorm: " << arma::norm(mu - muE) << std::endl;
 
             //update W
             std::cout << "Updating W..."<< std::endl;
+
             W = W % arma::exp(logBeta * G(mu));
+
             std::cout << "W: "<< std::endl << W.t() << std::endl;
 
         }
@@ -114,10 +110,8 @@ private:
     const double gamma;
     const arma::vec& muE;
 
-    //Data needed to compute policy and feature expectation
-    AbstractBasisVector& basis;
-    LinearApproximator& regressor;
-    Core<ActionC, StateC>& core;
+    //Solver
+    IRLSolver<ActionC, StateC>& solver;
 
     //Algorithm data
     double logBeta;

@@ -134,28 +134,24 @@ int main(int argc, char *argv[])
         rewardBasis.push_back(bf);
     }
 
+    LinearApproximator rewardRegressor(1, rewardBasis);
+
     //Compute expert feature expectations
     arma::vec muE = collection.data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
-
-    // Create a parametric MDP
-    LinearApproximator rewardRegressor(1, rewardBasis);
-    ParametricRewardMDP<FiniteAction, FiniteState> prMdp(mdp, rewardRegressor);
 
     //Create an agent to solve the mdp direct problem
     e_Greedy policy;
     SARSA agent(policy);
 
     //Setup the solver
-    Core<FiniteAction, FiniteState> core(prMdp, agent);
-    core.getSettings().episodeLenght = 1000;
-    core.getSettings().episodeN = 1000;
-    core.getSettings().testEpisodeN = 1000;
+    IRLAgentSolver<FiniteAction, FiniteState> solver(agent, mdp, policy, rewardBasis, rewardRegressor);
+    solver.setLearningParams(1000, 1000);
+    solver.setTestParams(100, 10000);
 
     //Run MWAL
     unsigned int T = 20;
-    double gamma = prMdp.getSettings().gamma;
 
-    MWAL<FiniteAction, FiniteState> irlAlg(rewardBasis, rewardRegressor, core, T, gamma, muE);
+    MWAL<FiniteAction, FiniteState> irlAlg(T,  muE, solver);
     irlAlg.run();
     arma::vec w = irlAlg.getWeights();
 

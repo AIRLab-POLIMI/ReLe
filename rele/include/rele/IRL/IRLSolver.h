@@ -31,11 +31,13 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class IRLSolver : public Solver<ActionC, StateC>
+class IRLSolver: public Solver<ActionC, StateC>
 {
 public:
-    IRLSolver(Environment<ActionC, StateC>& mdp, AbstractBasisMatrix& features, ParametricRegressor& rewardRegressor)
-        : prMdp(mdp, rewardRegressor), features(features), rewardRegressor(rewardRegressor)
+    IRLSolver(Environment<ActionC, StateC>& mdp, AbstractBasisMatrix& features,
+              ParametricRegressor& rewardRegressor) :
+        prMdp(mdp, rewardRegressor), features(features),
+        rewardRegressor(rewardRegressor)
     {
 
     }
@@ -45,10 +47,20 @@ public:
         rewardRegressor.setParameters(weights);
     }
 
+    inline unsigned int getBasisSize()
+    {
+    	return features.rows();
+    }
+
+    inline double getGamma()
+    {
+    	return prMdp.getSettings().gamma;
+    }
+
     arma::mat computeFeaturesExpectations()
     {
-        Dataset<ActionC, StateC>&& data = this->test();
-        return data.computefeatureExpectation(features, mdp.getSettings().gamma);
+        Dataset<ActionC, StateC> && data = this->test();
+        return data.computefeatureExpectation(features, prMdp.getSettings().gamma);
     }
 
 protected:
@@ -58,40 +70,62 @@ protected:
 
 };
 
-
-/*template<class ActionC, class StateC, class SolverC>
-class IRLOracleSolver : public IRLSolver<ActionC, StateC>
+template<class ActionC, class StateC>
+class IRLAgentSolver: public IRLSolver<ActionC, StateC>
 {
-    static_assert(std::is_base_of<Solver<ActionC, StateC>, SolverC>::value, "Not valid Solver class as template parameter");
-public:
-    IRLOracleSolver(Solver<ActionC, StateC>& solver, Environment<ActionC, StateC>& mdp,
-                    AbstractBasisMatrix& features, ParametricRegressor& rewardRegressor)
-        : IRLSolver(mdp, features, rewardRegressor), solver(prMdp)
-    {
 
+public:
+    IRLAgentSolver(Agent<ActionC, StateC>& agent,
+                   Environment<ActionC, StateC>& mdp,
+                   Policy<ActionC, StateC>& policy, AbstractBasisMatrix& features,
+                   ParametricRegressor& rewardRegressor) :
+        IRLSolver<ActionC, StateC>(mdp, features, rewardRegressor), agent(agent), policy(policy)
+    {
+    	episodes = 1;
+    	episodeLength = 10000;
+    }
+
+    virtual void solve()
+    {
+    	EmptyStrategy<ActionC, StateC> strategy;
+    	Core<ActionC, StateC> core(this->prMdp, agent);
+    	core.getSettings().episodeLenght = episodeLength;
+    	core.getSettings().episodeN = episodes;
+    	core.getSettings().loggerStrategy = &strategy;
+
+    	core.runEpisodes();
     }
 
     virtual Dataset<ActionC, StateC> test()
     {
-    	return solver.test();
+        return Solver<ActionC, StateC>::test(this->prMdp, policy);
     }
-
 
     virtual Policy<ActionC, StateC>& getPolicy()
     {
-    	return solver.getPolicy();
+        return policy;
     }
 
-    virtual ~IRLOracleSolver()
+    inline void setLearningParams(unsigned int episodes,
+                                  unsigned int episodeLength)
+    {
+        this->episodeLength = episodeLength;
+        this->episodes = episodes;
+    }
+
+    virtual ~IRLAgentSolver()
     {
 
     }
 
-private:
-    SolverC solver;
+protected:
+    Agent<ActionC, StateC>& agent;
+    Policy<ActionC, StateC>& policy;
 
-};*/
+    unsigned int episodeLength;
+    unsigned int episodes;
 
+};
 
 }
 
