@@ -43,7 +43,7 @@ void SimulatedBasketBot::setState(ReLe::FiniteState& state)
 }
 
 void SimulatedBasketBot::setReward(const ReLe::FiniteAction& action,
-                                   const ReLe::FiniteState& state, ReLe::Reward reward)
+                                   const ReLe::FiniteState& state, ReLe::Reward& reward)
 {
 
 }

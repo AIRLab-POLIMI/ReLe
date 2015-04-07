@@ -56,12 +56,13 @@ public:
             publishAction(action);
             ros::spinOnce();
             r.sleep();
-            std::cout << "waiting for next state" << std::endl;
+            //std::cout << "waiting for next state" << std::endl;
             checkTermination();
         }
         while (!stateReady && ros::ok());
 
         setState(nextState);
+        setReward(action, nextState, reward);
 
         if (nextState.isAbsorbing())
         {
@@ -76,7 +77,7 @@ public:
         do
         {
             ros::spinOnce();
-            std::cout << "waiting for initial state" << std::endl;
+            //std::cout << "waiting for initial state" << std::endl;
             checkTermination();
         }
         while (!stateReady && ros::ok());
@@ -98,7 +99,7 @@ protected:
     virtual void publishAction(const ActionC& action) = 0;
     virtual void setState(StateC& state) = 0;
     virtual void setReward(const ActionC& action, const StateC& state,
-                           ReLe::Reward reward) = 0;
+                           ReLe::Reward& reward) = 0;
 
 private:
     void checkTermination()

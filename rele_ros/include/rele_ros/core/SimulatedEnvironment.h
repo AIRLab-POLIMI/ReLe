@@ -32,6 +32,7 @@
 #include <vrep_common/simRosGetObjectHandle.h>
 #include <vrep_common/simRosEnablePublisher.h>
 #include <vrep_common/simRosEnableSubscriber.h>
+#include <vrep_common/simRosGetObjectPose.h>
 
 #include <vrep_common/VrepInfo.h>
 #include "RosEnvironment.h"
@@ -47,7 +48,8 @@ enum JointMode
 template<class ActionC, class StateC>
 class SimulatedEnvironment: public RosEnvirorment<ActionC, StateC>
 {
-    using RosEnvirorment<ActionC, StateC>::n;
+protected:
+	using RosEnvirorment<ActionC, StateC>::n;
 
 public:
     SimulatedEnvironment(const std::string& name, double controlFrequency) :
@@ -137,7 +139,7 @@ protected:
         }
     }
 
-    bool getHandle(const std::string& name, int& handle)
+    void getHandle(const std::string& name, int& handle)
     {
         vrep_common::simRosGetObjectHandle robot_handle;
         robot_handle.request.objectName = name;
@@ -155,8 +157,34 @@ protected:
         }
 
         handle = robot_handle.response.handle;
+    }
 
-        return true;
+    bool getObjectPose(arma::vec& pose, int handle, int relative = -1)
+    {
+    	vrep_common::simRosGetObjectPose object_pose;
+    	object_pose.request.handle = handle;
+    	object_pose.request.relativeToObjectHandle = relative;
+
+    	if(ros::service::call("/vrep/simRosGetObjectPose", object_pose))
+    	{
+    		auto& poseMsg = object_pose.response.pose.pose;
+
+    		pose[0] = poseMsg.position.x;
+    		pose[1] = poseMsg.position.y;
+    		pose[2] = poseMsg.position.z;
+
+    		pose[3] = poseMsg.orientation.x;
+    		pose[4] = poseMsg.orientation.y;
+    		pose[5] = poseMsg.orientation.z;
+    		pose[6] = poseMsg.orientation.w;
+
+
+    		return true;
+    	}
+    	else
+    		return false;
+
+
     }
 
 private:

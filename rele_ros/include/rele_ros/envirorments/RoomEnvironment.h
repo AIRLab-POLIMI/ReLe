@@ -2,7 +2,7 @@
  * rele_ros,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele_ros.
@@ -21,30 +21,44 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_ENVIRORMENTS_BASKETBOT_H_
-#define INCLUDE_RELE_ROS_ENVIRORMENTS_BASKETBOT_H_
+#ifndef INCLUDE_RELE_ROS_ENVIRORMENTS_ROOMENVIRONMENT_H_
+#define INCLUDE_RELE_ROS_ENVIRORMENTS_ROOMENVIRONMENT_H_
 
 #include "../core/SimulatedEnvironment.h"
 
 namespace ReLe_ROS
 {
 
-class SimulatedBasketBot : public SimulatedEnvironment<ReLe::FiniteAction,
-    ReLe::FiniteState>
+class SimulatedRoomEnvironment : public SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>
 {
+
 public:
-    SimulatedBasketBot(double controlFrequency);
+    SimulatedRoomEnvironment(double controlFrequency);
 
 protected:
-    virtual void publishAction(const ReLe::FiniteAction& action);
-    virtual void setState(ReLe::FiniteState& state);
-    virtual void setReward(const ReLe::FiniteAction& action,
-                           const ReLe::FiniteState& state, ReLe::Reward& reward);
+    virtual void publishAction(const ReLe::DenseAction& action);
+    virtual void setState(ReLe::DenseState& state);
+    virtual void setReward(const ReLe::DenseAction& action,
+                           const ReLe::DenseState& state, ReLe::Reward& reward);
 
 private:
+    void writeSettings();
+
+private:
+    int leftMotorHandle;
+    int rightMotorHandle;
+
+    int positionHandle;
+
+    int objectiveHandle;
+
+    ros::Publisher motorSpeedPub;
+
+
+    arma::vec objective;
 
 };
 
 }
 
-#endif /* INCLUDE_RELE_ROS_ENVIRORMENTS_BASKETBOT_H_ */
+#endif /* INCLUDE_RELE_ROS_ENVIRORMENTS_ROOMENVIRONMENT_H_ */
