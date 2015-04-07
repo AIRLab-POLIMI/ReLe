@@ -48,7 +48,7 @@ void Rocky::step(const DenseAction& action, DenseState& nextState,
     //action threshold
     double v = utils::threshold(action[0], maxV);
     double omega = utils::threshold(action[1], maxOmega);
-    bool eat = (action[3] > 0 && v == 0 && omega == 0) ? true : false;
+    bool eat = (action[2] > 0 && v == 0 && omega == 0) ? true : false;
 
     //Compute rocky control using chicken pose prediction
     double omegar;

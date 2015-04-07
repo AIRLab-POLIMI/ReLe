@@ -49,12 +49,12 @@ public:
 
     inline unsigned int getBasisSize()
     {
-    	return features.rows();
+        return features.rows();
     }
 
     inline double getGamma()
     {
-    	return prMdp.getSettings().gamma;
+        return prMdp.getSettings().gamma;
     }
 
     arma::mat computeFeaturesExpectations()
@@ -81,19 +81,19 @@ public:
                    ParametricRegressor& rewardRegressor) :
         IRLSolver<ActionC, StateC>(mdp, features, rewardRegressor), agent(agent), policy(policy)
     {
-    	episodes = 1;
-    	episodeLength = 10000;
+        episodes = 1;
+        episodeLength = 10000;
     }
 
     virtual void solve()
     {
-    	EmptyStrategy<ActionC, StateC> strategy;
-    	Core<ActionC, StateC> core(this->prMdp, agent);
-    	core.getSettings().episodeLenght = episodeLength;
-    	core.getSettings().episodeN = episodes;
-    	core.getSettings().loggerStrategy = &strategy;
+        EmptyStrategy<ActionC, StateC> strategy;
+        Core<ActionC, StateC> core(this->prMdp, agent);
+        core.getSettings().episodeLenght = episodeLength;
+        core.getSettings().episodeN = episodes;
+        core.getSettings().loggerStrategy = &strategy;
 
-    	core.runEpisodes();
+        core.runEpisodes();
     }
 
     virtual Dataset<ActionC, StateC> test()

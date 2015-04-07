@@ -126,9 +126,6 @@ target_link_libraries(lqr_BBO rele)
 add_executable(lqr_REPS src/test/LqrREPSTest.cpp)
 target_link_libraries(lqr_REPS rele)
 
-add_executable(rocky_REPS src/test/RockyTest.cpp)
-target_link_libraries(rocky_REPS rele)
-
 add_executable(nls_BBO src/test/NlsBBOTest.cpp)
 target_link_libraries(nls_BBO rele)
 
@@ -201,6 +198,9 @@ target_link_libraries(lqr_solver_test rele)
 add_executable(dynamic_programming_test src/test/solvers/dynamic_programming/DynamicProgrammingTest.cpp)
 target_link_libraries(dynamic_programming_test rele)
 
+#Rocky test
+add_executable(rocky_REPS src/test/Rocky/RockyTest.cpp)
+target_link_libraries(rocky_REPS rele)
 
 
 

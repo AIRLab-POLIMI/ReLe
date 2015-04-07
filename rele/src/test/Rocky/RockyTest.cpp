@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/Rocky.h"
+#include "Rocky.h"
 
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
@@ -38,71 +38,6 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-
-
-namespace ReLe
-{
-class RockyCircularPolicy : public ParametricPolicy<DenseAction, DenseState>
-{
-public:
-
-    RockyCircularPolicy() : v(1)
-    {
-
-    }
-
-    //Policy
-    virtual vec operator() (const vec& state)
-    {
-        vec u(3);
-        u[0] = 1;
-        u[1] = M_PI/16;
-        u[2] = 0;
-
-        return u;
-    }
-    virtual double operator() (const vec& state, const vec& action)
-    {
-        return 0;
-    }
-
-    virtual std::string getPolicyName()
-    {
-        return "Circular fake";
-    }
-
-    virtual std::string getPolicyHyperparameters()
-    {
-        return "";
-    }
-
-    virtual std::string printPolicy()
-    {
-        return "";
-    }
-
-    //ParametricPolicy
-    virtual const arma::vec& getParameters() const
-    {
-        return v;
-    }
-
-    virtual const unsigned int getParametersSize() const
-    {
-        return 1;
-    }
-
-    virtual void setParameters(arma::vec& w)
-    {
-
-    }
-
-
-private:
-    vec v;
-};
-
-}
 
 int main(int argc, char *argv[])
 {
