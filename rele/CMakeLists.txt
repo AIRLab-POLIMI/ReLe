@@ -199,7 +199,8 @@ add_executable(dynamic_programming_test src/test/solvers/dynamic_programming/Dyn
 target_link_libraries(dynamic_programming_test rele)
 
 #Rocky test
-add_executable(rocky_REPS src/test/Rocky/RockyTest.cpp)
+add_executable(rocky_REPS src/test/Rocky/RockyTest.cpp
+                          src/test/Rocky/RockyPolicy.cpp)
 target_link_libraries(rocky_REPS rele)
 
 

@@ -23,36 +23,41 @@
 
 #include "RockyPolicy.h"
 
+#include "Utils.h"
+
 using namespace arma;
+using namespace std;
 
 namespace ReLe
 {
 
+RockyPolicy::RockyPolicy(double dt) : maxV(1), dt(dt)
+{
+	w.zeros(PARAM_SIZE);
+}
 
 arma::vec RockyPolicy::operator() (const arma::vec& state)
 {
-    //robot pose
-    double x = state[0];
-    double y = state[1];
-    double theta = state[2];
-
-    //robot sensors
-    double energy = state[3];
-    double food = state[4];
-
-    //rocky pose
-    double xr = state[5];
-    double yr = state[6];
-    double thetar = state[7];
-
     //compute objective
     auto objective = computeObjective(state);
 
     switch(objective)
     {
-    	case eat:
-    		return eatPolicy();
+    case eat:
+        return eatPolicy();
 
+    case home:
+        return homePolicy(state);
+
+    case feed:
+        return feedPolicy(state);
+
+    case escape:
+        return escapePolicy(state);
+
+    default:
+        std::cout << "Error!" << std::endl;
+        return vec(3, fill::zeros);
 
     }
 
@@ -61,41 +66,101 @@ arma::vec RockyPolicy::operator() (const arma::vec& state)
 
 double RockyPolicy::operator() (const arma::vec& state, const arma::vec& action)
 {
-	return 0;
+    return 0;
 }
 
 RockyPolicy::Objective RockyPolicy::computeObjective(const arma::vec& state)
 {
-	const vec& rockyDistance = state(span(xr, yr));
-	if(norm(rockyDistance) < w[escapeThreshold])
-	{
-		return escape;
-	}
-	else if(state[energy] > w[homeThreshold])
-	{
-		return home;
-	}
-	else if(state[food] == 1)
-	{
-		return eat;
-	}
-	else
-	{
-		return feed;
-	}
-
-
+    const vec& rockyDistance = state(span(xr, yr));
+    if(norm(rockyDistance) < abs(w[escapeThreshold]))
+    {
+    	//std::cout << "escape" << std::endl;
+        return escape;
+    }
+    else if(state[food] == 1 && state[energy] < min(2*abs(w[energyThreshold]), 100.0))
+    {
+        //std::cout << "eat" << std::endl;
+        return eat;
+    }
+    else if(state[energy] < abs(w[energyThreshold]))
+    {
+    	//std::cout << "home" << std::endl;
+        return feed;
+    }
+    else
+    {
+    	//std::cout << "feed" << std::endl;
+        return home;
+    }
 }
 
 vec RockyPolicy::eatPolicy()
 {
-	vec pi(3);
+    vec pi(3);
 
-	pi[0] = 0;
-	pi[1] = 0;
-	pi[2] = 1;
+    pi[0] = 0;
+    pi[1] = 0;
+    pi[2] = 1;
 
-	return pi;
+    return pi;
+}
+
+arma::vec RockyPolicy::homePolicy(const arma::vec& state)
+{
+	return wayPointPolicy(state, 0, 0);
+}
+
+arma::vec RockyPolicy::feedPolicy(const arma::vec& state)
+{
+	return wayPointPolicy(state, 5, 0);
+}
+
+arma::vec RockyPolicy::escapePolicy(const arma::vec& state)
+{
+    vec we = w(span(escapeParamsStart, escapeParamsEnd));
+    mat phi(12, 3, fill::zeros);
+
+    phi(span(0, 2), span(0)) = state(span(x, theta));
+    phi(span(3, 5), span(0)) = state(span(xr, thetar));
+
+    phi(span(5, 7), span(1)) = state(span(x, theta));
+    phi(span(8, 10), span(1)) = state(span(xr, thetar));
+
+    vec pi = phi.t()*we;
+
+    return pi;
+}
+
+arma::vec RockyPolicy::wayPointPolicy(const arma::vec& state, double ox, double oy)
+{
+    double waypointDir = atan2(oy - state[y], ox - state[x]);
+    double deltaTheta = utils::wrapToPi(waypointDir - state[theta]);
+    double omega = deltaTheta / dt;
+    double v;
+
+    vec deltaPos(2);
+    deltaPos[0] = ox - state[x];
+    deltaPos[1] = oy - state[y];
+
+    if (abs(deltaTheta) > M_PI / 2 || norm(deltaPos) < 0.01)
+    {
+        v = 0;
+    }
+    else if (abs(deltaTheta) > M_PI / 4)
+    {
+        v = maxV / 2;
+    }
+    else
+    {
+        v = maxV;
+    }
+
+    vec pi(3);
+    pi[0] = v;
+    pi[1] = omega;
+    pi[2] = 0;
+
+    return pi;
 }
 
 }

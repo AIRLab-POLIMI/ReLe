@@ -26,7 +26,8 @@
 #include "policy_search/REPS/REPS.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
-#include "parametric/differentiable/LinearPolicy.h"
+//#include "parametric/differentiable/LinearPolicy.h"
+#include "RockyPolicy.h"
 #include "BasisFunctions.h"
 
 #include "FileManager.h"
@@ -50,14 +51,8 @@ int main(int argc, char *argv[])
     //-- Low level policy
     int dim = rocky.getSettings().continuosStateDim;
     int actionDim = rocky.getSettings().continuosActionDim;
-    DenseBasisVector basis;
-    basis.generatePolynomialBasisFunctions(1, dim);
-    SparseBasisMatrix basisMatrix(basis, actionDim);
 
-    LinearApproximator regressor(dim, basisMatrix);
-
-    DetLinearPolicy<DenseState> policy(&regressor);
-    //RockyCircularPolicy policy;
+    RockyPolicy policy(0.01);
     //--
 
     //-- high level policy
@@ -65,7 +60,7 @@ int main(int argc, char *argv[])
     arma::vec mean(dimPolicy, fill::zeros);
     arma::mat cov(dimPolicy, dimPolicy, fill::eye);
 
-    cov *= 10;
+    cov *= 5;
 
 
     ParametricNormal dist(mean, cov);
@@ -74,7 +69,7 @@ int main(int argc, char *argv[])
     //-- REPS agent
     int nbepperpol = 1, nbpolperupd = 50;
     REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    agent.setEps(0.5);
+    agent.setEps(1.0);
 
     Core<DenseAction, DenseState> core(rocky, agent);
     //--
@@ -82,7 +77,8 @@ int main(int argc, char *argv[])
 
     int episodes = nbepperpol*nbpolperupd*60;
     core.getSettings().episodeLenght = 10000;
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"));
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
+    				WriteStrategy<DenseAction, DenseState>::outType::AGENT);
 
 
     ConsoleManager console(episodes, 1);
@@ -93,10 +89,21 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
 
+    delete core.getSettings().loggerStrategy;
+
     console.printInfo("Starting evaluation episode");
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
+            				WriteStrategy<DenseAction, DenseState>::outType::TRANS);
     core.runTestEpisode();
 
     delete core.getSettings().loggerStrategy;
+
+
+
+
+
+    cout << "Parameters" << endl;
+    cout << dist.getParameters() << endl;
 
     return 0;
 

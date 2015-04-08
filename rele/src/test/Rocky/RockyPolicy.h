@@ -24,6 +24,8 @@
 #ifndef SRC_TEST_ROCKY_ROCKYPOLICY_H_
 #define SRC_TEST_ROCKY_ROCKYPOLICY_H_
 
+#include "Policy.h"
+
 namespace ReLe
 {
 
@@ -31,7 +33,7 @@ class RockyPolicy : public ParametricPolicy<DenseAction, DenseState>
 {
 public:
 
-	RockyPolicy();
+	RockyPolicy(double dt);
 
     //Policy
     virtual arma::vec operator() (const arma::vec& state);
@@ -60,7 +62,7 @@ public:
 
     inline virtual const unsigned int getParametersSize() const
     {
-        return w.n_elem;
+        return PARAM_SIZE;
     }
 
     virtual void setParameters(arma::vec& w)
@@ -81,9 +83,11 @@ private:
 		x = 0,
 		y,
 		theta,
+
 		//robot sensors
 		energy,
 		food,
+
 		//rocky state
 		xr,
 		yr,
@@ -93,17 +97,30 @@ private:
     enum ParameterComponents
     {
     	escapeThreshold = 0,
-		homeThreshold
+		energyThreshold = 1,
+		escapeParamsStart = 2,
+		escapeParamsEnd = 13,
+		PARAM_SIZE = 14
     };
 
 
 private:
     Objective computeObjective(const arma::vec& state);
+
     arma::vec eatPolicy();
+    arma::vec homePolicy(const arma::vec& state);
+    arma::vec feedPolicy(const arma::vec& state);
+    arma::vec escapePolicy(const arma::vec& state);
+
+    arma::vec wayPointPolicy(const arma::vec& state, double ox, double oy);
 
 
 private:
     arma::vec w;
+    double dt;
+
+private:
+    const double maxV;
 };
 
 }

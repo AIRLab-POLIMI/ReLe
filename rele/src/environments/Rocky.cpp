@@ -32,13 +32,13 @@ namespace ReLe
 {
 
 Rocky::Rocky() :
-    ContinuousMDP(STATESIZE, 3, 1, false, true, 0.99), dt(0.01),
-    maxOmega(M_PI), maxV(1), maxOmegar(M_PI-M_PI/12), maxVr(1), predictor(dt)
+    ContinuousMDP(STATESIZE, 3, 1, false, true, 0.9999), dt(0.01),
+    maxOmega(M_PI), maxV(1), maxOmegar(M_PI-M_PI/12), maxVr(1), limitX(10), limitY(10), predictor(dt, limitX, limitY)
 {
     //TODO parameter in the constructor
     vec2 spot;
-    spot[1] = 5;
-    spot[2] = 0;
+    spot[0] = 5;
+    spot[1] = 0;
     foodSpots.push_back(spot);
 }
 
@@ -123,6 +123,10 @@ void Rocky::computeRockyControl(double& vr, double& omegar)
     {
         vr = maxVr;
     }
+
+    //FIXME levami
+    /*vr = 0;
+    omegar = 0;*/
 }
 
 void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
@@ -136,6 +140,10 @@ void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
                                currentState[thetar] + omegar * dt);
     xrabs = chickenPosition[0] + rockyRelPosition[0] + vr * cos(thetarM) * dt;
     yrabs = chickenPosition[1] + rockyRelPosition[1] + vr * sin(thetarM) * dt;
+
+    //Anelastic walls
+    xrabs = utils::threshold(xrabs, limitX);
+    yrabs = utils::threshold(yrabs, limitY);
 }
 
 void Rocky::updateChickenPose(double v, double omega)
@@ -143,6 +151,11 @@ void Rocky::updateChickenPose(double v, double omega)
     double thetaM = (2 * currentState[theta] + omega * dt) / 2;
     currentState[x] += v * cos(thetaM) * dt;
     currentState[y] += v * sin(thetaM) * dt;
+
+    //Anelastic walls
+    currentState[x] = utils::threshold(currentState[x], limitX);
+    currentState[y] = utils::threshold(currentState[y], limitY);
+
     currentState[theta] = utils::wrapToPi(
                               currentState[theta] + omega * dt);
 
@@ -153,7 +166,7 @@ void Rocky::computeSensors(bool eat)
 {
     vec2 chickenPosition = currentState.rows(span(x, y));
 
-    currentState[energy] = utils::threshold(currentState[energy] - 1, 0, 100);
+    currentState[energy] = utils::threshold(currentState[energy] - 0.01, 0, 100);
     currentState[food] = 0;
 
     for (auto& spot : foodSpots)
@@ -195,8 +208,8 @@ void Rocky::computeReward(Reward& reward)
     }
 }
 
-Rocky::Predictor::Predictor(double dt) :
-    dt(dt)
+Rocky::Predictor::Predictor(double dt, double limitX, double limitY) :
+    dt(dt), limitX(limitX), limitY(limitY)
 {
     reset();
 }
@@ -217,6 +230,11 @@ void Rocky::Predictor::predict(const DenseState& state, double& xhat, double& yh
 {
     xhat = state[x] + v * cos(thetaM) * dt;
     yhat = state[y] + v * sin(thetaM) * dt;
+
+    //Anelastic walls
+    xhat = utils::threshold(xhat, limitX);
+    yhat = utils::threshold(yhat, limitY);
+
     thetaDirhat = utils::wrapToPi(atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr])));
 }
 

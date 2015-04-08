@@ -60,7 +60,7 @@ private:
     class Predictor
     {
     public:
-        Predictor(double dt);
+        Predictor(double dt, double limitX, double limitY);
         void reset();
         void saveLastValues(double thetaM, double v);
         void predict(const DenseState& state, double& xhat, double& yhat, double& thetaDirhat);
@@ -72,6 +72,10 @@ private:
         double thetaM;
         double v;
 
+        //walls
+        const double limitX;
+        const double limitY;
+
     };
 
 private:
@@ -81,6 +85,8 @@ private:
     const double maxV;
     const double maxOmegar;
     const double maxVr;
+    const double limitX;
+    const double limitY;
 
     //Predictor for rocky
     Predictor predictor;
