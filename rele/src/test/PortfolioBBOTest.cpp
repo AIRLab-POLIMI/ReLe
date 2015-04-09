@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
         ParametricNormal* distr= new ParametricNormal(mean, cov);
         REPS<FiniteAction, DenseState, ParametricNormal>* agent = new REPS<FiniteAction, DenseState, ParametricNormal>
         (*distr,policy,nbepperpol,nbpolperupd);
-        agent->setEps(0.9);
+        agent->setEps(0.4);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "portfolio_reps.log");
     }
