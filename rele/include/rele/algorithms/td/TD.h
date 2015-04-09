@@ -44,7 +44,7 @@ public:
     virtual void writeData(std::ostream& os);
     virtual void writeDecoratedData(std::ostream& os);
 
-private:
+protected:
     double gamma;
     double alpha;
     std::string policyName;
@@ -64,7 +64,7 @@ public:
     virtual void writeData(std::ostream& os);
     virtual void writeDecoratedData(std::ostream& os);
 
-private:
+protected:
     double gamma;
     double alpha;
     std::string policyName;

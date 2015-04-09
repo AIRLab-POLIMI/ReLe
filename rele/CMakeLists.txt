@@ -181,6 +181,9 @@ target_link_libraries(factory rele)
 add_executable(simple_chain src/test/TD/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)
 
+add_executable(simple_chain_mean src/test/TD/SimpleChainMeanReward.cpp)
+target_link_libraries(simple_chain_mean rele)
+
 add_executable(grid_world src/test/TD/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
 

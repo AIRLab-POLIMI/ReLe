@@ -33,7 +33,7 @@ namespace ReLe
 
 RockyPolicy::RockyPolicy(double dt) : maxV(1), dt(dt)
 {
-	w.zeros(PARAM_SIZE);
+    w.zeros(PARAM_SIZE);
 }
 
 arma::vec RockyPolicy::operator() (const arma::vec& state)
@@ -74,7 +74,7 @@ RockyPolicy::Objective RockyPolicy::computeObjective(const arma::vec& state)
     const vec& rockyDistance = state(span(xr, yr));
     if(norm(rockyDistance) < abs(w[escapeThreshold]))
     {
-    	//std::cout << "escape" << std::endl;
+        //std::cout << "escape" << std::endl;
         return escape;
     }
     else if(state[food] == 1 && state[energy] < min(2*abs(w[energyThreshold]), 100.0))
@@ -84,12 +84,12 @@ RockyPolicy::Objective RockyPolicy::computeObjective(const arma::vec& state)
     }
     else if(state[energy] < abs(w[energyThreshold]))
     {
-    	//std::cout << "home" << std::endl;
+        //std::cout << "home" << std::endl;
         return feed;
     }
     else
     {
-    	//std::cout << "feed" << std::endl;
+        //std::cout << "feed" << std::endl;
         return home;
     }
 }
@@ -107,12 +107,12 @@ vec RockyPolicy::eatPolicy()
 
 arma::vec RockyPolicy::homePolicy(const arma::vec& state)
 {
-	return wayPointPolicy(state, 0, 0);
+    return wayPointPolicy(state, 0, 0);
 }
 
 arma::vec RockyPolicy::feedPolicy(const arma::vec& state)
 {
-	return wayPointPolicy(state, 5, 0);
+    return wayPointPolicy(state, 5, 0);
 }
 
 arma::vec RockyPolicy::escapePolicy(const arma::vec& state)
