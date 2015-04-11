@@ -4,8 +4,19 @@ TODO:
 0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
 0e) aggiungere condizione di termine agli algoritmi
 
+DAVE:
+1a) eliminare la necessità di differenziare tra state/azioni finite e dense
+1b) eliminare DenseBasisVector mettendo DenseBasisMatrix e SparseBasisMatrix
+1c) i metodi che adesso sono in DenseBasisVector che servono a creare vettori di basis (e.g., generatepolbasis) vanno
+    messi neel singole basis functions come metodi factory
+1d) templetizzare anche le basis functions
+
+TEO:
+2a) Interfaccia Matlab? per ora solo per collect samples
+2b) implementare off-policy gradients
+2c) implementare IRL
+
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 
 3) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
 4) Cambiare nota di copyright: mettere tutti gli autori, e soprattutto mettere politecnico di milano
-5) Interfaccia Matlab?
