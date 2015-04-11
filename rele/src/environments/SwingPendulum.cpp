@@ -42,10 +42,17 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
     settings.useOverRotated = false;
     settings.random_start = false;
 
-    settings.actionList = {settings.actionRange.Lo(), 0.0,
-                           settings.actionRange.Hi()
-                          };
+    settings.actionList =
+    {
+        settings.actionRange.Lo(), 0.0,
+        settings.actionRange.Hi()
+    };
     assert(settings.finiteActionDim == settings.actionList.size());
+}
+
+SwingUpSettings::~SwingUpSettings()
+{
+
 }
 
 void SwingUpSettings::WriteToStream(ostream &out) const
@@ -57,7 +64,7 @@ void SwingUpSettings::WriteToStream(ostream &out) const
     out << velocityRange.Lo() << " " << velocityRange.Hi() << std::endl;
     out << mass << " " << length << " " << g << std::endl;
     out << requiredUpTime << " " << upRange << " ";
-    out << (useOverRotated?1:0) << (random_start?1:0) << std::endl;
+    out << (useOverRotated ? 1 : 0) << (random_start ? 1 : 0) << std::endl;
 
     int dima = actionList.size();
     out << dima;
@@ -79,9 +86,9 @@ void SwingUpSettings::ReadFromStream(istream &in)
     velocityRange = Range(lo, hi);
     in >> mass >> length >> g >> requiredUpTime >> upRange;
     in >> boolval;
-    useOverRotated = boolval==1?true:false;
+    useOverRotated = boolval == 1 ? true : false;
     in >> boolval;
-    random_start = boolval==1?true:false;
+    random_start = boolval == 1 ? true : false;
 
     int dima;
     in >> dima;
@@ -94,29 +101,40 @@ void SwingUpSettings::ReadFromStream(istream &in)
     assert(finiteActionDim == actionList.size());
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////////////
 /// NLS ENVIRONMENTS
 ///////////////////////////////////////////////////////////////////////////////////////
 
-
-DiscreteActionSwingUp::DiscreteActionSwingUp()
-    : config()
+DiscreteActionSwingUp::DiscreteActionSwingUp() :
+    config()
 {
-    setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
-                     config.isFiniteHorizon, config.isEpisodic, config.horizon, config.gamma);
+    setupEnvirorment(config.continuosStateDim, config.finiteActionDim,
+                     config.rewardDim, config.isFiniteHorizon, config.isEpisodic,
+                     config.horizon, config.gamma);
     currentState.set_size(config.continuosStateDim);
+
+    //variable initialization
+    previousTheta = cumulatedRotation = overRotatedTime = 0;
+    overRotated = false;
+    upTime = 0;
 }
 
-DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config)
-    : config(config)
+DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
+    config(config)
 {
-    setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
-                     config.isFiniteHorizon, config.isEpisodic, config.horizon, config.gamma);
+    setupEnvirorment(config.continuosStateDim, config.finiteActionDim,
+                     config.rewardDim, config.isFiniteHorizon, config.isEpisodic,
+                     config.horizon, config.gamma);
     currentState.set_size(config.continuosStateDim);
+
+    //variable initialization
+    previousTheta = cumulatedRotation = overRotatedTime = 0;
+    overRotated = false;
+    upTime = 0;
 }
 
-void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
+void DiscreteActionSwingUp::step(const FiniteAction& action,
+                                 DenseState& nextState, Reward& reward)
 {
     //get current state
     double theta = currentState[0];
@@ -124,7 +142,8 @@ void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextSta
 
     //std::cout << a.at() << std::endl;
     double torque = config.actionList[action.getActionN()];
-    double thetaAcc = -config.stepTime * velocity + config.mass * config.g * config.length * sin(theta) + torque;
+    double thetaAcc = -config.stepTime * velocity
+                      + config.mass * config.g * config.length * sin(theta) + torque;
     velocity = config.velocityRange.bound(velocity + thetaAcc);
     theta += velocity * config.stepTime;
     adjustTheta(theta);
@@ -134,11 +153,8 @@ void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextSta
     currentState[0] = theta;
     currentState[1] = velocity;
 
-
-    double signAngleDifference = std::atan2(
-                                     std::sin(theta - previousTheta),
-                                     std::cos(theta - previousTheta)
-                                 );
+    double signAngleDifference = std::atan2(std::sin(theta - previousTheta),
+                                            std::cos(theta - previousTheta));
     cumulatedRotation += signAngleDifference;
     if (!overRotated && std::abs(cumulatedRotation) > 5.0f * M_PI)
         overRotated = true;
@@ -150,7 +166,9 @@ void DiscreteActionSwingUp::step(const FiniteAction& action, DenseState& nextSta
     bool endepisode = false;
     if (config.useOverRotated)
         // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
-        endepisode = (overRotated && (overRotatedTime > 1.0 / config.stepTime)) ? true : false;
+        endepisode =
+            (overRotated && (overRotatedTime > 1.0 / config.stepTime)) ?
+            true : false;
     //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
 
     currentState.setAbsorbing(endepisode);
@@ -170,7 +188,8 @@ void DiscreteActionSwingUp::getInitialState(DenseState& state)
     double theta;
     upTime = 0;
     if (config.random_start)
-        theta = RandomGenerator::sampleUniform(config.thetaRange.Lo(), config.thetaRange.Hi());
+        theta = RandomGenerator::sampleUniform(config.thetaRange.Lo(),
+                                               config.thetaRange.Hi());
     else
         theta = M_PI_2;
     adjustTheta(theta);

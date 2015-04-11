@@ -65,6 +65,11 @@ void UWVSettings::defaultSettings(UWVSettings& settings)
                           };
 }
 
+UWVSettings::~UWVSettings()
+{
+
+}
+
 void UWVSettings::WriteToStream(ostream &out) const
 {
     //TODO
@@ -107,20 +112,6 @@ void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, 
     double t0 = 0;
     double t1 = uwvConfig.dt;
     integrate_adaptive( controlled_stepper , uwvode , currentState, t0 , t1 , t1/100.0);
-
-    ////Runge-Kutta 4/5
-    //double** odeTime;
-    //double** odeState;
-    //unsigned int ndata;
-    //ode45(UnderwaterVehicle::ode, &u, 0, uwvConfig.dt,
-    //      cState.memptr(), cState.n_elem,
-    //      odeTime, odeState, ndata);
-    //nextState[0] = odeState[0][ndata-1];
-    //nextState.setAbsorbing(false);
-    //Cstate = nextState;
-    ////free variables
-    //free(odeState);
-    //free(odeTime);
 
     nextState = currentState;
 

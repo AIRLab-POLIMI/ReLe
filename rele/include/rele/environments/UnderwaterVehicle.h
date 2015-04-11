@@ -47,6 +47,7 @@ class UWVSettings : public EnvironmentSettings
 public:
     UWVSettings();
     static void defaultSettings(UWVSettings& settings);
+    virtual ~UWVSettings();
 
 public:
     Range thrustRange;
@@ -74,7 +75,7 @@ private:
     public:
         double action;
 
-        UWVOde() { }
+        UWVOde() : action(0) { }
 
         void operator() ( const state_type& x , state_type& dxdt , const double /* t */ )
         {
@@ -87,20 +88,6 @@ private:
             dxdt[0] = (u * k_v_u - c_v * v * abs_v) / m_v;
         }
     };
-
-//public:
-//    static int ode(double t, const double x[], double dxdt[], void* params)
-//    {
-//        double* action = static_cast<double*>(params);
-//        const double u     = action[0];
-//        const double v     = x[0];
-//        const double abs_v = fabs(v);
-//        const double c_v   = 1.2f + 0.2f * sin(abs_v);
-//        const double m_v   = 3.0f + 1.5f * sin(abs_v);
-//        const double k_v_u = -0.5f * tanh((fabs(c_v * v * abs_v - u) - 30.0f) * 0.1f) + 0.5f;
-//        dxdt[0] = (u * k_v_u - c_v * v * abs_v) / m_v;
-//        return 1;
-//    }
 
 public:
 

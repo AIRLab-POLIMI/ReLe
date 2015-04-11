@@ -60,7 +60,7 @@ public:
     inline virtual AgentOutputData* getAgentOutputDataEnd()
     {
         return new R_LearningOutput(alpha, beta, policy.getPolicyName(),
-                                  policy.getPolicyHyperparameters(), Q, ro);
+                                    policy.getPolicyHyperparameters(), Q, ro);
     }
 
 

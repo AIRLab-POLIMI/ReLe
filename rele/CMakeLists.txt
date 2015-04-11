@@ -20,7 +20,7 @@ if(catkin_FOUND)
 	set(CATKIN_MSG TRUE)
 else()
 	set(CATKIN_MSG FALSE)
-endif()
+endif() 
 
 #----------------------- CMAKE MODULES ------------------------
 

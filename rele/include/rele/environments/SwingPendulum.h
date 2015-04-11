@@ -44,6 +44,7 @@ class SwingUpSettings : public EnvironmentSettings
 public:
     SwingUpSettings();
     static void defaultSettings(SwingUpSettings& settings);
+    virtual ~SwingUpSettings();
 
 public:
     double stepTime;
