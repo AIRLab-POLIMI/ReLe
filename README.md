@@ -21,7 +21,7 @@ The ReLe core library can be build also using plain cmake (without catkin). To b
 `mkdir ReLe/build` <br\>
 `mkdir ReLe/src` <br\>
 `cd ReLe/src` <br\>
-`git clone git@github.com:AIRLab-POLIMI/ReLe.git` <br\>
+`git clone https://github.com/AIRLab-POLIMI/ReLe.git` <br\>
 `cd ../build` <br\>
 `cmake ../src/rele` <br\>
 `make` <br\>

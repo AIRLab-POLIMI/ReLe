@@ -130,7 +130,6 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
  */
 int main(int argc, char *argv[])
 {
-    RandomGenerator::seed(975127838);
     bboConfig config;
 
     //--- INPUT VALIDATION
@@ -279,11 +278,10 @@ int main(int argc, char *argv[])
     {
         arma::vec mean(nparams, fill::zeros);
         arma::mat cov(nparams, nparams, arma::fill::eye);
-        cov*=6;
         ParametricNormal* distr= new ParametricNormal(mean, cov);
         REPS<FiniteAction, DenseState, ParametricNormal>* agent = new REPS<FiniteAction, DenseState, ParametricNormal>
         (*distr,policy,nbepperpol,nbpolperupd);
-        agent->setEps(config.stepLength);
+        agent->setEps(0.9);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "portfolio_reps.log");
     }
