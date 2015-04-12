@@ -25,7 +25,7 @@
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 #include "parametric/differentiable/GibbsPolicy.h"
-#include "policy_search/offpolicy/OffAlgorithm.h"
+#include "policy_search/offpolicy/OffPolicyREINFORCE.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
@@ -73,7 +73,7 @@ class deep_state_identity: public BasisFunction
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("Offpolicy", "Deep");
+    FileManager fm("Offpolicy", "deep");
     fm.createDir();
     fm.cleanDir();
 
@@ -143,10 +143,10 @@ int main(int argc, char *argv[])
     cout << "# Ended data collection" << endl;
 
 
-    PureOffAlgorithm<FiniteAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
+    OffpolicyREINFORCE<FiniteAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
     BatchCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        fm.addPath("Deep.log"),
+        fm.addPath("deep.log"),
         WriteStrategy<FiniteAction, DenseState>::AGENT,
         true /*delete file*/
     );
