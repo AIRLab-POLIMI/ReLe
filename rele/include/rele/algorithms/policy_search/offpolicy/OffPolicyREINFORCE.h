@@ -32,7 +32,7 @@ namespace ReLe
 //Templates needed to handle different action types
 template<class StateC, class PolicyC, class PolicyC2>
 double OffPolicyReinforceIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-        double& iwb, double& iwt)
+                                  double& iwb, double& iwt)
 {
     typename action_type<FiniteAction>::type_ref u = action.getActionN();
 
@@ -47,7 +47,7 @@ double OffPolicyReinforceIWWorker(const StateC& state, const FiniteAction& actio
 
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
 double OffPolicyReinforceIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
-        double& iwb, double& iwt)
+                                  double& iwb, double& iwt)
 {
     double valb = behav(state,action);
     double valt = policy(state,action);
@@ -118,7 +118,7 @@ protected:
     virtual double updateStep(const Reward& reward)
     {
         double currIW = OffPolicyReinforceIWWorker(
-            currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT);
+                            currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT);
 
         arma::vec grad = diffLogWorker(currentState, currentAction, target);
         sumdlogpi += grad;

@@ -32,7 +32,7 @@ namespace ReLe
 //Templates needed to handle different action types
 template<class StateC, class PolicyC, class PolicyC2>
 double OffPolicyGpomdpIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-        double& iwb, double& iwt)
+                               double& iwb, double& iwt)
 {
     typename action_type<FiniteAction>::type_ref u = action.getActionN();
 
@@ -47,7 +47,7 @@ double OffPolicyGpomdpIWWorker(const StateC& state, const FiniteAction& action, 
 
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
 double OffPolicyGpomdpIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
-        double& iwb, double& iwt)
+                               double& iwb, double& iwt)
 {
     double valb = behav(state,action);
     double valt = policy(state,action);
@@ -64,8 +64,8 @@ class OffPolicyGPOMDP: public AbstractOffPolicyGradientAlgorithm<ActionC, StateC
 
     USE_PUREOFFPGA_MEMBERS
 
-    public:
-        enum BaseLineType { MULTI, SINGLE };
+public:
+    enum BaseLineType { MULTI, SINGLE };
 
     OffPolicyGPOMDP(DifferentiablePolicy<ActionC, StateC>& target_pol,
                     Policy<ActionC, StateC>& behave_pol,
@@ -129,7 +129,7 @@ protected:
 
         //compute importance weight
         double currIW = OffPolicyReinforceIWWorker(
-            currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT);
+                            currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT);
         double IW     = prodImpWeightT / prodImpWeightB;
         sumIWOverRun += IW;
         IW_EpStep(epCounter,stepCount) = IW;
