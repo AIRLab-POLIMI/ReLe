@@ -97,8 +97,8 @@ protected:
     virtual void init()
     {
         unsigned int dp = target.getParametersSize();
-        AbstractOffPolicyGradientAlgorithm<ActionC, StateC>::init();
-        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
+//        AbstractOffPolicyGradientAlgorithm<ActionC, StateC>::init();
+        history_sumdlogpi.assign(nbEpisodesperUpdate,arma::vec(dp));
         sumdlogpi.set_size(dp);
 
         // variables for baseline settings
@@ -108,9 +108,10 @@ protected:
         baseline_den_single.zeros(dp);
         baseline_num1_single.zeros(dp);
         baseline_num2_single.zeros(dp);
-        reward_EpStep.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode);
-        sumGradLog_CompEpStep.zeros(dp,nbEpisodesToEvalPolicy,maxStepsPerEpisode);
-        maxsteps_Ep.zeros(nbEpisodesToEvalPolicy);
+        reward_EpStep.zeros(nbEpisodesperUpdate,maxStepsPerEpisode);
+        sumGradLog_CompEpStep.zeros(dp,nbEpisodesperUpdate,maxStepsPerEpisode);
+        maxsteps_Ep.zeros(nbEpisodesperUpdate);
+        IW_EpStep.zeros(nbEpisodesperUpdate, maxStepsPerEpisode);
     }
 
     virtual void initializeVariables()
@@ -120,12 +121,14 @@ protected:
         stepCount = 0;
         baseline_num1_single.zeros();
         baseline_num2_single.zeros();
+        prodImpWeightT = 1.0;
+        prodImpWeightB = 1.0;
     }
 
     virtual double updateStep(const Reward& reward)
     {
 
-        int dp = policy.getParametersSize();
+        int dp = target.getParametersSize();
 
         //compute importance weight
         double currIW = OffPolicyReinforceIWWorker(
@@ -135,7 +138,7 @@ protected:
         IW_EpStep(epCounter,stepCount) = IW;
 
         //compute policy gradient
-        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        arma::vec grad = diffLogWorker(currentState, currentAction, target);
         sumdlogpi += grad;
 
         // store the basic elements used to compute the gradient
@@ -173,12 +176,12 @@ protected:
 
     virtual void updateAtEpisodeEnd()
     {
-        maxsteps_Ep(epiCount) = stepCount;
+        maxsteps_Ep(epCounter) = stepCount;
 
         // compute the baseline
 
-        int nbParams = policy.getParametersSize();
-        for (int p = 0; p < nbParams; ++p)
+        int dp = target.getParametersSize();
+        for (int p = 0; p < dp; ++p)
         {
             baseline_num_single(p) += baseline_num1_single(p) * baseline_num2_single(p);
             baseline_den_single(p) += baseline_num2_single(p) * baseline_num2_single(p);
@@ -190,7 +193,7 @@ protected:
 
     virtual void updatePolicy()
     {
-        int dp = policy.getParametersSize();
+        int dp = target.getParametersSize();
         arma::vec gradient(dp, arma::fill::zeros);
         // compute the gradient
 
@@ -198,7 +201,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+                for (int ep = 0; ep < nbEpisodesperUpdate; ++ep)
                 {
                     for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
                     {
@@ -217,7 +220,7 @@ protected:
             {
                 double baseline =  (useBaseline == true && baseline_den_single(p) != 0) ? baseline_num_single(p) / baseline_den_single(p) : 0;
 
-                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+                for (int ep = 0; ep < nbEpisodesperUpdate; ++ep)
                 {
                     for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
                     {
@@ -233,7 +236,7 @@ protected:
 
         //--- Compute learning step
         arma::mat eMetric = arma::eye(dp,dp);
-        arma::vec step_size = stepLength.stepLength(gradient, eMetric);
+        arma::vec step_size = stepRule.stepLength(gradient, eMetric);
         //---
 
         //--- save actual policy performance
@@ -243,8 +246,8 @@ protected:
         currentItStats->stepLength = step_size;
         //---
 
-        arma::vec newvalues = policy.getParameters() + gradient * step_size;
-        policy.setParameters(newvalues);
+        arma::vec newvalues = target.getParameters() + gradient * step_size;
+        target.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
         for (int p = 0; p < dp; ++p)
@@ -264,10 +267,10 @@ protected:
 protected:
     arma::vec sumdlogpi;
     std::vector<arma::vec> history_sumdlogpi;
-    arma::mat reward_EpStep;
+    arma::mat reward_EpStep, IW_EpStep;
     arma::cube sumGradLog_CompEpStep;
     arma::ivec maxsteps_Ep;
-    double prodImpWeightB, prodImpWeightT;
+    double prodImpWeightB, prodImpWeightT, sumIWOverRun, sumAvgIW;
 
     unsigned int maxStepsPerEpisode, stepCount;
 

@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     AdaptiveStep stepl(0.1);
 //    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size(), stepl);
-    OffPolicyGPOMDP<DenseAction, DenseState> offagent(target, behavioral, data.size(), stepl);
+    OffPolicyGPOMDP<DenseAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size(), horiz, stepl);
     BatchCore<DenseAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath("nls.log"),
