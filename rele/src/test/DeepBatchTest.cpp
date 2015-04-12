@@ -143,7 +143,9 @@ int main(int argc, char *argv[])
     cout << "# Ended data collection" << endl;
 
 
-    OffpolicyREINFORCE<FiniteAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size());
+    AdaptiveStep stepl(0.1);
+
+    OffpolicyREINFORCE<FiniteAction, DenseState> offagent(target, behavioral, data.size(), stepl);
     BatchCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
         fm.addPath("deep.log"),

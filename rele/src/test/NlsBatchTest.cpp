@@ -26,6 +26,7 @@
 #include "PolicyEvalAgent.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "policy_search/offpolicy/OffPolicyREINFORCE.h"
+#include "policy_search/offpolicy/OffPolicyGPOMDP.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "RandomGenerator.h"
@@ -120,7 +121,9 @@ int main(int argc, char *argv[])
     cout << "# Ended data collection" << endl;
 
 
-    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size());
+    AdaptiveStep stepl(0.1);
+//    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size(), stepl);
+    OffPolicyGPOMDP<DenseAction, DenseState> offagent(target, behavioral, data.size(), stepl);
     BatchCore<DenseAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath("nls.log"),

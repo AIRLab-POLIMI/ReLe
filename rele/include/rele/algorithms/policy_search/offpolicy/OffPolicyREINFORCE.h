@@ -29,8 +29,38 @@
 namespace ReLe
 {
 
+//Templates needed to handle different action types
+template<class StateC, class PolicyC, class PolicyC2>
+double OffPolicyReinforceIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
+        double& iwb, double& iwt)
+{
+    typename action_type<FiniteAction>::type_ref u = action.getActionN();
+
+    double valb = behav(state,u);
+    double valt = policy(state,u);
+
+    iwt *= valt;
+    iwb *= valb;
+
+    return valt/valb;
+}
+
+template<class StateC, class ActionC, class PolicyC, class PolicyC2>
+double OffPolicyReinforceIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
+        double& iwb, double& iwt)
+{
+    double valb = behav(state,action);
+    double valt = policy(state,action);
+
+    iwt *= valt;
+    iwb *= valb;
+
+    return valt/valb;
+}
+
+
 template<class ActionC, class StateC>
-class MBPGA: public PureOffPolicyGradientAlgorithm<ActionC, StateC>
+class MBPGA: public AbstractOffPolicyGradientAlgorithm<ActionC, StateC>
 {
 
     USE_PUREOFFPGA_MEMBERS
@@ -39,9 +69,9 @@ public:
     MBPGA(DifferentiablePolicy<ActionC, StateC>& target_pol,
           Policy<ActionC, StateC>& behave_pol,
           unsigned int nbEpisodes, unsigned int nbSamplesForJ,
-          double penalization = 0.0, double stepL = 0.5,
+          StepRule& stepL, double penalization = 0.0,
           bool baseline = true, int reward_obj = 0) :
-        PureOffPolicyGradientAlgorithm<ActionC, StateC>(target_pol, behave_pol, nbEpisodes, nbSamplesForJ, stepL, baseline, reward_obj),
+        AbstractOffPolicyGradientAlgorithm<ActionC, StateC>(target_pol, behave_pol, nbEpisodes, nbSamplesForJ, stepL, baseline, reward_obj),
         penal_factor(penalization)
     {
     }
@@ -72,6 +102,35 @@ protected:
         bJ_num.zeros(dp); // baseline J
         bM_num.zeros(dp); // baseline M
         b_den.zeros(dp);  // baseline denom (common to J and M)
+    }
+
+    virtual void initializeVariables()
+    {
+        sumdlogpi.zeros();
+        prodImpWeightB = 1.0;
+        prodImpWeightT = 1.0;
+        if (epCounter == 0)
+        {
+            sumIWOverRun = 0.0;
+        }
+    }
+
+    virtual double updateStep(const Reward& reward)
+    {
+        double currIW = OffPolicyReinforceIWWorker(
+            currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT);
+
+        arma::vec grad = diffLogWorker(currentState, currentAction, target);
+        sumdlogpi += grad;
+
+        return currIW;
+    }
+
+    virtual void updateAtEpisodeEnd()
+    {
+        history_sumdlogpi[epCounter] = sumdlogpi;
+        history_impWeights[epCounter] = prodImpWeightT / prodImpWeightB;
+        sumIWOverRun += history_impWeights[epCounter];
     }
 
     virtual void updatePolicy()
@@ -149,12 +208,8 @@ protected:
 
 
         //--- Compute learning step
-        //http://www.ias.informatik.tu-darmstadt.de/uploads/Geri/lecture-notes-constraint.pdf
-        double lambda = arma::dot(gradient,gradient) / (4*stepLength);
-        lambda = sqrt(lambda);
-        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-        double step_size = 1.0 / (2 * lambda);
-        std::cout << "step_size: " << step_size << std::endl;
+        arma::mat eMetric = arma::eye(dp,dp);
+        arma::vec step_size = stepRule.stepLength(gradient, eMetric);
         //---
 
         //--- save actual policy performance
@@ -176,12 +231,17 @@ protected:
             bM_num[i] = 0;
             b_den[i]  = 0;
         }
+        sumIWOverRun = 0.0;
     }
 
 
 protected:
     double penal_factor;
+    double prodImpWeightB, prodImpWeightT, sumIWOverRun;
     arma::vec bJ_num, b_den, bM_num;
+    arma::vec sumdlogpi;
+    std::vector<arma::vec> history_sumdlogpi;
+    std::vector<double> history_impWeights;
 };
 
 
@@ -191,10 +251,10 @@ class OffpolicyREINFORCE : public MBPGA<ActionC, StateC>
 public:
     OffpolicyREINFORCE(DifferentiablePolicy<ActionC, StateC>& target,
                        Policy<ActionC, StateC>& behave_pol,
-                       unsigned int nbEpisodes, double stepL = 0.5,
+                       unsigned int nbEpisodes, StepRule& stepL,
                        bool baseline = true, int reward_obj = 0)
         : MBPGA<ActionC, StateC>(
-            target, behave_pol, nbEpisodes, 0, 0.0, stepL,
+            target, behave_pol, nbEpisodes, 0, stepL, 0.0,
             baseline, reward_obj)
     {
     }

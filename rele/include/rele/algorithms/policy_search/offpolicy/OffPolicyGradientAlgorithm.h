@@ -32,78 +32,44 @@
 #include <cassert>
 #include <iomanip>
 #include "policy_search/offpolicy/OffGradientOutputData.h"
+#include "policy_search/step_rules/StepRules.h"
 
 namespace ReLe
 {
 
-//Templates needed to handle different action types
-template<class StateC, class PolicyC, class PolicyC2>
-double PureOffPolicyGradientAlgorithmStepWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-        double& iwb, double& iwt, arma::vec& grad)
+////Templates needed to sample different action types
+template<class StateC, class PolicyC>
+arma::vec diffLogWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
 {
-    typename action_type<FiniteAction>::type_ref u = action.getActionN();
-
-    double valb = behav(state,u);
-    double valt = policy(state,u);
-
-    iwt *= valt;
-    iwb *= valb;
-
-    //init the sum of the gradient of the policy logarithm
-    arma::vec logGradient = policy.difflog(state, u);
-    grad += logGradient;
-
-    return valt/valb;
+    unsigned int u = action.getActionN();
+    return policy.difflog(state, u);
 }
 
-template<class StateC, class ActionC, class PolicyC, class PolicyC2>
-double PureOffPolicyGradientAlgorithmStepWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
-        double& iwb, double& iwt, arma::vec& grad)
+template<class StateC, class ActionC, class PolicyC>
+arma::vec diffLogWorker(const StateC& state, ActionC& action, PolicyC& policy)
 {
-    double valb = behav(state,action);
-    double valt = policy(state,action);
-
-    iwt *= valt;
-    iwb *= valb;
-
-    //init the sum of the gradient of the policy logarithm
-    arma::vec logGradient = policy.difflog(state, action);
-    grad += logGradient;
-
-    return valt/valb;
+    return policy.difflog(state, action);
 }
-
 
 template<class ActionC, class StateC>
-class PureOffPolicyGradientAlgorithm: public BatchAgent<ActionC, StateC>
+class AbstractOffPolicyGradientAlgorithm: public BatchAgent<ActionC, StateC>
 {
 
 public:
-    PureOffPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& target_pol,
+    AbstractOffPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& target_pol,
                                    Policy<ActionC, StateC>& behave_pol,
                                    unsigned int nbEpisodes, unsigned int nbSamplesForJ,
-                                   double stepL = 0.5,
-                                   bool baseline = true, int reward_obj = 0) :
+                                   StepRule& stepL, bool baseline = true, int reward_obj = 0) :
         target(target_pol), behavioral(behave_pol), nbEpisodesperUpdate(nbEpisodes), runCounter(0),
         epCounter(0), df(1.0), Jep(0.0), rewardId(reward_obj),
         useBaseline(baseline), output2LogReady(false),
-        currentItStats(nullptr), stepLength(stepL),
+        currentItStats(nullptr), stepRule(stepL),
         nbIndipendentSamples(std::min(std::max(1,static_cast<int>(nbSamplesForJ)), static_cast<int>(nbEpisodes*0.1)))
     {
     }
 
-    virtual ~PureOffPolicyGradientAlgorithm()
+    virtual ~AbstractOffPolicyGradientAlgorithm()
     {
-    }
-
-    inline void setStepLength(double penal)
-    {
-        stepLength = penal;
-    }
-
-    inline double getStepLength()
-    {
-        return stepLength;
     }
 
     // Agent interface
@@ -114,21 +80,17 @@ public:
         Jep = 0.0;    //reset J of current episode
         Jepoff = 0.0;
 
+        // Initialize variables
+        initializeVariables();
+
         //--- set up agent output
         if (epCounter == 0)
         {
-            sumIWOverRun = 0.0;
-            prodImpWeightT = 1.0;
-            prodImpWeightB = 1.0;
-
             currentItStats = new OffGradientIndividual();
             currentItStats->policy_parameters = target.getParameters();
         }
         //---
 
-        prodImpWeightB = 1.0;
-        prodImpWeightT = 1.0;
-        sumdlogpi.zeros(target.getParametersSize());
         currentState  = state;
         currentAction = action;
 
@@ -147,11 +109,9 @@ public:
     virtual void step(const Reward& reward, const StateC& nextState,
                       const ActionC& nextAction)
     {
+        double currentIW = updateStep(reward);
 
-
-        //        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
-
-        double currentIW = PureOffPolicyGradientAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT, sumdlogpi);
+        updateStep(reward);
 
         //calculate current J value
         Jep += df * reward[rewardId];
@@ -165,11 +125,7 @@ public:
 
     virtual void endEpisode(const Reward& reward)
     {
-
-
-        //        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
-
-        double currentIW = PureOffPolicyGradientAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT, sumdlogpi);
+        double currentIW = updateStep(reward);
 
         //add last contribute
         Jep += df * reward[rewardId];
@@ -184,12 +140,12 @@ public:
 
         history_J[epCounter] = Jep;
         history_J_off[epCounter] = Jepoff;
-        history_impWeights[epCounter] = prodImpWeightT / prodImpWeightB;
-        history_sumdlogpi[epCounter] = sumdlogpi;
-        sumIWOverRun += history_impWeights[epCounter];
 
+        updateAtEpisodeEnd();
+
+        //last episode is the number epiCount+1
         ++epCounter;
-
+        //check evaluation of actual policy
         if (epCounter == nbEpisodesperUpdate)
         {
             //all policies have been evaluated
@@ -197,7 +153,6 @@ public:
             updatePolicy();
 
             //reset counters and gradient
-            sumIWOverRun = 0.0;
             epCounter = 0; //reset policy counter
             runCounter++; //update run counter
             output2LogReady = true; //output must be ready for log
@@ -217,6 +172,9 @@ public:
 
 protected:
     virtual void init() = 0;
+    virtual void initializeVariables() = 0;
+    virtual double updateStep(const Reward& reward) = 0;
+    virtual void updateAtEpisodeEnd() = 0;
     virtual void updatePolicy() = 0;
 
 
@@ -225,16 +183,12 @@ protected:
     Policy<ActionC, StateC>& behavioral;
     unsigned int nbEpisodesperUpdate;
     unsigned int runCounter, epCounter;
-    double df, Jep, Jepoff, stepLength, sumIWOverRun;
+    double df, Jep, Jepoff;
+    StepRule& stepRule;
     int rewardId;
-
-    double prodImpWeightB, prodImpWeightT;
-    arma::vec sumdlogpi;
 
     std::vector<double> history_J;
     std::vector<double> history_J_off;
-    std::vector<double> history_impWeights;
-    std::vector<arma::vec> history_sumdlogpi;
 
     bool useBaseline, output2LogReady;
     OffGradientIndividual* currentItStats;
@@ -245,7 +199,7 @@ protected:
 };
 
 #define USE_PUREOFFPGA_MEMBERS                                               \
-    typedef PureOffPolicyGradientAlgorithm<ActionC, StateC> Base;            \
+    typedef AbstractOffPolicyGradientAlgorithm<ActionC, StateC> Base;        \
     using Base::target;                                                      \
     using Base::behavioral;                                                  \
     using Base::nbEpisodesperUpdate;                                         \
@@ -254,13 +208,10 @@ protected:
     using Base::df;                                                          \
     using Base::Jep;                                                         \
     using Base::Jepoff;                                                      \
-    using Base::stepLength;                                                  \
-    using Base::sumIWOverRun;                                                \
+    using Base::stepRule;                                                    \
     using Base::rewardId;                                                    \
     using Base::history_J;                                                   \
     using Base::history_J_off;                                               \
-    using Base::history_impWeights;                                          \
-    using Base::history_sumdlogpi;                                           \
     using Base::useBaseline;                                                 \
     using Base::output2LogReady;                                             \
     using Base::currentItStats;                                              \
