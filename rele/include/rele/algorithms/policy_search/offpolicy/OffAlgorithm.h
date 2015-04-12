@@ -280,8 +280,12 @@ protected:
             for (int p = 0; p < dp; ++p)
             {
 
-                double baselineJ = (useBaseline && bJ_den[0] != 0) ? bJ_num[p]/bJ_den[p] : 0.0;
-                double baselineM = (useBaseline && bM_den[0] != 0) ? bM_num[p]/bM_den[p] : 0.0;
+                double baselineJ = 0, baselineM = 0;
+                if (useBaseline && b_den[p] != 0)
+                {
+                    baselineJ = bJ_num[p]/b_den[p];
+                    baselineM = bM_num[p]/b_den[p];
+                }
 
                 gradientJ[p] += (history_J[i] - baselineJ) * history_impWeights[i] * history_sumdlogpi[i][p];
 
@@ -334,6 +338,7 @@ protected:
             bM_num[i] = 0;
             b_den[i]  = 0;
         }
+        sumIWOverRun = 0.0;
     }
 
 
@@ -342,7 +347,7 @@ protected:
     Policy<ActionC, StateC>& behavioral;
     unsigned int nbEpisodesperUpdate;
     unsigned int runCounter, epCounter;
-    double df, Jep, Jepoff, stepLength, penal_factor;
+    double df, Jep, Jepoff, stepLength, penal_factor, sumIWOverRun;
     int rewardId;
 
     double prodImpWeightB, prodImpWeightT;
