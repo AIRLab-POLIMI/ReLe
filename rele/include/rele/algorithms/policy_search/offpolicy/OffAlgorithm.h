@@ -38,45 +38,39 @@ namespace ReLe
 
 //Templates needed to handle different action types
 template<class StateC, class PolicyC, class PolicyC2>
-double PureOffAlgorithmComputeIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav)
-{
-    typename action_type<FiniteAction>::type_ref u = action.getActionN();
-    return policy(state,u) / behav(state,u);
-}
-
-template<class StateC, class ActionC, class PolicyC, class PolicyC2>
-double PureOffAlgorithmComputeIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav)
-{
-    return policy(state,action) / behav(state,action);
-}
-
-template<class StateC, class PolicyC, class PolicyC2>
 double PureOffAlgorithmStepWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-                                  double& iw, arma::vec& grad)
+                                  double& iwb, double& iwt, arma::vec& grad)
 {
     typename action_type<FiniteAction>::type_ref u = action.getActionN();
 
-    double val = policy(state,u) / behav(state,u);
-    iw *= val;
+    double valb = behav(state,u);
+    double valt = policy(state,u);
+
+    iwt *= valt;
+    iwb *= valb;
 
     //init the sum of the gradient of the policy logarithm
     arma::vec logGradient = policy.difflog(state, u);
     grad += logGradient;
 
+    return valt/valb;
 }
 
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
 double PureOffAlgorithmStepWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
-                                  double& iw, arma::vec& grad)
+                                  double& iwb, double& iwt, arma::vec& grad)
 {
-    double val = policy(state,action) / behav(state,action);
-    iw *= val;
+    double valb = behav(state,action);
+    double valt = policy(state,action);
+
+    iwt *= valt;
+    iwb *= valb;
 
     //init the sum of the gradient of the policy logarithm
     arma::vec logGradient = policy.difflog(state, action);
     grad += logGradient;
 
-    return val;
+    return valt/valb;
 }
 
 
@@ -96,8 +90,8 @@ public:
         currentItStats(nullptr), stepLength(stepL), penal_factor(penalization),
         nbIndipendentSamples(std::min(std::max(1,static_cast<int>(nbSamplesForJandVar)), static_cast<int>(nbPolicies*0.5)))
     {
-        prodImpWeight = 1.0;
-        currentIW = 0;
+        prodImpWeightT = 1.0;
+        prodImpWeightB = 1.0;
     }
 
     virtual ~PureOffAlgorithm()
@@ -130,6 +124,7 @@ public:
     {
         df  = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
+        Jepoff = 0.0;
 
         //--- set up agent output
         if (epCounter == 0)
@@ -139,12 +134,13 @@ public:
         }
         //---
 
-        prodImpWeight = 1.0;
+        prodImpWeightB = 1.0;
+        prodImpWeightT = 1.0;
         sumdlogpi.zeros(target.getParametersSize());
         currentState  = state;
         currentAction = action;
 
-//        std::cout << std::endl;
+        //        std::cout << std::endl;
     }
 
     virtual void initTestEpisode()
@@ -161,12 +157,13 @@ public:
     {
 
 
-//        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
+        //        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
 
-        currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
+        double currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT, sumdlogpi);
 
         //calculate current J value
-        Jep += df * currentIW * reward[rewardId];
+        Jep += df * reward[rewardId];
+        Jepoff += df * currentIW * reward[rewardId];
         //update discount factor
         df *= this->task.gamma;
 
@@ -178,12 +175,13 @@ public:
     {
 
 
-//        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
+        //        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
 
-        currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
+        double currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT, sumdlogpi);
 
         //add last contribute
-        Jep += df * currentIW * reward[rewardId];
+        Jep += df * reward[rewardId];
+        Jepoff += df * currentIW * reward[rewardId];
         //perform remaining operation
         this->endEpisode();
 
@@ -193,18 +191,10 @@ public:
     {
 
         history_J[epCounter] = Jep;
-        history_impWeights[epCounter] = prodImpWeight;
+        history_J_off[epCounter] = Jepoff;
+        history_impWeights[epCounter] = prodImpWeightT / prodImpWeightB;
         history_sumdlogpi[epCounter] = sumdlogpi;
-
-        //        //--- update baseline (moved down in the update)
-        //        arma::vec d2 = sumdlogpi % sumdlogpi;
-        //        bJ_num += Jep * prodImpWeight * prodImpWeight * d2;
-        //        bJ_den += prodImpWeight * prodImpWeight * d2;
-
-
-        //        bM_num += Jep * Jep * prodImpWeight * prodImpWeight * prodImpWeight * d2;
-        //        bM_den += prodImpWeight * prodImpWeight * d2;
-        //        //---
+        sumIWOverRun += history_impWeights[epCounter];
 
         ++epCounter;
 
@@ -235,22 +225,29 @@ public:
 protected:
     virtual void init()
     {
-        history_J.assign(nbEpisodesperUpdate,0.0);
-        history_impWeights.assign(nbEpisodesperUpdate,0.0);
-        history_sumdlogpi.assign(nbEpisodesperUpdate,arma::vec(target.getParametersSize()));
+        unsigned int dp = target.getParametersSize();
+        history_J.assign(nbEpisodesperUpdate,0.0); // policy performance per episode
+        history_J_off.assign(nbEpisodesperUpdate,0.0); // policy performance per episode
+        history_impWeights.assign(nbEpisodesperUpdate,0.0); // importance weight per episode (w_0 * w_1 * w_2 * ...)
+        history_sumdlogpi.assign(nbEpisodesperUpdate,arma::vec(target.getParametersSize())); //gradient log policy per episode (sum)
 
-        bJ_num.zeros(target.getParametersSize());
-        bJ_den.zeros(target.getParametersSize());
-        bM_num.zeros(target.getParametersSize());
-        bM_den.zeros(target.getParametersSize());
+        bJ_num.zeros(dp); // baseline J
+        bM_num.zeros(dp); // baseline M
+        b_den.zeros(dp);  // baseline denom (common to J and M)
     }
 
     virtual void updatePolicy()
     {
 
-        double Jmean = 0.0, Jvar = 0.0;
+        unsigned int dp = target.getParametersSize();
+        // expected J value (computed indipendently)
+        double Jmean = 0.0;
 
+        // two different set of samples are used to estimate gradient and expected J
+        //in_idxs are used to estimate the gradient
         std::vector<unsigned int> in_idxs;
+        in_idxs.reserve(nbEpisodesperUpdate-nbIndipendentSamples);
+        //out_idxs are used for the expected J
         arma::ivec out_idxs = arma::randi(nbIndipendentSamples, arma::distr_param(0,nbEpisodesperUpdate-1));
         for (int i = 0; i < nbEpisodesperUpdate; ++i)
         {
@@ -263,68 +260,50 @@ protected:
                 //--- update baseline
                 arma::vec d2 = history_sumdlogpi[i] % history_sumdlogpi[i];
                 bJ_num += history_J[i] * history_impWeights[i] * history_impWeights[i] * d2;
-                bJ_den += history_impWeights[i] * history_impWeights[i] * d2;
-
-
                 bM_num += history_J[i] * history_J[i] * history_impWeights[i] * history_impWeights[i] * history_impWeights[i] * d2;
-                bM_den += history_impWeights[i] * history_impWeights[i] * d2;
+                b_den  += history_impWeights[i] * history_impWeights[i] * d2;
                 //---
             }
             else
             {
-                // this data are used for the J and Var(J) estimate
-                Jmean += history_J[i];
+                // this data are used for the J
+                Jmean += history_J_off[i];
             }
         }
         Jmean /= nbIndipendentSamples;
 
-        arma::vec baselineJ(target.getParametersSize(), arma::fill::zeros);
-        arma::vec baselineM(target.getParametersSize(), arma::fill::zeros);
-        if (useBaseline)
-        {
-            for (int i = 0; i < bJ_den.n_elem; ++i)
-            {
-                baselineJ[i] = bJ_den[0] != 0 ? bJ_num[i]/bJ_den[i] : 0.0;
-                baselineM[i] = bM_den[0] != 0 ? bM_num[i]/bM_den[i] : 0.0;
-            }
-        }
-
-        arma::vec gradientJ(target.getParametersSize(), arma::fill::zeros);
-        arma::vec gradientM(target.getParametersSize(), arma::fill::zeros);
+        arma::vec gradientJ(dp, arma::fill::zeros);
+        arma::vec gradientM(dp, arma::fill::zeros);
         for (auto i : in_idxs)
         {
 
-            //            std::cout << history_impWeights[i] << " " << history_J[i] << std::endl;
-            //            std::cout << history_sumdlogpi[i].t();
-            gradientJ += history_impWeights[i] * history_J[i] * (history_sumdlogpi[i] - baselineJ);
-            //            if (isnan(gradientJ[0]))
-            //            {
-            //                std::cout << "error" << std::endl;
-            //            }
-            //            std::cout << gradientJ.t();
+            for (int p = 0; p < dp; ++p)
+            {
+
+                double baselineJ = (useBaseline && bJ_den[0] != 0) ? bJ_num[p]/bJ_den[p] : 0.0;
+                double baselineM = (useBaseline && bM_den[0] != 0) ? bM_num[p]/bM_den[p] : 0.0;
+
+                gradientJ[p] += (history_J[i] - baselineJ) * history_impWeights[i] * history_sumdlogpi[i][p];
 
 
-            gradientM += history_impWeights[i] * history_impWeights[i] *
-                         history_J[i] * history_J[i] *
-                         (history_sumdlogpi[i] - baselineM);
+                gradientM[p] += (history_J[i] * history_J[i] - baselineM / history_impWeights[i]) *
+                                history_impWeights[i] * history_impWeights[i] *
+                                history_sumdlogpi[i][p];
+            }
         }
-        gradientJ /= in_idxs.size();
-        gradientM *= 2.0/in_idxs.size();
+        //gradientJ /= in_idxs.size();
+        //gradientM *= 2.0/in_idxs.size();
+        gradientJ /= sumIWOverRun;
+        gradientM *= 2.0/sumIWOverRun;
 
-
-        for (auto i : out_idxs)
-        {
-            Jvar += (history_J[i] - Jmean) * (history_J[i] - Jmean);
-        }
-        Jvar /= nbIndipendentSamples;
-        double stddevJ = std::max(1e-8,sqrt(Jvar)); // to avoid numerical problems
 
         std::cerr << "gradJ: " << gradientJ.t();
+        std::cerr << "gradM: " << gradientM.t();
 
         arma::vec gradient  = gradientJ
-                              + penal_factor * (
+                              - penal_factor * (
                                   gradientM - 2 * Jmean * gradientJ
-                              ) / (2 * (nbEpisodesperUpdate-nbIndipendentSamples) * stddevJ);
+                              ) / (nbEpisodesperUpdate-nbIndipendentSamples);
 
 
         //--- Compute learning step
@@ -352,9 +331,8 @@ protected:
         for (int i = 0, ie = target.getParametersSize(); i < ie; ++i)
         {
             bJ_num[i] = 0;
-            bJ_den[i] = 0;
             bM_num[i] = 0;
-            bM_den[i] = 0;
+            b_den[i]  = 0;
         }
     }
 
@@ -364,13 +342,14 @@ protected:
     Policy<ActionC, StateC>& behavioral;
     unsigned int nbEpisodesperUpdate;
     unsigned int runCounter, epCounter;
-    double df, Jep, stepLength, penal_factor;
+    double df, Jep, Jepoff, stepLength, penal_factor;
     int rewardId;
 
-    double prodImpWeight, currentIW;
-    arma::vec sumdlogpi, bJ_num, bJ_den, bM_num, bM_den;
+    double prodImpWeightB, prodImpWeightT;
+    arma::vec sumdlogpi, bJ_num, b_den, bM_num;
 
     std::vector<double> history_J;
+    std::vector<double> history_J_off;
     std::vector<double> history_impWeights;
     std::vector<arma::vec> history_sumdlogpi;
 
