@@ -1,14 +1,5 @@
 #include "mex.h" /* Always include this */
 
-#include <NLS.h>
-#include <DifferentiableNormals.h>
-#include <Core.h>
-#include <PolicyEvalAgent.h>
-#include <parametric/differentiable/NormalPolicy.h>
-#include <policy_search/offpolicy/OffAlgorithm.h>
-#include <BasisFunctions.h>
-#include <basis/PolynomialFunction.h>
-#include <basis/ConditionBasedFunction.h>
 #include <RandomGenerator.h>
 #include <FileManager.h>
 
@@ -28,27 +19,43 @@ using namespace ReLe;
     const char* F [] = {"s", "a", "r", "nexts", "terminal"}
 
 
-void help() {
-    mexPrintf(" [new_samples, expdret, expuret, rethist] = mexCollectSamples(domain, mdp_config,...\n\t\t\t maxepisodes, maxsteps, policy, [isAvgReward])\n");
+void help()
+{
+    mexPrintf(" [new_samples, dret] = mexCollectSamples(domain,...\n\t\t\t nbEpisodes, maxSteps)\n");
     mexPrintf(" INPUTS:\n");
     mexPrintf("  - domain:       domain name (e.g., HumanWalk)\n");
-    mexPrintf("  - mdp_config:     the configuration of the mdp\n");
-    mexPrintf("  - maxepisodes:  maximum number of episodes\n");
-    mexPrintf("  - maxsteps:     maximum number of steps\n");
-    mexPrintf("  - policy:       policy structure\n");
-    mexPrintf("  - isAvgReward:  flag for average reward\n");
+    mexPrintf("  - nbEpisodes:   maximum number of episodes\n");
+    mexPrintf("  - maxSteps:     maximum number of steps\n");
     mexPrintf(" OUTPUTS\n");
     mexPrintf("  - new_samples:  the set of episodess {state, action, nextstate, reward, absorb}\n");
-    mexPrintf("  - expdret:      expected discounted reward over episodes\n");
-    mexPrintf("  - expuret:      expected undiscounted reward over episodes\n");
-    mexPrintf("  - rethist:      the return history, i.e., the expected return of each episode\n");
+    mexPrintf("  - dret:      expected discounted reward over per episode\n");
 }
 
 
 void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
                  int nrhs, const mxArray *prhs[]) /* Input variables */
 {
+#define IN_DOMAIN     prhs[0]
+#define IN_NBEPISODES prhs[1]
+#define IN_MAXSTEPS   prhs[2]
+
 #define SAMPLES  plhs[0]
+#define DRETURN  plhs[1]
+
+    char* domain_settings = mxArrayToString(IN_DOMAIN);
+
+    if ((strcmp(domain_settings, "lqr") == 0) || (strcmp(domain_settings, "nls") == 0))
+    {
+        CollectSamplesInContinuousMDP(nrhs, prhs, nlhs, plhs);
+    }
+    else if(strcmp(domain_settings, "deep") == 0)
+    {
+        CollectSamplesInDenseMDP(nrhs, prhs, nlhs, plhs);
+    }
+    else
+    {
+        mexErrMsgTxt("mexCollectSamples: Unknown settings!\n");
+    }
 
     NLS mdp;
     int dim = mdp.getSettings().continuosStateDim;
@@ -78,10 +85,11 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     //---
 
     PolicyEvalAgent
-    <DenseAction,DenseState,NormalStateDependantStddevPolicy > agent(policy);
+    <DenseAction,DenseState> agent(policy);
 
+    double gamma = 0.99;
     ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
-    MatlabCollectorStrategy<DenseAction, DenseState> strat = MatlabCollectorStrategy<DenseAction, DenseState>();
+    MatlabCollectorStrategy<DenseAction, DenseState> strat = MatlabCollectorStrategy<DenseAction, DenseState>(gamma);
     oncore.getSettings().loggerStrategy = &strat;
 
     int horiz = mdp.getSettings().horizon;
@@ -92,48 +100,52 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
         oncore.runTestEpisode();
 
     std::vector<MatlabCollectorStrategy<DenseAction,DenseState>::MatlabEpisode>& data = strat.data;
-    
+
     int ds = data[0].dx;
     int da = data[0].du;
     int dr = data[0].dr;
-    
+
     MEX_DATA_FIELDS(fieldnames);
     // return samples
     SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);
-
-	cout << "PROVAAAA" << endl;
+    DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);
+    double* Jptr = mxGetPr(DRETURN);
 
     for (int i = 0, ie = data.size(); i < ie; ++i)
     {
         int steps = data[i].steps;
-        cout << steps << endl;
 
-        mxArray* state_vector      = mxCreateDoubleMatrix(0, 0, mxREAL);
-        mxSetM(state_vector, ds);
-        mxSetN(state_vector, steps);
-        mxSetData(state_vector, data[i].states);
-
-
-        mxArray* nextstate_vector  = mxCreateDoubleMatrix(0, 0, mxREAL);
-        mxSetM(nextstate_vector, ds);
-        mxSetN(nextstate_vector, steps);
-        mxSetData(nextstate_vector, data[i].nextstates);
-
-        mxArray* action_vector     = mxCreateDoubleMatrix(0, 0, mxREAL);
-        mxSetM(action_vector, ds);
-        mxSetN(action_vector, steps);
-        mxSetData(action_vector, data[i].actions);
-
-        mxArray* reward_vector     = mxCreateDoubleMatrix(0, 0, mxREAL);
-        mxSetM(reward_vector, dr);
-        mxSetN(reward_vector, steps);
-        mxSetData(reward_vector, data[i].rewards);
+        mxArray* state_vector      = mxCreateDoubleMatrix(ds, steps, mxREAL);
+//        mxSetM(state_vector, ds);
+//        mxSetN(state_vector, steps);
+//        mxSetData(state_vector, data[i].states);
+        memcpy(mxGetPr(state_vector), data[i].states.memptr(), sizeof(double)*ds*steps);
 
 
-        mxArray* absorb_vector     = mxCreateNumericMatrix(0, 0, mxINT8_CLASS, mxREAL);
-        mxSetM(absorb_vector, 1);
-        mxSetN(absorb_vector, steps);
-        mxSetData(absorb_vector, data[i].absorb);
+        mxArray* nextstate_vector  = mxCreateDoubleMatrix(ds, steps, mxREAL);
+//        mxSetM(nextstate_vector, ds);
+//        mxSetN(nextstate_vector, steps);
+//        mxSetData(nextstate_vector, data[i].nextstates);
+        memcpy(mxGetPr(nextstate_vector), data[i].nextstates.memptr(), sizeof(double)*ds*steps);
+
+        mxArray* action_vector     = mxCreateDoubleMatrix(da, steps, mxREAL);
+//        mxSetM(action_vector, da);
+//        mxSetN(action_vector, steps);
+//        mxSetData(action_vector, data[i].actions);
+        memcpy(mxGetPr(action_vector), data[i].actions.memptr(), sizeof(double)*da*steps);
+
+        mxArray* reward_vector     = mxCreateDoubleMatrix(dr, steps, mxREAL);
+//        mxSetM(reward_vector, dr);
+//        mxSetN(reward_vector, steps);
+//        mxSetData(reward_vector, data[i].rewards);
+        memcpy(mxGetPr(reward_vector), data[i].rewards.memptr(), sizeof(double)*dr*steps);
+
+
+        mxArray* absorb_vector     = mxCreateNumericMatrix(1, steps, mxINT32_CLASS, mxREAL);
+//        mxSetM(absorb_vector, 1);
+//        mxSetN(absorb_vector, steps);
+//        mxSetData(absorb_vector, data[i].absorb);
+        memcpy(mxGetPr(absorb_vector), data[i].absorb.memptr(), sizeof(signed char)*steps);
 
 
         mxSetFieldByNumber(SAMPLES, i, 0, state_vector);
@@ -142,7 +154,9 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
         mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);
         mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);
 
+        for (int oo = 0; oo < dr; ++oo)
+            Jptr[i*dr+oo] = data[i].Jvalue[oo];
     }
 
-
+    mxFree(domain);
 }

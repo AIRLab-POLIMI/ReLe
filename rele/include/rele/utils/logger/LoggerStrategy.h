@@ -324,12 +324,82 @@ class MatlabCollectorStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
 
+//    struct MatlabEpisode
+//    {
+//        double *states = nullptr, *actions, *nextstates, *rewards;
+//        signed char* absorb;
+//        int dx,du,dr,steps;
+//        double *Jvalue;
+//    };
     struct MatlabEpisode
     {
-        double *states, *actions, *nextstates, *rewards;
-        signed char* absorb;
+        arma::vec states, actions, nextstates, rewards;
+        arma::ivec absorb;
         int dx,du,dr,steps;
+        arma::vec Jvalue;
     };
+
+
+    MatlabCollectorStrategy(double gamma)
+        : gamma(gamma)
+    {
+    }
+
+    virtual ~MatlabCollectorStrategy()
+    {
+    }
+
+//    virtual void processData(Episode<ActionC, StateC>& samples)
+//    {
+//        int ds = samples[0].x.n_elem;
+//        int da = samples[0].u.n_elem;
+//        int dr = samples[0].r.size();
+//        int nsteps = samples.size();
+//        double* states      = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
+//        double* nextstates  = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
+//        double* actions     = static_cast<double*>(malloc(da*nsteps*sizeof(double)));
+//        double* rewards     = static_cast<double*>(malloc(dr*nsteps*sizeof(double)));
+//        signed char* absorb = static_cast<signed char*>(calloc(nsteps, sizeof(signed char)));
+//        double* Jvalue      = static_cast<double*>(calloc(dr, sizeof(double)));
+//        int count = 0;
+//        double df = 1.0;
+//        for (auto sample : samples)
+//        {
+//            for (int i = 0; i < ds; ++i)
+//            {
+//                states[count*ds+i] = sample.x[i];
+//                nextstates[count*ds+i] = sample.xn[i];
+//            }
+//            for (int i = 0; i < da; ++i)
+//            {
+//                actions[count*da+i] = sample.u[i];
+//            }
+//            for (int i = 0; i < dr; ++i)
+//            {
+//                rewards[count*dr+i] = sample.r[i];
+//                Jvalue[i] += df*sample.r[i];
+//            }
+//            count++;
+//            df *= gamma;
+//        }
+//        if (samples[nsteps-1].xn.isAbsorbing())
+//        {
+//            absorb[nsteps-1] = 1;
+//        }
+
+//        MatlabEpisode ep;
+//        ep.states = states;
+//        ep.actions = actions;
+//        ep.nextstates = nextstates;
+//        ep.absorb = absorb;
+//        ep.dx = ds;
+//        ep.du = da;
+//        ep.dr = dr;
+//        ep.steps = nsteps;
+//        ep.Jvalue = Jvalue;
+
+//        data.push_back(ep);
+//    }
 
     virtual void processData(Episode<ActionC, StateC>& samples)
     {
@@ -337,12 +407,14 @@ public:
         int da = samples[0].u.n_elem;
         int dr = samples[0].r.size();
         int nsteps = samples.size();
-        double* states      = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
-        double* nextstates  = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
-        double* actions     = static_cast<double*>(malloc(da*nsteps*sizeof(double)));
-        double* rewards     = static_cast<double*>(malloc(dr*nsteps*sizeof(double)));
-        signed char* absorb = static_cast<signed char*>(calloc(nsteps, sizeof(signed char)));
+        arma::vec states(ds*nsteps);
+        arma::vec nextstates(ds*nsteps);
+        arma::vec actions(da*nsteps);
+        arma::vec rewards(dr*nsteps);
+        arma::ivec absorb(nsteps);
+        arma::vec Jvalue(dr);
         int count = 0;
+        double df = 1.0;
         for (auto sample : samples)
         {
             for (int i = 0; i < ds; ++i)
@@ -357,8 +429,10 @@ public:
             for (int i = 0; i < dr; ++i)
             {
                 rewards[count*dr+i] = sample.r[i];
+                Jvalue[i] += df*sample.r[i];
             }
             count++;
+            df *= gamma;
         }
         if (samples[nsteps-1].xn.isAbsorbing())
         {
@@ -374,6 +448,7 @@ public:
         ep.du = da;
         ep.dr = dr;
         ep.steps = nsteps;
+        ep.Jvalue = Jvalue;
 
         data.push_back(ep);
     }
@@ -384,11 +459,8 @@ public:
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
     }
 
-    virtual ~MatlabCollectorStrategy()
-    {
-    }
-
     std::vector<MatlabEpisode> data;
+    double gamma;
 };
 
 }
