@@ -1,4 +1,4 @@
-#include "collecSamplesUtils.h"
+#include "collectSamplesUtils.h"
 
 #include <DifferentiableNormals.h>
 #include <Core.h>
@@ -6,6 +6,7 @@
 #include <parametric/differentiable/NormalPolicy.h>
 #include <BasisFunctions.h>
 #include <basis/PolynomialFunction.h>
+#include <LQR.h>
 
 using namespace std;
 using namespace ReLe;
@@ -22,7 +23,7 @@ using namespace arma;
 void
 CollectSamplesInContinuousMDP(
     int nlhs, mxArray *plhs[], /* Output variables */
-    int nrhs, const mxArray *prhs[]) /* Input variables */
+    int nrhs, const mxArray *prhs[] /* Input variables */
 )
 {
 
@@ -35,10 +36,8 @@ CollectSamplesInContinuousMDP(
     {
         LQR mdp(1,1);
         PolynomialFunction* pf = new PolynomialFunction(1,1);
-        cout << *pf << endl;
         DenseBasisVector basis;
         basis.push_back(pf);
-        cout << basis << endl;
         LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
         NormalPolicy policy(0.1, &regressor);
 
