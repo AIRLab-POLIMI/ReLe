@@ -12,4 +12,10 @@ CollectSamplesInContinuousMDP(
     int nrhs, const mxArray *prhs[] /* Input variables */
 );
 
+void
+CollectSamplesInDenseMDP(
+    int nlhs, mxArray *plhs[], /* Output variables */
+    int nrhs, const mxArray *prhs[] /* Input variables */
+);
+
 #endif

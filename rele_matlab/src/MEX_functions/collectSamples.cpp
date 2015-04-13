@@ -63,10 +63,10 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     {
         CollectSamplesInContinuousMDP(nlhs, plhs, nrhs, prhs);
     }
-//     else if(strcmp(domain_settings, "deep") == 0)
-//     {
-//         CollectSamplesInDenseMDP(nlhs, plhs, nrhs, prhs);
-//     }
+    else if(strcmp(domain_settings, "deep") == 0)
+    {
+        CollectSamplesInDenseMDP(nlhs, plhs, nrhs, prhs);
+    }
     else
     {
         mexErrMsgTxt("collectSamples: Unknown settings!\n");

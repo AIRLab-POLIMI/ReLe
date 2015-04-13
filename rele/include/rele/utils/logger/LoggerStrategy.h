@@ -319,6 +319,48 @@ public:
     Dataset<ActionC, StateC> data;
 };
 
+
+inline void getDimensionsWorker(Episode<FiniteAction, FiniteState>& samples, int& ds, int& da, int& dr)
+{
+    ds = 1;
+    da = 1;
+    dr = samples[0].r.size();
+}
+
+inline void getDimensionsWorker(Episode<FiniteAction, DenseState>& samples, int& ds, int& da, int& dr)
+{
+    ds = samples[0].x.n_elem;
+    da = 1;
+    dr = samples[0].r.size();
+}
+
+inline void getDimensionsWorker(Episode<DenseAction, DenseState>& samples, int& ds, int& da, int& dr)
+{
+    ds = samples[0].x.n_elem;
+    da = samples[0].u.n_elem;
+    dr = samples[0].r.size();
+}
+
+inline void assigneActionWorker(double& val, FiniteAction& action, int i)
+{
+    val = action.getActionN();
+}
+
+inline void assigneActionWorker(double& val, DenseAction& action, int i)
+{
+    val = action[i];
+}
+
+inline void assigneStateWorker(arma::vec& val, int idx, FiniteState& state, int i)
+{
+    val[idx] = state.getStateN();
+}
+
+inline void assigneStateWorker(arma::vec& val, int idx, DenseState& state, int i)
+{
+    val[idx] = state[i];
+}
+
 template<class ActionC, class StateC>
 class MatlabCollectorStrategy : public LoggerStrategy<ActionC, StateC>
 {
@@ -403,28 +445,33 @@ public:
 
     virtual void processData(Episode<ActionC, StateC>& samples)
     {
-        int ds = samples[0].x.n_elem;
-        int da = samples[0].u.n_elem;
-        int dr = samples[0].r.size();
+//        int ds = samples[0].x.n_elem;
+//        int da = samples[0].u.n_elem;
+//        int dr = samples[0].r.size();
+        int ds, da, dr;
+        getDimensionsWorker(samples, ds, da, dr);
         int nsteps = samples.size();
         arma::vec states(ds*nsteps);
         arma::vec nextstates(ds*nsteps);
         arma::vec actions(da*nsteps);
         arma::vec rewards(dr*nsteps);
         arma::ivec absorb(nsteps);
-        arma::vec Jvalue(dr);
+        arma::vec Jvalue(dr, arma::fill::zeros);
         int count = 0;
         double df = 1.0;
         for (auto sample : samples)
         {
             for (int i = 0; i < ds; ++i)
             {
-                states[count*ds+i] = sample.x[i];
-                nextstates[count*ds+i] = sample.xn[i];
+                assigneStateWorker(states, count*ds+i, sample.x, i);
+                assigneStateWorker(nextstates, count*ds+i, sample.xn, i);
+//                states[count*ds+i] = sample.x[i];
+//                nextstates[count*ds+i] = sample.xn[i];
             }
             for (int i = 0; i < da; ++i)
             {
-                actions[count*da+i] = sample.u[i];
+                assigneActionWorker(actions[count*da+i], sample.u, i);
+//                actions[count*da+i] = sample.u[i];
             }
             for (int i = 0; i < dr; ++i)
             {
@@ -443,6 +490,7 @@ public:
         ep.states = states;
         ep.actions = actions;
         ep.nextstates = nextstates;
+        ep.rewards = rewards;
         ep.absorb = absorb;
         ep.dx = ds;
         ep.du = da;
