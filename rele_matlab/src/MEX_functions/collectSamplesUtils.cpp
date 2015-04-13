@@ -9,6 +9,7 @@
 #include <basis/PolynomialFunction.h>
 #include <basis/ConditionBasedFunction.h>
 #include <LQR.h>
+#include <NLS.h>
 #include <DeepSeaTreasure.h>
 
 using namespace std;
@@ -179,6 +180,40 @@ CollectSamplesInContinuousMDP(
 //         }
 //         ////////////////////////////////////////////////
     }
+    else if (strcmp(domain_settings, "nls") == 0)
+    {
+        NLS mdp;
+        int dim = mdp.getSettings().continuosStateDim;
+
+        //--- define policy
+        DenseBasisVector basis;
+        basis.generatePolynomialBasisFunctions(1,dim);
+        delete basis.at(0);
+        basis.erase(basis.begin());
+        LinearApproximator meanRegressor(dim, basis);
+
+        DenseBasisVector stdBasis;
+        stdBasis.generatePolynomialBasisFunctions(1,dim);
+        delete stdBasis.at(0);
+        stdBasis.erase(stdBasis.begin());
+        LinearApproximator stdRegressor(dim, stdBasis);
+        arma::vec stdWeights(stdRegressor.getParametersSize());
+        stdWeights.fill(0.5);
+        stdRegressor.setParameters(stdWeights);
+
+
+        NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
+
+        arma::vec pp(2);
+        pp(0) = -0.4;
+        pp(1) = 0.4;
+        meanRegressor.setParameters(pp);
+
+        SAMPLES_GATHERING(DenseAction, DenseState)
+    }
+//     else if (strcmp(domain_settings, "dam") == 0)
+//     {
+//     }
     else
     {
         mexErrMsgTxt("CollectSamplesInContinuousMDP: Unknown settings!\n");
