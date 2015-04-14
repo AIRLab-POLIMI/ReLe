@@ -59,7 +59,9 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
 
     char* domain_settings = mxArrayToString(IN_DOMAIN);
 
-    if ((strcmp(domain_settings, "lqr") == 0) || (strcmp(domain_settings, "nls") == 0))
+    if ((strcmp(domain_settings, "lqr") == 0) || (strcmp(domain_settings, "nls") == 0)
+            || (strcmp(domain_settings, "dam") == 0)
+       )
     {
         CollectSamplesInContinuousMDP(nlhs, plhs, nrhs, prhs);
     }

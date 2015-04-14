@@ -123,13 +123,14 @@ Dam::Dam()
 {
     setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
                      damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
+    currentState.set_size(damConfig.continuosStateDim);
 }
 
 Dam::Dam(DamSettings& config)
-    : ContinuousMDP(config.continuosStateDim, config.continuosActionDim, config.rewardDim,
-                    config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
-    damConfig(config)
+    : damConfig(config)
 {
+    setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
+                     damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
     currentState.set_size(damConfig.continuosStateDim);
 }
 
@@ -219,9 +220,9 @@ void Dam::getInitialState(DenseState& state)
                       };
 
     int idx   = RandomGenerator::sampleUniformInt(0,10);
-    state[0]  = s_init[idx];
-    //    state[0] = RandomGenerator::sampleUniformInt(160);
-    currentState[0] = state[0]; //keep info about the current state
+    //    currentState[0] = RandomGenerator::sampleUniformInt(160);
+    currentState[0] = s_init[idx]; //keep info about the current state
+    state = currentState;
 }
 
 

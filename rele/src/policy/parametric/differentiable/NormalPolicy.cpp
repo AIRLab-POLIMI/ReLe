@@ -191,6 +191,7 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
         //        std::cout <<"B: " << B << std::endl;
         gradient(i+dim) = A + B;
     }
+    return gradient;
 }
 
 arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& action)

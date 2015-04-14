@@ -390,6 +390,17 @@ public:
     }
 
     MVNLogisticPolicy(LinearApproximator* projector,
+                      double variance_asymptote)
+        : MVNPolicy(projector),
+          mLogisticParams (arma::zeros<arma::vec>(projector->getOutputSize())),
+          mAsVariance(arma::ones<arma::vec>(1)*variance_asymptote)
+    {
+        unsigned int out_dim = projector->getOutputSize();
+        mCovariance.zeros(out_dim, out_dim);
+        UpdateCovarianceMatrix();
+    }
+
+    MVNLogisticPolicy(LinearApproximator* projector,
                       arma::vec variance_asymptote,
                       arma::vec varianceparams)
         : MVNPolicy(projector),
@@ -430,16 +441,16 @@ public:
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return 2*mMean.n_elem;
+        return approximator->getParametersSize() + mLogisticParams.n_elem;
     }
     virtual inline void setParameters(arma::vec &w)
     {
-        int ie = mLogisticParams.n_elem;
-        arma::vec tmp = w.rows(0, ie-1);
+        int dp = approximator->getParametersSize();
+        arma::vec tmp = w.rows(0, dp-1);
         approximator->setParameters(tmp);
-        for (int i = 0; i < ie; ++i)
+        for (int i = 0, ie = mLogisticParams.n_elem; i < ie; ++i)
         {
-            mLogisticParams(i) = w[ie + i];
+            mLogisticParams(i) = w[dp + i];
             assert(!std::isnan(mLogisticParams(i)) && !std::isinf(mLogisticParams(i)));
         }
         UpdateCovarianceMatrix();

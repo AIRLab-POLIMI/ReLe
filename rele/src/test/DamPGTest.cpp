@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
         config.nbRuns      = 400;
         config.nbEpisodes  = 100;
         config.stepLength  = 0.01;
+        config.steprule    = new AdaptiveStep(config.stepLength);
     }
     //---
 
@@ -154,11 +155,13 @@ int main(int argc, char *argv[])
 
     Dam mdp;
 
+    PolynomialFunction *pf = new PolynomialFunction(1,0);
     GaussianRbf* gf1 = new GaussianRbf(0,50);
     GaussianRbf* gf2 = new GaussianRbf(50,20);
     GaussianRbf* gf3 = new GaussianRbf(120,40);
     GaussianRbf* gf4 = new GaussianRbf(160,50);
     DenseBasisVector basis;
+    basis.push_back(pf);
     basis.push_back(gf1);
     basis.push_back(gf2);
     basis.push_back(gf3);
@@ -171,7 +174,8 @@ int main(int argc, char *argv[])
     p(2) = 0;
     p(3) = 0;
     p(4) = 50;
-    MVNLogisticPolicy policy(&regressor, 50*ones<vec>(p.n_elem), p);
+    regressor.setParameters(p);
+    MVNLogisticPolicy policy(&regressor, 50);
 
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;

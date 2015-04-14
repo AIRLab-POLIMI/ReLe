@@ -7,9 +7,11 @@
 #include <parametric/differentiable/GibbsPolicy.h>
 #include <BasisFunctions.h>
 #include <basis/PolynomialFunction.h>
+#include <basis/GaussianRBF.h>
 #include <basis/ConditionBasedFunction.h>
 #include <LQR.h>
 #include <NLS.h>
+#include <Dam.h>
 #include <DeepSeaTreasure.h>
 
 using namespace std;
