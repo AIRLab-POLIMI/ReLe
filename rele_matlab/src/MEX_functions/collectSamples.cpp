@@ -41,8 +41,9 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
 #define IN_NBEPISODES prhs[1]
 #define IN_MAXSTEPS   prhs[2]
 #define IN_GAMMA      prhs[3]
+#define IN_PAR_STRUCT prhs[4]
 
-    if (nrhs < 4)
+    if (nrhs < 5)
     {
         help();
         mexErrMsgTxt("collectSamples: missing input parameters!\n");
@@ -56,6 +57,8 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
         mexErrMsgTxt("collectSamples: argument 3 must be a scalar!\n");
     if (!mxIsScalar(IN_GAMMA))
         mexErrMsgTxt("collectSamples: argument 4 must be a scalar!\n");
+    if (!mxIsStruct(IN_PAR_STRUCT))
+        mexErrMsgTxt("collectSamples: argument 5 must be a struct!\n");      
 
     char* domain_settings = mxArrayToString(IN_DOMAIN);
 

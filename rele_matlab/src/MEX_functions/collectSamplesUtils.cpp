@@ -94,6 +94,7 @@ class deep_state_identity: public BasisFunction
 #define IN_NBEPISODES prhs[1]
 #define IN_MAXSTEPS   prhs[2]
 #define IN_GAMMA      prhs[3]
+#define IN_PAR_STRUCT prhs[4]
 
 #define SAMPLES  plhs[0]
 #define DRETURN  plhs[1]
@@ -109,16 +110,37 @@ CollectSamplesInContinuousMDP(
     int nbEpisodes = mxGetScalar(IN_NBEPISODES);
     int maxSteps   = mxGetScalar(IN_MAXSTEPS);
     double gamma   = mxGetScalar(IN_GAMMA);
-    mexPrintf("%f\n", gamma);
 
     if (strcmp(domain_settings, "lqr") == 0)
     {
+        // extract information from the struct
+        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: missing field policyParameters!\n");
+        }
+        int ncols = mxGetN(array);
+        int nrows = mxGetM(array);
+        if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: wrong number of policy parameters!\n");
+        }
+        arma::vec policyParams(mxGetPr(array), ncols*nrows);
+
+        array = mxGetField(IN_PAR_STRUCT, 0, "stddev");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: missing field stddev!\n");
+        }
+        double stddev = mxGetScalar(array);
+
         LQR mdp(1,1);
         PolynomialFunction* pf = new PolynomialFunction(1,1);
         DenseBasisVector basis;
         basis.push_back(pf);
         LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-        NormalPolicy policy(0.1, &regressor);
+        NormalPolicy policy(stddev, &regressor);
+        policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState)
 //         //////////////////////////////////////////////// METTERE IN UNA DEFINE
@@ -184,6 +206,20 @@ CollectSamplesInContinuousMDP(
     }
     else if (strcmp(domain_settings, "nls") == 0)
     {
+        // extract information from the struct
+        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-NLS: missing field policyParameters!\n");
+        }
+        int ncols = mxGetN(array);
+        int nrows = mxGetM(array);
+        if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-NLS: wrong number of policy parameters!\n");
+        }
+        arma::vec policyParams(mxGetPr(array), ncols*nrows);
+
         NLS mdp;
         int dim = mdp.getSettings().continuosStateDim;
 
@@ -205,36 +241,68 @@ CollectSamplesInContinuousMDP(
 
 
         NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
-
-        arma::vec pp(2);
-        pp(0) = -0.4;
-        pp(1) = 0.4;
-        meanRegressor.setParameters(pp);
+        policy.setParameters(policyParams);
+        /*
+                arma::vec pp(2);
+                pp(0) = -0.4;
+                pp(1) = 0.4;
+                meanRegressor.setParameters(pp);*/
 
         SAMPLES_GATHERING(DenseAction, DenseState)
     }
     else if (strcmp(domain_settings, "dam") == 0)
     {
+        // extract information from the struct
+        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field policyParameters!\n");
+        }
+        int ncols = mxGetN(array);
+        int nrows = mxGetM(array);
+        if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of policy parameters!\n");
+        }
+        arma::vec policyParams(mxGetPr(array), ncols*nrows);
+
+        array = mxGetField(IN_PAR_STRUCT, 0, "asVariance");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field asVarince!\n");
+        }
+
+        ncols = mxGetN(array);
+        nrows = mxGetM(array);
+        if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of asymptotic variance elements!\n");
+        }
+        arma::vec as_variance(mxGetPr(array), ncols*nrows);
+
         Dam mdp;
 
+        PolynomialFunction *pf = new PolynomialFunction(1,0);
         GaussianRbf* gf1 = new GaussianRbf(0,50);
         GaussianRbf* gf2 = new GaussianRbf(50,20);
         GaussianRbf* gf3 = new GaussianRbf(120,40);
         GaussianRbf* gf4 = new GaussianRbf(160,50);
         DenseBasisVector basis;
+        basis.push_back(pf);
         basis.push_back(gf1);
         basis.push_back(gf2);
         basis.push_back(gf3);
         basis.push_back(gf4);
-        cout << basis << endl;
         LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-        vec p(5);
-        p(0) = 50;
-        p(1) = -50;
-        p(2) = 0;
-        p(3) = 0;
-        p(4) = 50;
-        MVNLogisticPolicy policy(&regressor, 50*ones<vec>(p.n_elem), p);
+//         vec p(5);
+//         p(0) = 50;
+//         p(1) = -50;
+//         p(2) = 0;
+//         p(3) = 0;
+//         p(4) = 50;
+//         regressor.setParameters(p);
+        MVNLogisticPolicy policy(&regressor, as_variance);
+        policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState)
     }
@@ -262,6 +330,20 @@ CollectSamplesInDenseMDP(
 
     if (strcmp(domain_settings, "deep") == 0)
     {
+        // extract information from the struct
+        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field policyParameters!\n");
+        }
+        int ncols = mxGetN(array);
+        int nrows = mxGetM(array);
+        if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of policy parameters!\n");
+        }
+        arma::vec policyParams(mxGetPr(array), ncols*nrows);
+
         DeepSeaTreasure mdp;
         vector<FiniteAction> actions;
         for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
@@ -292,6 +374,7 @@ CollectSamplesInDenseMDP(
 
         LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
         ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);
+        policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(FiniteAction, DenseState)
     }
