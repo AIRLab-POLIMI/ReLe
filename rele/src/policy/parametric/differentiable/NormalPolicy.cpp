@@ -152,5 +152,52 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
     return - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// MVNLogisticPolicy
+///////////////////////////////////////////////////////////////////////////////////////
+
+arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& action)
+{
+    UpdateInternalState(state);
+    arma::vec smdiff(mCovariance.n_rows);
+    for (unsigned i = 0; i < mCovariance.n_rows; ++i)
+    {
+        smdiff(i) = action[i] - mMean(i);
+    }
+    AbstractBasisMatrix& basis = approximator->getBasis();
+    arma::mat features = basis(state);
+
+    // compute gradient
+    arma::vec meang = 0.5 * features * (mCinv + mCinv.t()) * smdiff;
+    unsigned int dim = meang.n_elem, gradDim = dim + mLogisticParams.n_elem;
+
+    //correct gradient dimension
+    arma::vec gradient(gradDim, arma::fill::zeros);
+
+    //first fill gradient of the mean
+    for (unsigned int i = 0; i < dim; ++i)
+    {
+        gradient(i) = meang(i);
+    }
+
+    //gradient of covariance matrix
+    for (unsigned int i = 0, ie = mLogisticParams.n_elem; i < ie; ++i)
+    {
+        double logisticVal = logistic(mLogisticParams(i), mAsVariance(i));
+        double A = - 0.5 * logisticVal * exp(-mLogisticParams(i)) / mAsVariance(i);
+        double B = 0.5 * exp(-mLogisticParams(i))
+                   * smdiff(i) * smdiff(i) / mAsVariance(i);
+        //        std::cout <<"A: " << A << std::endl;
+        //        std::cout <<"B: " << B << std::endl;
+        gradient(i+dim) = A + B;
+    }
+}
+
+arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& action)
+{
+    std::cerr << "MVNLogisticPolicy: TODO " << std::endl;
+    abort();
+}
+
 
 } //end namespace

@@ -55,7 +55,7 @@ public:
     }
 
     //ParametricPolicy
-    inline virtual const arma::vec& getParameters() const
+    inline virtual arma::vec getParameters() const
     {
         return w;
     }

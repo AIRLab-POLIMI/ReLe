@@ -264,16 +264,7 @@ CollectSamplesInDenseMDP(
             basis.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
             basis.push_back(new AndConditionBasisFunction(d2si,2,i));
             basis.push_back(new AndConditionBasisFunction(dsi,2,i));
-
-            //        basis.push_back(new ConditionBasisFunction(pf0,i));
-            //        basis.push_back(new ConditionBasisFunction(pfs1,i));
-            //        basis.push_back(new ConditionBasisFunction(pfs2,i));
-            //        basis.push_back(new ConditionBasisFunction(pfs1s2,i));
-            //        basis.push_back(new ConditionBasisFunction(d2si,i));
-            //        basis.push_back(new ConditionBasisFunction(dsi,i));
         }
-        //    cout << basis << endl;
-        //    cout << "basis length: " << basis.size() << endl;
 
         LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
         ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);

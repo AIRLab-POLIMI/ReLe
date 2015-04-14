@@ -60,7 +60,7 @@ public:
 
     // ParametricPolicy interface
 public:
-    virtual inline const arma::vec &getParameters() const
+    virtual inline arma::vec getParameters() const
     {
         return approximator->getParameters();
     }
@@ -254,6 +254,19 @@ public:
         }
     }
 
+    virtual inline std::string getPolicyName()
+    {
+        return "MVNPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy()
+    {
+        return "";
+    }
+
 public:
 
     virtual double operator()(const arma::vec& state, const arma::vec& action);
@@ -262,7 +275,7 @@ public:
 
     // ParametricPolicy interface
 public:
-    virtual inline const arma::vec &getParameters() const
+    virtual inline arma::vec getParameters() const
     {
         return approximator->getParameters();
     }
@@ -322,6 +335,158 @@ protected:
     LinearApproximator* approximator;
     arma::vec mMean;
     bool clearRegressorOnExit;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// MVNLogisticPolicy
+///////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * This class represents a Multivariate Normal policy with
+ * linearly approximated mean value and diagonal covariance matrix
+ * parameterized via logistic functions:
+ * \f[\pi^{\theta}(a|s) = \mathcal{N}(a;\phi(s)\rho, \Sigma^{\Omega}),\qquad
+ * \forall s \in R^{n_s}, a \in R^{n_a},\f]
+ * where \f$\phi(s)\f$ is an \f$(n_a \times k)\f$ matrix,
+ * \f$\rho\f$ is a \f$k\f$-dimensional vector and
+ * \f$\Sigma^{\Omega}\f$ is a \f$(n_a \times n_a)\f$ diagonal matrix
+ * such that \f$\Sigma_{ii} = \frac{\tau}{1+e^{-\omega}}\f$.
+ *
+ * As a consequence, the parameter vector \f$\theta\f$ is obtained by
+ * concatenation of the mean and covariance parameters:
+ * \f[\rho = [K, \Omega]^{T},\f]
+ * where
+ * \f$\rho=[\rho_1,\dots,\rho_k]\f$ and \f$\Omega = [\omega_1, \dots,\omega_{n_a}]\f$.
+ *
+ *
+ * @brief Multivariate Normal distribution with logistic diagonal covariance matrix
+ */
+class MVNLogisticPolicy : public MVNPolicy
+{
+protected:
+    arma::vec mLogisticParams, mAsVariance;
+public:
+
+    /**
+     * Create an instance of Multivariate logistic policy with the given
+     * parameters. \a variance_asymptote defines the asymptotic value of the
+     * logistic function used for variance approximation:
+     * \f[\lim_{w \to +\infty} \frac{\tau}{1+e^{-w}} = \tau,\f]
+     * where \f$\tau\f$ is equal to \a variance_asymptote.
+     *
+     * @brief The constructor.
+     * @param projector The linear projector used for mean approximation
+     * @param variance_asymptote The asymptotic value of the logistic function.
+     */
+    MVNLogisticPolicy(LinearApproximator* projector,
+                      arma::vec variance_asymptote)
+        : MVNPolicy(projector),
+          mLogisticParams (arma::zeros<arma::vec>(projector->getOutputSize())),
+          mAsVariance(variance_asymptote)
+    {
+        unsigned int out_dim = projector->getOutputSize();
+        mCovariance.zeros(out_dim, out_dim);
+        UpdateCovarianceMatrix();
+    }
+
+    MVNLogisticPolicy(LinearApproximator* projector,
+                      arma::vec variance_asymptote,
+                      arma::vec varianceparams)
+        : MVNPolicy(projector),
+          mLogisticParams (varianceparams),
+          mAsVariance(variance_asymptote)
+    {
+        unsigned int out_dim = projector->getOutputSize();
+        mCovariance.zeros(out_dim, out_dim);
+        UpdateCovarianceMatrix();
+    }
+
+    virtual ~MVNLogisticPolicy()
+    {
+        if (clearRegressorOnExit == true)
+        {
+            delete approximator;
+        }
+    }
+
+    virtual inline std::string getPolicyName()
+    {
+        return "MVNLogisticPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy()
+    {
+        return "";
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline arma::vec getParameters() const
+    {
+        return arma::join_vert(approximator->getParameters(), mLogisticParams);
+    }
+    virtual inline const unsigned int getParametersSize() const
+    {
+        return 2*mMean.n_elem;
+    }
+    virtual inline void setParameters(arma::vec &w)
+    {
+        int ie = mLogisticParams.n_elem;
+        arma::vec tmp = w.rows(0, ie-1);
+        approximator->setParameters(tmp);
+        for (int i = 0; i < ie; ++i)
+        {
+            mLogisticParams(i) = w[ie + i];
+            assert(!std::isnan(mLogisticParams(i)) && !std::isinf(mLogisticParams(i)));
+        }
+        UpdateCovarianceMatrix();
+    }
+
+    // DifferentiablePolicy interface
+public:
+
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
+
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
+
+private:
+
+    /**
+     * @brief The logistic function
+     * @param w The exponent value
+     * @param asymptote The asymptotic value
+     * @return The value of the logistic function
+     */
+    double logistic(double w, double asymptote)
+    {
+        return asymptote / (1.0 + exp(-w));
+    }
+
+protected:
+
+    /**
+     * Compute the covariance matrix from the logistic parameters and
+     * compute the Cholesky decomposition of it.
+     *
+     * @brief Update the covariance matrix
+     */
+    void UpdateCovarianceMatrix()
+    {
+
+        for (unsigned int i = 0; i < mLogisticParams.n_elem; ++i)
+        {
+            mCovariance(i,i) = logistic(mLogisticParams(i), mAsVariance(i));
+            mCinv(i,i) = 1.0 / mCovariance(i,i);
+            // check that the covariance is not NaN or Inf
+            assert(!std::isnan(mCovariance(i,i)) && !std::isinf(mCovariance(i,i)));
+            assert(!std::isnan(mCinv(i,i)) && !std::isinf(mCinv(i,i)));
+        }
+        mCholeskyDec = arma::chol(mCovariance);
+    }
+
 };
 
 } // end namespace ReLe

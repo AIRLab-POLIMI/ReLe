@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/Dam.h"
+#include "Dam.h"
 
 #include "RandomGenerator.h"
 #include <cassert>
