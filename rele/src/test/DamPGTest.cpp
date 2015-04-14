@@ -26,6 +26,7 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
+#include "basis/GaussianRBF.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
@@ -153,10 +154,15 @@ int main(int argc, char *argv[])
 
     Dam mdp;
 
-    PolynomialFunction* pf = new PolynomialFunction(1,1);
-    cout << *pf << endl;
+    GaussianRbf* gf1 = new GaussianRbf(0,50);
+    GaussianRbf* gf2 = new GaussianRbf(50,20);
+    GaussianRbf* gf3 = new GaussianRbf(120,40);
+    GaussianRbf* gf4 = new GaussianRbf(160,50);
     DenseBasisVector basis;
-    basis.push_back(pf);
+    basis.push_back(gf1);
+    basis.push_back(gf2);
+    basis.push_back(gf3);
+    basis.push_back(gf4);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
     vec p(5);

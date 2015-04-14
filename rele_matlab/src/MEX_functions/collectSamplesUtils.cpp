@@ -211,9 +211,31 @@ CollectSamplesInContinuousMDP(
 
         SAMPLES_GATHERING(DenseAction, DenseState)
     }
-//     else if (strcmp(domain_settings, "dam") == 0)
-//     {
-//     }
+    else if (strcmp(domain_settings, "dam") == 0)
+    {
+        Dam mdp;
+
+        GaussianRbf* gf1 = new GaussianRbf(0,50);
+        GaussianRbf* gf2 = new GaussianRbf(50,20);
+        GaussianRbf* gf3 = new GaussianRbf(120,40);
+        GaussianRbf* gf4 = new GaussianRbf(160,50);
+        DenseBasisVector basis;
+        basis.push_back(gf1);
+        basis.push_back(gf2);
+        basis.push_back(gf3);
+        basis.push_back(gf4);
+        cout << basis << endl;
+        LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+        vec p(5);
+        p(0) = 50;
+        p(1) = -50;
+        p(2) = 0;
+        p(3) = 0;
+        p(4) = 50;
+        MVNLogisticPolicy policy(&regressor, 50*ones<vec>(p.n_elem), p);
+
+        SAMPLES_GATHERING(DenseAction, DenseState)
+    }
     else
     {
         mexErrMsgTxt("CollectSamplesInContinuousMDP: Unknown settings!\n");

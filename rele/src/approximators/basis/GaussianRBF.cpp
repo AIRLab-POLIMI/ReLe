@@ -27,8 +27,13 @@ using namespace arma;
 
 namespace ReLe
 {
+GaussianRbf::GaussianRbf(double center, double width)
+    : mean(arma::ones<arma::vec>(1)*center),
+      scale(width)
+{
+}
 
-GaussianRbf::GaussianRbf(unsigned int dimension, float mean_vec[], float scale_factor)
+GaussianRbf::GaussianRbf(unsigned int dimension, double mean_vec[], double scale_factor)
     : mean(arma::zeros<arma::vec>(dimension)), scale(scale_factor)
 {
     if (dimension != 0)
@@ -37,6 +42,10 @@ GaussianRbf::GaussianRbf(unsigned int dimension, float mean_vec[], float scale_f
         {
             mean[i] = mean_vec[i];
         }
+    }
+    else
+    {
+        abort();
     }
 }
 
