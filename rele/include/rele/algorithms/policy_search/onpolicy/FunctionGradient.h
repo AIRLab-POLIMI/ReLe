@@ -25,6 +25,7 @@
 #define FUNCTIONGRADIENT_H_
 
 #include "Transition.h"
+#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 
 namespace ReLe
 {
@@ -37,10 +38,28 @@ public:
 };
 
 template<class ActionC, class StateC>
-class WeightedSum : public RewardTransformation
+class IndexRT : public RewardTransformation<ActionC,StateC>
 {
 public:
-    WeightedSum(arma::vec weights)
+    IndexRT(unsigned int idx)
+        : index(idx)
+    {
+    }
+
+    virtual double operator()(StateC& s, ActionC& a, StateC& ns, Reward& r)
+    {
+        return r[index];
+    }
+
+protected:
+    unsigned int index;
+};
+
+template<class ActionC, class StateC>
+class WeightedSumRT : public RewardTransformation<ActionC,StateC>
+{
+public:
+    WeightedSumRT(arma::vec weights)
         : weights(weights)
     {
     }
@@ -101,7 +120,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn, tr.r);
                 // ********************** //
@@ -162,7 +181,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn, tr.r);
                 // ********************** //
@@ -251,7 +270,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
                 double creward = rewardf(tr.x, tr.u, tr.xn, tr.r);
                 Rew += df * creward;
@@ -285,10 +304,17 @@ public:
         int dp  = policy.getParametersSize();
         int nbEpisodes = data.size();
 
+        int maxSteps = 0;
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            int nbSteps = data[i].size();
+            if (maxSteps < nbSteps)
+                maxSteps = nbSteps;
+        }
+
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-
 
         arma::mat baseline_J_num(dp, maxSteps, arma::fill::zeros);
         arma::mat baseline_den(dp, maxSteps, arma::fill::zeros);
@@ -315,7 +341,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients

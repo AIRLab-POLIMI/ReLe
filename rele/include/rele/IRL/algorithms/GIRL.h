@@ -27,6 +27,7 @@
 #include "IRLAlgorithm.h"
 #include "Policy.h"
 #include "Transition.h"
+#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 #include <nlopt.hpp>
 
 namespace ReLe
@@ -192,7 +193,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
@@ -267,7 +268,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
@@ -375,7 +376,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
@@ -454,7 +455,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
+                localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients

@@ -44,6 +44,7 @@ LQR::LQR(arma::mat &A, arma::mat &B, std::vector<arma::mat> &Q, std::vector<arma
     ContinuousMDP(A.n_cols, B.n_cols, Q.size(), true, true, gamma, horizon),
     A(A), B(B), Q(Q), R(R)
 {
+    initialState.set_size(A.n_cols);
     assert(Q.size() == R.size());
     setInitialState();
 }

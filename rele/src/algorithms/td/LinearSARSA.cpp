@@ -79,8 +79,9 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
     vec deltaWeights = this->alpha * delta * this->eligibility;
 
     //TODO update
-    vec& regWeights = Q.getParameters();
+    vec regWeights = Q.getParameters();
     regWeights += deltaWeights;
+    Q.setParameters(regWeights);
 
     //update action and state
     x = nextState;
@@ -116,8 +117,9 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
     vec deltaWeights = this->alpha * delta * this->eligibility;
 
     //update regressor weights
-    vec& regWeights = Q.getParameters();
+    vec regWeights = Q.getParameters();
     regWeights += deltaWeights;
+    Q.setParameters(regWeights);
 }
 
 LinearGradientSARSA::~LinearGradientSARSA()
