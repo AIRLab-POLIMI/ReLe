@@ -20,7 +20,7 @@ namespace ReLe
 class NormalPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
-    NormalPolicy(const double& initialStddev, LinearApproximator* projector) :
+    NormalPolicy(const double initialStddev, LinearApproximator* projector) :
         mInitialStddev(initialStddev), mMean(0.0),
         approximator(projector), clearRegressorOnExit(false)
     {

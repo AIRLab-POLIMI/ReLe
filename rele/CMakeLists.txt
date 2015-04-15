@@ -194,6 +194,9 @@ target_link_libraries(grid_world rele)
 add_executable(lqr_MWAL src/test/IRL/LQRMWAL.cpp)
 target_link_libraries(lqr_MWAL rele)
 
+add_executable(lqr_GIRL src/test/IRL/LQRGIRL.cpp)
+target_link_libraries(lqr_GIRL rele)
+
 add_executable(simple_chain_MWAL src/test/IRL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
 
