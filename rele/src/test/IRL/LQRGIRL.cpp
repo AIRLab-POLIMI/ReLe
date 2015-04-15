@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
     LQR_IRL_Reward rewardRegressor;
     Dataset<DenseAction,DenseState>& data = collection.data;
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma,
-                                        GIRL<DenseAction,DenseState>::AlgType::RB);
+                                        GIRL<DenseAction,DenseState>::AlgType::GB);
 
     //Run MWAL
     irlAlg.run();
