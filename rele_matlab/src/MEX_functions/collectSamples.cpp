@@ -27,11 +27,28 @@ void help()
     mexPrintf("  - nbEpisodes:   maximum number of episodes\n");
     mexPrintf("  - maxSteps:     maximum number of steps\n");
     mexPrintf("  - gamma:        discount factor\n");
-    mexPrintf("  - params:       additional parameters for model or policy (optinal) ACTUALLY NOT IMPLEMENTED\n");
+    mexPrintf("  - params:       additional parameters for model or policy\n");
     mexPrintf(" OUTPUTS\n");
     mexPrintf("  - new_samples:  the set of episodess {state, action, nextstate, reward, absorb}\n");
     mexPrintf("  - dret:         expected discounted reward over per episode\n");
+    mexPrintf("\n\n\n");
+    mexPrintf("Available domains\n");
+    mexPrintf("  - LQR\n");
+    mexPrintf("    The policy is a standard Gaussian distribution with linear parametrization for the mean\n");
+    mexPrintf("    * params\n");
+    mexPrintf("      = policyParameters: mean parameters (vector)\n");
+    mexPrintf("      = stddev: standard deviation of the policy (scalar)\n");
+    mexPrintf("  - NLS\n");
+    mexPrintf("    The policy is specifically designed for this domain\n");
+    mexPrintf("    * params\n");
+    mexPrintf("      = policyParameters: mean parameters (vector)\n");
+    mexPrintf("  - Dam\n");
+    mexPrintf("    The policy is a Gaussian distribution with logistic diagonal covariance with linear parametrization for the mean\n");
+    mexPrintf("    * params\n");
+    mexPrintf("      = policyParameters: policy parameters (vector)\n");
+    mexPrintf("      = asVariance: asymptotic variance (vector)\n");
 }
+
 
 
 void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
