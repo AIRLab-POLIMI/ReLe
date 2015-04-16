@@ -31,6 +31,7 @@
 #include "BasicFunctions.h"
 #include "policy_search/BlackBoxOutputData.h"
 #include "policy_search/step_rules/StepRules.h"
+#include "RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
 
@@ -48,7 +49,22 @@ public:
                       bool baseline = true, int reward_obj = 0) :
         dist(dist), policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
         nbPoliciesToEvalMetap(nbPolicies), runCount(0), epiCount(0),
-        polCount(0), df(1.0), Jep(0.0), Jpol(0.0), rewardId(reward_obj),
+        polCount(0), df(1.0), Jep(0.0), Jpol(0.0),
+        rewardTr(new IndexRT(reward_obj)), cleanRT(true),
+        useBaseline(baseline), output2LogReady(false),
+        currentItStats(nullptr)
+    {
+    }
+
+    BlackBoxAlgorithm(DistributionC& dist,
+                      ParametricPolicy<ActionC, StateC>& policy,
+                      unsigned int nbEpisodes, unsigned int nbPolicies,
+                      RewardTransformation& reward_tr,
+                      bool baseline = true) :
+        dist(dist), policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
+        nbPoliciesToEvalMetap(nbPolicies), runCount(0), epiCount(0),
+        polCount(0), df(1.0), Jep(0.0), Jpol(0.0),
+        rewardTr(&reward_tr), cleanRT(false),
         useBaseline(baseline), output2LogReady(false),
         currentItStats(nullptr)
     {
@@ -56,6 +72,10 @@ public:
 
     virtual ~BlackBoxAlgorithm()
     {
+        if (cleanRT)
+        {
+            delete rewardTr;
+        }
     }
 
     // Agent interface
@@ -107,7 +127,7 @@ public:
                       ActionC& action)
     {
         //calculate current J value
-        Jep += df * reward[rewardId];
+        Jep += df * rewardTr->operator ()(reward);
         //update discount factor
         df *= this->task.gamma;
 
@@ -117,7 +137,7 @@ public:
     virtual void endEpisode(const Reward& reward)
     {
         //add last contribute
-        Jep += df * reward[rewardId];
+        Jep += df * rewardTr->operator ()(reward);
         //perform remaining operation
         this->endEpisode();
 
@@ -187,9 +207,9 @@ protected:
     unsigned int runCount, epiCount, polCount;
     double df;
     double Jep, Jpol;
-    int rewardId;
     arma::vec history_J;
-
+    RewardTransformation* rewardTr;
+    bool cleanRT;
     bool useBaseline, output2LogReady; //TODO levare baseline
     AgentOutputC* currentItStats;
 };
@@ -206,6 +226,18 @@ public:
         BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
             dist, policy, nbEpisodes, nbPolicies, baseline,
             reward_obj),
+        stepLengthRule(step_length)
+    {
+    }
+
+    GradientBlackBoxAlgorithm(DistributionC& dist,
+                              ParametricPolicy<ActionC, StateC>& policy,
+                              unsigned int nbEpisodes, unsigned int nbPolicies,
+                              StepRule& step_length,
+                              RewardTransformation& reward_tr,
+                              bool baseline = true) :
+        BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
+            dist, policy, nbEpisodes, nbPolicies, reward_tr, baseline),
         stepLengthRule(step_length)
     {
     }
@@ -233,7 +265,7 @@ protected:
     using Base::df;                                                                   \
     using Base::Jep;                                                                  \
     using Base::Jpol;                                                                 \
-    using Base::rewardId;                                                             \
+    using Base::rewardTr;                                                             \
     using Base::history_J;                                                            \
     using Base::useBaseline;                                                          \
     using Base::output2LogReady;                                                      \

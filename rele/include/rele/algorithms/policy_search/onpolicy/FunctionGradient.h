@@ -26,58 +26,10 @@
 
 #include "Transition.h"
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "RewardTransformation.h"
 
 namespace ReLe
 {
-
-template<class ActionC, class StateC>
-class RewardTransformation
-{
-public:
-    virtual double operator()(StateC& s, ActionC& a, StateC& ns, Reward& r) = 0;
-};
-
-template<class ActionC, class StateC>
-class IndexRT : public RewardTransformation<ActionC,StateC>
-{
-public:
-    IndexRT(unsigned int idx)
-        : index(idx)
-    {
-    }
-
-    virtual double operator()(StateC& s, ActionC& a, StateC& ns, Reward& r)
-    {
-        return r[index];
-    }
-
-protected:
-    unsigned int index;
-};
-
-template<class ActionC, class StateC>
-class WeightedSumRT : public RewardTransformation<ActionC,StateC>
-{
-public:
-    WeightedSumRT(arma::vec weights)
-        : weights(weights)
-    {
-    }
-
-    virtual double operator()(StateC& s, ActionC& a, StateC& ns, Reward& r)
-    {
-        double val = 0.0;
-        assert(r.size() == weights.n_elem);
-        for (int i =0, ie = weights.n_elem; i < ie; ++i)
-        {
-            val += weights[i] * r[i];
-        }
-        return val;
-    }
-
-protected:
-    arma::vec weights;
-};
 
 template<class ActionC, class StateC>
 class GradientFromDataWorker
@@ -86,11 +38,25 @@ public:
 
     GradientFromDataWorker(Dataset<ActionC,StateC>& dataset,
                            DifferentiablePolicy<ActionC,StateC>& policy,
-                           RewardTransformation<ActionC,StateC>& rewardf,
-                           double gamma)
-        : policy(policy), data(dataset), rewardf(rewardf), gamma(gamma)
+                           double gamma, int reward_obj = 0)
+        : policy(policy), data(dataset), rewardf(new IndexRT(reward_obj)), gamma(gamma), cleanRT(false)
     {
+    }
 
+    GradientFromDataWorker(Dataset<ActionC,StateC>& dataset,
+                           DifferentiablePolicy<ActionC,StateC>& policy,
+                           RewardTransformation& rewardf,
+                           double gamma)
+        : policy(policy), data(dataset), rewardf(&rewardf), gamma(gamma), cleanRT(false)
+    {
+    }
+
+    virtual ~GradientFromDataWorker()
+    {
+        if (cleanRT)
+        {
+            delete rewardf;
+        }
     }
 
     arma::vec ReinforceGradient()
@@ -122,7 +88,7 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn, tr.r);
+                Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
 
                 df *= gamma;
@@ -183,7 +149,7 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn, tr.r);
+                Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
 
                 df *= gamma;
@@ -272,7 +238,7 @@ public:
                 // *** GPOMDP CORE *** //
                 localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
-                double creward = rewardf(tr.x, tr.u, tr.xn, tr.r);
+                double creward = rewardf->operator ()(tr.r);
                 Rew += df * creward;
 
                 // compute the gradients
@@ -345,7 +311,7 @@ public:
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
-                double creward = rewardf(tr.x, tr.u, tr.xn, tr.r);
+                double creward = rewardf->operator ()(tr.r);
                 Rew += df * creward;
                 reward_J_ObjEpStep(ep,t) = df * creward;
 
@@ -434,8 +400,9 @@ public:
 protected:
     Dataset<ActionC,StateC>& data;
     DifferentiablePolicy<ActionC,StateC>& policy;
-    RewardTransformation<ActionC,StateC>& rewardf;
+    RewardTransformation* rewardf;
     double gamma;
+    bool cleanRT;
 };
 
 }

@@ -44,7 +44,7 @@ using namespace ReLe;
 using namespace arma;
 
 class LQR_IRL_Reward : public IRLParametricReward<DenseAction, DenseState>,
-    public RewardTransformation<DenseAction, DenseState>
+    public RewardTransformation
 {
 public:
 
@@ -58,9 +58,9 @@ public:
         return -(weights(0)*s(0)*s(0)+weights(1)*a(0)*a(0));
     }
 
-    double operator()(DenseState& s, DenseAction& a, DenseState& ns, Reward& r)
+    double operator()(const Reward& r)
     {
-        return -(weights(0)*s(0)*s(0)+weights(1)*a(0)*a(0));
+        return r[0];
     }
 
     arma::mat diff(DenseState& s, DenseAction& a, DenseState& ns)
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     ofstream outf(fm.addPath("girl.log"), ios_base::app);
     outf << w.t();
 
-    IndexRT<DenseAction,DenseState> rt(0);
+    IndexRT rt(0);
     GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rt, mdp.getSettings().gamma);
     arma::vec grad = gdw.GpomdpBaseGradient();
 

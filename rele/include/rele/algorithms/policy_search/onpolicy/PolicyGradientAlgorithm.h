@@ -30,6 +30,7 @@
 #include "BasicFunctions.h"
 #include "policy_search/onpolicy/GradientOutputData.h"
 #include "policy_search/step_rules/StepRules.h"
+#include "RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
 
@@ -63,7 +64,20 @@ public:
                                     unsigned int nbEpisodes, StepRule& stepL,
                                     bool baseline = true, int reward_obj = 0) :
         policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
-        runCount(0), epiCount(0), df(1.0), Jep(0.0), rewardId(reward_obj),
+        runCount(0), epiCount(0), df(1.0), Jep(0.0),
+        rewardTr(new IndexRT(reward_obj)), cleanRT(true),
+        useBaseline(baseline), output2LogReady(false), stepLength(stepL),
+        currentItStats(nullptr)
+    {
+    }
+
+    AbstractPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                                    unsigned int nbEpisodes, StepRule& stepL,
+                                    RewardTransformation& reward_tr,
+                                    bool baseline = true) :
+        policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
+        runCount(0), epiCount(0), df(1.0), Jep(0.0),
+        rewardTr(&reward_tr), cleanRT(false),
         useBaseline(baseline), output2LogReady(false), stepLength(stepL),
         currentItStats(nullptr)
     {
@@ -71,6 +85,10 @@ public:
 
     virtual ~AbstractPolicyGradientAlgorithm()
     {
+        if (cleanRT)
+        {
+            delete rewardTr;
+        }
     }
 
     // Agent interface
@@ -114,7 +132,7 @@ public:
         updateStep(reward);
 
         //calculate current J value
-        Jep += df * reward[rewardId];
+        Jep += df * rewardTr->operator ()(reward);
         //update discount factor
         df *= this->task.gamma;
 
@@ -130,7 +148,7 @@ public:
         updateStep(reward);
 
         //add last contribute
-        Jep += df * reward[rewardId];
+        Jep += df * rewardTr->operator ()(reward);
 
         //perform remaining operation
         this->endEpisode();
@@ -187,7 +205,8 @@ protected:
     unsigned int runCount, epiCount;
     double df, Jep;
     StepRule& stepLength;
-    int rewardId;
+    RewardTransformation* rewardTr;
+    bool cleanRT;
 
     std::vector<double> history_J;
     bool useBaseline, output2LogReady;
@@ -205,7 +224,7 @@ protected:
     using Base::df;                                                \
     using Base::Jep;                                               \
     using Base::stepLength;                                        \
-    using Base::rewardId;                                          \
+    using Base::rewardTr;                                          \
     using Base::history_J;                                         \
     using Base::useBaseline;                                       \
     using Base::output2LogReady;                                   \
@@ -228,6 +247,14 @@ public:
                        unsigned int nbEpisodes, StepRule& stepL,
                        bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
+    {
+    }
+
+    REINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                       unsigned int nbEpisodes, StepRule& stepL,
+                       RewardTransformation& reward_tr,
+                       bool baseline = true) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)
     {
     }
 
@@ -349,6 +376,25 @@ public:
     {
     }
 
+
+    GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                    BaseLineType btype, RewardTransformation& rewardt) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, rewardt, true),
+        maxStepsPerEpisode(nbSteps),
+        bType(btype)
+    {
+    }
+
+    GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                    RewardTransformation& rewardt) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, rewardt, false),
+        maxStepsPerEpisode(nbSteps),
+        bType(BaseLineType::SINGLE)
+    {
+    }
+
     virtual ~GPOMDPAlgorithm()
     {
     }
@@ -391,7 +437,7 @@ protected:
         sumdlogpi += grad;
 
         // store the basic elements used to compute the gradient
-        reward_EpStep(epiCount, stepCount) = df * reward[rewardId];
+        reward_EpStep(epiCount, stepCount) = df * rewardTr->operator ()(reward);
 
         for (int p = 0; p < dp; ++p)
         {
@@ -405,7 +451,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                baseline_num(p,stepCount) += df * reward[rewardId] * sumdlogpi(p) * sumdlogpi(p);
+                baseline_num(p,stepCount) += df * rewardTr->operator ()(reward) * sumdlogpi(p) * sumdlogpi(p);
             }
 
             for (int p = 0; p < dp; ++p)
@@ -417,7 +463,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                baseline_num1_single(p) += df * reward[rewardId] * sumdlogpi(p);
+                baseline_num1_single(p) += df * rewardTr->operator ()(reward) * sumdlogpi(p);
                 baseline_num2_single(p) += sumdlogpi(p);
             }
         }
@@ -549,6 +595,16 @@ public:
     {
     }
 
+    NaturalGPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                           unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                           RewardTransformation& reward_tr,
+                           bool baseline = true) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline),
+        maxStepsPerEpisode(nbSteps)
+    {
+    }
+
+
     virtual ~NaturalGPOMDPAlgorithm()
     {
     }
@@ -590,7 +646,7 @@ protected:
         fisherEp += grad * grad.t();
 
         // store the basic elements used to compute the gradient
-        reward_EpStep(epiCount, stepCount) = df * reward[rewardId];
+        reward_EpStep(epiCount, stepCount) = df * rewardTr->operator ()(reward);
 
         for (int p = 0; p < dp; ++p)
         {
@@ -601,7 +657,7 @@ protected:
 
         for (int p = 0; p < dp; ++p)
         {
-            baseline_num(p,stepCount) += df * reward[rewardId] * sumdlogpi(p) * sumdlogpi(p);
+            baseline_num(p,stepCount) += df * rewardTr->operator ()(reward) * sumdlogpi(p) * sumdlogpi(p);
         }
 
         for (int p = 0; p < dp; ++p)
@@ -719,6 +775,15 @@ public:
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
     }
+
+    NaturalREINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                              unsigned int nbEpisodes, StepRule& stepL,
+                              RewardTransformation& reward_tr,
+                              bool baseline = true) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)
+    {
+    }
+
 
     virtual ~NaturalREINFORCEAlgorithm()
     {
@@ -860,6 +925,14 @@ public:
                   unsigned int nbEpisodes, StepRule& stepL,
                   bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
+    {
+    }
+
+    eNACAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
+                  unsigned int nbEpisodes, StepRule& stepL,
+                  RewardTransformation& reward_tr,
+                  bool baseline = true) :
+        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)
     {
     }
 
