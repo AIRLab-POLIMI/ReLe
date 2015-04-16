@@ -79,6 +79,7 @@ public:
         : policy(policy), data(dataset), rewardf(rewardf),
           gamma(gamma), maxSteps(0), atype(aType)
     {
+        std::cout << aType << std::endl;
     }
 
     virtual ~GIRL() { }
@@ -547,18 +548,22 @@ public:
         rewardf.setParameters(n, x);
         if (atype == AlgType::R)
         {
+//            std::cout << "GIRL REINFORCE" << std::endl;
             gradient = ReinforceGradient(dGradient);
         }
         else if (atype == AlgType::RB)
         {
+//            std::cout << "GIRL REINFORCE BASE" << std::endl;
             gradient = ReinforceBaseGradient(dGradient);
         }
         else if (atype == AlgType::G)
         {
+//            std::cout << "GIRL GPOMDP" << std::endl;
             gradient = GpomdpGradient(dGradient);
         }
         else if (atype == AlgType::GB)
         {
+//            std::cout << "GIRL GPOMDP BASE" << std::endl;
             gradient = GpomdpBaseGradient(dGradient);
         }
 

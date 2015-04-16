@@ -121,10 +121,53 @@ class deep_state_identity: public BasisFunction
 };
 /////////////////////////////////////////////////////////////
 
+void help()
+{
+    cout << "deep_GIRL [algorithm]" << endl;
+    cout << " - algorithm: r, rb, g, gb (default)" << endl;
+}
+
 
 int main(int argc, char *argv[])
 {
     //    RandomGenerator::seed(12354);
+
+    /*** check inputs ***/
+    GIRL<FiniteAction,DenseState>::AlgType atype;
+    if (argc > 1)
+    {
+        if (strcmp(argv[1], "r") == 0)
+        {
+            cout << "GIRL REINFORCE" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::R;
+        }
+        else if (strcmp(argv[1], "rb") == 0)
+        {
+            cout << "GIRL REINFORCE BASE" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::RB;
+        }
+        else if (strcmp(argv[1], "g") == 0)
+        {
+            cout << "GIRL GPOMDP" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::G;
+        }
+        else if (strcmp(argv[1], "gb") == 0)
+        {
+            cout << "GIRL GPOMDP BASE" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+        }
+        else
+        {
+            std::cout << "Error unknown argument " << argv[1] << std::endl;
+            help();
+            exit(1);
+        }
+    }
+    else
+    {
+        atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+    }
+    /******/
 
     FileManager fm("lqr", "GIRL");
     fm.createDir();
@@ -164,7 +207,7 @@ int main(int argc, char *argv[])
     ParametricGibbsPolicy<DenseState> expertPolicy(actions, &regressor, 1);
     //---
 
-#if 1
+#if 0
     /*** learn the optimal policy ***/
     int nbepperpol = 150;
     AdaptiveStep srule(0.001);
@@ -215,7 +258,11 @@ int main(int argc, char *argv[])
 
 #else
     arma::vec param(expertPolicy.getParametersSize());
-    param << -0.0783 << -0.1144 << -0.2249 << -0.3522 <<  0.0056 << -0.0499 <<  0.8050 <<  1.1729 <<  0.0149 << -0.1588 <<  0.4539 <<  0.5678 <<  0.0112 <<  0.0357 << -0.0725 << -0.1477 <<  0.0047 << -0.0005;
+    //parametri ottenuto con [1.0,0.0]
+    //    param << -0.0783 << -0.1144 << -0.2249 << -0.3522 <<  0.0056 << -0.0499 <<  0.8050 <<  1.1729 <<  0.0149 << -0.1588 <<  0.4539 <<  0.5678 <<  0.0112 <<  0.0357 << -0.0725 << -0.1477 <<  0.0047 << -0.0005;
+
+    // parametri ottenuto con [0.6,0.4]
+    param <<-0.0949 << -0.1268 << -0.2743 << -0.3641 << -0.0059 << -0.0665 <<  0.7563 <<  1.1532 <<  0.0561 << -0.1504 <<  0.4044 <<  0.5052 << -0.0334 << -0.0349 << -0.1495 << -0.2065 << -0.0091 << -0.0305;
     expertPolicy.setParameters(param);
 #endif
 
@@ -237,8 +284,8 @@ int main(int argc, char *argv[])
     /* Learn weight with GIRL */
     Deep_IRL_Reward rewardRegressor;
     Dataset<FiniteAction,DenseState>& data = collection.data;
-    GIRL<FiniteAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma,
-                                         GIRL<FiniteAction,DenseState>::AlgType::GB);
+    GIRL<FiniteAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                         mdp.getSettings().gamma, atype);
 
     //Run MWAL
     irlAlg.run();
