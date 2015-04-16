@@ -103,7 +103,7 @@ void help()
 
 int main(int argc, char *argv[])
 {
-    //    RandomGenerator::seed(12354);
+        RandomGenerator::seed(418932850);
 
     /*** check inputs ***/
     char alg[10];
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLenght = 50;
-    expertCore.getSettings().testEpisodeN = 4000;
+    expertCore.getSettings().testEpisodeN = 200;
     expertCore.runTestEpisodes();
 
 
@@ -316,6 +316,38 @@ int main(int argc, char *argv[])
     cout << "Gradient computed by objective function: " << endl << grad3.t();
     cout << "\tnorm2: " << norm(grad3,2) << endl;
     cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
+
+    vec v = linspace<vec>(0, 1, 30);
+    ofstream ooo(fm.addPath("objective.log"));
+    for (int i = 0; i < v.n_elem; ++i)
+    {
+        vec x(2);
+        x(0) = v[i];
+        x(1) = 1 - v[i];
+        if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.ReinforceGradient(dgrad3);
+        }
+        else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+        }
+        else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.GpomdpGradient(dgrad3);
+        }
+        else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+        }
+        double val = norm(grad3,2)*norm(grad3,2)*0.5;
+        ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+    }
+    ooo.close();
 
     return 0;
 }

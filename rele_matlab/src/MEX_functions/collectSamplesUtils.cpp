@@ -54,7 +54,7 @@ class deep_state_identity: public BasisFunction
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
         MatlabCollectorStrategy<ActionC, StateC> strat = MatlabCollectorStrategy<ActionC, StateC>(gamma);\
         oncore.getSettings().loggerStrategy = &strat;\
-        int horiz = mdp.getSettings().horizon;\
+        int horiz = maxSteps;\
         oncore.getSettings().episodeLenght = horiz;\
         int nbTrajectories = nbEpisodes;\
         for (int n = 0; n < nbTrajectories; ++n)\
@@ -65,7 +65,7 @@ class deep_state_identity: public BasisFunction
         int dr = data[0].dr;\
         MEX_DATA_FIELDS(fieldnames);\
         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);\
-        DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);\
+        DRETURN = mxCreateDoubleMatrix(data.size(), dr, mxREAL);\
         double* Jptr = mxGetPr(DRETURN);\
         for (int i = 0, ie = data.size(); i < ie; ++i)\
         {\

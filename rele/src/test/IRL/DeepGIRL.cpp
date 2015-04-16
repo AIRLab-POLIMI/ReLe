@@ -44,7 +44,7 @@ using namespace ReLe;
 using namespace arma;
 
 class Deep_IRL_Reward : public IRLParametricReward<FiniteAction, DenseState>,
-    public RewardTransformation
+        public RewardTransformation
 {
 public:
 
@@ -55,7 +55,7 @@ public:
 
     double operator()(DenseState& s, FiniteAction& a, DenseState& ns)
     {
-//        std::cout << deep_reward_treasure(ns) << " -1" << std::endl;
+        //        std::cout << deep_reward_treasure(ns) << " -1" << std::endl;
         return weights(0)*deep_reward_treasure(ns) - weights(1);
     }
 
@@ -131,7 +131,7 @@ void help()
 
 int main(int argc, char *argv[])
 {
-    //    RandomGenerator::seed(12354);
+        RandomGenerator::seed(49921158);
 
     /*** check inputs ***/
     char alg[10];
@@ -218,13 +218,13 @@ int main(int argc, char *argv[])
     AdaptiveStep srule(0.001);
     WeightedSumRT rewardtr(eReward);
     GPOMDPAlgorithm<FiniteAction, DenseState> agent(expertPolicy, nbepperpol,
-            mdp.getSettings().horizon, srule, rewardtr);
+                                                    mdp.getSettings().horizon, srule, rewardtr);
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        fm.addPath("gradient_log_learning.log"),
-        WriteStrategy<FiniteAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
+                fm.addPath("gradient_log_learning.log"),
+                WriteStrategy<FiniteAction, DenseState>::AGENT,
+                true /*delete file*/
+                );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
     CollectorStrategy<FiniteAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLenght = 50;
-    expertCore.getSettings().testEpisodeN = 500;
+    expertCore.getSettings().testEpisodeN = 100;
     expertCore.runTestEpisodes();
 
 
@@ -349,6 +349,39 @@ int main(int argc, char *argv[])
     cout << "Gradient computed by objective function: " << endl << grad3.t();
     cout << "\tnorm2: " << norm(grad3,2) << endl;
     cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
+
+    vec v = linspace<vec>(0, 1, 30);
+    ofstream ooo(fm.addPath("objective.log"));
+    for (int i = 0; i < v.n_elem; ++i)
+//        for (int j = 0; j < v.n_elem; ++j)
+        {
+            vec x(2);
+            x(0) = v[i];
+            x(1) = 1 - v[i];
+            if (atype == GIRL<FiniteAction,DenseState>::AlgType::R)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.ReinforceGradient(dgrad3);
+            }
+            else if (atype == GIRL<FiniteAction,DenseState>::AlgType::RB)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+            }
+            else if (atype == GIRL<FiniteAction,DenseState>::AlgType::G)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.GpomdpGradient(dgrad3);
+            }
+            else if (atype == GIRL<FiniteAction,DenseState>::AlgType::GB)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+            }
+            double val = norm(grad3,2)*norm(grad3,2)*0.5;
+            ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+        }
+    ooo.close();
 
     return 0;
 }

@@ -80,31 +80,31 @@ void help()
 
 int main(int argc, char *argv[])
 {
-//    RandomGenerator::seed(12354);
+    RandomGenerator::seed(545404224);
 
     /*** check inputs ***/
-    GIRL<FiniteAction,DenseState>::AlgType atype;
+    GIRL<DenseAction,DenseState>::AlgType atype;
     if (argc > 1)
     {
         if (strcmp(argv[1], "r") == 0)
         {
             cout << "GIRL REINFORCE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::R;
+            atype = GIRL<DenseAction,DenseState>::AlgType::R;
         }
         else if (strcmp(argv[1], "rb") == 0)
         {
             cout << "GIRL REINFORCE BASE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::RB;
+            atype = GIRL<DenseAction,DenseState>::AlgType::RB;
         }
         else if (strcmp(argv[1], "g") == 0)
         {
             cout << "GIRL GPOMDP" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::G;
+            atype = GIRL<DenseAction,DenseState>::AlgType::G;
         }
         else if (strcmp(argv[1], "gb") == 0)
         {
             cout << "GIRL GPOMDP BASE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+            atype = GIRL<DenseAction,DenseState>::AlgType::GB;
         }
         else
         {
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+        atype = GIRL<DenseAction,DenseState>::AlgType::GB;
     }
     /******/
 
@@ -137,6 +137,11 @@ int main(int argc, char *argv[])
 //    initialState[0] = -5;
 //    mdp.setInitialState(initialState);
 
+
+    vec eReward(2);
+    eReward(0) = Q(0,0);
+    eReward(1) = R(0,0);
+
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
     DenseBasisVector basis;
@@ -145,6 +150,7 @@ int main(int argc, char *argv[])
 //    DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
     NormalPolicy expertPolicy(1,&expertRegressor);
 
+#if 0
     //learn the optimal policy
     int nbepperpol = 100;
     AdaptiveStep srule(0.0001);
@@ -189,10 +195,11 @@ int main(int argc, char *argv[])
 
     cout << endl << "### Ended Optimization" << endl;
     cout << expertPolicy.getParameters().t();
+#endif
 
-//    vec param(1);
-//    param[0] = -0.390388203202208; //0.2, 0.8
-//    expertPolicy.setParameters(param);
+    vec param(1);
+    param[0] = -0.390388203202208; //0.2, 0.8
+    expertPolicy.setParameters(param);
 
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
@@ -208,8 +215,8 @@ int main(int argc, char *argv[])
     /* Learn weight with GIRL */
     LQR_IRL_Reward rewardRegressor;
     Dataset<DenseAction,DenseState>& data = collection.data;
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma,
-                                        GIRL<DenseAction,DenseState>::AlgType::GB);
+    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                        mdp.getSettings().gamma, atype);
 
     //Run MWAL
     irlAlg.run();
@@ -220,18 +227,85 @@ int main(int argc, char *argv[])
     ofstream outf(fm.addPath("girl.log"), ios_base::app);
     outf << w.t();
 
-    IndexRT rt(0);
-    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rt, mdp.getSettings().gamma);
-    arma::vec grad = gdw.GpomdpBaseGradient();
+    vec grad, grad2, grad3;
+    mat dgrad3;
+    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
+    if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
+    {
+        cout << "PG REINFORCE" << endl;
+        grad3 = irlAlg.ReinforceGradient(dgrad3);
+        rewardRegressor.setParameters(eReward);
+        grad = gdw.ReinforceGradient();
+        rewardRegressor.setParameters(w);
+        grad2 = gdw.ReinforceGradient();
+    }
+    else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
+    {
+        cout << "PG REINFORCE BASE" << endl;
+        grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+        rewardRegressor.setParameters(eReward);
+        grad = gdw.ReinforceBaseGradient();
+        rewardRegressor.setParameters(w);
+        grad2 = gdw.ReinforceBaseGradient();
+    }
+    else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
+    {
+        cout << "PG GPOMDP" << endl;
+        grad3 = irlAlg.GpomdpGradient(dgrad3);
+        rewardRegressor.setParameters(eReward);
+        grad = gdw.GpomdpGradient();
+        rewardRegressor.setParameters(w);
+        grad2 = gdw.GpomdpGradient();
+    }
+    else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
+    {
+        cout << "PG GPOMDP BASE" << endl;
+        grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+        rewardRegressor.setParameters(eReward);
+        grad = gdw.GpomdpBaseGradient();
+        rewardRegressor.setParameters(w);
+        grad2 = gdw.GpomdpBaseGradient();
+    }
+    cout << "Gradient Original (" << eReward[0] << ", " << eReward[1] << "): " << endl << grad.t();
+    cout << "\tnorm2: " << norm(grad,2) << endl << endl;
+    cout << "Gradient weights IRL (" << w[0] << ", " << w[1] << "): " << endl << grad2.t();
+    cout << "\tnorm2: " << norm(grad2,2) << endl << endl;
+    cout << "Gradient computed by objective function: " << endl << grad3.t();
+    cout << "\tnorm2: " << norm(grad3,2) << endl;
+    cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
 
-    rewardRegressor.setParameters(w);
-    GradientFromDataWorker<DenseAction,DenseState> gdw2(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
-    arma::vec grad2 = gdw2.GpomdpBaseGradient();
-
-    cout << "Gradient Original: " << endl << grad.t() << endl;
-    cout << "Gradient weights IRL: " << endl << grad2.t() << endl;
-
-    cout << norm(grad2,2)*norm(grad2,2)*0.5 << endl;
+    vec v = linspace<vec>(0, 1, 30);
+    ofstream ooo(fm.addPath("objective.log"));
+    for (int i = 0; i < v.n_elem; ++i)
+//        for (int j = 0; j < v.n_elem; ++j)
+        {
+            vec x(2);
+            x(0) = v[i];
+            x(1) = 1 - v[i];
+            if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.ReinforceGradient(dgrad3);
+            }
+            else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+            }
+            else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.GpomdpGradient(dgrad3);
+            }
+            else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
+            {
+                rewardRegressor.setParameters(x);
+                grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+            }
+            double val = norm(grad3,2)*norm(grad3,2)*0.5;
+            ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+        }
+    ooo.close();
 
     return 0;
 }
