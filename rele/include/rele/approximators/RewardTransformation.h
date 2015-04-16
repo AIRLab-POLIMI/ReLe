@@ -64,7 +64,7 @@ public:
     virtual inline double operator()(const Reward& r)
     {
         double val = 0.0;
-        assert(r.size() == weights.n_elem);
+//        assert(r.size() == weights.n_elem);
         for (int i =0, ie = weights.n_elem; i < ie; ++i)
         {
             val += weights[i] * r[i];

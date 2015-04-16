@@ -45,14 +45,14 @@ using namespace ReLe;
 using namespace arma;
 
 class dam_IRL_Reward : public IRLParametricReward<DenseAction, DenseState>,
-        public RewardTransformation
+    public RewardTransformation
 {
 public:
 
-    dam_IRL_Reward(Dam& mdp)
+    dam_IRL_Reward(Dam& mdp, arma::vec& rew)
         : mdp(mdp)
     {
-        weights.zeros(2);
+        weights = rew;
     }
 
     double operator()(DenseState& s, DenseAction& a, DenseState& ns)
@@ -174,29 +174,35 @@ int main(int argc, char *argv[])
     p(4) = 50;
     regressor.setParameters(p);
     MVNLogisticPolicy expertPolicy(&regressor, 50);
+
+    vec params(6);
+//    params << 52.1602 << -49.0788  <<  1.5016  <<  0.2076 <<  50.1777  << -1.4606;
+//    params << 53.9091 << -48.3235 <<   3.4510  <<  0.3419 <<  50.2393 <<  -2.8437;
+    params << 54.0501 << -48.1380 <<   3.8204  <<  0.2451 <<  50.2006 <<  -3.5755;
+    expertPolicy.setParameters(params);
     //---
 
     vec eReward(2);
     eReward(0) = 0.1;
     eReward(1) = 0.9;
-#if 1
+    dam_IRL_Reward rewardRegressor(mdp, eReward);
+#if 0
     /*** learn the optimal policy ***/
     int nbepperpol = 150;
     AdaptiveStep srule(0.001);
-    WeightedSumRT rewardtr(eReward);
     GPOMDPAlgorithm<DenseAction, DenseState> agent(expertPolicy, nbepperpol,
-                                                   mdp.getSettings().horizon, srule, rewardtr);
+            mdp.getSettings().horizon, srule, rewardRegressor);
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-                fm.addPath("gradient_log_learning.log"),
-                WriteStrategy<DenseAction, DenseState>::AGENT,
-                true /*delete file*/
-                );
+        fm.addPath("gradient_log_learning.log"),
+        WriteStrategy<DenseAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 550;
+    int nbUpdates = 750;
     int episodes  = nbUpdates*nbepperpol;
     double every, bevery;
     every = bevery = 0.05; //%
@@ -226,15 +232,7 @@ int main(int argc, char *argv[])
     cout << endl << "### Ended Optimization" << endl;
 
 #else
-    arma::vec param(expertPolicy.getParametersSize());
-    //parametri ottenuto con [1.0,0.0]
-    //    param << -0.0783 << -0.1144 << -0.2249 << -0.3522 <<  0.0056 << -0.0499 <<  0.8050 <<  1.1729 <<  0.0149 << -0.1588 <<  0.4539 <<  0.5678 <<  0.0112 <<  0.0357 << -0.0725 << -0.1477 <<  0.0047 << -0.0005;
 
-    // parametri ottenuto con [0.6,0.4]
-    eReward(0) = 0.6;
-    eReward(1) = 0.4;
-    param <<-0.0949 << -0.1268 << -0.2743 << -0.3641 << -0.0059 << -0.0665 <<  0.7563 <<  1.1532 <<  0.0561 << -0.1504 <<  0.4044 <<  0.5052 << -0.0334 << -0.0349 << -0.1495 << -0.2065 << -0.0091 << -0.0305;
-    expertPolicy.setParameters(param);
 #endif
 
 
@@ -248,12 +246,14 @@ int main(int argc, char *argv[])
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLenght = 50;
-    expertCore.getSettings().testEpisodeN = 100;
+    expertCore.getSettings().testEpisodeN = 4000;
     expertCore.runTestEpisodes();
 
 
     /* Learn weight with GIRL */
-    dam_IRL_Reward rewardRegressor(mdp);
+
+//    mdp.damConfig.DAM_INFLOW_STD = 0.00001;
+
     Dataset<DenseAction,DenseState>& data = collection.data;
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                         mdp.getSettings().gamma, atype);

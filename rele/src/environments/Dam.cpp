@@ -159,6 +159,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
     // transition dynamic
     double inflow = RandomGenerator::sampleNormal(damConfig.DAM_INFLOW_MEAN, damConfig.DAM_INFLOW_STD);
+    inflow = damConfig.DAM_INFLOW_MEAN;
     //    std::cout << "inflow: " << inflow << std::endl;
     nextState[0]  = currentState[0] + inflow - curr_action;
 
@@ -178,7 +179,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
         //        std::cout << "q: " << q << std::endl;
     }
     double p_hyd = damConfig.ETA * damConfig.G * damConfig.GAMMA_H2O *
-            (nextState[0]/damConfig.S) * (q / (3.6e6));
+                   (nextState[0]/damConfig.S) * (q / (3.6e6));
     //    std::cout << "damConfig.ETA " << damConfig.ETA << "\n";
     //    std::cout << "damConfig.G " << damConfig.G << "\n";
     //    std::cout << "damConfig.GAMMA_H20 " << damConfig.GAMMA_H2O << "\n";
