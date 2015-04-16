@@ -79,7 +79,6 @@ public:
         : policy(policy), data(dataset), rewardf(rewardf),
           gamma(gamma), maxSteps(0), atype(aType)
     {
-        std::cout << aType << std::endl;
     }
 
     virtual ~GIRL() { }
@@ -196,6 +195,7 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = diffLogWorker(tr.x, tr.u, policy);
                 sumGradLog += localg;
+//                std::cout << tr.r[0] << " " << tr.r[1] << std::endl;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
                 // ********************** //

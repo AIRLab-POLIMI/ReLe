@@ -69,6 +69,8 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
+    void setCurrentState(const DenseState& state);
+
 private:
     DamSettings damConfig;
 };

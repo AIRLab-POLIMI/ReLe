@@ -200,6 +200,9 @@ target_link_libraries(lqr_GIRL rele)
 add_executable(deep_GIRL src/test/IRL/DeepGIRL.cpp)
 target_link_libraries(deep_GIRL rele)
 
+add_executable(dam_GIRL src/test/IRL/DamGIRL.cpp)
+target_link_libraries(dam_GIRL rele)
+
 add_executable(simple_chain_MWAL src/test/IRL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
 

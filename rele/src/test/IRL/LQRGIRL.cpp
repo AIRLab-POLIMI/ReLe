@@ -72,9 +72,52 @@ public:
     }
 };
 
+void help()
+{
+    cout << "lqr_GIRL [algorithm]" << endl;
+    cout << " - algorithm: r, rb, g, gb (default)" << endl;
+}
+
 int main(int argc, char *argv[])
 {
 //    RandomGenerator::seed(12354);
+
+    /*** check inputs ***/
+    GIRL<FiniteAction,DenseState>::AlgType atype;
+    if (argc > 1)
+    {
+        if (strcmp(argv[1], "r") == 0)
+        {
+            cout << "GIRL REINFORCE" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::R;
+        }
+        else if (strcmp(argv[1], "rb") == 0)
+        {
+            cout << "GIRL REINFORCE BASE" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::RB;
+        }
+        else if (strcmp(argv[1], "g") == 0)
+        {
+            cout << "GIRL GPOMDP" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::G;
+        }
+        else if (strcmp(argv[1], "gb") == 0)
+        {
+            cout << "GIRL GPOMDP BASE" << endl;
+            atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+        }
+        else
+        {
+            std::cout << "Error unknown argument " << argv[1] << std::endl;
+            help();
+            exit(1);
+        }
+    }
+    else
+    {
+        atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+    }
+    /******/
 
     FileManager fm("lqr", "GIRL");
     fm.createDir();

@@ -178,7 +178,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
         //        std::cout << "q: " << q << std::endl;
     }
     double p_hyd = damConfig.ETA * damConfig.G * damConfig.GAMMA_H2O *
-                   (nextState[0]/damConfig.S) * (q / (3.6e6));
+            (nextState[0]/damConfig.S) * (q / (3.6e6));
     //    std::cout << "damConfig.ETA " << damConfig.ETA << "\n";
     //    std::cout << "damConfig.G " << damConfig.G << "\n";
     //    std::cout << "damConfig.GAMMA_H20 " << damConfig.GAMMA_H2O << "\n";
@@ -223,6 +223,11 @@ void Dam::getInitialState(DenseState& state)
     //    currentState[0] = RandomGenerator::sampleUniformInt(160);
     currentState[0] = s_init[idx]; //keep info about the current state
     state = currentState;
+}
+
+void Dam::setCurrentState(const DenseState &state)
+{
+    currentState[0] = state[0];
 }
 
 

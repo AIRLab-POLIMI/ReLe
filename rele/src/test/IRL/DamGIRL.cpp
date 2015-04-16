@@ -24,11 +24,12 @@
 #include "Core.h"
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "BasisFunctions.h"
-#include "DifferentiableNormals.h"
+#include "parametric/differentiable/NormalPolicy.h"
 #include "basis/PolynomialFunction.h"
+#include "basis/GaussianRBF.h"
 #include "basis/ConditionBasedFunction.h"
 
-#include "DeepSeaTreasure.h"
+#include "Dam.h"
 #include "PolicyEvalAgent.h"
 #include "algorithms/GIRL.h"
 #include "policy_search/PGPE/PGPE.h"
@@ -43,88 +44,59 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-class Deep_IRL_Reward : public IRLParametricReward<FiniteAction, DenseState>,
-    public RewardTransformation
+class dam_IRL_Reward : public IRLParametricReward<DenseAction, DenseState>,
+        public RewardTransformation
 {
 public:
 
-    Deep_IRL_Reward()
+    dam_IRL_Reward(Dam& mdp)
+        : mdp(mdp)
     {
-        weights.set_size(2);
+        weights.zeros(2);
     }
 
-    double operator()(DenseState& s, FiniteAction& a, DenseState& ns)
+    double operator()(DenseState& s, DenseAction& a, DenseState& ns)
     {
-//        std::cout << deep_reward_treasure(ns) << " -1" << std::endl;
-        return weights(0)*deep_reward_treasure(ns) - weights(1);
+        Reward r(mdp.getSettings().rewardDim);
+        DenseState nexts(1);
+        mdp.setCurrentState(s);
+        mdp.step(a, nexts, r);
+
+        double val = 0.0;
+        for (int i = 0; i < weights.n_elem; ++i)
+            val += weights[i] * r[i];
+        return val;
     }
 
     double operator()(const Reward& r)
     {
-        return weights(0)*r[0] + weights(1)*r[1];
+        double val = 0.0;
+        for (int i = 0; i < weights.n_elem; ++i)
+            val += weights[i] * r[i];
+        return val;
     }
 
-    arma::mat diff(DenseState& s, FiniteAction& a, DenseState& ns)
+    arma::mat diff(DenseState& s, DenseAction& a, DenseState& ns)
     {
-        arma::mat m(1,2);
-        m(0) = deep_reward_treasure(ns);
-        m(1) = -1;
+        arma::mat m(1,weights.n_elem);
+        Reward r(mdp.getSettings().rewardDim);
+        DenseState nexts(1);
+        mdp.setCurrentState(s);
+        mdp.step(a, nexts, r);
+
+        for (int i = 0; i < weights.n_elem; ++i)
+            m(0,i) = r[i];
         return m;
     }
 
 private:
-    double deep_reward_treasure(DenseState& state)
-    {
-        int xdim = 11;
-        int ydim = 10;
-        arma::mat reward(xdim+1,ydim+1,arma::fill::zeros);
-        reward(2,1) = 1;
-        reward(3,2) = 2;
-        reward(4,3) = 3;
-        reward(5,4) = 5;
-        reward(5,5) = 8;
-        reward(5,6) = 16;
-        reward(8,7) = 24;
-        reward(8,8) = 50;
-        reward(10,9) = 74;
-        reward(11,10) = 124;
-        return reward(state[0],state[1]);
 
-    }
+    Dam& mdp;
 };
-
-/////////////////////////////////////////////////////////////
-
-class deep_2state_identity: public BasisFunction
-{
-    double operator()(const arma::vec& input)
-    {
-        return ((input[0] == 1) && (input[1] == 1))?1:0;
-    }
-    void writeOnStream(std::ostream& out)
-    {
-        out << "deep_2state" << endl;
-    }
-    void readFromStream(std::istream& in) {}
-};
-
-class deep_state_identity: public BasisFunction
-{
-    double operator()(const arma::vec& input)
-    {
-        return (input[0] == 1)?1:0;
-    }
-    void writeOnStream(std::ostream& out)
-    {
-        out << "deep_state" << endl;
-    }
-    void readFromStream(std::istream& in) {}
-};
-/////////////////////////////////////////////////////////////
 
 void help()
 {
-    cout << "deep_GIRL [algorithm]" << endl;
+    cout << "dam_GIRL [algorithm]" << endl;
     cout << " - algorithm: r, rb, g, gb (default)" << endl;
 }
 
@@ -135,28 +107,28 @@ int main(int argc, char *argv[])
 
     /*** check inputs ***/
     char alg[10];
-    GIRL<FiniteAction,DenseState>::AlgType atype;
+    GIRL<DenseAction,DenseState>::AlgType atype;
     if (argc > 1)
     {
         if (strcmp(argv[1], "r") == 0)
         {
             cout << "GIRL REINFORCE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::R;
+            atype = GIRL<DenseAction,DenseState>::AlgType::R;
         }
         else if (strcmp(argv[1], "rb") == 0)
         {
             cout << "GIRL REINFORCE BASE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::RB;
+            atype = GIRL<DenseAction,DenseState>::AlgType::RB;
         }
         else if (strcmp(argv[1], "g") == 0)
         {
             cout << "GIRL GPOMDP" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::G;
+            atype = GIRL<DenseAction,DenseState>::AlgType::G;
         }
         else if (strcmp(argv[1], "gb") == 0)
         {
             cout << "GIRL GPOMDP BASE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+            atype = GIRL<DenseAction,DenseState>::AlgType::GB;
         }
         else
         {
@@ -168,63 +140,58 @@ int main(int argc, char *argv[])
     }
     else
     {
-        atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+        atype = GIRL<DenseAction,DenseState>::AlgType::GB;
         strcpy(alg, "gb");
     }
     /******/
 
-    FileManager fm("deep", "GIRL");
+    FileManager fm("dam", "GIRL");
     fm.createDir();
     //    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     /*** Set up MDP ***/
-    DeepSeaTreasure mdp;
-    vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
-        actions.push_back(FiniteAction(i));
+    Dam mdp;
 
-    //--- policy setup
-    PolynomialFunction* pf0 = new PolynomialFunction(2,0);
-    vector<unsigned int> dim = {0,1};
-    vector<unsigned int> deg = {1,0};
-    PolynomialFunction* pfs1 = new PolynomialFunction(dim,deg);
-    deg = {0,1};
-    PolynomialFunction* pfs2 = new PolynomialFunction(dim,deg);
-    deg = {1,1};
-    PolynomialFunction* pfs1s2 = new PolynomialFunction(dim, deg);
-    deep_2state_identity* d2si = new deep_2state_identity();
-    deep_state_identity* dsi = new deep_state_identity();
-
+    PolynomialFunction *pf = new PolynomialFunction(1,0);
+    GaussianRbf* gf1 = new GaussianRbf(0,50);
+    GaussianRbf* gf2 = new GaussianRbf(50,20);
+    GaussianRbf* gf3 = new GaussianRbf(120,40);
+    GaussianRbf* gf4 = new GaussianRbf(160,50);
     DenseBasisVector basis;
-    for (int i = 0; i < actions.size() -1; ++i)
-    {
-        basis.push_back(new AndConditionBasisFunction(pf0,2,i));
-        basis.push_back(new AndConditionBasisFunction(pfs1,2,i));
-        basis.push_back(new AndConditionBasisFunction(pfs2,2,i));
-        basis.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
-        basis.push_back(new AndConditionBasisFunction(d2si,2,i));
-        basis.push_back(new AndConditionBasisFunction(dsi,2,i));
-    }
-
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
-    ParametricGibbsPolicy<DenseState> expertPolicy(actions, &regressor, 1);
+    basis.push_back(pf);
+    basis.push_back(gf1);
+    basis.push_back(gf2);
+    basis.push_back(gf3);
+    basis.push_back(gf4);
+    cout << basis << endl;
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+    vec p(5);
+    p(0) = 50;
+    p(1) = -50;
+    p(2) = 0;
+    p(3) = 0;
+    p(4) = 50;
+    regressor.setParameters(p);
+    MVNLogisticPolicy expertPolicy(&regressor, 50);
     //---
 
     vec eReward(2);
-#if 0
+    eReward(0) = 0.1;
+    eReward(1) = 0.9;
+#if 1
     /*** learn the optimal policy ***/
     int nbepperpol = 150;
     AdaptiveStep srule(0.001);
     WeightedSumRT rewardtr(eReward);
-    GPOMDPAlgorithm<FiniteAction, DenseState> agent(expertPolicy, nbepperpol,
-            mdp.getSettings().horizon, srule, rewardtr);
-    ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        fm.addPath("gradient_log_learning.log"),
-        WriteStrategy<FiniteAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
+    GPOMDPAlgorithm<DenseAction, DenseState> agent(expertPolicy, nbepperpol,
+                                                   mdp.getSettings().horizon, srule, rewardtr);
+    ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+                fm.addPath("gradient_log_learning.log"),
+                WriteStrategy<DenseAction, DenseState>::AGENT,
+                true /*delete file*/
+                );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
@@ -274,24 +241,24 @@ int main(int argc, char *argv[])
     cout << expertPolicy.getParameters().t();
 
 
-    PolicyEvalAgent<FiniteAction, DenseState> expert(expertPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
-    /* Generate LQR expert dataset */
-    Core<FiniteAction, DenseState> expertCore(mdp, expert);
-    CollectorStrategy<FiniteAction, DenseState> collection;
+    /* Generate DAM expert dataset */
+    Core<DenseAction, DenseState> expertCore(mdp, expert);
+    CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLenght = 50;
-    expertCore.getSettings().testEpisodeN = 500;
+    expertCore.getSettings().testEpisodeN = 100;
     expertCore.runTestEpisodes();
 
 
     /* Learn weight with GIRL */
-    Deep_IRL_Reward rewardRegressor;
-    Dataset<FiniteAction,DenseState>& data = collection.data;
-    GIRL<FiniteAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype);
+    dam_IRL_Reward rewardRegressor(mdp);
+    Dataset<DenseAction,DenseState>& data = collection.data;
+    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                        mdp.getSettings().gamma, atype);
 
-    //Run MWAL
+    //Run GIRL
     irlAlg.run();
     arma::vec w = irlAlg.getWeights();
 
@@ -305,8 +272,8 @@ int main(int argc, char *argv[])
 
     vec grad, grad2, grad3;
     mat dgrad3;
-    GradientFromDataWorker<FiniteAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
-    if (atype == GIRL<FiniteAction,DenseState>::AlgType::R)
+    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
+    if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
     {
         cout << "PG REINFORCE" << endl;
         grad3 = irlAlg.ReinforceGradient(dgrad3);
@@ -315,7 +282,7 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(w);
         grad2 = gdw.ReinforceGradient();
     }
-    else if (atype == GIRL<FiniteAction,DenseState>::AlgType::RB)
+    else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
     {
         cout << "PG REINFORCE BASE" << endl;
         grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
@@ -324,7 +291,7 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(w);
         grad2 = gdw.ReinforceBaseGradient();
     }
-    else if (atype == GIRL<FiniteAction,DenseState>::AlgType::G)
+    else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
     {
         cout << "PG GPOMDP" << endl;
         grad3 = irlAlg.GpomdpGradient(dgrad3);
@@ -333,7 +300,7 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(w);
         grad2 = gdw.GpomdpGradient();
     }
-    else if (atype == GIRL<FiniteAction,DenseState>::AlgType::GB)
+    else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
     {
         cout << "PG GPOMDP BASE" << endl;
         grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
