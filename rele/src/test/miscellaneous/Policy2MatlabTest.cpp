@@ -59,33 +59,67 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
 
-    arma::vec point;
     if (strcmp(argv[1], "normal") == 0)
     {
-        arma::vec std;
-        std.load(argv[2], raw_ascii);
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
 
-        point.load(argv[3], raw_ascii);
+        //load stddeviation
+        vec stddev;
+        stddev.load(argv[3], raw_ascii);
 
+        //load state
+        vec state;
+        state.load(argv[4], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[5], raw_ascii);
+
+        //load degree
         arma::vec deg;
-        deg.load(argv[4], raw_ascii);
-
-        arma::vec initw;
-        initw.load(argv[5], raw_ascii);
+        deg.load(argv[6], raw_ascii);
 
         DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
-
-        assert(initw.n_elem == basis.size());
-
-        LinearApproximator la(point.n_elem, basis);
-        la.setParameters(initw);
+        basis.generatePolynomialBasisFunctions(deg(0),state.n_elem);
+        LinearApproximator la(state.n_elem, basis);
 
         //----- NormalPolicy
-        NormalPolicy* policy = new NormalPolicy(std(0), &la);
+        NormalPolicy policy(stddev(0), &la);
+        policy.setParameters(params);
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action);
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action);
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+        //compute hessian
+        mat hess = policy.diff2log(state,action);
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
+
     }
     else if (strcmp(argv[1], "normalstd") == 0)
     {
+        //TODO update
+        arma::vec point;
         point.load(argv[2], raw_ascii);
 
         arma::vec deg;
@@ -140,7 +174,7 @@ int main(int argc, char *argv[])
         vec state;
         state.load(argv[3], raw_ascii);
 
-        //load state
+        //load action
         vec action;
         action.load(argv[4], raw_ascii);
 
@@ -152,7 +186,7 @@ int main(int argc, char *argv[])
         DenseBasisVector basis;
         basis.generatePolynomialBasisFunctions(deg(0), state.n_elem);
         cout << basis;
-        LinearApproximator lam(point.n_elem, basis);
+        LinearApproximator lam(state.n_elem, basis);
 
         //define policy
         cerr << params.t();
@@ -165,14 +199,14 @@ int main(int argc, char *argv[])
 
 
         //draw random points
-//        mat P(nbs,dim);
-//        for (int i = 0; i < nbs; ++i)
-//        {
-//            arma::vec sample = policy(state);
-//            for (int k = 0; k < dim; ++k)
-//                P(i,k) = sample[k];
-//        }
-//        P.save(fm.addPath("samples.dat"), raw_ascii);
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
 
 
         //evaluate density
@@ -188,10 +222,12 @@ int main(int argc, char *argv[])
         mat hess = policy.diff2log(state,action);
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
 
-        exit(0);
     }
     else if (strcmp(argv[1], "portfolio") == 0)
     {
+        //TODO update
+        arma::vec point;
+
         arma::vec epsilon;
         epsilon.load(argv[2], raw_ascii);
 

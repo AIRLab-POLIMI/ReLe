@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FUNCTIONGRADIENT_H_
-#define FUNCTIONGRADIENT_H_
+#ifndef FUNCTIONHESSIAN_H_
+#define FUNCTIONHESSIAN_H_
 
 #include "Transition.h"
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
@@ -258,5 +258,5 @@ protected:
 
 }
 
-#endif //FUNCTIONGRADIENT_H_
+#endif //FUNCTIONHESSIAN_H_
 
