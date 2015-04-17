@@ -301,7 +301,7 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
         double logisticVal = logistic(mLogisticParams(i), mAsVariance(i));
         double A = - 0.5 * logisticVal * exp(-mLogisticParams(i)) / mAsVariance(i);
         double B = 0.5 * exp(-mLogisticParams(i))
-                * smdiff(i) * smdiff(i) / mAsVariance(i);
+                   * smdiff(i) * smdiff(i) / mAsVariance(i);
         //        std::cout <<"A: " << A << std::endl;
         //        std::cout <<"B: " << B << std::endl;
         gradient(i+dim) = A + B;

@@ -39,7 +39,7 @@ public:
     GradientFromDataWorker(Dataset<ActionC,StateC>& dataset,
                            DifferentiablePolicy<ActionC,StateC>& policy,
                            double gamma, int reward_obj = 0)
-        : policy(policy), data(dataset), rewardf(new IndexRT(reward_obj)), gamma(gamma), cleanRT(false)
+        : policy(policy), data(dataset), rewardf(new IndexRT(reward_obj)), gamma(gamma), cleanRT(true)
     {
     }
 
