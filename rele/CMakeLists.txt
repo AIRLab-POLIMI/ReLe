@@ -132,9 +132,6 @@ target_link_libraries(nls_BBO rele)
 add_executable(nls_REPS src/test/NlsREPSTest.cpp)
 target_link_libraries(nls_REPS rele)
 
-add_executable(basisMatrixTest src/test/BasisMatrixTest.cpp)
-target_link_libraries(basisMatrixTest rele)
-
 add_executable(nls_OptParams src/test/NlsOptimalParamsTest.cpp)
 target_link_libraries(nls_OptParams rele)
 
@@ -159,15 +156,6 @@ target_link_libraries(deep_PG rele)
 add_executable(dam_PG src/test/DamPGTest.cpp)
 target_link_libraries(dam_PG rele)
 
-add_executable(chol_FIM src/test/CholeskyFIMTest.cpp)
-target_link_libraries(chol_FIM rele)
-
-add_executable(dist2mat src/test/Distribution2MatlabTest.cpp)
-target_link_libraries(dist2mat rele)
-
-add_executable(pol2mat src/test/Policy2MatlabTest.cpp)
-target_link_libraries(pol2mat rele)
-
 add_executable(deep_off src/test/DeepBatchTest.cpp)
 target_link_libraries(deep_off rele)
 
@@ -177,8 +165,18 @@ target_link_libraries(nls_off rele)
 add_executable(pr_mdp src/test/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 
-add_executable(factory src/test/FactoryTest.cpp)
-target_link_libraries(factory rele)
+#miscellaneous tests
+add_executable(pol2mat src/test/miscellaneous/Policy2MatlabTest.cpp)
+target_link_libraries(pol2mat rele)
+
+add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
+target_link_libraries(chol_FIM rele)
+
+add_executable(dist2mat src/test/miscellaneous/Distribution2MatlabTest.cpp)
+target_link_libraries(dist2mat rele)
+
+add_executable(basisMatrixTest src/test/miscellaneous/BasisMatrixTest.cpp)
+target_link_libraries(basisMatrixTest rele)
 
 #TD tests
 add_executable(simple_chain src/test/TD/SimpleChain.cpp)
