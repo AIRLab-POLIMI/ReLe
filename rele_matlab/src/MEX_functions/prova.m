@@ -2,8 +2,8 @@ clear all;
 homePath = getenv('HOME');
 pathToReLeSrc = [homePath, '/Projects/github/ReLe/rele/'];
 pathToReLeLib = [homePath, '/Projects/github/ReLe/rele-build/'];
-gcc_path = '/home/mpirotta/Downloads/gcc-4.7/bin/gcc4.7';
-cpp_path = '/home/mpirotta/Downloads/gcc-4.7/bin/c++4.7';
+gcc_path = '/home/matteo/Downloads/gcc-4.7.4/build/gcc-4.7.4/bin/gcc4.7';
+cpp_path = '/home/matteo/Downloads/gcc-4.7.4/build/gcc-4.7.4/bin/c++4.7';
 mexCmd = ['mex -v -g GCC=''',gcc_path,''' CXX=''',cpp_path,''' ' ...
     ' -DARMA_DONT_USE_CXX11' ...
     ' -I' pathToReLeSrc 'include/rele/core' ...

@@ -77,6 +77,7 @@ public:
 
 private:
     DamSettings damConfig;
+    int nbSteps;
 };
 
 }

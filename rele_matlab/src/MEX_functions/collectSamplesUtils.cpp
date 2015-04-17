@@ -52,11 +52,12 @@ class deep_state_identity: public BasisFunction
 
 
 #define SAMPLES_GATHERING(ActionC, StateC, acdim, stdim) \
+	mdp.setHorizon(maxSteps);\
         PolicyEvalAgent<ActionC,StateC> agent(policy);\
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
         CollectorStrategy<ActionC, StateC> collection;\
         oncore.getSettings().loggerStrategy = &collection;\
-        oncore.getSettings().episodeLenght = maxSteps;\
+        oncore.getSettings().episodeLenght = mdp.getSettings().horizon;\
         oncore.getSettings().testEpisodeN = nbEpisodes;\
         oncore.runTestEpisodes();\
         Dataset<ActionC,StateC>& data = collection.data;\
@@ -65,7 +66,7 @@ class deep_state_identity: public BasisFunction
         int dr = mdp.getSettings().rewardDim;\
         MEX_DATA_FIELDS(fieldnames);\
         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);\
-        DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);\
+        DRETURN = mxCreateDoubleMatrix(data.size(), dr, mxREAL);\
         double* Jptr = mxGetPr(DRETURN);\
         for (int i = 0, ie = data.size(); i < ie; ++i)\
         {\
@@ -113,7 +114,7 @@ class deep_state_identity: public BasisFunction
             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);\
             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);\
             for (int oo = 0; oo < dr; ++oo)\
-                Jptr[i*dr+oo] = Jvalue[oo];\
+                Jptr[i+oo*nbEpisodes] = Jvalue[oo];\
         }
 
 #define IN_DOMAIN     prhs[0]

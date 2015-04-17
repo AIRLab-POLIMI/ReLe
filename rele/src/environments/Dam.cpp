@@ -46,7 +46,7 @@ void DamSettings::defaultSettings(DamSettings& settings)
     settings.finiteStateDim = -1;
     settings.finiteActionDim = -1;
     settings.isFiniteHorizon = false;
-    settings.isAverageReward = false;
+    settings.isAverageReward = true;
     settings.isEpisodic = false;
     settings.horizon = 100;
 
@@ -120,7 +120,7 @@ void DamSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Dam::Dam()
-    : damConfig()
+    : damConfig(), nbSteps(0)
 {
     setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
                      damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
@@ -128,7 +128,7 @@ Dam::Dam()
 }
 
 Dam::Dam(DamSettings& config)
-    : damConfig(config)
+    : damConfig(config), nbSteps(0)
 {
     setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
                      damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
@@ -162,7 +162,6 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
     // transition dynamic
     double inflow = RandomGenerator::sampleNormal(damConfig.DAM_INFLOW_MEAN, damConfig.DAM_INFLOW_STD);
-    inflow = damConfig.DAM_INFLOW_MEAN;
     //    std::cout << "inflow: " << inflow << std::endl;
     nextState[0]  = currentState[0] + inflow - curr_action;
 
@@ -207,13 +206,22 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
     for (unsigned int i = 0, ie = damConfig.rewardDim; i < ie; ++i)
     {
         reward[i] /= damConfig.normalization_factor[i];
+        if (damConfig.isAverageReward)
+            reward[i] /= getSettings().horizon;
     }
 
     currentState = nextState;
+    ++nbSteps;
 }
 
 void Dam::getInitialState(DenseState& state)
 {
+
+    if (damConfig.isAverageReward && nbSteps != 0)
+    {
+        assert(nbSteps == getSettings().horizon);
+    }
+
     state.setAbsorbing(false);
 
     if (damConfig.initial_state_type == DamSettings::initType::RANDOM_DISCRETE)
@@ -240,6 +248,7 @@ void Dam::getInitialState(DenseState& state)
         abort();
     }
     state = currentState;
+    nbSteps = 0;
 }
 
 void Dam::setCurrentState(const DenseState &state)
