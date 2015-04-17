@@ -19,6 +19,6 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
 
 
 // vec b = randn(n);
-// 
+//
 // mat sol = solve(A,b);
 }

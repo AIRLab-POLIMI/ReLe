@@ -296,7 +296,7 @@ public:
 
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
 
-    inline void clearRegressor(bool clear)
+    inline virtual void clearRegressor(bool clear)
     {
         clearRegressorOnExit = clear;
     }
@@ -335,6 +335,78 @@ protected:
     LinearApproximator* approximator;
     arma::vec mMean;
     bool clearRegressorOnExit;
+};
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// MVN POLICY with Diagonal covariance (parameters of the diagonal are stddev)
+///////////////////////////////////////////////////////////////////////////////////////
+class MVNDiagonalPolicy : public MVNPolicy
+{
+public:
+    MVNDiagonalPolicy(LinearApproximator* projector)
+        :MVNPolicy(projector), stddevParams(projector->getOutputSize(),arma::fill::ones)
+    {
+        UpdateCovarianceMatrix();
+    }
+
+    MVNDiagonalPolicy(LinearApproximator* projector,
+                      arma::vec stddevVector)
+        :MVNPolicy(projector), stddevParams(stddevVector)
+    {
+        UpdateCovarianceMatrix();
+    }
+
+    virtual ~MVNDiagonalPolicy()
+    {
+        if (clearRegressorOnExit == true)
+        {
+            delete approximator;
+        }
+    }
+
+    virtual inline std::string getPolicyName()
+    {
+        return "MVNDiagonalPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy()
+    {
+        return "";
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline arma::vec getParameters() const
+    {
+        return arma::join_vert(approximator->getParameters(), stddevParams);
+    }
+    virtual inline const unsigned int getParametersSize() const
+    {
+        return approximator->getParametersSize() + stddevParams.n_elem;
+    }
+    virtual void setParameters(arma::vec &w);
+
+    // DifferentiablePolicy interface
+public:
+
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
+
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
+
+private:
+    /**
+     * Compute the covariance matrix from the logistic parameters and
+     * compute the Cholesky decomposition of it.
+     *
+     * @brief Update the covariance matrix
+     */
+    void UpdateCovarianceMatrix();
+
+protected:
+    arma::vec stddevParams;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////

@@ -75,7 +75,7 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
     if (!mxIsScalar(IN_GAMMA))
         mexErrMsgTxt("collectSamples: argument 4 must be a scalar!\n");
     if (!mxIsStruct(IN_PAR_STRUCT))
-        mexErrMsgTxt("collectSamples: argument 5 must be a struct!\n");      
+        mexErrMsgTxt("collectSamples: argument 5 must be a struct!\n");
 
     char* domain_settings = mxArrayToString(IN_DOMAIN);
 

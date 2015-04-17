@@ -325,7 +325,51 @@ CollectSamplesInContinuousMDP(
         }
         arma::vec as_variance(mxGetPr(array), ncols*nrows);
 
-        Dam mdp;
+        //*** get mdp settings ***//
+        //load default settings
+        DamSettings settings;
+        DamSettings::defaultSettings(settings);
+        // number of rewards
+        array = mxGetField(IN_PAR_STRUCT, 0, "nbRewards");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field nbRewards!\n");
+        }
+
+        int nbRewards = mxGetScalar(array);
+        if ( nbRewards < 1 || nbRewards > settings.rewardDim )
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of rewards!\n");
+        }
+        settings.rewardDim = nbRewards;
+        //penalize
+        array = mxGetField(IN_PAR_STRUCT, 0, "penalize");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field penalize!\n");
+        }
+        int penalize = mxGetScalar(array);
+        settings.penalize = (penalize == 0) ? false : true;
+        //initial state
+        array = mxGetField(IN_PAR_STRUCT, 0, "initType");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field initType!\n");
+        }
+        char* initStateType = mxArrayToString(array);
+        if (strcmp(initStateType, "random") == 0)
+        {
+            settings.initial_state_type = DamSettings::initType::RANDOM;
+        }
+        else if (strcmp(initStateType, "random_discrete") == 0)
+        {
+            settings.initial_state_type = DamSettings::initType::RANDOM_DISCRETE;
+        }
+        else
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: available initType are 'random' and 'random_discrete'!\n");
+        }
+        Dam mdp(settings);
 
         PolynomialFunction *pf = new PolynomialFunction(1,0);
         GaussianRbf* gf1 = new GaussianRbf(0,50);
@@ -351,8 +395,7 @@ CollectSamplesInContinuousMDP(
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
 
-
-//         GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
+        mxFree(initStateType);
     }
     else
     {
