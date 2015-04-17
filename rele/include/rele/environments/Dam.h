@@ -32,6 +32,8 @@ namespace ReLe
 class DamSettings : public EnvironmentSettings
 {
 public:
+    enum initType {RANDOM, RANDOM_DISCRETE};
+
     DamSettings();
     static void defaultSettings(DamSettings& settings);
     virtual ~DamSettings() {}
@@ -56,6 +58,8 @@ public:
 
     virtual void WriteToStream(std::ostream& out) const;
     virtual void ReadFromStream(std::istream& in);
+
+    initType initial_state_type;
 };
 
 class Dam: public ContinuousMDP
