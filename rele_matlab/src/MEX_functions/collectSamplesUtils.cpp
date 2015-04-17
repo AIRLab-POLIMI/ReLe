@@ -13,6 +13,9 @@
 #include <NLS.h>
 #include <Dam.h>
 #include <DeepSeaTreasure.h>
+#include <policy_search/onpolicy/FunctionGradient.h>
+#include <policy_search/onpolicy/FunctionHessian.h>
+#include "RewardTransformation.h"
 
 using namespace std;
 using namespace ReLe;
@@ -121,6 +124,9 @@ class deep_state_identity: public BasisFunction
 
 #define SAMPLES  plhs[0]
 #define DRETURN  plhs[1]
+#define GRADS    plhs[2]
+#define HESS     plhs[3]
+
 
 inline void assigneStateWorker(double* val, int idx, FiniteState& state, int i)
 {
@@ -390,11 +396,43 @@ CollectSamplesInContinuousMDP(
 //         p(3) = 0;
 //         p(4) = 50;
 //         regressor.setParameters(p);
-        MVNLogisticPolicy policy(&regressor, as_variance);
+//         MVNLogisticPolicy policy(&regressor, as_variance);
+	NormalPolicy policy(0.1, &regressor);
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
 
+        if (nlhs > 2)
+        {
+            int dp = policy.getParametersSize();
+            GRADS = mxCreateDoubleMatrix(dp, dr, mxREAL);
+            double* gptr = mxGetPr(GRADS);
+            for (int i = 0; i < dr; ++i)
+            {
+                IndexRT rewardRegressor(i);
+                GradientFromDataWorker<DenseAction,DenseState> gdw(data, policy, rewardRegressor, gamma);
+                arma::vec g = gdw.GpomdpBaseGradient();
+                for (int ll = 0; ll < dp; ++ll)
+                    gptr[i*dp+ll] = g[ll];
+            }
+        }
+        if (nlhs > 3)
+        {
+            unsigned int dp = policy.getParametersSize();
+	    long unsigned int dims[] = {dr};
+            HESS = mxCreateCellArray(1, dims);
+            for (int i = 0; i < dr; ++i)
+            {
+                IndexRT rewardRegressor(i);
+                HessianFromDataWorker<DenseAction,DenseState,NormalPolicy> gdw(data, policy, rewardRegressor, gamma);
+                arma::mat h = gdw.ReinforceHessian();
+
+                mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
+                double* gptr = mxGetPr(hmat);
+                memcpy(gptr, h.memptr(), sizeof(double)*dp*dp);
+                mxSetCell(HESS, i, hmat);
+            }
+        }
         mxFree(initStateType);
     }
     else

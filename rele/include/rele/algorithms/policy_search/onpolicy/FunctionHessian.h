@@ -24,27 +24,28 @@
 #ifndef FUNCTIONHESSIAN_H_
 #define FUNCTIONHESSIAN_H_
 
+#include "Basics.h"
 #include "Transition.h"
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 #include "RewardTransformation.h"
 
+
+namespace ReLe
+{
+
 ////Templates needed to sample different action types
 template<class StateC, class PolicyC>
-arma::vec diff2LogWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
+arma::mat diff2LogWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
 {
     unsigned int u = action.getActionN();
     return policy.diff2log(state, u);
 }
 
 template<class StateC, class ActionC, class PolicyC>
-arma::vec diff2LogWorker(const StateC& state, ActionC& action, PolicyC& policy)
+arma::mat diff2LogWorker(const StateC& state, ActionC& action, PolicyC& policy)
 {
     return policy.diff2log(state, action);
 }
-
-
-namespace ReLe
-{
 
 template<class ActionC, class StateC, class PolicyC>
 class HessianFromDataWorker
@@ -76,7 +77,7 @@ public:
         }
     }
 
-    arma::vec ReinforceHessian()
+    arma::mat ReinforceHessian()
     {
         int dp  = policy.getParametersSize();
         arma::vec sumGradLog(dp), localg;
@@ -133,7 +134,7 @@ public:
         return hessian_J;
     }
 
-//    arma::vec ReinforceBaseHessian()
+//    arma::mat ReinforceBaseHessian()
 //    {
 //        int dp  = policy.getParametersSize();
 //        int nbEpisodes = data.size();
