@@ -44,7 +44,7 @@ using namespace ReLe;
 using namespace arma;
 
 class Deep_IRL_Reward : public IRLParametricReward<FiniteAction, DenseState>,
-        public RewardTransformation
+    public RewardTransformation
 {
 public:
 
@@ -131,7 +131,7 @@ void help()
 
 int main(int argc, char *argv[])
 {
-        RandomGenerator::seed(49921158);
+    RandomGenerator::seed(49921158);
 
     /*** check inputs ***/
     char alg[10];
@@ -218,13 +218,13 @@ int main(int argc, char *argv[])
     AdaptiveStep srule(0.001);
     WeightedSumRT rewardtr(eReward);
     GPOMDPAlgorithm<FiniteAction, DenseState> agent(expertPolicy, nbepperpol,
-                                                    mdp.getSettings().horizon, srule, rewardtr);
+            mdp.getSettings().horizon, srule, rewardtr);
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-                fm.addPath("gradient_log_learning.log"),
-                WriteStrategy<FiniteAction, DenseState>::AGENT,
-                true /*delete file*/
-                );
+        fm.addPath("gradient_log_learning.log"),
+        WriteStrategy<FiniteAction, DenseState>::AGENT,
+        true /*delete file*/
+    );
 
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
@@ -354,33 +354,33 @@ int main(int argc, char *argv[])
     ofstream ooo(fm.addPath("objective.log"));
     for (int i = 0; i < v.n_elem; ++i)
 //        for (int j = 0; j < v.n_elem; ++j)
+    {
+        vec x(2);
+        x(0) = v[i];
+        x(1) = 1 - v[i];
+        if (atype == GIRL<FiniteAction,DenseState>::AlgType::R)
         {
-            vec x(2);
-            x(0) = v[i];
-            x(1) = 1 - v[i];
-            if (atype == GIRL<FiniteAction,DenseState>::AlgType::R)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.ReinforceGradient(dgrad3);
-            }
-            else if (atype == GIRL<FiniteAction,DenseState>::AlgType::RB)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-            }
-            else if (atype == GIRL<FiniteAction,DenseState>::AlgType::G)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.GpomdpGradient(dgrad3);
-            }
-            else if (atype == GIRL<FiniteAction,DenseState>::AlgType::GB)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-            }
-            double val = norm(grad3,2)*norm(grad3,2)*0.5;
-            ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.ReinforceGradient(dgrad3);
         }
+        else if (atype == GIRL<FiniteAction,DenseState>::AlgType::RB)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+        }
+        else if (atype == GIRL<FiniteAction,DenseState>::AlgType::G)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.GpomdpGradient(dgrad3);
+        }
+        else if (atype == GIRL<FiniteAction,DenseState>::AlgType::GB)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+        }
+        double val = norm(grad3,2)*norm(grad3,2)*0.5;
+        ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+    }
     ooo.close();
 
     return 0;

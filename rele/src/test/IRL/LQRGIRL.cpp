@@ -278,33 +278,33 @@ int main(int argc, char *argv[])
     ofstream ooo(fm.addPath("objective.log"));
     for (int i = 0; i < v.n_elem; ++i)
 //        for (int j = 0; j < v.n_elem; ++j)
+    {
+        vec x(2);
+        x(0) = v[i];
+        x(1) = 1 - v[i];
+        if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
         {
-            vec x(2);
-            x(0) = v[i];
-            x(1) = 1 - v[i];
-            if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.ReinforceGradient(dgrad3);
-            }
-            else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-            }
-            else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.GpomdpGradient(dgrad3);
-            }
-            else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
-            {
-                rewardRegressor.setParameters(x);
-                grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-            }
-            double val = norm(grad3,2)*norm(grad3,2)*0.5;
-            ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.ReinforceGradient(dgrad3);
         }
+        else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+        }
+        else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.GpomdpGradient(dgrad3);
+        }
+        else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
+        {
+            rewardRegressor.setParameters(x);
+            grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+        }
+        double val = norm(grad3,2)*norm(grad3,2)*0.5;
+        ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+    }
     ooo.close();
 
     return 0;

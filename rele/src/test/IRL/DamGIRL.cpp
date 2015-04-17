@@ -103,7 +103,7 @@ void help()
 
 int main(int argc, char *argv[])
 {
-        RandomGenerator::seed(418932850);
+    RandomGenerator::seed(418932850);
 
     /*** check inputs ***/
     char alg[10];
