@@ -177,10 +177,10 @@ CollectSamplesInContinuousMDP(
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
 //         //////////////////////////////////////////////// METTERE IN UNA DEFINE
-// 
+//
 //         PolicyEvalAgent
 //         <DenseAction,DenseState> agent(policy);
-// 
+//
 //         ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
 //         CollectorStrategy<DenseAction, DenseState> collection;
 //         oncore.getSettings().loggerStrategy = &collection;
@@ -195,7 +195,7 @@ CollectSamplesInContinuousMDP(
 //         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);
 //         DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);
 //         double* Jptr = mxGetPr(DRETURN);
-// 
+//
 //         for (int i = 0, ie = data.size(); i < ie; ++i)
 //         {
 //             int nsteps = data[i].size();
@@ -204,7 +204,7 @@ CollectSamplesInContinuousMDP(
 //             mxArray* action_vector     = mxCreateDoubleMatrix(da, nsteps, mxREAL);
 //             mxArray* reward_vector     = mxCreateDoubleMatrix(dr, nsteps, mxREAL);
 //             mxArray* absorb_vector     = mxCreateDoubleMatrix(1, nsteps, mxREAL);;//mxCreateNumericMatrix(1, nsteps, mxINT32_CLASS, mxREAL);
-// 
+//
 //             double* states = mxGetPr(state_vector);
 //             double* nextstates = mxGetPr(nextstate_vector);
 //             double* actions = mxGetPr(action_vector);
@@ -237,13 +237,13 @@ CollectSamplesInContinuousMDP(
 //             {
 //                 absorb[nsteps-1] = 1;
 //             }
-// 
+//
 //             mxSetFieldByNumber(SAMPLES, i, 0, state_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 1, action_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 2, reward_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);
-// 
+//
 //             for (int oo = 0; oo < dr; ++oo)
 //                 Jptr[i*dr+oo] = Jvalue[oo];
 //         }
