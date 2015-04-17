@@ -48,47 +48,70 @@ class deep_state_identity: public BasisFunction
 /////////////////////////////////////////////////////////////
 
 
-#define SAMPLES_GATHERING(ActionC, StateC) \
-        PolicyEvalAgent\
-        <ActionC,StateC> agent(policy);\
+#define SAMPLES_GATHERING(ActionC, StateC, acdim, stdim) \
+        PolicyEvalAgent<ActionC,StateC> agent(policy);\
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
-        MatlabCollectorStrategy<ActionC, StateC> strat = MatlabCollectorStrategy<ActionC, StateC>(gamma);\
-        oncore.getSettings().loggerStrategy = &strat;\
-        int horiz = maxSteps;\
-        oncore.getSettings().episodeLenght = horiz;\
-        int nbTrajectories = nbEpisodes;\
-        for (int n = 0; n < nbTrajectories; ++n)\
-            oncore.runTestEpisode();\
-        std::vector<MatlabCollectorStrategy<ActionC,StateC>::MatlabEpisode>& data = strat.data;\
-        int ds = data[0].dx;\
-        int da = data[0].du;\
-        int dr = data[0].dr;\
+        CollectorStrategy<ActionC, StateC> collection;\
+        oncore.getSettings().loggerStrategy = &collection;\
+        oncore.getSettings().episodeLenght = maxSteps;\
+        oncore.getSettings().testEpisodeN = nbEpisodes;\
+        oncore.runTestEpisodes();\
+        Dataset<ActionC,StateC>& data = collection.data;\
+        int ds = mdp.getSettings().stdim;\
+        int da = mdp.getSettings().acdim;\
+        int dr = mdp.getSettings().rewardDim;\
         MEX_DATA_FIELDS(fieldnames);\
         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);\
-        DRETURN = mxCreateDoubleMatrix(data.size(), dr, mxREAL);\
+        DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);\
         double* Jptr = mxGetPr(DRETURN);\
         for (int i = 0, ie = data.size(); i < ie; ++i)\
         {\
-            int steps = data[i].steps;\
-            mxArray* state_vector      = mxCreateDoubleMatrix(ds, steps, mxREAL);\
-            memcpy(mxGetPr(state_vector), data[i].states.memptr(), sizeof(double)*ds*steps);\
-            mxArray* nextstate_vector  = mxCreateDoubleMatrix(ds, steps, mxREAL);\
-            memcpy(mxGetPr(nextstate_vector), data[i].nextstates.memptr(), sizeof(double)*ds*steps);\
-            mxArray* action_vector     = mxCreateDoubleMatrix(da, steps, mxREAL);\
-            memcpy(mxGetPr(action_vector), data[i].actions.memptr(), sizeof(double)*da*steps);\
-            mxArray* reward_vector     = mxCreateDoubleMatrix(dr, steps, mxREAL);\
-            memcpy(mxGetPr(reward_vector), data[i].rewards.memptr(), sizeof(double)*dr*steps);\
-            mxArray* absorb_vector     = mxCreateNumericMatrix(1, steps, mxINT32_CLASS, mxREAL);\
-            memcpy(mxGetPr(absorb_vector), data[i].absorb.memptr(), sizeof(signed char)*steps);\
+            int nsteps = data[i].size();\
+            mxArray* state_vector      = mxCreateDoubleMatrix(ds, nsteps, mxREAL);\
+            mxArray* nextstate_vector  = mxCreateDoubleMatrix(ds, nsteps, mxREAL);\
+            mxArray* action_vector     = mxCreateDoubleMatrix(da, nsteps, mxREAL);\
+            mxArray* reward_vector     = mxCreateDoubleMatrix(dr, nsteps, mxREAL);\
+            mxArray* absorb_vector     = mxCreateDoubleMatrix(1, nsteps, mxREAL);\
+            double* states = mxGetPr(state_vector);\
+            double* nextstates = mxGetPr(nextstate_vector);\
+            double* actions = mxGetPr(action_vector);\
+	    double* rewards = mxGetPr(reward_vector);\
+            double* absorb = mxGetPr(absorb_vector);\
+            int count = 0;\
+            double df = 1.0;\
+            arma::vec Jvalue(dr, arma::fill::zeros);\
+            for (auto sample : data[i])\
+            {\
+                absorb[count] = 0;\
+                for (int i = 0; i < ds; ++i)\
+                {\
+                    assigneStateWorker(states, count*ds+i, sample.x, i);\
+                    assigneStateWorker(nextstates, count*ds+i, sample.xn, i);\
+                }\
+                for (int i = 0; i < da; ++i)\
+                {\
+                    assigneActionWorker(actions[count*da+i], sample.u, i);\
+                }\
+                for (int i = 0; i < dr; ++i)\
+                {\
+                    rewards[count*dr+i] = sample.r[i];\
+                    Jvalue[i] += df*sample.r[i];\
+                }\
+                count++;\
+                df *= gamma;\
+            }\
+            if (data[i][nsteps-1].xn.isAbsorbing())\
+            {\
+                absorb[nsteps-1] = 1;\
+            }\
             mxSetFieldByNumber(SAMPLES, i, 0, state_vector);\
             mxSetFieldByNumber(SAMPLES, i, 1, action_vector);\
             mxSetFieldByNumber(SAMPLES, i, 2, reward_vector);\
             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);\
             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);\
             for (int oo = 0; oo < dr; ++oo)\
-                Jptr[i*dr+oo] = data[i].Jvalue[oo];\
+                Jptr[i*dr+oo] = Jvalue[oo];\
         }
-
 
 #define IN_DOMAIN     prhs[0]
 #define IN_NBEPISODES prhs[1]
@@ -98,6 +121,16 @@ class deep_state_identity: public BasisFunction
 
 #define SAMPLES  plhs[0]
 #define DRETURN  plhs[1]
+
+inline void assigneStateWorker(double* val, int idx, FiniteState& state, int i)
+{
+    val[idx] = state.getStateN();
+}
+
+inline void assigneStateWorker(double* val, int idx, DenseState& state, int i)
+{
+    val[idx] = state[i];
+}
 
 void
 CollectSamplesInContinuousMDP(
@@ -142,65 +175,77 @@ CollectSamplesInContinuousMDP(
         NormalPolicy policy(stddev, &regressor);
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(DenseAction, DenseState)
+        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
 //         //////////////////////////////////////////////// METTERE IN UNA DEFINE
-//
+// 
 //         PolicyEvalAgent
 //         <DenseAction,DenseState> agent(policy);
-//
+// 
 //         ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
-//         MatlabCollectorStrategy<DenseAction, DenseState> strat = MatlabCollectorStrategy<DenseAction, DenseState>(gamma);
-//         oncore.getSettings().loggerStrategy = &strat;
-//
-//         int horiz = mdp.getSettings().horizon;
-//         oncore.getSettings().episodeLenght = horiz;
-//
-//         int nbTrajectories = nbEpisodes;
-//         for (int n = 0; n < nbTrajectories; ++n)
-//             oncore.runTestEpisode();
-//
-//         std::vector<MatlabCollectorStrategy<DenseAction,DenseState>::MatlabEpisode>& data = strat.data;
-//
-//         int ds = data[0].dx;
-//         int da = data[0].du;
-//         int dr = data[0].dr;
-//
+//         CollectorStrategy<DenseAction, DenseState> collection;
+//         oncore.getSettings().loggerStrategy = &collection;
+//         oncore.getSettings().episodeLenght = maxSteps;
+//         oncore.getSettings().testEpisodeN = nbEpisodes;
+//         oncore.runTestEpisodes();
+//         Dataset<DenseAction,DenseState>& data = collection.data;
+//         int ds = mdp.getSettings().continuosStateDim;
+//         int da = mdp.getSettings().continuosActionDim;
+//         int dr = mdp.getSettings().rewardDim;
 //         MEX_DATA_FIELDS(fieldnames);
-//         // return samples
 //         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);
 //         DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);
 //         double* Jptr = mxGetPr(DRETURN);
-//
+// 
 //         for (int i = 0, ie = data.size(); i < ie; ++i)
 //         {
-//             int steps = data[i].steps;
-//
-//             mxArray* state_vector      = mxCreateDoubleMatrix(ds, steps, mxREAL);
-//             memcpy(mxGetPr(state_vector), data[i].states.memptr(), sizeof(double)*ds*steps);
-//
-//
-//             mxArray* nextstate_vector  = mxCreateDoubleMatrix(ds, steps, mxREAL);
-//             memcpy(mxGetPr(nextstate_vector), data[i].nextstates.memptr(), sizeof(double)*ds*steps);
-//
-//             mxArray* action_vector     = mxCreateDoubleMatrix(da, steps, mxREAL);
-//             memcpy(mxGetPr(action_vector), data[i].actions.memptr(), sizeof(double)*da*steps);
-//
-//             mxArray* reward_vector     = mxCreateDoubleMatrix(dr, steps, mxREAL);
-//             memcpy(mxGetPr(reward_vector), data[i].rewards.memptr(), sizeof(double)*dr*steps);
-//
-//
-//             mxArray* absorb_vector     = mxCreateNumericMatrix(1, steps, mxINT32_CLASS, mxREAL);
-//             memcpy(mxGetPr(absorb_vector), data[i].absorb.memptr(), sizeof(signed char)*steps);
-//
-//
+//             int nsteps = data[i].size();
+//             mxArray* state_vector      = mxCreateDoubleMatrix(ds, nsteps, mxREAL);
+//             mxArray* nextstate_vector  = mxCreateDoubleMatrix(ds, nsteps, mxREAL);
+//             mxArray* action_vector     = mxCreateDoubleMatrix(da, nsteps, mxREAL);
+//             mxArray* reward_vector     = mxCreateDoubleMatrix(dr, nsteps, mxREAL);
+//             mxArray* absorb_vector     = mxCreateDoubleMatrix(1, nsteps, mxREAL);;//mxCreateNumericMatrix(1, nsteps, mxINT32_CLASS, mxREAL);
+// 
+//             double* states = mxGetPr(state_vector);
+//             double* nextstates = mxGetPr(nextstate_vector);
+//             double* actions = mxGetPr(action_vector);
+// 	    double* rewards = mxGetPr(reward_vector);
+//             double* absorb = mxGetPr(absorb_vector);
+//             int count = 0;
+//             double df = 1.0;
+//             arma::vec Jvalue(dr, arma::fill::zeros);
+//             for (auto sample : data[i])
+//             {
+//                 absorb[count] = 0;
+//                 for (int i = 0; i < ds; ++i)
+//                 {
+//                     assigneStateWorker(states, count*ds+i, sample.x, i);
+//                     assigneStateWorker(nextstates, count*ds+i, sample.xn, i);
+//                 }
+//                 for (int i = 0; i < da; ++i)
+//                 {
+//                     assigneActionWorker(actions[count*da+i], sample.u, i);
+//                 }
+//                 for (int i = 0; i < dr; ++i)
+//                 {
+//                     rewards[count*dr+i] = sample.r[i];
+//                     Jvalue[i] += df*sample.r[i];
+//                 }
+//                 count++;
+//                 df *= gamma;
+//             }
+//             if (data[i][nsteps-1].xn.isAbsorbing())
+//             {
+//                 absorb[nsteps-1] = 1;
+//             }
+// 
 //             mxSetFieldByNumber(SAMPLES, i, 0, state_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 1, action_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 2, reward_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);
 //             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);
-//
+// 
 //             for (int oo = 0; oo < dr; ++oo)
-//                 Jptr[i*dr+oo] = data[i].Jvalue[oo];
+//                 Jptr[i*dr+oo] = Jvalue[oo];
 //         }
 //         ////////////////////////////////////////////////
     }
@@ -248,7 +293,7 @@ CollectSamplesInContinuousMDP(
                 pp(1) = 0.4;
                 meanRegressor.setParameters(pp);*/
 
-        SAMPLES_GATHERING(DenseAction, DenseState)
+        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
     }
     else if (strcmp(domain_settings, "dam") == 0)
     {
@@ -304,7 +349,10 @@ CollectSamplesInContinuousMDP(
         MVNLogisticPolicy policy(&regressor, as_variance);
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(DenseAction, DenseState)
+        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+
+
+//         GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
     }
     else
     {
@@ -376,7 +424,7 @@ CollectSamplesInDenseMDP(
         ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(FiniteAction, DenseState)
+        SAMPLES_GATHERING(FiniteAction, DenseState, finiteActionDim, continuosStateDim)
     }
     else
     {
