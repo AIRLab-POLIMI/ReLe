@@ -36,21 +36,6 @@
 namespace ReLe
 {
 
-////Templates needed to sample different action types
-template<class StateC, class PolicyC>
-arma::vec diffLogWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
-{
-    unsigned int u = action.getActionN();
-    return policy.difflog(state, u);
-}
-
-template<class StateC, class ActionC, class PolicyC>
-arma::vec diffLogWorker(const StateC& state, ActionC& action, PolicyC& policy)
-{
-    return policy.difflog(state, action);
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////////////
 /// ABSTRACT GRADIENT ALGORITHM
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +241,7 @@ protected:
 
     virtual void updateStep(const Reward& reward)
     {
-        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        arma::vec grad = policy.difflog(currentState, currentAction);
         sumdlogpi += grad;
     }
 
@@ -388,7 +373,7 @@ protected:
 
         int dp = policy.getParametersSize();
 
-        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        arma::vec grad = policy.difflog(currentState, currentAction);
         sumdlogpi += grad;
 
         // store the basic elements used to compute the gradient
@@ -585,7 +570,7 @@ protected:
 
         int dp = policy.getParametersSize();
 
-        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        arma::vec grad = policy.difflog(currentState, currentAction);
         sumdlogpi += grad;
 
         fisherEp += grad * grad.t();
@@ -750,7 +735,7 @@ protected:
 
     virtual void updateStep(const Reward& reward)
     {
-        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        arma::vec grad = policy.difflog(currentState, currentAction);
         sumdlogpi += grad;
 
         fisherEp += grad * grad.t();
@@ -904,7 +889,7 @@ protected:
 
         // Compute the derivative of the logarithm of the policy and
         // Evaluate it in (s_t, a_t)
-        arma::vec grad = diffLogWorker(currentState, currentAction, policy);
+        arma::vec grad = policy.difflog(currentState, currentAction);
 
         //Construct basis functions
         for (unsigned int i = 0; i < dp; ++i)
