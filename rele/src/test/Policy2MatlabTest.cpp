@@ -26,6 +26,7 @@
 #include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
 #include "RandomGenerator.h"
+#include "basis/PolynomialFunction.h"
 
 #include <iostream>
 #include <iomanip>
@@ -67,12 +68,12 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[5], raw_ascii);
 
-        DenseBasisMatrix basis;
-        basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 
-        LinearApproximator la(point.n_elem, basis);
+        DenseFeatures phi(basis);
+        LinearApproximator la(point.n_elem, phi);
         la.setParameters(initw);
 
         //----- NormalPolicy
@@ -88,12 +89,12 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[4], raw_ascii);
 
-        DenseBasisMatrix basis;
-        basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 
-        LinearApproximator lam(point.n_elem, basis);
+        DenseFeatures phi(basis);
+        LinearApproximator lam(point.n_elem, phi);
         lam.setParameters(initw);
 
         arma::vec degs;
@@ -102,12 +103,12 @@ int main(int argc, char *argv[])
         arma::vec initws;
         initws.load(argv[6], raw_ascii);
 
-        DenseBasisMatrix basiss;
-        basiss.generatePolynomialBasisFunctions(degs(0),point.n_elem);
+        BasisFunctions basiss = PolynomialFunction::generatePolynomialBasisFunctions(degs(0),point.n_elem);
 
         assert(initws.n_elem == basiss.size());
 
-        LinearApproximator las(point.n_elem, basiss);
+        DenseFeatures phis(basiss);
+        LinearApproximator las(point.n_elem, phis);
         las.setParameters(initws);
 
         //----- NormalStateDependantStddevPolicy
@@ -137,12 +138,12 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[5], raw_ascii);
 
-        DenseBasisMatrix basis;
-        basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 
-        LinearApproximator la(point.n_elem, basis);
+        DenseFeatures phi(basis);
+        LinearApproximator la(point.n_elem, phi);
         la.setParameters(initw);
 
         //----- PortfolioNormalPolicy

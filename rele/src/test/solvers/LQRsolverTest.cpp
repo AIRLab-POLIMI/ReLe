@@ -31,14 +31,14 @@ int main(int argc, char *argv[])
 {
     LQR lqr(2,1);
 
-    DenseBasisMatrix basis;
+    BasisFunctions basis;
     IdentityBasis* bf1 = new IdentityBasis(0);
     IdentityBasis* bf2 = new IdentityBasis(1);
     basis.push_back(bf1);
     basis.push_back(bf2);
 
-    SparseBasisMatrix basisMatrix(basis, 2);
-    LinearApproximator regressor(basis.size(), basisMatrix);
+    SparseFeatures phi(basis, 2);
+    LinearApproximator regressor(phi.rows(), phi);
 
     LQRsolver solver(lqr, regressor);
 

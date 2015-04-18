@@ -21,10 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/GaussianRBF.h"
+#include "Features.h"
 #include <cassert>
+
 using namespace arma;
 
 
@@ -35,7 +34,12 @@ namespace ReLe
 /// DENSE BASIS MATRIX
 ///////////////////////////////////////////////////////////////////////////////////////
 
-DenseBasisMatrix::DenseBasisMatrix(BasisFunctions& basisVector) : basis(basisVector.size())
+DenseFeatures::DenseFeatures(BasisFunction* basisfunction) : basis(1)
+{
+    basis[0] = basisfunction;
+}
+
+DenseFeatures::DenseFeatures(BasisFunctions& basisVector) : basis(basisVector.size())
 {
 
     for(unsigned int i = 0; i < basisVector.size(); i++)
@@ -44,7 +48,7 @@ DenseBasisMatrix::DenseBasisMatrix(BasisFunctions& basisVector) : basis(basisVec
     }
 }
 
-DenseBasisMatrix::DenseBasisMatrix(BasisFunctions& basisVector, unsigned int rows, unsigned int cols)
+DenseFeatures::DenseFeatures(BasisFunctions& basisVector, unsigned int rows, unsigned int cols)
     : basis(rows, cols)
 {
     assert(rows*cols == basisVector.size());
@@ -59,7 +63,7 @@ DenseBasisMatrix::DenseBasisMatrix(BasisFunctions& basisVector, unsigned int row
     }
 }
 
-DenseBasisMatrix::~DenseBasisMatrix()
+DenseFeatures::~DenseFeatures()
 {
     for(auto bf : basis)
     {
@@ -67,7 +71,7 @@ DenseBasisMatrix::~DenseBasisMatrix()
     }
 }
 
-mat DenseBasisMatrix::operator()(const vec& input)
+mat DenseFeatures::operator()(const vec& input)
 {
     mat output(basis.n_rows, basis.n_cols);
 
@@ -76,7 +80,7 @@ mat DenseBasisMatrix::operator()(const vec& input)
     {
         for(unsigned int j = 0; j < basis.n_cols; j++)
         {
-        	BasisFunction& bf = *basis(i, j);
+            BasisFunction& bf = *basis(i, j);
             output(i, j) = bf(input);
         }
     }
@@ -88,13 +92,13 @@ mat DenseBasisMatrix::operator()(const vec& input)
 /// SPARSE BASIS MATRIX
 ///////////////////////////////////////////////////////////////////////////////////////
 
-SparseBasisMatrix::SparseBasisMatrix()
+SparseFeatures::SparseFeatures()
     : n_rows(0), n_cols(0)
 {
 }
 
-SparseBasisMatrix::SparseBasisMatrix(BasisFunctions& basis,
-                                     unsigned int nbReplication, bool indipendent)
+SparseFeatures::SparseFeatures(BasisFunctions& basis,
+                               unsigned int nbReplication, bool indipendent)
     : n_rows(basis.size()*(indipendent?nbReplication:1)), n_cols(nbReplication)
 {
     unsigned int i, k;
@@ -117,7 +121,7 @@ SparseBasisMatrix::SparseBasisMatrix(BasisFunctions& basis,
     }
 }
 
-arma::mat SparseBasisMatrix::operator ()(const arma::vec& input)
+arma::mat SparseFeatures::operator ()(const arma::vec& input)
 {
     unsigned int c, r, i, nelem = rowsIdxs.size();
     double val;
@@ -136,7 +140,7 @@ arma::mat SparseBasisMatrix::operator ()(const arma::vec& input)
     return F;
 }
 
-void SparseBasisMatrix::addBasis(unsigned int row, unsigned int col, BasisFunction *bfs)
+void SparseFeatures::addBasis(unsigned int row, unsigned int col, BasisFunction *bfs)
 {
     unsigned int c, r, i, nelem = rowsIdxs.size();
     bool found = false;

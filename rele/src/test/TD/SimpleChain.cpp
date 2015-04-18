@@ -44,10 +44,10 @@ int main(int argc, char *argv[])
 
     FiniteMDP mdp = generator.getMPD(0.9);
     //e_Greedy policy;
-    //Boltzmann policy;
-    //SARSA agent(policy);
+    Boltzmann policy;
+    SARSA agent(policy);
     //Q_Learning agent(policy);
-    TabularREPS agent;
+    //TabularREPS agent;
     Core<FiniteAction, FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;

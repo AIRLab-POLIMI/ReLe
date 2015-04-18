@@ -59,8 +59,7 @@ int main(int argc, char *argv[])
     ParametricNormal dist(mean, cov);
 
     PolynomialFunction* pf = new PolynomialFunction(1, 1);
-    DenseBasisMatrix basis;
-    basis.push_back(pf);
+    DenseFeatures basis(pf);
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
     DetLinearPolicy<DenseState> policy(&regressor);
 

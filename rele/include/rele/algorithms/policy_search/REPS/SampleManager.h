@@ -26,7 +26,7 @@
 
 #include "BasicsTraits.h"
 #include "Sample.h"
-#include "BasisFunctions.h"
+#include "Features.h"
 
 #include <map>
 #include <vector>
@@ -72,7 +72,7 @@ public:
     };
 
 public:
-    SampleManager(BasisMatrix& phi) :
+    SampleManager(Features& phi) :
         phi(phi)
     {
 
@@ -143,7 +143,7 @@ private:
     LambdaMap nlambda;
     CountMap d;
     SampleVector samples;
-    BasisMatrix& phi;
+    Features& phi;
 
 };
 

@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -29,10 +29,10 @@
 namespace ReLe
 {
 
-class BasisMatrix
+class Features
 {
 public:
-    virtual ~BasisMatrix()
+    virtual ~Features()
     {
     }
 
@@ -42,12 +42,13 @@ public:
 
 };
 
-class DenseBasisMatrix: public BasisMatrix
+class DenseFeatures: public Features
 {
 public:
-    DenseBasisMatrix(BasisFunctions& basisVector);
-    DenseBasisMatrix(BasisFunctions& basisVector, unsigned int rows, unsigned int cols);
-    virtual ~DenseBasisMatrix();
+    DenseFeatures(BasisFunction* basisVector);
+    DenseFeatures(BasisFunctions& basisVector);
+    DenseFeatures(BasisFunctions& basisVector, unsigned int rows, unsigned int cols);
+    virtual ~DenseFeatures();
     virtual arma::mat operator()(const arma::vec& input);
 
     inline virtual size_t rows() const
@@ -65,14 +66,14 @@ private:
 
 };
 
-class SparseBasisMatrix: public BasisMatrix
+class SparseFeatures: public Features
 {
 public:
-    SparseBasisMatrix();
+    SparseFeatures();
 
-    SparseBasisMatrix(BasisFunctions& basis,
-                      unsigned int nbReplication = 1,
-                      bool indipendent = true);
+    SparseFeatures(BasisFunctions& basis,
+                   unsigned int nbReplication = 1,
+                   bool indipendent = true);
 
     // AbstractBasisMatrix interface
 public:

@@ -201,25 +201,19 @@ int main(int argc, char *argv[])
     deep_2state_identity* d2si = new deep_2state_identity();
     deep_state_identity* dsi = new deep_state_identity();
 
-    DenseBasisMatrix basis;
+    BasisFunctions bfs;
+
     for (int i = 0; i < actions.size() -1; ++i)
     {
-        basis.push_back(new AndConditionBasisFunction(pf0,2,i));
-        basis.push_back(new AndConditionBasisFunction(pfs1,2,i));
-        basis.push_back(new AndConditionBasisFunction(pfs2,2,i));
-        basis.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
-        basis.push_back(new AndConditionBasisFunction(d2si,2,i));
-        basis.push_back(new AndConditionBasisFunction(dsi,2,i));
-
-        //        basis.push_back(new ConditionBasisFunction(pf0,i));
-        //        basis.push_back(new ConditionBasisFunction(pfs1,i));
-        //        basis.push_back(new ConditionBasisFunction(pfs2,i));
-        //        basis.push_back(new ConditionBasisFunction(pfs1s2,i));
-        //        basis.push_back(new ConditionBasisFunction(d2si,i));
-        //        basis.push_back(new ConditionBasisFunction(dsi,i));
+        bfs.push_back(new AndConditionBasisFunction(pf0,2,i));
+        bfs.push_back(new AndConditionBasisFunction(pfs1,2,i));
+        bfs.push_back(new AndConditionBasisFunction(pfs2,2,i));
+        bfs.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
+        bfs.push_back(new AndConditionBasisFunction(d2si,2,i));
+        bfs.push_back(new AndConditionBasisFunction(dsi,2,i));
     }
-    //    cout << basis << endl;
-    //    cout << "basis length: " << basis.size() << endl;
+
+    DenseFeatures basis(bfs);
 
     LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
     ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);

@@ -30,27 +30,6 @@
 
 namespace ReLe
 {
-//Templates needed to sample different action types
-/*inline void sampleActionWorker(const FiniteState& state, FiniteAction& action, Policy<FiniteAction, FiniteState>& policy)
-{
-    unsigned int u = policy(state.getStateN());
-    action.setActionN(u);
-}
-
-
-template<class StateC>
-void sampleActionWorker(const StateC& state, FiniteAction& action, Policy<FiniteAction, StateC>& policy)
-{
-    unsigned int u = policy(state);
-    action.setActionN(u);
-}
-
-template<class StateC, class ActionC>
-void sampleActionWorker(const StateC& state, ActionC& action, Policy<ActionC, StateC>& policy)
-{
-    typename action_type<ActionC>::type_ref u = action;
-    u = policy(state);
-}*/
 
 //templates needed to store action and state in a vector
 template<class StateC, class ActionC>

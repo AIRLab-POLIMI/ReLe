@@ -91,24 +91,25 @@ int main(int argc, char *argv[])
     /* Learn weight with MWAL */
 
     //Create features vector
-    DenseBasisMatrix rewardBasis;
+    BasisFunctions rewardBasis;
     for(int i = 0; i < 5; i++)
     {
         SimpleChainBasis* bf = new SimpleChainBasis(i);
         rewardBasis.push_back(bf);
     }
 
-    LinearApproximator rewardRegressor(1, rewardBasis);
+    DenseFeatures rewardPhi(rewardBasis);
+    LinearApproximator rewardRegressor(1, rewardPhi);
 
     //Compute expert feature expectations
-    arma::vec muE = data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
+    arma::vec muE = data.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
 
     //Create an agent to solve the mdp direct problem
     e_Greedy policy;
     SARSA agent(policy);
 
     //Setup the solver
-    IRLAgentSolver<FiniteAction, FiniteState> solver(agent, mdp, policy, rewardBasis, rewardRegressor);
+    IRLAgentSolver<FiniteAction, FiniteState> solver(agent, mdp, policy, rewardPhi, rewardRegressor);
     solver.setLearningParams(1000, 1000);
     solver.setTestParams(100, 10000);
 

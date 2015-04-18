@@ -28,7 +28,7 @@
 #include <fstream>
 
 #include "BasicFunctions.h"
-#include "BasisFunctions.h"
+#include "Features.h"
 
 
 namespace ReLe
@@ -114,21 +114,21 @@ class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
 
 public:
-    arma::mat computefeatureExpectation(BasisMatrix& basis, double gamma = 1)
+    arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
     {
         size_t episodes = this->size();
-        arma::mat featureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);
+        arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
 
         for(auto& episode : *this)
         {
-            arma::mat episodefeatureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);
+            arma::mat episodefeatureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
 
             double df = 1;
 
             for(unsigned int t = 0; t < episode.size(); t++)
             {
                 Transition<ActionC, StateC>& transition = episode[t];
-                episodefeatureExpectation += df * basis(vectorize(transition.x, transition.u));
+                episodefeatureExpectation += df * phi(vectorize(transition.x, transition.u));
                 df *= gamma;
             }
 

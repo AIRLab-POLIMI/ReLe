@@ -34,7 +34,7 @@ template<class ActionC, class StateC>
 class IRLSolver: public Solver<ActionC, StateC>
 {
 public:
-    IRLSolver(Environment<ActionC, StateC>& mdp, BasisMatrix& features,
+    IRLSolver(Environment<ActionC, StateC>& mdp, Features& features,
               ParametricRegressor& rewardRegressor) :
         prMdp(mdp, rewardRegressor), features(features),
         rewardRegressor(rewardRegressor)
@@ -65,7 +65,7 @@ public:
 
 protected:
     ParametricRewardMDP<ActionC, StateC> prMdp;
-    BasisMatrix& features;
+    Features& features;
     ParametricRegressor& rewardRegressor;
 
 };
@@ -77,7 +77,7 @@ class IRLAgentSolver: public IRLSolver<ActionC, StateC>
 public:
     IRLAgentSolver(Agent<ActionC, StateC>& agent,
                    Environment<ActionC, StateC>& mdp,
-                   Policy<ActionC, StateC>& policy, BasisMatrix& features,
+                   Policy<ActionC, StateC>& policy, Features& features,
                    ParametricRegressor& rewardRegressor) :
         IRLSolver<ActionC, StateC>(mdp, features, rewardRegressor), agent(agent), policy(policy)
     {

@@ -35,7 +35,7 @@ namespace ReLe
  * http://incompleteideas.net/rlai.cs.ualberta.ca/RLAI/RLtoolkit/tiles.html
  */
 
-class TileCoder: public AbstractBasisVector
+class TileCoder: public Features
 {
 protected:
     bool includeActiveFeature;

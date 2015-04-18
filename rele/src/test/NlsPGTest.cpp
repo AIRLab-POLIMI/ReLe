@@ -174,22 +174,18 @@ int main(int argc, char *argv[])
 
     int dim = mdp.getSettings().continuosStateDim;
 
-    //--- define policy
-    DenseBasisMatrix basis;
-    basis.generatePolynomialBasisFunctions(1,dim);
+    //--- define policy (low level)
+    BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
     delete basis.at(0);
     basis.erase(basis.begin());
-    cout << "--- Mean regressor ---" << endl;
-    cout << basis << endl;
-    LinearApproximator meanRegressor(dim, basis);
+    DenseFeatures phi(basis);
+    LinearApproximator meanRegressor(dim, phi);
 
-    DenseBasisMatrix stdBasis;
-    stdBasis.generatePolynomialBasisFunctions(1,dim);
+    BasisFunctions stdBasis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
     delete stdBasis.at(0);
     stdBasis.erase(stdBasis.begin());
-    cout << "--- Standard deviation regressor ---" << endl;
-    cout << stdBasis << endl;
-    LinearApproximator stdRegressor(dim, stdBasis);
+    DenseFeatures stdPhi(stdBasis);
+    LinearApproximator stdRegressor(dim, stdPhi);
     arma::vec stdWeights(stdRegressor.getParametersSize());
     stdWeights.fill(0.5);
     stdRegressor.setParameters(stdWeights);

@@ -24,7 +24,7 @@
 #define LINEARAPPROXIMATOR_H
 
 #include "Approximators.h"
-#include "BasisFunctions.h"
+#include "Features.h"
 #include <armadillo>
 #include <vector>
 #include <cassert>
@@ -36,12 +36,12 @@ class LinearApproximator: public ParametricRegressor
 {
 
 public:
-    LinearApproximator(const unsigned int input_dim, BasisMatrix& bfs);
+    LinearApproximator(const unsigned int input_dim, Features& bfs);
     virtual ~LinearApproximator();
     arma::vec operator()(const arma::vec& input);
     arma::vec diff(const arma::vec& input);
 
-    inline BasisMatrix& getBasis()
+    inline Features& getBasis()
     {
         return basis;
     }
@@ -64,7 +64,7 @@ public:
 
 private:
     arma::vec parameters;
-    BasisMatrix& basis;
+    Features& basis;
 };
 
 } //end namespace

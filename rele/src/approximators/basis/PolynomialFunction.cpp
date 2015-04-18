@@ -83,4 +83,58 @@ void PolynomialFunction::readFromStream(std::istream &in)
     }
 }
 
+
+BasisFunctions PolynomialFunction::generatePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
+{
+    BasisFunctions basis;
+
+    std::vector<unsigned int> dim;
+    for (unsigned int i = 0; i < input_size; i++)
+    {
+        dim.push_back(i);
+    }
+    for (unsigned int d = 0; d <= degree; d++)
+    {
+        std::vector<unsigned int> deg(input_size);
+        deg[0] = d;
+        generatePolynomialsPermutations(deg, dim, basis);
+        generatePolynomials(deg, dim, 1, basis);
+    }
+
+    return basis;
+}
+
+void PolynomialFunction::generatePolynomialsPermutations(std::vector<unsigned int> deg,
+        std::vector<unsigned int>& dim, BasisFunctions& basis)
+{
+    std::sort(deg.begin(), deg.end());
+    do
+    {
+        BasisFunction* pBF = new PolynomialFunction(dim, deg);
+        basis.push_back(pBF);
+    }
+    while (next_permutation(deg.begin(), deg.end()));
+}
+
+void PolynomialFunction::generatePolynomials(std::vector<unsigned int> deg,
+        std::vector<unsigned int>& dim,
+        unsigned int place, BasisFunctions& basis)
+{
+    if (deg.size() > 1)
+    {
+        if (deg[0] > deg[1] && deg[place] < deg[place - 1] && deg[0] - deg[place] > 1)
+        {
+            std::vector<unsigned int> degree = deg;
+            degree[0]--;
+            degree[place]++;
+            generatePolynomialsPermutations(degree, dim, basis);
+            generatePolynomials(degree, dim, place, basis);
+            if (place < deg.size() - 1)
+            {
+                generatePolynomials(degree, dim, place + 1, basis);
+            }
+        }
+    }
+}
+
 }//end namespace

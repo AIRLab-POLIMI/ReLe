@@ -21,34 +21,28 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/MountainCar.h"
+#include "MountainCar.h"
 
 #include "Core.h"
 #include "td/LinearSARSA.h"
-#include "basis/GaussianRBF.h"
-#include "Hashing.h"
-#include "TileCoder.h"
+#include "basis/PolynomialFunction.h"
 
 using namespace std;
+using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
     int episodes = 40;
-    ReLe::MountainCar mdp;
-//    srand(time(0));
+    MountainCar mdp;
 
-    ReLe::DenseBasisMatrix bf;
-    bf.generatePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
-    ReLe::LinearApproximator approximator(3, bf);
-//    arma::vec& w = approximator.getParameters();
-//    for (int i = 0; i < w.n_elem; i++)
-//        w[i] = rand() / ((double) RAND_MAX);
-//    cout << w << endl;
+    BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
+    DenseFeatures phi(basis);
+    LinearApproximator approximator(3, phi);
 
-    ReLe::e_GreedyApproximate policy;
-    ReLe::LinearGradientSARSA agent(policy, approximator);
+    e_GreedyApproximate policy;
+    LinearGradientSARSA agent(policy, approximator);
 
-    ReLe::Core<ReLe::FiniteAction, ReLe::DenseState> core(mdp, agent);
+    Core<FiniteAction, DenseState> core(mdp, agent);
 
     for (int i = 0; i < episodes; i++)
     {
@@ -57,9 +51,4 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
 
-
-    ReLe::Hashing* hashing = new ReLe::UNH(1000);
-    ReLe::TileCoderHashing tiles(hashing, mdp.getSettings().continuosStateDim, 10, 10, false);
-    ReLe::LinearApproximator projector(3, bf);
-    delete hashing;
 }

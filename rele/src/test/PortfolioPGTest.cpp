@@ -164,13 +164,12 @@ int main(int argc, char *argv[])
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    DenseBasisMatrix basis;
-    basis.generatePolynomialBasisFunctions(1,dim);
+    BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
     delete basis.at(0);
     basis.erase(basis.begin());
-    cout << "--- Regressor ---" << endl;
-    cout << basis << endl;
-    LinearApproximator meanRegressor(dim, basis);
+
+    DenseFeatures phi(basis);
+    LinearApproximator meanRegressor(dim, phi);
 
 
     double epsilon = 0.05;

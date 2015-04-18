@@ -29,50 +29,38 @@
 namespace ReLe
 {
 
-class PolynomialFunction : public BasisFunction
+class PolynomialFunction: public BasisFunction
 {
 public:
-    PolynomialFunction(std::vector<unsigned int> dimension, std::vector<unsigned int> degree);
+    PolynomialFunction(std::vector<unsigned int> dimension,
+                       std::vector<unsigned int> degree);
     PolynomialFunction(unsigned int _dimension = 0, unsigned int _degree = 0);
     virtual ~PolynomialFunction();
-    double operator() (const arma::vec& input);
+    double operator()(const arma::vec& input);
 
-
-    virtual void writeOnStream (std::ostream& out);
+    virtual void writeOnStream(std::ostream& out);
     virtual void readFromStream(std::istream& in);
 
-
     /**
-         * Automatically generates polynomial basis functions up to the specified degree
-         * @param  degree The maximum degree of the polynomial
-         * @param  input_size Number of input dimensions
-         */
-    //void generatePolynomialBasisFunctions(unsigned int degree, unsigned int input_size);
-
-    /**
-     * @brief Write the internal state to the stream.
-     * @see WriteOnStream
-     * @param out the output stream
-     * @param bf an instance of basis functions
-     * @return the output stream
+     * Automatically generates polynomial basis functions up to the specified degree
+     * @param  degree The maximum degree of the polynomial
+     * @param  input_size Number of input dimensions
      */
-    //friend std::ostream& operator<<(std::ostream& out, DenseBasisMatrix& bf);
+    static BasisFunctions generatePolynomialBasisFunctions(unsigned int degree,
+            unsigned int input_size);
 
-    /**
-     * @brief Read the internal stream from a stream
-     * @see ReadFromStream
-     * @param in the input stream
-     * @param bf an instance of basis functions
-     * @return the input stream
-     */
-    //friend std::istream& operator>>(std::istream& in, DenseBasisMatrix& bf);
+private:
+    static void generatePolynomialsPermutations(std::vector<unsigned int> deg,
+            std::vector<unsigned int>& dim, BasisFunctions& basis);
+    static void generatePolynomials(std::vector<unsigned int> deg,
+                                    std::vector<unsigned int>& dim, unsigned int place,
+                                    BasisFunctions& basis);
 
 private:
     std::vector<unsigned int> dimension;
     std::vector<unsigned int> degree;
 };
 
-}//end namespace
-
+} //end namespace
 
 #endif // POLYNOMIALFUNCTION_H

@@ -82,8 +82,7 @@ int main(int argc, char *argv[])
     mdp.setInitialState(initialState);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
-    DenseBasisMatrix basis;
-    basis.push_back(pf);
+    DenseFeatures basis(pf);
     LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, basis);
     DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
     vec param(1);
@@ -103,7 +102,7 @@ int main(int argc, char *argv[])
     /* Learn weight with MWAL */
 
     //Create features vector
-    DenseBasisMatrix rewardBasis;
+    BasisFunctions rewardBF;
     for(int i = 0; i < 3; i++)
     {
         double mean = 2.5*i;
@@ -111,24 +110,26 @@ int main(int argc, char *argv[])
         double min = mean + delta;
         double max = mean - delta;
         MWALBasis* bfP = new MWALBasis(0, min, max);
-        rewardBasis.push_back(bfP);
+        rewardBF.push_back(bfP);
 
         if(i != 0)
         {
             MWALBasis* bfN = new MWALBasis(0, -max, -min);
-            rewardBasis.push_back(bfN);
+            rewardBF.push_back(bfN);
         }
     }
 
-    LinearApproximator rewardRegressor(mdp.getSettings().continuosStateDim, rewardBasis);
+    DenseFeatures rewardPhi(rewardBF);
+
+    LinearApproximator rewardRegressor(mdp.getSettings().continuosStateDim, rewardPhi);
 
 
     //Compute expert feature expectations
-    arma::vec muE = collection.data.computefeatureExpectation(rewardBasis, mdp.getSettings().gamma);
+    arma::vec muE = collection.data.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
 
     //Create an agent to solve the mdp direct problem
     DetLinearPolicy<DenseState> policy(&expertRegressor);
-    int nparams = basis.size();
+    int nparams = basis.rows();
     arma::vec mean(nparams, fill::zeros);
     expertRegressor.setParameters(mean);
 
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
     int nbUpdates = 600;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
 
-    IRLAgentSolver<DenseAction, DenseState> solver(agent, mdp, policy, rewardBasis, rewardRegressor);
+    IRLAgentSolver<DenseAction, DenseState> solver(agent, mdp, policy, rewardPhi, rewardRegressor);
     solver.setLearningParams(episodes, 50);
     solver.setTestParams(1000, 50);
 
