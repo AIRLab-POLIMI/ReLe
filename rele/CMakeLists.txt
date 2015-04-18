@@ -117,65 +117,26 @@ else()
                                    ${Boost_LIBRARIES})
 endif()
 
-add_executable(mountain_car src/test/MountainCarTest.cpp)
-target_link_libraries(mountain_car rele)
 
-add_executable(lqr_BBO src/test/LqrBBOTest.cpp)
-target_link_libraries(lqr_BBO rele)
-
-add_executable(lqr_REPS src/test/LqrREPSTest.cpp)
-target_link_libraries(lqr_REPS rele)
-
-add_executable(nls_BBO src/test/NlsBBOTest.cpp)
-target_link_libraries(nls_BBO rele)
-
-add_executable(nls_REPS src/test/NlsREPSTest.cpp)
-target_link_libraries(nls_REPS rele)
-
-add_executable(basisMatrixTest src/test/BasisMatrixTest.cpp)
+#Core test
+add_executable(basisMatrixTest src/test/core/BasisMatrixTest.cpp)
 target_link_libraries(basisMatrixTest rele)
 
-add_executable(nls_OptParams src/test/NlsOptimalParamsTest.cpp)
-target_link_libraries(nls_OptParams rele)
-
-add_executable(deep_BBO src/test/DeepBBOTest.cpp)
-target_link_libraries(deep_BBO rele)
-
-add_executable(portfolio_BBO src/test/PortfolioBBOTest.cpp)
-target_link_libraries(portfolio_BBO rele)
-
-add_executable(nls_PG src/test/NlsPGTest.cpp)
-target_link_libraries(nls_PG rele)
-
-add_executable(lqr_PG src/test/LqrPGTest.cpp)
-target_link_libraries(lqr_PG rele)
-
-add_executable(portfolio_PG src/test/PortfolioPGTest.cpp)
-target_link_libraries(portfolio_PG rele)
-
-add_executable(deep_PG src/test/DeepPGTest.cpp)
-target_link_libraries(deep_PG rele)
-
-add_executable(chol_FIM src/test/CholeskyFIMTest.cpp)
+add_executable(chol_FIM src/test/core/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
 
-add_executable(dist2mat src/test/Distribution2MatlabTest.cpp)
-target_link_libraries(dist2mat rele)
-
-add_executable(pol2mat src/test/Policy2MatlabTest.cpp)
-target_link_libraries(pol2mat rele)
-
-add_executable(deep_off src/test/DeepBatchTest.cpp)
-target_link_libraries(deep_off rele)
-
-add_executable(nls_off src/test/NlsBatchTest.cpp)
-target_link_libraries(nls_off rele)
-
-add_executable(pr_mdp src/test/ParametricRewardMDPTest.cpp)
+add_executable(pr_mdp src/test/core/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 
-add_executable(factory src/test/FactoryTest.cpp)
+add_executable(factory src/test/core/FactoryTest.cpp)
 target_link_libraries(factory rele)
+
+#Matlab test
+add_executable(dist2mat src/test/Matlab/Distribution2MatlabTest.cpp)
+target_link_libraries(dist2mat rele)
+
+add_executable(pol2mat src/test/Matlab/Policy2MatlabTest.cpp)
+target_link_libraries(pol2mat rele)
 
 #TD tests
 add_executable(simple_chain src/test/TD/SimpleChain.cpp)
@@ -186,6 +147,9 @@ target_link_libraries(simple_chain_mean rele)
 
 add_executable(grid_world src/test/TD/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
+
+add_executable(mountain_car src/test/TD/MountainCarTest.cpp)
+target_link_libraries(mountain_car rele)
 
 #IRL tests
 add_executable(lqr_MWAL src/test/IRL/LQRMWAL.cpp)
@@ -206,7 +170,49 @@ add_executable(rocky_REPS src/test/Rocky/RockyTest.cpp
                           src/test/Rocky/RockyPolicy.cpp)
 target_link_libraries(rocky_REPS rele)
 
+#REPS test
+add_executable(lqr_REPS src/test/REPS/LqrREPSTest.cpp)
+target_link_libraries(lqr_REPS rele)
 
+add_executable(nls_REPS src/test/REPS/NlsREPSTest.cpp)
+target_link_libraries(nls_REPS rele)
+
+#BBO test
+add_executable(deep_BBO src/test/BBO/DeepBBOTest.cpp)
+target_link_libraries(deep_BBO rele)
+
+add_executable(portfolio_BBO src/test/BBO/PortfolioBBOTest.cpp)
+target_link_libraries(portfolio_BBO rele)
+
+add_executable(lqr_BBO src/test/BBO/LqrBBOTest.cpp)
+target_link_libraries(lqr_BBO rele)
+
+add_executable(nls_BBO src/test/BBO/NlsBBOTest.cpp)
+target_link_libraries(nls_BBO rele)
+
+#PG test
+add_executable(nls_PG src/test/PG/NlsPGTest.cpp)
+target_link_libraries(nls_PG rele)
+
+add_executable(lqr_PG src/test/PG/LqrPGTest.cpp)
+target_link_libraries(lqr_PG rele)
+
+add_executable(portfolio_PG src/test/PG/PortfolioPGTest.cpp)
+target_link_libraries(portfolio_PG rele)
+
+add_executable(deep_PG src/test/PG/DeepPGTest.cpp)
+target_link_libraries(deep_PG rele)
+
+#Batch test
+add_executable(deep_off src/test/Batch/DeepBatchTest.cpp)
+target_link_libraries(deep_off rele)
+
+add_executable(nls_off src/test/Batch/NlsBatchTest.cpp)
+target_link_libraries(nls_off rele)
+
+#Others tests
+add_executable(nls_OptParams src/test/Others/NlsOptimalParamsTest.cpp)
+target_link_libraries(nls_OptParams rele)
 
 # ------------------------ INSTALLATION ------------------------
 

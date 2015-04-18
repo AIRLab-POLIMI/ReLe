@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015  Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,11 +21,12 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "policy_search/REPS/REPS.h"
+#include "DifferentiableNormals.h"
 #include "Core.h"
+#include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
-#include "LinearApproximator.h"
-#include "ParametricRewardMDP.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"
@@ -36,8 +37,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "../../include/rele/environments/DeepSeaTreasure.h"
-#include "../../include/rele/environments/LQR.h"
+#include "LQR.h"
 
 using namespace std;
 using namespace ReLe;
@@ -45,31 +45,36 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("IRL", "basicTest");
+    FileManager fm("LQR", "REPS");
     fm.createDir();
     fm.cleanDir();
 
-    LQR mdp1(1, 1);
-    DeepSeaTreasure mdp2;
+    LQR mdp(1, 1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
+    arma::vec mean(1);
+    mean[0] = -0.1;
+    arma::mat cov(1, 1, arma::fill::eye);
+    cov *= 0.01;
 
-    PolynomialFunction* pf1 = new PolynomialFunction(1, 1);
-    DenseFeatures basis1(pf1);
-    LinearApproximator regressor1(mdp1.getSettings().continuosStateDim, basis1);
+    ParametricNormal dist(mean, cov);
 
-    PolynomialFunction* pf2 = new PolynomialFunction(1, mdp2.getSettings().continuosStateDim);
-    DenseFeatures basis2(pf2);
-    LinearApproximator regressor2(mdp2.getSettings().continuosStateDim, basis1);
+    PolynomialFunction* pf = new PolynomialFunction(1, 1);
+    DenseFeatures basis(pf);
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+    DetLinearPolicy<DenseState> policy(&regressor);
 
-    ParametricRewardMDP<DenseAction, DenseState> prMDP1(mdp1, regressor1);
-    ParametricRewardMDP<FiniteAction, DenseState> prMDP2(mdp2, regressor2);
+    int nbepperpol = 1, nbpolperupd = 250;
+    REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
+    agent.setEps(0.5);
 
-
-    /*ReLe::Core<DenseAction, DenseState> core(mdp, agent);
+    ReLe::Core<DenseAction, DenseState> core(mdp, agent);
 
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction,
     DenseState>(fm.addPath("agent.log"),
                 WriteStrategy<DenseAction, DenseState>::AGENT);
+
+    int nbUpdates = 800;
+    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
 
     ConsoleManager console(episodes, 1);
     for (int i = 0; i < episodes; i++)
@@ -79,7 +84,10 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
 
-    delete core.getSettings().loggerStrategy;*/
+    delete core.getSettings().loggerStrategy;
+
+    cout << dist.getMean().t() << endl;
+    cout << dist.getCovariance() << endl;
 
     return 0;
 }

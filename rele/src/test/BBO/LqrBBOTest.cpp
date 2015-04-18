@@ -38,7 +38,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "../../include/rele/environments/LQR.h"
+#include "LQR.h"
 
 using namespace std;
 using namespace ReLe;
