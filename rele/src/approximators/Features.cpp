@@ -53,13 +53,9 @@ DenseFeatures::DenseFeatures(BasisFunctions& basisVector, unsigned int rows, uns
 {
     assert(rows*cols == basisVector.size());
 
-    unsigned int k = 0;
-    for(unsigned int i = 0; i < rows; i++)
+    for(unsigned int i = 0; i < basisVector.size(); i++)
     {
-        for(unsigned int j = 0; j < cols; j++)
-        {
-            basis(i, j) = basisVector[k++];
-        }
+        basis[i] = basisVector[i];
     }
 }
 
@@ -75,14 +71,10 @@ mat DenseFeatures::operator()(const vec& input)
 {
     mat output(basis.n_rows, basis.n_cols);
 
-    //TODO use only one index???
-    for(unsigned int i = 0; i < basis.n_rows; i++)
+    for(unsigned int i = 0; i < basis.n_elem; i++)
     {
-        for(unsigned int j = 0; j < basis.n_cols; j++)
-        {
-            BasisFunction& bf = *basis(i, j);
-            output(i, j) = bf(input);
-        }
+        BasisFunction& bf = *basis[i];
+        output[i] = bf(input);
     }
 
     return output;
