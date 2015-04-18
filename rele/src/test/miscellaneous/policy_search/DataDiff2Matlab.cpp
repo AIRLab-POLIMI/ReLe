@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
-    expertCore.getSettings().testEpisodeN = 2;
+    expertCore.getSettings().testEpisodeN = 200;
     expertCore.runTestEpisodes();
 
     Dataset<DenseAction,DenseState>& data = collection.data;

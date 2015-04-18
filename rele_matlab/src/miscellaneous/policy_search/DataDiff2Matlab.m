@@ -6,7 +6,7 @@ reset(symengine);
 excmd = '../../../../rele-build/datadiff2mat';
 
 %% REINFORCE
-algorithm = 'r';
+algorithm = 'rb';
 
 % policy for dam
 stateDim = 1;
