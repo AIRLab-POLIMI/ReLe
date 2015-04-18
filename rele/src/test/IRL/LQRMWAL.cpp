@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     mdp.setInitialState(initialState);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
-    DenseBasisVector basis;
+    DenseBasisMatrix basis;
     basis.push_back(pf);
     LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, basis);
     DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     /* Learn weight with MWAL */
 
     //Create features vector
-    DenseBasisVector rewardBasis;
+    DenseBasisMatrix rewardBasis;
     for(int i = 0; i < 3; i++)
     {
         double mean = 2.5*i;

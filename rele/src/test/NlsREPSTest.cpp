@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 
     //--- define policy (low level)
-    DenseBasisVector basis;
+    DenseBasisMatrix basis;
     basis.generatePolynomialBasisFunctions(1,dim);
     delete basis.at(0);
     basis.erase(basis.begin());
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     cout << basis << endl;
     LinearApproximator meanRegressor(dim, basis);
 
-    DenseBasisVector stdBasis;
+    DenseBasisMatrix stdBasis;
     stdBasis.generatePolynomialBasisFunctions(1,dim);
     delete stdBasis.at(0);
     stdBasis.erase(stdBasis.begin());

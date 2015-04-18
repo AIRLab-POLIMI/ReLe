@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
     LQR lqr(2,1);
 
-    DenseBasisVector basis;
+    DenseBasisMatrix basis;
     IdentityBasis* bf1 = new IdentityBasis(0);
     IdentityBasis* bf2 = new IdentityBasis(1);
     basis.push_back(bf1);

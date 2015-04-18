@@ -114,7 +114,7 @@ class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
 
 public:
-    arma::mat computefeatureExpectation(AbstractBasisMatrix& basis, double gamma = 1)
+    arma::mat computefeatureExpectation(BasisMatrix& basis, double gamma = 1)
     {
         size_t episodes = this->size();
         arma::mat featureExpectation(basis.rows(), basis.cols(), arma::fill::zeros);

@@ -161,7 +161,7 @@ public:
             tuple[i] = state[i];
         }
 
-        AbstractBasisMatrix& basis = approximator->getBasis();
+        BasisMatrix& basis = approximator->getBasis();
         for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
         {
             tuple[statesize] = mActions[k].getActionN();

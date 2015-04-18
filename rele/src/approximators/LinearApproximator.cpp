@@ -30,13 +30,7 @@ using namespace arma;
 namespace ReLe
 {
 
-LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisVector& bfs)
-    : ParametricRegressor(input_dim, 1), basis(bfs),
-      parameters(bfs.size(), fill::zeros)
-{
-}
-
-LinearApproximator::LinearApproximator(const unsigned int input_dim, AbstractBasisMatrix& bfs)
+LinearApproximator::LinearApproximator(const unsigned int input_dim, BasisMatrix& bfs)
     : ParametricRegressor(input_dim, bfs.cols()), basis(bfs),
       parameters(bfs.rows(), fill::zeros)
 {

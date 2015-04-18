@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     /* Learn weight with MWAL */
 
     //Create features vector
-    DenseBasisVector rewardBasis;
+    DenseBasisMatrix rewardBasis;
     for(int i = 0; i < 5; i++)
     {
         SimpleChainBasis* bf = new SimpleChainBasis(i);

@@ -54,12 +54,12 @@ int main(int argc, char *argv[])
 
 
     PolynomialFunction* pf1 = new PolynomialFunction(1, 1);
-    DenseBasisVector basis1;
+    DenseBasisMatrix basis1;
     basis1.push_back(pf1);
     LinearApproximator regressor1(mdp1.getSettings().continuosStateDim, basis1);
 
     PolynomialFunction* pf2 = new PolynomialFunction(1, mdp2.getSettings().continuosStateDim);
-    DenseBasisVector basis2;
+    DenseBasisMatrix basis2;
     basis2.push_back(pf2);
     LinearApproximator regressor2(mdp2.getSettings().continuosStateDim, basis1);
 

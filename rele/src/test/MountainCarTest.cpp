@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     ReLe::MountainCar mdp;
 //    srand(time(0));
 
-    ReLe::DenseBasisVector bf;
+    ReLe::DenseBasisMatrix bf;
     bf.generatePolynomialBasisFunctions(1, mdp.getSettings().continuosStateDim + 1);
     ReLe::LinearApproximator approximator(3, bf);
 //    arma::vec& w = approximator.getParameters();

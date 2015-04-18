@@ -72,7 +72,7 @@ public:
     };
 
 public:
-    SampleManager(AbstractBasisVector& phi) :
+    SampleManager(BasisMatrix& phi) :
         phi(phi)
     {
 
@@ -89,8 +89,8 @@ public:
                 ndelta[sample.x][sample.u] = 0;
             }
 
-            ndelta[sample.x][sample.u] += sample.r + phi.dot(sample.xn, theta)
-                                          - phi.dot(sample.x, theta);
+            /*ndelta[sample.x][sample.u] += sample.r + (phi(sample.xn)*theta)[0]
+                                          - (phi(sample.x)*theta)[0];*/ //FIXME! REPS is broken...
         }
 
         return DeltaFunctor(ndelta, d);
@@ -143,7 +143,7 @@ private:
     LambdaMap nlambda;
     CountMap d;
     SampleVector samples;
-    AbstractBasisVector& phi;
+    BasisMatrix& phi;
 
 };
 

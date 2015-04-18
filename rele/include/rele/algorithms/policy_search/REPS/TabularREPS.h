@@ -33,7 +33,7 @@
 namespace ReLe
 {
 
-class TabularREPS: public Agent<FiniteAction, FiniteState>
+/*class TabularREPS: public Agent<FiniteAction, FiniteState>
 {
 public:
     TabularREPS();
@@ -85,7 +85,7 @@ private:
     //debug TODO togliere
     int iteration;
 
-};
+};*/
 
 }
 

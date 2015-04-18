@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
-    DenseBasisVector basis;
+    DenseBasisMatrix basis;
     basis.push_back(pf);
     cout << basis << endl;
     LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);

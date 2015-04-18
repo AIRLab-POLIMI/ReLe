@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     deep_2state_identity* d2si = new deep_2state_identity();
     deep_state_identity* dsi = new deep_state_identity();
 
-    DenseBasisVector basis;
+    DenseBasisMatrix basis;
     for (int i = 0; i < actions.size() -1; ++i)
     {
         basis.push_back(new AndConditionBasisFunction(pf0,2,i));

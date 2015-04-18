@@ -33,7 +33,7 @@ using namespace arma;
 namespace ReLe
 {
 
-TabularREPS::TabularREPS() :
+/*TabularREPS::TabularREPS() :
     s(phi)
 {
     x = 0;
@@ -285,6 +285,6 @@ void TabularREPS::init()
     lowerBounds.back() = std::numeric_limits<double>::epsilon();
 
     optimizator.set_lower_bounds(lowerBounds);
-}
+}*/
 
 }

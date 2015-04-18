@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
 
     int dim = 1;
     int deg = 5;
-    DenseBasisVector basis;
+    /*DenseBasisMatrix basis;
     basis.generatePolynomialBasisFunctions(deg, dim);
     cout << basis << endl;
 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     cout << endl << "## Matrix Test ##" << endl;
     mat evalBasis = basis(pt);
     cout << evalBasis << endl;
-    cout << "You see, it is a column vector!!" << endl;
+    cout << "You see, it is a column vector!!" << endl;*/ //FIXME enable
 
     return 0;
 }

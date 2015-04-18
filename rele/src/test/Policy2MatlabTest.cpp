@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[5], raw_ascii);
 
-        DenseBasisVector basis;
+        DenseBasisMatrix basis;
         basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[4], raw_ascii);
 
-        DenseBasisVector basis;
+        DenseBasisMatrix basis;
         basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         arma::vec initws;
         initws.load(argv[6], raw_ascii);
 
-        DenseBasisVector basiss;
+        DenseBasisMatrix basiss;
         basiss.generatePolynomialBasisFunctions(degs(0),point.n_elem);
 
         assert(initws.n_elem == basiss.size());
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[5], raw_ascii);
 
-        DenseBasisVector basis;
+        DenseBasisMatrix basis;
         basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
