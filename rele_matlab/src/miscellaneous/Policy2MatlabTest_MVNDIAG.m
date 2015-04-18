@@ -5,7 +5,7 @@ clear all;
 reset(symengine);
 excmd = '../../../rele-build/pol2mat';
 
-%% Normal policy with diagonal covariance (sigma parameters)
+%% Multivariate Normal policy with diagonal covariance (sigma parameters)
 polname = 'mvndiag';
 stateDim = 1;
 actionDim = 1;

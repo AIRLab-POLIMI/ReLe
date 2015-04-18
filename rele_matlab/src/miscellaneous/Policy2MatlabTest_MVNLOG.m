@@ -5,8 +5,8 @@ clear all;
 reset(symengine);
 excmd = '../../../rele-build/pol2mat';
 
-%% Normal policy with constant sigma
-polname = 'normal';
+%% Multivariate Normal policy with diagonal covariance (logistic parameters)
+polname = 'mvnlog';
 stateDim = 2;
 actionDim = 1;
 s = sym('s', [stateDim, 1]);
@@ -16,35 +16,39 @@ w = sym('w', [size(phi,1), 1]);
 mu = transpose(phi)*w;
 diff = (a - mu);
 
+asv = sym('asv', [actionDim,1]);
 sigma = sym('sg', [actionDim,1]);
-S = diag(sigma.*sigma);
+for i = 1:actionDim
+    S(i,i) = asv(i)/ (1 + exp(-sigma(i)));
+end
 pols = (2*pi)^(-actionDim/2) * det(S)^(-1/2) * exp( ...
     -0.5 * transpose(diff) * inv(S) * diff ...
     );
 
 % polf = matlabFunction(pols);
 
-g = transpose(jacobian(log(pols), w));
-h = jacobian(g, w);
+g = transpose(jacobian(log(pols), [w;sigma]));
+h = jacobian(g, [w;sigma]);
 
 
 polDeg = 1;
-state = [1.21321; 0.9765];
+state = 1.21321;
 action = 0.865;
-wVal = [0.5; 0.245; 0.11234];
+wVal = [0.5; 0.245];
 sigmaVal = 1.3;
+asvVal = [13.4];
 
 % write parameters
 mkdir('/tmp/ReLe/pol2mat/test/')
 dlmwrite('/tmp/ReLe/pol2mat/test/state.dat', state, 'delimiter', '\t', 'precision', 10);
 dlmwrite('/tmp/ReLe/pol2mat/test/action.dat', action, 'delimiter', '\t', 'precision', 10);
-dlmwrite('/tmp/ReLe/pol2mat/test/params.dat', wVal, 'delimiter', '\t', 'precision', 10);
-dlmwrite('/tmp/ReLe/pol2mat/test/stddev.dat', sigmaVal, 'delimiter', '\t', 'precision', 10);
+dlmwrite('/tmp/ReLe/pol2mat/test/params.dat', [wVal;sigmaVal], 'delimiter', '\t', 'precision', 10);
 dlmwrite('/tmp/ReLe/pol2mat/test/deg.dat', polDeg, 'delimiter', '\t');
+dlmwrite('/tmp/ReLe/pol2mat/test/asvariace.dat', asVariance, 'delimiter', '\t');
 
-tcmd = [excmd ' ' polname ' /tmp/ReLe/pol2mat/test/params.dat /tmp/ReLe/pol2mat/test/stddev.dat '... 
-    '/tmp/ReLe/pol2mat/test/state.dat ' ...
-    '/tmp/ReLe/pol2mat/test/action.dat /tmp/ReLe/pol2mat/test/deg.dat'];
+tcmd = [excmd ' ' polname ' /tmp/ReLe/pol2mat/test/params.dat /tmp/ReLe/pol2mat/test/state.dat ' ...
+    '/tmp/ReLe/pol2mat/test/action.dat /tmp/ReLe/pol2mat/test/deg.dat ' ...
+    ' /tmp/ReLe/pol2mat/test/asvariace.dat'];
 
 disp('------------------------');
 status = system(tcmd);
@@ -75,3 +79,4 @@ redH, evalH
 assert(max(max(abs(redH-evalH))) <= 1e-6);
 
 
+    

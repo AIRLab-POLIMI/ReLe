@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
 
     }
-    else if (strcmp(argv[1], "normalstd") == 0)
+    else if (strcmp(argv[1], "normalstdstate") == 0)
     {
         //TODO update
         arma::vec point;
@@ -163,6 +163,68 @@ int main(int argc, char *argv[])
         //----- MVNPolicy
         //        policy = new MVNPolicy(p1, p2);
         //        point.load(argv[4], raw_ascii);
+    }
+    else if (strcmp(argv[1], "mvnlog") == 0)
+    {
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
+
+        //load state
+        vec state;
+        state.load(argv[3], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[4], raw_ascii);
+
+        //load degree
+        arma::vec deg;
+        deg.load(argv[5], raw_ascii);
+
+        //as variance
+        arma::vec as_variance;
+        as_variance.load(argv[6], raw_ascii);
+
+        //define approximation
+        DenseBasisVector basis;
+        basis.generatePolynomialBasisFunctions(deg(0), state.n_elem);
+        cout << basis;
+        LinearApproximator lam(state.n_elem, basis);
+
+        //define policy
+        cerr << params.t();
+        MVNLogisticPolicy policy(&lam, as_variance);
+        policy.setParameters(params);
+
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action);
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action);
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+        //compute hessian
+        mat hess = policy.diff2log(state,action);
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
     }
     else if (strcmp(argv[1], "mvndiag") == 0)
     {
