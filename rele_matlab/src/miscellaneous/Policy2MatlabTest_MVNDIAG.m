@@ -70,6 +70,6 @@ assert(abs(redD-evalD) <= 1e-6);
 assert(max(abs(redG-evalG)) <= 1e-6);
 
 redH, evalH
-assert(max(max(abs(redG-evalG))) <= 1e-6);
+assert(max(max(abs(redH-evalH))) <= 1e-6);
 
 

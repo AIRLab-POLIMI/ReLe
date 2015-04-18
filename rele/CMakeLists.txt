@@ -178,6 +178,10 @@ target_link_libraries(dist2mat rele)
 add_executable(basisMatrixTest src/test/miscellaneous/BasisMatrixTest.cpp)
 target_link_libraries(basisMatrixTest rele)
 
+#miscellaneous/policy_search tests
+add_executable(datadiff2mat src/test/miscellaneous/policy_search/DataDiff2Matlab.cpp)
+target_link_libraries(datadiff2mat rele)
+
 #TD tests
 add_executable(simple_chain src/test/TD/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)
