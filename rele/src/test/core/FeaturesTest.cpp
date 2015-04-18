@@ -21,7 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BasisFunctions.h"
+#include "Features.h"
+#include "basis/PolynomialFunction.h"
 #include "LinearApproximator.h"
 
 using namespace std;
@@ -34,24 +35,26 @@ int main(int argc, char *argv[])
 
     int dim = 1;
     int deg = 5;
-    /*DenseBasisMatrix basis;
-    basis.generatePolynomialBasisFunctions(deg, dim);
-    cout << basis << endl;
 
-    SparseBasisMatrix spm;
-    spm.addBasis(0,0,basis[2]);
-    spm.addBasis(1,0,basis[1]);
-    spm.addBasis(2,0,basis[0]);
 
-    spm.addBasis(3,1,basis[3]);
-    spm.addBasis(4,1,basis[5]);
+    BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg, dim);
+
+
+    cout << endl << "## Sparse features Test ##" << endl;
+    SparseFeatures phi0;
+    phi0.addBasis(0,0,basis[2]);
+    phi0.addBasis(1,0,basis[1]);
+    phi0.addBasis(2,0,basis[0]);
+
+    phi0.addBasis(3,1,basis[3]);
+    phi0.addBasis(4,1,basis[5]);
 
     arma::vec pt(1);
     pt[0] = 2;
     cout << "F(" << pt[0] << ") = " << endl;
-    cout << spm(pt) << endl;
+    cout << phi0(pt) << endl;
 
-    LinearApproximator regressor(dim,spm);
+    LinearApproximator regressor(dim,phi0);
     arma::vec weights = arma::ones(regressor.getParametersSize());
     regressor.setParameters(weights);
     cout << "W = " << endl << weights << endl;
@@ -59,11 +62,21 @@ int main(int argc, char *argv[])
     cout << "y = F(" << pt[0] << ") * w =" << endl;
     cout << regressor(pt);
 
+    cout << endl << "## Dense features Test 1 (basis) ##" << endl;
+    DenseFeatures phi1(new PolynomialFunction(1,25));
+    cout << "F(" << pt[0] << ") = " << endl;
+    cout << phi1(pt) << endl;
 
-    cout << endl << "## Matrix Test ##" << endl;
-    mat evalBasis = basis(pt);
-    cout << evalBasis << endl;
-    cout << "You see, it is a column vector!!" << endl;*/ //FIXME enable
+    cout << endl << "## Dense features Test 2 (vector) ##" << endl;
+    DenseFeatures phi2(basis);
+    cout << "F(" << pt[0] << ") = " << endl;
+    cout << phi1(pt) << endl;
+
+    cout << endl << "## Dense features Test 3 (matrix) ##" << endl;
+    DenseFeatures phi3(basis, 3, 2);
+    cout << "F(" << pt[0] << ") = " << endl;
+    cout << phi1(pt) << endl;
+
 
     return 0;
 }

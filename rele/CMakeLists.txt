@@ -119,8 +119,8 @@ endif()
 
 
 #Core test
-add_executable(basisMatrixTest src/test/core/BasisMatrixTest.cpp)
-target_link_libraries(basisMatrixTest rele)
+add_executable(features_test src/test/core/FeaturesTest.cpp)
+target_link_libraries(features_test rele)
 
 add_executable(chol_FIM src/test/core/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
