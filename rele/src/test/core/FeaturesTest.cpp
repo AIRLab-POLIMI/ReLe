@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     cout << endl << "## Dense features Test 4 (matrix) ##" << endl;
     DenseFeatures phi4(basis4, 2, 3);
     cout << "F(" << pt[0] << ") = " << endl;
-    cout << phi3(pt) << endl;
+    cout << phi4(pt) << endl;
 
     return 0;
 }
