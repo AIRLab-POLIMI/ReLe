@@ -36,8 +36,8 @@ public:
     class updater;
 
 public:
-    virtual unsigned int operator()(size_t state);
-    virtual double operator()(size_t state, unsigned int action);
+    virtual unsigned int operator()(const size_t& state);
+    virtual double operator()(const size_t& state, const unsigned int& action);
 
     inline virtual std::string getPolicyName()
     {

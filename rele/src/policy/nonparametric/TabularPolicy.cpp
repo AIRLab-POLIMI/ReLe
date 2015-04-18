@@ -48,13 +48,13 @@ void TabularPolicy::updater::normalize()
     row /= normalization;
 }
 
-unsigned int TabularPolicy::operator()(size_t state)
+unsigned int TabularPolicy::operator()(const size_t& state)
 {
     arma::rowvec&& row = pi.row(state);
     return RandomGenerator::sampleDiscrete(row.begin(), row.end());
 }
 
-double TabularPolicy::operator()(size_t state, unsigned int action)
+double TabularPolicy::operator()(const size_t& state, const unsigned int& action)
 {
     return pi(state, action);
 }

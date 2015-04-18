@@ -50,21 +50,6 @@ double PureOffAlgorithmComputeIWWorker(const StateC& state, const ActionC& actio
     return policy(state,action) / behav(state,action);
 }
 
-template<class StateC, class PolicyC, class PolicyC2>
-double PureOffAlgorithmStepWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-                                  double& iw, arma::vec& grad)
-{
-    typename action_type<FiniteAction>::type_ref u = action.getActionN();
-
-    double val = policy(state,u) / behav(state,u);
-    iw *= val;
-
-    //init the sum of the gradient of the policy logarithm
-    arma::vec logGradient = policy.difflog(state, u);
-    grad += logGradient;
-
-}
-
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
 double PureOffAlgorithmStepWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
                                   double& iw, arma::vec& grad)
@@ -153,7 +138,8 @@ public:
 
     virtual void sampleAction(const StateC& state, ActionC& action)
     {
-        sampleActionWorker(state, action, target);
+        typename action_type<ActionC>::type_ref u = action;
+        u = target(state);
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,

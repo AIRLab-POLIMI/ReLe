@@ -45,8 +45,8 @@ struct action_type<FiniteAction>
 {
     typedef unsigned int type;
     typedef const unsigned int const_type;
-    typedef unsigned int type_ref;
-    typedef const unsigned int const_type_ref;
+    typedef typename std::add_lvalue_reference<unsigned int>::type type_ref;
+    typedef typename std::add_lvalue_reference<const unsigned int>::type const_type_ref;
 };
 
 template<>
@@ -72,8 +72,8 @@ struct state_type<FiniteState>
 {
     typedef size_t type;
     typedef const size_t const_type;
-    typedef size_t type_ref;
-    typedef const size_t const_type_ref;
+    typedef typename std::add_lvalue_reference<size_t>::type type_ref;
+    typedef typename std::add_lvalue_reference<const size_t>::type const_type_ref;
 };
 
 template<>

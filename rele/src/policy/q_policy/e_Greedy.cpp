@@ -45,7 +45,7 @@ e_Greedy::~e_Greedy()
 
 }
 
-unsigned int e_Greedy::operator()(size_t state)
+unsigned int e_Greedy::operator()(const size_t& state)
 {
     unsigned int un;
 
@@ -67,7 +67,7 @@ unsigned int e_Greedy::operator()(size_t state)
     return un;
 }
 
-double e_Greedy::operator()(size_t state, unsigned int action)
+double e_Greedy::operator()(const size_t& state, const unsigned int& action)
 {
     const rowvec& Qx = Q->row(state);
     double qmax = Qx.max();
@@ -151,7 +151,7 @@ unsigned int e_GreedyApproximate::operator()(const arma::vec& state)
     return un;
 }
 
-double e_GreedyApproximate::operator()(const arma::vec& state, unsigned int action)
+double e_GreedyApproximate::operator()(const arma::vec& state, const unsigned int& action)
 {
     //TODO implement
     assert(false);

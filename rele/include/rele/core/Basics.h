@@ -137,6 +137,16 @@ public:
         actionN = n;
     }
 
+    operator unsigned int&()
+    {
+        return actionN;
+    }
+
+    operator const unsigned int&() const
+    {
+        return actionN;
+    }
+
     inline unsigned int getActionN() const
     {
         return actionN;
@@ -273,6 +283,16 @@ public:
     FiniteState()
     {
         stateN = 0;
+    }
+
+    operator size_t&()
+    {
+        return stateN;
+    }
+
+    operator const size_t&() const
+    {
+        return stateN;
     }
 
     inline std::size_t getStateN() const

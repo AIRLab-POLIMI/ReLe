@@ -54,7 +54,8 @@ public:
 
     void sampleAction(const StateC &state, ActionC &action)
     {
-        sampleActionWorker(state, action, policy);
+        typename action_type<ActionC>::type_ref u = action;
+        u = policy(state);
     }
 
     void step(const Reward &reward, const StateC &nextState, ActionC &action)

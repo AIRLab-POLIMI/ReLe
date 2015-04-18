@@ -39,7 +39,7 @@ Boltzmann::Boltzmann()
 
 }
 
-unsigned int Boltzmann::operator()(size_t state)
+unsigned int Boltzmann::operator()(const size_t& state)
 {
     if (tau != 0)
     {
@@ -52,7 +52,7 @@ unsigned int Boltzmann::operator()(size_t state)
     }
 }
 
-double Boltzmann::operator()(size_t state, unsigned int action)
+double Boltzmann::operator()(const size_t& state, const unsigned int& action)
 {
     if (tau != 0)
     {
@@ -116,7 +116,7 @@ unsigned int BoltzmannApproximate::operator()(const arma::vec& state)
     }
 }
 
-double BoltzmannApproximate::operator()(const arma::vec& state, unsigned int action)
+double BoltzmannApproximate::operator()(const arma::vec& state, const unsigned int& action)
 {
     if (tau != 0)
     {

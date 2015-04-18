@@ -28,12 +28,12 @@
 namespace ReLe
 {
 
-unsigned int DeterministicPolicy::operator()(size_t state)
+unsigned int DeterministicPolicy::operator()(const size_t& state)
 {
     return pi(state);
 }
 
-double DeterministicPolicy::operator()(size_t state, unsigned int action)
+double DeterministicPolicy::operator()(const size_t& state, const unsigned int& action)
 {
     if(action == pi(state))
         return 1.0;
