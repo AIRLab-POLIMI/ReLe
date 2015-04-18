@@ -31,7 +31,7 @@
 #include <armadillo>
 #include <iomanip>
 
-#define OS_PRECISION 6
+#define OS_PRECISION 10
 
 namespace ReLe
 {

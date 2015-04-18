@@ -39,7 +39,7 @@ DamSettings::DamSettings()
 void DamSettings::defaultSettings(DamSettings& settings)
 {
     //Environment Parameters
-    settings.gamma = 0.99;
+    settings.gamma = 1.0;
     settings.continuosStateDim = 1;
     settings.continuosActionDim = 1;
     settings.rewardDim = 4;

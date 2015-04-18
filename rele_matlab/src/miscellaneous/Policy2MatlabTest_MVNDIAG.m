@@ -5,7 +5,7 @@ clear all;
 reset(symengine);
 excmd = '../../../rele-build/pol2mat';
 
-%% Normal policy with diagonal covariance (sigma parameters)
+%% Multivariate Normal policy with diagonal covariance (sigma parameters)
 polname = 'mvndiag';
 stateDim = 1;
 actionDim = 1;
@@ -70,6 +70,6 @@ assert(abs(redD-evalD) <= 1e-6);
 assert(max(abs(redG-evalG)) <= 1e-6);
 
 redH, evalH
-assert(max(max(abs(redG-evalG))) <= 1e-6);
+assert(max(max(abs(redH-evalH))) <= 1e-6);
 
 
