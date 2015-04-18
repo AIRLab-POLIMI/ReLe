@@ -36,35 +36,6 @@
 namespace ReLe
 {
 
-//Templates needed to handle different action types
-template<class StateC, class PolicyC, class PolicyC2>
-double PureOffAlgorithmComputeIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav)
-{
-    typename action_type<FiniteAction>::type_ref u = action.getActionN();
-    return policy(state,u) / behav(state,u);
-}
-
-template<class StateC, class ActionC, class PolicyC, class PolicyC2>
-double PureOffAlgorithmComputeIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav)
-{
-    return policy(state,action) / behav(state,action);
-}
-
-template<class StateC, class ActionC, class PolicyC, class PolicyC2>
-double PureOffAlgorithmStepWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
-                                  double& iw, arma::vec& grad)
-{
-    double val = policy(state,action) / behav(state,action);
-    iw *= val;
-
-    //init the sum of the gradient of the policy logarithm
-    arma::vec logGradient = policy.difflog(state, action);
-    grad += logGradient;
-
-    return val;
-}
-
-
 template<class ActionC, class StateC>
 class PureOffAlgorithm: public BatchAgent<ActionC, StateC>
 {
@@ -149,7 +120,7 @@ public:
 
 //        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
 
-        currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
+        currentIW = stepWorker(currentState, currentAction);
 
         //calculate current J value
         Jep += df * currentIW * reward[rewardId];
@@ -166,7 +137,7 @@ public:
 
 //        std::cout << currentState << " " << currentAction << " " << reward[0] << std::endl;
 
-        currentIW = PureOffAlgorithmStepWorker(currentState, currentAction, target, behavioral, prodImpWeight, sumdlogpi);
+        currentIW = stepWorker(currentState, currentAction);
 
         //add last contribute
         Jep += df * currentIW * reward[rewardId];
@@ -342,6 +313,20 @@ protected:
             bM_num[i] = 0;
             bM_den[i] = 0;
         }
+    }
+
+
+private:
+    double stepWorker(const StateC& state, const ActionC& action)
+    {
+        double val = target(state,action) / behavioral(state,action);
+        prodImpWeight *= val;
+
+        //init the sum of the gradient of the policy logarithm
+        arma::vec logGradient = target.difflog(state, action);
+        sumdlogpi += logGradient;
+
+        return val;
     }
 
 
