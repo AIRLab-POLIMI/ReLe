@@ -56,7 +56,7 @@ struct gradConfig
 
 void help()
 {
-    cout << "lqr_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
+    cout << "nls_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
     cout << " - algorithm: r, rb, g, gb" << endl;
     cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
 }
@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
         config.nbRuns      = 400;
         config.nbEpisodes  = 100;
         config.stepLength  = 0.01;
+        config.steprule = new AdaptiveStep(config.stepLength);
     }
     //---
 
