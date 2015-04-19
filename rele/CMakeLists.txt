@@ -125,12 +125,15 @@ target_link_libraries(features_test rele)
 add_executable(pr_mdp src/test/core/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 
-#Matlab test
+#Matlab test (miscellaneous)
 add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
 
 add_executable(dist2mat src/test/miscellaneous/Distribution2MatlabTest.cpp)
 target_link_libraries(dist2mat rele)
+
+add_executable(pol2mat src/test/miscellaneous/Policy2MatlabTest.cpp)
+target_link_libraries(pol2mat rele)
 
 #miscellaneous/policy_search tests
 add_executable(datadiff2mat src/test/miscellaneous/policy_search/DataDiff2Matlab.cpp)
