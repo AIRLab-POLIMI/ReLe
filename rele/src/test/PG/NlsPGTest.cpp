@@ -26,7 +26,7 @@
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/IdentityBasis.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
@@ -175,15 +175,11 @@ int main(int argc, char *argv[])
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
-    delete basis.at(0);
-    basis.erase(basis.begin());
+    BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
     LinearApproximator meanRegressor(dim, phi);
 
-    BasisFunctions stdBasis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
-    delete stdBasis.at(0);
-    stdBasis.erase(stdBasis.begin());
+    BasisFunctions stdBasis = IdentityBasis::generate(dim);
     DenseFeatures stdPhi(stdBasis);
     LinearApproximator stdRegressor(dim, stdPhi);
     arma::vec stdWeights(stdRegressor.getParametersSize());

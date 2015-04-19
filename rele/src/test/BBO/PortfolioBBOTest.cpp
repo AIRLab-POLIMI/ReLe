@@ -28,7 +28,7 @@
 #include "Core.h"
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
 #include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/IdentityBasis.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 #include "Portfolio.h"
@@ -201,9 +201,7 @@ int main(int argc, char *argv[])
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
-    delete basis.at(0);
-    basis.erase(basis.begin());
+    BasisFunctions basis = IdentityBasis::generate(dim);
 
     DenseFeatures phi(basis);
     LinearApproximator meanRegressor(dim, phi);

@@ -37,10 +37,10 @@ int main(int argc, char *argv[])
     int deg = 5;
 
 
-    BasisFunctions basis0 = PolynomialFunction::generatePolynomialBasisFunctions(deg, dim);
-    BasisFunctions basis2 = PolynomialFunction::generatePolynomialBasisFunctions(deg, dim);
-    BasisFunctions basis3 = PolynomialFunction::generatePolynomialBasisFunctions(deg, dim);
-    BasisFunctions basis4 = PolynomialFunction::generatePolynomialBasisFunctions(deg, dim);
+    BasisFunctions basis0 = PolynomialFunction::generate(deg, dim);
+    BasisFunctions basis2 = PolynomialFunction::generate(deg, dim);
+    BasisFunctions basis3 = PolynomialFunction::generate(deg, dim);
+    BasisFunctions basis4 = PolynomialFunction::generate(deg, dim);
 
 
     cout << endl << "## Sparse features Test ##" << endl;

@@ -84,7 +84,7 @@ void PolynomialFunction::readFromStream(std::istream &in)
 }
 
 
-BasisFunctions PolynomialFunction::generatePolynomialBasisFunctions(unsigned int degree, unsigned int input_size)
+BasisFunctions PolynomialFunction::generate(unsigned int degree, unsigned int input_size)
 {
     BasisFunctions basis;
 

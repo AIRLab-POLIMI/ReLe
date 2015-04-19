@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
         arma::vec deg;
         deg.load(argv[6], raw_ascii);
 
-        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),state.n_elem);
+        BasisFunctions basis = PolynomialFunction::generate(deg(0),state.n_elem);
         DenseFeatures phi(basis);
         LinearApproximator la(state.n_elem, phi);
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[4], raw_ascii);
 
-        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generate(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         arma::vec initws;
         initws.load(argv[6], raw_ascii);
 
-        BasisFunctions basiss = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basiss = PolynomialFunction::generate(deg(0),point.n_elem);
 
         assert(initw.n_elem == basiss.size());
 
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
         //define approximation
         LinearApproximator* lam;
 
-        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0), state.n_elem);
+        BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
         SparseFeatures* sparsefeatures = nullptr;
         DenseFeatures* densefeatures = nullptr;
 
@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
         //define approximation
         LinearApproximator* lam;
 
-        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0), state.n_elem);
+        BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
         SparseFeatures* sparsefeatures = nullptr;
         DenseFeatures* densefeatures = nullptr;
 
@@ -342,7 +342,7 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[5], raw_ascii);
 
-        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generate(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 

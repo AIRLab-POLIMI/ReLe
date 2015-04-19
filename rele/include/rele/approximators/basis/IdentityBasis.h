@@ -40,6 +40,8 @@ public:
     virtual void writeOnStream (std::ostream& out);
     virtual void readFromStream(std::istream& in);
 
+    static BasisFunctions generate(unsigned int input_size);
+
 private:
     unsigned int index;
 };

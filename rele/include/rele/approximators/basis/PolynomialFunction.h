@@ -41,13 +41,7 @@ public:
     virtual void writeOnStream(std::ostream& out);
     virtual void readFromStream(std::istream& in);
 
-    /**
-     * Automatically generates polynomial basis functions up to the specified degree
-     * @param  degree The maximum degree of the polynomial
-     * @param  input_size Number of input dimensions
-     */
-    static BasisFunctions generatePolynomialBasisFunctions(unsigned int degree,
-            unsigned int input_size);
+    static BasisFunctions generate(unsigned int degree, unsigned int input_size);
 
 private:
     static void generatePolynomialsPermutations(std::vector<unsigned int> deg,
