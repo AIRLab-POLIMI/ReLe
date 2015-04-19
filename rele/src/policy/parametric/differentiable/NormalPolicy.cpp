@@ -13,7 +13,7 @@ namespace ReLe
 void NormalPolicy::calculateMeanAndStddev(const arma::vec& state)
 {
     // compute mean value
-    arma::vec mean = (*approximator)(state);
+    arma::vec mean = approximator(state);
     mMean = mean[0];
 }
 
@@ -58,7 +58,7 @@ arma::vec NormalPolicy::difflog(const arma::vec& state, const arma::vec& action)
     calculateMeanAndStddev(state);
 
     // get features
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -72,7 +72,7 @@ arma::mat NormalPolicy::diff2log(const arma::vec& state, const arma::vec& action
     calculateMeanAndStddev(state);
 
     // get features
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
 
     return -features * features.t() / (mInitialStddev * mInitialStddev);
@@ -87,11 +87,11 @@ void
 NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 {
     // compute mean value
-    arma::vec mean = (*approximator)(state);
+    arma::vec mean = approximator(state);
     mMean = mean[0];
 
     // compute stddev
-    arma::vec evalstd = (*stdApproximator)(state);
+    arma::vec evalstd = stdApproximator(state);
     mInitialStddev = evalstd[0];
 }
 
@@ -133,7 +133,7 @@ arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
     }
     //        std::cout << "\n";
 
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
 
     //        MY_PRINT(features);
@@ -148,7 +148,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
     UpdateInternalState(state);
 
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -163,9 +163,9 @@ void MVNDiagonalPolicy::setParameters(arma::vec &w)
 {
     std::cout << getParametersSize() << std::endl;
     assert(w.n_elem == this->getParametersSize());
-    int dp = approximator->getParametersSize();
+    int dp = approximator.getParametersSize();
     arma::vec tmp = w.rows(0, dp-1);
-    approximator->setParameters(tmp);
+    approximator.setParameters(tmp);
     for (int i = 0, ie = stddevParams.n_elem; i < ie; ++i)
     {
         stddevParams(i) = w[dp + i];
@@ -189,7 +189,7 @@ arma::vec MVNDiagonalPolicy::difflog(const arma::vec &state, const arma::vec &ac
     }
     //        std::cout << "\n";
 
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
     //    std::cerr << "action: " << action;
     //    std::cerr << "features: " << features;
@@ -212,11 +212,11 @@ arma::mat MVNDiagonalPolicy::diff2log(const arma::vec &state, const arma::vec &a
     //TODO controllare implementazione
     int paramSize = this->getParametersSize();
     arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
-    int dm = approximator->getParametersSize();
+    int dm = approximator.getParametersSize();
     int ds = stddevParams.n_elem;
 
 
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
     arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 
@@ -284,7 +284,7 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
     {
         smdiff(i) = action[i] - mMean(i);
     }
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -321,11 +321,11 @@ arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& a
     //TODO controllare implementazione
     int paramSize = this->getParametersSize();
     arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
-    int dm = approximator->getParametersSize();
+    int dm = approximator.getParametersSize();
     int ds = mLogisticParams.n_elem;
 
 
-    Features& basis = approximator->getBasis();
+    Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
     arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 

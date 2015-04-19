@@ -29,8 +29,8 @@ using namespace std;
 namespace ReLe
 {
 
-LQRsolver::LQRsolver(LQR& lqr, LinearApproximator& approximator) :
-    lqr(lqr), pi(&approximator)
+LQRsolver::LQRsolver(LQR& lqr, Features& phi) :
+    lqr(lqr), pi(phi)
 {
     rewardIndex = 0;
     gamma = lqr.getSettings().gamma;

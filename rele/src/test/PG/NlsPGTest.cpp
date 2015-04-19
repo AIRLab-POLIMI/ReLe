@@ -177,23 +177,19 @@ int main(int argc, char *argv[])
     //--- define policy (low level)
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
-    LinearApproximator meanRegressor(dim, phi);
 
     BasisFunctions stdBasis = IdentityBasis::generate(dim);
     DenseFeatures stdPhi(stdBasis);
-    LinearApproximator stdRegressor(dim, stdPhi);
-    arma::vec stdWeights(stdRegressor.getParametersSize());
+    arma::vec stdWeights(stdPhi.rows());
     stdWeights.fill(0.5);
-    stdRegressor.setParameters(stdWeights);
 
-
-    NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
+    NormalStateDependantStddevPolicy policy(phi, stdPhi, stdWeights);
 //  NormalPolicy policy(0.2, &meanRegressor); // used for testing algorithm through matlab
 
     arma::vec pp(2);
     pp(0) = -0.4;
     pp(1) = 0.4;
-    meanRegressor.setParameters(pp);
+    policy.setParameters(pp);
     //---
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;

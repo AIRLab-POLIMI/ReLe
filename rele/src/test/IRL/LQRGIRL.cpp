@@ -145,9 +145,8 @@ int main(int argc, char *argv[])
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
     DenseFeatures phi(pf);
-    LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, phi);
-//    DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
-    NormalPolicy expertPolicy(1,&expertRegressor);
+//    DetLinearPolicy<DenseState> expertPolicy(phi);
+    NormalPolicy expertPolicy(1, phi);
 
 #if 0
     //learn the optimal policy

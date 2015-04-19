@@ -13,7 +13,7 @@ namespace ReLe
 double PortfolioNormalPolicy::operator()(const arma::vec& state,
         typename action_type<FiniteAction>::const_type_ref action)
 {
-    arma::vec output = (*approximator)(state);
+    arma::vec output = approximator(state);
     double prob = epsilon + (1 - 2 * epsilon) * exp(-0.01 * pow(output(0,0) - 10.0, 2));
     return (action == 1) ? prob : 1 - prob;
 }
@@ -21,7 +21,7 @@ double PortfolioNormalPolicy::operator()(const arma::vec& state,
 unsigned int PortfolioNormalPolicy::operator() (const arma::vec& state)
 {
     double random = RandomGenerator::sampleUniform(0,1);
-    arma::vec output = (*approximator)(state);
+    arma::vec output = approximator(state);
     double prob = epsilon + (1 - 2 * epsilon) * exp(-0.01 * pow(output(0,0) - 10.0, 2));
     return (random <= prob) ? 1 : 0;
 
@@ -41,10 +41,10 @@ arma::vec PortfolioNormalPolicy::diff(const arma::vec& state,
 arma::vec PortfolioNormalPolicy::difflog(const arma::vec& state,
         typename action_type<FiniteAction>::const_type_ref action)
 {
-    arma::vec output = (*approximator)(state);
+    arma::vec output = approximator(state);
     double Exp = exp(0.01 * pow(output(0,0) - 10.0, 2));
     // the gradient is a vector of length nparams, where nparams is the parameter dimension
-    unsigned nparams = approximator->getParametersSize();
+    unsigned nparams = approximator.getParametersSize();
     arma::vec gradient(nparams);
     for (unsigned i = 0; i < nparams; ++i)
     {

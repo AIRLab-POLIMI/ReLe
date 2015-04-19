@@ -37,10 +37,9 @@ int main(int argc, char *argv[])
 
     BasisFunctions basis = PolynomialFunction::generate(1, mdp.getSettings().continuosStateDim + 1);
     DenseFeatures phi(basis);
-    LinearApproximator approximator(3, phi);
 
     e_GreedyApproximate policy;
-    LinearGradientSARSA agent(policy, approximator);
+    LinearGradientSARSA agent(policy, phi);
 
     Core<FiniteAction, DenseState> core(mdp, agent);
 

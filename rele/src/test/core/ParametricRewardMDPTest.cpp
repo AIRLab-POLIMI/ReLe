@@ -55,11 +55,11 @@ int main(int argc, char *argv[])
 
     PolynomialFunction* pf1 = new PolynomialFunction(1, 1);
     DenseFeatures basis1(pf1);
-    LinearApproximator regressor1(mdp1.getSettings().continuosStateDim, basis1);
+    LinearApproximator regressor1(basis1);
 
     PolynomialFunction* pf2 = new PolynomialFunction(1, mdp2.getSettings().continuosStateDim);
     DenseFeatures basis2(pf2);
-    LinearApproximator regressor2(mdp2.getSettings().continuosStateDim, basis1);
+    LinearApproximator regressor2(basis1);
 
     ParametricRewardMDP<DenseAction, DenseState> prMDP1(mdp1, regressor1);
     ParametricRewardMDP<FiniteAction, DenseState> prMDP2(mdp2, regressor2);

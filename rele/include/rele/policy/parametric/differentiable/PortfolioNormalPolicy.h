@@ -18,18 +18,15 @@ namespace ReLe
 class PortfolioNormalPolicy: public DifferentiablePolicy<FiniteAction, DenseState>
 {
 public:
-    PortfolioNormalPolicy(const double& epsilon, LinearApproximator* projector) :
+    PortfolioNormalPolicy(const double& epsilon, Features& phi) :
         epsilon(epsilon),
-        approximator(projector), clearRegressorOnExit(false)
+        approximator(phi)
     {
     }
 
     virtual ~PortfolioNormalPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-            delete approximator;
-        }
+
     }
 
 public:
@@ -57,15 +54,15 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return approximator->getParameters();
+        return approximator.getParameters();
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParameters().n_elem;
+        return approximator.getParametersSize();
     }
     virtual inline void setParameters(arma::vec &w)
     {
-        approximator->setParameters(w);
+        approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
@@ -79,15 +76,9 @@ public:
     virtual arma::mat diff2log(const arma::vec& state,
                                typename action_type<FiniteAction>::const_type_ref action);
 
-    inline void clearRegressor(bool clear)
-    {
-        clearRegressorOnExit = clear;
-    }
-
 protected:
     double epsilon;
-    LinearApproximator* approximator;
-    bool clearRegressorOnExit;
+    LinearApproximator approximator;
 };
 
 } // end namespace ReLe

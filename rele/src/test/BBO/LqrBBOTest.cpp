@@ -194,13 +194,12 @@ int main(int argc, char *argv[])
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
-    DenseFeatures basis(pf);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-    DetLinearPolicy<DenseState> policy(&regressor);
+    DenseFeatures phi(pf);
+    DetLinearPolicy<DenseState> policy(phi);
     //---
 
     //--- distribution setup
-    int nparams = basis.rows();
+    int nparams = phi.rows();
     arma::vec mean(nparams, fill::zeros);
     mean[0] = -0.42;
     mean[1] =  0.42;

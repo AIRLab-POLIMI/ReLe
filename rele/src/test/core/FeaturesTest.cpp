@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     cout << "F(" << pt[0] << ") = " << endl;
     cout << phi0(pt) << endl;
 
-    LinearApproximator regressor(dim,phi0);
+    LinearApproximator regressor(phi0);
     arma::vec weights = arma::ones(regressor.getParametersSize());
     regressor.setParameters(weights);
     cout << "W = " << endl << weights << endl;

@@ -59,9 +59,8 @@ int main(int argc, char *argv[])
     ParametricNormal dist(mean, cov);
 
     PolynomialFunction* pf = new PolynomialFunction(1, 1);
-    DenseFeatures basis(pf);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-    DetLinearPolicy<DenseState> policy(&regressor);
+    DenseFeatures phi(pf);
+    DetLinearPolicy<DenseState> policy(phi);
 
     int nbepperpol = 1, nbpolperupd = 250;
     REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);

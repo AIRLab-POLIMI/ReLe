@@ -54,17 +54,13 @@ public:
      * @brief The constructor.
      * @param projector The linear projector
      */
-    DetLinearPolicy(LinearApproximator* projector) :
-        approximator(projector), clearRegressorOnExit(false)
+    DetLinearPolicy(Features& phi) :
+        approximator(phi)
     {
     }
 
     virtual ~DetLinearPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-            delete approximator;
-        }
     }
 
     // Policy interface
@@ -86,14 +82,12 @@ public:
 
     virtual arma::vec operator()(const arma::vec& state)
     {
-        //TODO CONTROLLARE ASSEGNAMENTO
-        arma::vec output = (*approximator)(state);
-        return output;
+        return approximator(state);
     }
 
     virtual double operator()(const arma::vec& state, const arma::vec& action)
     {
-        arma::vec output = this->operator ()(state);
+        arma::vec output = (*this)(state);
 
         //TODO CONTROLLARE ASSEGNAMENTO
         DenseAction a;
@@ -109,22 +103,22 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return approximator->getParameters();
+        return approximator.getParameters();
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParameters().n_elem;
+        return approximator.getParametersSize();
     }
     virtual inline void setParameters(arma::vec& w)
     {
-        approximator->setParameters(w);
+        approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
 public:
     arma::vec diff(const arma::vec& state, const arma::vec& action)
     {
-        return approximator->diff(state);
+        return approximator.diff(state);
     }
 
     arma::vec difflog(const arma::vec& state, const arma::vec& action)
@@ -134,14 +128,8 @@ public:
         return arma::vec();
     }
 
-    inline void clearRegressor(bool clear)
-    {
-        clearRegressorOnExit = clear;
-    }
-
 protected:
-    LinearApproximator* approximator;
-    bool clearRegressorOnExit;
+    LinearApproximator approximator;
 
 };
 

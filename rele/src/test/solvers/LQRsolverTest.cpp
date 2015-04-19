@@ -38,9 +38,7 @@ int main(int argc, char *argv[])
     basis.push_back(bf2);
 
     SparseFeatures phi(basis, 2);
-    LinearApproximator regressor(phi.rows(), phi);
-
-    LQRsolver solver(lqr, regressor);
+    LQRsolver solver(lqr, phi);
 
     solver.solve();
 

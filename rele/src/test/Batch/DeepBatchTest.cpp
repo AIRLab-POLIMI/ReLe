@@ -108,11 +108,9 @@ int main(int argc, char *argv[])
 
     DenseFeatures basis(bfs);
 
-    LinearApproximator behav_regressor(mdp.getSettings().continuosStateDim + 1, basis);
-    ParametricGibbsPolicy<DenseState> behavioral(actions, &behav_regressor, 1);
+    ParametricGibbsPolicy<DenseState> behavioral(actions, basis, 1);
 
-    LinearApproximator target_regressor(mdp.getSettings().continuosStateDim + 1, basis);
-    ParametricGibbsPolicy<DenseState> target(actions, &target_regressor, 1);
+    ParametricGibbsPolicy<DenseState> target(actions, basis, 1);
     //---
 
     PolicyEvalAgent<FiniteAction,DenseState> agent(behavioral);

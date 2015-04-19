@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     }
 
     DenseFeatures rewardPhi(rewardBasis);
-    LinearApproximator rewardRegressor(1, rewardPhi);
+    LinearApproximator rewardRegressor(rewardPhi);
 
     //Compute expert feature expectations
     arma::vec muE = data.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);

@@ -36,7 +36,7 @@ class LinearApproximator: public ParametricRegressor
 {
 
 public:
-    LinearApproximator(const unsigned int input_dim, Features& bfs);
+    LinearApproximator(Features& bfs);
     virtual ~LinearApproximator();
     arma::vec operator()(const arma::vec& input);
     arma::vec diff(const arma::vec& input);
@@ -46,7 +46,7 @@ public:
         return basis;
     }
 
-    inline arma::vec getParameters()
+    inline arma::vec getParameters() const
     {
         return parameters;
     }
@@ -57,7 +57,7 @@ public:
         parameters = params;
     }
 
-    inline unsigned int getParametersSize()
+    inline unsigned int getParametersSize() const
     {
         return parameters.n_elem;
     }

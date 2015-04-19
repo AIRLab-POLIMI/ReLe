@@ -34,7 +34,7 @@ namespace ReLe
 class LQRsolver: public Solver<DenseAction, DenseState>
 {
 public:
-    LQRsolver(LQR& lqr, LinearApproximator& approximator);
+    LQRsolver(LQR& lqr, Features& approximator);
     virtual void solve();
     virtual Dataset<DenseAction, DenseState> test();
     virtual Policy<DenseAction, DenseState>& getPolicy();

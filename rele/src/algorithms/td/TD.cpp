@@ -102,8 +102,8 @@ void FiniteTDOutput::writeDecoratedData(ostream& os)
 }
 
 LinearTD::LinearTD(ActionValuePolicy<DenseState>& policy,
-                   LinearApproximator& la) :
-    Q(la), policy(policy)
+                   Features& phi) :
+    Q(phi), policy(policy)
 {
     u = 0;
 

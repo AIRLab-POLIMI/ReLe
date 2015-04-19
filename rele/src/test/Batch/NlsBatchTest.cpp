@@ -71,24 +71,18 @@ int main(int argc, char *argv[])
     //--- define policy (low level)
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
-    LinearApproximator behave_meanRegressor(dim, phi);
     arma::vec wB(2);
     wB(0) = -0.57;
     wB(1) = 0.5;
-    behave_meanRegressor.setParameters(wB);
-
-    LinearApproximator target_meanRegressor(dim, phi);
 
     BasisFunctions stdBasis = IdentityBasis::generate(dim);
     DenseFeatures stdPhi(stdBasis);
-    LinearApproximator stdRegressor(dim, stdPhi);
-    arma::vec stdWeights(stdRegressor.getParametersSize());
+    arma::vec stdWeights(stdPhi.rows());
     stdWeights.fill(0.5);
-    stdRegressor.setParameters(stdWeights);
 
-
-    NormalStateDependantStddevPolicy behavioral(&behave_meanRegressor, &stdRegressor);
-    NormalStateDependantStddevPolicy target(&target_meanRegressor, &stdRegressor);
+    NormalStateDependantStddevPolicy behavioral(phi, stdPhi, stdWeights);
+    behavioral.setParameters(wB);
+    NormalStateDependantStddevPolicy target(phi, stdPhi, stdWeights);
     //---
 
     PolicyEvalAgent<DenseAction,DenseState> agent(behavioral);

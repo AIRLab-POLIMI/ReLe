@@ -208,8 +208,7 @@ int main(int argc, char *argv[])
     }
 
     DenseFeatures phi(basis);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, phi);
-    ParametricGibbsPolicy<DenseState> expertPolicy(actions, &regressor, 1);
+    ParametricGibbsPolicy<DenseState> expertPolicy(actions, phi, 1);
     //---
 
     vec eReward(2);

@@ -168,11 +168,9 @@ int main(int argc, char *argv[])
     BasisFunctions basis = IdentityBasis::generate(dim);
 
     DenseFeatures phi(basis);
-    LinearApproximator meanRegressor(dim, phi);
-
 
     double epsilon = 0.05;
-    PortfolioNormalPolicy policy(epsilon, &meanRegressor);
+    PortfolioNormalPolicy policy(epsilon, phi);
     //---
 
     AbstractPolicyGradientAlgorithm<FiniteAction, DenseState>* agent;

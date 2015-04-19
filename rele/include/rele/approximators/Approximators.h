@@ -34,8 +34,8 @@ class Regressor
 
 public:
 
-    Regressor(unsigned int input = 1, unsigned int output = 1) :
-        inputDimension(input), outputDimension(output)
+    Regressor(unsigned int output = 1) :
+        outputDimension(output)
     {
     }
 
@@ -50,26 +50,21 @@ public:
         return outputDimension;
     }
 
-    int getInputSize()
-    {
-        return inputDimension;
-    }
-
 protected:
-    unsigned int inputDimension, outputDimension;
+    unsigned int outputDimension;
 };
 
 class ParametricRegressor: public Regressor
 {
 public:
-    ParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
-        Regressor(input, output)
+    ParametricRegressor(unsigned int output = 1) :
+        Regressor(output)
     {
     }
 
     virtual void setParameters(arma::vec& params) = 0;
-    virtual arma::vec getParameters() = 0;
-    virtual unsigned int getParametersSize() = 0;
+    virtual arma::vec getParameters() const = 0;
+    virtual unsigned int getParametersSize() const = 0;
     virtual arma::vec  diff(const arma::vec& output) = 0;
 
 };
@@ -77,8 +72,8 @@ public:
 class NonParametricRegressor: public Regressor
 {
 public:
-    NonParametricRegressor(unsigned int input = 1, unsigned int output = 1) :
-        Regressor(input, output)
+    NonParametricRegressor(unsigned int output = 1) :
+        Regressor(output)
     {
     }
 };

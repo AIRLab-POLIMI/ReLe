@@ -85,10 +85,9 @@ int main(int argc, char *argv[])
 
         BasisFunctions basis = PolynomialFunction::generate(deg(0),state.n_elem);
         DenseFeatures phi(basis);
-        LinearApproximator la(state.n_elem, phi);
 
         //----- NormalPolicy
-        NormalPolicy policy(stddev(0), &la);
+        NormalPolicy policy(stddev(0), phi);
         policy.setParameters(params);
 
         cout << policy.getPolicyName() << endl;
@@ -135,8 +134,6 @@ int main(int argc, char *argv[])
         assert(initw.n_elem == basis.size());
 
         DenseFeatures phi(basis);
-        LinearApproximator lam(point.n_elem, phi);
-        lam.setParameters(initw);
 
         arma::vec degs;
         degs.load(argv[5], raw_ascii);
@@ -149,13 +146,12 @@ int main(int argc, char *argv[])
         assert(initw.n_elem == basiss.size());
 
         DenseFeatures phis(basiss);
-        LinearApproximator las(point.n_elem, phis);
-        las.setParameters(initws);
 
         //----- NormalStateDependantStddevPolicy
         vec varas;
         varas.load(argv[4], raw_ascii);
-        NormalStateDependantStddevPolicy* policy = new NormalStateDependantStddevPolicy(&lam, &las);
+        NormalStateDependantStddevPolicy* policy = new NormalStateDependantStddevPolicy(phi, phis, initws);
+        policy->setParameters(initw);
     }
     else if (strcmp(argv[1], "mvn") == 0)
     {
@@ -189,27 +185,22 @@ int main(int argc, char *argv[])
         as_variance.load(argv[6], raw_ascii);
 
         //define approximation
-        LinearApproximator* lam;
-
         BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
-        SparseFeatures* sparsefeatures = nullptr;
-        DenseFeatures* densefeatures = nullptr;
+        Features* phi = nullptr;
 
         if (action.n_elem == 1)
         {
-        	densefeatures = new DenseFeatures(basis);
-            lam = new LinearApproximator(state.n_elem, *densefeatures);
+            phi = new DenseFeatures(basis);
         }
         else
         {
-            sparsefeatures = new SparseFeatures(basis, action.n_elem);
-            cout << (*sparsefeatures)(state);
-            lam = new LinearApproximator(state.n_elem, *sparsefeatures);
+            phi = new SparseFeatures(basis, action.n_elem);
+            cout << (*phi)(state);
         }
 
         //define policy
         cerr << params.t();
-        MVNLogisticPolicy policy(lam, as_variance);
+        MVNLogisticPolicy policy(*phi, as_variance);
         policy.setParameters(params);
 
 
@@ -241,11 +232,9 @@ int main(int argc, char *argv[])
         mat hess = policy.diff2log(state,action);
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
 
-        delete lam;
-        if (sparsefeatures != nullptr)
-            delete sparsefeatures;
-        if(densefeatures != nullptr)
-        	delete densefeatures;
+        if (phi != nullptr)
+            delete phi;
+
     }
     else if (strcmp(argv[1], "mvndiag") == 0)
     {
@@ -266,27 +255,22 @@ int main(int argc, char *argv[])
         deg.load(argv[5], raw_ascii);
 
         //define approximation
-        LinearApproximator* lam;
-
         BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
-        SparseFeatures* sparsefeatures = nullptr;
-        DenseFeatures* densefeatures = nullptr;
+        Features* phi = nullptr;
 
         if (action.n_elem == 1)
         {
-        	densefeatures = new DenseFeatures(basis);
-            lam = new LinearApproximator(state.n_elem, *densefeatures);
+            phi = new DenseFeatures(basis);
         }
         else
         {
-            sparsefeatures = new SparseFeatures(basis, action.n_elem);
-            cout << (*sparsefeatures)(state);
-            lam = new LinearApproximator(state.n_elem, *sparsefeatures);
+            phi = new SparseFeatures(basis, action.n_elem);
+            cout << (*phi)(state);
         }
 
         //define policy
         cerr << params.t();
-        MVNDiagonalPolicy policy(lam);
+        MVNDiagonalPolicy policy(*phi);
         policy.setParameters(params);
 
 
@@ -318,12 +302,8 @@ int main(int argc, char *argv[])
         mat hess = policy.diff2log(state,action);
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
 
-        delete lam;
-        if (sparsefeatures != nullptr)
-            delete sparsefeatures;
-
-        if (densefeatures != nullptr)
-                    delete densefeatures;
+        if (phi != nullptr)
+            delete phi;
 
     }
     else if (strcmp(argv[1], "portfolio") == 0)
@@ -347,11 +327,10 @@ int main(int argc, char *argv[])
         assert(initw.n_elem == basis.size());
 
         DenseFeatures phi(basis);
-        LinearApproximator la(point.n_elem, phi);
-        la.setParameters(initw);
 
         //----- PortfolioNormalPolicy
-        PortfolioNormalPolicy* policy = new PortfolioNormalPolicy(epsilon(0), &la);
+        PortfolioNormalPolicy* policy = new PortfolioNormalPolicy(epsilon(0), phi);
+        policy->setParameters(initw);
 
 
 

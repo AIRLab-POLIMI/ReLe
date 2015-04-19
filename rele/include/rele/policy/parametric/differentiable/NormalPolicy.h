@@ -20,18 +20,15 @@ namespace ReLe
 class NormalPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
-    NormalPolicy(const double initialStddev, LinearApproximator* projector) :
+    NormalPolicy(const double initialStddev, Features& phi) :
         mInitialStddev(initialStddev), mMean(0.0),
-        approximator(projector), clearRegressorOnExit(false)
+        approximator(phi)
     {
     }
 
     virtual ~NormalPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-            delete approximator;
-        }
+
     }
 
 protected:
@@ -62,15 +59,15 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return approximator->getParameters();
+        return approximator.getParameters();
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParameters().n_elem;
+        return approximator.getParametersSize();
     }
     virtual inline void setParameters(arma::vec &w)
     {
-        approximator->setParameters(w);
+        approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
@@ -81,15 +78,9 @@ public:
 
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
 
-    inline void clearRegressor(bool clear)
-    {
-        clearRegressorOnExit = clear;
-    }
-
 protected:
     double mInitialStddev, mMean;
-    LinearApproximator* approximator;
-    bool clearRegressorOnExit;
+    LinearApproximator approximator;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -112,19 +103,16 @@ class NormalStateDependantStddevPolicy: public NormalPolicy
 {
 
 public:
-    NormalStateDependantStddevPolicy(LinearApproximator* projector,
-                                     LinearApproximator* stdprojector) :
-        NormalPolicy(1, projector), stdApproximator(stdprojector)
+    NormalStateDependantStddevPolicy(Features& phi,
+                                     Features& stdPhi, arma::vec& stdDevParameters) :
+        NormalPolicy(1, phi), stdApproximator(stdPhi)
     {
+    	stdApproximator.setParameters(stdDevParameters);
     }
 
     virtual ~NormalStateDependantStddevPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-//            delete mpProjector;
-            delete stdApproximator;
-        }
+
     }
 
 
@@ -146,7 +134,7 @@ protected:
     virtual void calculateMeanAndStddev(const arma::vec& state);
 
 protected:
-    LinearApproximator* stdApproximator;
+    LinearApproximator stdApproximator;
 
 };
 
@@ -178,12 +166,11 @@ public:
      * @brief The constructor.
      * @param projector The linear projector used for mean approximation
      */
-    MVNPolicy(LinearApproximator* projector) :
-        approximator(projector),
-        mMean(projector->getOutputSize(), arma::fill::zeros),
-        clearRegressorOnExit(false)
+    MVNPolicy(Features& phi) :
+        approximator(phi),
+        mMean(approximator.getOutputSize(), arma::fill::zeros)
     {
-        int output_dim = projector->getOutputSize();
+        int output_dim = approximator.getOutputSize();
         mCovariance.eye(output_dim, output_dim);
         mCinv = arma::inv(mCovariance);
         mCholeskyDec = arma::chol(mCovariance);
@@ -203,13 +190,12 @@ public:
      * @param projector The linear projector used for mean approximation.
      * @param initialCov The covariance matrix (\f$n_a \times n_a\f$).
      */
-    MVNPolicy(LinearApproximator* projector,
+    MVNPolicy(Features& phi,
               std::initializer_list<double> initialCov) :
-        approximator(projector),
-        mMean(projector->getOutputSize(), arma::fill::zeros),
-        clearRegressorOnExit(false)
+        approximator(phi),
+        mMean(approximator.getOutputSize(), arma::fill::zeros)
     {
-        int output_dim = projector->getOutputSize();
+        int output_dim = approximator.getOutputSize();
         mCovariance.zeros(output_dim, output_dim);
         int row = 0, col = 0;
         for (double x : initialCov)
@@ -226,12 +212,11 @@ public:
         mDeterminant = arma::det(mCovariance);
     }
 
-    MVNPolicy(LinearApproximator* projector, double* covariance) :
-        approximator(projector),
-        mMean(projector->getOutputSize(), arma::fill::zeros),
-        clearRegressorOnExit(false)
+    MVNPolicy(Features& phi, double* covariance) :
+        approximator(phi),
+        mMean(approximator.getOutputSize(), arma::fill::zeros)
     {
-        int output_dim = projector->getOutputSize();
+        int output_dim = approximator.getOutputSize();
         mCovariance.zeros(output_dim, output_dim);
         for (int i = 0; i < output_dim; ++i)
         {
@@ -248,10 +233,7 @@ public:
 
     virtual ~MVNPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-            delete approximator;
-        }
+
     }
 
     virtual inline std::string getPolicyName()
@@ -277,15 +259,15 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return approximator->getParameters();
+        return approximator.getParameters();
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParameters().n_elem;
+        return approximator.getParametersSize();
     }
     virtual inline void setParameters(arma::vec &w)
     {
-        approximator->setParameters(w);
+        approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
@@ -295,11 +277,6 @@ public:
     virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
 
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
-
-    inline virtual void clearRegressor(bool clear)
-    {
-        clearRegressorOnExit = clear;
-    }
 
 protected:
 
@@ -325,16 +302,15 @@ protected:
         // sul puntatore dello stato. Se è uguale al ultimo non ricomputo tutto
 
         // compute mean vector
-        mMean = approximator->operator ()(state);
+        mMean = approximator(state);
 
     }
 
 protected:
     arma::mat mCovariance, mCinv, mCholeskyDec;
     double mDeterminant;
-    LinearApproximator* approximator;
+    LinearApproximator approximator;
     arma::vec mMean;
-    bool clearRegressorOnExit;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -343,25 +319,22 @@ protected:
 class MVNDiagonalPolicy : public MVNPolicy
 {
 public:
-    MVNDiagonalPolicy(LinearApproximator* projector)
-        :MVNPolicy(projector), stddevParams(projector->getOutputSize(),arma::fill::ones)
+    MVNDiagonalPolicy(Features& phi)
+        :MVNPolicy(phi), stddevParams(approximator.getOutputSize(),arma::fill::ones)
     {
         UpdateCovarianceMatrix();
     }
 
-    MVNDiagonalPolicy(LinearApproximator* projector,
+    MVNDiagonalPolicy(Features& phi,
                       arma::vec stddevVector)
-        :MVNPolicy(projector), stddevParams(stddevVector)
+        :MVNPolicy(phi), stddevParams(stddevVector)
     {
         UpdateCovarianceMatrix();
     }
 
     virtual ~MVNDiagonalPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-            delete approximator;
-        }
+
     }
 
     virtual inline std::string getPolicyName()
@@ -381,11 +354,11 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return arma::join_vert(approximator->getParameters(), stddevParams);
+        return arma::join_vert(approximator.getParameters(), stddevParams);
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParametersSize() + stddevParams.n_elem;
+        return approximator.getParametersSize() + stddevParams.n_elem;
     }
     virtual void setParameters(arma::vec &w);
 
@@ -450,10 +423,10 @@ public:
      * @param projector The linear projector used for mean approximation
      * @param variance_asymptote The asymptotic value of the logistic function.
      */
-    MVNLogisticPolicy(LinearApproximator* projector,
+    MVNLogisticPolicy(Features& phi,
                       arma::vec variance_asymptote)
-        : MVNPolicy(projector),
-          mLogisticParams (arma::zeros<arma::vec>(projector->getOutputSize())),
+        : MVNPolicy(phi),
+          mLogisticParams (arma::zeros<arma::vec>(approximator.getOutputSize())),
           mAsVariance(variance_asymptote)
     {
 //        unsigned int out_dim = projector->getOutputSize();
@@ -461,10 +434,10 @@ public:
         UpdateCovarianceMatrix();
     }
 
-    MVNLogisticPolicy(LinearApproximator* projector,
+    MVNLogisticPolicy(Features& phi,
                       double variance_asymptote)
-        : MVNPolicy(projector),
-          mLogisticParams (arma::zeros<arma::vec>(projector->getOutputSize())),
+        : MVNPolicy(phi),
+          mLogisticParams (arma::zeros<arma::vec>(approximator.getOutputSize())),
           mAsVariance(arma::ones<arma::vec>(1)*variance_asymptote)
     {
 //        unsigned int out_dim = projector->getOutputSize();
@@ -472,24 +445,21 @@ public:
         UpdateCovarianceMatrix();
     }
 
-    MVNLogisticPolicy(LinearApproximator* projector,
+    MVNLogisticPolicy(Features& phi,
                       arma::vec variance_asymptote,
                       arma::vec varianceparams)
-        : MVNPolicy(projector),
+        : MVNPolicy(phi),
           mLogisticParams (varianceparams),
           mAsVariance(variance_asymptote)
     {
-        unsigned int out_dim = projector->getOutputSize();
+        unsigned int out_dim = approximator.getOutputSize();
         mCovariance.zeros(out_dim, out_dim);
         UpdateCovarianceMatrix();
     }
 
     virtual ~MVNLogisticPolicy()
     {
-        if (clearRegressorOnExit == true)
-        {
-            delete approximator;
-        }
+
     }
 
     virtual inline std::string getPolicyName()
@@ -509,17 +479,17 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return arma::join_vert(approximator->getParameters(), mLogisticParams);
+        return arma::join_vert(approximator.getParameters(), mLogisticParams);
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParametersSize() + mLogisticParams.n_elem;
+        return approximator.getParametersSize() + mLogisticParams.n_elem;
     }
     virtual inline void setParameters(arma::vec &w)
     {
-        int dp = approximator->getParametersSize();
+        int dp = approximator.getParametersSize();
         arma::vec tmp = w.rows(0, dp-1);
-        approximator->setParameters(tmp);
+        approximator.setParameters(tmp);
         for (int i = 0, ie = mLogisticParams.n_elem; i < ie; ++i)
         {
             mLogisticParams(i) = w[dp + i];

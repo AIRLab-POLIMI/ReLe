@@ -111,7 +111,7 @@ protected:
 class LinearTD : public Agent<FiniteAction, DenseState>
 {
 public:
-    LinearTD(ActionValuePolicy<DenseState>& policy, LinearApproximator& la);
+    LinearTD(ActionValuePolicy<DenseState>& policy, Features& phi);
 
     virtual void endEpisode();
 

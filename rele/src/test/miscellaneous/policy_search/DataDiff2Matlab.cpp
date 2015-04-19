@@ -120,15 +120,7 @@ int main(int argc, char *argv[])
     basis.push_back(gf4);
 
     DenseFeatures phi(basis);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, phi);
-//    vec p(5);
-//    p(0) = 50;
-//    p(1) = -50;
-//    p(2) = 0;
-//    p(3) = 0;
-//    p(4) = 50;
-//    regressor.setParameters(p);
-    NormalPolicy policy(0.1, &regressor);
+    NormalPolicy policy(0.1, phi);
     policy.setParameters(params);
     //---
 

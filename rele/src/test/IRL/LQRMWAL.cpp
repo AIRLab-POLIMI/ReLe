@@ -82,9 +82,8 @@ int main(int argc, char *argv[])
     mdp.setInitialState(initialState);
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
-    DenseFeatures basis(pf);
-    LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, basis);
-    DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
+    DenseFeatures phi(pf);
+    DetLinearPolicy<DenseState> expertPolicy(phi);
     vec param(1);
     param[0] = -0.6180;
     expertPolicy.setParameters(param);
@@ -121,17 +120,17 @@ int main(int argc, char *argv[])
 
     DenseFeatures rewardPhi(rewardBF);
 
-    LinearApproximator rewardRegressor(mdp.getSettings().continuosStateDim, rewardPhi);
+    LinearApproximator rewardRegressor(rewardPhi);
 
 
     //Compute expert feature expectations
     arma::vec muE = collection.data.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
 
     //Create an agent to solve the mdp direct problem
-    DetLinearPolicy<DenseState> policy(&expertRegressor);
-    int nparams = basis.rows();
+    DetLinearPolicy<DenseState> policy(phi);
+    int nparams = phi.rows();
     arma::vec mean(nparams, fill::zeros);
-    expertRegressor.setParameters(mean);
+    policy.setParameters(mean);
 
     int nbepperpol = 1, nbpolperupd = 100;
     arma::mat cov(nparams, nparams, arma::fill::eye);

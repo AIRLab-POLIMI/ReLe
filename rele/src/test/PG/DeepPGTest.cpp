@@ -214,10 +214,9 @@ int main(int argc, char *argv[])
         bfs.push_back(new AndConditionBasisFunction(dsi,2,i));
     }
 
-    DenseFeatures basis(bfs);
+    DenseFeatures phi(bfs);
 
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
-    ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);
+    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
     //---
 
     AbstractPolicyGradientAlgorithm<FiniteAction, DenseState>* agent;

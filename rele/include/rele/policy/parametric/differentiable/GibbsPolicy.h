@@ -15,9 +15,9 @@ class ParametricGibbsPolicy : public DifferentiablePolicy<FiniteAction, StateC>
 public:
 
     ParametricGibbsPolicy(std::vector<FiniteAction> actions,
-                          LinearApproximator* projector, double inverseTemp) :
+                          Features& phi, double inverseTemp) :
         mActions(actions), distribution(actions.size(),0),
-        approximator(projector), clearRegressorOnExit(false),
+        approximator(phi), clearRegressorOnExit(false),
         inverseTemperature(inverseTemp)
     {
     }
@@ -58,7 +58,7 @@ public:
         for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
         {
             tuple[statesize] = mActions[k].getActionN();
-            arma::vec preference = (*approximator)(tuple);
+            arma::vec preference = approximator(tuple);
             den += exp(inverseTemperature*preference[0]);
         }
 
@@ -67,7 +67,7 @@ public:
         double num = 1.0;
         if (action != mActions[nactions - 1].getActionN())
         {
-            arma::vec preference = (*approximator)(tuple);
+            arma::vec preference = approximator(tuple);
             num = exp(inverseTemperature*preference[0]);
         }
 
@@ -92,7 +92,7 @@ public:
 //            AbstractBasisMatrix& basis = approximator->getBasis();
 //            std::cout << basis(tuple).t();
 
-            arma::vec preference = (*approximator)(tuple);
+            arma::vec preference = approximator(tuple);
 //            std::cout << preference << std::endl;
             double val = exp(inverseTemperature*preference[0]);
 //            std::cout << val << std::endl;
@@ -124,15 +124,15 @@ public:
 public:
     virtual inline arma::vec getParameters() const
     {
-        return approximator->getParameters();
+        return approximator.getParameters();
     }
     virtual inline const unsigned int getParametersSize() const
     {
-        return approximator->getParameters().n_elem;
+        return approximator.getParametersSize();
     }
     virtual inline void setParameters(arma::vec& w)
     {
-        approximator->setParameters(w);
+        approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
@@ -161,11 +161,11 @@ public:
             tuple[i] = state[i];
         }
 
-        Features& basis = approximator->getBasis();
+        Features& basis = approximator.getBasis();
         for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
         {
             tuple[statesize] = mActions[k].getActionN();
-            arma::vec pref = (*approximator)(tuple);
+            arma::vec pref = approximator(tuple);
             arma::mat loc_phi = basis(tuple);
             double val = exp(IT*pref[0]);
             distribution[k] = val;
@@ -199,7 +199,7 @@ protected:
     std::vector<FiniteAction> mActions;
     std::vector<double> distribution;
     double inverseTemperature;
-    LinearApproximator* approximator;
+    LinearApproximator approximator;
     bool clearRegressorOnExit;
 };
 

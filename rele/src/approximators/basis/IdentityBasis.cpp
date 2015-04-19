@@ -59,14 +59,14 @@ void IdentityBasis::readFromStream(std::istream &in)
 
 BasisFunctions IdentityBasis::generate(unsigned int input_size)
 {
-	BasisFunctions basis;
+    BasisFunctions basis;
 
-	for(int i = 0; i < input_size; i++)
-	{
-		basis.push_back(new IdentityBasis(i));
-	}
+    for(int i = 0; i < input_size; i++)
+    {
+        basis.push_back(new IdentityBasis(i));
+    }
 
-	return basis;
+    return basis;
 }
 
 }//end namespace

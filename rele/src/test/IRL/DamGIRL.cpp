@@ -166,16 +166,14 @@ int main(int argc, char *argv[])
     basis.push_back(gf4);
 
     DenseFeatures phi(basis);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, phi);
+    MVNLogisticPolicy expertPolicy(phi, 50);
     vec p(5);
     p(0) = 50;
     p(1) = -50;
     p(2) = 0;
     p(3) = 0;
     p(4) = 50;
-    regressor.setParameters(p);
-    MVNLogisticPolicy expertPolicy(&regressor, 50);
-
+    expertPolicy.setParameters(p);
     vec params(6);
 //    params << 52.1602 << -49.0788  <<  1.5016  <<  0.2076 <<  50.1777  << -1.4606;
 //    params << 53.9091 << -48.3235 <<   3.4510  <<  0.3419 <<  50.2393 <<  -2.8437;

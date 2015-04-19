@@ -6,8 +6,8 @@ using namespace arma;
 namespace ReLe
 {
 
-LinearGradientSARSA::LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, LinearApproximator& la)
-    : LinearTD(policy, la), lambda(0.0), eligibility(la.getParameters().n_elem, fill::zeros),
+LinearGradientSARSA::LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, Features& phi)
+    : LinearTD(policy, phi), lambda(0.0), eligibility(Q.getParametersSize(), fill::zeros),
       useReplacingTraces(false)
 {
 }

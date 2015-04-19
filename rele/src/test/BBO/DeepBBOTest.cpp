@@ -248,14 +248,13 @@ int main(int argc, char *argv[])
         bfs.push_back(new AndConditionBasisFunction(dsi,2,i));
     }
 
-    DenseFeatures basis(bfs);
+    DenseFeatures phi(bfs);
 
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
-    ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1e8);
+    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1e8);
     //---
 
     //--- distribution setup
-    int nparams = basis.rows();
+    int nparams = phi.rows();
     DifferentiableDistribution* dist;
 
     if (strcmp(polType, "gauss") == 0)
