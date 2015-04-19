@@ -98,6 +98,11 @@ void DeepSeaTreasure::step(const FiniteAction& action, DenseState& nextState, Re
         currentState.setAbsorbing(false);
     else
         currentState.setAbsorbing(true);
+
+    assert(!std::isnan(reward1));
+    assert(!std::isnan(reward2));
+    assert(!std::isinf(reward1));
+    assert(!std::isinf(reward2));
     reward[0] = reward1;
     reward[1] = reward2;
     nextState = currentState;

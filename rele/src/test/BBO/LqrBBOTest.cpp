@@ -138,8 +138,17 @@ int main(int argc, char *argv[])
         int offset = 0;
         if ((strcmp(alg,"pgpe") == 0) || (strcmp(alg,"nes") == 0))
         {
-            strncpy(polType, argv[2], 10);
-            offset = 1;
+            if (argc > 2)
+            {
+                strncpy(polType, argv[2], 10);
+                offset = 1;
+            }
+            else
+            {
+                std::cout << "ERROR: Too few arguments." << endl;
+                help();
+                exit(1);
+            }
         }
         else if (strcmp(alg,"reps") == 0)
         {
@@ -324,5 +333,6 @@ int main(int argc, char *argv[])
     //    //---
 
     delete dist;
+    delete core;
     return 0;
 }

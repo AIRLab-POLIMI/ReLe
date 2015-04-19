@@ -55,7 +55,7 @@ public:
 
     // ParametricPolicy interface
 public:
-    virtual inline const arma::vec &getParameters() const
+    virtual inline arma::vec getParameters() const
     {
         return approximator->getParameters();
     }

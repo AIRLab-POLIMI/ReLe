@@ -1,6 +1,8 @@
 TODO:
 
-0a) controllare derivate politiche
+SISTEMARE SETTINGS ENVIRONMENT
+
+0a) controllare derivate politiche (alcune fatte vedi rele_matlab/miscellaneous)
 0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
 0e) aggiungere condizione di termine agli algoritmi
 
@@ -12,9 +14,8 @@ DAVE:
 1d) templetizzare anche le basis functions
 
 TEO:
-2a) Interfaccia Matlab? per ora solo per collect samples
-2b) implementare off-policy gradients
-2c) implementare IRL
+2a) implementare off-policy gradients
+2b) implementare IRL
 
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 

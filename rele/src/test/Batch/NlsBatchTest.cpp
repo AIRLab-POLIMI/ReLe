@@ -25,7 +25,8 @@
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 #include "parametric/differentiable/NormalPolicy.h"
-#include "policy_search/offpolicy/OffAlgorithm.h"
+#include "policy_search/offpolicy/OffPolicyREINFORCE.h"
+#include "policy_search/offpolicy/OffPolicyGPOMDP.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "RandomGenerator.h"
@@ -45,7 +46,7 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("Offpolicy", "Nls");
+    FileManager fm("Offpolicy", "nls");
     fm.createDir();
     fm.cleanDir();
 
@@ -116,10 +117,12 @@ int main(int argc, char *argv[])
     cout << "# Ended data collection" << endl;
 
 
-    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size());
+    AdaptiveStep stepl(0.1);
+//    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size(), stepl);
+    OffPolicyGPOMDP<DenseAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size(), horiz, stepl);
     BatchCore<DenseAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath("Deep.log"),
+        fm.addPath("nls.log"),
         WriteStrategy<DenseAction, DenseState>::AGENT,
         true /*delete file*/
     );

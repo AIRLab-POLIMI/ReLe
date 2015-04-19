@@ -143,6 +143,7 @@ int main(int argc, char *argv[])
         config.nbRuns      = 400;
         config.nbEpisodes  = 100;
         config.stepLength  = 0.01;
+        config.steprule    = new AdaptiveStep(config.stepLength);
     }
     //---
 

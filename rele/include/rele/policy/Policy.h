@@ -61,7 +61,7 @@ template<class ActionC, class StateC>
 class ParametricPolicy: public Policy<ActionC, StateC>
 {
 public:
-    virtual const arma::vec& getParameters() const = 0;
+    virtual arma::vec getParameters() const = 0;
     virtual const unsigned int getParametersSize() const = 0;
     virtual void setParameters(arma::vec& w) = 0;
 

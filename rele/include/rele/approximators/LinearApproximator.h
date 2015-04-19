@@ -46,7 +46,7 @@ public:
         return basis;
     }
 
-    inline arma::vec& getParameters()
+    inline arma::vec getParameters()
     {
         return parameters;
     }

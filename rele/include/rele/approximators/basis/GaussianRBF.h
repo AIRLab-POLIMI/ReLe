@@ -12,7 +12,8 @@ class GaussianRbf : public BasisFunction
 
 public:
 
-    GaussianRbf(unsigned int dimension = 0, float mean_vec[] = 0, float scale_factor = 0);
+    GaussianRbf(double center, double width);
+    GaussianRbf(unsigned int dimension = 0, double mean_vec[] = 0, double scale_factor = 0);
     virtual ~GaussianRbf();
     double operator() (const arma::vec& input);
 

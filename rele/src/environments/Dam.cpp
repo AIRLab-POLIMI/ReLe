@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/Dam.h"
+#include "Dam.h"
 
 #include "RandomGenerator.h"
 #include <cassert>
@@ -39,14 +39,14 @@ DamSettings::DamSettings()
 void DamSettings::defaultSettings(DamSettings& settings)
 {
     //Environment Parameters
-    settings.gamma = 0.99;
+    settings.gamma = 1.0;
     settings.continuosStateDim = 1;
     settings.continuosActionDim = 1;
     settings.rewardDim = 4;
     settings.finiteStateDim = -1;
     settings.finiteActionDim = -1;
     settings.isFiniteHorizon = false;
-    settings.isAverageReward = false;
+    settings.isAverageReward = true;
     settings.isEpisodic = false;
     settings.horizon = 100;
 
@@ -70,6 +70,7 @@ void DamSettings::defaultSettings(DamSettings& settings)
     settings.normalization_factor.push_back(1);
 
     settings.penalize = false;
+    settings.initial_state_type = initType::RANDOM;
 }
 
 void DamSettings::WriteToStream(ostream &out) const
@@ -119,18 +120,21 @@ void DamSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Dam::Dam()
-    : damConfig()
+    : damConfig(), nbSteps(0)
 {
     setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
                      damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
+    currentState.set_size(damConfig.continuosStateDim);
 }
 
 Dam::Dam(DamSettings& config)
-    : ContinuousMDP(config.continuosStateDim, config.continuosActionDim, config.rewardDim,
-                    config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
-    damConfig(config)
+    : damConfig(config), nbSteps(0)
 {
+    setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
+                     damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
     currentState.set_size(damConfig.continuosStateDim);
+//    std::cout << damConfig.rewardDim << std::endl;
+//    std::cout << damConfig.penalize << std::endl;
 }
 
 void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
@@ -199,29 +203,57 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
     nextState.setAbsorbing(false);
 
-    for (unsigned int i = 0, ie = damConfig.normalization_factor.size(); i < ie; ++i)
+    for (unsigned int i = 0, ie = damConfig.rewardDim; i < ie; ++i)
     {
         reward[i] /= damConfig.normalization_factor[i];
+        if (damConfig.isAverageReward)
+            reward[i] /= getSettings().horizon;
     }
 
     currentState = nextState;
+    ++nbSteps;
 }
 
 void Dam::getInitialState(DenseState& state)
 {
-    state.setAbsorbing(false);
-    // initial states
-    double s_init[] = {9.6855361e+01, 5.8046026e+01,
-                       1.1615767e+02, 2.0164311e+01,
-                       7.9191000e+01, 1.4013098e+02,
-                       1.3101816e+02, 4.4351321e+01,
-                       1.3185943e+01, 7.3508622e+01
-                      };
 
-    int idx   = RandomGenerator::sampleUniformInt(0,10);
-    state[0]  = s_init[idx];
-    //    state[0] = RandomGenerator::sampleUniformInt(160);
-    currentState[0] = state[0]; //keep info about the current state
+    if (damConfig.isAverageReward && nbSteps != 0)
+    {
+        assert(nbSteps == getSettings().horizon);
+    }
+
+    state.setAbsorbing(false);
+
+    if (damConfig.initial_state_type == DamSettings::initType::RANDOM_DISCRETE)
+    {
+//        std::cout << "RANDOM_DISCRETE" << std::endl;
+        // initial states
+        double s_init[] = {9.6855361e+01, 5.8046026e+01,
+                           1.1615767e+02, 2.0164311e+01,
+                           7.9191000e+01, 1.4013098e+02,
+                           1.3101816e+02, 4.4351321e+01,
+                           1.3185943e+01, 7.3508622e+01
+                          };
+        int idx   = RandomGenerator::sampleUniformInt(0,10);
+        currentState[0] = s_init[idx]; //keep info about the current state
+    }
+    else if (damConfig.initial_state_type == DamSettings::initType::RANDOM)
+    {
+//        std::cout << "RANDOM" << std::endl;
+        currentState[0] = RandomGenerator::sampleUniformInt(0,160);
+    }
+    else
+    {
+        std::cerr << "getInitialState: something wrong!" << std::endl;
+        abort();
+    }
+    state = currentState;
+    nbSteps = 0;
+}
+
+void Dam::setCurrentState(const DenseState &state)
+{
+    currentState[0] = state[0];
 }
 
 

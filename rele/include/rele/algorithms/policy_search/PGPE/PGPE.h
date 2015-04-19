@@ -51,6 +51,17 @@ public:
     {
     }
 
+    PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
+         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
+         RewardTransformation& reward_tr,
+         bool baseline = true)
+        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, PGPEIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
+        useDirection(false)
+    {
+    }
+
+
     virtual ~PGPE() {}
 
     inline virtual void setNormalization(bool flag)

@@ -50,6 +50,12 @@ public:
     {
     }
 
+    //TODO controllare
+    inline void setHorizon(unsigned int horizon)
+    {
+        settings.horizon = horizon;
+    }
+
 protected:
     inline EnvironmentSettings& getWritableSettings()
     {
