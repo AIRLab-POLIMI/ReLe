@@ -33,20 +33,6 @@
 namespace ReLe
 {
 
-////Templates needed to sample different action types
-template<class StateC, class PolicyC>
-arma::mat diff2LogWorker(const StateC& state, FiniteAction& action, PolicyC& policy)
-{
-    unsigned int u = action.getActionN();
-    return policy.diff2log(state, u);
-}
-
-template<class StateC, class ActionC, class PolicyC>
-arma::mat diff2LogWorker(const StateC& state, ActionC& action, PolicyC& policy)
-{
-    return policy.diff2log(state, action);
-}
-
 template<class ActionC, class StateC, class PolicyC>
 class HessianFromDataWorker
 {
@@ -106,8 +92,8 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
-                localh = diff2LogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
+                localh = policy.diff2log(tr.x, tr.u);
                 sumGradLog += localg;
                 sumHessLog += localh;
                 Rew += df * rewardf->operator ()(tr.r);
@@ -231,7 +217,7 @@ public:
 
     void setPolicy(DifferentiablePolicy<ActionC,StateC>& policy)
     {
-        policy = policy;
+        this->policy = policy;
     }
 
     virtual DifferentiablePolicy<ActionC, StateC>* getPolicy()

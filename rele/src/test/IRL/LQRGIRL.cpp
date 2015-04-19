@@ -144,9 +144,8 @@ int main(int argc, char *argv[])
 
     PolynomialFunction* pf = new PolynomialFunction(1,1);
     cout << *pf << endl;
-    DenseBasisVector basis;
-    basis.push_back(pf);
-    LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, basis);
+    DenseFeatures phi(pf);
+    LinearApproximator expertRegressor(mdp.getSettings().continuosStateDim, phi);
 //    DetLinearPolicy<DenseState> expertPolicy(&expertRegressor);
     NormalPolicy expertPolicy(1,&expertRegressor);
 

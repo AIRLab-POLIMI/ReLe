@@ -122,32 +122,20 @@ endif()
 add_executable(features_test src/test/core/FeaturesTest.cpp)
 target_link_libraries(features_test rele)
 
-add_executable(chol_FIM src/test/core/CholeskyFIMTest.cpp)
-target_link_libraries(chol_FIM rele)
-
 add_executable(pr_mdp src/test/core/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 
-add_executable(factory src/test/core/FactoryTest.cpp)
-target_link_libraries(factory rele)
-
 #Matlab test
-add_executable(dist2mat src/test/Matlab/Distribution2MatlabTest.cpp)
-add_executable(pol2mat src/test/Matlab/Policy2MatlabTest.cpp)
-target_link_libraries(pol2mat rele)
-
 add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
 
 add_executable(dist2mat src/test/miscellaneous/Distribution2MatlabTest.cpp)
 target_link_libraries(dist2mat rele)
 
-add_executable(basisMatrixTest src/test/miscellaneous/BasisMatrixTest.cpp)
-target_link_libraries(basisMatrixTest rele)
-
 #miscellaneous/policy_search tests
 add_executable(datadiff2mat src/test/miscellaneous/policy_search/DataDiff2Matlab.cpp)
 target_link_libraries(datadiff2mat rele)
+
 #TD tests
 add_executable(simple_chain src/test/TD/SimpleChain.cpp)
 target_link_libraries(simple_chain rele)

@@ -158,14 +158,15 @@ int main(int argc, char *argv[])
     GaussianRbf* gf2 = new GaussianRbf(50,20);
     GaussianRbf* gf3 = new GaussianRbf(120,40);
     GaussianRbf* gf4 = new GaussianRbf(160,50);
-    DenseBasisVector basis;
+    BasisFunctions basis;
     basis.push_back(pf);
     basis.push_back(gf1);
     basis.push_back(gf2);
     basis.push_back(gf3);
     basis.push_back(gf4);
-    cout << basis << endl;
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+
+    DenseFeatures phi(basis);
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim, phi);
     vec p(5);
     p(0) = 50;
     p(1) = -50;

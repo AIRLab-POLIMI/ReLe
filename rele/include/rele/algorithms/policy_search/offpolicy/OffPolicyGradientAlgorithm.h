@@ -103,7 +103,8 @@ public:
 
     virtual void sampleAction(const StateC& state, ActionC& action)
     {
-        sampleActionWorker(state, action, target);
+        typename action_type<ActionC>::type_ref u = action;
+        u = target(state);
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,

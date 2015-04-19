@@ -86,7 +86,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
@@ -147,7 +147,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
@@ -236,7 +236,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 double creward = rewardf->operator ()(tr.r);
                 Rew += df * creward;
@@ -307,7 +307,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
@@ -379,7 +379,7 @@ public:
 
     void setPolicy(DifferentiablePolicy<ActionC,StateC>& policy)
     {
-        policy = policy;
+        this->policy = policy;
     }
 
     virtual DifferentiablePolicy<ActionC, StateC>* getPolicy()

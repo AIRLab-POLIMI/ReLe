@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
     deep_2state_identity* d2si = new deep_2state_identity();
     deep_state_identity* dsi = new deep_state_identity();
 
-    DenseBasisVector basis;
+    BasisFunctions basis;
     for (int i = 0; i < actions.size() -1; ++i)
     {
         basis.push_back(new AndConditionBasisFunction(pf0,2,i));
@@ -207,7 +207,8 @@ int main(int argc, char *argv[])
         basis.push_back(new AndConditionBasisFunction(dsi,2,i));
     }
 
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
+    DenseFeatures phi(basis);
+    LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, phi);
     ParametricGibbsPolicy<DenseState> expertPolicy(actions, &regressor, 1);
     //---
 

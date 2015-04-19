@@ -29,22 +29,6 @@
 namespace ReLe
 {
 
-//Templates needed to handle different action types
-template<class StateC, class PolicyC, class PolicyC2>
-double OffPolicyReinforceIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-                                  double& iwb, double& iwt)
-{
-    typename action_type<FiniteAction>::type_ref u = action.getActionN();
-
-    double valb = behav(state,u);
-    double valt = policy(state,u);
-
-    iwt *= valt;
-    iwb *= valb;
-
-    return valt/valb;
-}
-
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
 double OffPolicyReinforceIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
                                   double& iwb, double& iwt)

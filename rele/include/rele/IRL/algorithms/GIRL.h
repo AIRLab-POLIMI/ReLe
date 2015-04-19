@@ -193,7 +193,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
 //                std::cout << tr.r[0] << " " << tr.r[1] << std::endl;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
@@ -269,7 +269,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** REINFORCE CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
@@ -377,7 +377,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
@@ -456,7 +456,7 @@ public:
                 //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
                 // *** GPOMDP CORE *** //
-                localg = diffLogWorker(tr.x, tr.u, policy);
+                localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients

@@ -189,7 +189,7 @@ arma::vec MVNDiagonalPolicy::difflog(const arma::vec &state, const arma::vec &ac
     }
     //        std::cout << "\n";
 
-    AbstractBasisMatrix& basis = approximator->getBasis();
+    Features& basis = approximator->getBasis();
     arma::mat features = basis(state);
     //    std::cerr << "action: " << action;
     //    std::cerr << "features: " << features;
@@ -216,7 +216,7 @@ arma::mat MVNDiagonalPolicy::diff2log(const arma::vec &state, const arma::vec &a
     int ds = stddevParams.n_elem;
 
 
-    AbstractBasisMatrix& basis = approximator->getBasis();
+    Features& basis = approximator->getBasis();
     arma::mat features = basis(state);
     arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 
@@ -284,7 +284,7 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
     {
         smdiff(i) = action[i] - mMean(i);
     }
-    AbstractBasisMatrix& basis = approximator->getBasis();
+    Features& basis = approximator->getBasis();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -325,7 +325,7 @@ arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& a
     int ds = mLogisticParams.n_elem;
 
 
-    AbstractBasisMatrix& basis = approximator->getBasis();
+    Features& basis = approximator->getBasis();
     arma::mat features = basis(state);
     arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 
