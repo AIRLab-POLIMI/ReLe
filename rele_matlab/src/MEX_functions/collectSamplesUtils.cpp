@@ -176,8 +176,7 @@ CollectSamplesInContinuousMDP(
 
         LQR mdp(1,1);
         PolynomialFunction* pf = new PolynomialFunction(1,1);
-        DenseBasisVector basis;
-        basis.push_back(pf);
+        DenseFeatures basis(pf);
         LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
         NormalPolicy policy(stddev, &regressor);
         policy.setParameters(policyParams);
@@ -255,6 +254,40 @@ CollectSamplesInContinuousMDP(
 //                 Jptr[i*dr+oo] = Jvalue[oo];
 //         }
 //         ////////////////////////////////////////////////
+
+
+        if (nlhs > 2)
+        {
+            int dp = policy.getParametersSize();
+            GRADS = mxCreateDoubleMatrix(dp, dr, mxREAL);
+            double* gptr = mxGetPr(GRADS);
+            for (int i = 0; i < dr; ++i)
+            {
+                IndexRT rewardRegressor(i);
+                GradientFromDataWorker<DenseAction,DenseState> gdw(data, policy, rewardRegressor, gamma);
+                arma::vec g = gdw.GpomdpBaseGradient();
+                for (int ll = 0; ll < dp; ++ll)
+                    gptr[i*dp+ll] = g[ll];
+            }
+        }
+        if (nlhs > 3)
+        {
+            unsigned int dp = policy.getParametersSize();
+            long unsigned int dims[] = {dr};
+            HESS = mxCreateCellArray(1, dims);
+            for (int i = 0; i < dr; ++i)
+            {
+                IndexRT rewardRegressor(i);
+                HessianFromDataWorker<DenseAction,DenseState,NormalPolicy> gdw(data, policy, rewardRegressor, gamma);
+                arma::mat h = gdw.ReinforceHessian();
+
+                mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
+                double* gptr = mxGetPr(hmat);
+                memcpy(gptr, h.memptr(), sizeof(double)*dp*dp);
+                mxSetCell(HESS, i, hmat);
+            }
+        }
+
     }
     else if (strcmp(domain_settings, "nls") == 0)
     {
@@ -276,21 +309,20 @@ CollectSamplesInContinuousMDP(
         int dim = mdp.getSettings().continuosStateDim;
 
         //--- define policy
-        DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(1,dim);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
         delete basis.at(0);
         basis.erase(basis.begin());
-        LinearApproximator meanRegressor(dim, basis);
+        DenseFeatures phi(basis);
+        LinearApproximator meanRegressor(dim, phi);
 
-        DenseBasisVector stdBasis;
-        stdBasis.generatePolynomialBasisFunctions(1,dim);
+        BasisFunctions stdBasis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
         delete stdBasis.at(0);
         stdBasis.erase(stdBasis.begin());
-        LinearApproximator stdRegressor(dim, stdBasis);
+        DenseFeatures stdPhi(stdBasis);
+        LinearApproximator stdRegressor(dim, stdPhi);
         arma::vec stdWeights(stdRegressor.getParametersSize());
         stdWeights.fill(0.5);
         stdRegressor.setParameters(stdWeights);
-
 
         NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
         policy.setParameters(policyParams);
@@ -318,19 +350,19 @@ CollectSamplesInContinuousMDP(
         }
         arma::vec policyParams(mxGetPr(array), ncols*nrows);
 
-        array = mxGetField(IN_PAR_STRUCT, 0, "asVariance");
-        if (array == nullptr)
-        {
-            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field asVarince!\n");
-        }
-
-        ncols = mxGetN(array);
-        nrows = mxGetM(array);
-        if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
-        {
-            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of asymptotic variance elements!\n");
-        }
-        arma::vec as_variance(mxGetPr(array), ncols*nrows);
+//         array = mxGetField(IN_PAR_STRUCT, 0, "asVariance");
+//         if (array == nullptr)
+//         {
+//             mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: missing field asVarince!\n");
+//         }
+//
+//         ncols = mxGetN(array);
+//         nrows = mxGetM(array);
+//         if ( (ncols > 1 && nrows > 1) || (ncols == 0 && nrows == 0) )
+//         {
+//             mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of asymptotic variance elements!\n");
+//         }
+//         arma::vec as_variance(mxGetPr(array), ncols*nrows);
 
         //*** get mdp settings ***//
         //load default settings
@@ -383,13 +415,15 @@ CollectSamplesInContinuousMDP(
         GaussianRbf* gf2 = new GaussianRbf(50,20);
         GaussianRbf* gf3 = new GaussianRbf(120,40);
         GaussianRbf* gf4 = new GaussianRbf(160,50);
-        DenseBasisVector basis;
+        BasisFunctions basis;
         basis.push_back(pf);
         basis.push_back(gf1);
         basis.push_back(gf2);
         basis.push_back(gf3);
         basis.push_back(gf4);
-        LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
+
+        DenseFeatures phi(basis);
+        LinearApproximator regressor(mdp.getSettings().continuosStateDim, phi);
 //         vec p(5);
 //         p(0) = 50;
 //         p(1) = -50;
@@ -398,7 +432,7 @@ CollectSamplesInContinuousMDP(
 //         p(4) = 50;
 //         regressor.setParameters(p);
 //         MVNLogisticPolicy policy(&regressor, as_variance);
-	NormalPolicy policy(0.1, &regressor);
+        MVNDiagonalPolicy policy(&regressor);
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
@@ -420,12 +454,12 @@ CollectSamplesInContinuousMDP(
         if (nlhs > 3)
         {
             unsigned int dp = policy.getParametersSize();
-	    long unsigned int dims[] = {dr};
+            long unsigned int dims[] = {dr};
             HESS = mxCreateCellArray(1, dims);
             for (int i = 0; i < dr; ++i)
             {
                 IndexRT rewardRegressor(i);
-                HessianFromDataWorker<DenseAction,DenseState,NormalPolicy> gdw(data, policy, rewardRegressor, gamma);
+                HessianFromDataWorker<DenseAction,DenseState,MVNDiagonalPolicy> gdw(data, policy, rewardRegressor, gamma);
                 arma::mat h = gdw.ReinforceHessian();
 
                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
@@ -491,16 +525,19 @@ CollectSamplesInDenseMDP(
         deep_2state_identity* d2si = new deep_2state_identity();
         deep_state_identity* dsi = new deep_state_identity();
 
-        DenseBasisVector basis;
+        BasisFunctions bfs;
+
         for (int i = 0; i < actions.size() -1; ++i)
         {
-            basis.push_back(new AndConditionBasisFunction(pf0,2,i));
-            basis.push_back(new AndConditionBasisFunction(pfs1,2,i));
-            basis.push_back(new AndConditionBasisFunction(pfs2,2,i));
-            basis.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
-            basis.push_back(new AndConditionBasisFunction(d2si,2,i));
-            basis.push_back(new AndConditionBasisFunction(dsi,2,i));
+            bfs.push_back(new AndConditionBasisFunction(pf0,2,i));
+            bfs.push_back(new AndConditionBasisFunction(pfs1,2,i));
+            bfs.push_back(new AndConditionBasisFunction(pfs2,2,i));
+            bfs.push_back(new AndConditionBasisFunction(pfs1s2,2,i));
+            bfs.push_back(new AndConditionBasisFunction(d2si,2,i));
+            bfs.push_back(new AndConditionBasisFunction(dsi,2,i));
         }
+
+        DenseFeatures basis(bfs);
 
         LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
         ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);
