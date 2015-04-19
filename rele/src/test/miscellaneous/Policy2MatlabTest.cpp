@@ -27,6 +27,8 @@
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
+#include "basis/PolynomialFunction.h"
+#include "Features.h"
 
 #include <iostream>
 #include <iomanip>
@@ -81,9 +83,9 @@ int main(int argc, char *argv[])
         arma::vec deg;
         deg.load(argv[6], raw_ascii);
 
-        DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(deg(0),state.n_elem);
-        LinearApproximator la(state.n_elem, basis);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),state.n_elem);
+        DenseFeatures phi(basis);
+        LinearApproximator la(state.n_elem, phi);
 
         //----- NormalPolicy
         NormalPolicy policy(stddev(0), &la);
@@ -128,12 +130,12 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[4], raw_ascii);
 
-        DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 
-        LinearApproximator lam(point.n_elem, basis);
+        DenseFeatures phi(basis);
+        LinearApproximator lam(point.n_elem, phi);
         lam.setParameters(initw);
 
         arma::vec degs;
@@ -142,12 +144,12 @@ int main(int argc, char *argv[])
         arma::vec initws;
         initws.load(argv[6], raw_ascii);
 
-        DenseBasisVector basiss;
-        basiss.generatePolynomialBasisFunctions(degs(0),point.n_elem);
+        BasisFunctions basiss = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
-        assert(initws.n_elem == basiss.size());
+        assert(initw.n_elem == basiss.size());
 
-        LinearApproximator las(point.n_elem, basiss);
+        DenseFeatures phis(basiss);
+        LinearApproximator las(point.n_elem, phis);
         las.setParameters(initws);
 
         //----- NormalStateDependantStddevPolicy
@@ -189,20 +191,20 @@ int main(int argc, char *argv[])
         //define approximation
         LinearApproximator* lam;
 
-        DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(deg(0), state.n_elem);
-        cout << basis;
-        SparseBasisMatrix* mtxBasis = nullptr;
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0), state.n_elem);
+        SparseFeatures* sparsefeatures = nullptr;
+        DenseFeatures* densefeatures = nullptr;
 
         if (action.n_elem == 1)
         {
-            lam = new LinearApproximator(state.n_elem, basis);
+        	densefeatures = new DenseFeatures(basis);
+            lam = new LinearApproximator(state.n_elem, *densefeatures);
         }
         else
         {
-            mtxBasis = new SparseBasisMatrix(basis, action.n_elem);
-            cout << (*mtxBasis)(state);
-            lam = new LinearApproximator(state.n_elem, *mtxBasis);
+            sparsefeatures = new SparseFeatures(basis, action.n_elem);
+            cout << (*sparsefeatures)(state);
+            lam = new LinearApproximator(state.n_elem, *sparsefeatures);
         }
 
         //define policy
@@ -240,8 +242,10 @@ int main(int argc, char *argv[])
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
 
         delete lam;
-        if (mtxBasis != nullptr)
-            delete mtxBasis;
+        if (sparsefeatures != nullptr)
+            delete sparsefeatures;
+        if(densefeatures != nullptr)
+        	delete densefeatures;
     }
     else if (strcmp(argv[1], "mvndiag") == 0)
     {
@@ -264,20 +268,20 @@ int main(int argc, char *argv[])
         //define approximation
         LinearApproximator* lam;
 
-        DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(deg(0), state.n_elem);
-        cout << basis;
-        SparseBasisMatrix* mtxBasis = nullptr;
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0), state.n_elem);
+        SparseFeatures* sparsefeatures = nullptr;
+        DenseFeatures* densefeatures = nullptr;
 
         if (action.n_elem == 1)
         {
-            lam = new LinearApproximator(state.n_elem, basis);
+        	densefeatures = new DenseFeatures(basis);
+            lam = new LinearApproximator(state.n_elem, *densefeatures);
         }
         else
         {
-            mtxBasis = new SparseBasisMatrix(basis, action.n_elem);
-            cout << (*mtxBasis)(state);
-            lam = new LinearApproximator(state.n_elem, *mtxBasis);
+            sparsefeatures = new SparseFeatures(basis, action.n_elem);
+            cout << (*sparsefeatures)(state);
+            lam = new LinearApproximator(state.n_elem, *sparsefeatures);
         }
 
         //define policy
@@ -315,8 +319,11 @@ int main(int argc, char *argv[])
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
 
         delete lam;
-        if (mtxBasis != nullptr)
-            delete mtxBasis;
+        if (sparsefeatures != nullptr)
+            delete sparsefeatures;
+
+        if (densefeatures != nullptr)
+                    delete densefeatures;
 
     }
     else if (strcmp(argv[1], "portfolio") == 0)
@@ -335,12 +342,12 @@ int main(int argc, char *argv[])
         arma::vec initw;
         initw.load(argv[5], raw_ascii);
 
-        DenseBasisVector basis;
-        basis.generatePolynomialBasisFunctions(deg(0),point.n_elem);
+        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(deg(0),point.n_elem);
 
         assert(initw.n_elem == basis.size());
 
-        LinearApproximator la(point.n_elem, basis);
+        DenseFeatures phi(basis);
+        LinearApproximator la(point.n_elem, phi);
         la.setParameters(initw);
 
         //----- PortfolioNormalPolicy
