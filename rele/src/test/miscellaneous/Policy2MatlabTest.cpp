@@ -177,6 +177,7 @@ int main(int argc, char *argv[])
         //load action
         vec action;
         action.load(argv[4], raw_ascii);
+        cout << "---"<< action.t();
 
         //load degree
         arma::vec deg;

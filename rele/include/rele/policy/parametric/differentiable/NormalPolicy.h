@@ -456,8 +456,8 @@ public:
           mLogisticParams (arma::zeros<arma::vec>(projector->getOutputSize())),
           mAsVariance(variance_asymptote)
     {
-        unsigned int out_dim = projector->getOutputSize();
-        mCovariance.zeros(out_dim, out_dim);
+//        unsigned int out_dim = projector->getOutputSize();
+//        mCovariance.zeros(out_dim, out_dim);
         UpdateCovarianceMatrix();
     }
 
@@ -467,8 +467,8 @@ public:
           mLogisticParams (arma::zeros<arma::vec>(projector->getOutputSize())),
           mAsVariance(arma::ones<arma::vec>(1)*variance_asymptote)
     {
-        unsigned int out_dim = projector->getOutputSize();
-        mCovariance.zeros(out_dim, out_dim);
+//        unsigned int out_dim = projector->getOutputSize();
+//        mCovariance.zeros(out_dim, out_dim);
         UpdateCovarianceMatrix();
     }
 
@@ -556,19 +556,8 @@ protected:
      *
      * @brief Update the covariance matrix
      */
-    void UpdateCovarianceMatrix()
-    {
+    void UpdateCovarianceMatrix();
 
-        for (unsigned int i = 0; i < mLogisticParams.n_elem; ++i)
-        {
-            mCovariance(i,i) = logistic(mLogisticParams(i), mAsVariance(i));
-            mCinv(i,i) = 1.0 / mCovariance(i,i);
-            // check that the covariance is not NaN or Inf
-            assert(!std::isnan(mCovariance(i,i)) && !std::isinf(mCovariance(i,i)));
-            assert(!std::isnan(mCinv(i,i)) && !std::isinf(mCinv(i,i)));
-        }
-        mCholeskyDec = arma::chol(mCovariance);
-    }
 
 };
 

@@ -103,6 +103,9 @@ NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 double MVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
     UpdateInternalState(state);
+    std::cout << mMean.t();
+    std::cout << mCinv << std::endl;
+    std::cout << mDeterminant << std::endl;
     return mvnpdfFast(action, mMean, mCinv, mDeterminant);
 }
 
@@ -263,8 +266,9 @@ void MVNDiagonalPolicy::UpdateCovarianceMatrix()
         assert(!std::isnan(mCovariance(i,i)) && !std::isinf(mCovariance(i,i)));
         assert(!std::isnan(mCinv(i,i)) && !std::isinf(mCinv(i,i)));
         mDeterminant *= mCovariance(i,i);
+        mCholeskyDec(i,i) = sqrt(mCovariance(i,i));
     }
-    mCholeskyDec = arma::chol(mCovariance);
+//    mCholeskyDec = arma::chol(mCovariance);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -311,8 +315,24 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
 
 arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
-    std::cerr << "MVNLogisticPolicy: TODO " << std::endl;
-    abort();
+    return arma::mat();
+}
+
+void MVNLogisticPolicy::UpdateCovarianceMatrix()
+{
+
+    mDeterminant = 1.0;
+    for (unsigned int i = 0; i < mLogisticParams.n_elem; ++i)
+    {
+        mCovariance(i,i) = logistic(mLogisticParams(i), mAsVariance(i));
+        mCinv(i,i) = 1.0 / mCovariance(i,i);
+        // check that the covariance is not NaN or Inf
+        assert(!std::isnan(mCovariance(i,i)) && !std::isinf(mCovariance(i,i)));
+        assert(!std::isnan(mCinv(i,i)) && !std::isinf(mCinv(i,i)));
+        mDeterminant *= mCovariance(i,i);
+        mCholeskyDec(i,i) = sqrt(mCovariance(i,i));
+    }
+//        mCholeskyDec = arma::chol(mCovariance);
 }
 
 
