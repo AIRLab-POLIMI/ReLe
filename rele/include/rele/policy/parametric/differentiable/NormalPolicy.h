@@ -107,7 +107,7 @@ public:
                                      Features& stdPhi, arma::vec& stdDevParameters) :
         NormalPolicy(1, phi), stdApproximator(stdPhi)
     {
-    	stdApproximator.setParameters(stdDevParameters);
+        stdApproximator.setParameters(stdDevParameters);
     }
 
     virtual ~NormalStateDependantStddevPolicy()

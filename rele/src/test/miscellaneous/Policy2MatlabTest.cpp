@@ -27,6 +27,7 @@
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
+#include "basis/IdentityBasis.h"
 #include "basis/PolynomialFunction.h"
 #include "Features.h"
 
@@ -119,39 +120,68 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "normalstdstate") == 0)
     {
-        //TODO update
-        arma::vec point;
-        point.load(argv[2], raw_ascii);
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
 
+        //load state
+        vec state;
+        state.load(argv[3], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[4], raw_ascii);
+
+        //load degree mean
         arma::vec deg;
-        deg.load(argv[3], raw_ascii);
+        deg.load(argv[5], raw_ascii);
 
-        arma::vec initw;
-        initw.load(argv[4], raw_ascii);
-
-        BasisFunctions basis = PolynomialFunction::generate(deg(0),point.n_elem);
-
-        assert(initw.n_elem == basis.size());
-
+        //define basis for mean
+        BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
         DenseFeatures phi(basis);
 
+        //load degree stddev
         arma::vec degs;
-        degs.load(argv[5], raw_ascii);
+        degs.load(argv[6], raw_ascii);
 
+        //load weights stddev
         arma::vec initws;
-        initws.load(argv[6], raw_ascii);
+        initws.load(argv[7], raw_ascii);
 
-        BasisFunctions basiss = PolynomialFunction::generate(deg(0),point.n_elem);
-
-        assert(initw.n_elem == basiss.size());
-
+        //define basis for stddev
+        BasisFunctions basiss = PolynomialFunction::generate(degs(0), state.n_elem);
+        assert(initws.n_elem == basiss.size());
         DenseFeatures phis(basiss);
 
         //----- NormalStateDependantStddevPolicy
-        vec varas;
-        varas.load(argv[4], raw_ascii);
-        NormalStateDependantStddevPolicy* policy = new NormalStateDependantStddevPolicy(phi, phis, initws);
-        policy->setParameters(initw);
+        NormalStateDependantStddevPolicy policy(phi, phis, initws);
+        policy.setParameters(params);
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action);
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action);
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+        //compute hessian
+        mat hess = policy.diff2log(state,action);
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
     }
     else if (strcmp(argv[1], "mvn") == 0)
     {
@@ -308,56 +338,57 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "portfolio") == 0)
     {
-        //TODO update
-        arma::vec point;
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
 
-        arma::vec epsilon;
-        epsilon.load(argv[2], raw_ascii);
+        //load epsilon
+        vec epsilon;
+        epsilon.load(argv[3], raw_ascii);
 
-        point.load(argv[3], raw_ascii);
+        //load state
+        vec state;
+        state.load(argv[4], raw_ascii);
+        assert(state.n_elem == 6);
 
-        arma::vec deg;
-        deg.load(argv[4], raw_ascii);
+        //load action
+        vec action;
+        action.load(argv[5], raw_ascii);
 
-        arma::vec initw;
-        initw.load(argv[5], raw_ascii);
-
-        BasisFunctions basis = PolynomialFunction::generate(deg(0),point.n_elem);
-
-        assert(initw.n_elem == basis.size());
-
-        DenseFeatures phi(basis);
+//        BasisFunctions basis = IdentityBasis::generate(6);
+//        DenseFeatures phi(basis);
 
         //----- PortfolioNormalPolicy
-        PortfolioNormalPolicy* policy = new PortfolioNormalPolicy(epsilon(0), phi);
-        policy->setParameters(initw);
+        PortfolioNormalPolicy policy(epsilon(0));
+        policy.setParameters(params);
 
 
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
 
-        arma::vec action;
-        action.load(argv[6], raw_ascii);
-
-        cout << policy->getPolicyName() << endl;
-
-
-        int dim = point.n_elem, nbs = 50000;
 
         //draw random points
-        mat P(nbs,1);
+        mat P(nbs,dim);
         for (int i = 0; i < nbs; ++i)
         {
-            unsigned int sample = (*policy)(point);
-            P(i,0) = sample;
+            unsigned int u = policy(state);
+            P(i,0) = u;
         }
-        P.save("/tmp/pol2matlab/samples.dat", raw_ascii);
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action(0));
+        density.save(fm.addPath("density.dat"), raw_ascii);
 
         //compute gradient
-        vec grad = policy->difflog(point,action(0));
-        grad.save("/tmp/pol2matlab/grad.dat", raw_ascii);
+        vec grad = policy.difflog(state,action(0));
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
 
         //compute hessian
-        mat hess = policy->diff2log(point,action(0));
-        hess.save("/tmp/pol2matlab/hess.dat", raw_ascii);
+        mat hess = policy.diff2log(state,action(0));
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
     }
     else if (strcmp(argv[1], "linear") == 0)
     {

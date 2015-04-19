@@ -1,6 +1,5 @@
 %% DEEP gradient test
 addpath(genpath('../Statistics'));
-addpath(genpath('./GradientTests'));
 addpath('../');
 
 %clear old data
