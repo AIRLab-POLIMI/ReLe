@@ -161,6 +161,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 
 void MVNDiagonalPolicy::setParameters(arma::vec &w)
 {
+    std::cout << getParametersSize() << std::endl;
     assert(w.n_elem == this->getParametersSize());
     int dp = approximator->getParametersSize();
     arma::vec tmp = w.rows(0, dp-1);
@@ -236,7 +237,7 @@ arma::mat MVNDiagonalPolicy::diff2log(const arma::vec &state, const arma::vec &a
         // these terms are only mSupportSize
         // d2 logp / dpdp
         double sigma2 = stddevParams(i) * stddevParams(i);
-        hessian(idx,idx) = 1.0 / (sigma2) - 3.0 * (diff * diff) /  (sigma2 * sigma2);;
+        hessian(idx,idx) = 1.0 / (sigma2) - 3.0 * (diff * diff) /  (sigma2 * sigma2);
     }
 
     for (unsigned m = 0; m < dm; ++m)
@@ -315,7 +316,58 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
 
 arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
-    return arma::mat();
+    UpdateInternalState(state);
+
+    //TODO controllare implementazione
+    int paramSize = this->getParametersSize();
+    arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
+    int dm = approximator->getParametersSize();
+    int ds = mLogisticParams.n_elem;
+
+
+    AbstractBasisMatrix& basis = approximator->getBasis();
+    arma::mat features = basis(state);
+    arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
+
+    for (unsigned i = 0; i < dm; ++i)
+        for (unsigned k = 0; k < dm; ++k)
+        {
+            // d2 logp / dmdm
+            hessian(i,k) = Hm(i,k);
+        }
+
+    for (unsigned i = 0; i < ds; ++i)
+    {
+        int idx = dm + i;
+        double diff = action[i] - mMean(i);
+
+        // consider only the components different from zero
+        // obtained from the derivative of the gradient w.r.t. the covariance parameters
+        // these terms are only mSupportSize
+        // d2 logp / dpdp
+        double expw = exp(-mLogisticParams(i));
+        double A = 0.5 * expw / ((1+expw)*(1+expw));
+        double B = -0.5 * diff * diff * expw / mAsVariance(i);
+        hessian(idx,idx) = A + B;
+    }
+
+    for (unsigned m = 0; m < dm; ++m)
+    {
+        for (unsigned k = 0; k < ds; ++k)
+        {
+            double diff = action[k] - mMean(k);
+            double sigma4 = mCovariance(k,k) * mCovariance(k,k);
+            // d2 logp / dpdm
+            double A = -features(m,k) * diff / (sigma4);
+            double expw = exp(-mLogisticParams(k));
+            double B = mAsVariance(k) * expw / ((1+expw)*(1+expw));
+            hessian(dm+k, m) = A*B;
+
+            // d2 logp / dmdp
+            hessian(m, dm+k) = hessian(dm+k, m);
+        }
+    }
+    return hessian;
 }
 
 void MVNLogisticPolicy::UpdateCovarianceMatrix()

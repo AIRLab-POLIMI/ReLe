@@ -14,9 +14,8 @@ DAVE:
 1d) templetizzare anche le basis functions
 
 TEO:
-2a) Interfaccia Matlab? per ora solo per collect samples
-2b) implementare off-policy gradients
-2c) implementare IRL
+2a) implementare off-policy gradients
+2b) implementare IRL
 
 1) interfaccia RL-glue in pacchetto separato?
 2) interfaccia ROS 

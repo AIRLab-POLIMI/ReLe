@@ -177,7 +177,6 @@ int main(int argc, char *argv[])
         //load action
         vec action;
         action.load(argv[4], raw_ascii);
-        cout << "---"<< action.t();
 
         //load degree
         arma::vec deg;
@@ -188,14 +187,27 @@ int main(int argc, char *argv[])
         as_variance.load(argv[6], raw_ascii);
 
         //define approximation
+        LinearApproximator* lam;
+
         DenseBasisVector basis;
         basis.generatePolynomialBasisFunctions(deg(0), state.n_elem);
         cout << basis;
-        LinearApproximator lam(state.n_elem, basis);
+        SparseBasisMatrix* mtxBasis = nullptr;
+
+        if (action.n_elem == 1)
+        {
+            lam = new LinearApproximator(state.n_elem, basis);
+        }
+        else
+        {
+            mtxBasis = new SparseBasisMatrix(basis, action.n_elem);
+            cout << (*mtxBasis)(state);
+            lam = new LinearApproximator(state.n_elem, *mtxBasis);
+        }
 
         //define policy
         cerr << params.t();
-        MVNLogisticPolicy policy(&lam, as_variance);
+        MVNLogisticPolicy policy(lam, as_variance);
         policy.setParameters(params);
 
 
@@ -226,6 +238,10 @@ int main(int argc, char *argv[])
         //compute hessian
         mat hess = policy.diff2log(state,action);
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
+
+        delete lam;
+        if (mtxBasis != nullptr)
+            delete mtxBasis;
     }
     else if (strcmp(argv[1], "mvndiag") == 0)
     {
@@ -246,14 +262,27 @@ int main(int argc, char *argv[])
         deg.load(argv[5], raw_ascii);
 
         //define approximation
+        LinearApproximator* lam;
+
         DenseBasisVector basis;
         basis.generatePolynomialBasisFunctions(deg(0), state.n_elem);
         cout << basis;
-        LinearApproximator lam(state.n_elem, basis);
+        SparseBasisMatrix* mtxBasis = nullptr;
+
+        if (action.n_elem == 1)
+        {
+            lam = new LinearApproximator(state.n_elem, basis);
+        }
+        else
+        {
+            mtxBasis = new SparseBasisMatrix(basis, action.n_elem);
+            cout << (*mtxBasis)(state);
+            lam = new LinearApproximator(state.n_elem, *mtxBasis);
+        }
 
         //define policy
         cerr << params.t();
-        MVNDiagonalPolicy policy(&lam);
+        MVNDiagonalPolicy policy(lam);
         policy.setParameters(params);
 
 
@@ -284,6 +313,10 @@ int main(int argc, char *argv[])
         //compute hessian
         mat hess = policy.diff2log(state,action);
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
+
+        delete lam;
+        if (mtxBasis != nullptr)
+            delete mtxBasis;
 
     }
     else if (strcmp(argv[1], "portfolio") == 0)

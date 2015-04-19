@@ -7,18 +7,23 @@ excmd = '../../../rele-build/pol2mat';
 
 %% Multivariate Normal policy with diagonal covariance (sigma parameters)
 polname = 'mvndiag';
-stateDim = 1;
-actionDim = 1;
+stateDim = 2;
+actionDim = 2;
 s = sym('s', [stateDim, 1]);
 a = sym('a', [actionDim, 1]);
 phi = [1;s(end:-1:1)];
+if (actionDim == 2)
+    c{1} = phi;
+    c{2} = phi;
+    phi = blkdiag(c{:});
+end
 w = sym('w', [size(phi,1), 1]);
 mu = transpose(phi)*w;
 diff = (a - mu);
 
 sigma = sym('sg', [actionDim,1]);
 S = diag(sigma.*sigma);
-pols = (2*pi)^(-actionDim/2) * det(S)^(-1/2) * exp( ...
+pols = (2*pi)^(-actionDim/2) * det(S)^(-1/2) * exp( ...1
     -0.5 * transpose(diff) * inv(S) * diff ...
     );
 
@@ -29,10 +34,10 @@ h = jacobian(g, [w;sigma]);
 
 
 polDeg = 1;
-state = 1.21321;
-action = 0.865;
-wVal = [0.5; 0.245];
-sigmaVal = 1.3;
+state = [1.21321;0.956];
+action = [0.865;1.123];
+wVal = [0.5; 0.245; 0.99;0.3; 0.3245; 0.599];
+sigmaVal = [1.3; 0.9];
 
 % write parameters
 mkdir('/tmp/ReLe/pol2mat/test/')
