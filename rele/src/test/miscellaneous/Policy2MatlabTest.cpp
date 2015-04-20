@@ -25,6 +25,7 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
+#include "nonparametric/RandomPolicy.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 #include "basis/IdentityBasis.h"
@@ -454,6 +455,24 @@ int main(int argc, char *argv[])
     else if (strcmp(argv[1], "linear") == 0)
     {
         //----- DetLinearPolicy
+        //TODO!!
+        abort();
+    }
+    else if (strcmp(argv[1], "random") == 0)
+    {
+        //----- RandomPolicy
+        //TODO!!
+        abort();
+    }
+    else if (strcmp(argv[1], "randomdiscrete") == 0)
+    {
+        //----- StochasticDiscretePolicy
+        //TODO!!
+        abort();
+    }
+    else if (strcmp(argv[1], "randomdiscretebias") == 0)
+    {
+        //----- RandomDiscreteBiasPolicy
         //TODO!!
         abort();
     }

@@ -55,9 +55,9 @@ public:
      * @param ranges the range of the action elements
      */
     RandomPolicy(std::vector<Range>& ranges)
-        : mpRanges(ranges), mpAction(ranges->size())
+        : mpRanges(ranges), mpAction(ranges.size())
     {
-        for (int i = 0; i < ranges->size(); ++i)
+        for (int i = 0; i < ranges.size(); ++i)
         {
             mpAction[i] = 0.0;
         }
@@ -87,10 +87,10 @@ public:
 
     virtual DenseAction operator() (const StateC state)
     {
-        for (int i = 0; i < mpRanges->dimension(); ++i)
+        for (int i = 0; i < mpRanges.size(); ++i)
         {
-            double a = mpRanges[i].min();
-            double b = mpRanges[i].max();
+            double a = mpRanges[i].lo();
+            double b = mpRanges[i].hi();
             double val = a + (b - a) * RandomGenerator::sampleUniform(0,1);
             mpAction[i] =  val;
         }
@@ -104,7 +104,7 @@ public:
         std::vector<Range>::iterator it;
         for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
         {
-            prob *= 1.0 / (*it).width();
+            prob *= 1.0 / it->Width();
         }
         return prob;
     }
@@ -115,10 +115,10 @@ public:
     double pi(const double* state, const double* action)
     {
         double prob = 1.0;
-        typedef typename RLLib::Ranges<T>::iterator rit;
-        for(rit it = mpRanges->begin(); it != mpRanges->end(); ++it)
+        std::vector<Range>::iterator it;
+        for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
         {
-            prob *= 1.0 / (*it)->length();
+            prob *= 1.0 / it->Width();
         }
         return prob;
     }
@@ -255,17 +255,19 @@ private:
     }
 };
 
-//TODO
 template<class ActionC, class StateC>
 class RandomDiscreteBiasPolicy: public StochasticDiscretePolicy<ActionC,StateC>
 {
+    typedef StochasticDiscretePolicy<ActionC, StateC> Base;
+    using Base::mActions;
+    using Base::distribution;
+
 protected:
     ActionC& prev;
     int prevActionId;
-    typedef StochasticDiscretePolicy<ActionC,StateC> Base;
 public:
     RandomDiscreteBiasPolicy(std::vector<ActionC> actions) :
-        StochasticDiscretePolicy<T>(actions), prev(actions[0]), prevActionId(0)
+        StochasticDiscretePolicy<ActionC,StateC>(actions), prev(actions[0]), prevActionId(0)
     { }
 
     virtual ~RandomDiscreteBiasPolicy()
@@ -294,32 +296,35 @@ public:
 
         int i, ie;
         // 50% prev action
-        if (Base::mActions.size() == 1)
-            Base::distribution[0] = 1.0;
+        if (mActions.size() == 1)
+            distribution[0] = 1.0;
         else
         {
+            double tot;
             for (i = 0, ie = mActions.size(); i < ie; ++i)
             {
-                if (id == previd)
-                    Base::distribution[id] = 0.5;
+                if (i == prevActionId)
+                    distribution[i] = 0.5;
                 else
-                    Base::distribution[id] = 0.5 / (ie - 1);
+                    distribution[i] = 0.5 / (ie - 1);
+                tot += distribution[i];
             }
+            assert(fabs(tot-1.0) <= 1e-8);
         }
         // chose an action
         double random = RandomGenerator::sampleUniform(0,1);
         double sum = 0.0;
         for (i = 0, ie = mActions.size(); i < ie; ++i)
         {
-            sum += Base::distribution[i];
+            sum += distribution[i];
             if (sum >= random)
             {
-                prev = Base::mActions[i];
+                prev = mActions[i];
                 prevActionId = i;
                 return prev;
             }
         }
-        prev = Base::mActions[ie - 1];
+        prev = mActions[ie - 1];
         prevActionId = ie - 1;
         return prev;
     }
