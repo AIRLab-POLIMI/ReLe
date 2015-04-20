@@ -7,6 +7,7 @@
 #include <parametric/differentiable/GibbsPolicy.h>
 #include <BasisFunctions.h>
 #include <basis/PolynomialFunction.h>
+#include <basis/IdentityBasis.h>
 #include <basis/GaussianRBF.h>
 #include <basis/ConditionBasedFunction.h>
 #include <LQR.h>
@@ -176,9 +177,9 @@ CollectSamplesInContinuousMDP(
 
         LQR mdp(1,1);
         PolynomialFunction* pf = new PolynomialFunction(1,1);
-        DenseFeatures basis(pf);
-        LinearApproximator regressor(mdp.getSettings().continuosStateDim, basis);
-        NormalPolicy policy(stddev, &regressor);
+        cout << *pf << endl;
+        DenseFeatures phi(pf);
+        NormalPolicy policy(0.1, phi);
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
@@ -309,22 +310,15 @@ CollectSamplesInContinuousMDP(
         int dim = mdp.getSettings().continuosStateDim;
 
         //--- define policy
-        BasisFunctions basis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
-        delete basis.at(0);
-        basis.erase(basis.begin());
+        BasisFunctions basis = IdentityBasis::generate(dim);
         DenseFeatures phi(basis);
-        LinearApproximator meanRegressor(dim, phi);
 
-        BasisFunctions stdBasis = PolynomialFunction::generatePolynomialBasisFunctions(1,dim);
-        delete stdBasis.at(0);
-        stdBasis.erase(stdBasis.begin());
+        BasisFunctions stdBasis = IdentityBasis::generate(dim);
         DenseFeatures stdPhi(stdBasis);
-        LinearApproximator stdRegressor(dim, stdPhi);
-        arma::vec stdWeights(stdRegressor.getParametersSize());
+        arma::vec stdWeights(stdPhi.rows());
         stdWeights.fill(0.5);
-        stdRegressor.setParameters(stdWeights);
 
-        NormalStateDependantStddevPolicy policy(&meanRegressor, &stdRegressor);
+        NormalStateDependantStddevPolicy policy(phi, stdPhi, stdWeights);
         policy.setParameters(policyParams);
         /*
                 arma::vec pp(2);
@@ -423,16 +417,8 @@ CollectSamplesInContinuousMDP(
         basis.push_back(gf4);
 
         DenseFeatures phi(basis);
-        LinearApproximator regressor(mdp.getSettings().continuosStateDim, phi);
-//         vec p(5);
-//         p(0) = 50;
-//         p(1) = -50;
-//         p(2) = 0;
-//         p(3) = 0;
-//         p(4) = 50;
-//         regressor.setParameters(p);
-//         MVNLogisticPolicy policy(&regressor, as_variance);
-        MVNDiagonalPolicy policy(&regressor);
+//     MVNLogisticPolicy policy(phi, 50);
+        MVNDiagonalPolicy policy(phi);
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
@@ -513,7 +499,7 @@ CollectSamplesInDenseMDP(
         for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
             actions.push_back(FiniteAction(i));
 
-        //--- policy setup
+//--- policy setup
         PolynomialFunction* pf0 = new PolynomialFunction(2,0);
         vector<unsigned int> dim = {0,1};
         vector<unsigned int> deg = {1,0};
@@ -537,10 +523,10 @@ CollectSamplesInDenseMDP(
             bfs.push_back(new AndConditionBasisFunction(dsi,2,i));
         }
 
-        DenseFeatures basis(bfs);
+        DenseFeatures phi(bfs);
 
-        LinearApproximator regressor(mdp.getSettings().continuosStateDim + 1, basis);
-        ParametricGibbsPolicy<DenseState> policy(actions, &regressor, 1);
+        ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
+        //---
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(FiniteAction, DenseState, finiteActionDim, continuosStateDim)
