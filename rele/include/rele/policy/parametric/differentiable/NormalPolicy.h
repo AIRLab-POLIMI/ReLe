@@ -177,6 +177,16 @@ public:
         mDeterminant = arma::det(mCovariance);
     }
 
+    MVNPolicy(Features& phi, arma::mat& covariance) :
+        approximator(phi),
+        mMean(approximator.getOutputSize(), arma::fill::zeros),
+        mCovariance(covariance)
+    {
+        mCinv = arma::inv(mCovariance);
+        mCholeskyDec = arma::chol(mCovariance);
+        mDeterminant = arma::det(mCovariance);
+    }
+
     /**
      * Create an instance of the class using the given projector and
      * covariance matrix.

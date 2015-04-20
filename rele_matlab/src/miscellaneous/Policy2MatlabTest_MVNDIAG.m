@@ -78,3 +78,5 @@ redH, evalH
 assert(max(max(abs(redH-evalH))) <= 1e-6);
 
 
+samples = dlmread('/tmp/ReLe/pol2mat/test/samples.dat');
+assert(norm(mean(samples)' - mval) <= 0.1);
