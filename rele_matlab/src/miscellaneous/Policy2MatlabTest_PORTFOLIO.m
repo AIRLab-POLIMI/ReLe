@@ -21,17 +21,16 @@ pols = epsilon + (1 - 2 * epsilon) * exp(-0.01 * (mu- 10.0)^2);
 % polf = matlabFunction(pols);
 
 polDeg = 1;
-state = [1.21321; 0.9765; 3; 2.3; 1.3; 0.768];
+state = [1.21321; 1.9765; 2.4; 2.3; 1.3; 0.768];
 action = 0;
 wVal = [0.5; 0.245; 0.11234; 1.3; 4.5; 0.4135];
 epsilonVal = 0.05;
 assert(action == 1 || action == 0);
 
-g = transpose(jacobian(log(pols), w));
 if action == 1
-    g =  g ./ (-epsilon * exp(-0.01 * (mu- 10.0)^2) - 1 + 2 * epsilon);
+    g =  transpose(jacobian(log(pols), w));
 else
-    g =  g ./ ((1.0 - epsilon) * exp(-0.01 * (mu- 10.0)^2) - 1 + 2 * epsilon);
+    g =  transpose(jacobian(log(1-pols), w));
 end
 h = jacobian(g, w);
 
@@ -56,7 +55,7 @@ disp('------------------------');
 % read values
 redD = dlmread('/tmp/ReLe/pol2mat/test/density.dat');
 redG = dlmread('/tmp/ReLe/pol2mat/test/grad.dat');
-% redH = dlmread('/tmp/ReLe/pol2mat/test/hessian.dat');
+redH = dlmread('/tmp/ReLe/pol2mat/test/hessian.dat');
 
 % compute using sym engine
 evalD = double(subs(pols, [s;a;w;epsilon], [state;action;wVal;epsilonVal]));

@@ -355,11 +355,11 @@ int main(int argc, char *argv[])
         vec action;
         action.load(argv[5], raw_ascii);
 
-//        BasisFunctions basis = IdentityBasis::generate(6);
-//        DenseFeatures phi(basis);
+        BasisFunctions basis = IdentityBasis::generate(6);
+        DenseFeatures phi(basis);
 
         //----- PortfolioNormalPolicy
-        PortfolioNormalPolicy policy(epsilon(0));
+        PortfolioNormalPolicy policy(epsilon(0), phi);
         policy.setParameters(params);
 
 

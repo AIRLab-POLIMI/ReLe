@@ -513,7 +513,7 @@ private:
      * @param asymptote The asymptotic value
      * @return The value of the logistic function
      */
-    double logistic(double w, double asymptote)
+    inline double logistic(double w, double asymptote)
     {
         return asymptote / (1.0 + exp(-w));
     }

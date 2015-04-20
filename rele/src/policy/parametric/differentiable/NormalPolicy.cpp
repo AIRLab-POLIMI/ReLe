@@ -209,7 +209,6 @@ arma::mat MVNDiagonalPolicy::diff2log(const arma::vec &state, const arma::vec &a
 {
     UpdateInternalState(state);
 
-    //TODO controllare implementazione
     int paramSize = this->getParametersSize();
     arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
     int dm = approximator.getParametersSize();

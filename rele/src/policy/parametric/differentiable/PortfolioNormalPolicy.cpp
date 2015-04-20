@@ -22,7 +22,7 @@ unsigned int PortfolioNormalPolicy::operator() (const arma::vec& state)
 {
     double random = RandomGenerator::sampleUniform(0,1);
     arma::vec output = approximator(state);
-    double prob = epsilon + (1 - 2 * epsilon) * exp(-0.01 * pow(output(0,0) - 10.0, 2));
+    double prob = epsilon + (1 - 2 * epsilon) * exp(-0.01 * (output(0) - 10.0) * (output(0) - 10.0));
     return (random <= prob) ? 1 : 0;
 
     // std::cout << "State: " << state[0] << " " << state[1] << " " << state[2] << " " << state[3] << " " << state[4] << " " << state[5] << std::endl;
@@ -41,15 +41,18 @@ arma::vec PortfolioNormalPolicy::diff(const arma::vec& state,
 arma::vec PortfolioNormalPolicy::difflog(const arma::vec& state,
         typename action_type<FiniteAction>::const_type_ref action)
 {
+    Features& basis = approximator.getBasis();
+    arma::mat features = basis(state);
+
     arma::vec output = approximator(state);
-    double Exp = exp(0.01 * pow(output(0,0) - 10.0, 2));
+    double Exp = exp(0.01 * (output(0) - 10.0) * (output(0) - 10.0));
     // the gradient is a vector of length nparams, where nparams is the parameter dimension
     unsigned nparams = approximator.getParametersSize();
     arma::vec gradient(nparams);
     for (unsigned i = 0; i < nparams; ++i)
     {
 
-        gradient(i) = (1.0 - 2 * epsilon) / 50 * state[5-i] * (output(0,0) - 10.0);
+        gradient(i) = (1.0 - 2 * epsilon) / 50 * features(i,0) * (output(0) - 10.0);
 
         if(action == 1)
             gradient(i) /= -epsilon * Exp - 1 + 2 * epsilon;
@@ -62,8 +65,44 @@ arma::vec PortfolioNormalPolicy::difflog(const arma::vec& state,
 arma::mat PortfolioNormalPolicy::diff2log(const arma::vec& state,
         typename action_type<FiniteAction>::const_type_ref action)
 {
-//TODO
-    return arma::mat();
+
+    int paramSize = this->getParametersSize();
+    arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
+    int dm = approximator.getParametersSize();
+
+
+    Features& basis = approximator.getBasis();
+    arma::mat features = basis(state);
+    arma::vec output = approximator(state);
+    double Exp = exp(0.01 * (output(0) - 10.0) * (output(0) - 10.0));
+
+    for (unsigned i = 0; i < dm; ++i)
+    {
+        for (unsigned k = 0; k < dm; ++k)
+        {
+
+            if (action == 1)
+            {
+                double den = epsilon * (Exp - 2) + 1;
+                double A = 0.04 * features(i,0) * features(k,0) * (epsilon - 0.5) / den;
+                double B = 0.0008 * features(i,0) * features(k,0) * (epsilon - 0.5)
+                           * epsilon * Exp * (output(0) - 10.0) * (output(0) - 10.0)
+                           / (den * den);
+                hessian(i,k) = A - B;
+            }
+            else
+            {
+                double den = (epsilon - 1) * Exp - 2 * epsilon + 1;
+                double A = 0.04 * features(i,0) * features(k,0) * (epsilon - 0.5) / den;
+                double B = 0.0008 * features(i,0) * features(k,0) * (epsilon - 1)
+                           * (epsilon - 0.5) * Exp * (output(0) - 10.0) * (output(0) - 10.0)
+                           / (den * den);
+                hessian(i,k) = A - B;
+            }
+        }
+    }
+
+    return hessian;
 }
 
 } //end namespace
