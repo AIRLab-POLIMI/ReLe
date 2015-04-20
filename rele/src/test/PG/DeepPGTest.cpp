@@ -21,7 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "policy_search/onpolicy/REINFORCEAlgorithm.h"
+#include "policy_search/onpolicy/GPOMDPAlgorithm.h"
+#include "policy_search/onpolicy/NaturalPGAlgorithm.h"
+#include "policy_search/onpolicy/ENACAlgorithm.h"
 #include "Core.h"
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "BasisFunctions.h"
