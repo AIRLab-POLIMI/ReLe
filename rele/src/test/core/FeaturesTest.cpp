@@ -86,5 +86,14 @@ int main(int argc, char *argv[])
     cout << "F(" << pt[0] << ") = " << endl;
     cout << phi4(pt) << endl;
 
+    cout << "## Test Polynomial basis ##" << endl;
+    arma::vec test(2);
+    test(0) = 2;
+    test(1) = 6;
+
+    PolynomialFunction basis(2,1);
+    cout << "F(" << test.t() << ") = " << endl;
+    cout << basis(test) << endl;
+
     return 0;
 }

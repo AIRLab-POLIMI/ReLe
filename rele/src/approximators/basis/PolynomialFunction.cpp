@@ -53,7 +53,7 @@ double PolynomialFunction::operator()(const vec& input)
     {
         for (j = 0; j < degree[i]; j++)
         {
-            result *= input[dimension[i]];
+            result *= input(dimension[i]);
         }
     }
     return result;

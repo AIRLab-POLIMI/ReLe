@@ -29,22 +29,6 @@
 namespace ReLe
 {
 
-//Templates needed to handle different action types
-template<class StateC, class PolicyC, class PolicyC2>
-double OffPolicyGpomdpIWWorker(const StateC& state, const FiniteAction& action, PolicyC& policy, PolicyC2& behav,
-                               double& iwb, double& iwt)
-{
-    typename action_type<FiniteAction>::type_ref u = action.getActionN();
-
-    double valb = behav(state,u);
-    double valt = policy(state,u);
-
-    iwt *= valt;
-    iwb *= valb;
-
-    return valt/valb;
-}
-
 template<class StateC, class ActionC, class PolicyC, class PolicyC2>
 double OffPolicyGpomdpIWWorker(const StateC& state, const ActionC& action, PolicyC& policy, PolicyC2& behav,
                                double& iwb, double& iwt)
@@ -75,6 +59,8 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(btype)
     {
+    	prodImpWeightB = prodImpWeightT = sumIWOverRun = sumAvgIW = 0;
+    	stepCount = 0;
     }
 
     OffPolicyGPOMDP(DifferentiablePolicy<ActionC, StateC>& target_pol,
@@ -85,6 +71,8 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
     {
+    	prodImpWeightB = prodImpWeightT = sumIWOverRun = sumAvgIW = 0;
+    	stepCount = 0;
     }
 
     virtual ~OffPolicyGPOMDP()

@@ -108,12 +108,12 @@ int main(int argc, char *argv[])
         double delta = 1.25;
         double min = mean + delta;
         double max = mean - delta;
-        MWALBasis* bfP = new MWALBasis(0, min, max);
+        MWALBasis* bfP = new MWALBasis(2, min, max);
         rewardBF.push_back(bfP);
 
         if(i != 0)
         {
-            MWALBasis* bfN = new MWALBasis(0, -max, -min);
+            MWALBasis* bfN = new MWALBasis(2, -max, -min);
             rewardBF.push_back(bfN);
         }
     }
@@ -132,16 +132,16 @@ int main(int argc, char *argv[])
     arma::vec mean(nparams, fill::zeros);
     policy.setParameters(mean);
 
-    int nbepperpol = 1, nbpolperupd = 100;
+    int epPerPol = 1, polPerUpd = 100;
     arma::mat cov(nparams, nparams, arma::fill::eye);
     cov *= 0.1;
     ParametricNormal dist(mean, cov);
     AdaptiveStep steprule(0.1);
-    PGPE<DenseAction, DenseState> agent(dist, policy, nbepperpol, nbpolperupd, steprule, true);
+    PGPE<DenseAction, DenseState> agent(dist, policy, epPerPol, polPerUpd, steprule, true);
 
     //Setup the solver
-    int nbUpdates = 600;
-    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    int updates = 600;
+    int episodes  = updates*epPerPol*polPerUpd;
 
     IRLAgentSolver<DenseAction, DenseState> solver(agent, mdp, policy, rewardPhi, rewardRegressor);
     solver.setLearningParams(episodes, 50);

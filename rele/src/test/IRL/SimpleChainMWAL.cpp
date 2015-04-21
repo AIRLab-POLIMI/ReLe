@@ -48,7 +48,7 @@ public:
 
     virtual double operator()(const arma::vec& input)
     {
-        size_t currentState = input[0];
+        size_t currentState = input[2];
 
         if(currentState == state)
             return 1;
