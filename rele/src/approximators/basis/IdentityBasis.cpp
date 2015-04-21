@@ -43,7 +43,7 @@ IdentityBasis::~IdentityBasis()
 
 double IdentityBasis::operator()(const vec& input)
 {
-    return input[index];
+    return input(index);
 }
 
 void IdentityBasis::writeOnStream(std::ostream &out)

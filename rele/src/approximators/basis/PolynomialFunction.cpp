@@ -23,6 +23,8 @@
 
 #include "basis/PolynomialFunction.h"
 
+#include <cassert>
+
 using namespace arma;
 
 namespace ReLe
@@ -40,11 +42,13 @@ PolynomialFunction::PolynomialFunction(std::vector<unsigned int> dimension, std:
 PolynomialFunction::PolynomialFunction(unsigned int _dimension, unsigned int _degree)
     : dimension(1, _dimension)
 {
+    assert(_degree > 0);
     degree.push_back(_degree);
 }
 
 PolynomialFunction::~PolynomialFunction()
-{}
+{
+}
 
 double PolynomialFunction::operator()(const vec& input)
 {

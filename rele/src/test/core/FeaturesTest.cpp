@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     cout << regressor(pt);
 
     cout << endl << "## Dense features Test 1 (basis) ##" << endl;
-    DenseFeatures phi1(new PolynomialFunction(1,5));
+    DenseFeatures phi1(new PolynomialFunction(0,5));
     cout << "F(" << pt[0] << ") = " << endl;
     cout << phi1(pt) << endl;
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     test(0) = 2;
     test(1) = 6;
 
-    PolynomialFunction basis(2,1);
+    PolynomialFunction basis(1,2);
     cout << "F(" << test.t() << ") = " << endl;
     cout << basis(test) << endl;
 

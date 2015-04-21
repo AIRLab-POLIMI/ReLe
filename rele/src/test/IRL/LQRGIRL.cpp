@@ -26,7 +26,7 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
 #include "DifferentiableNormals.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/IdentityBasis.h"
 
 #include "LQR.h"
 #include "PolicyEvalAgent.h"
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     eReward(0) = Q(0,0);
     eReward(1) = R(0,0);
 
-    PolynomialFunction* pf = new PolynomialFunction(1,1);
+    IdentityBasis* pf = new IdentityBasis(0);
     cout << *pf << endl;
     DenseFeatures phi(pf);
 //    DetLinearPolicy<DenseState> expertPolicy(phi);

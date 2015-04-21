@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     /*** Set up MDP ***/
     Dam mdp;
 
-    PolynomialFunction *pf = new PolynomialFunction(1,0);
+    PolynomialFunction *pf = new PolynomialFunction();
     GaussianRbf* gf1 = new GaussianRbf(0, 50, true);
     GaussianRbf* gf2 = new GaussianRbf(50, 20, true);
     GaussianRbf* gf3 = new GaussianRbf(120, 40, true);

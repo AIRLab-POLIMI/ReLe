@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
 
     //--- policy setup
-    PolynomialFunction* pf0 = new PolynomialFunction(2,0);
+    PolynomialFunction* pf0 = new PolynomialFunction();
     vector<unsigned int> dim = {0,1};
     vector<unsigned int> deg = {1,0};
     PolynomialFunction* pfs1 = new PolynomialFunction(dim,deg);

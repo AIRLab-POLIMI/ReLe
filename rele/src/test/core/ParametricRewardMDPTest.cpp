@@ -23,7 +23,7 @@
 
 #include "Core.h"
 #include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/IdentityBasis.h"
 #include "LinearApproximator.h"
 #include "ParametricRewardMDP.h"
 
@@ -53,11 +53,11 @@ int main(int argc, char *argv[])
     DeepSeaTreasure mdp2;
 
 
-    PolynomialFunction* pf1 = new PolynomialFunction(1, 1);
+    IdentityBasis* pf1 = new IdentityBasis(0);
     DenseFeatures basis1(pf1);
     LinearApproximator regressor1(basis1);
 
-    PolynomialFunction* pf2 = new PolynomialFunction(1, mdp2.getSettings().continuosStateDim);
+    IdentityBasis* pf2 = new IdentityBasis(0);
     DenseFeatures basis2(pf2);
     LinearApproximator regressor2(basis1);
 
