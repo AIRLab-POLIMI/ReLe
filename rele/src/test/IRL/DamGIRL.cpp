@@ -154,10 +154,10 @@ int main(int argc, char *argv[])
     Dam mdp;
 
     PolynomialFunction *pf = new PolynomialFunction(1,0);
-    GaussianRbf* gf1 = new GaussianRbf(0,50);
-    GaussianRbf* gf2 = new GaussianRbf(50,20);
-    GaussianRbf* gf3 = new GaussianRbf(120,40);
-    GaussianRbf* gf4 = new GaussianRbf(160,50);
+    GaussianRbf* gf1 = new GaussianRbf(0, 50, true);
+    GaussianRbf* gf2 = new GaussianRbf(50, 20, true);
+    GaussianRbf* gf3 = new GaussianRbf(120, 40, true);
+    GaussianRbf* gf4 = new GaussianRbf(160, 50, true);
     BasisFunctions basis;
     basis.push_back(pf);
     basis.push_back(gf1);

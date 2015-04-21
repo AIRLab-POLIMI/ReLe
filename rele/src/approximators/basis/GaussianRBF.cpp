@@ -27,14 +27,16 @@ using namespace arma;
 
 namespace ReLe
 {
-GaussianRbf::GaussianRbf(double center, double width)
+GaussianRbf::GaussianRbf(double center, double width, bool useSquareRoot)
     : mean(arma::ones<arma::vec>(1)*center),
-      scale(width)
+      scale(width), squareRoot(useSquareRoot)
 {
 }
 
-GaussianRbf::GaussianRbf(unsigned int dimension, double mean_vec[], double scale_factor)
-    : mean(arma::zeros<arma::vec>(dimension)), scale(scale_factor)
+GaussianRbf::GaussianRbf(unsigned int dimension, double mean_vec[],
+                         double scale_factor, bool useSquareRoot)
+    : mean(arma::zeros<arma::vec>(dimension)), scale(scale_factor),
+      squareRoot(useSquareRoot)
 {
     if (dimension != 0)
     {
@@ -61,7 +63,15 @@ double GaussianRbf::operator()(const vec& input)
     {
         normv += (input[i] - mean[i]) * (input[i] - mean[i]);
     }
-    double retv = - sqrt(normv) / scale;
+    double retv;
+    if (squareRoot)
+    {
+        retv = - sqrt(normv) / scale;
+    }
+    else
+    {
+        retv = - normv / scale;
+    }
     retv = exp(retv);
     return retv;
 }
@@ -74,7 +84,8 @@ void GaussianRbf::writeOnStream(std::ostream &out)
     {
         out << mean[i] << " ";
     }
-    out << scale;
+    out << scale << endl;
+    out << (squareRoot?1:0) << endl;
 }
 
 void GaussianRbf::readFromStream(std::istream &in)
@@ -91,6 +102,10 @@ void GaussianRbf::readFromStream(std::istream &in)
     }
     in >> value;
     scale = value;
+    in >> value;
+    squareRoot = true;
+    if (value == 0)
+        squareRoot = false;
 }
 
 
