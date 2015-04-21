@@ -128,7 +128,7 @@ public:
             for(unsigned int t = 0; t < episode.size(); t++)
             {
                 Transition<ActionC, StateC>& transition = episode[t];
-                episodefeatureExpectation += df * phi(vectorize(transition.x, transition.u));
+                episodefeatureExpectation += df * phi(vectorize(transition.x, transition.u, transition.xn));
                 df *= gamma;
             }
 

@@ -62,6 +62,40 @@ inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
     return vec;
 }
 
+//templates needed to store action, state and next state in a vector
+template<class StateC, class ActionC>
+arma::vec vectorize(const StateC& state, const ActionC& action, const StateC& nextState)
+{
+    return arma::join_vert(arma::join_vert(state, action), nextState);
+}
+
+template<class ActionC>
+arma::vec vectorize(const FiniteState& state, const ActionC& action, const FiniteState& nextState)
+{
+    arma::vec aux1(1);
+    aux1[0] = state.getStateN();
+    arma::vec aux2(1);
+    aux2[0] = state.getStateN();
+    return arma::join_vert(arma::join_vert(aux1, action), aux2);
+}
+
+template<class StateC>
+arma::vec vectorize(const StateC& state, const FiniteAction& action, const StateC& nextState)
+{
+    arma::vec aux(1);
+    aux[0] = action.getActionN();
+    return arma::join_vert(arma::join_vert(state, aux), nextState);
+}
+
+inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action, const FiniteState& nextState)
+{
+    arma::vec vec(3);
+    vec[0] = state.getStateN();
+    vec[1] = action.getActionN();
+    vec[2] = state.getStateN();
+    return vec;
+}
+
 }
 
 

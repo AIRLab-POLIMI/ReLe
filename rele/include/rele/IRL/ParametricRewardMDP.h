@@ -29,23 +29,10 @@
 #include <armadillo>
 #include "../core/Environment.h"
 
+#include "BasicFunctions.h"
+
 namespace ReLe
 {
-
-template<class StateC>
-arma::vec computeRewardWorker(const StateC& state, ParametricRegressor& regressor)
-{
-    //TODO check this. probably is not correct!
-    return regressor(state);
-}
-
-template<>
-arma::vec computeRewardWorker<FiniteState>(const FiniteState& state, ParametricRegressor& regressor)
-{
-    arma::vec input(1);
-    input[0] = state.getStateN();
-    return regressor(input);
-}
 
 template<class ActionC, class StateC>
 class ParametricRewardMDP : public Environment<ActionC, StateC>
@@ -66,13 +53,16 @@ public:
         Reward trashReward(envirorment.getSettings().rewardDim);
         envirorment.step(action, nextState, trashReward);
 
-        arma::vec&& r = computeReward(nextState);
+        arma::vec&& r = computeReward(state, action, nextState);
         reward = arma::conv_to<Reward>::from(r);
+
+        state = nextState;
     }
 
     virtual void getInitialState(StateC& state)
     {
         envirorment.getInitialState(state);
+        this->state = state;
     }
 
     virtual ~ParametricRewardMDP()
@@ -82,14 +72,15 @@ public:
 
 
 private:
-    arma::vec computeReward(StateC& nextState)
+    arma::vec computeReward(const StateC& state, const ActionC& action, const StateC& nextState)
     {
-        return computeRewardWorker(nextState, regressor);
+    	return regressor(vectorize(state, action, nextState));
     }
 
 private:
     Environment<ActionC, StateC>& envirorment;
     ParametricRegressor& regressor;
+    StateC state;
 };
 
 

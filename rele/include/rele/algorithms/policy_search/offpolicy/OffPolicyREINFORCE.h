@@ -58,6 +58,7 @@ public:
         AbstractOffPolicyGradientAlgorithm<ActionC, StateC>(target_pol, behave_pol, nbEpisodes, nbSamplesForJ, stepL, baseline, reward_obj),
         penal_factor(penalization)
     {
+    	prodImpWeightB = prodImpWeightT = sumIWOverRun = 0;
     }
 
     virtual ~MBPGA()

@@ -46,6 +46,11 @@ public:
      * @brief reset the internal state of class
      */
     virtual void reset() = 0;
+
+    virtual ~StepRule()
+    {
+
+    }
 };
 
 class ConstantStep : public StepRule
