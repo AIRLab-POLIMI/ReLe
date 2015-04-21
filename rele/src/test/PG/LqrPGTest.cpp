@@ -28,7 +28,7 @@
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/IdentityBasis.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
-    PolynomialFunction* pf = new PolynomialFunction(1,1);
+    IdentityBasis* pf = new IdentityBasis(0);
     cout << *pf << endl;
     DenseFeatures phi(pf);
     NormalPolicy policy(0.1, phi);

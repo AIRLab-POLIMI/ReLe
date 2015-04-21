@@ -26,7 +26,7 @@
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/IdentityBasis.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
     ParametricNormal dist(mean, cov);
 
-    PolynomialFunction* pf = new PolynomialFunction(1, 1);
+    IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);
     DetLinearPolicy<DenseState> policy(phi);
 
