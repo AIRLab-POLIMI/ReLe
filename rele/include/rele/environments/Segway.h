@@ -91,6 +91,12 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
+    inline const SegwaySettings& getSettings() const
+    {
+        return *segwayConfig;
+    }
+
+
 private:
     SegwaySettings* segwayConfig;
     SegwayOde segwayode;

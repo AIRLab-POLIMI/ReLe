@@ -79,6 +79,10 @@ public:
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
+    inline const PortfolioSettings& getSettings() const
+    {
+        return *config;
+    }
 
 private:
     void defaultValues();

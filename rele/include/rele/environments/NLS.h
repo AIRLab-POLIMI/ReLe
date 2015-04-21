@@ -67,6 +67,11 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
+    inline const NLSSettings& getSettings() const
+    {
+        return *config;
+    }
+
 private:
     NLSSettings* config;
 };

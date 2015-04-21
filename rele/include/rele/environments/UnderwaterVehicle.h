@@ -98,6 +98,11 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
+    inline const UWVSettings& getSettings() const
+    {
+        return *config;
+    }
+
 private:
     UWVSettings* config;
     UWVOde uwvode;

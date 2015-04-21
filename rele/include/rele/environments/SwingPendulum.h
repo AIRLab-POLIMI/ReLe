@@ -70,6 +70,11 @@ public:
     void step(const FiniteAction& action, DenseState& nextState, Reward& reward);
     void getInitialState(DenseState& state);
 
+    inline const SwingUpSettings& getSettings() const
+    {
+        return *config;
+    }
+
 private:
     inline void adjustTheta(double& theta)
     {
