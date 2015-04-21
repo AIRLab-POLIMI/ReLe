@@ -49,7 +49,7 @@ template<class ActionC, class StateC>
 class SimulatedEnvironment: public RosEnvirorment<ActionC, StateC>
 {
 protected:
-	using RosEnvirorment<ActionC, StateC>::n;
+    using RosEnvirorment<ActionC, StateC>::n;
 
 public:
     SimulatedEnvironment(const std::string& name, double controlFrequency) :
@@ -161,28 +161,28 @@ protected:
 
     bool getObjectPose(arma::vec& pose, int handle, int relative = -1)
     {
-    	vrep_common::simRosGetObjectPose object_pose;
-    	object_pose.request.handle = handle;
-    	object_pose.request.relativeToObjectHandle = relative;
+        vrep_common::simRosGetObjectPose object_pose;
+        object_pose.request.handle = handle;
+        object_pose.request.relativeToObjectHandle = relative;
 
-    	if(ros::service::call("/vrep/simRosGetObjectPose", object_pose))
-    	{
-    		auto& poseMsg = object_pose.response.pose.pose;
+        if(ros::service::call("/vrep/simRosGetObjectPose", object_pose))
+        {
+            auto& poseMsg = object_pose.response.pose.pose;
 
-    		pose[0] = poseMsg.position.x;
-    		pose[1] = poseMsg.position.y;
-    		pose[2] = poseMsg.position.z;
+            pose[0] = poseMsg.position.x;
+            pose[1] = poseMsg.position.y;
+            pose[2] = poseMsg.position.z;
 
-    		pose[3] = poseMsg.orientation.x;
-    		pose[4] = poseMsg.orientation.y;
-    		pose[5] = poseMsg.orientation.z;
-    		pose[6] = poseMsg.orientation.w;
+            pose[3] = poseMsg.orientation.x;
+            pose[4] = poseMsg.orientation.y;
+            pose[5] = poseMsg.orientation.z;
+            pose[6] = poseMsg.orientation.w;
 
 
-    		return true;
-    	}
-    	else
-    		return false;
+            return true;
+        }
+        else
+            return false;
 
 
     }

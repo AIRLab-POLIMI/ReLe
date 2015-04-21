@@ -55,6 +55,11 @@ public:
         return this->tau;
     }
 
+    virtual Boltzmann* clone()
+    {
+        return new Boltzmann(*this);
+    }
+
 protected:
     double tau;
 
@@ -85,6 +90,11 @@ public:
     double getTemperature()
     {
         return this->tau;
+    }
+
+    virtual BoltzmannApproximate* clone()
+    {
+        return new BoltzmannApproximate(*this);
     }
 
 private:

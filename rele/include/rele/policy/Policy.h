@@ -25,6 +25,7 @@
 #define POLICY_H_
 
 #include "BasicsTraits.h"
+#include "Interfaces.h"
 
 #include <string>
 
@@ -44,6 +45,8 @@ public:
     virtual std::string getPolicyName() = 0;
     virtual std::string getPolicyHyperparameters() = 0;
     virtual std::string printPolicy() = 0;
+
+    virtual Policy<ActionC, StateC>* clone() = 0;
 
     virtual ~Policy()
     {

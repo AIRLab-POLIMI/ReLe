@@ -58,6 +58,11 @@ public:
         pi.zeros(nstates);
     }
 
+    virtual DeterministicPolicy* clone()
+    {
+        return new DeterministicPolicy(*this);
+    }
+
 private:
     arma::uvec pi;
 };

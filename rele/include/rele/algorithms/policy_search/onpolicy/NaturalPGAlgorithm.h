@@ -50,7 +50,7 @@ public:
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj),
         maxStepsPerEpisode(nbSteps)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
     NaturalGPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
@@ -60,7 +60,7 @@ public:
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline),
         maxStepsPerEpisode(nbSteps)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
 
@@ -233,7 +233,7 @@ public:
                               bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
     NaturalREINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
@@ -242,7 +242,7 @@ public:
                               bool baseline = true) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
 

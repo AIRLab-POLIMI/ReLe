@@ -120,6 +120,11 @@ public:
         return mActions.at(idx).getActionN();
     }
 
+    virtual ParametricGibbsPolicy<StateC>* clone()
+    {
+        return new  ParametricGibbsPolicy<StateC>(*this);
+    }
+
     // ParametricPolicy interface
 public:
     virtual inline arma::vec getParameters() const

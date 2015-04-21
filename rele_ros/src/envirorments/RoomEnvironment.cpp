@@ -32,9 +32,9 @@ SimulatedRoomEnvironment::SimulatedRoomEnvironment(double controlFrequency)
     : SimulatedEnvironment("RoomEnvirorment", controlFrequency)
 {
 
-	writeSettings();
+    writeSettings();
 
-	this->getHandle("Pioneer_p3dx_leftMotor", leftMotorHandle);
+    this->getHandle("Pioneer_p3dx_leftMotor", leftMotorHandle);
     this->getHandle("Pioneer_p3dx_rightMotor", rightMotorHandle);
     this->getHandle("Pioneer_p3dx", positionHandle);
 
@@ -66,41 +66,41 @@ void SimulatedRoomEnvironment::publishAction(const ReLe::DenseAction& action)
 
 void SimulatedRoomEnvironment::setState(ReLe::DenseState& state)
 {
-	state.resize(7);
-	while(!getObjectPose(state, positionHandle) && ros::ok());
+    state.resize(7);
+    while(!getObjectPose(state, positionHandle) && ros::ok());
 
-	double distance = arma::norm(objective(arma::span(0, 2)) - state(arma::span(0, 2)));
+    double distance = arma::norm(objective(arma::span(0, 2)) - state(arma::span(0, 2)));
 
-	if(distance < 0.3)
-		state.setAbsorbing();
-	else
-		state.setAbsorbing(false);
+    if(distance < 0.3)
+        state.setAbsorbing();
+    else
+        state.setAbsorbing(false);
 }
 
 void SimulatedRoomEnvironment::setReward(const ReLe::DenseAction& action,
-               const ReLe::DenseState& state, ReLe::Reward& reward)
+        const ReLe::DenseState& state, ReLe::Reward& reward)
 {
-	//TODO
-	if(state.isAbsorbing())
-		reward[0] = 0.0;
-	else
-		reward[0] = -1;
+    //TODO
+    if(state.isAbsorbing())
+        reward[0] = 0.0;
+    else
+        reward[0] = -1;
 }
 
 
 void SimulatedRoomEnvironment::writeSettings()
 {
-	auto& settings = this->getWritableSettings();
-	settings.continuosActionDim = 2;
-	settings.continuosStateDim = 1;
-	settings.finiteActionDim = 0;
-	settings.finiteStateDim = 0;
-	settings.rewardDim = 1;
-	settings.gamma = 0.9;
-	settings.horizon = 0;
-	settings.isFiniteHorizon = false;
-	settings.isAverageReward = false;
-	settings.isEpisodic = true;
+    auto& settings = this->getWritableSettings();
+    settings.continuosActionDim = 2;
+    settings.continuosStateDim = 1;
+    settings.finiteActionDim = 0;
+    settings.finiteStateDim = 0;
+    settings.rewardDim = 1;
+    settings.gamma = 0.9;
+    settings.horizon = 0;
+    settings.isFiniteHorizon = false;
+    settings.isAverageReward = false;
+    settings.isEpisodic = true;
 }
 
 }

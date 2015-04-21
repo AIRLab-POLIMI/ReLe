@@ -62,6 +62,11 @@ public:
         pi.fill(1.0/nactions);
     }
 
+    virtual TabularPolicy* clone()
+    {
+        return new TabularPolicy(*this);
+    }
+
 
 public:
     class updater

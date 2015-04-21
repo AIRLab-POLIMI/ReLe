@@ -62,6 +62,10 @@ add_executable(room_environment src/test/RoomEnvironmentTest.cpp)
 target_link_libraries(room_environment releROS ${catkin_LIBRARIES})
 add_dependencies(room_environment ${catkin_EXPORTED_TARGETS})
 
+add_executable(snake src/test/SnakeTest.cpp)
+target_link_libraries(snake releROS ${catkin_LIBRARIES})
+add_dependencies(snake ${catkin_EXPORTED_TARGETS})
+
 
 # ------------------------ INSTALLATION ------------------------
 

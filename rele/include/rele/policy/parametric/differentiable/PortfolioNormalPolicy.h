@@ -50,6 +50,11 @@ public:
         return "";
     }
 
+    virtual PortfolioNormalPolicy* clone()
+    {
+        return new  PortfolioNormalPolicy(*this);
+    }
+
     // ParametricPolicy interface
 public:
     virtual inline arma::vec getParameters() const

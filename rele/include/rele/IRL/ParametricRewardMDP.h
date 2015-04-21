@@ -74,7 +74,7 @@ public:
 private:
     arma::vec computeReward(const StateC& state, const ActionC& action, const StateC& nextState)
     {
-    	return regressor(vectorize(state, action, nextState));
+        return regressor(vectorize(state, action, nextState));
     }
 
 private:
