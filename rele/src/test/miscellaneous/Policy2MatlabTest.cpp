@@ -25,6 +25,7 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
+#include "parametric/differentiable/GibbsPolicy.h"
 #include "nonparametric/RandomPolicy.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
@@ -183,6 +184,71 @@ int main(int argc, char *argv[])
         //compute hessian
         mat hess = policy.diff2log(state,action);
         hess.save(fm.addPath("hessian.dat"), raw_ascii);
+    }
+    else if (strcmp(argv[1], "paramgibbs") == 0)
+    {
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
+
+        //load inverse temperature
+        vec inverseT;
+        inverseT.load(argv[3], raw_ascii);
+
+        //load naction
+        vec nactions;
+        nactions.load(argv[4], raw_ascii);
+
+        //load state
+        vec state;
+        state.load(argv[5], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[6], raw_ascii);
+
+        //load degree
+        arma::vec deg;
+        deg.load(argv[7], raw_ascii);
+
+        BasisFunctions basis = PolynomialFunction::generate(deg(0),1+state.n_elem);
+        for (int i = 0; i < basis.size(); ++i)
+            std::cout << *(basis[i]) << std::endl;
+        DenseFeatures phi(basis);
+
+        //----- NormalPolicy
+        vector<FiniteAction> actions;
+        for (int i = 0; i < nactions(0); ++i)
+            actions.push_back(FiniteAction(i));
+
+        ParametricGibbsPolicy<DenseState> policy(actions, phi, inverseT(0));
+        policy.setParameters(params);
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            unsigned int sample = policy(state);
+            P(i,0) = sample;
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action(0));
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action(0));
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+//        //compute hessian
+//        mat hess = policy.diff2log(state,action(0));
+//        hess.save(fm.addPath("hessian.dat"), raw_ascii);
+
     }
     else if (strcmp(argv[1], "mvn") == 0)
     {

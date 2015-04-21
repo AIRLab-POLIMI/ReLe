@@ -37,7 +37,8 @@
 #include "FileManager.h"
 
 #include "policy_search/onpolicy/FunctionGradient.h"
-#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "policy_search/onpolicy/GPOMDPAlgorithm.h"
+#include "policy_search/onpolicy/REINFORCEAlgorithm.h"
 
 using namespace std;
 using namespace ReLe;
@@ -93,6 +94,53 @@ private:
     }
 };
 
+class DEEP_R1 : public IRLParametricReward<FiniteAction, DenseState>
+{
+public:
+    double operator()(DenseState& s, FiniteAction& a, DenseState& ns)
+    {
+        return deep_reward_treasure(ns);
+    }
+
+    arma::mat diff(DenseState& s, FiniteAction& a, DenseState& ns)
+    {
+        return arma::mat();
+    }
+private:
+    double deep_reward_treasure(DenseState& state)
+    {
+        int xdim = 11;
+        int ydim = 10;
+        arma::mat reward(xdim+1,ydim+1,arma::fill::zeros);
+        reward(2,1) = 1;
+        reward(3,2) = 2;
+        reward(4,3) = 3;
+        reward(5,4) = 5;
+        reward(5,5) = 8;
+        reward(5,6) = 16;
+        reward(8,7) = 24;
+        reward(8,8) = 50;
+        reward(10,9) = 74;
+        reward(11,10) = 124;
+        return reward(state[0],state[1]);
+
+    }
+};
+class DEEP_R2 : public IRLParametricReward<FiniteAction, DenseState>
+{
+public:
+    double operator()(DenseState& s, FiniteAction& a, DenseState& ns)
+    {
+        return -1;
+    }
+
+    arma::mat diff(DenseState& s, FiniteAction& a, DenseState& ns)
+    {
+        return arma::mat();
+    }
+};
+
+
 /////////////////////////////////////////////////////////////
 
 class deep_2state_identity: public BasisFunction
@@ -131,32 +179,32 @@ void help()
 
 int main(int argc, char *argv[])
 {
-    RandomGenerator::seed(49921158);
+//    RandomGenerator::seed(49921158);
 
     /*** check inputs ***/
     char alg[10];
-    GIRL<FiniteAction,DenseState>::AlgType atype;
+    IRLGradType atype;
     if (argc > 1)
     {
         if (strcmp(argv[1], "r") == 0)
         {
             cout << "GIRL REINFORCE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::R;
+            atype = IRLGradType::R;
         }
         else if (strcmp(argv[1], "rb") == 0)
         {
             cout << "GIRL REINFORCE BASE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::RB;
+            atype = IRLGradType::RB;
         }
         else if (strcmp(argv[1], "g") == 0)
         {
             cout << "GIRL GPOMDP" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::G;
+            atype = IRLGradType::G;
         }
         else if (strcmp(argv[1], "gb") == 0)
         {
             cout << "GIRL GPOMDP BASE" << endl;
-            atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+            atype = IRLGradType::GB;
         }
         else
         {
@@ -168,7 +216,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        atype = GIRL<FiniteAction,DenseState>::AlgType::GB;
+        atype = IRLGradType::GB;
         strcpy(alg, "gb");
     }
     /******/
@@ -212,13 +260,15 @@ int main(int argc, char *argv[])
     //---
 
     vec eReward(2);
-#if 0
+    eReward(0) = 1;
+    eReward(1) = 0;
+#if 1
     /*** learn the optimal policy ***/
     int nbepperpol = 150;
-    AdaptiveStep srule(0.001);
+    AdaptiveStep srule(0.01);
     WeightedSumRT rewardtr(eReward);
-    GPOMDPAlgorithm<FiniteAction, DenseState> agent(expertPolicy, nbepperpol,
-            mdp.getSettings().horizon, srule, rewardtr);
+    REINFORCEAlgorithm<FiniteAction, DenseState> agent(expertPolicy, nbepperpol,
+            srule, rewardtr);
     ReLe::Core<FiniteAction, DenseState> core(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
         fm.addPath("gradient_log_learning.log"),
@@ -229,7 +279,7 @@ int main(int argc, char *argv[])
     int horiz = mdp.getSettings().horizon;
     core.getSettings().episodeLenght = horiz;
 
-    int nbUpdates = 550;
+    int nbUpdates = 1550;
     int episodes  = nbUpdates*nbepperpol;
     double every, bevery;
     every = bevery = 0.05; //%
@@ -246,7 +296,8 @@ int main(int argc, char *argv[])
                 cout << expertPolicy.getParameters().t();
                 core.getSettings().testEpisodeN = 1000;
                 arma::vec J = core.runBatchTest();
-                cout << "mean score: " << J(0) << endl;
+                cout << "mean score: " << J.t() << endl;
+                cout << "MORL score: " << J.t() * eReward << endl;
                 if (updateCount != 1)
                     every += bevery;
             }
@@ -306,7 +357,7 @@ int main(int argc, char *argv[])
     vec grad, grad2, grad3;
     mat dgrad3;
     GradientFromDataWorker<FiniteAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
-    if (atype == GIRL<FiniteAction,DenseState>::AlgType::R)
+    if (atype == IRLGradType::R)
     {
         cout << "PG REINFORCE" << endl;
         grad3 = irlAlg.ReinforceGradient(dgrad3);
@@ -315,7 +366,7 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(w);
         grad2 = gdw.ReinforceGradient();
     }
-    else if (atype == GIRL<FiniteAction,DenseState>::AlgType::RB)
+    else if (atype == IRLGradType::RB)
     {
         cout << "PG REINFORCE BASE" << endl;
         grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
@@ -324,7 +375,7 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(w);
         grad2 = gdw.ReinforceBaseGradient();
     }
-    else if (atype == GIRL<FiniteAction,DenseState>::AlgType::G)
+    else if (atype == IRLGradType::G)
     {
         cout << "PG GPOMDP" << endl;
         grad3 = irlAlg.GpomdpGradient(dgrad3);
@@ -333,7 +384,7 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(w);
         grad2 = gdw.GpomdpGradient();
     }
-    else if (atype == GIRL<FiniteAction,DenseState>::AlgType::GB)
+    else if (atype == IRLGradType::GB)
     {
         cout << "PG GPOMDP BASE" << endl;
         grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
@@ -358,22 +409,22 @@ int main(int argc, char *argv[])
         vec x(2);
         x(0) = v[i];
         x(1) = 1 - v[i];
-        if (atype == GIRL<FiniteAction,DenseState>::AlgType::R)
+        if (atype == IRLGradType::R)
         {
             rewardRegressor.setParameters(x);
             grad3 = irlAlg.ReinforceGradient(dgrad3);
         }
-        else if (atype == GIRL<FiniteAction,DenseState>::AlgType::RB)
+        else if (atype == IRLGradType::RB)
         {
             rewardRegressor.setParameters(x);
             grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
         }
-        else if (atype == GIRL<FiniteAction,DenseState>::AlgType::G)
+        else if (atype == IRLGradType::G)
         {
             rewardRegressor.setParameters(x);
             grad3 = irlAlg.GpomdpGradient(dgrad3);
         }
-        else if (atype == GIRL<FiniteAction,DenseState>::AlgType::GB)
+        else if (atype == IRLGradType::GB)
         {
             rewardRegressor.setParameters(x);
             grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
@@ -382,6 +433,19 @@ int main(int argc, char *argv[])
         ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
     }
     ooo.close();
+
+    std::vector<IRLParametricReward<FiniteAction,DenseState>*> rewards;
+    DEEP_R1 r1;
+    DEEP_R2 r2;
+    rewards.push_back(&r1);
+    rewards.push_back(&r2);
+
+    PlaneGIRL<FiniteAction,DenseState> pgirl(data, expertPolicy, rewards,
+            mdp.getSettings().gamma, atype);
+
+    pgirl.run();
+
+    cout << pgirl.getWeights().t();
 
     return 0;
 }

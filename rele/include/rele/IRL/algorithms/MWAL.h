@@ -79,12 +79,12 @@ public:
 
             if(deltaMuNormNew < deltaMuNorm)
             {
-            	if(!policyOpt)
-            		delete policyOpt;
+                if(!policyOpt)
+                    delete policyOpt;
 
-            	deltaMuNorm = deltaMuNormNew;
-            	policyOpt = solver.getPolicy().clone();
-            	wOpt = w;
+                deltaMuNorm = deltaMuNormNew;
+                policyOpt = solver.getPolicy().clone();
+                wOpt = w;
             }
 
             //update W

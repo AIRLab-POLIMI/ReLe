@@ -58,29 +58,29 @@ int main(int argc, char *argv[])
 
     /*** check inputs ***/
     char alg[10];
-    GIRL<DenseAction,DenseState>::AlgType atype;
+    IRLGradType atype;
     vec params;
     if (argc == 3)
     {
         if (strcmp(argv[1], "r") == 0)
         {
             cout << "REINFORCE" << endl;
-            atype = GIRL<DenseAction,DenseState>::AlgType::R;
+            atype = IRLGradType::R;
         }
         else if (strcmp(argv[1], "rb") == 0)
         {
             cout << "REINFORCE BASE" << endl;
-            atype = GIRL<DenseAction,DenseState>::AlgType::RB;
+            atype = IRLGradType::RB;
         }
         else if (strcmp(argv[1], "g") == 0)
         {
             cout << "GPOMDP" << endl;
-            atype = GIRL<DenseAction,DenseState>::AlgType::G;
+            atype = IRLGradType::G;
         }
         else if (strcmp(argv[1], "gb") == 0)
         {
             cout << "GPOMDP BASE" << endl;
-            atype = GIRL<DenseAction,DenseState>::AlgType::GB;
+            atype = IRLGradType::GB;
         }
         else
         {
@@ -150,23 +150,23 @@ int main(int argc, char *argv[])
     mat hessian;
     GradientFromDataWorker<DenseAction, DenseState> gdw(data, policy, mdp.getSettings().gamma, 0);
     HessianFromDataWorker<DenseAction, DenseState, NormalPolicy> hdw(data, policy, mdp.getSettings().gamma, 0);
-    if (atype == GIRL<DenseAction,DenseState>::AlgType::R)
+    if (atype == IRLGradType::R)
     {
         cout << "PG REINFORCE" << endl;
         gradient = gdw.ReinforceGradient();
         hessian = hdw.ReinforceHessian();
     }
-    else if (atype == GIRL<DenseAction,DenseState>::AlgType::RB)
+    else if (atype == IRLGradType::RB)
     {
         cout << "PG REINFORCE BASE" << endl;
         gradient = gdw.ReinforceBaseGradient();
     }
-    else if (atype == GIRL<DenseAction,DenseState>::AlgType::G)
+    else if (atype == IRLGradType::G)
     {
         cout << "PG GPOMDP" << endl;
         gradient = gdw.GpomdpGradient();
     }
-    else if (atype == GIRL<DenseAction,DenseState>::AlgType::GB)
+    else if (atype == IRLGradType::GB)
     {
         cout << "PG GPOMDP BASE" << endl;
         gradient = gdw.GpomdpBaseGradient();
