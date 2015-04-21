@@ -123,19 +123,18 @@ Dam::Dam()
     : ContinuousMDP(new DamSettings(), true), nbSteps(0)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
+    config = static_cast<DamSettings*>(settings);
 }
 
 Dam::Dam(DamSettings& config)
-    : ContinuousMDP(&config, false), nbSteps(0)
+    : ContinuousMDP(&config, false), nbSteps(0), config(&config)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
-//    std::cout << damConfig.rewardDim << std::endl;
-//    std::cout << damConfig.penalize << std::endl;
 }
 
 void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
-    const DamSettings& damConfig = reinterpret_cast<const DamSettings&>(this->getSettings());
+    const DamSettings& damConfig = *config;
     // bound the action
     double min_action = std::max(currentState[0] - damConfig.S_MIN_REL, 0.0);
     double max_action = currentState[0];
@@ -213,7 +212,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
 void Dam::getInitialState(DenseState& state)
 {
-    const DamSettings& damConfig = reinterpret_cast<const DamSettings&>(this->getSettings());
+    const DamSettings& damConfig = *config;
 
     if (damConfig.isAverageReward && nbSteps != 0)
     {

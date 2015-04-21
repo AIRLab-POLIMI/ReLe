@@ -93,35 +93,36 @@ Portfolio::Portfolio() :
     DenseMDP(new PortfolioSettings(), true)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
+    config = static_cast<PortfolioSettings*>(settings);
 }
 
 Portfolio::Portfolio(PortfolioSettings& config):
-    DenseMDP(&config, false)
+    DenseMDP(&config, false), config(&config)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
 }
 
 void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
 {
-    PortfolioSettings& config = reinterpret_cast<PortfolioSettings&>(this->getWritableSettings());
+    PortfolioSettings& nlsconfig = *config;
 
     // time dependent variables
-    unsigned int t = config.t;
-    double rNL = config.rNL;
-    double T_rNL = config.T_rNL;
+    unsigned int t = nlsconfig.t;
+    double rNL = nlsconfig.rNL;
+    double T_rNL = nlsconfig.T_rNL;
     double retL = 0;
     double retNL = 0;
-    double T_Ret_Inv = config.T_Ret_Inv;
+    double T_Ret_Inv = nlsconfig.T_Ret_Inv;
 
     // time independent variables
-    unsigned int T = config.T;
-    unsigned int n = config.n;
-    double alpha = config.alpha;
-    double P_Risk = config.P_Risk;
-    double P_Switch = config.P_Switch;
-    double rL = config.rL;
-    double rNL_High = config.rNL_High;
-    double rNL_Low = config.rNL_Low;
+    unsigned int T = nlsconfig.T;
+    unsigned int n = nlsconfig.n;
+    double alpha = nlsconfig.alpha;
+    double P_Risk = nlsconfig.P_Risk;
+    double P_Switch = nlsconfig.P_Switch;
+    double rL = nlsconfig.rL;
+    double rNL_High = nlsconfig.rNL_High;
+    double rNL_Low = nlsconfig.rNL_Low;
 
 
     // next instant
@@ -186,12 +187,12 @@ void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& 
     // time dependent variables are saved in config or restored to their default values
     if (!absorbing)
     {
-        config.t = t;
-        config.rNL = rNL;
-        config.T_rNL = T_rNL;
-        config.retL = retL;
-        config.retNL = retNL;
-        config.T_Ret_Inv = T_Ret_Inv;
+        nlsconfig.t = t;
+        nlsconfig.rNL = rNL;
+        nlsconfig.T_rNL = T_rNL;
+        nlsconfig.retL = retL;
+        nlsconfig.retNL = retNL;
+        nlsconfig.T_Ret_Inv = T_Ret_Inv;
     }
     else
         defaultValues();
@@ -200,23 +201,23 @@ void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& 
 
 void Portfolio::getInitialState(DenseState& state)
 {
-    const PortfolioSettings& config = reinterpret_cast<const PortfolioSettings&>(this->getSettings());
+    const PortfolioSettings& nlsconfig = *config;
     currentState.zeros();
-    currentState[0] = config.initial_state;
+    currentState[0] = nlsconfig.initial_state;
     currentState.setAbsorbing(false);
     state = currentState;
 }
 
 void Portfolio::defaultValues()
 {
-    PortfolioSettings& config = reinterpret_cast<PortfolioSettings&>(this->getWritableSettings());
+    PortfolioSettings& nlsconfig = *config;
     // time dependent variables
-    config.t = 0;
-    config.rNL = RNL_HIGH;
-    config.T_rNL = 0;
-    config.retL = 0;
-    config.retNL = 0;
-    config.T_Ret_Inv = 0;
+    nlsconfig.t = 0;
+    nlsconfig.rNL = RNL_HIGH;
+    nlsconfig.T_rNL = 0;
+    nlsconfig.retL = 0;
+    nlsconfig.retNL = 0;
+    nlsconfig.T_Ret_Inv = 0;
 }
 
 

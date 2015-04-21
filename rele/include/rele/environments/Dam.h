@@ -75,8 +75,14 @@ public:
 
     void setCurrentState(const DenseState& state);
 
+    inline const DamSettings& getSettings() const
+    {
+        return *config;
+    }
+
 private:
     int nbSteps;
+    DamSettings* config;
 };
 
 }

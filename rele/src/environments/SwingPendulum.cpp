@@ -109,6 +109,7 @@ DiscreteActionSwingUp::DiscreteActionSwingUp() :
     DenseMDP(new SwingUpSettings(), true)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
+    config = static_cast<SwingUpSettings*>(settings);
 
     //variable initialization
     previousTheta = cumulatedRotation = overRotatedTime = 0;
@@ -117,7 +118,7 @@ DiscreteActionSwingUp::DiscreteActionSwingUp() :
 }
 
 DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
-    DenseMDP(&config, false)
+    DenseMDP(&config, false), config(&config)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
 
@@ -130,20 +131,20 @@ DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
 void DiscreteActionSwingUp::step(const FiniteAction& action,
                                  DenseState& nextState, Reward& reward)
 {
-    const SwingUpSettings& config = reinterpret_cast<const SwingUpSettings&>(this->getSettings());
+    const SwingUpSettings& swconfig = *config;
 
     //get current state
     double theta = currentState[0];
     double velocity = currentState[1];
 
     //std::cout << a.at() << std::endl;
-    double torque = config.actionList[action.getActionN()];
-    double thetaAcc = -config.stepTime * velocity
-                      + config.mass * config.g * config.length * sin(theta) + torque;
-    velocity = config.velocityRange.bound(velocity + thetaAcc);
-    theta += velocity * config.stepTime;
+    double torque = swconfig.actionList[action.getActionN()];
+    double thetaAcc = -swconfig.stepTime * velocity
+                      + swconfig.mass * swconfig.g * swconfig.length * sin(theta) + torque;
+    velocity = swconfig.velocityRange.bound(velocity + thetaAcc);
+    theta += velocity * swconfig.stepTime;
     adjustTheta(theta);
-    upTime = fabs(theta) > config.upRange ? 0 : upTime + 1;
+    upTime = fabs(theta) > swconfig.upRange ? 0 : upTime + 1;
 
     //update current state
     currentState[0] = theta;
@@ -160,10 +161,10 @@ void DiscreteActionSwingUp::step(const FiniteAction& action,
 
     //###################### TERMINAL CONDITION REACHED ######################
     bool endepisode = false;
-    if (config.useOverRotated)
+    if (swconfig.useOverRotated)
         // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
         endepisode =
-            (overRotated && (overRotatedTime > 1.0 / config.stepTime)) ?
+            (overRotated && (overRotatedTime > 1.0 / swconfig.stepTime)) ?
             true : false;
     //return upTime + 1 >= requiredUpTime / stepTime; // 1000 steps
 
@@ -171,7 +172,7 @@ void DiscreteActionSwingUp::step(const FiniteAction& action,
     nextState = currentState;
 
     //###################### REWARD ######################
-    if (config.useOverRotated)
+    if (swconfig.useOverRotated)
         // Reinforcement Learning in Continuous Time and Space (Kenji Doya)
         reward[0] = (!overRotated) ? cos(nextState[0]) : -1.0;
     else
@@ -181,13 +182,12 @@ void DiscreteActionSwingUp::step(const FiniteAction& action,
 
 void DiscreteActionSwingUp::getInitialState(DenseState& state)
 {
-    const SwingUpSettings& config = reinterpret_cast<const SwingUpSettings&>(this->getSettings());
 
     double theta;
     upTime = 0;
-    if (config.random_start)
-        theta = RandomGenerator::sampleUniform(config.thetaRange.Lo(),
-                                               config.thetaRange.Hi());
+    if (config->random_start)
+        theta = RandomGenerator::sampleUniform(config->thetaRange.Lo(),
+                                               config->thetaRange.Hi());
     else
         theta = M_PI_2;
     adjustTheta(theta);

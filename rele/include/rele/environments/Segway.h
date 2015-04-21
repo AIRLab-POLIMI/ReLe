@@ -92,7 +92,7 @@ public:
     virtual void getInitialState(DenseState& state);
 
 private:
-    SegwaySettings segwayConfig;
+    SegwaySettings* segwayConfig;
     SegwayOde segwayode;
 
     //[ define_adapt_stepper

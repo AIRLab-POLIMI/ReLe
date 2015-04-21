@@ -114,21 +114,18 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Segway::Segway()
-    : segwayConfig(), segwayode(segwayConfig),
+    : ContinuousMDP(new SegwaySettings(), true), segwayode(static_cast<SegwaySettings&>(getWritableSettings())),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
-    setupEnvirorment(segwayConfig.continuosStateDim,segwayConfig.finiteActionDim,segwayConfig.rewardDim,
-                     segwayConfig.isFiniteHorizon, segwayConfig.isEpisodic, segwayConfig.horizon, segwayConfig.gamma);
-    currentState.set_size(segwayConfig.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
+    segwayConfig = static_cast<SegwaySettings*>(settings);
 }
 
-Segway::Segway(SegwaySettings &config)
-    : segwayConfig(config), segwayode(segwayConfig),
+Segway::Segway(SegwaySettings& config)
+    : ContinuousMDP(&config, false), segwayConfig(&config), segwayode(*segwayConfig),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
-    setupEnvirorment(segwayConfig.continuosStateDim,segwayConfig.finiteActionDim,segwayConfig.rewardDim,
-                     segwayConfig.isFiniteHorizon, segwayConfig.isEpisodic, segwayConfig.horizon, segwayConfig.gamma);
-    currentState.set_size(segwayConfig.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 }
 
 void Segway::step(const DenseAction& action, DenseState& nextState, Reward& reward)
@@ -138,7 +135,7 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
     //ODEINT (BOOST 1.53+)
     segwayode.action = u;
     double t0 = 0;
-    double t1 = segwayConfig.dt;
+    double t1 = segwayConfig->dt;
     integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/100.0);
 
     nextState = currentState;

@@ -82,6 +82,7 @@ public:
 
 private:
     void defaultValues();
+    PortfolioSettings* config;
 
 };
 

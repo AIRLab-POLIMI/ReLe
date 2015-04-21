@@ -63,21 +63,14 @@ public:
             delete settings;
     }
 
-    //TODO controllare
-    inline void setHorizon(unsigned int horizon)
-    {
-        settings->horizon = horizon;
-    }
-
 protected:
     inline EnvironmentSettings& getWritableSettings()
     {
         return *settings;
     }
 
-private:
-    EnvironmentSettings* settings;
 protected:
+    EnvironmentSettings* settings;
     bool clearEnvSettings;
 };
 

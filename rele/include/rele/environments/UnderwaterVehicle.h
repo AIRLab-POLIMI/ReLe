@@ -99,7 +99,7 @@ public:
     virtual void getInitialState(DenseState& state);
 
 private:
-    UWVSettings uwvConfig;
+    UWVSettings* config;
     UWVOde uwvode;
 
     //[ define_adapt_stepper

@@ -70,12 +70,12 @@ UWVSettings::~UWVSettings()
 
 }
 
-void UWVSettings::WriteToStream(ostream &out) const
+void UWVSettings::WriteToStream(ostream& out) const
 {
     //TODO
 }
 
-void UWVSettings::ReadFromStream(istream &in)
+void UWVSettings::ReadFromStream(istream& in)
 {
     //TODO
 }
@@ -86,42 +86,39 @@ void UWVSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 UnderwaterVehicle::UnderwaterVehicle()
-    : uwvConfig(), uwvode(),
+    : DenseMDP(new UWVSettings(), true), uwvode(),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
-    setupEnvirorment(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
-                     uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.horizon, uwvConfig.gamma);
-    currentState.set_size(uwvConfig.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
+    config = static_cast<UWVSettings*>(settings);
 }
 
-UnderwaterVehicle::UnderwaterVehicle(UWVSettings &config)
-    : uwvConfig(config), uwvode(),
+UnderwaterVehicle::UnderwaterVehicle(UWVSettings& config)
+    : DenseMDP(&config, false), config(&config), uwvode(),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
-    setupEnvirorment(uwvConfig.continuosStateDim,uwvConfig.finiteActionDim,uwvConfig.rewardDim,
-                     uwvConfig.isFiniteHorizon, uwvConfig.isEpisodic, uwvConfig.horizon, uwvConfig.gamma);
-    currentState.set_size(uwvConfig.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 }
 
 void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
 {
-    double u = uwvConfig.actionList[action.getActionN()];
+    double u = config->actionList[action.getActionN()];
 
     //ODEINT (BOOST 1.53+)
     uwvode.action = u;
     double t0 = 0;
-    double t1 = uwvConfig.dt;
+    double t1 = config->dt;
     integrate_adaptive( controlled_stepper , uwvode , currentState, t0 , t1 , t1/100.0);
 
     nextState = currentState;
 
-    reward[0] = fabs(uwvConfig.setPoint - nextState[0]) < uwvConfig.mu ? 0.0f : -uwvConfig.C;
+    reward[0] = fabs(config->setPoint - nextState[0]) < config->mu ? 0.0f : -config->C;
 
 }
 
-void UnderwaterVehicle::getInitialState(DenseState &state)
+void UnderwaterVehicle::getInitialState(DenseState& state)
 {
-    state[0] = RandomGenerator::sampleUniform(uwvConfig.velocityRange.Lo(),uwvConfig.velocityRange.Hi());
+    state[0] = RandomGenerator::sampleUniform(config->velocityRange.Lo(), config->velocityRange.Hi());
     state.setAbsorbing(false);
     currentState[0] = state[0]; //keep info about the current state
 }

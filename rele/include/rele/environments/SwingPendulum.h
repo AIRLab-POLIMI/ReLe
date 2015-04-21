@@ -84,6 +84,7 @@ private:
     bool overRotated;
     int upTime;
     //current state [theta, velocity]
+    SwingUpSettings* config;
 };
 
 }//end namespace

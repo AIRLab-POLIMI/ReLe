@@ -68,7 +68,7 @@ public:
     virtual void getInitialState(DenseState& state);
 
 private:
-    NLSSettings nlsConfig;
+    NLSSettings* config;
 };
 
 }
