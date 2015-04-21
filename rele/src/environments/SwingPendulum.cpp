@@ -106,12 +106,9 @@ void SwingUpSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 DiscreteActionSwingUp::DiscreteActionSwingUp() :
-    config()
+    DenseMDP(new SwingUpSettings(), true)
 {
-    setupEnvirorment(config.continuosStateDim, config.finiteActionDim,
-                     config.rewardDim, config.isFiniteHorizon, config.isEpisodic,
-                     config.horizon, config.gamma);
-    currentState.set_size(config.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 
     //variable initialization
     previousTheta = cumulatedRotation = overRotatedTime = 0;
@@ -120,12 +117,9 @@ DiscreteActionSwingUp::DiscreteActionSwingUp() :
 }
 
 DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
-    config(config)
+    DenseMDP(&config, false)
 {
-    setupEnvirorment(config.continuosStateDim, config.finiteActionDim,
-                     config.rewardDim, config.isFiniteHorizon, config.isEpisodic,
-                     config.horizon, config.gamma);
-    currentState.set_size(config.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 
     //variable initialization
     previousTheta = cumulatedRotation = overRotatedTime = 0;
@@ -136,6 +130,8 @@ DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
 void DiscreteActionSwingUp::step(const FiniteAction& action,
                                  DenseState& nextState, Reward& reward)
 {
+    const SwingUpSettings& config = reinterpret_cast<const SwingUpSettings&>(this->getSettings());
+
     //get current state
     double theta = currentState[0];
     double velocity = currentState[1];
@@ -185,6 +181,8 @@ void DiscreteActionSwingUp::step(const FiniteAction& action,
 
 void DiscreteActionSwingUp::getInitialState(DenseState& state)
 {
+    const SwingUpSettings& config = reinterpret_cast<const SwingUpSettings&>(this->getSettings());
+
     double theta;
     upTime = 0;
     if (config.random_start)

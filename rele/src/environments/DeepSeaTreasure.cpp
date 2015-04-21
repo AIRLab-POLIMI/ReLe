@@ -36,10 +36,9 @@ namespace ReLe
 ///////////////////////////////////////////////////////////////////////////////////////
 
 DeepSeaTreasure::DeepSeaTreasure()
-    : xdim(11), ydim(10)
+    : DenseMDP(2,4,2,false,true,1.0,50), xdim(11), ydim(10)
 {
     currentState.set_size(2);
-    setupEnvirorment(2,4,2,false,true,50,1.0);
 }
 
 

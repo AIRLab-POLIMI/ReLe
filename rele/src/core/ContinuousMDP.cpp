@@ -28,6 +28,13 @@ using namespace std;
 namespace ReLe
 {
 
+ContinuousMDP::ContinuousMDP(EnvironmentSettings *settings, bool clear)
+    : Environment(settings, clear)
+{
+    settings->finiteStateDim = 0;
+    settings->finiteActionDim = 0;
+}
+
 ContinuousMDP::ContinuousMDP(size_t stateSize, size_t actionSize, size_t rewardSize, bool isFiniteHorizon,
                              bool isEpisodic, double gamma, unsigned int horizon) :
     currentState(stateSize)

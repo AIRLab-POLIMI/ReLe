@@ -76,7 +76,6 @@ public:
     void setCurrentState(const DenseState& state);
 
 private:
-    DamSettings damConfig;
     int nbSteps;
 };
 

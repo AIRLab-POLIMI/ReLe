@@ -89,24 +89,22 @@ void PortfolioSettings::ReadFromStream(istream &in)
 /// PORTFOLIO ENVIRONMENTS
 ///////////////////////////////////////////////////////////////////////////////////////
 
-Portfolio::Portfolio()
-    : config()
+Portfolio::Portfolio() :
+    DenseMDP(new PortfolioSettings(), true)
 {
-    setupEnvirorment(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
-                     config.isFiniteHorizon, config.isEpisodic, config.horizon, config.gamma);
-    currentState.set_size(config.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 }
 
-Portfolio::Portfolio(PortfolioSettings& config)
-    : DenseMDP(config.continuosStateDim, config.finiteActionDim, config.rewardDim,
-               config.isFiniteHorizon, config.isEpisodic, config.gamma, config.horizon),
-    config(config)
+Portfolio::Portfolio(PortfolioSettings& config):
+    DenseMDP(&config, false)
 {
-    currentState.set_size(config.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 }
 
 void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& reward)
 {
+    PortfolioSettings& config = reinterpret_cast<PortfolioSettings&>(this->getWritableSettings());
+
     // time dependent variables
     unsigned int t = config.t;
     double rNL = config.rNL;
@@ -202,6 +200,7 @@ void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& 
 
 void Portfolio::getInitialState(DenseState& state)
 {
+    const PortfolioSettings& config = reinterpret_cast<const PortfolioSettings&>(this->getSettings());
     currentState.zeros();
     currentState[0] = config.initial_state;
     currentState.setAbsorbing(false);
@@ -210,6 +209,7 @@ void Portfolio::getInitialState(DenseState& state)
 
 void Portfolio::defaultValues()
 {
+    PortfolioSettings& config = reinterpret_cast<PortfolioSettings&>(this->getWritableSettings());
     // time dependent variables
     config.t = 0;
     config.rNL = RNL_HIGH;

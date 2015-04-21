@@ -80,7 +80,6 @@ private:
     }
 
 private:
-    SwingUpSettings config;
     double previousTheta, cumulatedRotation, overRotatedTime;
     bool overRotated;
     int upTime;

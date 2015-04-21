@@ -37,33 +37,48 @@ class Environment
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
+
+    Environment()
+        : settings(new EnvironmentSettings()), clearEnvSettings(true)
+    {
+    }
+
+    Environment(EnvironmentSettings* settings, bool clear = false)
+        : settings(settings), clearEnvSettings(clear)
+    {
+    }
+
     virtual void step(const ActionC& action, StateC& nextState,
                       Reward& reward) = 0;
     virtual void getInitialState(StateC& state) = 0;
 
     inline const EnvironmentSettings& getSettings() const
     {
-        return settings;
+        return *settings;
     }
 
     virtual ~Environment()
     {
+        if (clearEnvSettings)
+            delete settings;
     }
 
     //TODO controllare
     inline void setHorizon(unsigned int horizon)
     {
-        settings.horizon = horizon;
+        settings->horizon = horizon;
     }
 
 protected:
     inline EnvironmentSettings& getWritableSettings()
     {
-        return settings;
+        return *settings;
     }
 
 private:
-    EnvironmentSettings settings;
+    EnvironmentSettings* settings;
+protected:
+    bool clearEnvSettings;
 };
 
 }

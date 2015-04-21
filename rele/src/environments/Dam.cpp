@@ -120,25 +120,22 @@ void DamSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Dam::Dam()
-    : damConfig(), nbSteps(0)
+    : ContinuousMDP(new DamSettings(), true), nbSteps(0)
 {
-    setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
-                     damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
-    currentState.set_size(damConfig.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 }
 
 Dam::Dam(DamSettings& config)
-    : damConfig(config), nbSteps(0)
+    : ContinuousMDP(&config, false), nbSteps(0)
 {
-    setupEnvirorment(damConfig.continuosStateDim, damConfig.continuosActionDim, damConfig.rewardDim,
-                     damConfig.isFiniteHorizon, damConfig.isEpisodic, damConfig.horizon, damConfig.gamma);
-    currentState.set_size(damConfig.continuosStateDim);
+    currentState.set_size(this->getSettings().continuosStateDim);
 //    std::cout << damConfig.rewardDim << std::endl;
 //    std::cout << damConfig.penalize << std::endl;
 }
 
 void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
+    const DamSettings& damConfig = reinterpret_cast<const DamSettings&>(this->getSettings());
     // bound the action
     double min_action = std::max(currentState[0] - damConfig.S_MIN_REL, 0.0);
     double max_action = currentState[0];
@@ -216,6 +213,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
 void Dam::getInitialState(DenseState& state)
 {
+    const DamSettings& damConfig = reinterpret_cast<const DamSettings&>(this->getSettings());
 
     if (damConfig.isAverageReward && nbSteps != 0)
     {

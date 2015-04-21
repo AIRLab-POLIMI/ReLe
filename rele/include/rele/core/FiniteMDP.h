@@ -41,6 +41,8 @@ public:
               bool isFiniteHorizon, double gamma = 1.0, unsigned int horizon =
                   0);
 
+    FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings, bool clear = false);
+
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward);
     virtual void getInitialState(FiniteState& state);

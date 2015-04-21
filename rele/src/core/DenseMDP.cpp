@@ -28,6 +28,13 @@ using namespace std;
 namespace ReLe
 {
 
+DenseMDP::DenseMDP(EnvironmentSettings *settings, bool clear)
+    : Environment(settings, clear)
+{
+    settings->finiteStateDim = 0;
+    settings->continuosActionDim = 0;
+}
+
 DenseMDP::DenseMDP(size_t stateSize, unsigned int actionN, size_t rewardSize, bool isFiniteHorizon,
                    bool isEpisodic, double gamma, unsigned int horizon) :
     currentState(stateSize)
