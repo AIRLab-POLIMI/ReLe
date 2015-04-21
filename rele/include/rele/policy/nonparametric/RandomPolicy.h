@@ -261,7 +261,7 @@ private:
         std::cerr << "Error: unknown action" << std::endl;
         std::cerr << "Action:" << action << std::endl;
         abort();
-        return;
+       // return;
     }
 };
 
