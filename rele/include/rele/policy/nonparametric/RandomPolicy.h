@@ -123,6 +123,11 @@ public:
         return prob;
     }
 
+    virtual RandomPolicy<StateC>* clone()
+    {
+        return new RandomPolicy<StateC>(*this);
+    }
+
 };
 
 /**
@@ -238,6 +243,11 @@ public:
         return mActions[ie-1];
     }
 
+    virtual StochasticDiscretePolicy<ActionC, StateC>* clone()
+    {
+        return new StochasticDiscretePolicy<ActionC, StateC>(*this);
+    }
+
 private:
     int findAction(ActionC& action)
     {
@@ -327,6 +337,11 @@ public:
         prev = mActions[ie - 1];
         prevActionId = ie - 1;
         return prev;
+    }
+
+    virtual RandomDiscreteBiasPolicy<ActionC, StateC>* clone()
+    {
+        return new RandomDiscreteBiasPolicy<ActionC, StateC>(*this);
     }
 
 };

@@ -55,6 +55,11 @@ public:
         return "";
     }
 
+    virtual NormalPolicy* clone()
+    {
+        return new  NormalPolicy(*this);
+    }
+
     // ParametricPolicy interface
 public:
     virtual inline arma::vec getParameters() const
@@ -120,13 +125,20 @@ public:
     {
         return "NormalStateDependantStddevPolicy";
     }
+
     virtual inline std::string getPolicyHyperparameters()
     {
         return "";
     }
+
     virtual inline std::string printPolicy()
     {
         return "";
+    }
+
+    virtual NormalStateDependantStddevPolicy* clone()
+    {
+        return new  NormalStateDependantStddevPolicy(*this);
     }
 
 protected:
@@ -265,6 +277,11 @@ public:
 
     virtual arma::vec operator()(const arma::vec& state);
 
+    virtual MVNPolicy* clone()
+    {
+        return new  MVNPolicy(*this);
+    }
+
     // ParametricPolicy interface
 public:
     virtual inline arma::vec getParameters() const
@@ -358,6 +375,11 @@ public:
     virtual inline std::string printPolicy()
     {
         return "";
+    }
+
+    virtual MVNDiagonalPolicy* clone()
+    {
+        return new  MVNDiagonalPolicy(*this);
     }
 
     // ParametricPolicy interface
@@ -483,6 +505,11 @@ public:
     virtual inline std::string printPolicy()
     {
         return "";
+    }
+
+    virtual MVNLogisticPolicy* clone()
+    {
+        return new  MVNLogisticPolicy(*this);
     }
 
     // ParametricPolicy interface

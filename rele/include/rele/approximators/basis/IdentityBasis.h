@@ -46,6 +46,21 @@ private:
     unsigned int index;
 };
 
+class InverseBasis : public BasisFunction
+{
+public:
+    InverseBasis(BasisFunction* basis);
+    virtual ~InverseBasis();
+    double operator() (const arma::vec& input);
+
+
+    virtual void writeOnStream (std::ostream& out);
+    virtual void readFromStream(std::istream& in);
+
+private:
+    BasisFunction* basis;
+};
+
 }
 
 

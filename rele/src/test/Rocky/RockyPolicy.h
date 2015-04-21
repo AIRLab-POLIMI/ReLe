@@ -70,6 +70,11 @@ public:
     	this->w = w;
     }
 
+    virtual RockyPolicy* clone()
+    {
+       	return new RockyPolicy(*this);
+    }
+
 
 private:
     enum Objective

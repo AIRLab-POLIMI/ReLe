@@ -54,6 +54,11 @@ public:
         return this->eps;
     }
 
+    virtual e_Greedy* clone()
+    {
+        return new e_Greedy(*this);
+    }
+
 protected:
     double eps;
 };
@@ -81,6 +86,11 @@ public:
     inline double getEpsilon()
     {
         return this->eps;
+    }
+
+    virtual e_GreedyApproximate* clone()
+    {
+        return new e_GreedyApproximate(*this);
     }
 
 protected:

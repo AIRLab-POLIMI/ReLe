@@ -26,8 +26,10 @@
 #include "BasisFunctions.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
+#include "basis/PolynomialFunction.h"
 
 #include "LQR.h"
+#include "LQRsolver.h"
 #include "PolicyEvalAgent.h"
 #include "algorithms/MWAL.h"
 #include "policy_search/PGPE/PGPE.h"
@@ -38,56 +40,28 @@ using namespace ReLe;
 using namespace arma;
 
 
-class MWALBasis : public BasisFunction
-{
-
-public:
-    MWALBasis(unsigned int index, double max, double min) :
-        index(index), min(min), max(max)
-    {
-
-    }
-
-    virtual double operator()(const arma::vec& input)
-    {
-        double value = input[index];
-        if(value > min && value < max)
-            return +1.0;
-        else
-            return 0;
-    }
-
-    virtual void writeOnStream(std::ostream& out)
-    {
-
-    }
-
-    virtual void readFromStream(std::istream& in)
-    {
-
-    }
-
-private:
-    unsigned int index;
-    double min;
-    double max;
-};
-
 int main(int argc, char *argv[])
 {
     /* Learn lqr correct policy */
-    LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
-    vec initialState(1);
-    initialState[0] = -5;
-    mdp.setInitialState(initialState);
+    mat A, B, q, r;
+    A = 1;
+    B = 1;
+    q = 0.6;
+    r = 0.4;
+    vector<mat> Q, R;
+    Q.push_back(q);
+    R.push_back(r);
+    LQR mdp(A,B,Q,R);
 
     IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);
-    DetLinearPolicy<DenseState> expertPolicy(phi);
-    vec param(1);
-    param[0] = -0.6180;
-    expertPolicy.setParameters(param);
+
+    //Find optimal policy
+    LQRsolver optimalSolver(mdp, phi);
+    optimalSolver.solve();
+    Policy<DenseAction, DenseState>& expertPolicy = optimalSolver.getPolicy();
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
+    cout << "Optimal Policy: " << endl << expertPolicy.printPolicy() << endl;
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -102,21 +76,8 @@ int main(int argc, char *argv[])
 
     //Create features vector
     BasisFunctions rewardBF;
-    for(int i = 0; i < 3; i++)
-    {
-        double mean = 2.5*i;
-        double delta = 1.25;
-        double min = mean + delta;
-        double max = mean - delta;
-        MWALBasis* bfP = new MWALBasis(2, min, max);
-        rewardBF.push_back(bfP);
-
-        if(i != 0)
-        {
-            MWALBasis* bfN = new MWALBasis(2, -max, -min);
-            rewardBF.push_back(bfN);
-        }
-    }
+    rewardBF.push_back(new InverseBasis(new PolynomialFunction(0, 2))); //-State^2
+    rewardBF.push_back(new InverseBasis(new PolynomialFunction(1, 2))); //-Action^2
 
     DenseFeatures rewardPhi(rewardBF);
 
@@ -154,10 +115,10 @@ int main(int argc, char *argv[])
     irlAlg.run();
     arma::vec w = irlAlg.getWeights();
 
-    cout << "Computed weights: " << endl << w.t() << endl;
-    arma::vec meanFinal = dist.getMean();
-    cout <<  "Policy learned" << endl << meanFinal.t() << endl;
-
+    cout << "Computed weights: " << endl << irlAlg.getWeights() << endl;
+    Policy<DenseAction, DenseState>* pi = irlAlg.getPolicy();
+    cout <<  "Policy learned" << endl << pi->printPolicy() << endl;
+    delete pi;
 
     return 0;
 }

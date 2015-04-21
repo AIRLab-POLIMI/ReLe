@@ -66,7 +66,7 @@ public:
         currentItStats(nullptr), stepRule(stepL),
         nbIndipendentSamples(std::min(std::max(1,static_cast<int>(nbSamplesForJ)), static_cast<int>(nbEpisodes*0.1)))
     {
-    	Jepoff = 0;
+        Jepoff = 0;
     }
 
     virtual ~AbstractOffPolicyGradientAlgorithm()

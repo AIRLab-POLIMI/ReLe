@@ -54,7 +54,7 @@ void IdentityBasis::writeOnStream(std::ostream &out)
 
 void IdentityBasis::readFromStream(std::istream &in)
 {
-    //TODO
+    //TODO Implement
 }
 
 BasisFunctions IdentityBasis::generate(unsigned int input_size)
@@ -67,6 +67,33 @@ BasisFunctions IdentityBasis::generate(unsigned int input_size)
     }
 
     return basis;
+}
+
+InverseBasis::InverseBasis(BasisFunction* basis) : basis(basis)
+{
+
+}
+
+InverseBasis::~InverseBasis()
+{
+    delete basis;
+}
+
+double InverseBasis::operator() (const arma::vec& input)
+{
+    BasisFunction& bf = *basis;
+    return -bf(input);
+}
+
+void InverseBasis::writeOnStream (std::ostream& out)
+{
+    out << "Inverse ";
+    basis->writeOnStream(out);
+}
+
+void InverseBasis::readFromStream(std::istream& in)
+{
+    //TODO implement
 }
 
 }//end namespace

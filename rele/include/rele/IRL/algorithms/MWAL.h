@@ -46,6 +46,10 @@ public:
         //initialize W(i) = 1 forall i
         W.ones(k);
         std::cout << "W: "<< std::endl << W.t() << std::endl;
+
+        deltaMuNorm = std::numeric_limits<double>::infinity();
+
+        policyOpt = nullptr;
     }
 
     virtual void run()
@@ -67,10 +71,21 @@ public:
             //compute feature expectations
             std::cout << "Computing features expectations..."<< std::endl;
             const arma::vec& mu = solver.computeFeaturesExpectations();
+            double deltaMuNormNew = arma::norm(mu - muE);
 
             std::cout << "mu: "<< std::endl << mu.t() << std::endl;
             std::cout << "muE: "<< std::endl << muE.t() << std::endl;
-            std::cout << "deltaMuNorm: " << arma::norm(mu - muE) << std::endl;
+            std::cout << "deltaMuNorm: " << deltaMuNormNew << std::endl;
+
+            if(deltaMuNormNew < deltaMuNorm)
+            {
+            	if(!policyOpt)
+            		delete policyOpt;
+
+            	deltaMuNorm = deltaMuNormNew;
+            	policyOpt = solver.getPolicy().clone();
+            	wOpt = w;
+            }
 
             //update W
             std::cout << "Updating W..."<< std::endl;
@@ -84,12 +99,12 @@ public:
 
     virtual arma::vec getWeights()
     {
-        return W / arma::sum(W);
+        return wOpt;
     }
 
     virtual Policy<ActionC, StateC>* getPolicy()
     {
-        return nullptr;
+        return policyOpt;
     }
 
     virtual ~MWAL()
@@ -117,6 +132,12 @@ private:
     double logBeta;
 
     arma::vec W;
+
+    //Best policy data
+    double deltaMuNorm;
+    arma::vec wOpt;
+    Policy<ActionC, StateC>* policyOpt;
+
 
 };
 

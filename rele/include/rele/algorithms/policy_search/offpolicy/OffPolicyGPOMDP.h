@@ -59,8 +59,8 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(btype)
     {
-    	prodImpWeightB = prodImpWeightT = sumIWOverRun = sumAvgIW = 0;
-    	stepCount = 0;
+        prodImpWeightB = prodImpWeightT = sumIWOverRun = sumAvgIW = 0;
+        stepCount = 0;
     }
 
     OffPolicyGPOMDP(DifferentiablePolicy<ActionC, StateC>& target_pol,
@@ -71,8 +71,8 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
     {
-    	prodImpWeightB = prodImpWeightT = sumIWOverRun = sumAvgIW = 0;
-    	stepCount = 0;
+        prodImpWeightB = prodImpWeightT = sumIWOverRun = sumAvgIW = 0;
+        stepCount = 0;
     }
 
     virtual ~OffPolicyGPOMDP()

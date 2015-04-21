@@ -50,7 +50,7 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(btype)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
@@ -60,7 +60,7 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
 
@@ -71,7 +71,7 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(btype)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
@@ -81,7 +81,7 @@ public:
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
     {
-    	stepCount = 0;
+        stepCount = 0;
     }
 
     virtual ~GPOMDPAlgorithm()

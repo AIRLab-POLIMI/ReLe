@@ -77,7 +77,9 @@ public:
 
     std::string printPolicy()
     {
-        return std::string("");
+        std::stringstream ss;
+        ss << approximator.getParameters().t();
+        return ss.str();
     }
 
     virtual arma::vec operator()(const arma::vec& state)
@@ -97,6 +99,11 @@ public:
             return 1.0;
         }
         return 0.0;
+    }
+
+    virtual DetLinearPolicy<StateC>* clone()
+    {
+        return new DetLinearPolicy<StateC>(*this);
     }
 
     // ParametricPolicy interface
