@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = 50;
+    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
     expertCore.getSettings().testEpisodeN = 200;
     expertCore.runTestEpisodes();
 
