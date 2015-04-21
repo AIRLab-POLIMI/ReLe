@@ -28,18 +28,19 @@ using namespace arma;
 namespace ReLe
 {
 
+PolynomialFunction::PolynomialFunction()
+{
+}
+
 PolynomialFunction::PolynomialFunction(std::vector<unsigned int> dimension, std::vector<unsigned int> degree)
     : dimension(dimension), degree(degree)
 {
 }
 
 PolynomialFunction::PolynomialFunction(unsigned int _dimension, unsigned int _degree)
-    : dimension(_dimension)
+    : dimension(1, _dimension)
 {
-    for (unsigned i = 0; i < _dimension; ++i)
-    {
-        degree.push_back(_degree);
-    }
+    degree.push_back(_degree);
 }
 
 PolynomialFunction::~PolynomialFunction()

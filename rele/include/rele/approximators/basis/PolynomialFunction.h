@@ -32,9 +32,10 @@ namespace ReLe
 class PolynomialFunction: public BasisFunction
 {
 public:
+    PolynomialFunction();
     PolynomialFunction(std::vector<unsigned int> dimension,
                        std::vector<unsigned int> degree);
-    PolynomialFunction(unsigned int _dimension = 0, unsigned int _degree = 0);
+    PolynomialFunction(unsigned int _dimension, unsigned int _degree);
     virtual ~PolynomialFunction();
     double operator()(const arma::vec& input);
 
