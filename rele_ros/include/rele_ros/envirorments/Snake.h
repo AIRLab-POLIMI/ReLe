@@ -32,13 +32,15 @@ namespace ReLe_ROS
 class SimulatedSnake : public SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>
 {
 public:
-    SimulatedSnake(double controlFrequency);
+    SimulatedSnake(double controlFrequency, double k = 1e-8);
 
 protected:
     virtual void publishAction(const ReLe::DenseAction& action);
     virtual void setState(ReLe::DenseState& state);
     virtual void setReward(const ReLe::DenseAction& action,
                            const ReLe::DenseState& state, ReLe::Reward& reward);
+
+    virtual void start();
 
 private:
     void writeSettings();
@@ -47,11 +49,15 @@ private:
 
 private:
     std::vector<int> jointHandle;
-    std::vector<int> vJointHandle;
-
     std::vector<int> positionHandle;
 
     ros::Publisher motorSpeedPub;
+
+    arma::vec lastPosition;
+    double dt;
+
+    //constants
+    const double k;
 };
 
 
