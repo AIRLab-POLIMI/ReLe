@@ -167,12 +167,13 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi(basis);
     MVNLogisticPolicy expertPolicy(phi, 50);
-    vec p(5);
+    vec p(6);
     p(0) = 50;
     p(1) = -50;
     p(2) = 0;
     p(3) = 0;
     p(4) = 50;
+    p(5) = 0;
     expertPolicy.setParameters(p);
     vec params(6);
 //    params << 52.1602 << -49.0788  <<  1.5016  <<  0.2076 <<  50.1777  << -1.4606;

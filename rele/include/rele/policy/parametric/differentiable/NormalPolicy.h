@@ -524,6 +524,7 @@ public:
     }
     virtual inline void setParameters(arma::vec &w)
     {
+        assert(w.n_elem == this->getParametersSize());
         int dp = approximator.getParametersSize();
         arma::vec tmp = w.rows(0, dp-1);
         approximator.setParameters(tmp);

@@ -21,7 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "policy_search/onpolicy/REINFORCEAlgorithm.h"
+#include "policy_search/onpolicy/GPOMDPAlgorithm.h"
+#include "policy_search/onpolicy/NaturalPGAlgorithm.h"
+#include "policy_search/onpolicy/ENACAlgorithm.h"
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
@@ -155,11 +158,11 @@ int main(int argc, char *argv[])
 
     Dam mdp;
 
-    PolynomialFunction *pf = new PolynomialFunction(1,0);
-    GaussianRbf* gf1 = new GaussianRbf(0,50);
-    GaussianRbf* gf2 = new GaussianRbf(50,20);
-    GaussianRbf* gf3 = new GaussianRbf(120,40);
-    GaussianRbf* gf4 = new GaussianRbf(160,50);
+    PolynomialFunction *pf = new PolynomialFunction();
+    GaussianRbf* gf1 = new GaussianRbf(0, 50, true);
+    GaussianRbf* gf2 = new GaussianRbf(50, 20, true);
+    GaussianRbf* gf3 = new GaussianRbf(120, 40, true);
+    GaussianRbf* gf4 = new GaussianRbf(160, 50, true);
     BasisFunctions basis;
     basis.push_back(pf);
     basis.push_back(gf1);
@@ -168,15 +171,15 @@ int main(int argc, char *argv[])
     basis.push_back(gf4);
 
     DenseFeatures phi(basis);
-    LinearApproximator regressor(mdp.getSettings().continuosStateDim, phi);
-    vec p(5);
+    MVNLogisticPolicy policy(phi, 50);
+    vec p(6);
     p(0) = 50;
     p(1) = -50;
     p(2) = 0;
     p(3) = 0;
     p(4) = 50;
-    regressor.setParameters(p);
-    MVNLogisticPolicy policy(&regressor, 50);
+    p(5) = 0;
+    policy.setParameters(p);
 
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
