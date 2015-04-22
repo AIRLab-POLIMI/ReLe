@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/GaussianRBF.h"
+#include "basis/GaussianRbf.h"
 #include <cassert>
 
 using namespace arma;
@@ -95,8 +95,11 @@ void uniform_grid(arma::mat& grid, int& nrows, int& ncols, arma::vec& discrete_v
 
 }
 
-BasisFunctions GaussianRbf::generate(unsigned int n_centers, arma::mat& range)
+BasisFunctions GaussianRbf::generate(arma::vec& numb_centers, arma::mat& range)
 {
+    assert(numb_centers.n_elem == range.n_rows);
+    assert(2 == range.n_cols);
+
     BasisFunctions basis;
 
     int n_features = range.n_rows;
@@ -107,6 +110,7 @@ BasisFunctions GaussianRbf::generate(unsigned int n_centers, arma::mat& range)
     int totpoints = 1;
     for (int i = 0; i < n_features; ++i)
     {
+        int n_centers = numb_centers[i];
         b(i) = (range(i,1) - range(i,0))*(range(i,1) - range(i,0)) / (n_centers*n_centers*n_centers);
         double m = fabs(range(i,1) - range(i,0)) / n_centers;
         c[i] = arma::linspace<arma::vec>(-m * 0.1 + range(i,0), range(i,1) + m * 0.1, n_centers);
@@ -152,7 +156,34 @@ BasisFunctions GaussianRbf::generate(unsigned int n_centers, std::initializer_li
             col = 0;
         }
     }
-    return GaussianRbf::generate(n_centers, range);
+    arma::vec centerDim(dim/2);
+    centerDim.fill(n_centers);
+    return GaussianRbf::generate(centerDim, range);
+}
+
+BasisFunctions GaussianRbf::generate(std::initializer_list<unsigned int> n_centers, std::initializer_list<double> l)
+{
+    int dim = l.size();
+    assert(dim % 2 == 0);
+    assert(dim / 2 == n_centers.size());
+    arma::mat range(dim/2, 2);
+    int row = 0, col = 0;
+    for (auto v : l)
+    {
+        range(row, col++) = v;
+        if (col == 2)
+        {
+            row++;
+            col = 0;
+        }
+    }
+    arma::vec centerDim(dim/2);
+    int i = 0;
+    for (auto v : n_centers)
+    {
+        centerDim[i++] = v;
+    }
+    return GaussianRbf::generate(centerDim, range);
 }
 
 void GaussianRbf::writeOnStream(std::ostream &out)

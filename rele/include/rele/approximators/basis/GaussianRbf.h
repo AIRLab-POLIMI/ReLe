@@ -43,9 +43,10 @@ public:
      * @param range N-by-2 matrix with min and max values for the N-dimensional input state
      * @return the set of Gaussin RBF
      */
-    static BasisFunctions generate(unsigned int n_centers, arma::mat& range);
+    static BasisFunctions generate(arma::vec& numb_centers, arma::mat& range);
 
     static BasisFunctions generate(unsigned int n_centers, std::initializer_list<double> l);
+    static BasisFunctions generate(std::initializer_list<unsigned int> n_centers, std::initializer_list<double> l);
 
 
     virtual void writeOnStream (std::ostream& out);

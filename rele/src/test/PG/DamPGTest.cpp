@@ -29,7 +29,7 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
-#include "basis/GaussianRBF.h"
+#include "basis/GaussianRbf.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 

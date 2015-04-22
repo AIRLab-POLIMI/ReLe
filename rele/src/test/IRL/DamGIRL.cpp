@@ -26,7 +26,7 @@
 #include "BasisFunctions.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "basis/PolynomialFunction.h"
-#include "basis/GaussianRBF.h"
+#include "basis/GaussianRbf.h"
 #include "basis/ConditionBasedFunction.h"
 
 #include "Dam.h"
