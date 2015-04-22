@@ -29,6 +29,7 @@
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/IdentityBasis.h"
+#include "basis/GaussianRBF.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
@@ -128,6 +129,10 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
  */
 int main(int argc, char *argv[])
 {
+    BasisFunctions bff = GaussianRbf::generate(2, {0,1, -5,8, -1,1});
+    for (int i = 0; i < bff.size(); ++i)
+        std::cout << *(bff[i]);
+    return 0;
     bboConfig config;
 
     //--- INPUT VALIDATION
