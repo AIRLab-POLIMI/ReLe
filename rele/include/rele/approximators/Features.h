@@ -38,19 +38,19 @@ struct feature_traits
 template<>
 struct feature_traits<true>
 {
-	typedef arma::mat type;
+    typedef arma::mat type;
 };
 
 template<>
 struct feature_traits<false>
 {
-	typedef arma::mat type;
+    typedef arma::mat type;
 };
 
 template<class InputC, bool denseOutput = true>
 class Features_
 {
-	using return_type = typename feature_traits<denseOutput>::type;
+    using return_type = typename feature_traits<denseOutput>::type;
 
 public:
 

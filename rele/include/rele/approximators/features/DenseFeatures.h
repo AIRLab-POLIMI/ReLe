@@ -25,19 +25,62 @@
 #define INCLUDE_RELE_APPROXIMATORS_FEATURES_DENSEFEATURES_H_
 
 #include "Features.h"
+#include <cassert>
 
 namespace ReLe
 {
 
-
-class DenseFeatures: public Features
+template<class InputC>
+class DenseFeatures_: public Features_<InputC>
 {
+    using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
+
 public:
-    DenseFeatures(BasisFunction* basisVector);
-    DenseFeatures(BasisFunctions& basisVector);
-    DenseFeatures(BasisFunctions& basisVector, unsigned int rows, unsigned int cols);
-    virtual ~DenseFeatures();
-    virtual arma::mat operator()(const arma::vec& input);
+    DenseFeatures_(BasisFunction_<InputC>* basisFunction) : basis(1)
+    {
+        basis[0] = basisFunction;
+    }
+
+    DenseFeatures_(BasisFunctions_& basisVector) :  basis(basisVector.size())
+    {
+
+        for(unsigned int i = 0; i < basisVector.size(); i++)
+        {
+            basis[i] = basisVector[i];
+        }
+    }
+
+    DenseFeatures_(BasisFunctions_& basisVector, unsigned int rows, unsigned int cols)
+        : basis(rows, cols)
+    {
+        assert(rows*cols == basisVector.size());
+
+        for(unsigned int i = 0; i < basisVector.size(); i++)
+        {
+            basis[i] = basisVector[i];
+        }
+    }
+
+    virtual ~DenseFeatures_()
+    {
+        for(auto bf : basis)
+        {
+            delete bf;
+        }
+    }
+
+    virtual arma::mat operator()(const InputC& input)
+    {
+        arma::mat output(basis.n_rows, basis.n_cols);
+
+        for(unsigned int i = 0; i < basis.n_elem; i++)
+        {
+            BasisFunction& bf = *basis[i];
+            output[i] = bf(input);
+        }
+
+        return output;
+    }
 
     inline virtual size_t rows() const
     {
@@ -50,9 +93,12 @@ public:
     }
 
 private:
-    arma::field<BasisFunction*> basis;
+    arma::field<BasisFunction_<InputC>*> basis;
 
 };
+
+typedef DenseFeatures_<arma::vec> DenseFeatures;
+
 
 }
 
