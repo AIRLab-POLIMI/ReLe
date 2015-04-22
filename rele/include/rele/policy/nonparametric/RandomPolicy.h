@@ -94,6 +94,8 @@ public:
             double val = a + (b - a) * RandomGenerator::sampleUniform(0,1);
             mpAction[i] =  val;
         }
+
+        return mpAction;
     }
 
     virtual double operator() (
