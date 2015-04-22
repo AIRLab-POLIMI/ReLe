@@ -30,10 +30,11 @@
 namespace ReLe
 {
 
-class BasisFunction
+template<class InputC>
+class BasisFunction_
 {
 public:
-    virtual double operator()(const arma::vec& input) = 0;
+    virtual double operator()(const InputC& input) = 0;
 
     /**
      * @brief Write a complete description of the instance to
@@ -57,7 +58,7 @@ public:
      * @param bf an instance of basis function
      * @return the output stream
      */
-    friend std::ostream& operator<<(std::ostream& out, BasisFunction& bf)
+    friend std::ostream& operator<<(std::ostream& out, BasisFunction_<InputC>& bf)
     {
         bf.writeOnStream(out);
         return out;
@@ -70,17 +71,19 @@ public:
      * @param bf an instance of basis function
      * @return the input stream
      */
-    friend std::istream& operator>>(std::istream& in, BasisFunction& bf)
+    friend std::istream& operator>>(std::istream& in, BasisFunction_<InputC>& bf)
     {
         bf.readFromStream(in);
         return in;
     }
 
-    virtual ~BasisFunction()
+    virtual ~BasisFunction_()
     {
     }
 
 };
+
+typedef BasisFunction_<arma::vec> BasisFunction;
 
 typedef std::vector<BasisFunction*> BasisFunctions;
 

@@ -29,18 +29,43 @@
 namespace ReLe
 {
 
-class Features
+template<bool denseOutput>
+struct feature_traits
 {
+
+};
+
+template<>
+struct feature_traits<true>
+{
+	typedef arma::mat type;
+};
+
+template<>
+struct feature_traits<false>
+{
+	typedef arma::mat type;
+};
+
+template<class InputC, bool denseOutput = true>
+class Features_
+{
+	using return_type = typename feature_traits<denseOutput>::type;
+
 public:
-    virtual ~Features()
+
+    virtual ~Features_()
     {
     }
 
-    virtual arma::mat operator()(const arma::vec& input) = 0;
+    virtual return_type operator()(const InputC& input) = 0;
     virtual size_t rows() const = 0;
     virtual size_t cols() const = 0;
 
 };
+
+
+typedef Features_<arma::vec> Features;
 
 class DenseFeatures: public Features
 {
