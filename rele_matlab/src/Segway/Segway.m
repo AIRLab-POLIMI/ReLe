@@ -64,15 +64,16 @@ for i=1:size(episodes, 1)
         ylim([0, l+0.1]);
         
         hold off;
-    pause(0.01)
+    pause(0.1)
     end
 end
 
 %% ODE45
 x0 = [0.08 0 0];
-[t,y] = ode45(@segway_ode, [0, 300*0.03], x0);
+[t,y] = ode45(@segway_ode, [0, 40*0.03], x0);
 figure(2);
-plot (t,y(:,1), 0.03*(1:size(x,1)), x(:,1));
+plot (t,y(:,1)*180/pi, 0.03*(1:size(x,1)), x(:,1)*180/pi);
+legend('matlab', 'odeint');
 xlabel('t'); ylabel('x_1');
 figure(3);
 plot (t,y(:,2), 0.03*(1:size(x,1)), x(:,2));

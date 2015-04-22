@@ -132,9 +132,6 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
 {
     double u = action[0];
 
-    //    vector<state_type> x_vec;
-    //    vector<double> times;
-
     //ODEINT (BOOST 1.53+)
     segwayode.action = u;
     double t0 = 0;

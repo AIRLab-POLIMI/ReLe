@@ -107,19 +107,19 @@ void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, 
     uwvode.action = u;
     double t0 = 0;
     double t1 = config->dt;
-    integrate_adaptive( controlled_stepper , uwvode , currentState, t0 , t1 , t1/100.0);
+    integrate_adaptive( controlled_stepper , uwvode , currentState, t0 , t1 , t1/1000.0);
 
     nextState = currentState;
 
-    reward[0] = fabs(config->setPoint - nextState[0]) < config->mu ? 0.0f : -config->C;
+    reward[0] = abs(config->setPoint - nextState[0]) < config->mu ? 0.0 : -config->C;
 
 }
 
 void UnderwaterVehicle::getInitialState(DenseState& state)
 {
-    state[0] = RandomGenerator::sampleUniform(config->velocityRange.Lo(), config->velocityRange.Hi());
-    state.setAbsorbing(false);
-    currentState[0] = state[0]; //keep info about the current state
+    currentState[0] = RandomGenerator::sampleUniform(config->velocityRange.Lo(), config->velocityRange.Hi());
+    currentState.setAbsorbing(false);
+    state = currentState;
 }
 
 
