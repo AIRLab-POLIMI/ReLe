@@ -52,7 +52,7 @@ PolynomialFunction::~PolynomialFunction()
 
 double PolynomialFunction::operator()(const vec& input)
 {
-    float result = 1.0;
+    double result = 1.0;
     unsigned int i, j;
     for (i = 0; i < dimension.size(); i++)
     {

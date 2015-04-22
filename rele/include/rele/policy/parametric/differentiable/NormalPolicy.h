@@ -24,6 +24,8 @@ public:
         mInitialStddev(initialStddev), mMean(0.0),
         approximator(phi)
     {
+        assert(phi.cols() == 1);
+        assert(phi.rows() >= 1);
     }
 
     virtual ~NormalPolicy()

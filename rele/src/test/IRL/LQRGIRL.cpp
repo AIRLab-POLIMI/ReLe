@@ -185,6 +185,7 @@ int main(int argc, char *argv[])
 //    ss.randn();
 //    std::cout << ss.t();
 //    std::cout << phi(ss);
+//    MVNPolicy expertPolicy(phi);
 
 
     vec eReward(2);
