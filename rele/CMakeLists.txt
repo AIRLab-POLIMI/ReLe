@@ -213,6 +213,9 @@ target_link_libraries(portfolio_PG rele)
 add_executable(deep_PG src/test/PG/DeepPGTest.cpp)
 target_link_libraries(deep_PG rele)
 
+add_executable(dam_PG src/test/PG/DamPGTest.cpp)
+target_link_libraries(dam_PG rele)
+
 #Batch test
 add_executable(deep_off src/test/Batch/DeepBatchTest.cpp)
 target_link_libraries(deep_off rele)
