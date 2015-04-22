@@ -8,20 +8,10 @@ clear
 figure(1)
 clf(1)
 
-figure(2)
-clf(2)
 
-figure(3)
-clf(3)
 
-figure(4)
-clf(4)
-
-figure(5)
-clf(5)
-
-%cmd = '/home/dave/ReLe/devel/lib/rele/segway_BBO';
-%status = system(cmd);
+cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/segway_BBO';
+status = system(cmd);
 
 %% Read data
 

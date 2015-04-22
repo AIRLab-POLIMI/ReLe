@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("segway", "BBO");
     fm.createDir();
-    //    fm.cleanDir();
+    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
 

@@ -81,10 +81,6 @@ Segway::SegwayOde::SegwayOde(SegwaySettings& config) :
 void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
                                     const double /* t */)
 {
-
-    //    std::cout << "------------" << std::endl;
-    //    std::cout << x << std::endl;
-    //    std::cout << dx << std::endl;
     //Status and actions
     const double tau = action;
     const double theta = x[0];
@@ -93,7 +89,7 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
 
     //parameters
     const double h1 = (Mr+Mp)*pow(r, 2)+Ir;
-    const double h2 = Mp*r*cos(theta);
+    const double h2 = Mp*r*l*cos(theta);
     const double h3 = pow(l, 2)*Mp+Ip;
 
     //dinamics
@@ -101,22 +97,16 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
     const double dTheta = omegaP;
 
     //angular acceleration [rad/s^2]
-    const double dOmegaP = (h3 * l * Mp * r * sin(theta)
-                            * pow(omegaP, 2) - g * h1 * l * Mp * sin(theta)
-                            + (h3 + h1) * tau) / (pow(h3, 2) - h1 * h2);
+    const double dOmegaP = -(h2*l*Mp*r*sin(theta)*pow(omegaP,2)-g*h1*l*Mp*sin(theta)+(h2+h1)*tau)/(h1*h3-pow(h2,2));
 
     //angular acceleration [rad/s^2]
-    const double dOmegaR = (h2 * l * Mp * r * sin(theta)
-                            * pow(omegaP, 2) - g * h3 * l * Mp * sin(theta)
-                            + (h3 + h2) * tau) / (pow(h3, 2) - h1 * h2);
+    const double dOmegaR = (h3*l*Mp*r*sin(theta)*pow(omegaP,2)-g*h2*l*Mp*sin(theta)+(h3+h2)*tau)/(h1*h3-pow(h2,2));
 
     dx.resize(3);
     dx[0] = dTheta;
     dx[1] = dOmegaP;
     dx[2] = dOmegaR;
 
-    //    std::cout << x << std::endl;
-    //    std::cout << dx << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -138,21 +128,6 @@ Segway::Segway(SegwaySettings& config)
     currentState.set_size(this->getSettings().continuosStateDim);
 }
 
-//struct push_back_state_and_time
-//{
-//    std::vector< arma::vec >& m_states;
-//    std::vector< double >& m_times;
-
-//    push_back_state_and_time( std::vector< arma::vec > &states , std::vector< double > &times )
-//        : m_states( states ) , m_times( times ) { }
-
-//    void operator()( const arma::vec& x , double t )
-//    {
-//        m_states.push_back( x );
-//        m_times.push_back( t );
-//    }
-//};
-
 void Segway::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
     double u = action[0];
@@ -164,15 +139,7 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
     segwayode.action = u;
     double t0 = 0;
     double t1 = segwayConfig->dt;
-    //    size_t steps =
     integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/1000.0);
-    //                       ,push_back_state_and_time( x_vec , times ));
-
-    /* output */
-    //    for( size_t i=0; i<= steps; i++ )
-    //    {
-    //        cerr << times[i] << '\t' << x_vec[i][0] << '\n';
-    //    }
 
     nextState = currentState;
 
