@@ -23,10 +23,10 @@
 
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
-#include "BasisFunctions.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
 #include "basis/PolynomialFunction.h"
+#include "features/DenseFeatures.h"
 
 #include "LQR.h"
 #include "LQRsolver.h"

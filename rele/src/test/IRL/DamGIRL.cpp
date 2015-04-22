@@ -28,6 +28,7 @@
 #include "basis/PolynomialFunction.h"
 #include "basis/GaussianRBF.h"
 #include "basis/ConditionBasedFunction.h"
+#include "features/DenseFeatures.h"
 
 #include "Dam.h"
 #include "PolicyEvalAgent.h"

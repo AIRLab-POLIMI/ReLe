@@ -27,8 +27,8 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "policy_search/offpolicy/OffPolicyREINFORCE.h"
 #include "policy_search/offpolicy/OffPolicyGPOMDP.h"
-#include "BasisFunctions.h"
 #include "basis/IdentityBasis.h"
+#include "features/DenseFeatures.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
 

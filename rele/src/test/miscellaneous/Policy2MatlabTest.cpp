@@ -31,7 +31,8 @@
 #include "FileManager.h"
 #include "basis/IdentityBasis.h"
 #include "basis/PolynomialFunction.h"
-#include "Features.h"
+#include "features/DenseFeatures.h"
+#include "features/SparseFeatures.h"
 
 #include <iostream>
 #include <iomanip>

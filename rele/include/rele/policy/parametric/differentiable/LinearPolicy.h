@@ -25,7 +25,7 @@
 #define LINEARPOLICY_H_
 
 #include "Policy.h"
-#include "LinearApproximator.h"
+#include "regressors/LinearApproximator.h"
 #include <armadillo>
 
 #define DETLINPOL_NAME "DeterministicLinearPolicy"

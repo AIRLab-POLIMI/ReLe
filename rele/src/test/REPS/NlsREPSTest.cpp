@@ -27,6 +27,8 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/IdentityBasis.h"
+#include "features/DenseFeatures.h"
+
 #include "RandomGenerator.h"
 
 #include <iostream>

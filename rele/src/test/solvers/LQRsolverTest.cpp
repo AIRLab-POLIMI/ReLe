@@ -23,6 +23,7 @@
 
 #include "LQRsolver.h"
 #include "basis/IdentityBasis.h"
+#include "features/SparseFeatures.h"
 
 using namespace ReLe;
 using namespace std;

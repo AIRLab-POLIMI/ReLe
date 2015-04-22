@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef APPROXIMATORS_H_
-#define APPROXIMATORS_H_
+#ifndef REGRESSORS_H_
+#define REGRESSORS_H_
 
 #include "Basics.h"
 
@@ -87,4 +87,4 @@ public:
 
 }
 
-#endif /* APPROXIMATORS_H_ */
+#endif /* REGRESSORS_H_ */

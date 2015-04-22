@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LinearApproximator.h"
+#include "regressors/LinearApproximator.h"
 #include <cassert>
 
 using namespace std;

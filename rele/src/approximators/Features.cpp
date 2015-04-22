@@ -21,7 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Features.h"
+#include "features/DenseFeatures.h"
+#include "features/SparseFeatures.h"
 #include <cassert>
 
 using namespace arma;

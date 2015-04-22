@@ -27,6 +27,7 @@
 #include "parametric/differentiable/LinearPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/IdentityBasis.h"
+#include "features/DenseFeatures.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"

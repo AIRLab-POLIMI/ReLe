@@ -31,6 +31,8 @@
 #include "td/SARSA.h"
 #include "q_policy/e_Greedy.h"
 
+#include "features/DenseFeatures.h"
+
 #include "ParametricRewardMDP.h"
 
 #include "algorithms/MWAL.h"

@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_IRL_PARAMETRICREWARDMDP_H_
 #define INCLUDE_RELE_IRL_PARAMETRICREWARDMDP_H_
 
-#include "Approximators.h"
-
 #include <armadillo>
+
+#include "../approximators/Regressors.h"
 #include "../core/Environment.h"
 
 #include "BasicFunctions.h"

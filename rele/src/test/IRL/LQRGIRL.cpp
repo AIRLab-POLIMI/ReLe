@@ -27,6 +27,7 @@
 #include "BasisFunctions.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
+#include "features/DenseFeatures.h"
 
 #include "LQR.h"
 #include "LQRsolver.h"

@@ -30,6 +30,8 @@
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
+#include "features/DenseFeatures.h"
+
 #include "RandomGenerator.h"
 #include "FileManager.h"
 #include "DeepSeaTreasure.h"

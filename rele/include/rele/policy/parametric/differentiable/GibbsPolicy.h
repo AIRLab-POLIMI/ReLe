@@ -2,7 +2,7 @@
 #define GIBBSPOLICY_H_
 
 #include "Policy.h"
-#include "LinearApproximator.h"
+#include "regressors/LinearApproximator.h"
 #include "RandomGenerator.h"
 
 namespace ReLe

@@ -27,6 +27,7 @@
 #include "DifferentiableNormals.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
+#include "features/DenseFeatures.h"
 
 #include "DeepSeaTreasure.h"
 #include "PolicyEvalAgent.h"

@@ -26,6 +26,7 @@
 #include "Core.h"
 #include "td/LinearSARSA.h"
 #include "basis/PolynomialFunction.h"
+#include "features/DenseFeatures.h"
 
 using namespace std;
 using namespace ReLe;

@@ -30,6 +30,8 @@
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/GaussianRBF.h"
+#include "features/DenseFeatures.h"
+
 #include "RandomGenerator.h"
 #include "FileManager.h"
 

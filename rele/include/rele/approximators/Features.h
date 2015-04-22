@@ -67,61 +67,6 @@ public:
 
 typedef Features_<arma::vec> Features;
 
-class DenseFeatures: public Features
-{
-public:
-    DenseFeatures(BasisFunction* basisVector);
-    DenseFeatures(BasisFunctions& basisVector);
-    DenseFeatures(BasisFunctions& basisVector, unsigned int rows, unsigned int cols);
-    virtual ~DenseFeatures();
-    virtual arma::mat operator()(const arma::vec& input);
-
-    inline virtual size_t rows() const
-    {
-        return basis.n_rows;
-    }
-
-    inline virtual size_t cols() const
-    {
-        return basis.n_cols;
-    }
-
-private:
-    arma::field<BasisFunction*> basis;
-
-};
-
-class SparseFeatures: public Features
-{
-public:
-    SparseFeatures();
-
-    SparseFeatures(BasisFunctions& basis,
-                   unsigned int nbReplication = 1,
-                   bool indipendent = true);
-
-    // AbstractBasisMatrix interface
-public:
-    arma::mat operator ()(const arma::vec& input);
-    inline size_t rows() const
-    {
-        return n_rows;
-    }
-
-    size_t cols() const
-    {
-        return n_cols;
-    }
-
-    void addBasis(unsigned int row, unsigned int col, BasisFunction* bfs);
-
-private:
-    //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
-    std::vector<unsigned int> rowsIdxs, colsIdxs;
-    std::vector<BasisFunction*> values;
-    unsigned int n_rows, n_cols;
-};
-
 }
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_FEATURES_H_ */
