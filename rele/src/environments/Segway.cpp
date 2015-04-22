@@ -46,15 +46,15 @@ void SegwaySettings::defaultSettings(SegwaySettings& settings)
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = true;
-    settings.horizon = 0;
+    settings.horizon = 300;
 
     //UWV Parameters
     settings.Mp = 10;
     settings.Mr = 15;
-    settings.Ip = 1; //TODO change
-    settings.Ir = 1; //TODO change
+    settings.Ip = 19; //TODO change
+    settings.Ir = 19; //TODO change
     settings.l = 1.2; //m
-    settings.r = 0.1; //TODO change
+    settings.r = 0.2; //TODO change
     settings.dt = 0.03; //s
 }
 
@@ -94,12 +94,15 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
     const double h3 = pow(l, 2)*Mp+Ip;
 
     //dinamics
+    //angular velocity [rad/s]
     const double dTheta = omegaP;
 
+    //angular acceleration [rad/s^2]
     const double dOmegaP = (h3 * l * Mp * r * sin(theta)
                             * pow(omegaP, 2) - g * h1 * l * Mp * sin(theta)
                             + (h3 + h1) * tau) / (pow(h3, 2) - h1 * h2);
 
+    //angular acceleration [rad/s^2]
     const double dOmegaR = (h2 * l * Mp * r * sin(theta)
                             * pow(omegaP, 2) - g * h3 * l * Mp * sin(theta)
                             + (h3 + h2) * tau) / (pow(h3, 2) - h1 * h2);
@@ -128,20 +131,47 @@ Segway::Segway(SegwaySettings& config)
     currentState.set_size(this->getSettings().continuosStateDim);
 }
 
+struct push_back_state_and_time
+{
+    std::vector< arma::vec >& m_states;
+    std::vector< double >& m_times;
+
+    push_back_state_and_time( std::vector< arma::vec > &states , std::vector< double > &times )
+        : m_states( states ) , m_times( times ) { }
+
+    void operator()( const arma::vec& x , double t )
+    {
+        m_states.push_back( x );
+        m_times.push_back( t );
+    }
+};
+
 void Segway::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
     double u = action[0];
+
+    vector<state_type> x_vec;
+    vector<double> times;
 
     //ODEINT (BOOST 1.53+)
     segwayode.action = u;
     double t0 = 0;
     double t1 = segwayConfig->dt;
-    integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/100.0);
+//    integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/1000.0,
+//                       push_back_state_and_time( x_vec , times ));
+    integrate(segwayode , currentState, t0 , t1 , t1/1000.0,
+              push_back_state_and_time( x_vec , times ));
+
+    /* output */
+    for( size_t i=0; i< x_vec.size(); i++ )
+    {
+        cerr << times[i] << '\t' << x_vec[i][0] << '\n';
+    }
 
     nextState = currentState;
 
     //compute reward
-    if(abs(currentState[0] > M_PI/18))
+    if(abs(currentState[0]) > M_PI/18)
     {
         currentState.setAbsorbing();
         reward[0] = -1000;
@@ -149,27 +179,25 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
     else
     {
         arma::mat Q(3, 3, arma::fill::eye);
-        arma::mat R(3, 3, arma::fill::eye);
+        arma::mat R(1, 1, arma::fill::eye);
 
 
         const arma::vec& x = currentState;
         const arma::vec& u = action;
         arma::mat J = x.t()*Q*x + u.t()*R*u;
 
-        reward[0] = J[0];
+        reward[0] = -J[0];
     }
 
 }
 
 void Segway::getInitialState(DenseState &state)
 {
-    state[0] = 0.08;
-    state[1] = 0;
-    state[2] = 0;
-
-    state.setAbsorbing(false);
-
-    currentState = state;
+    currentState.setAbsorbing(false);
+    currentState[0] = 0.08;
+    currentState[1] = 0;
+    currentState[2] = 0;
+    state = currentState;
 }
 
 
