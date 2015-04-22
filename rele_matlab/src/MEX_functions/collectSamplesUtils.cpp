@@ -8,7 +8,7 @@
 #include <BasisFunctions.h>
 #include <basis/PolynomialFunction.h>
 #include <basis/IdentityBasis.h>
-#include <basis/GaussianRBF.h>
+#include <basis/GaussianRbf.h>
 #include <basis/ConditionBasedFunction.h>
 #include <LQR.h>
 #include <NLS.h>
@@ -53,7 +53,7 @@ class deep_state_identity: public BasisFunction
 
 
 #define SAMPLES_GATHERING(ActionC, StateC, acdim, stdim) \
-	mdp.setHorizon(maxSteps);\
+	    mdp.setHorizon(maxSteps);\
         PolicyEvalAgent<ActionC,StateC> agent(policy);\
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
         CollectorStrategy<ActionC, StateC> collection;\
@@ -155,7 +155,14 @@ CollectSamplesInContinuousMDP(
     if (strcmp(domain_settings, "lqr") == 0)
     {
         // extract information from the struct
-        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
+        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "dim");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: missing field dim!\n");
+        }
+        int dim = mxGetScalar(array);
+        
+        array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
         if (array == nullptr)
         {
             mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: missing field policyParameters!\n");
@@ -175,11 +182,13 @@ CollectSamplesInContinuousMDP(
         }
         double stddev = mxGetScalar(array);
 
-        LQR mdp(1,1);
-        PolynomialFunction* pf = new PolynomialFunction(1,1);
-        cout << *pf << endl;
-        DenseFeatures phi(pf);
-        NormalPolicy policy(0.1, phi);
+        LQR mdp(dim,dim);
+        BasisFunctions basis;
+        for (int ll = 0; ll < dim; ++ll)
+            basis.push_back(new IdentityBasis(ll));
+    SparseFeatures phi;
+    phi.setDiagonal(basis);
+        NormalPolicy policy(1, phi);
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)

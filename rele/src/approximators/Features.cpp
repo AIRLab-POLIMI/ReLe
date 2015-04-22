@@ -159,6 +159,21 @@ void SparseFeatures::addBasis(unsigned int row, unsigned int col, BasisFunction 
 
 }
 
+void SparseFeatures::setDiagonal(BasisFunctions &basis)
+{
+    rowsIdxs.clear();
+    colsIdxs.clear();
+    values.clear();
+    int dim = basis.size();
+    n_rows = n_cols = dim;
+    for (int i = 0; i < dim; ++i)
+    {
+        rowsIdxs.push_back(i);
+        colsIdxs.push_back(i);
+        values.push_back(basis[i]);
+    }
+}
+
 
 
 }//end namespace

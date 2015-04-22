@@ -57,6 +57,11 @@ public:
         return *settings;
     }
 
+    void setHorizon(unsigned int h)
+    {
+        settings->horizon = h;
+    }
+
     virtual ~Environment()
     {
         if (cleanSettings)

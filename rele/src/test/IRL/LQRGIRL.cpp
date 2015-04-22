@@ -167,7 +167,24 @@ int main(int argc, char *argv[])
 //    initialState[0] = -5;
 //    mdp.setInitialState(initialState);
 
+//    LQR mdp(2,2);
 
+
+//    IdentityBasis* pf1 = new IdentityBasis(0);
+//    IdentityBasis* pf2 = new IdentityBasis(1);
+//    IdentityBasis* pf3 = new IdentityBasis(2);
+//    BasisFunctions basis;
+//    basis.push_back(pf1);
+//    basis.push_back(pf2);
+//    basis.push_back(pf3);
+
+//    SparseFeatures phi;
+//    phi.setDiagonal(basis);
+
+//    arma::vec ss(3);
+//    ss.randn();
+//    std::cout << ss.t();
+//    std::cout << phi(ss);
 
 
     vec eReward(2);

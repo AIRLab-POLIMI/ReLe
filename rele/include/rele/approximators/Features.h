@@ -90,6 +90,8 @@ public:
 
     void addBasis(unsigned int row, unsigned int col, BasisFunction* bfs);
 
+    void setDiagonal(BasisFunctions& basis);
+
 private:
     //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
     std::vector<unsigned int> rowsIdxs, colsIdxs;
