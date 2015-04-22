@@ -30,7 +30,8 @@ using namespace std;
 namespace ReLe_ROS
 {
 
-SimulatedSnake::SimulatedSnake(double controlFrequency) : SimulatedEnvironment("Snake", controlFrequency)
+SimulatedSnake::SimulatedSnake(double controlFrequency, double k) :
+    SimulatedEnvironment("Snake", controlFrequency), dt(1/controlFrequency), k(k)
 {
     writeSettings();
 
@@ -40,6 +41,16 @@ SimulatedSnake::SimulatedSnake(double controlFrequency) : SimulatedEnvironment("
     motorSpeedPub = n.advertise<vrep_common::JointSetStateData>("/Snake/wheels",1);
 
     stateReady = true; //FIXME LEVARE!!!
+}
+
+void SimulatedSnake::start()
+{
+    SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>::start();
+
+    //setup initial position
+    arma::vec pose(7);
+    while(!getObjectPose(pose, positionHandle[0]) && ros::ok());
+    lastPosition = pose(arma::span(0, 2));
 }
 
 
@@ -80,7 +91,14 @@ void SimulatedSnake::setState(ReLe::DenseState& state)
 void SimulatedSnake::setReward(const ReLe::DenseAction& action,
                                const ReLe::DenseState& state, ReLe::Reward& reward)
 {
+    double oldX = lastPosition[0];
+    double newX = state[0];
+    double vx = (newX - oldX) / dt;
 
+    const arma::vec& u = action;
+    reward[0] = vx - k*arma::norm(u);
+
+    lastPosition = state(arma::span(0, 2));
 }
 
 void SimulatedSnake::writeSettings()
@@ -115,7 +133,7 @@ void SimulatedSnake::getJointsHandles()
 
 void SimulatedSnake::getBodyHandles()
 {
-	positionHandle.resize(10);
+    positionHandle.resize(10);
 
     for (unsigned int i = 0; i < 10; i++)
     {

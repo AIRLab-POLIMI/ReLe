@@ -37,8 +37,8 @@ public:
 
     virtual void initEpisode(const DenseState& state, DenseAction& action)
     {
-    	arma::vec& u = action;
-    	u = arma::vec(8, arma::fill::randn);
+        arma::vec& u = action;
+        u = arma::vec(8, arma::fill::randn);
     }
 
     virtual void sampleAction(const DenseState& state, DenseAction& action)
@@ -75,7 +75,10 @@ int main(int argc, char* argv[])
     FakeAgent agent;
     Core<DenseAction, DenseState> core(snake, agent);
 
-    core.getSettings().episodeLenght = 600;
+
+    PrintStrategy<DenseAction, DenseState> strategy(true, false);
+    core.getSettings().episodeLenght = 100;
+    core.getSettings().loggerStrategy = &strategy;
 
     try
     {
