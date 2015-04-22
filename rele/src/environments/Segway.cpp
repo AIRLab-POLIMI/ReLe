@@ -76,12 +76,15 @@ void SegwaySettings::ReadFromStream(std::istream& in)
 Segway::SegwayOde::SegwayOde(SegwaySettings& config) :
     l(config.l), r(config.r), Ir(config.Ir), Ip(config.Ip), Mp(config.Mp), Mr(config.Mr), action(0)
 {
-
 }
 
 void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
                                     const double /* t */)
 {
+
+    //    std::cout << "------------" << std::endl;
+    //    std::cout << x << std::endl;
+    //    std::cout << dx << std::endl;
     //Status and actions
     const double tau = action;
     const double theta = x[0];
@@ -107,9 +110,13 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
                             * pow(omegaP, 2) - g * h3 * l * Mp * sin(theta)
                             + (h3 + h2) * tau) / (pow(h3, 2) - h1 * h2);
 
+    dx.resize(3);
     dx[0] = dTheta;
     dx[1] = dOmegaP;
     dx[2] = dOmegaR;
+
+    //    std::cout << x << std::endl;
+    //    std::cout << dx << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -131,42 +138,41 @@ Segway::Segway(SegwaySettings& config)
     currentState.set_size(this->getSettings().continuosStateDim);
 }
 
-struct push_back_state_and_time
-{
-    std::vector< arma::vec >& m_states;
-    std::vector< double >& m_times;
+//struct push_back_state_and_time
+//{
+//    std::vector< arma::vec >& m_states;
+//    std::vector< double >& m_times;
 
-    push_back_state_and_time( std::vector< arma::vec > &states , std::vector< double > &times )
-        : m_states( states ) , m_times( times ) { }
+//    push_back_state_and_time( std::vector< arma::vec > &states , std::vector< double > &times )
+//        : m_states( states ) , m_times( times ) { }
 
-    void operator()( const arma::vec& x , double t )
-    {
-        m_states.push_back( x );
-        m_times.push_back( t );
-    }
-};
+//    void operator()( const arma::vec& x , double t )
+//    {
+//        m_states.push_back( x );
+//        m_times.push_back( t );
+//    }
+//};
 
 void Segway::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
     double u = action[0];
 
-    vector<state_type> x_vec;
-    vector<double> times;
+    //    vector<state_type> x_vec;
+    //    vector<double> times;
 
     //ODEINT (BOOST 1.53+)
     segwayode.action = u;
     double t0 = 0;
     double t1 = segwayConfig->dt;
-//    integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/1000.0,
-//                       push_back_state_and_time( x_vec , times ));
-    integrate(segwayode , currentState, t0 , t1 , t1/1000.0,
-              push_back_state_and_time( x_vec , times ));
+    //    size_t steps =
+    integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/1000.0);
+    //                       ,push_back_state_and_time( x_vec , times ));
 
     /* output */
-    for( size_t i=0; i< x_vec.size(); i++ )
-    {
-        cerr << times[i] << '\t' << x_vec[i][0] << '\n';
-    }
+    //    for( size_t i=0; i<= steps; i++ )
+    //    {
+    //        cerr << times[i] << '\t' << x_vec[i][0] << '\n';
+    //    }
 
     nextState = currentState;
 

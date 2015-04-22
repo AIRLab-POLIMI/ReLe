@@ -8,11 +8,8 @@ clear
 figure(1)
 clf(1)
 
-% figure(2)
-% clf(2)
-% 
-% figure(3)
-% clf(3)
+cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/segway_BBO';
+status = system(cmd);
 
 %% Read data
 
@@ -33,6 +30,7 @@ r = 0.2; %m
 %%
 for i=1:size(episodes, 1)
     x = episodes(i).x;
+    u = episodes(i).u;
     
     for step = 1:length(x)
         
@@ -51,6 +49,7 @@ for i=1:size(episodes, 1)
         hold on;
         plot([x_c;x_h],[y_c;y_h]);
         axis equal;
+        ylim([0, l+0.1]);
         
         hold off;
     pause(0.01)
@@ -59,9 +58,19 @@ end
 
 %% ODE45
 x0 = [0.08 0 0];
-[t,y] = ode45(@segway_ode, [0, 0.03], x0);
-plot (t,y(:,1))
-
-
+[t,y] = ode45(@segway_ode, [0, 300*0.03], x0);
+figure(2);
+plot (t,y(:,1), 0.03*(1:size(x,1)), x(:,1));
+xlabel('t'); ylabel('x_1');
+figure(3);
+plot (t,y(:,2), 0.03*(1:size(x,1)), x(:,2));
+xlabel('t'); ylabel('x_2');
+figure(4);
+plot (t,y(:,3), 0.03*(1:size(x,1)), x(:,3));
+xlabel('t'); ylabel('x_3');
+figure(5);
+title('action u');
+plot (0.03*(1:size(x,1)), u);
+xlabel('t'); ylabel('u');
 
 
