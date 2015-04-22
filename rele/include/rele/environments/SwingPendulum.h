@@ -67,6 +67,12 @@ public:
     DiscreteActionSwingUp();
     DiscreteActionSwingUp(SwingUpSettings& config);
 
+    virtual ~DiscreteActionSwingUp()
+    {
+        if (cleanConfig)
+            delete config;
+    }
+
     void step(const FiniteAction& action, DenseState& nextState, Reward& reward);
     void getInitialState(DenseState& state);
 
@@ -90,6 +96,7 @@ private:
     int upTime;
     //current state [theta, velocity]
     SwingUpSettings* config;
+    bool cleanConfig;
 };
 
 }//end namespace

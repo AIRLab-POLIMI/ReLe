@@ -63,6 +63,12 @@ public:
     NLS();
     NLS(NLSSettings& config);
 
+    virtual ~NLS()
+    {
+        if (cleanConfig)
+            delete config;
+    }
+
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
@@ -74,6 +80,7 @@ public:
 
 private:
     NLSSettings* config;
+    bool cleanConfig;
 };
 
 }

@@ -28,8 +28,8 @@ using namespace std;
 namespace ReLe
 {
 
-DenseMDP::DenseMDP(EnvironmentSettings *settings, bool clear)
-    : Environment(settings, clear)
+DenseMDP::DenseMDP(EnvironmentSettings *settings)
+    : Environment(settings)
 {
     settings->finiteStateDim = 0;
     settings->continuosActionDim = 0;

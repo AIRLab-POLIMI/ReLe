@@ -86,15 +86,14 @@ void UWVSettings::ReadFromStream(istream& in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 UnderwaterVehicle::UnderwaterVehicle()
-    : DenseMDP(new UWVSettings(), true), uwvode(),
+    : DenseMDP(new UWVSettings()), cleanConfig(true), uwvode(), config(static_cast<UWVSettings*>(settings)),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().continuosStateDim);
-    config = static_cast<UWVSettings*>(settings);
 }
 
 UnderwaterVehicle::UnderwaterVehicle(UWVSettings& config)
-    : DenseMDP(&config, false), config(&config), uwvode(),
+    : DenseMDP(&config), cleanConfig(false), config(&config), uwvode(),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().continuosStateDim);

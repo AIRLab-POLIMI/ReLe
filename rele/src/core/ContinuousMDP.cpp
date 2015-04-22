@@ -28,8 +28,8 @@ using namespace std;
 namespace ReLe
 {
 
-ContinuousMDP::ContinuousMDP(EnvironmentSettings *settings, bool clear)
-    : Environment(settings, clear)
+ContinuousMDP::ContinuousMDP(EnvironmentSettings *settings)
+    : Environment(settings)
 {
     settings->finiteStateDim = 0;
     settings->finiteActionDim = 0;

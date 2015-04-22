@@ -193,7 +193,6 @@ int main(int argc, char *argv[])
     LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
 
     IdentityBasis* pf = new IdentityBasis(0);
-    cout << *pf << endl;
     DenseFeatures phi(pf);
     DetLinearPolicy<DenseState> policy(phi);
     //---
@@ -231,6 +230,8 @@ int main(int argc, char *argv[])
         //-----
     }
     //---
+
+    cout << "## MetaDistribution: " << dist->getDistributionName() << endl;
 
     int nbepperpol = 1, nbpolperupd = config.nbPolicies;
     char outputname[100];

@@ -32,10 +32,13 @@ namespace ReLe
 class DenseMDP: public Environment<FiniteAction, DenseState>
 {
 public:
-    DenseMDP(EnvironmentSettings* settings, bool clear = false);
+    DenseMDP(EnvironmentSettings* settings);
 
     DenseMDP(std::size_t stateSize, unsigned int actionN, size_t rewardSize, bool isFiniteHorizon,
              bool isEpisodic, double gamma = 1.0, unsigned int horizon = 0);
+
+    virtual ~DenseMDP()
+    {}
 
 protected:
     void setupEnvirorment(std::size_t stateSize, unsigned int actionN, size_t rewardSize,

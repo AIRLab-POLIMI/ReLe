@@ -106,10 +106,9 @@ void SwingUpSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 DiscreteActionSwingUp::DiscreteActionSwingUp() :
-    DenseMDP(new SwingUpSettings(), true)
+    DenseMDP(new SwingUpSettings()),  cleanConfig(true), config(static_cast<SwingUpSettings*>(settings))
 {
     currentState.set_size(this->getSettings().continuosStateDim);
-    config = static_cast<SwingUpSettings*>(settings);
 
     //variable initialization
     previousTheta = cumulatedRotation = overRotatedTime = 0;
@@ -118,7 +117,7 @@ DiscreteActionSwingUp::DiscreteActionSwingUp() :
 }
 
 DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
-    DenseMDP(&config, false), config(&config)
+    DenseMDP(&config), cleanConfig(false), config(&config)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
 

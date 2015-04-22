@@ -94,6 +94,12 @@ public:
     UnderwaterVehicle();
     UnderwaterVehicle(UWVSettings& config);
 
+    virtual ~UnderwaterVehicle()
+    {
+        if (cleanConfig)
+            delete config;
+    }
+
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
@@ -106,6 +112,7 @@ public:
 private:
     UWVSettings* config;
     UWVOde uwvode;
+    bool cleanConfig;
 
     //[ define_adapt_stepper
     typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;

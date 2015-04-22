@@ -95,14 +95,13 @@ NLSSettings::~NLSSettings()
 ///////////////////////////////////////////////////////////////////////////////////////
 
 NLS::NLS()
-    : ContinuousMDP(new NLSSettings(), true)
+    : ContinuousMDP(new NLSSettings()), cleanConfig(true), config(static_cast<NLSSettings*>(settings))
 {
     currentState.set_size(this->getSettings().continuosStateDim);
-    config = static_cast<NLSSettings*>(settings);
 }
 
 NLS::NLS(NLSSettings& config)
-    : ContinuousMDP(&config, false), config(&config)
+    : ContinuousMDP(&config), cleanConfig(true), config(&config)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
 }

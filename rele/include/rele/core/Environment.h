@@ -39,12 +39,12 @@ class Environment
 public:
 
     Environment()
-        : settings(new EnvironmentSettings()), clearEnvSettings(true)
+        : settings(new EnvironmentSettings()), cleanSettings(true)
     {
     }
 
-    Environment(EnvironmentSettings* settings, bool clear = false)
-        : settings(settings), clearEnvSettings(clear)
+    Environment(EnvironmentSettings* settings)
+        : settings(settings), cleanSettings(false)
     {
     }
 
@@ -59,7 +59,7 @@ public:
 
     virtual ~Environment()
     {
-        if (clearEnvSettings)
+        if (cleanSettings)
             delete settings;
     }
 
@@ -71,7 +71,8 @@ protected:
 
 protected:
     EnvironmentSettings* settings;
-    bool clearEnvSettings;
+private:
+    bool cleanSettings;
 };
 
 }

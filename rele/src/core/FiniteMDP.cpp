@@ -40,8 +40,8 @@ FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
     findAbsorbingStates();
 }
 
-FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings *settings, bool clear) :
-    Environment(settings, clear), P(P), R(R), Rsigma(Rsigma)
+FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings *settings) :
+    Environment(settings), P(P), R(R), Rsigma(Rsigma)
 {
     chekMatricesDimensions(P, R, Rsigma);
 

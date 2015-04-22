@@ -38,10 +38,9 @@ class FiniteMDP: public Environment<FiniteAction, FiniteState>
     friend class DynamicProgrammingAlgorithm;
 public:
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
-              bool isFiniteHorizon, double gamma = 1.0, unsigned int horizon =
-                  0);
+              bool isFiniteHorizon, double gamma = 1.0, unsigned int horizon = 0);
 
-    FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings, bool clear = false);
+    FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings);
 
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward);

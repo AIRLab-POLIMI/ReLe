@@ -254,6 +254,8 @@ int main(int argc, char *argv[])
     }
     //---
 
+    cout << "## MetaDistribution: " << dist->getDistributionName() << endl;
+
     int nbepperpol = 1, nbpolperupd = config.nbPolicies;
     char outputname[100];
     ReLe::Core<DenseAction, DenseState>* core;

@@ -87,6 +87,12 @@ public:
     Segway();
     Segway(SegwaySettings& config);
 
+    virtual ~Segway()
+    {
+        if (cleanConfig)
+            delete segwayConfig;
+    }
+
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
@@ -100,6 +106,7 @@ public:
 private:
     SegwaySettings* segwayConfig;
     SegwayOde segwayode;
+    bool cleanConfig;
 
     //[ define_adapt_stepper
     typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;

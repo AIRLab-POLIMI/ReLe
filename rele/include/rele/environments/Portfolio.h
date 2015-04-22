@@ -76,6 +76,12 @@ public:
     Portfolio();
     Portfolio(PortfolioSettings& config);
 
+    virtual ~Portfolio()
+    {
+        if (cleanConfig)
+            delete config;
+    }
+
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
@@ -87,6 +93,7 @@ public:
 private:
     void defaultValues();
     PortfolioSettings* config;
+    bool cleanConfig;
 
 };
 

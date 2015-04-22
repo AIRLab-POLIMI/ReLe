@@ -114,15 +114,15 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Segway::Segway()
-    : ContinuousMDP(new SegwaySettings(), true), segwayode(static_cast<SegwaySettings&>(getWritableSettings())),
+    : ContinuousMDP(new SegwaySettings()), cleanConfig(true), segwayode(static_cast<SegwaySettings&>(getWritableSettings())),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
     segwayConfig = static_cast<SegwaySettings*>(settings);
+    currentState.set_size(segwayConfig->continuosStateDim);
 }
 
 Segway::Segway(SegwaySettings& config)
-    : ContinuousMDP(&config, false), segwayConfig(&config), segwayode(*segwayConfig),
+    : ContinuousMDP(&config), cleanConfig(false), segwayConfig(&config), segwayode(*segwayConfig),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().continuosStateDim);

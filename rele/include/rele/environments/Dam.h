@@ -69,6 +69,12 @@ public:
     Dam();
     Dam(DamSettings& config);
 
+    virtual ~Dam()
+    {
+        if (cleanConfig)
+            delete config;
+    }
+
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
@@ -81,8 +87,9 @@ public:
     }
 
 private:
-    int nbSteps;
     DamSettings* config;
+    bool cleanConfig;
+    int nbSteps;
 };
 
 }

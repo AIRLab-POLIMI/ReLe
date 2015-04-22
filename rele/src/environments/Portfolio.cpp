@@ -90,14 +90,13 @@ void PortfolioSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Portfolio::Portfolio() :
-    DenseMDP(new PortfolioSettings(), true)
+    DenseMDP(new PortfolioSettings()), cleanConfig(true), config(static_cast<PortfolioSettings*>(settings))
 {
     currentState.set_size(this->getSettings().continuosStateDim);
-    config = static_cast<PortfolioSettings*>(settings);
 }
 
 Portfolio::Portfolio(PortfolioSettings& config):
-    DenseMDP(&config, false), config(&config)
+    DenseMDP(&config), cleanConfig(false), config(&config)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
 }

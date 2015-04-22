@@ -120,14 +120,13 @@ void DamSettings::ReadFromStream(istream &in)
 ///////////////////////////////////////////////////////////////////////////////////////
 
 Dam::Dam()
-    : ContinuousMDP(new DamSettings(), true), nbSteps(0)
+    : ContinuousMDP(new DamSettings()), cleanConfig(true), config(static_cast<DamSettings*>(settings)), nbSteps(0)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
-    config = static_cast<DamSettings*>(settings);
 }
 
 Dam::Dam(DamSettings& config)
-    : ContinuousMDP(&config, false), nbSteps(0), config(&config)
+    : ContinuousMDP(&config), cleanConfig(false), config(&config), nbSteps(0)
 {
     currentState.set_size(this->getSettings().continuosStateDim);
 }
