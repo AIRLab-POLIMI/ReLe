@@ -34,7 +34,7 @@ class RewardTransformation
 {
 public:
     virtual double operator()(const Reward& r) = 0;
-    virtual ~RewardTransformation(){}
+    virtual ~RewardTransformation() {}
 };
 
 class IndexRT : public RewardTransformation

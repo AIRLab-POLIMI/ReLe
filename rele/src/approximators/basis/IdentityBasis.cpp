@@ -28,13 +28,15 @@ using namespace arma;
 namespace ReLe
 {
 
+///////////////////////////////////////
+// IdentityBasis
+///////////////////////////////////////
+
 IdentityBasis::IdentityBasis(unsigned int index)
-    : index(index)
+    : IdentityBasis_(index)
 {
 
 }
-
-
 
 IdentityBasis::~IdentityBasis()
 {
@@ -61,7 +63,7 @@ BasisFunctions IdentityBasis::generate(unsigned int input_size)
 {
     BasisFunctions basis;
 
-    for(int i = 0; i < input_size; i++)
+    for(unsigned int i = 0; i < input_size; i++)
     {
         basis.push_back(new IdentityBasis(i));
     }
@@ -69,31 +71,47 @@ BasisFunctions IdentityBasis::generate(unsigned int input_size)
     return basis;
 }
 
-InverseBasis::InverseBasis(BasisFunction* basis) : basis(basis)
+////////////////////////////////////////////////
+// FiniteIdentityBasis
+////////////////////////////////////////////////
+
+FiniteIdentityBasis::FiniteIdentityBasis(unsigned int index)
+    : IdentityBasis_(index)
 {
 
 }
 
-InverseBasis::~InverseBasis()
+FiniteIdentityBasis::~FiniteIdentityBasis()
 {
-    delete basis;
+
 }
 
-double InverseBasis::operator() (const arma::vec& input)
+double FiniteIdentityBasis::operator() (const size_t& input)
 {
-    BasisFunction& bf = *basis;
-    return -bf(input);
+	return (input == index);
 }
 
-void InverseBasis::writeOnStream (std::ostream& out)
+void FiniteIdentityBasis::writeOnStream (std::ostream& out)
 {
-    out << "Inverse ";
-    basis->writeOnStream(out);
+	out << "Finite Identity" << std::endl;
+	out << index <<endl;
 }
 
-void InverseBasis::readFromStream(std::istream& in)
+void FiniteIdentityBasis::readFromStream(std::istream& in)
 {
-    //TODO implement
+	//TODO implement
+}
+
+BasisFunctions_<size_t> FiniteIdentityBasis::generate(unsigned int stateN)
+{
+	BasisFunctions_<size_t> basis;
+
+	for(size_t i = 0; i < stateN; i++)
+	{
+		 basis.push_back(new FiniteIdentityBasis(i));
+	}
+
+	return basis;
 }
 
 }//end namespace

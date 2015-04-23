@@ -32,16 +32,15 @@ namespace ReLe
 template<class InputC>
 class SparseFeatures_: public Features_<InputC>
 {
-	using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
 
 public:
-	SparseFeatures_(): n_rows(0), n_cols(0)
+    SparseFeatures_(): n_rows(0), n_cols(0)
     {
     }
 
-	SparseFeatures_(BasisFunctions_& basis,
-                   unsigned int nbReplication = 1,
-                   bool indipendent = true)
+    SparseFeatures_(BasisFunctions_<InputC>& basis,
+                    unsigned int nbReplication = 1,
+                    bool indipendent = true)
         : n_rows(basis.size()*(indipendent?nbReplication:1)), n_cols(nbReplication)
     {
         unsigned int i, k;
@@ -123,7 +122,7 @@ public:
 private:
     //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
     std::vector<unsigned int> rowsIdxs, colsIdxs;
-    BasisFunctions_ values;
+    BasisFunctions_<InputC> values;
     unsigned int n_rows, n_cols;
 };
 

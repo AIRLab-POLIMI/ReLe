@@ -29,7 +29,20 @@
 namespace ReLe
 {
 
-class IdentityBasis : public BasisFunction
+template<class InputC>
+class IdentityBasis_ : public BasisFunction_<InputC>
+{
+public:
+    IdentityBasis_(unsigned int index) : index(index)
+    {
+
+    }
+
+protected:
+    unsigned int index;
+};
+
+class IdentityBasis : public IdentityBasis_<arma::vec>
 {
 public:
     IdentityBasis(unsigned int index);
@@ -42,24 +55,60 @@ public:
 
     static BasisFunctions generate(unsigned int input_size);
 
-private:
-    unsigned int index;
+
 };
 
-class InverseBasis : public BasisFunction
+class FiniteIdentityBasis : public IdentityBasis_<size_t>
 {
 public:
-    InverseBasis(BasisFunction* basis);
-    virtual ~InverseBasis();
-    double operator() (const arma::vec& input);
+    FiniteIdentityBasis(unsigned int index);
+    virtual ~FiniteIdentityBasis();
+    double operator() (const size_t& input);
 
 
     virtual void writeOnStream (std::ostream& out);
     virtual void readFromStream(std::istream& in);
 
-private:
-    BasisFunction* basis;
+    static BasisFunctions_<size_t> generate(unsigned int stateN);
 };
+
+
+template<class InputC>
+class InverseBasis_ : public BasisFunction_<InputC>
+{
+public:
+    InverseBasis_(BasisFunction_<InputC>* basis) : basis(basis)
+    {
+
+    }
+
+    ~InverseBasis_()
+    {
+        delete basis;
+    }
+
+    double operator() (const InputC& input)
+    {
+        BasisFunction_<InputC>& bf = *basis;
+        return -bf(input);
+    }
+
+    void writeOnStream (std::ostream& out)
+    {
+        out << "Inverse ";
+        basis->writeOnStream(out);
+    }
+
+    void readFromStream(std::istream& in)
+    {
+        //TODO implement
+    }
+
+private:
+    BasisFunction_<InputC>* basis;
+};
+
+typedef InverseBasis_<arma::vec> InverseBasis;
 
 }
 

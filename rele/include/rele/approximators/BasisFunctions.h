@@ -84,8 +84,8 @@ public:
 };
 
 typedef BasisFunction_<arma::vec> BasisFunction;
-
 typedef std::vector<BasisFunction*> BasisFunctions;
+template<class InputC> using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
 
 } //end namespace
 

@@ -33,7 +33,6 @@ namespace ReLe
 template<class InputC>
 class DenseFeatures_: public Features_<InputC>
 {
-    using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
 
 public:
     DenseFeatures_(BasisFunction_<InputC>* basisFunction) : basis(1)
@@ -41,7 +40,7 @@ public:
         basis[0] = basisFunction;
     }
 
-    DenseFeatures_(BasisFunctions_& basisVector) :  basis(basisVector.size())
+    DenseFeatures_(BasisFunctions_<InputC>& basisVector) :  basis(basisVector.size())
     {
 
         for(unsigned int i = 0; i < basisVector.size(); i++)
@@ -50,7 +49,7 @@ public:
         }
     }
 
-    DenseFeatures_(BasisFunctions_& basisVector, unsigned int rows, unsigned int cols)
+    DenseFeatures_(BasisFunctions_<InputC>& basisVector, unsigned int rows, unsigned int cols)
         : basis(rows, cols)
     {
         assert(rows*cols == basisVector.size());
