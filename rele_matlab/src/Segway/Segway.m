@@ -1,5 +1,6 @@
 %% Rocky data visualizer
 addpath('../Statistics');
+addpath('../Toolbox/');
 
 %clear old data
 clear
@@ -64,9 +65,32 @@ for i=1:size(episodes, 1)
         ylim([0, l+0.1]);
         
         hold off;
-    pause(0.05)
+        pause(0.05)
     end
 end
+
+%%
+
+index = 1;
+ep = 1;
+csv = csvread('/tmp/ReLe/segway/BBO/lqr_nes_diag_agentData.log');
+while(index < size(csv, 1))
+    [data(ep), index] = ReadNESStatistics(csv, index);
+    ep = ep + 1;
+end
+clear csv;
+
+J_history = [];
+J = zeros(length(data),1);
+for o = 1:length(data)
+    J(o) = mean([data(o).policies.J]);
+    J_history = [J_history, [data(o).policies.J]'];
+end
+
+shadedErrorBar(1:size(J_history,2), ...
+    smooth(mean(J_history)), ...
+    smooth(2*sqrt(diag(cov(J_history)))), ...
+    {'LineWidth', 2'}, 1);
 
 %% ODE45
 x0 = [0.08 0 0];
