@@ -35,7 +35,7 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
+template<class ActionC, class StateC, class InputC>
 class SampleManager
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
@@ -47,8 +47,6 @@ class SampleManager
             std::map<typename action_type<ActionC>::type, arma::vec>> LambdaMap;
     typedef std::map<typename state_type<StateC>::type,
             std::map<typename action_type<ActionC>::type, int>> CountMap;
-
-    typedef std::vector<Sample<ActionC, StateC>> SampleVector;
 
 public:
     class DeltaFunctor
@@ -72,7 +70,7 @@ public:
     };
 
 public:
-    SampleManager(Features& phi) :
+    SampleManager(Features_<size_t>& phi) :
         phi(phi)
     {
 
@@ -81,6 +79,7 @@ public:
     DeltaFunctor getDelta(const arma::vec& theta)
     {
         ndelta.clear();
+
         for (auto& sample : samples)
         {
             if (ndelta.count(sample.x) == 0
@@ -89,8 +88,10 @@ public:
                 ndelta[sample.x][sample.u] = 0;
             }
 
-            /*ndelta[sample.x][sample.u] += sample.r + (phi(sample.xn)*theta)[0]
-                                          - (phi(sample.x)*theta)[0];*/ //FIXME! REPS is broken...
+            arma::vec v1 = theta.t()*phi(sample.xn);
+            arma::vec v2 = theta.t()*phi(sample.x);
+
+            ndelta[sample.x][sample.u] += sample.r + v1[0] - v2[0];
         }
 
         return DeltaFunctor(ndelta, d);
@@ -128,12 +129,12 @@ public:
         nlambda.clear();
     }
 
-    typename SampleVector::iterator begin()
+    typename SampleVector<ActionC, StateC>::iterator begin()
     {
         return samples.begin();
     }
 
-    typename SampleVector::iterator end()
+    typename SampleVector<ActionC, StateC>::iterator end()
     {
         return samples.end();
     }
@@ -142,8 +143,8 @@ private:
     DeltaMap ndelta;
     LambdaMap nlambda;
     CountMap d;
-    SampleVector samples;
-    Features& phi;
+    SampleVector<ActionC, StateC> samples;
+    Features_<InputC>& phi;
 
 };
 

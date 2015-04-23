@@ -69,6 +69,9 @@ struct MultiObjectiveSample
     Reward& r;
 };
 
+template<class ActionC, class StateC> using SampleVector = std::vector<Sample<ActionC, StateC>>;
+template<class ActionC, class StateC> using MultiSampleVector = std::vector<MultiObjectiveSample<ActionC, StateC>>;
+
 
 }
 

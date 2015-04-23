@@ -74,7 +74,7 @@ public:
 
         for(unsigned int i = 0; i < basis.n_elem; i++)
         {
-            BasisFunction& bf = *basis[i];
+            BasisFunction_<InputC>& bf = *basis[i];
             output[i] = bf(input);
         }
 

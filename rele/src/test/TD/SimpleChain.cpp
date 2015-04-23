@@ -33,6 +33,7 @@
 
 #include <iostream>
 #include "policy_search/REPS/TabularREPS.h"
+#include "basis/IdentityBasis.h"
 
 using namespace std;
 using namespace ReLe;
@@ -44,14 +45,18 @@ int main(int argc, char *argv[])
 
     FiniteMDP mdp = generator.getMPD(0.9);
     //e_Greedy policy;
-    Boltzmann policy;
-    SARSA agent(policy);
+    //Boltzmann policy;
+
+    //SARSA agent(policy);
     //Q_Learning agent(policy);
-    //TabularREPS agent;
+
+    BasisFunctions_<size_t> basis = FiniteIdentityBasis::generate(mdp.getSettings().finiteStateDim);
+    DenseFeatures_<size_t> phi(basis);
+    TabularREPS agent(phi);
     Core<FiniteAction, FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLenght = 10000;
-    core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(true, false);
+    core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false, true);
     cout << "starting episode" << endl;
     core.runEpisode();
     delete core.getSettings().loggerStrategy;

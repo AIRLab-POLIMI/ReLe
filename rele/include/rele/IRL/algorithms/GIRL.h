@@ -28,6 +28,7 @@
 #include "Policy.h"
 #include "Transition.h"
 #include <nlopt.hpp>
+#include <cassert>
 
 namespace ReLe
 {

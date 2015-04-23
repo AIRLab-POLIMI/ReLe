@@ -27,16 +27,17 @@
 #include "Agent.h"
 #include "SampleManager.h"
 #include "nonparametric/TabularPolicy.h"
+#include "features/DenseFeatures.h"
 
 #include <nlopt.hpp>
 
 namespace ReLe
 {
 
-/*class TabularREPS: public Agent<FiniteAction, FiniteState>
+class TabularREPS: public Agent<FiniteAction, FiniteState>
 {
 public:
-    TabularREPS();
+    TabularREPS(DenseFeatures_<size_t>& phi);
 
     virtual void initEpisode(const FiniteState& state, FiniteAction& action);
     virtual void sampleAction(const FiniteState& state, FiniteAction& action);
@@ -77,15 +78,15 @@ private:
     size_t x;
     unsigned int u;
 
-    IdentityBasisVector phi;
-    SampleManager<FiniteAction, FiniteState> s;
+    DenseFeatures_<size_t>& phi;
+    SampleManager<FiniteAction, FiniteState, size_t> s;
 
     nlopt::opt optimizator;
 
     //debug TODO togliere
     int iteration;
 
-};*/
+};
 
 }
 

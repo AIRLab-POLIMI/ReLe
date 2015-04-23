@@ -33,8 +33,8 @@ using namespace arma;
 namespace ReLe
 {
 
-/*TabularREPS::TabularREPS() :
-    s(phi)
+TabularREPS::TabularREPS(DenseFeatures_<size_t>& phi) :
+    phi(phi), s(phi)
 {
     x = 0;
     u = 0;
@@ -270,9 +270,6 @@ void TabularREPS::init()
     thetaOpt = vec(task.finiteStateDim, fill::zeros);
     etaOpt = 1;
 
-    //setup basis function
-    phi.setSize(task.finiteStateDim);
-
     //setup optimization algorithm
     optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, thetaOpt.size() + 1);
     optimizator.set_min_objective(TabularREPS::wrapper, this);
@@ -285,6 +282,6 @@ void TabularREPS::init()
     lowerBounds.back() = std::numeric_limits<double>::epsilon();
 
     optimizator.set_lower_bounds(lowerBounds);
-}*/
+}
 
 }
