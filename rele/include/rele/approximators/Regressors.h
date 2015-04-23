@@ -25,23 +25,25 @@
 #define REGRESSORS_H_
 
 #include "Basics.h"
+#include "Transition.h"
 
 namespace ReLe
 {
 
-class Regressor
+template<class InputC, bool denseOutput = true>
+class Regressor_
 {
 
 public:
 
-    Regressor(unsigned int output = 1) :
+    Regressor_(unsigned int output = 1) :
         outputDimension(output)
     {
     }
 
-    virtual arma::vec operator() (const arma::vec& input) = 0;
+    virtual arma::vec operator() (const InputC& input) = 0;
 
-    virtual ~Regressor()
+    virtual ~Regressor_()
     {
     }
 
@@ -54,35 +56,50 @@ protected:
     unsigned int outputDimension;
 };
 
-class ParametricRegressor: public Regressor
+
+typedef Regressor_<arma::vec> Regressor;
+
+template<class InputC, bool denseOutput = true>
+class ParametricRegressor_: public Regressor_<InputC, denseOutput>
 {
 public:
-    ParametricRegressor(unsigned int output = 1) :
-        Regressor(output)
+    ParametricRegressor_(unsigned int output = 1) :
+        Regressor_<InputC, denseOutput>(output)
     {
     }
 
     virtual void setParameters(arma::vec& params) = 0;
     virtual arma::vec getParameters() const = 0;
     virtual unsigned int getParametersSize() const = 0;
-    virtual arma::vec  diff(const arma::vec& output) = 0;
+    virtual arma::vec  diff(const InputC& input) = 0;
+
+    virtual ~ParametricRegressor_()
+    {
+
+    }
 
 };
 
-class NonParametricRegressor: public Regressor
+typedef ParametricRegressor_<arma::vec> ParametricRegressor;
+
+template<class InputC, bool denseOutput = true>
+class NonParametricRegressor_: public Regressor_<InputC, denseOutput>
 {
 public:
-    NonParametricRegressor(unsigned int output = 1) :
-        Regressor(output)
+    NonParametricRegressor_(unsigned int output = 1) :
+        Regressor_<InputC, denseOutput>(output)
     {
     }
 };
 
+typedef NonParametricRegressor_<arma::vec> NonParametricRegressor;
+
+template<class ActionC, class StateC>
 class BatchRegressor
 {
 
 public:
-    void train(/* classe che rappresenta il dataset da decidere*/);
+    void train(Dataset<ActionC, StateC>& dataset) = 0;
 };
 
 }

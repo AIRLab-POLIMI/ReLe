@@ -27,19 +27,38 @@
 #include <armadillo>
 #include <vector>
 #include <cassert>
-#include "../Regressors.h"
+#include "Regressors.h"
 
 namespace ReLe
 {
 
-class LinearApproximator: public ParametricRegressor
+template<class InputC, bool denseOutput = true>
+class LinearApproximator_: public ParametricRegressor_<InputC, denseOutput>
 {
 
 public:
-    LinearApproximator(Features& bfs);
-    virtual ~LinearApproximator();
-    arma::vec operator()(const arma::vec& input);
-    arma::vec diff(const arma::vec& input);
+    LinearApproximator_(Features_<InputC, denseOutput>& bfs)
+        : ParametricRegressor(bfs.cols()), basis(bfs),
+          parameters(bfs.rows(), arma::fill::zeros)
+    {
+    }
+
+    ~LinearApproximator_()
+    {
+    }
+
+    arma::vec operator()(const InputC& input)
+    {
+        arma::mat features = basis(input);
+        arma::vec output = features.t()*parameters;
+        return output;
+    }
+
+    arma::vec diff(const InputC& input)
+    {
+        arma::mat features = basis(input);
+        return vectorise(features);
+    }
 
     inline Features& getBasis()
     {
@@ -64,8 +83,10 @@ public:
 
 private:
     arma::vec parameters;
-    Features& basis;
+    Features_<InputC, denseOutput>& basis;
 };
+
+typedef LinearApproximator_<arma::vec> LinearApproximator;
 
 } //end namespace
 
