@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     //-- REPS agent
     int nbepperpol = 1, nbpolperupd = 50;
     REPS<DenseAction, DenseState, ParametricNormal> agent(dist,policy,nbepperpol,nbpolperupd);
-    agent.setEps(1.0);
+    agent.setEps(0.5);
 
     Core<DenseAction, DenseState> core(rocky, agent);
     //--
