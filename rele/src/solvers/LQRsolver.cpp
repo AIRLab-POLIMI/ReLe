@@ -30,9 +30,10 @@ namespace ReLe
 {
 
 LQRsolver::LQRsolver(LQR& lqr, Features& phi) :
-    lqr(lqr), pi(phi)
+    lqr(lqr), pi(phi), weightsRew(lqr.getSettings().rewardDim, arma::fill::zeros)
 {
-    rewardIndex = 0;
+//    rewardIndex = 0;
+    weightsRew(0) = 1;
     gamma = lqr.getSettings().gamma;
 }
 
@@ -41,8 +42,17 @@ void LQRsolver::solve()
     mat A = lqr.A;
     mat B = lqr.B;
 
-    mat Q =lqr.Q[rewardIndex];
-    mat R =lqr.R[rewardIndex];
+    int dim = lqr.Q.size();
+    mat Q(lqr.Q[0].n_rows, lqr.Q[0].n_cols, arma::fill::zeros);
+    mat R(lqr.R[0].n_rows, lqr.R[0].n_cols, arma::fill::zeros);
+    for (int i = 0; i < dim; ++i)
+    {
+        Q += weightsRew[i] * lqr.Q[i];
+        R += weightsRew[i] * lqr.R[i];
+    }
+
+//    mat Q =lqr.Q[rewardIndex];
+//    mat R =lqr.R[rewardIndex];
 
     mat P(Q.n_rows, Q.n_cols, fill::eye);
     mat K;
@@ -56,7 +66,7 @@ void LQRsolver::solve()
 
     K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
 
-    arma::vec w = vectorise(K);
+    arma::vec w = K.diag();
     pi.setParameters(w);
 }
 

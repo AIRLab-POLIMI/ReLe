@@ -41,7 +41,14 @@ public:
 
     inline void setRewardIndex(unsigned int rewardIndex)
     {
-        this->rewardIndex = rewardIndex;
+        weightsRew.zeros();
+        weightsRew[rewardIndex] = 1;
+//        this->rewardIndex = rewardIndex;
+    }
+
+    inline void setRewardWeights(arma::vec& weights)
+    {
+        weightsRew = weights;
     }
 
 private:
@@ -50,7 +57,8 @@ private:
 
     double gamma;
 
-    unsigned int rewardIndex;
+//    unsigned int rewardIndex;
+    arma::vec weightsRew;
 };
 
 }

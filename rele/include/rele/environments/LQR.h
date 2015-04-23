@@ -51,7 +51,7 @@ private:
     void initialize(unsigned int stateActionSize, unsigned int rewardSize, double e);
     void setInitialState();
 
-private:
+public:
     arma::mat A, B;
     std::vector<arma::mat> Q, R;
 

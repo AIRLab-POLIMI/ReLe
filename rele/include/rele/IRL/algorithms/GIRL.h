@@ -1012,6 +1012,8 @@ public:
             A.col(r) = gradients[r];
         }
 
+//        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
+
         arma::mat gramMatrix = A.t() * A;
 
         arma::mat X(dr-1, dr);

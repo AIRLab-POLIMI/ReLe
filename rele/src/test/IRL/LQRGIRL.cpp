@@ -44,12 +44,12 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-class LQR_IRL_Reward : public IRLParametricReward<DenseAction, DenseState>,
+class LQR_1D_WS : public IRLParametricReward<DenseAction, DenseState>,
     public RewardTransformation
 {
 public:
 
-    LQR_IRL_Reward()
+    LQR_1D_WS()
     {
         weights.set_size(2);
     }
@@ -73,7 +73,7 @@ public:
     }
 };
 
-class LQR_R1 : public IRLParametricReward<DenseAction, DenseState>
+class LQR_1D_R1 : public IRLParametricReward<DenseAction, DenseState>
 {
 public:
     double operator()(DenseState& s, DenseAction& a, DenseState& ns)
@@ -86,7 +86,7 @@ public:
         return arma::mat();
     }
 };
-class LQR_R2 : public IRLParametricReward<DenseAction, DenseState>
+class LQR_1D_R2 : public IRLParametricReward<DenseAction, DenseState>
 {
 public:
     double operator()(DenseState& s, DenseAction& a, DenseState& ns)
@@ -100,6 +100,80 @@ public:
     }
 };
 
+class LQR_ND_WS : public IRLParametricReward<DenseAction, DenseState>
+{
+public:
+
+    LQR_ND_WS(LQR& mdp)
+        : lqr(mdp)
+    {
+        weights.set_size(lqr.getSettings().rewardDim);
+    }
+
+    double operator()(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        int dim = lqr.Q.size();
+        double val = 0.0;
+        arma::vec& x = s;
+        arma::vec& u = a;
+        for (int i = 0; i < dim; ++i)
+        {
+            arma::mat& R = lqr.R[i];
+            arma::mat& Q = lqr.Q[i];
+            arma::mat J = (x.t() * Q * x + u.t() * R * u) * weights(i);
+            val -= J(0,0);
+        }
+        return val;
+    }
+
+    arma::mat diff(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        int dim = lqr.Q.size();
+        arma::vec& x = s;
+        arma::vec& u = a;
+        arma::mat m(1,dim);
+        for (int i = 0; i < dim; ++i)
+        {
+            arma::mat& R = lqr.R[i];
+            arma::mat& Q = lqr.Q[i];
+            arma::mat J = -(x.t() * Q * x + u.t() * R * u);
+            m(0,i) = J(0,0);
+        }
+        return m;
+    }
+
+private:
+    LQR& lqr;
+};
+
+class LQR_ND_R : public IRLParametricReward<DenseAction, DenseState>
+{
+public:
+    LQR_ND_R(LQR& mdp, unsigned int idx)
+        : lqr(mdp), idx(idx)
+    {
+    }
+
+    double operator()(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        arma::vec& x = s;
+        arma::vec& u = a;
+        arma::mat& R = lqr.R[idx];
+        arma::mat& Q = lqr.Q[idx];
+        arma::mat J = -(x.t() * Q * x + u.t() * R * u);
+        return J(0,0);
+    }
+
+    arma::mat diff(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        return arma::mat();
+    }
+private:
+    unsigned int idx;
+    LQR& lqr;
+};
+
+
 void help()
 {
     cout << "lqr_GIRL [algorithm]" << endl;
@@ -108,10 +182,11 @@ void help()
 
 int main(int argc, char *argv[])
 {
-//    RandomGenerator::seed(545404224);
+    //    RandomGenerator::seed(545404224);
 
     /*** check inputs ***/
     IRLGradType atype;
+    vec eReward;
     char gtypestr[10];
     if (argc > 1)
     {
@@ -142,6 +217,11 @@ int main(int argc, char *argv[])
             exit(1);
         }
         strcpy(gtypestr, argv[1]);
+
+        int nw = atoi(argv[2]);
+        eReward.set_size(nw);
+        for (int i = 0; i < nw; ++i)
+            eReward(i) = atof(argv[3+i]);
     }
     else
     {
@@ -151,10 +231,12 @@ int main(int argc, char *argv[])
 
     FileManager fm("lqr", "GIRL");
     fm.createDir();
-//    fm.cleanDir();
+    //    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     /* Learn lqr correct policy */
+#if 0
+
     arma::mat A(1,1), B(1,1), Q(1,1), R(1,1);
     A(0,0) = 1;
     B(0,0) = 1;
@@ -163,42 +245,44 @@ int main(int argc, char *argv[])
     std::vector<arma::mat> Qv(1, Q);
     std::vector<arma::mat> Rv(1, R);
     LQR mdp(A,B,Qv,Rv);
-//    vec initialState(1);
-//    initialState[0] = -5;
-//    mdp.setInitialState(initialState);
-
-//    LQR mdp(2,2);
-
-
-//    IdentityBasis* pf1 = new IdentityBasis(0);
-//    IdentityBasis* pf2 = new IdentityBasis(1);
-//    IdentityBasis* pf3 = new IdentityBasis(2);
-//    BasisFunctions basis;
-//    basis.push_back(pf1);
-//    basis.push_back(pf2);
-//    basis.push_back(pf3);
-
-//    SparseFeatures phi;
-//    phi.setDiagonal(basis);
-
-//    arma::vec ss(3);
-//    ss.randn();
-//    std::cout << ss.t();
-//    std::cout << phi(ss);
-//    MVNPolicy expertPolicy(phi);
-
-
-    vec eReward(2);
-    eReward(0) = Q(0,0);
-    eReward(1) = R(0,0);
+    //    vec initialState(1);
+    //    initialState[0] = -5;
+    //    mdp.setInitialState(initialState);
 
     IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);
     NormalPolicy expertPolicy(1, phi);
 
+    vec eReward(2);
+    eReward(0) = Q(0,0);
+    eReward(1) = R(0,0);
+#else
+
+    int dim = eReward.n_elem;
+    LQR mdp(dim, dim);
+
+    BasisFunctions basis;
+    for (int i = 0; i < dim; ++i)
+    {
+        basis.push_back(new IdentityBasis(i));
+    }
+
+    SparseFeatures phi;
+    phi.setDiagonal(basis);
+
+    MVNPolicy expertPolicy(phi);
+
+    //    vec eReward(dim);
+    //    eReward(0) = 0.05;
+    //    eReward(1) = 0.7;
+    //    eReward(2) = 0.25;
+#endif
+
+
 
     /*** solve the problem in exact way ***/
     LQRsolver solver(mdp,phi);
+    solver.setRewardWeights(eReward);
     solver.solve();
     DetLinearPolicy<DenseState>& pol = reinterpret_cast<DetLinearPolicy<DenseState>&>(solver.getPolicy());
     arma::vec p = pol.getParameters();
@@ -210,52 +294,7 @@ int main(int argc, char *argv[])
         std::cout << eReward(i) << " ";
     }
     std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
-#if 0
-    //learn the optimal policy
-    int nbepperpol = 100;
-    AdaptiveStep srule(0.0001);
-    GPOMDPAlgorithm<DenseAction, DenseState> agent(expertPolicy, nbepperpol,
-            mdp.getSettings().horizon, srule, 0);
-    ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath("gradient_log_learning.log"),
-        WriteStrategy<DenseAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
 
-    int horiz = mdp.getSettings().horizon;
-    core.getSettings().episodeLenght = horiz;
-
-    int nbUpdates = 60;
-    int episodes  = nbUpdates*nbepperpol;
-    double every, bevery;
-    every = bevery = 0.1; //%
-    int updateCount = 0;
-    for (int i = 0; i < episodes; i++)
-    {
-        if (i % nbepperpol == 0)
-        {
-            updateCount++;
-            if ((updateCount >= nbUpdates*every) || (updateCount == 1))
-            {
-                int p = std::floor(100 * (updateCount/static_cast<double>(nbUpdates)));
-                cout << "### " << p << "% ###" << endl;
-                cout << expertPolicy.getParameters().t();
-                core.getSettings().testEpisodeN = 1000;
-                arma::vec J = core.runBatchTest();
-                cout << "mean score: " << J(0) << endl;
-                if (updateCount != 1)
-                    every += bevery;
-            }
-        }
-
-        core.runEpisode();
-    }
-
-
-    cout << endl << "### Ended Optimization" << endl;
-    cout << expertPolicy.getParameters().t();
-#endif
 
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
@@ -263,14 +302,25 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = 50;
+    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
     expertCore.getSettings().testEpisodeN = 100;
     expertCore.runTestEpisodes();
 
 
-    /* Learn weight with GIRL */
-    LQR_IRL_Reward rewardRegressor;
+    //save data
     Dataset<DenseAction,DenseState>& data = collection.data;
+    ofstream datafile(fm.addPath("data.log"), ios_base::out);
+    datafile << std::setprecision(OS_PRECISION);
+    data.writeToStream(datafile);
+    datafile.close();
+
+
+    /* Learn weight with GIRL */
+#if 0
+    LQR_IRL_Reward rewardRegressor;
+#else
+    LQR_ND_WS rewardRegressor(mdp);
+#endif
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                         mdp.getSettings().gamma, atype);
 
@@ -283,97 +333,110 @@ int main(int argc, char *argv[])
     char name[100];
     sprintf(name, "girl_gnorm_%s.log", gtypestr);
     ofstream outf(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+    outf << std::setprecision(OS_PRECISION);
     outf << w.t();
     outf.close();
 
     // TEST GRADIENTS
-//    vec grad, grad2, grad3;
-//    mat dgrad3;
-//    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
-//    if (atype == IRLGradType::R)
-//    {
-//        cout << "PG REINFORCE" << endl;
-//        grad3 = irlAlg.ReinforceGradient(dgrad3);
-//        rewardRegressor.setParameters(eReward);
-//        grad = gdw.ReinforceGradient();
-//        rewardRegressor.setParameters(w);
-//        grad2 = gdw.ReinforceGradient();
-//    }
-//    else if (atype == IRLGradType::RB)
-//    {
-//        cout << "PG REINFORCE BASE" << endl;
-//        grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-//        rewardRegressor.setParameters(eReward);
-//        grad = gdw.ReinforceBaseGradient();
-//        rewardRegressor.setParameters(w);
-//        grad2 = gdw.ReinforceBaseGradient();
-//    }
-//    else if (atype == IRLGradType::G)
-//    {
-//        cout << "PG GPOMDP" << endl;
-//        grad3 = irlAlg.GpomdpGradient(dgrad3);
-//        rewardRegressor.setParameters(eReward);
-//        grad = gdw.GpomdpGradient();
-//        rewardRegressor.setParameters(w);
-//        grad2 = gdw.GpomdpGradient();
-//    }
-//    else if (atype == IRLGradType::GB)
-//    {
-//        cout << "PG GPOMDP BASE" << endl;
-//        grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-//        rewardRegressor.setParameters(eReward);
-//        grad = gdw.GpomdpBaseGradient();
-//        rewardRegressor.setParameters(w);
-//        grad2 = gdw.GpomdpBaseGradient();
-//    }
-//    cout << "Gradient Original (" << eReward[0] << ", " << eReward[1] << "): " << endl << grad.t();
-//    cout << "\tnorm2: " << norm(grad,2) << endl << endl;
-//    cout << "Gradient weights IRL (" << w[0] << ", " << w[1] << "): " << endl << grad2.t();
-//    cout << "\tnorm2: " << norm(grad2,2) << endl << endl;
-//    cout << "Gradient computed by objective function: " << endl << grad3.t();
-//    cout << "\tnorm2: " << norm(grad3,2) << endl;
-//    cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
+    //        vec grad, grad2, grad3;
+    //        mat dgrad3;
+    //    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
+    //    if (atype == IRLGradType::R)
+    //    {
+    //        cout << "PG REINFORCE" << endl;
+    //        grad3 = irlAlg.ReinforceGradient(dgrad3);
+    //        rewardRegressor.setParameters(eReward);
+    //        grad = gdw.ReinforceGradient();
+    //        rewardRegressor.setParameters(w);
+    //        grad2 = gdw.ReinforceGradient();
+    //    }
+    //    else if (atype == IRLGradType::RB)
+    //    {
+    //        cout << "PG REINFORCE BASE" << endl;
+    //        grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+    //        rewardRegressor.setParameters(eReward);
+    //        grad = gdw.ReinforceBaseGradient();
+    //        rewardRegressor.setParameters(w);
+    //        grad2 = gdw.ReinforceBaseGradient();
+    //    }
+    //    else if (atype == IRLGradType::G)
+    //    {
+    //        cout << "PG GPOMDP" << endl;
+    //        grad3 = irlAlg.GpomdpGradient(dgrad3);
+    //        rewardRegressor.setParameters(eReward);
+    //        grad = gdw.GpomdpGradient();
+    //        rewardRegressor.setParameters(w);
+    //        grad2 = gdw.GpomdpGradient();
+    //    }
+    //    else if (atype == IRLGradType::GB)
+    //    {
+    //        cout << "PG GPOMDP BASE" << endl;
+    //        grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+    //        rewardRegressor.setParameters(eReward);
+    //        grad = gdw.GpomdpBaseGradient();
+    //        rewardRegressor.setParameters(w);
+    //        grad2 = gdw.GpomdpBaseGradient();
+    //    }
+    //    cout << "Gradient Original (" << eReward[0] << ", " << eReward[1] << "): " << endl << grad.t();
+    //    cout << "\tnorm2: " << norm(grad,2) << endl << endl;
+    //    cout << "Gradient weights IRL (" << w[0] << ", " << w[1] << "): " << endl << grad2.t();
+    //    cout << "\tnorm2: " << norm(grad2,2) << endl << endl;
+    //    cout << "Gradient computed by objective function: " << endl << grad3.t();
+    //    cout << "\tnorm2: " << norm(grad3,2) << endl;
+    //    cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
 
 
-    //GENERATES GRAPH
-//    vec v = linspace<vec>(0, 1, 30);
-//    ofstream ooo(fm.addPath("objective.log"));
-//    for (int i = 0; i < v.n_elem; ++i)
-////        for (int j = 0; j < v.n_elem; ++j)
-//    {
-//        vec x(2);
-//        x(0) = v[i];
-//        x(1) = 1 - v[i];
-//        if (atype == IRLGradType::R)
-//        {
-//            rewardRegressor.setParameters(x);
-//            grad3 = irlAlg.ReinforceGradient(dgrad3);
-//        }
-//        else if (atype == IRLGradType::RB)
-//        {
-//            rewardRegressor.setParameters(x);
-//            grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-//        }
-//        else if (atype == IRLGradType::G)
-//        {
-//            rewardRegressor.setParameters(x);
-//            grad3 = irlAlg.GpomdpGradient(dgrad3);
-//        }
-//        else if (atype == IRLGradType::GB)
-//        {
-//            rewardRegressor.setParameters(x);
-//            grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-//        }
-//        double val = norm(grad3,2)*norm(grad3,2)*0.5;
-//        ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
-//    }
-//    ooo.close();
+    //    //    GENERATES GRAPH
+    //    vec v = linspace<vec>(0, 1, 30);
+    //    ofstream ooo(fm.addPath("objective.log"));
+    //    for (int i = 0; i < v.n_elem; ++i)
+    //        for (int j = 0; j < v.n_elem; ++j)
+    //        {
+    //            vec x(3);
+    //            x(0) = v[i];
+    //            //            x(1) = 1 - v[i];
+    //            x(1) = v[j];
+    //            x(2) = 1 - v[i] - v[j];
+    //            if (x(2) >= 0)
+    //            {
+    //                if (atype == IRLGradType::R)
+    //                {
+    //                    rewardRegressor.setParameters(x);
+    //                    grad3 = irlAlg.ReinforceGradient(dgrad3);
+    //                }
+    //                else if (atype == IRLGradType::RB)
+    //                {
+    //                    rewardRegressor.setParameters(x);
+    //                    grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+    //                }
+    //                else if (atype == IRLGradType::G)
+    //                {
+    //                    rewardRegressor.setParameters(x);
+    //                    grad3 = irlAlg.GpomdpGradient(dgrad3);
+    //                }
+    //                else if (atype == IRLGradType::GB)
+    //                {
+    //                    rewardRegressor.setParameters(x);
+    //                    grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+    //                }
+    //                double val = norm(grad3,2)*norm(grad3,2)*0.5;
+    //                ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+    //            }
+    //        }
+    //    ooo.close();
 
     std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
+#if 0
     LQR_R1 r1;
     LQR_R2 r2;
     rewards.push_back(&r1);
     rewards.push_back(&r2);
+#else
+    for (int i = 0; i < dim; ++i)
+    {
+        rewards.push_back(new LQR_ND_R(mdp, i));
+    }
+#endif
 
     PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
                                             mdp.getSettings().gamma, atype);
@@ -384,6 +447,7 @@ int main(int argc, char *argv[])
 
     sprintf(name, "girl_plane_%s.log", gtypestr);
     outf.open(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+    outf << std::setprecision(OS_PRECISION);
     outf << pgirl.getWeights().t();
     outf.close();
 
