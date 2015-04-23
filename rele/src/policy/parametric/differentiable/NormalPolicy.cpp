@@ -103,15 +103,14 @@ NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 double MVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
     UpdateInternalState(state);
-    std::cout << mMean.t();
-    std::cout << mCinv << std::endl;
-    std::cout << mDeterminant << std::endl;
     return mvnpdfFast(action, mMean, mCinv, mDeterminant);
 }
 
 arma::vec MVNPolicy::operator() (const arma::vec& state)
 {
     UpdateInternalState(state);
+//    std::cout << mMean.t();
+//    std::cout << mCholeskyDec << std::endl;
     return mvnrandFast(mMean, mCholeskyDec);
 }
 

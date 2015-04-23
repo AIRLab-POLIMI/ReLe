@@ -1040,6 +1040,7 @@ public:
 
         int np = s.n_elem;
         weights = V.cols(np, V.n_cols-1);
+//        weights.elem( arma::find(weights < 0) ).zeros();
         weights /= arma::norm(weights,1);
 
     }

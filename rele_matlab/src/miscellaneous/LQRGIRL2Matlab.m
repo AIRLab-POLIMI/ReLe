@@ -4,10 +4,10 @@ clear all; close all; clc;
 TESTMATLAB = 0;
 
 delete('/tmp/ReLe/lqr/GIRL/*');
-algorithm = 'gb';
+algorithm = 'rb';
 cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRL';
 
-nbEpisodes = 10;
+nbEpisodes = 200;
 gamma = 0.99; % remember to modify also C code
 eReward = [0.08; 0.67; 0.25];
 strval = '';
