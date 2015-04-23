@@ -20,8 +20,8 @@ clf(4)
 figure(5)
 clf(5)
 
-%cmd = '/home/dave/ReLe/devel/lib/rele/segway_BBO';
-%status = system(cmd);
+cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/segway_BBO';
+status = system(cmd);
 
 %% Read data
 
@@ -64,13 +64,13 @@ for i=1:size(episodes, 1)
         ylim([0, l+0.1]);
         
         hold off;
-    pause(0.1)
+    pause(0.05)
     end
 end
 
 %% ODE45
 x0 = [0.08 0 0];
-[t,y] = ode45(@segway_ode, [0, 40*0.03], x0);
+[t,y] = ode45(@segway_ode, [0, size(x,1)*0.03], x0);
 figure(2);
 plot (t,y(:,1)*180/pi, 0.03*(1:size(x,1)), x(:,1)*180/pi);
 legend('matlab', 'odeint');

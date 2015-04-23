@@ -154,7 +154,7 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
 
         const arma::vec& x = currentState;
         const arma::vec& u = action;
-        arma::mat J = x.t()*Q*x + u.t()*R*u;
+        arma::mat J = x.t()*Q*x;// + u.t()*R*u;
 
         reward[0] = -J[0];
     }
