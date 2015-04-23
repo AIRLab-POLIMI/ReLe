@@ -4,8 +4,8 @@ delete('/tmp/ReLe/lqr/GIRL/*');
 algorithm = 'gb';
 cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRL';
 
-
-gamma = 0.99;
+nbEpisodes = 200;
+gamma = 0.99; % remember to modify also C code
 eReward = [0.08; 0.67; 0.25];
 strval = '';
 for i = 1:length(eReward)
@@ -13,9 +13,10 @@ for i = 1:length(eReward)
 end
 
 tic;
-status = system([cmd, ' ', algorithm, ' ', num2str(length(eReward)), ' ', strval]);
-t = toc;
-fprintf('Time GIRL C++: %f\n', t);
+status = system([cmd, ' ', algorithm, ' ' num2str(nbEpisodes), ...
+    ' ', num2str(length(eReward)), ' ', strval]);
+tcpp = toc;
+fprintf('Time GIRL C++: %f\n', tcpp);
 
 %% READ DATASET
 disp('Reading data trajectories...')
@@ -40,7 +41,10 @@ gnorm_R = dlmread(['/tmp/ReLe/lqr/GIRL/girl_gnorm_',algorithm,'.log']);
 
 dim = size(gnorm_R,2);
 
+fprintf('\n');
+disp(' Plane weights (C++):');
 disp(plane_R);
+disp(' Gnorm weights (C++):');
 disp(gnorm_R);
 
 
@@ -59,6 +63,8 @@ assert(length(pol.theta) == length(K(:)));
 init_pol = pol;
 init_pol.theta = K(:);
 clear pol;
+
+assert(init_pol.dlogPidtheta == dim);
 
 if strcmp(domain,'lqr')
     rewards{1} = @(s,a,ns) irl_lqr_reward(s,a,ns,mdpconfig,1);
@@ -81,13 +87,15 @@ end
 % Plane method
 tic;
 [w, gradients] = IRLgrad_plane(init_pol, rewards, dataset, gamma, algorithm);
-t = toc;
-fprintf('Plane time: %f\n', t);
+tp = toc;
+fprintf('Plane time: %f\n', tp);
 
 gplane.val  = w;
 gplane.grad = gradients;
 gplane.alg  = algorithm;
-gplane.time = t;
+gplane.time = tp;
+
+gplane.val'
 
 % gradient norm
 objfun = @(x) IRLgrad_step_objfun(x, rewardf, drewardf, ...
@@ -105,14 +113,16 @@ x0 = ones(dim,1)/dim;
 tic;
 [x,fval,exitflag,output] = fmincon(objfun, x0, ...
     -eye(dim), zeros(dim,1), ones(1,dim), 1,[], [], [], options);
-t = toc;
-fprintf('Gnorm time: %f\n', t);
+tg = toc;
+fprintf('Gnorm time: %f\n', tg);
 
 gnorm.val  = x;
 gnorm.fval = fval;
 gnorm.out  = output;
 gnorm.alg  = algorithm;
-gnorm.time = t;
+gnorm.time = tg;
+
+gnorm.val'
 
 
 %% check

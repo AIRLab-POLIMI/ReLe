@@ -187,6 +187,7 @@ int main(int argc, char *argv[])
     /*** check inputs ***/
     IRLGradType atype;
     vec eReward;
+    int nbEpisodes;
     char gtypestr[10];
     if (argc > 1)
     {
@@ -218,10 +219,11 @@ int main(int argc, char *argv[])
         }
         strcpy(gtypestr, argv[1]);
 
-        int nw = atoi(argv[2]);
+        nbEpisodes = atoi(argv[2]);
+        int nw = atoi(argv[3]);
         eReward.set_size(nw);
         for (int i = 0; i < nw; ++i)
-            eReward(i) = atof(argv[3+i]);
+            eReward(i) = atof(argv[4+i]);
     }
     else
     {
@@ -303,7 +305,7 @@ int main(int argc, char *argv[])
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
-    expertCore.getSettings().testEpisodeN = 100;
+    expertCore.getSettings().testEpisodeN = nbEpisodes;
     expertCore.runTestEpisodes();
 
 
@@ -326,15 +328,18 @@ int main(int argc, char *argv[])
 
     //Run MWAL
     irlAlg.run();
-    arma::vec w = irlAlg.getWeights();
+    arma::vec gnormw = irlAlg.getWeights();
 
-    cout << "Weights (gnorm): " << w.t();
+    cout << "Weights (gnorm): " << gnormw.t();
 
     char name[100];
     sprintf(name, "girl_gnorm_%s.log", gtypestr);
     ofstream outf(fm.addPath(name), std::ofstream::out | std::ofstream::app);
     outf << std::setprecision(OS_PRECISION);
-    outf << w.t();
+    for (int i = 0; i < gnormw.n_elem; ++i)
+    {
+        outf << gnormw[i] << " ";
+    }
     outf.close();
 
     // TEST GRADIENTS
@@ -448,7 +453,11 @@ int main(int argc, char *argv[])
     sprintf(name, "girl_plane_%s.log", gtypestr);
     outf.open(fm.addPath(name), std::ofstream::out | std::ofstream::app);
     outf << std::setprecision(OS_PRECISION);
-    outf << pgirl.getWeights().t();
+    arma::vec planew = pgirl.getWeights();
+    for (int i = 0; i < planew.n_elem; ++i)
+    {
+        outf << planew[i] << " ";
+    }
     outf.close();
 
     return 0;
