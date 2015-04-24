@@ -4,6 +4,8 @@ clear all; close all; clc;
 TESTMATLAB = 0;
 
 delete('/tmp/ReLe/lqr/GIRL/*');
+
+
 algorithm = 'rb';
 cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRL';
 

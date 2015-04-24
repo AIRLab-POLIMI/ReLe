@@ -55,7 +55,7 @@ else()
         set(Boost_USE_STATIC_LIBS        OFF)
         set(Boost_USE_MULTITHREADED      ON)
         set(Boost_USE_STATIC_RUNTIME    OFF)
-        find_package(Boost 1.53 REQUIRED)
+        find_package(Boost 1.53 REQUIRED system timer)
         if(Boost_FOUND)
                 include_directories(${Boost_INCLUDE_DIRS})
         endif()
@@ -158,6 +158,9 @@ target_link_libraries(lqr_MWAL rele)
 
 add_executable(lqr_GIRL src/test/IRL/LQRGIRL.cpp)
 target_link_libraries(lqr_GIRL rele)
+
+add_executable(lqr_GIRLALL src/test/IRL/LQRGIRLALL.cpp)
+target_link_libraries(lqr_GIRLALL rele)
 
 add_executable(deep_GIRL src/test/IRL/DeepGIRL.cpp)
 target_link_libraries(deep_GIRL rele)

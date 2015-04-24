@@ -188,51 +188,16 @@ int main(int argc, char *argv[])
     //    RandomGenerator::seed(545404224);
 
     /*** check inputs ***/
-    IRLGradType atype;
     vec eReward;
     int nbEpisodes;
-    char gtypestr[10];
-    if (argc > 1)
-    {
-        if (strcmp(argv[1], "r") == 0)
-        {
-            cout << "GIRL REINFORCE" << endl;
-            atype = IRLGradType::R;
-        }
-        else if (strcmp(argv[1], "rb") == 0)
-        {
-            cout << "GIRL REINFORCE BASE" << endl;
-            atype = IRLGradType::RB;
-        }
-        else if (strcmp(argv[1], "g") == 0)
-        {
-            cout << "GIRL GPOMDP" << endl;
-            atype = IRLGradType::G;
-        }
-        else if (strcmp(argv[1], "gb") == 0)
-        {
-            cout << "GIRL GPOMDP BASE" << endl;
-            atype = IRLGradType::GB;
-        }
-        else
-        {
-            std::cout << "Error unknown argument " << argv[1] << std::endl;
-            help();
-            exit(1);
-        }
-        strcpy(gtypestr, argv[1]);
 
-        nbEpisodes = atoi(argv[2]);
-        cout << "Episodes: " << nbEpisodes << endl;
-        int nw = atoi(argv[3]);
-        eReward.set_size(nw);
-        for (int i = 0; i < nw; ++i)
-            eReward(i) = atof(argv[4+i]);
-    }
-    else
-    {
-        atype = IRLGradType::GB;
-    }
+    nbEpisodes = atoi(argv[1]);
+    cout << "Episodes: " << nbEpisodes << endl;
+    int nw = atoi(argv[2]);
+    eReward.set_size(nw);
+    for (int i = 0; i < nw; ++i)
+        eReward(i) = atof(argv[3+i]);
+
     /******/
 
     FileManager fm("lqr", "GIRL");
@@ -321,161 +286,117 @@ int main(int argc, char *argv[])
     datafile.close();
 
 
-    /* Learn weight with GIRL */
-#if 0
-    LQR_IRL_Reward rewardRegressor;
-#else
-    LQR_ND_WS rewardRegressor(mdp);
-#endif
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype);
-
-    ofstream timefile(fm.addPath("timer.log"));
-
-
-    //Run MWAL
-    cpu_timer timer;
-    timer.start();
-    irlAlg.run();
-    timer.stop();
-    arma::vec gnormw = irlAlg.getWeights();
-
-    timefile << timer.format(10, "%w") << std::endl;
-
-    cout << "Weights (gnorm): " << gnormw.t();
-
-    char name[100];
-    sprintf(name, "girl_gnorm_%s.log", gtypestr);
-    ofstream outf(fm.addPath(name), std::ofstream::out | std::ofstream::app);
-    outf << std::setprecision(OS_PRECISION);
-    for (int i = 0; i < gnormw.n_elem; ++i)
+    char gtypestr[5];
+    for (int i = 0; i < 4; ++i)
     {
-        outf << gnormw[i] << " ";
-    }
-    outf.close();
 
-    // TEST GRADIENTS
-    //        vec grad, grad2, grad3;
-    //        mat dgrad3;
-    //    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
-    //    if (atype == IRLGradType::R)
-    //    {
-    //        cout << "PG REINFORCE" << endl;
-    //        grad3 = irlAlg.ReinforceGradient(dgrad3);
-    //        rewardRegressor.setParameters(eReward);
-    //        grad = gdw.ReinforceGradient();
-    //        rewardRegressor.setParameters(w);
-    //        grad2 = gdw.ReinforceGradient();
-    //    }
-    //    else if (atype == IRLGradType::RB)
-    //    {
-    //        cout << "PG REINFORCE BASE" << endl;
-    //        grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-    //        rewardRegressor.setParameters(eReward);
-    //        grad = gdw.ReinforceBaseGradient();
-    //        rewardRegressor.setParameters(w);
-    //        grad2 = gdw.ReinforceBaseGradient();
-    //    }
-    //    else if (atype == IRLGradType::G)
-    //    {
-    //        cout << "PG GPOMDP" << endl;
-    //        grad3 = irlAlg.GpomdpGradient(dgrad3);
-    //        rewardRegressor.setParameters(eReward);
-    //        grad = gdw.GpomdpGradient();
-    //        rewardRegressor.setParameters(w);
-    //        grad2 = gdw.GpomdpGradient();
-    //    }
-    //    else if (atype == IRLGradType::GB)
-    //    {
-    //        cout << "PG GPOMDP BASE" << endl;
-    //        grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-    //        rewardRegressor.setParameters(eReward);
-    //        grad = gdw.GpomdpBaseGradient();
-    //        rewardRegressor.setParameters(w);
-    //        grad2 = gdw.GpomdpBaseGradient();
-    //    }
-    //    cout << "Gradient Original (" << eReward[0] << ", " << eReward[1] << "): " << endl << grad.t();
-    //    cout << "\tnorm2: " << norm(grad,2) << endl << endl;
-    //    cout << "Gradient weights IRL (" << w[0] << ", " << w[1] << "): " << endl << grad2.t();
-    //    cout << "\tnorm2: " << norm(grad2,2) << endl << endl;
-    //    cout << "Gradient computed by objective function: " << endl << grad3.t();
-    //    cout << "\tnorm2: " << norm(grad3,2) << endl;
-    //    cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
+        IRLGradType atype;
+        if (i == 0)
+        {
+            cout << "GIRL REINFORCE";
+            atype = IRLGradType::R;
+            strcpy(gtypestr, "r");
+        }
+        else if (i == 1)
+        {
+            cout << "GIRL REINFORCE BASE";
+            atype = IRLGradType::RB;
+            strcpy(gtypestr, "rb");
+        }
+        else if (i == 2)
+        {
+            cout << "GIRL GPOMDP";
+            atype = IRLGradType::G;
+            strcpy(gtypestr, "g");
+        }
+        else if (i == 3)
+        {
+            cout << "GIRL GPOMDP BASE";
+            atype = IRLGradType::GB;
+            strcpy(gtypestr, "gb");
+        }
+        else
+        {
+            std::cout << "Error unknown argument " << argv[1] << std::endl;
+            help();
+            exit(1);
+        }
 
-
-    //    //    GENERATES GRAPH
-    //    vec v = linspace<vec>(0, 1, 30);
-    //    ofstream ooo(fm.addPath("objective.log"));
-    //    for (int i = 0; i < v.n_elem; ++i)
-    //        for (int j = 0; j < v.n_elem; ++j)
-    //        {
-    //            vec x(3);
-    //            x(0) = v[i];
-    //            //            x(1) = 1 - v[i];
-    //            x(1) = v[j];
-    //            x(2) = 1 - v[i] - v[j];
-    //            if (x(2) >= 0)
-    //            {
-    //                if (atype == IRLGradType::R)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.ReinforceGradient(dgrad3);
-    //                }
-    //                else if (atype == IRLGradType::RB)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-    //                }
-    //                else if (atype == IRLGradType::G)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.GpomdpGradient(dgrad3);
-    //                }
-    //                else if (atype == IRLGradType::GB)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-    //                }
-    //                double val = norm(grad3,2)*norm(grad3,2)*0.5;
-    //                ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
-    //            }
-    //        }
-    //    ooo.close();
-
-    std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
+        /* Learn weight with GIRL */
 #if 0
-    LQR_R1 r1;
-    LQR_R2 r2;
-    rewards.push_back(&r1);
-    rewards.push_back(&r2);
+        LQR_IRL_Reward rewardRegressor;
 #else
-    for (int i = 0; i < dim; ++i)
-    {
-        rewards.push_back(new LQR_ND_R(mdp, i));
-    }
+        LQR_ND_WS rewardRegressor(mdp);
 #endif
-
-    PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
+        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                             mdp.getSettings().gamma, atype);
 
-    timer.start();
-    pgirl.run();
-    timer.stop();
-    timefile << timer.format(10, "%w") << std::endl;
 
-    timefile.close();
+        char namet[100];
+        sprintf(namet, "girl_time_%s.log", gtypestr);
+        ofstream timefile(fm.addPath(namet));
 
-    cout << "Weights (plane): " << pgirl.getWeights().t();
 
-    sprintf(name, "girl_plane_%s.log", gtypestr);
-    outf.open(fm.addPath(name), std::ofstream::out | std::ofstream::app);
-    outf << std::setprecision(OS_PRECISION);
-    arma::vec planew = pgirl.getWeights();
-    for (int i = 0; i < planew.n_elem; ++i)
-    {
-        outf << planew[i] << " ";
+        //Run MWAL
+        cpu_timer timer;
+        timer.start();
+        irlAlg.run();
+        timer.stop();
+        arma::vec gnormw = irlAlg.getWeights();
+
+        timefile << timer.format(10, "%w") << std::endl;
+
+        cout << "Weights (gnorm): " << gnormw.t();
+
+        char name[100];
+        sprintf(name, "girl_gnorm_%s.log", gtypestr);
+        ofstream outf(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+        outf << std::setprecision(OS_PRECISION);
+        for (int i = 0; i < gnormw.n_elem; ++i)
+        {
+            outf << gnormw[i] << " ";
+        }
+        outf.close();
+
+
+        std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
+#if 0
+        LQR_R1 r1;
+        LQR_R2 r2;
+        rewards.push_back(&r1);
+        rewards.push_back(&r2);
+#else
+        for (int i = 0; i < dim; ++i)
+        {
+            rewards.push_back(new LQR_ND_R(mdp, i));
+        }
+#endif
+
+        PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
+                                                mdp.getSettings().gamma, atype);
+
+        timer.start();
+        pgirl.run();
+        timer.stop();
+        timefile << timer.format(10, "%w") << std::endl;
+
+
+        cout << "Weights (plane): " << pgirl.getWeights().t();
+
+        sprintf(name, "girl_plane_%s.log", gtypestr);
+        outf.open(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+        outf << std::setprecision(OS_PRECISION);
+        arma::vec planew = pgirl.getWeights();
+        for (int i = 0; i < planew.n_elem; ++i)
+        {
+            outf << planew[i] << " ";
+        }
+
+        outf.close();
+        timefile.close();
+
+        cout << endl;
     }
-    outf.close();
 
     return 0;
 }
