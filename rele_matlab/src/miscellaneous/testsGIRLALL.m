@@ -15,10 +15,16 @@ for i = 0:0.2:1
         end
     end
 end
+
+W = samplePoints(zeros(3,1), ones(3,1), 10, 1, 0);
+AA = ones(1,10) - sum(W);
+W = [W;AA];
+W = W';
+
 clear i j
 
 %%
-for k = 6:size(W,1)
+for k = 1:size(W,1)
     
     
     eReward = W(k,:);
@@ -38,10 +44,11 @@ for k = 6:size(W,1)
         for kk = 1:length(gtypes)
             results(i).plane{kk} = [];
             results(i).gnorm{kk} = [];
-            results(i).time{kk} = [];
+            results(i).plane_time{kk} = [];
+            results(i).gnorm_time{kk} = [];
         end
         
-        for run = 1:3
+        for run = 1:5
             
             delete('/tmp/ReLe/lqr/GIRL/*');
             
@@ -86,7 +93,7 @@ for k = 6:size(W,1)
     test(k).results = results;
 end
 
-save test2.mat
+save /home/mpirotta/Dropbox/GIRL4D.mat
 
 %%
 clc;
