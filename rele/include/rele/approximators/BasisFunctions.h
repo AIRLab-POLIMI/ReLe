@@ -30,11 +30,11 @@
 namespace ReLe
 {
 
-template<class InputC>
+template<class InputC, class OutputC = double>
 class BasisFunction_
 {
 public:
-    virtual double operator()(const InputC& input) = 0;
+    virtual OutputC operator()(const InputC& input) = 0;
 
     /**
      * @brief Write a complete description of the instance to
@@ -86,6 +86,9 @@ public:
 typedef BasisFunction_<arma::vec> BasisFunction;
 typedef std::vector<BasisFunction*> BasisFunctions;
 template<class InputC> using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
+
+template<class InputC> using Tiles_ = BasisFunction_<InputC, unsigned int>;
+template<class InputC> using TilesVector_ = std::vector<Tiles_<InputC>*>;
 
 } //end namespace
 

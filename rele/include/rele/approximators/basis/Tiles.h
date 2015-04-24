@@ -1,298 +1,51 @@
 /*
- * Copyright 2014 Saminda Abeyruwan (saminda@cs.miami.edu)
+ * rele,
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Versione 1.0
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This file is part of rele.
  *
- * External documentation and recommendations on the use of this code is
- * available at http://www.cs.umass.edu/~rich/tiles.html.
+ * rele is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * This is an implementation of grid-style tile codings, based originally on
- * the UNH CMAC code (see http://www.ece.unh.edu/robots/cmac.htm).
- * Here we provide a procedure, "GetTiles", that maps floating-point and integer
- * variables to a list of tiles. This function is memoryless and requires no
- * setup. We assume that hashing colisions are to be ignored. There may be
- * duplicates in the list of tiles, but this is unlikely if memory-size is
- * large.
+ * rele is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * The floating-point input variables will be gridded at unit intervals, so generalization
- * will be by 1 in each direction, and any scaling will have
- * to be done externally before calling tiles.  There is no generalization
- * across integer values.
- *
- * It is recommended by the UNH folks that num-tilings be a power of 2, e.g., 16.
- *
- * We assume the existence of a function "rand()" that produces successive
- * random integers, of which we use only the low-order bytes.
- *
- * Modified by: Saminda Abeyruwan
- * To be used as a single header file.
+ *  You should have received a copy of the GNU General Public License
+ *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _TILES_H_
-#define _TILES_H_
+#ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_TILES_H_
+#define INCLUDE_RELE_APPROXIMATORS_BASIS_TILES_H_
 
-#include <fcntl.h>
-#include <stdint.h>
-#include <string.h>
-
-#include "Hashing.h"
+#include "BasisFunctions.h"
+#include "Range.h"
 
 namespace ReLe
 {
 
-template<class T>
-class Tiles
+class Tiles : public Tiles_<double>
 {
-protected:
-    int qstate[Hashing::MAX_NUM_VARS];
-    int base[Hashing::MAX_NUM_VARS];
-    int wrap_widths_times_num_tilings[Hashing::MAX_NUM_VARS];
-    int coordinates[Hashing::MAX_NUM_VARS * 2 + 1]; /* one interval number per relevant dimension */
-
-    Hashing* hashing; /*The has function*/
-
-    arma::Col<int>* i_tmp_arr;
-    arma::Col<T>* f_tmp_arr;
-
 public:
-    Tiles(Hashing* hashing) :
-        hashing(hashing), i_tmp_arr(new arma::Col<int>(Hashing::MAX_NUM_VARS)), f_tmp_arr(
-            new arma::Col<T>(Hashing::MAX_NUM_VARS))
-    {
-    }
+	Tiles(const std::vector<Range>& ranges, const std::vector<unsigned int>& tilesN);
+	virtual unsigned int operator()(const double& input);
 
-    ~Tiles()
-    {
-        delete i_tmp_arr;
-        delete f_tmp_arr;
-    }
-
-    void tiles(arma::Col<T>* the_tiles,        // provided array contains returned tiles (tile indices)
-               int num_tilings,           // number of tile indices to be returned in tiles
-               const arma::Col<T>* floats,            // array of floating point variables
-               int num_floats, // number of active floating point variables
-               const arma::Col<int>* ints,                   // array of integer variables
-               int num_ints)              // number of integer variables
-    {
-        int i, j;
-        int num_coordinates = num_floats + num_ints + 1;
-        for (int i = 0; i < num_ints; i++)
-            coordinates[num_floats + 1 + i] = ints->at(i);
-
-        /* quantize state to integers (henceforth, tile widths == num_tilings) */
-        for (i = 0; i < num_floats; i++)
-        {
-            qstate[i] = (int) floor(floats->at(i) * num_tilings);
-            base[i] = 0;
-        }
-
-        /*compute the tile numbers */
-        for (j = 0; j < num_tilings; j++)
-        {
-
-            /* loop over each relevant dimension */
-            for (i = 0; i < num_floats; i++)
-            {
-
-                /* find coordinates of activated tile in tiling space */
-                if (qstate[i] >= base[i])
-                    coordinates[i] = qstate[i] - ((qstate[i] - base[i]) % num_tilings);
-                else
-                    coordinates[i] = qstate[i] + 1 + ((base[i] - qstate[i] - 1) % num_tilings)
-                                     - num_tilings;
-
-                /* compute displacement of next tiling in quantized space */
-                base[i] += 1 + (2 * i);
-            }
-            /* add additional indices for tiling and hashing_set so they hash differently */
-            coordinates[i] = j;
-
-            the_tiles->at(hashing->hash(coordinates, num_coordinates)) = 1.0;
-        }
-    }
-
-    void tiles(arma::Col<T>* the_tiles,        // provided array contains returned tiles (tile indices)
-               int num_tilings,           // number of tile indices to be returned in tiles
-               const arma::Col<T>* floats,            // array of floating point variables
-               const arma::Col<int>* ints,                   // array of integer variables
-               int num_ints)              // number of integer variables
-    {
-        tiles(the_tiles, num_tilings, floats, floats->size(), ints, num_ints);
-    }
-
-// No ints
-    void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats)
-    {
-        tiles(the_tiles, nt, floats, i_tmp_arr, 0);
-    }
-
-    void tiles_reducedinput(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int floats_dim, int h1)
-    {
-        i_tmp_arr->at(0) =  h1;
-        tiles(the_tiles, nt, floats, floats_dim, i_tmp_arr, 1);
-    }
-
-    //one int
-    void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int h1)
-    {
-        i_tmp_arr->at(0) = h1;
-        tiles(the_tiles, nt, floats, i_tmp_arr, 1);
-    }
-
-// two ints
-    void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int h1, int h2)
-    {
-        i_tmp_arr->at(0) = h1;
-        i_tmp_arr->at(1) = h2;
-        tiles(the_tiles, nt, floats, i_tmp_arr, 2);
-    }
-
-// three ints
-    void tiles(arma::Col<T>* the_tiles, int nt, const arma::Col<T>* floats, int h1, int h2, int h3)
-    {
-        i_tmp_arr->at(0) = h1;
-        i_tmp_arr->at(1) = h2;
-        i_tmp_arr->at(2) = h3;
-        tiles(the_tiles, nt, floats, i_tmp_arr, 3);
-    }
-
-// one float, No ints
-    void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1)
-    {
-        f_tmp_arr->at(0) = f1;
-        tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 0);
-    }
-
-// one float, one int
-    void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1, int h1)
-    {
-        f_tmp_arr->at(0) = f1;
-        i_tmp_arr->at(0) = h1;
-        tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 1);
-    }
-
-// one float, two ints
-    void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1, int h1, int h2)
-    {
-        f_tmp_arr->at(0) = f1;
-        i_tmp_arr->at(0) = h1;
-        i_tmp_arr->at(1) = h2;
-        tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 2);
-    }
-
-// one float, three ints
-    void tiles1(arma::Col<T>* the_tiles, int nt, const T& f1, int h1, int h2, int h3)
-    {
-        f_tmp_arr->at(0) = f1;
-        i_tmp_arr->at(0) = h1;
-        i_tmp_arr->at(1) = h2;
-        i_tmp_arr->at(2) = h3;
-        tiles(the_tiles, nt, f_tmp_arr, 1, i_tmp_arr, 3);
-    }
-
-// two floats, No ints
-    void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2)
-    {
-        f_tmp_arr->at(0) = f1;
-        f_tmp_arr->at(1) = f2;
-        tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 0);
-    }
-
-// two floats, one int
-    void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2, int h1)
-    {
-        f_tmp_arr->at(0) = f1;
-        f_tmp_arr->at(1) = f2;
-        i_tmp_arr->at(0) = h1;
-        tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 1);
-    }
-
-// two floats, two ints
-    void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2, int h1, int h2)
-    {
-        f_tmp_arr->at(0) = f1;
-        f_tmp_arr->at(1) = f2;
-        i_tmp_arr->at(0) = h1;
-        i_tmp_arr->at(1) = h2;
-        tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 2);
-    }
-
-// two floats, three ints
-    void tiles2(arma::Col<T>* the_tiles, int nt, const T& f1, const T& f2, int h1, int h2, int h3)
-    {
-        f_tmp_arr->at(0) = f1;
-        f_tmp_arr->at(1) = f2;
-        i_tmp_arr->at(0) = h1;
-        i_tmp_arr->at(1) = h2;
-        i_tmp_arr->at(2) = h3;
-        tiles(the_tiles, nt, f_tmp_arr, 2, i_tmp_arr, 3);
-    }
-
-    void tileswrap(arma::Col<T>* the_tiles,    // provided array contains returned tiles (tile indices)
-                   int num_tilings,           // number of tile indices to be returned in tiles
-                   const arma::Col<T>* floats,            // array of floating point variables
-                   int num_floats, // number of active floating point variables
-                   int wrap_widths[],         // array of widths (length and units as in floats)
-                   const arma::Col<int>* ints,                  // array of integer variables
-                   int num_ints)             // number of integer variables
-    {
-        int i, j;
-        int num_coordinates = num_floats + num_ints + 1;
-
-        for (int i = 0; i < num_ints; i++)
-            coordinates[num_floats + 1 + i] = ints->at(i);
-
-        /* quantize state to integers (henceforth, tile widths == num_tilings) */
-        for (i = 0; i < num_floats; i++)
-        {
-            qstate[i] = (int) floor(floats->at(i) * num_tilings);
-            base[i] = 0;
-            wrap_widths_times_num_tilings[i] = wrap_widths[i] * num_tilings;
-        }
-
-        /*compute the tile numbers */
-        for (j = 0; j < num_tilings; j++)
-        {
-
-            /* loop over each relevant dimension */
-            for (i = 0; i < num_floats; i++)
-            {
-
-                /* find coordinates of activated tile in tiling space */
-                if (qstate[i] >= base[i])
-                    coordinates[i] = qstate[i] - ((qstate[i] - base[i]) % num_tilings);
-                else
-                    coordinates[i] = qstate[i] + 1 + ((base[i] - qstate[i] - 1) % num_tilings)
-                                     - num_tilings;
-                if (wrap_widths[i] != 0)
-                    coordinates[i] = coordinates[i] % wrap_widths_times_num_tilings[i];
-                if (coordinates[i] < 0)
-                {
-                    while (coordinates[i] < 0)
-                        coordinates[i] += wrap_widths_times_num_tilings[i];
-                }
-                /* compute displacement of next tiling in quantized space */
-                base[i] += 1 + (2 * i);
-            }
-            /* add additional indices for tiling and hashing_set so they hash differently */
-            coordinates[i] = j;
-
-            the_tiles->at(hashing->hash(coordinates, num_coordinates)) = 1.0;
-        }
-        return;
-    }
+private:
+	std::vector<Range>& ranges;
+	std::vector<unsigned int>& tilesN;
 };
 
-} // namespace ReLe
+class SelectiveTiles : public Tiles
+{
 
-#endif
+};
+
+}
+
+#endif /* INCLUDE_RELE_APPROXIMATORS_BASIS_TILES_H_ */

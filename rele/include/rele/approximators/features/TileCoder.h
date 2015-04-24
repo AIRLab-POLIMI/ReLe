@@ -24,8 +24,8 @@
 #define TILECODER_H
 
 #include "BasisFunctions.h"
-#include "basis/Tiles.h"
 #include <armadillo>
+#include "../basis/Tiles_old.h"
 
 namespace ReLe
 {
