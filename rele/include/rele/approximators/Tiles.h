@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta & Marcello Restelli
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,20 +21,19 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BASISFUNCTIONS_H
-#define BASISFUNCTIONS_H
+#ifndef INCLUDE_RELE_APPROXIMATORS_TILES_H_
+#define INCLUDE_RELE_APPROXIMATORS_TILES_H_
 
-#include <armadillo>
-#include <stdexcept>
+#include "BasisFunctions.h"
 
 namespace ReLe
 {
 
 template<class InputC>
-class BasisFunction_
+class Tiles_
 {
 public:
-    virtual double operator()(const InputC& input) = 0;
+    virtual unsigned int operator()(const InputC& input) = 0;
 
     /**
      * @brief Write a complete description of the instance to
@@ -77,16 +76,17 @@ public:
         return in;
     }
 
-    virtual ~BasisFunction_()
+    virtual ~Tiles_()
     {
     }
 
 };
 
-typedef BasisFunction_<arma::vec> BasisFunction;
-typedef std::vector<BasisFunction*> BasisFunctions;
-template<class InputC> using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
 
-} //end namespace
+typedef Tiles_<arma::vec> Tiles;
+typedef std::vector<BasisFunction*> TilesVector;
+template<class InputC> using TilesVector_ = std::vector<Tiles_<InputC>*>;
 
-#endif //BASISFUNCTIONS_H
+}
+
+#endif /* INCLUDE_RELE_APPROXIMATORS_TILES_H_ */

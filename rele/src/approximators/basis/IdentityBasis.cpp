@@ -88,30 +88,30 @@ FiniteIdentityBasis::~FiniteIdentityBasis()
 
 double FiniteIdentityBasis::operator() (const size_t& input)
 {
-	return (input == index);
+    return (input == index);
 }
 
 void FiniteIdentityBasis::writeOnStream (std::ostream& out)
 {
-	out << "Finite Identity" << std::endl;
-	out << index <<endl;
+    out << "Finite Identity" << std::endl;
+    out << index <<endl;
 }
 
 void FiniteIdentityBasis::readFromStream(std::istream& in)
 {
-	//TODO implement
+    //TODO implement
 }
 
 BasisFunctions_<size_t> FiniteIdentityBasis::generate(unsigned int stateN)
 {
-	BasisFunctions_<size_t> basis;
+    BasisFunctions_<size_t> basis;
 
-	for(size_t i = 0; i < stateN; i++)
-	{
-		 basis.push_back(new FiniteIdentityBasis(i));
-	}
+    for(size_t i = 0; i < stateN; i++)
+    {
+        basis.push_back(new FiniteIdentityBasis(i));
+    }
 
-	return basis;
+    return basis;
 }
 
 }//end namespace
