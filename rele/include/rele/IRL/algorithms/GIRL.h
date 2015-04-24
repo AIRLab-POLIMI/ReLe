@@ -110,11 +110,11 @@ public:
         //                      optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT_L, dpr);
         optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
         optimizator.set_min_objective(GIRL::wrapper, this);
-        optimizator.set_xtol_rel(1e-6);
-        optimizator.set_xtol_abs(1e-6);
-        optimizator.set_ftol_rel(1e-6);
-        optimizator.set_ftol_abs(1e-6);
-        optimizator.set_maxeval(200*dpr);
+        optimizator.set_xtol_rel(1e-4);
+        optimizator.set_xtol_abs(1e-4);
+        optimizator.set_ftol_rel(1e-4);
+        optimizator.set_ftol_abs(1e-4);
+        optimizator.set_maxeval(100*dpr);
 
         std::vector<double> lowerBounds(dpr, 0.0);
         std::vector<double> upperBounds(dpr, 1.0);

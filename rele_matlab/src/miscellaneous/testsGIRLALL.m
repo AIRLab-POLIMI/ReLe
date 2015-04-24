@@ -17,8 +17,8 @@ for i = 0:0.2:1
 end
 clear i j
 
-
-for k = 1:size(W,1)
+%%
+for k = 6:size(W,1)
     
     
     eReward = W(k,:);
@@ -29,7 +29,7 @@ for k = 1:size(W,1)
     
     i = 0;
     
-    for nbEpisodes = [10, 50,100, 500, 1000]
+    for nbEpisodes = [10, 50,100, 500]%, 1000]
         
         i = i + 1;
         

@@ -55,13 +55,22 @@ double GaussianRbf::operator()(const vec& input)
 {
     double retv = 0.0;
     unsigned int dim = mean.n_rows;
-    for (unsigned i = 0; i < dim; ++i)
-    {
-        retv += (input[i] - mean[i]) * (input[i] - mean[i]) / scale(i);
-    }
+
     if (squareRoot)
     {
+        //TODO REMOVE usato per la diga
+        for (unsigned i = 0; i < dim; ++i)
+        {
+            retv += (input[i] - mean[i]) * (input[i] - mean[i]) / (scale(i)*scale(i));
+        }
         retv = sqrt(retv);
+    }
+    else
+    {
+        for (unsigned i = 0; i < dim; ++i)
+        {
+            retv += (input[i] - mean[i]) * (input[i] - mean[i]) / scale(i);
+        }
     }
     retv = exp(-retv);
     return retv;
@@ -130,8 +139,8 @@ BasisFunctions GaussianRbf::generate(arma::vec& numb_centers, arma::mat& range)
         uniform_grid(grid, grid_nrows, grid_ncols, c[i]);
     }
 
-//    std::cerr << std::endl << grid <<std::endl;
-//    std::cerr << std::endl << b.t() <<std::endl;
+    //    std::cerr << std::endl << grid <<std::endl;
+    //    std::cerr << std::endl << b.t() <<std::endl;
     for (int i=0; i< totpoints; ++i)
     {
         arma::mat v = grid.row(i);
