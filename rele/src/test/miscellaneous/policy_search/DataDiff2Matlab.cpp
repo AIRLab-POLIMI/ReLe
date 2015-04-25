@@ -77,6 +77,10 @@ int main(int argc, char *argv[])
         {
             cout << "GPOMDP BASE" << endl;
         }
+        else if (strcmp(argv[1], "enac") == 0)
+        {
+            cout << "ENAC" << endl;
+        }
         else if (strcmp(argv[1], "enacb") == 0)
         {
             cout << "ENAC BASE" << endl;
@@ -169,6 +173,11 @@ int main(int argc, char *argv[])
     {
         cout << "PG GPOMDP BASE" << endl;
         gradient = gdw.GpomdpBaseGradient();
+    }
+    else if (strcmp(argv[1], "enac") == 0)
+    {
+        cout << "PG ENAC" << endl;
+        gradient = gdw.ENACGradient();
     }
     else if (strcmp(argv[1], "enacb") == 0)
     {

@@ -6,7 +6,7 @@ reset(symengine);
 excmd = '../../../../rele-build/datadiff2mat';
 
 %% REINFORCE
-algorithm = 'enacb';
+algorithm = 'enac';
 
 
 gamma = 0.99;
@@ -53,10 +53,11 @@ dlmwrite('/tmp/ReLe/datadiff2mat/test/params.dat', params, 'delimiter', '\t', 'p
 
 tcmd = [excmd ' ' algorithm ' /tmp/ReLe/datadiff2mat/test/params.dat' ...
     ' ' num2str(gamma)];
-
+tic;
 disp('------------------------');
 status = system(tcmd);
 disp('------------------------');
+tcpp = toc;
 
 % read values
 redG = dlmread('/tmp/ReLe/datadiff2mat/test/gradient.dat');
@@ -81,6 +82,7 @@ clearvars csv
 
 poldifflog = @(s,a) polgradf(a,s);
 poldiff2log = @(s,a) polhessf(s);
+toc;
 if strcmp(algorithm, 'r')
     evalG = eREINFORCE(poldifflog, data, gamma, 1);
     evalH = HessianRF(poldifflog, poldiff2log, data, gamma, 1);
@@ -90,11 +92,14 @@ elseif strcmp(algorithm, 'g')
     evalG = GPOMDP(poldifflog, data, gamma, 1);
 elseif strcmp(algorithm, 'gb')
     evalG = GPOMDPbase(poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'enac')
+    evalG = eNAC(poldifflog, length(params), data, gamma, 1);
 elseif strcmp(algorithm, 'enacb')
     evalG = eNACbase(poldifflog, length(params), data, gamma, 1);
 else
     error('unknown gradient type!');
 end
+tmat = toc;
 
 [redG, evalG]
 assert(max(abs(redG-evalG)) <= 1e-5);
@@ -103,4 +108,5 @@ if strcmp(algorithm, 'r')
     assert(max(max(abs(redH-evalH))) <= 1e-3);
 end
 
+fprintf('tcpp: %f\ntmat: %f\n', tcpp, tmat);
 
