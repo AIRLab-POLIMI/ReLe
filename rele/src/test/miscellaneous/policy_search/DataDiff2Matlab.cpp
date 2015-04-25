@@ -57,30 +57,29 @@ int main(int argc, char *argv[])
 //    RandomGenerator::seed(418932850);
 
     /*** check inputs ***/
-    char alg[10];
-    IRLGradType atype;
     vec params;
-    if (argc == 3)
+    double gamma;
+    if (argc == 4)
     {
         if (strcmp(argv[1], "r") == 0)
         {
             cout << "REINFORCE" << endl;
-            atype = IRLGradType::R;
         }
         else if (strcmp(argv[1], "rb") == 0)
         {
             cout << "REINFORCE BASE" << endl;
-            atype = IRLGradType::RB;
         }
         else if (strcmp(argv[1], "g") == 0)
         {
             cout << "GPOMDP" << endl;
-            atype = IRLGradType::G;
         }
         else if (strcmp(argv[1], "gb") == 0)
         {
             cout << "GPOMDP BASE" << endl;
-            atype = IRLGradType::GB;
+        }
+        else if (strcmp(argv[1], "enacb") == 0)
+        {
+            cout << "ENAC BASE" << endl;
         }
         else
         {
@@ -88,9 +87,9 @@ int main(int argc, char *argv[])
             help();
             exit(1);
         }
-        strcpy(alg, argv[1]);
 
         params.load(argv[2], raw_ascii);
+        gamma = atof(argv[3]);
     }
     else
     {
@@ -148,28 +147,33 @@ int main(int argc, char *argv[])
 
     vec gradient;
     mat hessian;
-    GradientFromDataWorker<DenseAction, DenseState> gdw(data, policy, mdp.getSettings().gamma, 0);
-    HessianFromDataWorker<DenseAction, DenseState, NormalPolicy> hdw(data, policy, mdp.getSettings().gamma, 0);
-    if (atype == IRLGradType::R)
+    GradientFromDataWorker<DenseAction, DenseState> gdw(data, policy, gamma, 0);
+    HessianFromDataWorker<DenseAction, DenseState, NormalPolicy> hdw(data, policy, gamma, 0);
+    if (strcmp(argv[1], "r") == 0)
     {
         cout << "PG REINFORCE" << endl;
         gradient = gdw.ReinforceGradient();
         hessian = hdw.ReinforceHessian();
     }
-    else if (atype == IRLGradType::RB)
+    else if (strcmp(argv[1], "rb") == 0)
     {
         cout << "PG REINFORCE BASE" << endl;
         gradient = gdw.ReinforceBaseGradient();
     }
-    else if (atype == IRLGradType::G)
+    else if (strcmp(argv[1], "g") == 0)
     {
         cout << "PG GPOMDP" << endl;
         gradient = gdw.GpomdpGradient();
     }
-    else if (atype == IRLGradType::GB)
+    else if (strcmp(argv[1], "gb") == 0)
     {
         cout << "PG GPOMDP BASE" << endl;
         gradient = gdw.GpomdpBaseGradient();
+    }
+    else if (strcmp(argv[1], "enacb") == 0)
+    {
+        cout << "PG ENAC BASE" << endl;
+        gradient = gdw.ENACBaseGradient();
     }
 
     gradient.save(fm.addPath("gradient.dat"), raw_ascii);

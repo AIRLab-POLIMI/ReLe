@@ -383,7 +383,7 @@ public:
         double Rew;
         arma::vec g(dp+1, arma::fill::zeros), eligibility(dp+1, arma::fill::zeros), phi(dp+1);
         arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
-        double Jpol;
+        double Jpol = 0.0;
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
