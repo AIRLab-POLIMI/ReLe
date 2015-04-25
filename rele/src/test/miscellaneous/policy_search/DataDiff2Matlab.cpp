@@ -85,6 +85,11 @@ int main(int argc, char *argv[])
         {
             cout << "ENAC BASE" << endl;
         }
+        else if ((strcmp(argv[1], "natr") == 0) || (strcmp(argv[1], "natrb") == 0) ||
+                 (strcmp(argv[1], "natg") == 0) || (strcmp(argv[1], "natgb") == 0) )
+        {
+            cout << "NATURAL GRADIENT" << endl;
+        }
         else
         {
             std::cout << "Error unknown argument " << argv[1] << std::endl;
@@ -183,6 +188,26 @@ int main(int argc, char *argv[])
     {
         cout << "PG ENAC BASE" << endl;
         gradient = gdw.ENACBaseGradient();
+    }
+    else if (strcmp(argv[1], "natr") == 0)
+    {
+        cout << "PG NAT R " << endl;
+        gradient = gdw.NaturalGradient(GradientFromDataWorker<DenseAction, DenseState>::NaturalGradType::NATR);
+    }
+    else if (strcmp(argv[1], "natrb") == 0)
+    {
+        cout << "PG NAT RB BASE" << endl;
+        gradient = gdw.NaturalGradient(GradientFromDataWorker<DenseAction, DenseState>::NaturalGradType::NATRB);
+    }
+    else if (strcmp(argv[1], "natg") == 0)
+    {
+        cout << "PG NAT G " << endl;
+        gradient = gdw.NaturalGradient(GradientFromDataWorker<DenseAction, DenseState>::NaturalGradType::NATG);
+    }
+    else if (strcmp(argv[1], "natgb") == 0)
+    {
+        cout << "PG NAT GB BASE" << endl;
+        gradient = gdw.NaturalGradient(GradientFromDataWorker<DenseAction, DenseState>::NaturalGradType::NATGB);
     }
 
     gradient.save(fm.addPath("gradient.dat"), raw_ascii);

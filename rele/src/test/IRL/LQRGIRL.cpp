@@ -185,7 +185,7 @@ void help()
 
 int main(int argc, char *argv[])
 {
-    //    RandomGenerator::seed(545404224);
+    RandomGenerator::seed(45423424);
 
     /*** check inputs ***/
     IRLGradType atype;
@@ -214,6 +214,31 @@ int main(int argc, char *argv[])
             cout << "GIRL GPOMDP BASE" << endl;
             atype = IRLGradType::GB;
         }
+        else if (strcmp(argv[1], "enac") == 0)
+        {
+            cout << "GIRL ENAC" << endl;
+            atype = IRLGradType::ENAC;
+        }
+        else if (strcmp(argv[1], "natr") == 0)
+        {
+            cout << "GIRL NATR" << endl;
+            atype = IRLGradType::NATR;
+        }
+        else if (strcmp(argv[1], "natrb") == 0)
+        {
+            cout << "GIRL NATR BASE" << endl;
+            atype = IRLGradType::NATRB;
+        }
+        else if (strcmp(argv[1], "natg") == 0)
+        {
+            cout << "GIRL NATG" << endl;
+            atype = IRLGradType::NATG;
+        }
+        else if (strcmp(argv[1], "natgb") == 0)
+        {
+            cout << "GIRL NATG BASE" << endl;
+            atype = IRLGradType::NATGB;
+        }
         else
         {
             std::cout << "Error unknown argument " << argv[1] << std::endl;
@@ -235,7 +260,7 @@ int main(int argc, char *argv[])
     }
     /******/
 
-    FileManager fm("lqr", "GIRL");
+    FileManager fm("lqr", "TESTGIRL");
     fm.createDir();
     //    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -336,7 +361,7 @@ int main(int argc, char *argv[])
     //Run MWAL
     cpu_timer timer;
     timer.start();
-    irlAlg.run();
+//    irlAlg.run();
     timer.stop();
     arma::vec gnormw = irlAlg.getWeights();
 
@@ -355,8 +380,8 @@ int main(int argc, char *argv[])
     outf.close();
 
     // TEST GRADIENTS
-    //        vec grad, grad2, grad3;
-    //        mat dgrad3;
+    vec grad, grad2, grad3;
+    mat dgrad3;
     //    GradientFromDataWorker<DenseAction,DenseState> gdw(data, expertPolicy, rewardRegressor, mdp.getSettings().gamma);
     //    if (atype == IRLGradType::R)
     //    {
@@ -403,44 +428,76 @@ int main(int argc, char *argv[])
     //    cout << "Objective function (0.5*nomr(g,2)^2: " << norm(grad3,2)*norm(grad3,2)*0.5 << endl;
 
 
-    //    //    GENERATES GRAPH
-    //    vec v = linspace<vec>(0, 1, 30);
-    //    ofstream ooo(fm.addPath("objective.log"));
-    //    for (int i = 0; i < v.n_elem; ++i)
-    //        for (int j = 0; j < v.n_elem; ++j)
-    //        {
-    //            vec x(3);
-    //            x(0) = v[i];
-    //            //            x(1) = 1 - v[i];
-    //            x(1) = v[j];
-    //            x(2) = 1 - v[i] - v[j];
-    //            if (x(2) >= 0)
-    //            {
-    //                if (atype == IRLGradType::R)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.ReinforceGradient(dgrad3);
-    //                }
-    //                else if (atype == IRLGradType::RB)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
-    //                }
-    //                else if (atype == IRLGradType::G)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.GpomdpGradient(dgrad3);
-    //                }
-    //                else if (atype == IRLGradType::GB)
-    //                {
-    //                    rewardRegressor.setParameters(x);
-    //                    grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
-    //                }
-    //                double val = norm(grad3,2)*norm(grad3,2)*0.5;
-    //                ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
-    //            }
-    //        }
-    //    ooo.close();
+//    //    GENERATES GRAPH
+//    vec v = linspace<vec>(0, 1, 30);
+//    char objname[100];
+//    sprintf(objname, "objective_%s.log", gtypestr);
+//    ofstream ooo(fm.addPath(objname));
+//    for (int i = 0; i < v.n_elem; ++i)
+//        for (int j = 0; j < v.n_elem; ++j)
+//        {
+//            vec x(3);
+//            x(0) = v[i];
+//            //            x(1) = 1 - v[i];
+//            x(1) = v[j];
+//            x(2) = 1 - v[i] - v[j];
+//            if (x(2) >= 0)
+//            {
+//                if (atype == IRLGradType::R)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.ReinforceGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::RB)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.ReinforceBaseGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::G)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.GpomdpGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::GB)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::ENAC)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.ENACGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::NATR)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.NaturalGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::NATRB)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.NaturalGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::NATG)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.NaturalGradient(dgrad3);
+//                }
+//                else if (atype == IRLGradType::NATGB)
+//                {
+//                    rewardRegressor.setParameters(x);
+//                    grad3 = irlAlg.NaturalGradient(dgrad3);
+//                }
+//                //                else if (atype == IRLGradType::ENACB)
+//                //                {
+//                //                    rewardRegressor.setParameters(x);
+//                //                    grad3 = irlAlg.GpomdpBaseGradient(dgrad3);
+//                //                }
+//                double val = norm(grad3,2)*norm(grad3,2)*0.5;
+//                ooo << x(0) << "\t" << x(1) << "\t" << val << endl;
+//            }
+//        }
+//    ooo.close();
 
     std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
 #if 0

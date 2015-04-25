@@ -35,6 +35,7 @@ template<class ActionC, class StateC>
 class GradientFromDataWorker
 {
 public:
+    enum NaturalGradType {NATR, NATRB, NATG, NATGB};
 
     GradientFromDataWorker(Dataset<ActionC,StateC>& dataset,
                            DifferentiablePolicy<ActionC,StateC>& policy,
@@ -449,7 +450,6 @@ public:
         return nat_grad.rows(0,dp-1);
     }
 
-
     arma::vec ENACBaseGradient()
     {
         int dp  = policy.getParametersSize();
@@ -536,6 +536,86 @@ public:
         }
 
         return nat_grad.rows(0,dp-1);
+    }
+
+    arma::vec NaturalGradient(NaturalGradType atype)
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        arma::mat fisher(dp,dp, arma::fill::zeros);
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                fisher += localg * localg.t();
+                // ********************** //
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+        }
+        fisher /= nbEpisodes;
+
+        arma::vec gradient;
+        if (atype == NaturalGradType::NATR)
+        {
+            std::cout << "PG NAT R" << std::endl;
+            gradient = ReinforceGradient();
+        }
+        else if (atype == NaturalGradType::NATRB)
+        {
+            std::cout << "PG NAT R BASE" << std::endl;
+            gradient = ReinforceBaseGradient();
+        }
+        else if (atype == NaturalGradType::NATG)
+        {
+            std::cout << "PG NAT G" << std::endl;
+            gradient = GpomdpGradient();
+        }
+        else if (atype == NaturalGradType::NATGB)
+        {
+            std::cout << "PG NAT G BASE" << std::endl;
+            gradient = GpomdpBaseGradient();
+        }
+        else
+        {
+            std::cout << "error" << std::endl;
+            abort();
+        }
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        std::cout << rnk << " " << fisher << std::endl;
+        std::cout << arma::det(fisher) << std::endl;
+        std::cout << gradient.t() << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, gradient);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * gradient;
+        }
+
+        return nat_grad;
     }
 
     void setPolicy(DifferentiablePolicy<ActionC,StateC>& policy)

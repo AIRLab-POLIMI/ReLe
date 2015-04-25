@@ -6,7 +6,7 @@ reset(symengine);
 excmd = '../../../../rele-build/datadiff2mat';
 
 %% REINFORCE
-algorithm = 'enac';
+algorithm = 'natgb';
 
 
 gamma = 0.99;
@@ -96,13 +96,21 @@ elseif strcmp(algorithm, 'enac')
     evalG = eNAC(poldifflog, length(params), data, gamma, 1);
 elseif strcmp(algorithm, 'enacb')
     evalG = eNACbase(poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natr')
+    evalG = NaturalPG('r', poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natrb')
+    evalG = NaturalPG('rb', poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natg')
+    evalG = NaturalPG('g', poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natgb')
+    evalG = NaturalPG('gb', poldifflog, length(params), data, gamma, 1);
 else
     error('unknown gradient type!');
 end
 tmat = toc;
 
 [redG, evalG]
-assert(max(abs(redG-evalG)) <= 1e-5);
+assert(max(abs(redG-evalG)) <= 1e-7);
 if strcmp(algorithm, 'r')
     redH, evalH
     assert(max(max(abs(redH-evalH))) <= 1e-3);
