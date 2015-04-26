@@ -34,9 +34,9 @@ class LQR: public ContinuousMDP
     friend class LQRsolver;
 public:
     LQR(unsigned int dimension, unsigned int reward_dimension,
-        double eps = 0.1, double gamma = 0.99, unsigned int horizon = 50);
+        double eps = 0.1, double gamma = 0.9, unsigned int horizon = 50);
     LQR(arma::mat& A, arma::mat& B, std::vector<arma::mat>& Q, std::vector<arma::mat>& R,
-        double gamma = 0.99, unsigned int horizon = 50);
+        double gamma = 0.9, unsigned int horizon = 50);
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);

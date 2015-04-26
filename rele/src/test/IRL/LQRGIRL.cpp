@@ -185,7 +185,8 @@ void help()
 
 int main(int argc, char *argv[])
 {
-    RandomGenerator::seed(45423424);
+//    RandomGenerator::seed(45423424);
+    RandomGenerator::seed(8763575);
 
     /*** check inputs ***/
     IRLGradType atype;
@@ -361,7 +362,7 @@ int main(int argc, char *argv[])
     //Run MWAL
     cpu_timer timer;
     timer.start();
-//    irlAlg.run();
+    irlAlg.run();
     timer.stop();
     arma::vec gnormw = irlAlg.getWeights();
 

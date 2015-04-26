@@ -1422,9 +1422,11 @@ public:
 
 //        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
 
-        std::cout << A << std::endl;
+        std::cout << "Grads: \n" << A << std::endl;
 
         arma::mat gramMatrix = A.t() * A;
+
+        std::cout << "Gram: \n" << gramMatrix << std::endl;
 
         arma::mat X(dr-1, dr);
         for (int r = 0; r < dr-1; ++r)
