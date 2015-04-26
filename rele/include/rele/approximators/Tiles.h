@@ -34,6 +34,7 @@ class Tiles_
 {
 public:
     virtual unsigned int operator()(const InputC& input) = 0;
+    virtual unsigned int size() = 0;
 
     /**
      * @brief Write a complete description of the instance to
@@ -84,7 +85,7 @@ public:
 
 
 typedef Tiles_<arma::vec> Tiles;
-typedef std::vector<BasisFunction*> TilesVector;
+typedef std::vector<Tiles*> TilesVector;
 template<class InputC> using TilesVector_ = std::vector<Tiles_<InputC>*>;
 
 }

@@ -122,6 +122,9 @@ endif()
 add_executable(features_test src/test/core/FeaturesTest.cpp)
 target_link_libraries(features_test rele)
 
+add_executable(tiles_test src/test/core/TilesTest.cpp)
+target_link_libraries(tiles_test rele)
+
 add_executable(pr_mdp src/test/core/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 

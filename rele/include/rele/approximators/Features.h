@@ -44,7 +44,7 @@ struct feature_traits<true>
 template<>
 struct feature_traits<false>
 {
-    typedef arma::mat type;
+    typedef arma::sp_mat type;
 };
 
 template<class InputC, bool denseOutput = true>

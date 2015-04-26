@@ -33,16 +33,28 @@ namespace ReLe
 class BasicTiles : public Tiles
 {
 public:
+    BasicTiles(Range& range, unsigned int tilesN);
     BasicTiles(std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
+    inline virtual unsigned int size()
+    {
+        return tilesSize;
+    }
     virtual unsigned int operator()(const arma::vec& input);
     virtual void writeOnStream(std::ostream& out);
     virtual void readFromStream(std::istream& in);
 
-    TilesVector generate(unsigned int inputSize, const Range& range);
+    //TilesVector generate(unsigned int inputSize, const Range& range);
 
 protected:
-    std::vector<Range>& ranges;
-    std::vector<unsigned int>& tilesN;
+    unsigned int computeComponentIndex(unsigned int i,double value);
+
+private:
+    void computeSize();
+
+protected:
+    std::vector<Range> ranges;
+    std::vector<unsigned int> tilesN;
+    unsigned int tilesSize;
 };
 
 class SelectiveTiles : public BasicTiles
