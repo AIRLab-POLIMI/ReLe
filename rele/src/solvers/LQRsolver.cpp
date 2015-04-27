@@ -39,6 +39,21 @@ LQRsolver::LQRsolver(LQR& lqr, Features& phi, Type type) :
 
 void LQRsolver::solve()
 {
+
+    arma::mat K = computeOptSolution();
+    arma::vec w(K.n_elem);
+    for (int r = 0, i = 0;  r < K.n_rows; ++r)
+    {
+        for (int c = 0;  c < K.n_cols; ++c)
+        {
+            w[i++] = K(r,c);
+        }
+    }
+    pi.setParameters(w);
+}
+
+arma::mat LQRsolver::computeOptSolution()
+{
     mat A = lqr.A;
     mat B = lqr.B;
 
@@ -99,15 +114,7 @@ void LQRsolver::solve()
 
     K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
 
-    arma::vec w(K.n_elem);
-    for (int r = 0, i = 0;  r < K.n_rows; ++r)
-    {
-        for (int c = 0;  c < K.n_cols; ++c)
-        {
-            w[i++] = K(r,c);
-        }
-    }
-    pi.setParameters(w);
+    return K;
 }
 
 Dataset<DenseAction, DenseState> LQRsolver::test()
@@ -119,5 +126,6 @@ Policy<DenseAction, DenseState>& LQRsolver::getPolicy()
 {
     return pi;
 }
+
 
 }

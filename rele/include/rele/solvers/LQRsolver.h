@@ -41,6 +41,7 @@ public:
     virtual Dataset<DenseAction, DenseState> test();
     virtual Policy<DenseAction, DenseState>& getPolicy();
 
+    arma::mat computeOptSolution();
     inline void setRewardIndex(unsigned int rewardIndex)
     {
         weightsRew.zeros();

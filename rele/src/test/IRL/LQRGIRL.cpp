@@ -299,8 +299,8 @@ int main(int argc, char *argv[])
         basis.push_back(new IdentityBasis(i));
     }
 
-    SparseFeatures phi(basis, 2);
-//    phi.setDiagonal(basis);
+    SparseFeatures phi;
+    phi.setDiagonal(basis);
 
     MVNPolicy expertPolicy(phi);
 
@@ -315,9 +315,9 @@ int main(int argc, char *argv[])
     /*** solve the problem in exact way ***/
     LQRsolver solver(mdp,phi);
     solver.setRewardWeights(eReward);
-    solver.solve();
-    DetLinearPolicy<DenseState>& pol = reinterpret_cast<DetLinearPolicy<DenseState>&>(solver.getPolicy());
-    arma::vec p = pol.getParameters();
+//    solver.solve();
+    mat K = solver.computeOptSolution();
+    arma::vec p = K.diag();
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
