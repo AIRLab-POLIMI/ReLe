@@ -39,9 +39,11 @@ namespace ReLe
  * \f[ \forall s \in S,\qquad \pi(s) = \sum_{i=1}^{n} w_i \phi_i(s)\f]
  * where \f$n\f$ is the number of parameters and basis functions.
  */
-template<class StateC>
+template<class StateC, bool denseFeatures = true>
 class DetLinearPolicy: public DifferentiablePolicy<DenseAction, StateC>
 {
+
+    using InputC = typename state_type<StateC>::type;
 
 public:
 
@@ -82,14 +84,15 @@ public:
         return ss.str();
     }
 
-    virtual arma::vec operator()(const arma::vec& state)
+    virtual arma::vec operator()(typename state_type<StateC>::const_type_ref state)
     {
         return approximator(state);
     }
 
-    virtual double operator()(const arma::vec& state, const arma::vec& action)
+    virtual double operator()(typename state_type<StateC>::const_type_ref state,
+                              const arma::vec& action)
     {
-        arma::vec output = (*this)(state);
+        arma::vec output = approximator(state);
 
         //TODO CONTROLLARE ASSEGNAMENTO
         DenseAction a;
@@ -101,9 +104,9 @@ public:
         return 0.0;
     }
 
-    virtual DetLinearPolicy<StateC>* clone()
+    virtual DetLinearPolicy<StateC, denseFeatures>* clone()
     {
-        return new DetLinearPolicy<StateC>(*this);
+        return new DetLinearPolicy<StateC, denseFeatures>(*this);
     }
 
     // ParametricPolicy interface
@@ -123,20 +126,18 @@ public:
 
     // DifferentiablePolicy interface
 public:
-    arma::vec diff(const arma::vec& state, const arma::vec& action)
+    arma::vec diff(typename state_type<StateC>::const_type_ref state, const arma::vec& action)
     {
         return approximator.diff(state);
     }
 
-    arma::vec difflog(const arma::vec& state, const arma::vec& action)
+    arma::vec difflog(typename state_type<StateC>::const_type_ref state, const arma::vec& action)
     {
-        //TODO ???
-
-        return arma::vec();
+        return approximator.diff(state) / approximator(state);
     }
 
 protected:
-    LinearApproximator approximator;
+    LinearApproximator_<InputC, denseFeatures> approximator;
 
 };
 

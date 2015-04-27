@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
     for(unsigned int i = 0; i < 6; i++)
     {
-    	cout << *tiles[i] << endl;
+        cout << *tiles[i] << endl;
     }
 
     //Inputs
@@ -65,11 +65,24 @@ int main(int argc, char *argv[])
     input2(0) = 0.55;
     input2(1) = 0.67;
 
+    arma::vec input3(1);
+    input3(0) = 1;
+
+    arma::vec input4(1);
+    input4(0) = -100;
+
     cout << "## Single tiling Test ##" << endl;
     TilesCoder phi1(tiles[0]);
 
     cout << "F(" << input1[0] << ") = " << endl;
     cout << arma::mat(phi1(input1)) << endl;
+
+    cout << "## out of bounds Test ##" << endl;
+    cout << "F(" << input3[0] << ") = " << endl;
+    cout << arma::mat(phi1(input3)) << endl;
+
+    cout << "F(" << input4[0] << ") = " << endl;
+    cout << arma::mat(phi1(input4)) << endl;
 
     cout << "## Single tiling double output Test ##" << endl;
     TilesCoder phi2(tiles[1], 2);

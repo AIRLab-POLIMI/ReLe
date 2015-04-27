@@ -26,9 +26,15 @@
 
 #include <armadillo>
 #include <iostream>
+#include <stdexcept>
 
 namespace ReLe
 {
+
+class out_of_bounds : public std::exception
+{
+
+};
 
 template<class InputC>
 class Tiles_

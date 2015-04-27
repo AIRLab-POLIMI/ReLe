@@ -63,7 +63,9 @@ unsigned int BasicTiles::operator()(const arma::vec& input)
 
 unsigned int BasicTiles::computeComponentIndex(unsigned int i, double value)
 {
-    //TODO add offset to tiles
+    if(!ranges[i].contains(value) || value == ranges[i].hi())
+        throw out_of_bounds();
+
     Range& range = ranges[i];
     unsigned int N = tilesN[i];
     return std::floor(N*(value - range.lo())/range.width());

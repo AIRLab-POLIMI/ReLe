@@ -25,7 +25,6 @@
 #define BASISFUNCTIONS_H
 
 #include <armadillo>
-#include <stdexcept>
 
 namespace ReLe
 {

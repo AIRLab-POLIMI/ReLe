@@ -57,8 +57,7 @@ public:
             for(auto t : tilesVector)
             {
                 auto& tiles = *t;
-                unsigned int index = tiles(input) + offset;
-                output(index, o) = 1.0;
+                computeTile(input, offset, o, tiles, output);
                 offset += tiles.size();
             }
         }
@@ -80,6 +79,20 @@ public:
     {
         for(auto tile : tilesVector)
             delete tile;
+    }
+
+protected:
+    void computeTile(const InputC& input, unsigned int offset,
+                     unsigned int o, Tiles_<InputC>& tiles,
+                     arma::sp_mat& output)
+    {
+        try
+        {
+            unsigned int index = tiles(input) + offset;
+            output(index, o) = 1.0;
+        }
+        catch (out_of_bounds& e) {}
+
     }
 
 private:

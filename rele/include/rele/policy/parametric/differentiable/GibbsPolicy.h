@@ -17,7 +17,7 @@ public:
     ParametricGibbsPolicy(std::vector<FiniteAction> actions,
                           Features& phi, double inverseTemp) :
         mActions(actions), distribution(actions.size(),0),
-        approximator(phi), clearRegressorOnExit(false),
+        approximator(phi),
         inverseTemperature(inverseTemp)
     {
     }
@@ -89,13 +89,9 @@ public:
         for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
         {
             tuple[statesize] = mActions[k].getActionN();
-//            AbstractBasisMatrix& basis = approximator->getBasis();
-//            std::cout << basis(tuple).t();
 
             arma::vec preference = approximator(tuple);
-//            std::cout << preference << std::endl;
             double val = exp(inverseTemperature*preference[0]);
-//            std::cout << val << std::endl;
             den += val;
             distribution[count++] = val;
         }
@@ -112,9 +108,7 @@ public:
             {
                 distribution[k] /= den;
             }
-//            std::cout << distribution[k] << " ";
         }
-//        std::cout << std::endl;
 
         unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
         return mActions.at(idx).getActionN();
@@ -145,8 +139,7 @@ public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
                            typename action_type<FiniteAction>::const_type_ref action)
     {
-        //TODO Implement this method
-        return arma::vec();
+        return (*this)(state)*difflog(state, action);
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
@@ -205,7 +198,7 @@ protected:
     std::vector<double> distribution;
     double inverseTemperature;
     LinearApproximator approximator;
-    bool clearRegressorOnExit;
+
 };
 
 }
