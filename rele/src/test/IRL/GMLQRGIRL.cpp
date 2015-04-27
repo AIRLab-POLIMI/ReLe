@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
     DenseFeatures phi(pf);
     NormalPolicy tmpPolicy(1, phi);
 
-    LQRsolver solver(mdp,phi);
+    LQRsolver solver(mdp,phi,LQRsolver::Type::CLASSIC);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
