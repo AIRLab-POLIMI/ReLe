@@ -299,10 +299,14 @@ int main(int argc, char *argv[])
         basis.push_back(new IdentityBasis(i));
     }
 
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
+    cout << basis.size() << endl;
+
+    SparseFeatures phi(basis, 2);
+    std::cout << phi.rows() << " " << phi.cols() << std::endl;
 
     MVNPolicy expertPolicy(phi);
+
+    cout << phi(eReward);
 
     //    vec eReward(dim);
     //    eReward(0) = 0.05;

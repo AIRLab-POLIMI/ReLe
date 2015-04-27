@@ -63,7 +63,7 @@ void LQRsolver::solve()
         int dimS = lqr.A.n_cols;
         int dimA = lqr.B.n_cols;
         int dim  = lqr.Q.size();
-        assert(weightsRew.n_elem == dim*dimS*dimA);
+        assert(weightsRew.n_elem == dim*dimS*dimS*dimA*dimA);
 
         int cont = 0;
         for (int i = 0; i < dim; ++i)
@@ -85,6 +85,8 @@ void LQRsolver::solve()
             }
         }
 
+        std::cout << Q << std::endl;
+        std::cout << R << std::endl;
     }
 
     mat P(Q.n_rows, Q.n_cols, fill::eye);
@@ -97,7 +99,14 @@ void LQRsolver::solve()
 
     K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
 
-    arma::vec w = K.diag();
+    arma::vec w(K.n_elem);
+    for (int r = 0, i = 0;  r < K.n_rows; ++r)
+    {
+        for (int c = 0;  c < K.n_cols; ++c)
+        {
+            w[i++] = K(r,c);
+        }
+    }
     pi.setParameters(w);
 }
 
