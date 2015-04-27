@@ -60,8 +60,8 @@ void UWVSettings::defaultSettings(UWVSettings& settings)
     settings.mu = 0.3; //rad
     settings.setPoint = 4; // m/s
     settings.timeSteps = settings.horizon;
-    settings.actionList = {settings.thrustRange.Lo(), settings.thrustRange.Lo()/2.0,
-                           0.0, settings.thrustRange.Hi()/2.0, settings.thrustRange.Hi()
+    settings.actionList = {settings.thrustRange.lo(), settings.thrustRange.lo()/2.0,
+                           0.0, settings.thrustRange.hi()/2.0, settings.thrustRange.hi()
                           };
 }
 
@@ -117,7 +117,7 @@ void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, 
 
 void UnderwaterVehicle::getInitialState(DenseState& state)
 {
-    state[0] = RandomGenerator::sampleUniform(config->velocityRange.Lo(), config->velocityRange.Hi());
+    state[0] = RandomGenerator::sampleUniform(config->velocityRange.lo(), config->velocityRange.hi());
     state.setAbsorbing(false);
     currentState[0] = state[0]; //keep info about the current state
 }

@@ -54,15 +54,4 @@ void CSVutils::vectorToCSV(const vec& v, ostream& os)
     os << v[i] << endl;
 }
 
-void CSVutils::vectorToCSV(const std::vector<double> &v, ostream &os)
-{
-    int i, ie = v.size() - 1;
-    for(i = 0; i < ie; i++)
-    {
-        os << v[i] << ",";
-    }
-
-    os << v[i] << endl;
-}
-
 }

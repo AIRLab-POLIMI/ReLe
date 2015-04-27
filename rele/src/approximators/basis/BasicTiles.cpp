@@ -22,6 +22,8 @@
  */
 
 #include "tiles/BasicTiles.h"
+#include "CSV.h"
+#include <cassert>
 
 namespace ReLe
 {
@@ -40,6 +42,7 @@ BasicTiles::BasicTiles(Range& range, unsigned int tilesN)
 BasicTiles::BasicTiles(std::vector<Range>& ranges, std::vector<unsigned int>& tilesN)
     : ranges(ranges), tilesN(tilesN)
 {
+    assert(ranges.size() == tilesN.size());
     computeSize();
 }
 
@@ -48,7 +51,7 @@ unsigned int BasicTiles::operator()(const arma::vec& input)
     unsigned int multiplier = 1;
     unsigned int tileIndex = 0;
 
-    for(unsigned int i = 0; i < input.n_elem; i++)
+    for(unsigned int i = 0; i < ranges.size(); i++)
     {
         tileIndex += computeComponentIndex(i, input(i))*multiplier;
         multiplier *= tilesN[i];
@@ -63,7 +66,7 @@ unsigned int BasicTiles::computeComponentIndex(unsigned int i, double value)
     //TODO add offset to tiles
     Range& range = ranges[i];
     unsigned int N = tilesN[i];
-    return std::floor(N*(value - range.Lo())/range.Width());
+    return std::floor(N*(value - range.lo())/range.width());
 }
 
 void BasicTiles::computeSize()
@@ -78,7 +81,11 @@ void BasicTiles::computeSize()
 
 void BasicTiles::writeOnStream(std::ostream& out)
 {
-    //TODO writeonstream
+    out << "Basic Tiles" << std::endl;
+    out << "Ranges: ";
+    CSVutils::vectorToCSV(ranges, out);
+    out << "TilesN: ";
+    CSVutils::vectorToCSV(tilesN, out);
 }
 
 void BasicTiles::readFromStream(std::istream& in)
@@ -114,7 +121,13 @@ unsigned int SelectiveTiles::operator()(const arma::vec& input)
 
 void SelectiveTiles::writeOnStream(std::ostream& out)
 {
-    //TODO writeonstream
+    out << "Selective Tiles" << std::endl;
+    out << "Ranges: ";
+    CSVutils::vectorToCSV(ranges, out);
+    out << "TilesN: ";
+    CSVutils::vectorToCSV(tilesN, out);
+    out << "State components: ";
+    CSVutils::vectorToCSV(stateComponents, out);
 }
 
 void SelectiveTiles::readFromStream(std::istream& in)

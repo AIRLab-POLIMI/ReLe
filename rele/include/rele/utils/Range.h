@@ -34,8 +34,8 @@ namespace ReLe
 class Range
 {
 private:
-    double lo; /// The lower bound.
-    double hi; /// The upper bound.
+    double lowerbound; /// The lower bound.
+    double upperBound; /// The upper bound.
 
 public:
     /** Initialize to an empty set (where lo > hi). */
@@ -58,36 +58,36 @@ public:
     Range(const double lo, const double hi);
 
     //! Get the lower bound.
-    double Lo() const
+    double lo() const
     {
-        return lo;
+        return lowerbound;
     }
     //! Modify the lower bound.
-    double& Lo()
+    double& lo()
     {
-        return lo;
+        return lowerbound;
     }
 
     //! Get the upper bound.
-    double Hi() const
+    double hi() const
     {
-        return hi;
+        return upperBound;
     }
     //! Modify the upper bound.
-    double& Hi()
+    double& hi()
     {
-        return hi;
+        return upperBound;
     }
 
     /**
     * Gets the span of the range (hi - lo).
     */
-    double Width() const;
+    double width() const;
 
     /**
     * Gets the midpoint of this range.
     */
-    double Mid() const;
+    double mid() const;
 
     double bound(const double& value) const;
 
@@ -177,7 +177,7 @@ public:
     *
     * @param d Point to check.
     */
-    bool Contains(const double d) const;
+    bool contains(const double d) const;
 
     /**
     * Determines if another range overlaps with this one.
@@ -186,12 +186,18 @@ public:
     *
     * @return true if ranges overlap at all.
     */
-    bool Contains(const Range& r) const;
+    bool contains(const Range& r) const;
 
     /**
     * Returns a string representation of an object.
     */
-    std::string ToString() const;
+    std::string toString() const;
+
+    friend inline std::ostream& operator<<(std::ostream& out, const Range& range)
+    {
+        out << range.toString();
+        return out;
+    }
 
 };
 

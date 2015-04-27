@@ -83,60 +83,11 @@ TabularREPSOutputData::~TabularREPSOutputData()
 
 }
 
-/*
- EpisodicREPSOutputData::EpisodicREPSOutputData(double eps,
- const string& policyName,
- const vec& policyParameters,
- const mat& policyVariance,
- std::vector<ParameterSample>& samples) :
- AgentOutputData(true), eps(eps), policyName(policyName),
- policyParameters(policyParameters), policyVariance(policyVariance), samples(samples)
- {
-
- }
-
- void EpisodicREPSOutputData::writeData(ostream& os)
- {
-
- os << "eps: " << eps << endl;
- os << policyName << endl;
-
- CSVutils::vectorToCSV(policyParameters, os);
- CSVutils::matrixToCSV(policyVariance, os);
-
- //TODO temporary debug hack, choose a good agent data format
- ParameterSample& sample0 = samples[0];
- os << "1," << sample0.theta.n_elem << endl;
-
- for(auto& sample : samples)
- {
- os << sample.r << ",";
- CSVutils::vectorToCSV(sample.theta, os);
- }
- }
-
- void EpisodicREPSOutputData::writeDecoratedData(ostream& os)
- {
- os << "- Parameters" << endl;
- os << "eps: " << eps << endl;
- os << "- Policy" << endl;
- os << "Using " << policyName << " policy"
- << endl << endl;
- os << "Policy parameters mean: " << policyParameters.t() << endl;
- os << "Policy parameters variance:" << endl << policyVariance << endl;
- }
-
- EpisodicREPSOutputData::~EpisodicREPSOutputData()
- {
-
- }
- */
-
 REPSOutputData::REPSOutputData(unsigned int nbIndividual,
                                unsigned int nbParams, unsigned int nbEvals) :
     BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
 {
-
+    eta = 0;
 }
 
 void REPSOutputData::writeData(ostream& os)

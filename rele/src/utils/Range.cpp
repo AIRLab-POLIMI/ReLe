@@ -31,7 +31,7 @@ namespace ReLe
  * Initialize the range to 0.
  */
 Range::Range() :
-    lo(DBL_MAX), hi(-DBL_MAX)
+    lowerbound(DBL_MAX), upperBound(-DBL_MAX)
 {
     /* nothing else to do */
 }
@@ -40,7 +40,7 @@ Range::Range() :
  * Initialize a range to enclose only the given point.
  */
 Range::Range(const double point) :
-    lo(point), hi(point)
+    lowerbound(point), upperBound(point)
 {
     /* nothing else to do */
 }
@@ -49,7 +49,7 @@ Range::Range(const double point) :
  * Initializes the range to the specified values.
  */
 Range::Range(const double lo, const double hi) :
-    lo(lo), hi(hi)
+    lowerbound(lo), upperBound(hi)
 {
     /* nothing else to do */
 }
@@ -57,25 +57,25 @@ Range::Range(const double lo, const double hi) :
 /**
  * Gets the span of the range, hi - lo.  Returns 0 if the range is negative.
  */
-double Range::Width() const
+double Range::width() const
 {
-    if (lo < hi)
-        return (hi - lo);
+    if (lowerbound < upperBound)
+        return (upperBound - lowerbound);
     else
         return 0.0;
 }
 
 double Range::bound(const double& value) const
 {
-    return std::max(lo, std::min(hi, value));
+    return std::max(lowerbound, std::min(upperBound, value));
 }
 
 /**
  * Gets the midpoint of this range.
  */
-double Range::Mid() const
+double Range::mid() const
 {
-    return (hi + lo) / 2;
+    return (upperBound + lowerbound) / 2;
 }
 
 /**
@@ -83,18 +83,18 @@ double Range::Mid() const
  */
 Range& Range::operator|=(const Range& rhs)
 {
-    if (rhs.lo < lo)
-        lo = rhs.lo;
-    if (rhs.hi > hi)
-        hi = rhs.hi;
+    if (rhs.lowerbound < lowerbound)
+        lowerbound = rhs.lowerbound;
+    if (rhs.upperBound > upperBound)
+        upperBound = rhs.upperBound;
 
     return *this;
 }
 
 Range Range::operator|(const Range& rhs) const
 {
-    return Range((rhs.lo < lo) ? rhs.lo : lo,
-                 (rhs.hi > hi) ? rhs.hi : hi);
+    return Range((rhs.lowerbound < lowerbound) ? rhs.lowerbound : lowerbound,
+                 (rhs.upperBound > upperBound) ? rhs.upperBound : upperBound);
 }
 
 /**
@@ -103,18 +103,18 @@ Range Range::operator|(const Range& rhs) const
  */
 Range& Range::operator&=(const Range& rhs)
 {
-    if (rhs.lo > lo)
-        lo = rhs.lo;
-    if (rhs.hi < hi)
-        hi = rhs.hi;
+    if (rhs.lowerbound > lowerbound)
+        lowerbound = rhs.lowerbound;
+    if (rhs.upperBound < upperBound)
+        upperBound = rhs.upperBound;
 
     return *this;
 }
 
 Range Range::operator&(const Range& rhs) const
 {
-    return Range((rhs.lo > lo) ? rhs.lo : lo,
-                 (rhs.hi < hi) ? rhs.hi : hi);
+    return Range((rhs.lowerbound > lowerbound) ? rhs.lowerbound : lowerbound,
+                 (rhs.upperBound < upperBound) ? rhs.upperBound : upperBound);
 }
 
 /**
@@ -122,15 +122,15 @@ Range Range::operator&(const Range& rhs) const
  */
 Range& Range::operator*=(const double d)
 {
-    lo *= d;
-    hi *= d;
+    lowerbound *= d;
+    upperBound *= d;
 
     // Now if we've negated, we need to flip things around so the bound is valid.
-    if (lo > hi)
+    if (lowerbound > upperBound)
     {
-        double tmp = hi;
-        hi = lo;
-        lo = tmp;
+        double tmp = upperBound;
+        upperBound = lowerbound;
+        lowerbound = tmp;
     }
 
     return *this;
@@ -138,8 +138,8 @@ Range& Range::operator*=(const double d)
 
 Range Range::operator*(const double d) const
 {
-    double nlo = lo * d;
-    double nhi = hi * d;
+    double nlo = lowerbound * d;
+    double nhi = upperBound * d;
 
     if (nlo <= nhi)
         return Range(nlo, nhi);
@@ -150,8 +150,8 @@ Range Range::operator*(const double d) const
 // Symmetric case.
 Range operator*(const double d, const Range& r)
 {
-    double nlo = r.lo * d;
-    double nhi = r.hi * d;
+    double nlo = r.lowerbound * d;
+    double nhi = r.upperBound * d;
 
     if (nlo <= nhi)
         return Range(nlo, nhi);
@@ -164,12 +164,12 @@ Range operator*(const double d, const Range& r)
  */
 bool Range::operator==(const Range& rhs) const
 {
-    return (lo == rhs.lo) && (hi == rhs.hi);
+    return (lowerbound == rhs.lowerbound) && (upperBound == rhs.upperBound);
 }
 
 bool Range::operator!=(const Range& rhs) const
 {
-    return (lo != rhs.lo) || (hi != rhs.hi);
+    return (lowerbound != rhs.lowerbound) || (upperBound != rhs.upperBound);
 }
 
 /**
@@ -178,37 +178,37 @@ bool Range::operator!=(const Range& rhs) const
  */
 bool Range::operator<(const Range& rhs) const
 {
-    return hi < rhs.lo;
+    return upperBound < rhs.lowerbound;
 }
 
 bool Range::operator>(const Range& rhs) const
 {
-    return lo > rhs.hi;
+    return lowerbound > rhs.upperBound;
 }
 
 /**
  * Determines if a point is contained within the range.
  */
-bool Range::Contains(const double d) const
+bool Range::contains(const double d) const
 {
-    return d >= lo && d <= hi;
+    return d >= lowerbound && d <= upperBound;
 }
 
 /**
  * Determines if this range overlaps with another range.
  */
-bool Range::Contains(const Range& r) const
+bool Range::contains(const Range& r) const
 {
-    return lo <= r.hi && hi >= r.lo;
+    return lowerbound <= r.upperBound && upperBound >= r.lowerbound;
 }
 
 /**
  * Returns a string representation of an object.
  */
-std::string Range::ToString() const
+std::string Range::toString() const
 {
     std::ostringstream convert;
-    convert << "[" << lo << ", " << hi << "]";
+    convert << "[" << lowerbound << ", " << upperBound << "]";
     return convert.str();
 }
 

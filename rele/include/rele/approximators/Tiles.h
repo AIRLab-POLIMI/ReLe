@@ -24,7 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_TILES_H_
 #define INCLUDE_RELE_APPROXIMATORS_TILES_H_
 
-#include "BasisFunctions.h"
+#include <armadillo>
+#include <iostream>
 
 namespace ReLe
 {
@@ -58,7 +59,7 @@ public:
      * @param bf an instance of basis function
      * @return the output stream
      */
-    friend std::ostream& operator<<(std::ostream& out, BasisFunction_<InputC>& bf)
+    friend std::ostream& operator<<(std::ostream& out, Tiles_<InputC>& bf)
     {
         bf.writeOnStream(out);
         return out;
@@ -71,7 +72,7 @@ public:
      * @param bf an instance of basis function
      * @return the input stream
      */
-    friend std::istream& operator>>(std::istream& in, BasisFunction_<InputC>& bf)
+    friend std::istream& operator>>(std::istream& in, Tiles_<InputC>& bf)
     {
         bf.readFromStream(in);
         return in;

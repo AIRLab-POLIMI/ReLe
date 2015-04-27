@@ -44,8 +44,8 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
 
     settings.actionList =
     {
-        settings.actionRange.Lo(), 0.0,
-        settings.actionRange.Hi()
+        settings.actionRange.lo(), 0.0,
+        settings.actionRange.hi()
     };
     assert(settings.finiteActionDim == settings.actionList.size());
 }
@@ -59,9 +59,9 @@ void SwingUpSettings::WriteToStream(ostream &out) const
 {
     EnvironmentSettings::WriteToStream(out);
     out << stepTime << std::endl;
-    out << actionRange.Lo() << " " << actionRange.Hi() << std::endl;
-    out << thetaRange.Lo() << " " << thetaRange.Hi() << std::endl;
-    out << velocityRange.Lo() << " " << velocityRange.Hi() << std::endl;
+    out << actionRange.lo() << " " << actionRange.hi() << std::endl;
+    out << thetaRange.lo() << " " << thetaRange.hi() << std::endl;
+    out << velocityRange.lo() << " " << velocityRange.hi() << std::endl;
     out << mass << " " << length << " " << g << std::endl;
     out << requiredUpTime << " " << upRange << " ";
     out << (useOverRotated ? 1 : 0) << (random_start ? 1 : 0) << std::endl;
@@ -185,8 +185,8 @@ void DiscreteActionSwingUp::getInitialState(DenseState& state)
     double theta;
     upTime = 0;
     if (config->random_start)
-        theta = RandomGenerator::sampleUniform(config->thetaRange.Lo(),
-                                               config->thetaRange.Hi());
+        theta = RandomGenerator::sampleUniform(config->thetaRange.lo(),
+                                               config->thetaRange.hi());
     else
         theta = M_PI_2;
     adjustTheta(theta);

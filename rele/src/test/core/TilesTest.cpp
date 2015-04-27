@@ -44,13 +44,18 @@ int main(int argc, char *argv[])
 
 
     //Tiles
-    Tiles* tiles1 = new BasicTiles(range, 10);
-    Tiles* tiles2 = new BasicTiles(range, 10);
-    Tiles* tiles3 = new BasicTiles(ranges, tilesN1);
-    Tiles* tiles4 = new BasicTiles(ranges, tilesN2);
-    Tiles* tiles5 = new BasicTiles(ranges, tilesN1);
-    Tiles* tiles6 = new BasicTiles(ranges, tilesN2);
+    Tiles* tiles[6];
+    tiles[0] = new BasicTiles(range, 10);
+    tiles[1] = new BasicTiles(range, 10);
+    tiles[2] = new BasicTiles(ranges, tilesN1);
+    tiles[3] = new BasicTiles(ranges, tilesN2);
+    tiles[4] = new BasicTiles(ranges, tilesN1);
+    tiles[5] = new BasicTiles(ranges, tilesN2);
 
+    for(unsigned int i = 0; i < 6; i++)
+    {
+    	cout << *tiles[i] << endl;
+    }
 
     //Inputs
     arma::vec input1(1);
@@ -61,23 +66,21 @@ int main(int argc, char *argv[])
     input2(1) = 0.67;
 
     cout << "## Single tiling Test ##" << endl;
-    TilesCoder phi1(tiles1);
-
-
+    TilesCoder phi1(tiles[0]);
 
     cout << "F(" << input1[0] << ") = " << endl;
     cout << arma::mat(phi1(input1)) << endl;
 
     cout << "## Single tiling double output Test ##" << endl;
-    TilesCoder phi2(tiles2, 2);
+    TilesCoder phi2(tiles[1], 2);
 
     cout << "F(" << input1[0] << ") = " << endl;
     cout << arma::mat(phi2(input1)) << endl;
 
     cout << "## Double tiling single output Test ##" << endl;
     TilesVector tVector0;
-    tVector0.push_back(tiles3);
-    tVector0.push_back(tiles4);
+    tVector0.push_back(tiles[2]);
+    tVector0.push_back(tiles[3]);
     TilesCoder phi3(tVector0, 1);
 
     cout << "F(" << input2[0] << ", " << input2[1] << ") = " << endl;
@@ -85,13 +88,11 @@ int main(int argc, char *argv[])
 
     cout << "## Double tiling double output Test ##" << endl;
     TilesVector tVector1;
-    tVector1.push_back(tiles5);
-    tVector1.push_back(tiles6);
+    tVector1.push_back(tiles[4]);
+    tVector1.push_back(tiles[5]);
     TilesCoder phi4(tVector1, 2);
 
     cout << "F(" << input2[0] << ", " << input2[1] << ") = " << endl;
     cout << arma::mat(phi4(input2)) << endl;
-
-
 
 }

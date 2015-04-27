@@ -89,8 +89,8 @@ public:
     {
         for (int i = 0; i < mpRanges.size(); ++i)
         {
-            double a = mpRanges[i].lo();
-            double b = mpRanges[i].hi();
+            double a = mpRanges[i].lowerbound();
+            double b = mpRanges[i].upperBound();
             double val = a + (b - a) * RandomGenerator::sampleUniform(0,1);
             mpAction[i] =  val;
         }
@@ -106,7 +106,7 @@ public:
         std::vector<Range>::iterator it;
         for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
         {
-            prob *= 1.0 / it->Width();
+            prob *= 1.0 / it->width();
         }
         return prob;
     }
@@ -120,7 +120,7 @@ public:
         std::vector<Range>::iterator it;
         for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
         {
-            prob *= 1.0 / it->Width();
+            prob *= 1.0 / it->width();
         }
         return prob;
     }
