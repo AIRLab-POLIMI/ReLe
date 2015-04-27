@@ -258,7 +258,7 @@ void MVNDiagonalPolicy::UpdateCovarianceMatrix()
     mDeterminant = 1.0;
     for (unsigned int i = 0; i < stddevParams.n_elem; ++i)
     {
-        mCovariance(i,i) = stddevParams(i) * stddevParams(i);
+        mCovariance(i,i) = std::max(1e-10,stddevParams(i) * stddevParams(i));
         mCinv(i,i) = 1.0 / mCovariance(i,i);
         // check that the covariance is not NaN or Inf
         assert(!std::isnan(mCovariance(i,i)) && !std::isinf(mCovariance(i,i)));

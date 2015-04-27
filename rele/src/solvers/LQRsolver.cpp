@@ -80,7 +80,7 @@ arma::mat LQRsolver::computeOptSolution()
         int dimS = lqr.A.n_cols;
         int dimA = lqr.B.n_cols;
         int dim  = lqr.Q.size();
-        assert(weightsRew.n_elem == dim*dimS*dimS*dimA*dimA);
+        assert(weightsRew.n_elem == dim*(dimS*dimS+dimA*dimA));
 
         int cont = 0;
         for (int i = 0; i < dim; ++i)
