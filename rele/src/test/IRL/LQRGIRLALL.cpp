@@ -185,18 +185,21 @@ void help()
 
 int main(int argc, char *argv[])
 {
-    //    RandomGenerator::seed(545404224);
+//        RandomGenerator::seed(4434224);
 
     /*** check inputs ***/
     vec eReward;
     int nbEpisodes;
+    long int seed = atol(argv[1]);
+    RandomGenerator::seed(seed);
+    std::cout << seed << std::endl;
 
-    nbEpisodes = atoi(argv[1]);
+    nbEpisodes = atoi(argv[2]);
     cout << "Episodes: " << nbEpisodes << endl;
-    int nw = atoi(argv[2]);
+    int nw = atoi(argv[3]);
     eReward.set_size(nw);
     for (int i = 0; i < nw; ++i)
-        eReward(i) = atof(argv[3+i]);
+        eReward(i) = atof(argv[4+i]);
 
     /******/
 
@@ -254,9 +257,8 @@ int main(int argc, char *argv[])
     /*** solve the problem in exact way ***/
     LQRsolver solver(mdp,phi);
     solver.setRewardWeights(eReward);
-    solver.solve();
-    DetLinearPolicy<DenseState>& pol = reinterpret_cast<DetLinearPolicy<DenseState>&>(solver.getPolicy());
-    arma::vec p = pol.getParameters();
+    mat K = solver.computeOptSolution();
+    arma::vec p = K.diag();
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
@@ -286,8 +288,8 @@ int main(int argc, char *argv[])
     datafile.close();
 
 
-    char gtypestr[5];
-    for (int i = 0; i < 4; ++i)
+    char gtypestr[10];
+    for (int i = 0; i < 5; ++i)
     {
 
         IRLGradType atype;
@@ -315,6 +317,12 @@ int main(int argc, char *argv[])
             atype = IRLGradType::GB;
             strcpy(gtypestr, "gb");
         }
+        else if (i == 4)
+        {
+            cout << "GIRL ENAC";
+            atype = IRLGradType::ENAC;
+            strcpy(gtypestr, "enac");
+        }
         else
         {
             std::cout << "Error unknown argument " << argv[1] << std::endl;
@@ -328,6 +336,7 @@ int main(int argc, char *argv[])
 #else
         LQR_ND_WS rewardRegressor(mdp);
 #endif
+        assert(mdp.getSettings().gamma == 0.9);
         GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                             mdp.getSettings().gamma, atype);
 
@@ -337,7 +346,7 @@ int main(int argc, char *argv[])
         ofstream timefile(fm.addPath(namet));
 
 
-        //Run MWAL
+        //Run GIRL
         cpu_timer timer;
         timer.start();
         irlAlg.run();
@@ -350,12 +359,18 @@ int main(int argc, char *argv[])
 
         char name[100];
         sprintf(name, "girl_gnorm_%s.log", gtypestr);
-        ofstream outf(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+        ofstream outf(fm.addPath(name), std::ofstream::out);
         outf << std::setprecision(OS_PRECISION);
         for (int i = 0; i < gnormw.n_elem; ++i)
         {
             outf << gnormw[i] << " ";
         }
+        outf.close();
+
+        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
+        outf.open(fm.addPath(name), std::ofstream::out);
+        outf << std::setprecision(OS_PRECISION);
+        outf << irlAlg.numberOfEvaluations;
         outf.close();
 
 
@@ -372,13 +387,15 @@ int main(int argc, char *argv[])
         }
 #endif
 
+        //Run PLANE GIRL
         PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
                                                 mdp.getSettings().gamma, atype);
 
-        timer.start();
+        cpu_timer timer2;
+        timer2.start();
         pgirl.run();
-        timer.stop();
-        timefile << timer.format(10, "%w") << std::endl;
+        timer2.stop();
+        timefile << timer2.format(10, "%w") << std::endl;
 
 
         cout << "Weights (plane): " << pgirl.getWeights().t();

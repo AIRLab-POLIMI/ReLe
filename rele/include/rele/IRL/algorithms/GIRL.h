@@ -65,7 +65,7 @@ protected:
     arma::vec weights;
 };
 
-enum IRLGradType {R, RB, G, GB, ENAC, ENACB, NATR, NATRB, NATG, NATGB};
+enum IRLGradType {R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB};
 
 template<class ActionC, class StateC>
 class GIRL : public IRLAlgorithm<ActionC, StateC>
@@ -85,6 +85,9 @@ public:
 
     virtual void run()
     {
+
+        numberOfEvaluations = 0;
+
         maxSteps = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -110,10 +113,10 @@ public:
         //                      optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT_L, dpr);
         optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
         optimizator.set_min_objective(GIRL::wrapper, this);
-        optimizator.set_xtol_rel(1e-8);
-        optimizator.set_xtol_abs(1e-8);
-        optimizator.set_ftol_rel(1e-8);
-        optimizator.set_ftol_abs(1e-8);
+        optimizator.set_xtol_rel(1e-14);
+//        optimizator.set_xtol_abs(1e-14);
+        optimizator.set_ftol_rel(1e-14);
+//        optimizator.set_ftol_abs(1e-14);
         optimizator.set_maxeval(200*dpr);
 
         std::vector<double> lowerBounds(dpr, 0.0);
@@ -694,6 +697,10 @@ public:
 
     double objFunction(unsigned int n, const double* x, double* grad)
     {
+
+        ++numberOfEvaluations;
+
+
         arma::vec gradient;
         arma::mat dGradient;
         rewardf.setParameters(n, x);
@@ -728,7 +735,7 @@ public:
         }
         else
         {
-            std::cerr << "PGIRL ERROR" << std::endl;
+            std::cerr << "GIRL ERROR" << std::endl;
             abort();
         }
 
@@ -800,6 +807,9 @@ protected:
     double gamma;
     unsigned int maxSteps;
     IRLGradType atype;
+
+public:
+    int numberOfEvaluations;
 };
 
 template<class ActionC, class StateC>
