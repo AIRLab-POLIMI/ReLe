@@ -29,10 +29,10 @@ using namespace std;
 namespace ReLe
 {
 
-LQRsolver::LQRsolver(LQR& lqr, Features& phi) :
-    lqr(lqr), pi(phi), weightsRew(lqr.getSettings().rewardDim, arma::fill::zeros)
+LQRsolver::LQRsolver(LQR& lqr, Features& phi, Type type) :
+    lqr(lqr), pi(phi), weightsRew(lqr.getSettings().rewardDim, arma::fill::zeros),
+    solution_type(type)
 {
-//    rewardIndex = 0;
     weightsRew(0) = 1;
     gamma = lqr.getSettings().gamma;
 }
@@ -42,21 +42,52 @@ void LQRsolver::solve()
     mat A = lqr.A;
     mat B = lqr.B;
 
-    int dim = lqr.Q.size();
+    mat K;
     mat Q(lqr.Q[0].n_rows, lqr.Q[0].n_cols, arma::fill::zeros);
     mat R(lqr.R[0].n_rows, lqr.R[0].n_cols, arma::fill::zeros);
-    for (int i = 0; i < dim; ++i)
+
+    if (solution_type == MOO)
     {
-        Q += weightsRew[i] * lqr.Q[i];
-        R += weightsRew[i] * lqr.R[i];
+        int dim = lqr.Q.size();
+        assert(weightsRew.n_elem == dim);
+
+        for (int i = 0; i < dim; ++i)
+        {
+            Q += weightsRew[i] * lqr.Q[i];
+            R += weightsRew[i] * lqr.R[i];
+        }
+
+    }
+    else
+    {
+        int dimS = lqr.A.n_cols;
+        int dimA = lqr.B.n_cols;
+        int dim  = lqr.Q.size();
+        assert(weightsRew.n_elem == dim*dimS*dimA);
+
+        int cont = 0;
+        for (int i = 0; i < dim; ++i)
+        {
+            for (int c = 0; c < dimS; ++c)
+            {
+                for (int r = 0; r < dimS; ++r)
+                {
+                    Q(r,c) += weightsRew[cont++];
+                }
+            }
+
+            for (int c = 0; c < dimA; ++c)
+            {
+                for (int r = 0; r < dimA; ++r)
+                {
+                    R(r,c) += weightsRew[cont++];
+                }
+            }
+        }
+
     }
 
-//    mat Q =lqr.Q[rewardIndex];
-//    mat R =lqr.R[rewardIndex];
-
     mat P(Q.n_rows, Q.n_cols, fill::eye);
-    mat K;
-
     for(unsigned int j = 0; j < 100; j++)
     {
         K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;

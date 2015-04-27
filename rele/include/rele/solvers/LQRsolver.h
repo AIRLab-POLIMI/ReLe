@@ -34,7 +34,9 @@ namespace ReLe
 class LQRsolver: public Solver<DenseAction, DenseState>
 {
 public:
-    LQRsolver(LQR& lqr, Features& approximator);
+    enum Type {MOO, CLASSIC};
+
+    LQRsolver(LQR& lqr, Features& approximator, Type type = Type::MOO);
     virtual void solve();
     virtual Dataset<DenseAction, DenseState> test();
     virtual Policy<DenseAction, DenseState>& getPolicy();
@@ -43,7 +45,6 @@ public:
     {
         weightsRew.zeros();
         weightsRew[rewardIndex] = 1;
-//        this->rewardIndex = rewardIndex;
     }
 
     inline void setRewardWeights(arma::vec& weights)
@@ -54,11 +55,9 @@ public:
 private:
     LQR& lqr;
     DetLinearPolicy<DenseState> pi;
-
     double gamma;
-
-//    unsigned int rewardIndex;
     arma::vec weightsRew;
+    Type solution_type;
 };
 
 }
