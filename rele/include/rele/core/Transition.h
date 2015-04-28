@@ -179,65 +179,55 @@ public:
 
         while(is)
         {
-            try
-            {
-            	bool first = true;
-            	bool last = false;
-            	Episode<ActionC,StateC> episode;
-            	Transition<ActionC,StateC> transition;
-
-                while(!last)
-                {
-                    std::vector<std::string> line;
-                    CSVutils::readCSVLine(is, line);
-                    if(line.size() == 0)
-                    {
-                        if(!first)
-                            continue;
-                        else
-                            throw std::exception();
-                    }
-
-                    last = std::stoi(line[0]);
-                    bool absorbing = std::stoi(line[1]);
-
-                    auto sit = line.begin() + 2;
-                    auto ait = sit + stateSize;
-                    auto rit = ait + actionSize;
-                    auto endit = rit + rewardSize;
-
-                    StateC state = StateC::generate(sit, ait);
-                    state.setAbsorbing(absorbing);
-
-                    if(!first)
-                    {
-                        transition.xn = state;
-                        episode.push_back(transition);
-                    }
-
-                    if(!last)
-                    {
-                        transition.x = state;
-                        transition.u = ActionC::generate(ait, rit);
-                        transition.r = generate(rit, endit);
-                    }
-
-                    first = false;
-
-                }
-
-                //Add episode to dataset
-                this->push_back(episode);
-            }
-            catch(...)
-            {
-            	std::cout << "exception" << std::endl;
-            }
-
+           readEpisodeFromStream(is, stateSize, actionSize, rewardSize);
         }
 
     }
 
+private:
+    void readEpisodeFromStream(std::istream& is, int stateSize, int actionSize,
+                               int rewardSize)
+    {
+        bool first = true;
+        bool last = false;
+        Episode<ActionC, StateC> episode;
+        Transition<ActionC, StateC> transition;
+
+        std::vector<std::string> line;
+        while (!last && CSVutils::readCSVLine(is, line))
+        {
+            last = std::stoi(line[0]);
+            bool absorbing = std::stoi(line[1]);
+
+            auto sit = line.begin() + 2;
+            auto ait = sit + stateSize;
+            auto rit = ait + actionSize;
+            auto endit = rit + rewardSize;
+
+            StateC state = StateC::generate(sit, ait);
+            state.setAbsorbing(absorbing);
+
+            if (!first)
+            {
+                transition.xn = state;
+                episode.push_back(transition);
+            }
+
+            if (!last)
+            {
+                transition.x = state;
+                transition.u = ActionC::generate(ait, rit);
+                transition.r = generate(rit, endit);
+            }
+
+            line.clear();
+            first = false;
+        }
+
+        //Add episode to dataset
+        if(last)
+        	this->push_back(episode);
+    }
 
 };
 

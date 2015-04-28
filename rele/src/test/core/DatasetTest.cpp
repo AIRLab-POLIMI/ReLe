@@ -30,37 +30,30 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-int main(int argc, char *argv[])
+void testFiniteDataset(unsigned int episodes, unsigned int transitions)
 {
-    unsigned int episodes = 5;
-    unsigned int transitions = 6;
-
     Dataset<FiniteAction, FiniteState> dataset;
 
-    for(unsigned int i = 0; i < episodes; i++)
+    for (unsigned int i = 0; i < episodes; i++)
     {
         Episode<FiniteAction, FiniteState> episode;
         bool first = true;
         unsigned int state = 0;
-        for(unsigned int j = 0; j < transitions; j++)
+        for (unsigned int j = 0; j < transitions; j++)
         {
             Transition<FiniteAction, FiniteState> transition;
-
             FiniteState x(state);
             FiniteAction u(RandomGenerator::randu32());
             state = RandomGenerator::randu32();
             FiniteState xn(state);
             Reward r(1);
             r[0] = RandomGenerator::randu32();
-
             transition.x = x;
             transition.u = u;
             transition.r = r;
             transition.xn = xn;
-
             episode.push_back(transition);
         }
-
         dataset.push_back(episode);
     }
 
@@ -81,13 +74,12 @@ int main(int argc, char *argv[])
     datasetReloaded.writeToStream(ss);
     after = ss.str();
 
-    cout << "---------------------" << endl;
     cout << before;
     cout << "---------------------" << endl;
     cout << after;
     cout << "---------------------" << endl;
 
-    if(before == after)
+    if (before == after)
     {
         cout << "Test passed!" << endl;
         cout << "example: " << endl;
@@ -98,7 +90,6 @@ int main(int argc, char *argv[])
         cout << "u = " << t.u << endl;
         cout << "r = " << t.r << endl;
         cout << "xn = " << t.xn << endl;
-
         cout << "Dataset reloaded" << endl;
         cout << "x = " << tr.x << endl;
         cout << "u = " << tr.u << endl;
@@ -107,4 +98,102 @@ int main(int argc, char *argv[])
     }
     else
         cout << "Test failed!" << endl;
+}
+
+void testDenseDataset(unsigned int episodes, unsigned int transitions)
+{
+    Dataset<DenseAction, DenseState> dataset;
+
+    for (unsigned int i = 0; i < episodes; i++)
+    {
+        Episode<DenseAction, DenseState> episode;
+        bool first = true;
+
+        arma::vec state(3, arma::fill::zeros);
+
+        for (unsigned int j = 0; j < transitions; j++)
+        {
+            Transition<DenseAction, DenseState> transition;
+
+            DenseState x(3);
+            arma::vec& xr = x;
+            xr = state;
+
+            DenseAction u(2);
+            arma::vec& ur = u;
+            ur = arma::vec(2, arma::fill::randn);
+
+            state = arma::vec(3, arma::fill::randn);
+            DenseState xn(3);
+            arma::vec& xnr = xn;
+            xnr = state;
+
+            Reward r(2);
+            r[0] = RandomGenerator::sampleNormal();
+            r[1] = RandomGenerator::sampleNormal();
+
+            transition.x = x;
+            transition.u = u;
+            transition.r = r;
+            transition.xn = xn;
+
+            episode.push_back(transition);
+        }
+
+        dataset.push_back(episode);
+    }
+
+    stringstream ss;
+    string before;
+    string after;
+
+    dataset.writeToStream(ss);
+    before = ss.str();
+
+    Dataset<DenseAction, DenseState> datasetReloaded;
+    datasetReloaded.readFromStream(ss);
+
+    //Clear stream
+    ss.str("");
+    ss.clear();
+
+    datasetReloaded.writeToStream(ss);
+    after = ss.str();
+
+    cout << before;
+    cout << "---------------------" << endl;
+    cout << after;
+    cout << "---------------------" << endl;
+
+    if (before == after)
+    {
+        cout << "Test passed!" << endl;
+        cout << "example: " << endl;
+        Transition<DenseAction, DenseState>& t = dataset[0][0];
+        Transition<DenseAction, DenseState>& tr = datasetReloaded[0][0];
+        cout << "Dataset" << endl;
+        cout << "x = " << t.x << endl;
+        cout << "u = " << t.u << endl;
+        cout << "r = " << t.r << endl;
+        cout << "xn = " << t.xn << endl;
+        cout << "Dataset reloaded" << endl;
+        cout << "x = " << tr.x << endl;
+        cout << "u = " << tr.u << endl;
+        cout << "r = " << tr.r << endl;
+        cout << "xn = " << tr.xn << endl;
+    }
+    else
+        cout << "Test failed!" << endl;
+}
+
+int main(int argc, char *argv[])
+{
+    unsigned int episodes = 5;
+    unsigned int transitions = 6;
+
+    cout << endl << "# Testing Finite action/state dataset #" << endl << endl;
+    testFiniteDataset(episodes, transitions);
+
+    cout << endl << "# Testing Dense action/state dataset #" << endl << endl;
+    testDenseDataset(episodes, transitions);
 }

@@ -26,20 +26,33 @@
 using namespace std;
 using namespace arma;
 
+//#define DEBUG_CSV_PARSER
+
 namespace ReLe
 {
 
-void CSVutils::readCSVLine(std::istream& is, vector<std::string>& tokens)
+bool CSVutils::readCSVLine(std::istream& is, vector<std::string>& tokens)
 {
     std::string line;
-    std::getline(is,line);
-    cout << "# " << line << endl;
+
+    while(line.empty() && is)
+    {
+    	std::getline(is,line);
+#ifdef DEBUG_CSV_PARSER
+    	cout << "# " << line << std::endl;
+#endif
+    }
+
+    if(line.empty())
+    	return false;
 
     std::stringstream lineStream(line);
     std::string token;
 
     while(std::getline(lineStream, token, ','))
         tokens.push_back(token);
+
+    return true;
 }
 
 void CSVutils::matrixToCSV(const mat& M, ostream& os)
