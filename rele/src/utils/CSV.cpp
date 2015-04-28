@@ -29,6 +29,19 @@ using namespace arma;
 namespace ReLe
 {
 
+void CSVutils::readCSVLine(std::istream& is, vector<std::string>& tokens)
+{
+    std::string line;
+    std::getline(is,line);
+    cout << "# " << line << endl;
+
+    std::stringstream lineStream(line);
+    std::string token;
+
+    while(std::getline(lineStream, token, ','))
+        tokens.push_back(token);
+}
+
 void CSVutils::matrixToCSV(const mat& M, ostream& os)
 {
     for (unsigned int i = 0; i < M.n_rows; i++)

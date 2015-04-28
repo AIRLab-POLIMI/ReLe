@@ -29,6 +29,7 @@
 
 #include "BasicFunctions.h"
 #include "Features.h"
+#include "CSV.h"
 
 
 namespace ReLe
@@ -132,9 +133,6 @@ public:
                 df *= gamma;
             }
 
-            /*Transition<ActionC, StateC>& transition = episode.back();
-            episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);*/
-
             featureExpectation += episodefeatureExpectation;
         }
 
@@ -168,6 +166,76 @@ public:
                 episode.print(os);
             }
         }
+    }
+
+    void readFromStream(std::istream& is)
+    {
+        std::vector<std::string> header;
+        CSVutils::readCSVLine(is, header);
+
+        int stateSize = std::stoi(header[0]);
+        int actionSize = std::stoi(header[1]);
+        int rewardSize = std::stoi(header[2]);
+
+        while(is)
+        {
+            try
+            {
+            	bool first = true;
+            	bool last = false;
+            	Episode<ActionC,StateC> episode;
+            	Transition<ActionC,StateC> transition;
+
+                while(!last)
+                {
+                    std::vector<std::string> line;
+                    CSVutils::readCSVLine(is, line);
+                    if(line.size() == 0)
+                    {
+                        if(!first)
+                            continue;
+                        else
+                            throw std::exception();
+                    }
+
+                    last = std::stoi(line[0]);
+                    bool absorbing = std::stoi(line[1]);
+
+                    auto sit = line.begin() + 2;
+                    auto ait = sit + stateSize;
+                    auto rit = ait + actionSize;
+                    auto endit = rit + rewardSize;
+
+                    StateC state = StateC::generate(sit, ait);
+                    state.setAbsorbing(absorbing);
+
+                    if(!first)
+                    {
+                        transition.xn = state;
+                        episode.push_back(transition);
+                    }
+
+                    if(!last)
+                    {
+                        transition.x = state;
+                        transition.u = ActionC::generate(ait, rit);
+                        transition.r = generate(rit, endit);
+                    }
+
+                    first = false;
+
+                }
+
+                //Add episode to dataset
+                this->push_back(episode);
+            }
+            catch(...)
+            {
+            	std::cout << "exception" << std::endl;
+            }
+
+        }
+
     }
 
 

@@ -125,6 +125,9 @@ target_link_libraries(features_test rele)
 add_executable(pr_mdp src/test/core/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 
+add_executable(dataset_test src/test/core/DatasetTest.cpp)
+target_link_libraries(dataset_test rele)
+
 #Matlab tests (miscellaneous)
 add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
