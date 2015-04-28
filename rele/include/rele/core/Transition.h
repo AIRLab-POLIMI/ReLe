@@ -114,7 +114,8 @@ class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
 
 public:
-    arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
+    template<class InputC>
+    arma::mat computefeatureExpectation(Features_<InputC>& phi, double gamma = 1)
     {
         size_t episodes = this->size();
         arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
@@ -131,9 +132,6 @@ public:
                 episodefeatureExpectation += df * phi(vectorize(transition.x, transition.u, transition.xn));
                 df *= gamma;
             }
-
-            /*Transition<ActionC, StateC>& transition = episode.back();
-            episodefeatureExpectation += std::pow(gamma, episode.size() + 1) * basis(transition.xn);*/
 
             featureExpectation += episodefeatureExpectation;
         }

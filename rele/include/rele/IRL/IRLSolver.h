@@ -30,12 +30,12 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
+template<class ActionC, class StateC, class FeaturesInputC = arma::vec>
 class IRLSolver: public Solver<ActionC, StateC>
 {
 public:
-    IRLSolver(Environment<ActionC, StateC>& mdp, Features& features,
-              ParametricRegressor& rewardRegressor) :
+    IRLSolver(Environment<ActionC, StateC>& mdp, Features_<FeaturesInputC>& features,
+              ParametricRegressor_<FeaturesInputC>& rewardRegressor) :
         prMdp(mdp, rewardRegressor), features(features),
         rewardRegressor(rewardRegressor)
     {
@@ -65,21 +65,22 @@ public:
 
 protected:
     ParametricRewardMDP<ActionC, StateC> prMdp;
-    Features& features;
-    ParametricRegressor& rewardRegressor;
+    Features_<FeaturesInputC>& features;
+    ParametricRegressor_<FeaturesInputC>& rewardRegressor;
 
 };
 
-template<class ActionC, class StateC>
-class IRLAgentSolver: public IRLSolver<ActionC, StateC>
+template<class ActionC, class StateC, class FeaturesInputC = arma::vec>
+class IRLAgentSolver: public IRLSolver<ActionC, StateC, FeaturesInputC>
 {
 
 public:
     IRLAgentSolver(Agent<ActionC, StateC>& agent,
                    Environment<ActionC, StateC>& mdp,
-                   Policy<ActionC, StateC>& policy, Features& features,
-                   ParametricRegressor& rewardRegressor) :
-        IRLSolver<ActionC, StateC>(mdp, features, rewardRegressor), agent(agent), policy(policy)
+                   Policy<ActionC, StateC>& policy, Features_<FeaturesInputC>& features,
+                   ParametricRegressor_<FeaturesInputC>& rewardRegressor) :
+        IRLSolver<ActionC, StateC, FeaturesInputC>(mdp, features, rewardRegressor),
+        agent(agent), policy(policy)
     {
         episodes = 1;
         episodeLength = 10000;

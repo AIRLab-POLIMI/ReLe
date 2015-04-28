@@ -28,8 +28,6 @@
 #include "regressors/LinearApproximator.h"
 #include <armadillo>
 
-#define DETLINPOL_NAME "DeterministicLinearPolicy"
-
 namespace ReLe
 {
 
@@ -69,7 +67,7 @@ public:
 public:
     std::string getPolicyName()
     {
-        return std::string(DETLINPOL_NAME);
+        return std::string("DeterministicLinearPolicy");
     }
 
     std::string getPolicyHyperparameters()
@@ -140,8 +138,6 @@ protected:
     LinearApproximator_<InputC, denseFeatures> approximator;
 
 };
-
-#undef DETLINPOL_NAME
 
 } //end namespace
 

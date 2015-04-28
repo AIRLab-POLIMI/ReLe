@@ -32,11 +32,11 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
+template<class ActionC, class StateC, class FeaturesInputC = arma::vec>
 class MWAL : public IRLAlgorithm<ActionC, StateC>
 {
 public:
-    MWAL(unsigned int T, arma::vec& muE, IRLSolver<ActionC, StateC>& solver)
+    MWAL(unsigned int T, arma::vec& muE, IRLSolver<ActionC, StateC, FeaturesInputC>& solver)
         : solver(solver), T(T), gamma(solver.getGamma()), muE(muE)
     {
         //Compute beta parameter
@@ -126,7 +126,7 @@ private:
     const arma::vec& muE;
 
     //Solver
-    IRLSolver<ActionC, StateC>& solver;
+    IRLSolver<ActionC, StateC, FeaturesInputC>& solver;
 
     //Algorithm data
     double logBeta;
