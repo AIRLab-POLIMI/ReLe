@@ -104,6 +104,80 @@ public:
     }
 };
 
+class LQR_ND_WS : public IRLParametricReward<DenseAction, DenseState>
+{
+public:
+
+    LQR_ND_WS(LQR& mdp)
+        : lqr(mdp)
+    {
+        weights.set_size(lqr.getSettings().rewardDim);
+    }
+
+    double operator()(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        int dim = lqr.Q.size();
+        double val = 0.0;
+        arma::vec& x = s;
+        arma::vec& u = a;
+        for (int i = 0; i < dim; ++i)
+        {
+            arma::mat& R = lqr.R[i];
+            arma::mat& Q = lqr.Q[i];
+            arma::mat J = (x.t() * Q * x + u.t() * R * u) * weights(i);
+            val -= J(0,0);
+        }
+        return val;
+    }
+
+    arma::mat diff(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        int dim = lqr.Q.size();
+        arma::vec& x = s;
+        arma::vec& u = a;
+        arma::mat m(1,dim);
+        for (int i = 0; i < dim; ++i)
+        {
+            arma::mat& R = lqr.R[i];
+            arma::mat& Q = lqr.Q[i];
+            arma::mat J = -(x.t() * Q * x + u.t() * R * u);
+            m(0,i) = J(0,0);
+        }
+        return m;
+    }
+
+private:
+    LQR& lqr;
+};
+
+class LQR_ND_R : public IRLParametricReward<DenseAction, DenseState>
+{
+public:
+    LQR_ND_R(LQR& mdp, unsigned int idx)
+        : lqr(mdp), idx(idx)
+    {
+    }
+
+    double operator()(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        arma::vec& x = s;
+        arma::vec& u = a;
+        arma::mat& R = lqr.R[idx];
+        arma::mat& Q = lqr.Q[idx];
+        arma::mat J = -(x.t() * Q * x + u.t() * R * u);
+        return J(0,0);
+    }
+
+    arma::mat diff(DenseState& s, DenseAction& a, DenseState& ns)
+    {
+        return arma::mat();
+    }
+private:
+    unsigned int idx;
+    LQR& lqr;
+};
+
+
 class MLE
 {
 public:
@@ -187,29 +261,34 @@ private:
 };
 
 
-
 void help()
 {
-    cout << "lqr_GMGIRL [algorithm]" << endl;
+    cout << "lqr_GIRL [algorithm]" << endl;
     cout << " - algorithm: r, rb, g, gb (default)" << endl;
 }
 
 int main(int argc, char *argv[])
 {
-    //    RandomGenerator::seed(45423424);
-//    RandomGenerator::seed(8763575);
+//        RandomGenerator::seed(4434224);
 
     /*** check inputs ***/
+    vec eReward;
+    int nbEpisodes;
+    long int seed = atol(argv[1]);
+    RandomGenerator::seed(seed);
+    std::cout << seed << std::endl;
+
+    nbEpisodes = atoi(argv[2]);
+    cout << "Episodes: " << nbEpisodes << endl;
+    int nw = atoi(argv[3]);
+    assert(nw == 2);
+    eReward.set_size(nw);
+    for (int i = 0; i < nw; ++i)
+        eReward(i) = atof(argv[4+i]);
 
     /******/
-    IRLGradType atype = IRLGradType::RB;
-    vec eReward(2);
-    eReward(0) = 0.65;
-    eReward(1) = 0.35;
-    char gtypestr[10];
-    int nbEpisodes = 150;
 
-    FileManager fm("lqr", "MLE");
+    FileManager fm("lqr", "MLEALL1D");
     fm.createDir();
     //    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -223,9 +302,6 @@ int main(int argc, char *argv[])
     std::vector<arma::mat> Qv(1, Q);
     std::vector<arma::mat> Rv(1, R);
     LQR mdp(A,B,Qv,Rv);
-//    vec initialState(1);
-//    initialState[0] = 2;
-//    mdp.setInitialState(initialState);
 
     IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);
@@ -238,15 +314,15 @@ int main(int argc, char *argv[])
     std::cout << "optimal pol: " << p.t();
     tmpPolicy.setParameters(p);
 
-
     std::cout << "Rewards: ";
     for (int i = 0; i < eReward.n_elem; ++i)
     {
         std::cout << eReward(i) << " ";
     }
-    std::cout << "| Params: " << tmpPolicy.getParameters().t() << std::endl;
+    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
 
-    PolicyEvalAgent<DenseAction, DenseState> expert(tmpPolicy);
+
+    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -264,83 +340,149 @@ int main(int argc, char *argv[])
     data.writeToStream(datafile);
     datafile.close();
 
-
     BasisFunctions basis = GaussianRbf::generate({5}, {-4,4});
     DenseFeatures phin(basis);
     arma::mat cov(1,1);
     cov(0,0) = 2;
     MVNPolicy policy(phin);
 
-//    MVNDiagonalPolicy policy(phi);
-
-
     MLE mle(policy, data);
-    double vv[] = {0,0,0,0,0,0};
-    arma::vec startVal(vv,6);
+    double vv[] = {0,0,0,0,0};
+    arma::vec startVal(vv,5);
     arma::vec pp = mle.solve(startVal);
 
     std::cerr << pp.t();
     policy.setParameters(pp);
 
-    int count = 0;
-    arma::mat F;
-    for (int ep = 0; ep < nbEpisodes; ++ep) //TO AVOID OVERFITTING
+
+    char gtypestr[10];
+    for (int i = 0; i < 3; ++i)
     {
-        int nbSteps = data[ep].size();
-        for (int t = 0; t < nbSteps; ++t)
-        {
-            Transition<DenseAction, DenseState>& tr = data[ep][t];
-            arma::vec aa = policy(tr.x);
-            F = arma::join_horiz(F,aa);
-            ++count;
-        }
-    }
 
-    F.save(fm.addPath("datafit.log"), arma::raw_ascii);
-
-//    //compute importance weights
-//    arma::vec IWOrig;
-//    for (int ep = 0; ep < nbEpisodes; ++ ep)
-//    {
-//        int nbSteps = data[ep].size();
-//        for (int t = 0; t < nbSteps; ++t)
+        IRLGradType atype;
+//        if (i == 0)
 //        {
-//            Transition<DenseAction, DenseState>& tr = data[ep][t];
-//            arma::vec iw(1);
-//            iw(0) = policy(tr.x,tr.u)/tmpPolicy(tr.x,tr.u);
-//            IWOrig = arma::join_vert(IWOrig, iw);
+//            cout << "GIRL REINFORCE";
+//            atype = IRLGradType::R;
+//            strcpy(gtypestr, "r");
 //        }
-//    }
-//    IWOrig.save(fm.addPath("iworig.log"), arma::raw_ascii);
+//        else
+            if (i == 0)
+        {
+            cout << "GIRL REINFORCE BASE";
+            atype = IRLGradType::RB;
+            strcpy(gtypestr, "rb");
+        }
+//        else if (i == 2)
+//        {
+//            cout << "GIRL GPOMDP";
+//            atype = IRLGradType::G;
+//            strcpy(gtypestr, "g");
+//        }
+        else if (i == 1)
+        {
+            cout << "GIRL GPOMDP BASE";
+            atype = IRLGradType::GB;
+            strcpy(gtypestr, "gb");
+        }
+        else if (i == 2)
+        {
+            cout << "GIRL ENAC";
+            atype = IRLGradType::ENAC;
+            strcpy(gtypestr, "enac");
+        }
+        else
+        {
+            std::cout << "Error unknown argument " << argv[1] << std::endl;
+            help();
+            exit(1);
+        }
+
+        /* Learn weight with GIRL */
+//#if 0
+//        LQR_IRL_Reward rewardRegressor;
+//#else
+//        LQR_ND_WS rewardRegressor(mdp);
+//#endif
+        assert(mdp.getSettings().gamma == 0.9);
+//        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+//                                            mdp.getSettings().gamma, atype);
 
 
-    LQR_1D_WS rewardRegressor;
-    GIRL<DenseAction,DenseState> irlAlg(data, policy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype);
-
-    ofstream timefile(fm.addPath("timer.log"));
+        char namet[100];
+        sprintf(namet, "girl_time_%s.log", gtypestr);
+        ofstream timefile(fm.addPath(namet));
 
 
-    //Run MWAL
-    cpu_timer timer;
-    timer.start();
-    irlAlg.run();
-    timer.stop();
-    arma::vec gnormw = irlAlg.getWeights();
+//        //Run GIRL
+//        cpu_timer timer;
+//        timer.start();
+//        irlAlg.run();
+//        timer.stop();
+//        arma::vec gnormw = irlAlg.getWeights();
 
-    timefile << timer.format(10, "%w") << std::endl;
+//        timefile << timer.format(10, "%w") << std::endl;
 
-    cout << "Weights (gnorm): " << gnormw.t();
+//        cout << "Weights (gnorm): " << gnormw.t();
 
-    char name[100];
-    sprintf(name, "girl_gnorm_%s.log", gtypestr);
-    ofstream outf(fm.addPath(name), std::ofstream::out);
-    outf << std::setprecision(OS_PRECISION);
-    for (int i = 0; i < gnormw.n_elem; ++i)
-    {
-        outf << gnormw[i] << " ";
+        char name[100];
+        ofstream outf;
+//        sprintf(name, "girl_gnorm_%s.log", gtypestr);
+//        ofstream outf(fm.addPath(name), std::ofstream::out);
+//        outf << std::setprecision(OS_PRECISION);
+//        for (int i = 0; i < gnormw.n_elem; ++i)
+//        {
+//            outf << gnormw[i] << " ";
+//        }
+//        outf.close();
+
+//        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
+//        outf.open(fm.addPath(name), std::ofstream::out);
+//        outf << std::setprecision(OS_PRECISION);
+//        outf << irlAlg.numberOfEvaluations;
+//        outf.close();
+
+
+        std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
+#if 0
+        LQR_R1 r1;
+        LQR_R2 r2;
+        rewards.push_back(&r1);
+        rewards.push_back(&r2);
+#else
+        for (int i = 0; i < dim; ++i)
+        {
+            rewards.push_back(new LQR_ND_R(mdp, i));
+        }
+#endif
+
+        //Run PLANE GIRL
+        PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
+                                                mdp.getSettings().gamma, atype);
+
+        cpu_timer timer2;
+        timer2.start();
+        pgirl.run();
+        timer2.stop();
+        timefile << timer2.format(10, "%w") << std::endl;
+
+
+        cout << "Weights (plane): " << pgirl.getWeights().t();
+
+        sprintf(name, "girl_plane_%s.log", gtypestr);
+        outf.open(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+        outf << std::setprecision(OS_PRECISION);
+        arma::vec planew = pgirl.getWeights();
+        for (int i = 0; i < planew.n_elem; ++i)
+        {
+            outf << planew[i] << " ";
+        }
+
+        outf.close();
+        timefile.close();
+
+        cout << endl;
     }
-    outf.close();
 
     return 0;
 }

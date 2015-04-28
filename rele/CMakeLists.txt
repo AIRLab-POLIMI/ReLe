@@ -165,6 +165,12 @@ target_link_libraries(lqr_GMGIRL rele)
 add_executable(lqr_MLEGIRL src/test/IRL/MLELQRGIRL.cpp)
 target_link_libraries(lqr_MLEGIRL rele)
 
+add_executable(lqr_MLEGIRLALL src/test/IRL/MLELQRGIRLALL.cpp)
+target_link_libraries(lqr_MLEGIRLALL rele)
+
+add_executable(lqr_MLEGIRLALL1D src/test/IRL/MLELQRGIRLALL1D.cpp)
+target_link_libraries(lqr_MLEGIRLALL1D rele)
+
 add_executable(lqr_GIRLALL src/test/IRL/LQRGIRLALL.cpp)
 target_link_libraries(lqr_GIRLALL rele)
 

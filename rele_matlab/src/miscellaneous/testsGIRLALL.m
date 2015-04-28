@@ -8,12 +8,12 @@ gtypes{3} = 'g';
 gtypes{4} = 'gb';
 gtypes{5} = 'enac';
 
-for dim = [5,10,20]
+for dim = [2, 5,10,20]
     
     clear test
     % dim = 2;
     
-    mkdir(['~/Dropbox/EWRL2015_irl/tests/LQR/',num2str(dim),'obj']);
+    mkdir(['~/Dropbox/EWRL2015_irl/tests/LQRRandomW/',num2str(dim),'obj']);
     
     % W = [];
     % for i = 0:0.2:1
@@ -30,46 +30,9 @@ for dim = [5,10,20]
     % W = [W;AA];
     % W = W';
     
-    if dim == 2
-        W = [0.5778, 0.4222];
-    elseif dim == 3
-        W = [0.2736, 0.4604, 0.2660];
-    elseif dim == 5
-        W = [0.0188, 0.2683, 0.0816, 0.5197, 0.1116];
-    elseif dim == 10
-        W = [0.1340
-            0.0521
-            0.0068
-            0.0665
-            0.1357
-            0.0361
-            0.0085
-            0.0675
-            0.2031
-            0.2897]';
-    elseif dim == 20
-        W = [0.0209
-            0.0546
-            0.0280
-            0.0249
-            0.0389
-            0.0323
-            0.0090
-            0.0286
-            0.0092
-            0.0529
-            0.1363
-            0.1871
-            0.0234
-            0.0820
-            0.0277
-            0.0297
-            0.0440
-            0.0233
-            0.0476
-            0.0996]';
-    else
-        error('unknown');
+    W = [];
+    for i = 1:19
+        W = [W; randSimplex(dim)']
     end
     
     clear i j
@@ -95,13 +58,13 @@ for dim = [5,10,20]
             
             for kk = 1:length(gtypes)
                 results(i).plane{kk} = [];
-                results(i).gnorm{kk} = [];
+%                 results(i).gnorm{kk} = [];
                 results(i).plane_time{kk} = [];
-                results(i).gnorm_time{kk} = [];
-                results(i).gnorm_eval{kk} = [];
+%                 results(i).gnorm_time{kk} = [];
+%                 results(i).gnorm_eval{kk} = [];
             end
             
-            for run = 1:10
+            for run = 1:5
                 
                 random_seed = randi([1000,2^30],1);
                 results(i).seed = [results(i).seed;random_seed];
@@ -127,30 +90,30 @@ for dim = [5,10,20]
                 for kk = 1:length(gtypes)
                     algorithm = gtypes{kk};
                     plane_R = dlmread(['/tmp/ReLe/lqr/GIRL/girl_plane_',algorithm,'.log']);
-                    gnorm_R = dlmread(['/tmp/ReLe/lqr/GIRL/girl_gnorm_',algorithm,'.log']);
-                    gnorm_eval = dlmread(['/tmp/ReLe/lqr/GIRL/girl_gnorm_',algorithm,'_neval.log']);
+%                     gnorm_R = dlmread(['/tmp/ReLe/lqr/GIRL/girl_gnorm_',algorithm,'.log']);
+%                     gnorm_eval = dlmread(['/tmp/ReLe/lqr/GIRL/girl_gnorm_',algorithm,'_neval.log']);
                     
                     A = dlmread(['/tmp/ReLe/lqr/GIRL/girl_time_',algorithm,'.log']);
-                    gnorm_T = A(1,:);
-                    plane_T = A(2,:);
+%                     gnorm_T = A(1,:);
+                    plane_T = A(1,:);
                     clear A;
                     results(i).plane{kk} = [results(i).plane{kk};plane_R];
                     results(i).plane_time{kk} = [results(i).plane_time{kk};plane_T];
-                    results(i).gnorm{kk} = [results(i).gnorm{kk};gnorm_R];
-                    results(i).gnorm_time{kk} = [results(i).gnorm_time{kk};gnorm_T];
-                    results(i).gnorm_eval{kk} = [results(i).gnorm_eval{kk}; gnorm_eval];
+%                     results(i).gnorm{kk} = [results(i).gnorm{kk};gnorm_R];
+%                     results(i).gnorm_time{kk} = [results(i).gnorm_time{kk};gnorm_T];
+%                     results(i).gnorm_eval{kk} = [results(i).gnorm_eval{kk}; gnorm_eval];
                 end
                 
                 
                 fprintf('\n -------------- \n\n');
                 
-                cmdtar = ['tar cvzf ~/Dropbox/EWRL2015_irl/tests/LQR/',num2str(dim),'obj/lqr_',num2str(nbEpisodes),'_',...
+                cmdtar = ['tar cvzf ~/Dropbox/EWRL2015_irl/tests/LQRRandomW/',num2str(dim),'obj/lqr_',num2str(nbEpisodes),'_',...
                     num2str(dim),'_',num2str(run),'.tar.gz -C  /tmp/ReLe/lqr/ GIRL'];
                 status = system(cmdtar);
                 
             end
             
-            sss = ['/home/mpirotta/Dropbox/EWRL2015_irl/tests/LQR/',num2str(dim),'obj/tmpGIRL',num2str(dim),'D_',num2str(dim),'dim.mat'];
+            sss = ['/home/mpirotta/Dropbox/EWRL2015_irl/tests/LQRRandomW/',num2str(dim),'obj/tmpGIRL',num2str(dim),'D_',num2str(dim),'dim.mat'];
             save(sss)
             
         end
@@ -158,9 +121,9 @@ for dim = [5,10,20]
         test(k).results = results;
     end
     
-    sss = ['/home/mpirotta/Dropbox/EWRL2015_irl/tests/LQR/',num2str(dim),'obj/GIRL',num2str(dim),'D_',num2str(dim),'dim.mat'];
+    sss = ['/home/mpirotta/Dropbox/EWRL2015_irl/tests/LQRRandomW/',num2str(dim),'obj/GIRL',num2str(dim),'D_',num2str(dim),'dim.mat'];
     save(sss);
-    % save /home/mpirotta/Dropbox/EWRL2015_irl/tests/LQR/2obj/GIRL2D_2dim.mat
+    % save /home/mpirotta/Dropbox/EWRL2015_irl/tests/LQRRandomW/2obj/GIRL2D_2dim.mat
     
 end
 

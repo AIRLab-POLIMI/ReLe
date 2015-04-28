@@ -77,6 +77,7 @@ void LQR::setInitialState()
 {
     for (unsigned int i = 0; i < initialState.n_elem; ++i)
     {
+//        initialState[i] = RandomGenerator::sampleUniform(-3,3);//-10.0;
         initialState[i] = -10.0;
     }
 }

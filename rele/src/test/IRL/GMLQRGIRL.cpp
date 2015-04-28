@@ -48,7 +48,7 @@ using namespace ReLe;
 using namespace arma;
 
 class LQR_1D_WS : public IRLParametricReward<DenseAction, DenseState>,
-    public RewardTransformation
+        public RewardTransformation
 {
 public:
 
@@ -203,7 +203,7 @@ public:
             gradient(i) = phi;
         }
         gradient /= tot;
-//        std::cout << gradient.t();
+        //        std::cout << gradient.t();
         return gradient;
     }
 
@@ -222,17 +222,17 @@ void help()
 int main(int argc, char *argv[])
 {
     //    RandomGenerator::seed(45423424);
-//    RandomGenerator::seed(8763575);
+    //    RandomGenerator::seed(8763575);
 
     /*** check inputs ***/
 
     /******/
     IRLGradType atype = IRLGradType::RB;
     vec eReward(2);
-    eReward(0) = 0.2;
-    eReward(1) = 0.8;
+    eReward(0) = 0.65;
+    eReward(1) = 0.35;
     char gtypestr[10];
-    int nbEpisodes = 150;
+    int nbEpisodes = 250;
 
     FileManager fm("lqr", "GMM1D");
     fm.createDir();
@@ -248,9 +248,9 @@ int main(int argc, char *argv[])
     std::vector<arma::mat> Qv(1, Q);
     std::vector<arma::mat> Rv(1, R);
     LQR mdp(A,B,Qv,Rv);
-    vec initialState(1);
-    initialState[0] = 2;
-    mdp.setInitialState(initialState);
+//    vec initialState(1);
+//    initialState[0] = 2;
+//    mdp.setInitialState(initialState);
 
     IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);
@@ -290,7 +290,7 @@ int main(int argc, char *argv[])
 
     arma::mat armaDATA(2, nbEpisodes*mdp.getSettings().horizon);
     int count = 0;
-    for (int ep = 0; ep < nbEpisodes/2; ++ ep) //TO AVOID OVERFITTING
+    for (int ep = 0; ep < nbEpisodes; ++ ep)
     {
         int nbSteps = data[ep].size();
         for (int t = 0; t < nbSteps; ++t)
@@ -305,7 +305,7 @@ int main(int argc, char *argv[])
 
     gmm_diag model;
 
-    model.learn(armaDATA, 3, maha_dist, random_subset, 100, 50, 1e-10, false);
+    model.learn(armaDATA, 5, maha_dist, random_subset, 400, 200, 1e-10, false);
 
     model.means.print("means:");
     model.dcovs.print("covs:");
@@ -330,8 +330,52 @@ int main(int argc, char *argv[])
     arma::vec faf = model.hefts.t();
 
     GMPolicy policy(vCenters, vCovs, faf);
+
+    //compute importance weights
+    arma::vec IWOrig;
+    for (int ep = 0; ep < nbEpisodes; ++ ep)
+    {
+        int nbSteps = data[ep].size();
+        for (int t = 0; t < nbSteps; ++t)
+        {
+            Transition<DenseAction, DenseState>& tr = data[ep][t];
+            arma::vec iw(1);
+            iw(0) = policy(tr.x,tr.u)/tmpPolicy(tr.x,tr.u);
+            IWOrig = arma::join_vert(IWOrig, iw);
+        }
+    }
+
+    IWOrig.save(fm.addPath("iworig.log"), arma::raw_ascii);
+
+    vCenters.clear();
+    vCovs.clear();
+    for (int i = 0; i < centers.n_cols; ++i)
+    {
+        vCenters.push_back(centers.col(i));
+        vCovs.push_back(2*arma::diagmat(covs.col(i)));
+        std::cout <<"---"<< vCenters[i].t();
+        std::cout << vCovs[i];
+    }
+
+    GMPolicy policy2(vCenters, vCovs, faf);
+    //compute importance weights 2COV
+    arma::vec IW2;
+    for (int ep = 0; ep < nbEpisodes; ++ ep)
+    {
+        int nbSteps = data[ep].size();
+        for (int t = 0; t < nbSteps; ++t)
+        {
+            Transition<DenseAction, DenseState>& tr = data[ep][t];
+            arma::vec iw(1);
+            iw(0) = policy2(tr.x,tr.u)/tmpPolicy(tr.x,tr.u);
+            IW2 = arma::join_vert(IW2, iw);
+        }
+    }
+    IW2.save(fm.addPath("iw2.log"), arma::raw_ascii);
+
+
     LQR_1D_WS rewardRegressor;
-    GIRL<DenseAction,DenseState> irlAlg(data, policy, rewardRegressor,
+    GIRL<DenseAction,DenseState> irlAlg(data, policy2, rewardRegressor,
                                         mdp.getSettings().gamma, atype);
 
     ofstream timefile(fm.addPath("timer.log"));
