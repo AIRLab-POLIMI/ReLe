@@ -28,6 +28,7 @@
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
 #include "basis/GaussianRbf.h"
+#include "basis/PolynomialFunction.h"
 
 #include "LQR.h"
 #include "LQRsolver.h"
@@ -42,6 +43,8 @@
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>
+
+#include "MLE.h"
 
 using namespace boost::timer;
 using namespace std;
@@ -177,90 +180,6 @@ private:
     LQR& lqr;
 };
 
-
-class MLE
-{
-public:
-    MLE(ParametricPolicy<DenseAction,DenseState>& policy, Dataset<DenseAction,DenseState>& ds)
-        : policy(policy), data(ds)
-    {
-    }
-
-    arma::vec solve(arma::vec starting)
-    {
-
-        int dp = policy.getParametersSize();
-        nlopt::opt optimizator;
-        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dp);
-        optimizator.set_min_objective(MLE::wrapper, this);
-        optimizator.set_xtol_rel(1e-6);
-        optimizator.set_ftol_rel(1e-6);
-        optimizator.set_maxeval(200);
-
-        //optimize the function
-        std::vector<double> parameters(dp, 0.0);
-        for (int i = 0; i < dp; ++i)
-            parameters[i] = starting[i];
-        double minf;
-        if (optimizator.optimize(parameters, minf) < 0)
-        {
-            printf("nlopt failed!\n");
-            abort();
-        }
-        else
-        {
-            printf("found minimum = %0.10g\n", minf);
-
-            arma::vec finalP(dp);
-            for(int i = 0; i < dp; ++i)
-            {
-                finalP(i) = parameters[i];
-            }
-
-            return finalP;
-        }
-    }
-
-    double objFunction(unsigned int n, const double* x, double* grad)
-    {
-        int dp = policy.getParametersSize();
-        assert(dp == n);
-        arma::vec params(x, dp);
-        policy.setParameters(params);
-
-        int nbEpisodes = data.size();
-        double likelihood = 0.0;
-        int counter = 0;
-        for (int ep = 0; ep < nbEpisodes; ++ep)
-        {
-            int nbSteps = data[ep].size();
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                Transition<DenseAction, DenseState>& tr = data[ep][t];
-                double prob = policy(tr.x,tr.u);
-                prob = max(1e-10,prob);
-                likelihood += log(prob);
-
-                ++counter;
-            }
-        }
-        likelihood /= counter;
-        return -likelihood;
-    }
-
-
-    static double wrapper(unsigned int n, const double* x, double* grad,
-                          void* o)
-    {
-        return reinterpret_cast<MLE*>(o)->objFunction(n, x, grad);
-    }
-
-private:
-    ParametricPolicy<DenseAction,DenseState>& policy;
-    Dataset<DenseAction,DenseState>& data;
-};
-
-
 void help()
 {
     cout << "lqr_GIRL [algorithm]" << endl;
@@ -319,10 +238,10 @@ int main(int argc, char *argv[])
     {
         std::cout << eReward(i) << " ";
     }
-    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
+    std::cout << "| Params: " << tmpPolicy.getParameters().t() << std::endl;
 
 
-    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(tmpPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -340,15 +259,24 @@ int main(int argc, char *argv[])
     data.writeToStream(datafile);
     datafile.close();
 
-    BasisFunctions basis = GaussianRbf::generate({5}, {-4,4});
+//    BasisFunctions basis = GaussianRbf::generate({5}, {-4,4});
+//    DenseFeatures phin(basis);
+//    arma::mat cov(1,1);
+//    cov(0,0) = 2;
+
+    BasisFunctions basis = PolynomialFunction::generate(3,1);
     DenseFeatures phin(basis);
     arma::mat cov(1,1);
     cov(0,0) = 2;
-    MVNPolicy policy(phin);
+
+    MVNPolicy policy(phin,cov);
+
+//    MVNDiagonalPolicy policy(phi);
+//    NormalPolicy policy(2,phi);
 
     MLE mle(policy, data);
-    double vv[] = {0,0,0,0,0};
-    arma::vec startVal(vv,5);
+    double vv[] = {0,6};
+    arma::vec startVal(vv,2);
     arma::vec pp = mle.solve(startVal);
 
     std::cerr << pp.t();
@@ -359,6 +287,8 @@ int main(int argc, char *argv[])
     for (int i = 0; i < 3; ++i)
     {
 
+        policy.setParameters(pp);
+
         IRLGradType atype;
 //        if (i == 0)
 //        {
@@ -367,7 +297,7 @@ int main(int argc, char *argv[])
 //            strcpy(gtypestr, "r");
 //        }
 //        else
-            if (i == 0)
+        if (i == 0)
         {
             cout << "GIRL REINFORCE BASE";
             atype = IRLGradType::RB;
@@ -444,9 +374,9 @@ int main(int argc, char *argv[])
 
 
         std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
-#if 0
-        LQR_R1 r1;
-        LQR_R2 r2;
+#if 1
+        LQR_1D_R1 r1;
+        LQR_1D_R2 r2;
         rewards.push_back(&r1);
         rewards.push_back(&r2);
 #else
@@ -457,7 +387,7 @@ int main(int argc, char *argv[])
 #endif
 
         //Run PLANE GIRL
-        PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
+        PlaneGIRL<DenseAction,DenseState> pgirl(data, policy, rewards,
                                                 mdp.getSettings().gamma, atype);
 
         cpu_timer timer2;

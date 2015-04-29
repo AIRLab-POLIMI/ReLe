@@ -28,6 +28,7 @@
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
 #include "basis/GaussianRbf.h"
+#include "basis/PolynomialFunction.h"
 
 #include "LQR.h"
 #include "LQRsolver.h"
@@ -42,6 +43,8 @@
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>
+
+#include "MLE.h"
 
 using namespace boost::timer;
 using namespace std;
@@ -104,89 +107,6 @@ public:
     }
 };
 
-class MLE
-{
-public:
-    MLE(ParametricPolicy<DenseAction,DenseState>& policy, Dataset<DenseAction,DenseState>& ds)
-        : policy(policy), data(ds)
-    {
-    }
-
-    arma::vec solve(arma::vec starting)
-    {
-
-        int dp = policy.getParametersSize();
-        nlopt::opt optimizator;
-        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dp);
-        optimizator.set_min_objective(MLE::wrapper, this);
-        optimizator.set_xtol_rel(1e-6);
-        optimizator.set_ftol_rel(1e-6);
-        optimizator.set_maxeval(200);
-
-        //optimize the function
-        std::vector<double> parameters(dp, 0.0);
-        for (int i = 0; i < dp; ++i)
-            parameters[i] = starting[i];
-        double minf;
-        if (optimizator.optimize(parameters, minf) < 0)
-        {
-            printf("nlopt failed!\n");
-            abort();
-        }
-        else
-        {
-            printf("found minimum = %0.10g\n", minf);
-
-            arma::vec finalP(dp);
-            for(int i = 0; i < dp; ++i)
-            {
-                finalP(i) = parameters[i];
-            }
-
-            return finalP;
-        }
-    }
-
-    double objFunction(unsigned int n, const double* x, double* grad)
-    {
-        int dp = policy.getParametersSize();
-        assert(dp == n);
-        arma::vec params(x, dp);
-        policy.setParameters(params);
-
-        int nbEpisodes = data.size();
-        double likelihood = 0.0;
-        int counter = 0;
-        for (int ep = 0; ep < nbEpisodes; ++ep)
-        {
-            int nbSteps = data[ep].size();
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                Transition<DenseAction, DenseState>& tr = data[ep][t];
-                double prob = policy(tr.x,tr.u);
-                prob = max(1e-10,prob);
-                likelihood += log(prob);
-
-                ++counter;
-            }
-        }
-        likelihood /= counter;
-        return -likelihood;
-    }
-
-
-    static double wrapper(unsigned int n, const double* x, double* grad,
-                          void* o)
-    {
-        return reinterpret_cast<MLE*>(o)->objFunction(n, x, grad);
-    }
-
-private:
-    ParametricPolicy<DenseAction,DenseState>& policy;
-    Dataset<DenseAction,DenseState>& data;
-};
-
-
 
 void help()
 {
@@ -197,7 +117,7 @@ void help()
 int main(int argc, char *argv[])
 {
     //    RandomGenerator::seed(45423424);
-//    RandomGenerator::seed(8763575);
+    RandomGenerator::seed(8763575);
 
     /*** check inputs ***/
 
@@ -266,17 +186,22 @@ int main(int argc, char *argv[])
 
 
     BasisFunctions basis = GaussianRbf::generate({5}, {-4,4});
+//    BasisFunctions basis = PolynomialFunction::generate(3,1);
+    for (int i = 0; i < basis.size(); ++i)
+        std::cout << *(basis[i]) << endl;
     DenseFeatures phin(basis);
     arma::mat cov(1,1);
     cov(0,0) = 2;
-    MVNPolicy policy(phin);
+    MVNPolicy policy(phin,cov);
 
 //    MVNDiagonalPolicy policy(phi);
 
 
     MLE mle(policy, data);
-    double vv[] = {0,0,0,0,0,0};
-    arma::vec startVal(vv,6);
+    double vv[] = {0,0,0,0,0};
+    arma::vec startVal(vv,5);
+//    double vv[] = {0,0,0,0};
+//    arma::vec startVal(vv,4);
     arma::vec pp = mle.solve(startVal);
 
     std::cerr << pp.t();

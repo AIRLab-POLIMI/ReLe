@@ -37,14 +37,14 @@ bool CSVutils::readCSVLine(std::istream& is, vector<std::string>& tokens)
 
     while(line.empty() && is)
     {
-    	std::getline(is,line);
+        std::getline(is,line);
 #ifdef DEBUG_CSV_PARSER
-    	cout << "# " << line << std::endl;
+        cout << "# " << line << std::endl;
 #endif
     }
 
     if(line.empty())
-    	return false;
+        return false;
 
     std::stringstream lineStream(line);
     std::string token;

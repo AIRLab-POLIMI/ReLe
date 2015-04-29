@@ -67,7 +67,10 @@ void LQR::step(const DenseAction& action,
 void LQR::getInitialState(DenseState& state)
 {
     arma::vec& x = currentState;
-    x = initialState;
+    for (unsigned int i = 0; i < initialState.n_elem; ++i)
+    {
+        x(i) = RandomGenerator::sampleUniform(-3,3);//initialState;
+    }
     currentState.setAbsorbing(false);
 
     state = currentState;

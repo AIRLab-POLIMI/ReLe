@@ -27,6 +27,8 @@
 #include "BasisFunctions.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
+#include "basis/GaussianRbf.h"
+#include "basis/PolynomialFunction.h"
 
 #include "LQR.h"
 #include "LQRsolver.h"
@@ -41,6 +43,8 @@
 #include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>
+
+#include "MLE.h"
 
 using namespace boost::timer;
 using namespace std;
@@ -203,7 +207,7 @@ int main(int argc, char *argv[])
 
     /******/
 
-    FileManager fm("lqr", "GIRL");
+    FileManager fm("lqr", "MLEGIRLALL");
     fm.createDir();
     //    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -244,7 +248,7 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    MVNPolicy expertPolicy(phi);
+    MVNPolicy tmpPolicy(phi);
 
     //    vec eReward(dim);
     //    eReward(0) = 0.05;
@@ -259,17 +263,17 @@ int main(int argc, char *argv[])
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
-    expertPolicy.setParameters(p);
+    tmpPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
     for (int i = 0; i < eReward.n_elem; ++i)
     {
         std::cout << eReward(i) << " ";
     }
-    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
+    std::cout << "| Params: " << tmpPolicy.getParameters().t() << std::endl;
 
 
-    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(tmpPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -287,37 +291,57 @@ int main(int argc, char *argv[])
     data.writeToStream(datafile);
     datafile.close();
 
+    BasisFunctions basisn = PolynomialFunction::generate(2,dim);
+    SparseFeatures phin(basisn,dim);
+    arma::mat cov(dim,dim, arma::fill::eye);
+    cov *= 2;
+
+    MVNPolicy policy(phin,cov);
+
+//    MVNPolicy policy(phi, cov);
+
+    MLE mle(policy, data);
+    arma::vec startVal(policy.getParametersSize(),arma::fill::ones);
+    arma::vec pp = mle.solve(startVal);
+
+    std::cerr << pp.t();
+    policy.setParameters(pp);
+
+
 
     char gtypestr[10];
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 3; ++i)
     {
 
+        policy.setParameters(pp);
+
         IRLGradType atype;
+//        if (i == 0)
+//        {
+//            cout << "GIRL REINFORCE";
+//            atype = IRLGradType::R;
+//            strcpy(gtypestr, "r");
+//        }
+//        else
         if (i == 0)
-        {
-            cout << "GIRL REINFORCE";
-            atype = IRLGradType::R;
-            strcpy(gtypestr, "r");
-        }
-        else if (i == 1)
         {
             cout << "GIRL REINFORCE BASE";
             atype = IRLGradType::RB;
             strcpy(gtypestr, "rb");
         }
-        else if (i == 2)
-        {
-            cout << "GIRL GPOMDP";
-            atype = IRLGradType::G;
-            strcpy(gtypestr, "g");
-        }
-        else if (i == 3)
+//        else if (i == 2)
+//        {
+//            cout << "GIRL GPOMDP";
+//            atype = IRLGradType::G;
+//            strcpy(gtypestr, "g");
+//        }
+        else if (i == 1)
         {
             cout << "GIRL GPOMDP BASE";
             atype = IRLGradType::GB;
             strcpy(gtypestr, "gb");
         }
-        else if (i == 4)
+        else if (i == 2)
         {
             cout << "GIRL ENAC";
             atype = IRLGradType::ENAC;
@@ -329,6 +353,18 @@ int main(int argc, char *argv[])
             help();
             exit(1);
         }
+
+//        vec centers(dim, fill::ones);
+//        centers *= 4;
+//        mat ranges(1,2);
+//        ranges(0,0) = -4;
+//        ranges(0,1) = 4;
+//        ranges = arma::repmat(ranges,dim,1);
+
+//        std::cout << centers.t();
+//        std::cout << ranges;
+
+//        BasisFunctions basis = GaussianRbf::generate(centers, ranges);
 
         /* Learn weight with GIRL */
 //#if 0
@@ -389,7 +425,7 @@ int main(int argc, char *argv[])
 #endif
 
         //Run PLANE GIRL
-        PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
+        PlaneGIRL<DenseAction,DenseState> pgirl(data, policy, rewards,
                                                 mdp.getSettings().gamma, atype);
 
         cpu_timer timer2;

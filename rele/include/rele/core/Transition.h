@@ -179,7 +179,7 @@ public:
 
         while(is)
         {
-           readEpisodeFromStream(is, stateSize, actionSize, rewardSize);
+            readEpisodeFromStream(is, stateSize, actionSize, rewardSize);
         }
 
     }
@@ -226,7 +226,7 @@ private:
 
         //Add episode to dataset
         if(last)
-        	this->push_back(episode);
+            this->push_back(episode);
     }
 
 };

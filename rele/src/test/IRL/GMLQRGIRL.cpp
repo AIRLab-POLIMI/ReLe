@@ -48,7 +48,7 @@ using namespace ReLe;
 using namespace arma;
 
 class LQR_1D_WS : public IRLParametricReward<DenseAction, DenseState>,
-        public RewardTransformation
+    public RewardTransformation
 {
 public:
 
