@@ -37,28 +37,45 @@ namespace ReLe
 class MLE
 {
 public:
-    MLE(ParametricPolicy<DenseAction,DenseState>& policy, Dataset<DenseAction,DenseState>& ds)
+    MLE(DifferentiablePolicy<DenseAction,DenseState>& policy, Dataset<DenseAction,DenseState>& ds)
         : policy(policy), data(ds)
     {
     }
 
-    arma::vec solve(arma::vec starting)
+    arma::vec solve(arma::vec starting = arma::vec(),
+                    unsigned int maxFunEvals = 0)
     {
-
         int dp = policy.getParametersSize();
-        assert(dp == starting.n_elem);
+        assert(dp > 0);
+
+        if (starting.n_elem == 0)
+        {
+            starting.zeros(dp);
+        }
+        else
+        {
+            assert(dp == starting.n_elem);
+        }
+
+        if (maxFunEvals == 0)
+            maxFunEvals = std::min(30*dp, 600);
+
         nlopt::opt optimizator;
-        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dp);
+        optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dp);
         optimizator.set_min_objective(MLE::wrapper, this);
         optimizator.set_xtol_rel(1e-6);
         optimizator.set_ftol_rel(1e-6);
-        optimizator.set_maxeval(200);
+        optimizator.set_ftol_abs(1e-6);
+        optimizator.set_maxeval(maxFunEvals);
 
         //optimize the function
         std::vector<double> parameters(dp, 0.0);
         for (int i = 0; i < dp; ++i)
             parameters[i] = starting[i];
         double minf;
+
+        // reset function evaluation counter
+        nbFunEvals = 0;
         if (optimizator.optimize(parameters, minf) < 0)
         {
             printf("nlopt failed!\n");
@@ -80,29 +97,51 @@ public:
 
     double objFunction(unsigned int n, const double* x, double* grad)
     {
+        ++nbFunEvals;
+
         int dp = policy.getParametersSize();
         assert(dp == n);
         arma::vec params(x, dp);
         policy.setParameters(params);
 
         int nbEpisodes = data.size();
-        double likelihood = 0.0;
+        double logLikelihood = 0.0;
         int counter = 0;
+        arma::vec gradient(dp, arma::fill::zeros);
         for (int ep = 0; ep < nbEpisodes; ++ep)
         {
             int nbSteps = data[ep].size();
             for (int t = 0; t < nbSteps; ++t)
             {
                 Transition<DenseAction, DenseState>& tr = data[ep][t];
-                double prob = policy(tr.x,tr.u);
-                prob = std::max(1e-10,prob);
-                likelihood += log(prob);
 
+                // compute probability
+                double prob = policy(tr.x,tr.u);
+                prob = std::max(1e-8,prob);
+                logLikelihood += log(prob);
+
+                // compute gradient
+                if (grad != nullptr)
+                {
+                    gradient += policy.difflog(tr.x, tr.u);
+                }
+
+                // increment counter of number of samples
                 ++counter;
             }
         }
-        likelihood /= counter;
-        return -likelihood;
+
+        // compute average value
+        logLikelihood /= counter;
+        if (grad != nullptr)
+        {
+            for (int i = 0; i < dp; ++i)
+            {
+                grad[i] = gradient(i) / counter;
+            }
+        }
+
+        return -logLikelihood;
     }
 
 
@@ -112,9 +151,15 @@ public:
         return reinterpret_cast<MLE*>(o)->objFunction(n, x, grad);
     }
 
+    unsigned int getFunEvals()
+    {
+        return nbFunEvals;
+    }
+
 private:
-    ParametricPolicy<DenseAction,DenseState>& policy;
+    DifferentiablePolicy<DenseAction,DenseState>& policy;
     Dataset<DenseAction,DenseState>& data;
+    unsigned int nbFunEvals;
 };
 
 } //end namespace
