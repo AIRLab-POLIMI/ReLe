@@ -34,7 +34,7 @@ class IRL_LQRSolver : public LQRsolver, public IRLSolver<DenseAction, DenseState
 {
 public:
     IRL_LQRSolver(LQR& lqr, Features& phi, Features& phiPi)
-        : IRLSolver<DenseAction, DenseState>(phi), LQRsolver(lqr, phi, Type::MOO)
+        : IRLSolver<DenseAction, DenseState>(phi), LQRsolver(lqr, phiPi, Type::MOO)
     {
 
     }
