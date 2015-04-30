@@ -36,7 +36,7 @@ class LQRsolver: public Solver<DenseAction, DenseState>
 public:
     enum Type {MOO, CLASSIC};
 
-    LQRsolver(LQR& lqr, Features& approximator, Type type = Type::MOO);
+    LQRsolver(LQR& lqr, Features& phi, Type type = Type::MOO);
     virtual void solve();
     virtual Dataset<DenseAction, DenseState> test();
     virtual Policy<DenseAction, DenseState>& getPolicy();
@@ -53,7 +53,7 @@ public:
         weightsRew = weights;
     }
 
-private:
+protected:
     LQR& lqr;
     DetLinearPolicy<DenseState> pi;
     double gamma;

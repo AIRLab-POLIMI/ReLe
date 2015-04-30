@@ -22,6 +22,7 @@
  */
 
 #include "LQRsolver.h"
+#include <cassert>
 
 using namespace arma;
 using namespace std;
