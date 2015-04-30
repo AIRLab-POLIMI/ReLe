@@ -103,8 +103,8 @@ arma::mat LQRsolver::computeOptSolution()
             }
         }
 
-        std::cout << Q << std::endl;
-        std::cout << R << std::endl;
+//        std::cout << Q << std::endl;
+//        std::cout << R << std::endl;
     }
 
     mat P(Q.n_rows, Q.n_cols, fill::eye);

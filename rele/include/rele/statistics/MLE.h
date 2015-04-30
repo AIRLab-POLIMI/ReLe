@@ -62,7 +62,7 @@ public:
 
         nlopt::opt optimizator;
         optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dp);
-        optimizator.set_min_objective(MLE::wrapper, this);
+        optimizator.set_max_objective(MLE::wrapper, this);
         optimizator.set_xtol_rel(1e-6);
         optimizator.set_ftol_rel(1e-6);
         optimizator.set_ftol_abs(1e-6);
@@ -139,9 +139,10 @@ public:
             {
                 grad[i] = gradient(i) / counter;
             }
+            std::cout << gradient << std::endl;
         }
 
-        return -logLikelihood;
+        return logLikelihood;
     }
 
 

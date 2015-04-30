@@ -56,7 +56,7 @@ if TESTMATLAB == 1
     %% REPLICATE RESULTS
     domain = 'lqr';
     mdpconfig  = irl_lqr_init ( dim );
-    mdpconfig.gamma = gamma;
+    mdpconfig.gamma = 0.95;
     tic;
     K = irl_lqr_calcolaPoliticaOttimaWS(mdpconfig, eReward);
     t = toc;
