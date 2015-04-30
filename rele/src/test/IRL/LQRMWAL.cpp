@@ -30,6 +30,7 @@
 
 #include "LQR.h"
 #include "LQRsolver.h"
+#include "solvers/IrlLQRSolver.h"
 #include "PolicyEvalAgent.h"
 #include "algorithms/MWAL.h"
 #include "policy_search/PGPE/PGPE.h"
@@ -81,31 +82,10 @@ int main(int argc, char *argv[])
 
     DenseFeatures rewardPhi(rewardBF);
 
-    LinearApproximator rewardRegressor(rewardPhi);
-
-
     //Compute expert feature expectations
     arma::vec muE = collection.data.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
 
-    //Create an agent to solve the mdp direct problem
-    DetLinearPolicy<DenseState> policy(phi);
-    int nparams = phi.rows();
-    arma::vec mean(nparams, fill::zeros);
-    policy.setParameters(mean);
-
-    int epPerPol = 1, polPerUpd = 100;
-    arma::mat cov(nparams, nparams, arma::fill::eye);
-    cov *= 0.1;
-    ParametricNormal dist(mean, cov);
-    AdaptiveStep steprule(0.1);
-    PGPE<DenseAction, DenseState> agent(dist, policy, epPerPol, polPerUpd, steprule, true);
-
-    //Setup the solver
-    int updates = 600;
-    int episodes  = updates*epPerPol*polPerUpd;
-
-    IRLAgentSolver<DenseAction, DenseState> solver(agent, mdp, policy, rewardPhi, rewardRegressor);
-    solver.setLearningParams(episodes, 50);
+    IRL_LQRSolver solver(mdp, phi, rewardPhi);
     solver.setTestParams(1000, 50);
 
     //Run MWAL

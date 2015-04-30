@@ -138,18 +138,18 @@ public:
 
     ~SparseFeatures_()
     {
-    	clearBasis();
+        clearBasis();
     }
 
 private:
     void clearBasis()
     {
-    	for(auto basis : values)
-    	{
-    		delete basis;
-    	}
+        for(auto basis : values)
+        {
+            delete basis;
+        }
 
-    	values.clear();
+        values.clear();
     }
 
 private:

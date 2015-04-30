@@ -34,9 +34,44 @@ template<class ActionC, class StateC, class FeaturesInputC = arma::vec>
 class IRLSolver: public Solver<ActionC, StateC>
 {
 public:
-    IRLSolver(Environment<ActionC, StateC>& mdp, Features_<FeaturesInputC>& features,
-              ParametricRegressor_<FeaturesInputC>& rewardRegressor) :
-        prMdp(mdp, rewardRegressor), features(features),
+    IRLSolver(Features_<FeaturesInputC>& phi) : phi(phi)
+    {
+
+    }
+
+    virtual void setWeights(arma::vec& weights) = 0;
+    virtual double getGamma() = 0;
+
+    inline unsigned int getBasisSize()
+    {
+        return phi.rows();
+    }
+
+    virtual arma::mat computeFeaturesExpectations()
+    {
+        Dataset<ActionC, StateC> && data = this->test();
+        return data.computefeatureExpectation(phi, this->getGamma());
+    }
+
+
+    virtual ~IRLSolver()
+    {
+
+    }
+
+protected:
+    Features_<FeaturesInputC>& phi;
+
+};
+
+template<class ActionC, class StateC, class FeaturesInputC = arma::vec>
+class IRLSolverBase: public IRLSolver<ActionC, StateC>
+{
+public:
+    IRLSolverBase(Environment<ActionC, StateC>& mdp, Features_<FeaturesInputC>& phi,
+                  ParametricRegressor_<FeaturesInputC>& rewardRegressor) :
+        IRLSolver<ActionC, StateC, FeaturesInputC>(phi),
+        prMdp(mdp, rewardRegressor),
         rewardRegressor(rewardRegressor)
     {
 
@@ -47,31 +82,19 @@ public:
         rewardRegressor.setParameters(weights);
     }
 
-    inline unsigned int getBasisSize()
-    {
-        return features.rows();
-    }
-
     inline double getGamma()
     {
         return prMdp.getSettings().gamma;
     }
 
-    arma::mat computeFeaturesExpectations()
-    {
-        Dataset<ActionC, StateC> && data = this->test();
-        return data.computefeatureExpectation(features, prMdp.getSettings().gamma);
-    }
-
 protected:
     ParametricRewardMDP<ActionC, StateC> prMdp;
-    Features_<FeaturesInputC>& features;
     ParametricRegressor_<FeaturesInputC>& rewardRegressor;
 
 };
 
 template<class ActionC, class StateC, class FeaturesInputC = arma::vec>
-class IRLAgentSolver: public IRLSolver<ActionC, StateC, FeaturesInputC>
+class IRLAgentSolver: public IRLSolverBase<ActionC, StateC, FeaturesInputC>
 {
 
 public:
@@ -79,7 +102,7 @@ public:
                    Environment<ActionC, StateC>& mdp,
                    Policy<ActionC, StateC>& policy, Features_<FeaturesInputC>& features,
                    ParametricRegressor_<FeaturesInputC>& rewardRegressor) :
-        IRLSolver<ActionC, StateC, FeaturesInputC>(mdp, features, rewardRegressor),
+        IRLSolverBase<ActionC, StateC, FeaturesInputC>(mdp, features, rewardRegressor),
         agent(agent), policy(policy)
     {
         episodes = 1;
