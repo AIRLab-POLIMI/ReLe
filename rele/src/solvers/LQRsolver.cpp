@@ -42,15 +42,6 @@ void LQRsolver::solve()
 {
 
     arma::mat K = computeOptSolution();
-//    questo fa la vettorizzazione di K.t() [controllare]
-//    arma::vec w(K.n_elem);
-//    for (int r = 0, i = 0;  r < K.n_rows; ++r)
-//    {
-//        for (int c = 0;  c < K.n_cols; ++c)
-//        {
-//            w[i++] = K(r,c);
-//        }
-//    }
     arma::vec w = arma::vectorise(K.t());
     pi.setParameters(w);
 }

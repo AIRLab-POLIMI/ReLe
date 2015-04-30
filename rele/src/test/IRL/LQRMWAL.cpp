@@ -25,7 +25,7 @@
 #include "parametric/differentiable/LinearPolicy.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/QuadraticBasis.h"
 #include "features/DenseFeatures.h"
 
 #include "LQR.h"
@@ -44,52 +44,59 @@ using namespace arma;
 int main(int argc, char *argv[])
 {
     /* Learn lqr correct policy */
-    mat A, B, q, r;
+    mat A, B, q1, r1, q2, r2;
     A = 1;
     B = 1;
-    q = 0.6;
-    r = 0.4;
+    q1 = 100;
+    r1 = 1;
+    q2 = 1;
+    r2 = 100;
     vector<mat> Q, R;
-    Q.push_back(q);
-    R.push_back(r);
+    Q.push_back(q1);
+    R.push_back(r1);
+    Q.push_back(q2);
+    R.push_back(r2);
     LQR mdp(A,B,Q,R);
+    vec wExpert(2);
+    wExpert[0] = 0.6;
+    wExpert[1] = 0.4;
 
     IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);
 
     //Find optimal policy
     LQRsolver optimalSolver(mdp, phi);
+    optimalSolver.setRewardWeights(wExpert);
     optimalSolver.solve();
     Policy<DenseAction, DenseState>& expertPolicy = optimalSolver.getPolicy();
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
     cout << "Optimal Policy: " << endl << expertPolicy.printPolicy() << endl;
 
     /* Generate LQR expert dataset */
-    Core<DenseAction, DenseState> expertCore(mdp, expert);
-    CollectorStrategy<DenseAction, DenseState> collection;
-    expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = 50;
-    expertCore.getSettings().testEpisodeN = 1000;
-    expertCore.runTestEpisodes();
+    optimalSolver.setTestParams(50, 1000);
+    Dataset<DenseAction, DenseState>&& dataset = optimalSolver.test();
 
 
     /* Learn weight with MWAL */
 
     //Create features vector
     BasisFunctions rewardBF;
-    rewardBF.push_back(new InverseBasis(new PolynomialFunction(0, 2))); //-State^2
-    rewardBF.push_back(new InverseBasis(new PolynomialFunction(1, 2))); //-Action^2
+    vector<mat> qb1 = {q1, r1};
+    vector<mat> qb2 = {q2, r2};
+    vector<span> spanV = {span(0), span(1)};
+    rewardBF.push_back(new InverseBasis(new QuadraticBasis(qb1, spanV))); //objective 1
+    rewardBF.push_back(new InverseBasis(new QuadraticBasis(qb2, spanV))); // Objective 2
 
     DenseFeatures rewardPhi(rewardBF);
 
     //Compute expert feature expectations
-    arma::vec muE = collection.data.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
+    arma::vec muE = dataset.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
 
-    IRL_LQRSolver solver(mdp, phi, rewardPhi);
+    IRL_LQRSolver solver(mdp, rewardPhi, phi);
     solver.setTestParams(1000, 50);
 
     //Run MWAL
-    unsigned int T = 30;
+    unsigned int T = 1000;
 
     MWAL<DenseAction, DenseState> irlAlg(T, muE, solver);
     irlAlg.run();
