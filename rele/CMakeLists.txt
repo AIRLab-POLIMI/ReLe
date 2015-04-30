@@ -55,7 +55,7 @@ else()
         set(Boost_USE_STATIC_LIBS        OFF)
         set(Boost_USE_MULTITHREADED      ON)
         set(Boost_USE_STATIC_RUNTIME    OFF)
-        find_package(Boost 1.53 REQUIRED)
+        find_package(Boost 1.53 REQUIRED system timer)
         if(Boost_FOUND)
                 include_directories(${Boost_INCLUDE_DIRS})
         endif()
@@ -128,6 +128,9 @@ target_link_libraries(tiles_test rele)
 add_executable(pr_mdp src/test/core/ParametricRewardMDPTest.cpp)
 target_link_libraries(pr_mdp rele)
 
+add_executable(dataset_test src/test/core/DatasetTest.cpp)
+target_link_libraries(dataset_test rele)
+
 #Matlab tests (miscellaneous)
 add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
@@ -161,6 +164,21 @@ target_link_libraries(lqr_MWAL rele)
 
 add_executable(lqr_GIRL src/test/IRL/LQRGIRL.cpp)
 target_link_libraries(lqr_GIRL rele)
+
+add_executable(lqr_GMGIRL src/test/IRL/GMLQRGIRL.cpp)
+target_link_libraries(lqr_GMGIRL rele)
+
+add_executable(lqr_MLEGIRL src/test/IRL/MLELQRGIRL.cpp)
+target_link_libraries(lqr_MLEGIRL rele)
+
+add_executable(lqr_MLEGIRLALL src/test/IRL/MLELQRGIRLALL.cpp)
+target_link_libraries(lqr_MLEGIRLALL rele)
+
+add_executable(lqr_MLEGIRLALL1D src/test/IRL/MLELQRGIRLALL1D.cpp)
+target_link_libraries(lqr_MLEGIRLALL1D rele)
+
+add_executable(lqr_GIRLALL src/test/IRL/LQRGIRLALL.cpp)
+target_link_libraries(lqr_GIRLALL rele)
 
 add_executable(deep_GIRL src/test/IRL/DeepGIRL.cpp)
 target_link_libraries(deep_GIRL rele)
@@ -202,6 +220,9 @@ target_link_libraries(lqr_BBO rele)
 
 add_executable(nls_BBO src/test/BBO/NlsBBOTest.cpp)
 target_link_libraries(nls_BBO rele)
+
+add_executable(segway_BBO src/test/BBO/SegwayBBOTest.cpp)
+target_link_libraries(segway_BBO rele)
 
 #PG test
 add_executable(nls_PG src/test/PG/NlsPGTest.cpp)

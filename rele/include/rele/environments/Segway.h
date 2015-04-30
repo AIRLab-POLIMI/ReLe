@@ -26,6 +26,7 @@
 
 #include "ContinuousMDP.h"
 #include <boost/numeric/odeint.hpp>
+#include "ArmadilloOdeint.h"
 
 namespace ReLe
 {

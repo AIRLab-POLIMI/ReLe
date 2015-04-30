@@ -29,6 +29,7 @@
 
 #include "BasicFunctions.h"
 #include "Features.h"
+#include "CSV.h"
 
 
 namespace ReLe
@@ -168,6 +169,66 @@ public:
         }
     }
 
+    void readFromStream(std::istream& is)
+    {
+        std::vector<std::string> header;
+        CSVutils::readCSVLine(is, header);
+
+        int stateSize = std::stoi(header[0]);
+        int actionSize = std::stoi(header[1]);
+        int rewardSize = std::stoi(header[2]);
+
+        while(is)
+        {
+            readEpisodeFromStream(is, stateSize, actionSize, rewardSize);
+        }
+
+    }
+
+private:
+    void readEpisodeFromStream(std::istream& is, int stateSize, int actionSize,
+                               int rewardSize)
+    {
+        bool first = true;
+        bool last = false;
+        Episode<ActionC, StateC> episode;
+        Transition<ActionC, StateC> transition;
+
+        std::vector<std::string> line;
+        while (!last && CSVutils::readCSVLine(is, line))
+        {
+            last = std::stoi(line[0]);
+            bool absorbing = std::stoi(line[1]);
+
+            auto sit = line.begin() + 2;
+            auto ait = sit + stateSize;
+            auto rit = ait + actionSize;
+            auto endit = rit + rewardSize;
+
+            StateC state = StateC::generate(sit, ait);
+            state.setAbsorbing(absorbing);
+
+            if (!first)
+            {
+                transition.xn = state;
+                episode.push_back(transition);
+            }
+
+            if (!last)
+            {
+                transition.x = state;
+                transition.u = ActionC::generate(ait, rit);
+                transition.r = generate(rit, endit);
+            }
+
+            line.clear();
+            first = false;
+        }
+
+        //Add episode to dataset
+        if(last)
+            this->push_back(episode);
+    }
 
 };
 

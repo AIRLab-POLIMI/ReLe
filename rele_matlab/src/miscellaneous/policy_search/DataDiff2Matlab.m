@@ -6,7 +6,10 @@ reset(symengine);
 excmd = '../../../../rele-build/datadiff2mat';
 
 %% REINFORCE
-algorithm = 'rb';
+algorithm = 'natgb';
+
+
+gamma = 0.99;
 
 % policy for dam
 stateDim = 1;
@@ -48,11 +51,13 @@ polhessf = matlabFunction(subbshp);
 mkdir('/tmp/ReLe/datadiff2mat/test/')
 dlmwrite('/tmp/ReLe/datadiff2mat/test/params.dat', params, 'delimiter', '\t', 'precision', 10);
 
-tcmd = [excmd ' ' algorithm ' /tmp/ReLe/datadiff2mat/test/params.dat'];
-
+tcmd = [excmd ' ' algorithm ' /tmp/ReLe/datadiff2mat/test/params.dat' ...
+    ' ' num2str(gamma)];
+tic;
 disp('------------------------');
 status = system(tcmd);
 disp('------------------------');
+tcpp = toc;
 
 % read values
 redG = dlmread('/tmp/ReLe/datadiff2mat/test/gradient.dat');
@@ -74,26 +79,42 @@ for i = 1:length(episodes)
 end
 clearvars csv
 
+
 poldifflog = @(s,a) polgradf(a,s);
 poldiff2log = @(s,a) polhessf(s);
+toc;
 if strcmp(algorithm, 'r')
-    evalG = eREINFORCE(poldifflog, data, 1, 1);
-    evalH = HessianRF(poldifflog, poldiff2log, data, 1, 1);
+    evalG = eREINFORCE(poldifflog, data, gamma, 1);
+    evalH = HessianRF(poldifflog, poldiff2log, data, gamma, 1);
 elseif strcmp(algorithm, 'rb')
-    evalG = eREINFORCEbase(poldifflog, data, 1, 1);
+    evalG = eREINFORCEbase(poldifflog, data, gamma, 1);
 elseif strcmp(algorithm, 'g')
-    evalG = GPOMDP(poldifflog, data, 1, 1);
+    evalG = GPOMDP(poldifflog, data, gamma, 1);
 elseif strcmp(algorithm, 'gb')
-    evalG = GPOMDPbase(poldifflog, length(params), data, 1, 1);
+    evalG = GPOMDPbase(poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'enac')
+    evalG = eNAC(poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'enacb')
+    evalG = eNACbase(poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natr')
+    evalG = NaturalPG('r', poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natrb')
+    evalG = NaturalPG('rb', poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natg')
+    evalG = NaturalPG('g', poldifflog, length(params), data, gamma, 1);
+elseif strcmp(algorithm, 'natgb')
+    evalG = NaturalPG('gb', poldifflog, length(params), data, gamma, 1);
 else
     error('unknown gradient type!');
 end
+tmat = toc;
 
 [redG, evalG]
-assert(max(abs(redG-evalG)) <= 1e-4);
+assert(max(abs(redG-evalG)) <= 1e-7);
 if strcmp(algorithm, 'r')
     redH, evalH
     assert(max(max(abs(redH-evalH))) <= 1e-3);
 end
 
+fprintf('tcpp: %f\ntmat: %f\n', tcpp, tmat);
 

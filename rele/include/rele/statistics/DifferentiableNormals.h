@@ -27,7 +27,7 @@ public:
     // Distribution interface
 public:
     virtual arma::vec operator() ();
-    virtual double operator() (arma::vec &point);
+    virtual double operator() (arma::vec& point);
 
     virtual inline std::string getDistributionName()
     {

@@ -27,8 +27,9 @@
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
-#include "basis/IdentityBasis.h"
+#include "PolicyEvalAgent.h"
 #include "features/DenseFeatures.h"
+#include "basis/IdentityBasis.h"
 #include "basis/GaussianRbf.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
@@ -39,7 +40,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "LQR.h"
+#include "Segway.h"
 
 using namespace std;
 using namespace ReLe;
@@ -60,7 +61,7 @@ struct bboConfig
 
 void help()
 {
-    cout << "lqr_BBO algorithm [] #Updates #Policies stepLength [updaterule]" << endl;
+    cout << "segway_BBO algorithm [] #Updates #Policies stepLength [updaterule]" << endl;
     cout << " - algorithm: pgpe, nes, enes, reps" << endl;
     cout << "   * notes that pgpe and nes requires and additional paramiter" << endl;
     cout << "   * distribution: gauss, log, chol, diag" << endl;
@@ -117,6 +118,7 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
     return true;
 }
 
+
 /**
  *
  * argv[1] learning algorithm name (pgpe, nes, enes, reps) -> pgpe and nes requires the distribution type
@@ -129,6 +131,7 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
  */
 int main(int argc, char *argv[])
 {
+
     bboConfig config;
 
     //--- INPUT VALIDATION
@@ -185,30 +188,30 @@ int main(int argc, char *argv[])
     }
     //---
 
-    FileManager fm("lqr", "BBO");
+
+    FileManager fm("segway", "BBO");
     fm.createDir();
-    //    fm.cleanDir();
+    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
 
-    LQR mdp(1,1); //with these settings the optimal value is -0.6180 (for the linear policy)
+    Segway mdp;
 
-    IdentityBasis* pf = new IdentityBasis(0);
-    DenseFeatures phi(pf);
+    BasisFunctions basis = GaussianRbf::generate({3,3,3}, {-M_PI/18, M_PI/18, -1, 1, -1,1});
+    DenseFeatures phi(basis);
     DetLinearPolicy<DenseState> policy(phi);
     //---
 
     //--- distribution setup
     int nparams = phi.rows();
     arma::vec mean(nparams, fill::zeros);
-    mean[0] = -0.42;
-    mean[1] =  0.42;
     DifferentiableDistribution* dist;
 
     if (strcmp(polType, "gauss") == 0)
     {
         //----- ParametricNormal
         arma::mat cov(nparams, nparams, arma::fill::eye);
+        cov *= 10;
         dist = new ParametricNormal(mean, cov);
     }
     else if (strcmp(polType, "log") == 0)
@@ -318,20 +321,25 @@ int main(int argc, char *argv[])
         }
     }
 
+
+
+
+
+    //        PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+    //        Core<DenseAction, DenseState> core(mdp, agent);
+    WriteStrategy<DenseAction, DenseState> collection(fm.addPath("seqway_final.log"),
+            WriteStrategy<DenseAction, DenseState>::TRANS,
+            true /*delete file*/);
+    core->getSettings().loggerStrategy = &collection;
+    core->getSettings().episodeLenght = mdp.getSettings().horizon;
+    core->getSettings().testEpisodeN = 1;
+    core->runTestEpisodes();
+
     //    int nbTestEpisodes = 1000;
     //    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
     //    core->getSettings().testEpisodeN = nbTestEpisodes;
     //    cout << core->runBatchTest() << endl;
 
-    //    //--- collect some trajectories
-    //    core->getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-    //        fm.addPath("NlsFinal.log"),
-    //        WriteStrategy<DenseAction, DenseState>::TRANS,
-    //        true /*delete file*/
-    //    );
-    //    for (int n = 0; n < 100; ++n)
-    //        core->runTestEpisode();
-    //    //---
 
     delete dist;
     delete core;

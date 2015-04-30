@@ -66,7 +66,7 @@ protected:
     arma::vec weights;
 };
 
-enum IRLGradType {R, RB, G, GB};
+enum IRLGradType {R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB};
 
 template<class ActionC, class StateC>
 class GIRL : public IRLAlgorithm<ActionC, StateC>
@@ -86,6 +86,9 @@ public:
 
     virtual void run()
     {
+
+        numberOfEvaluations = 0;
+
         maxSteps = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -111,9 +114,11 @@ public:
         //                      optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT_L, dpr);
         optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
         optimizator.set_min_objective(GIRL::wrapper, this);
-        optimizator.set_xtol_rel(1e-10);
+        optimizator.set_xtol_rel(1e-14);
+//        optimizator.set_xtol_abs(1e-14);
         optimizator.set_ftol_rel(1e-14);
-        optimizator.set_maxeval(300*dpr);
+//        optimizator.set_ftol_abs(1e-14);
+        optimizator.set_maxeval(200*dpr);
 
         std::vector<double> lowerBounds(dpr, 0.0);
         std::vector<double> upperBounds(dpr, 1.0);
@@ -541,9 +546,162 @@ public:
         return gradient_J;
     }
 
+    arma::vec ENACGradient(arma::mat& gGradient)
+    {
+        int dp  = policy.getParametersSize();
+        int dpr = rewardf.getParametersSize();
+
+        gGradient.zeros(dp,dpr);
+
+        arma::vec localg;
+        double Rew;
+        arma::vec g(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+
+            // *** eNAC CORE *** //
+            double df = 1.0;
+            Rew = 0.0;
+            phi.zeros();
+//    #ifdef AUGMENTED
+            phi(dp) = 1.0;
+//    #endif
+            // ********************** //
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                double creward = rewardf(tr.x, tr.u, tr.xn);
+                Rew += df * creward;
+
+                //Construct basis functions
+                for (unsigned int i = 0; i < dp; ++i)
+                    phi[i] += df * localg[i];
+                // ********************** //
+
+                df *= gamma;
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+            fisher += phi * phi.t();
+            g += Rew * phi;
+
+        }
+
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, g);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * g;
+        }
+
+        return nat_grad.rows(0,dp-1);
+    }
+
+    arma::vec NaturalGradient(arma::mat& gGradient)
+    {
+        int dp  = policy.getParametersSize();
+        int dpr = rewardf.getParametersSize();
+        arma::vec localg;
+        arma::mat fisher(dp,dp, arma::fill::zeros);
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                fisher += localg * localg.t();
+                // ********************** //
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+        }
+        fisher /= nbEpisodes;
+
+        arma::vec gradient;
+        if (atype == IRLGradType::NATR)
+        {
+            gradient = ReinforceGradient(gGradient);
+        }
+        else if (atype == IRLGradType::NATRB)
+        {
+            gradient = ReinforceBaseGradient(gGradient);
+        }
+        else if (atype == IRLGradType::NATG)
+        {
+            gradient = GpomdpGradient(gGradient);
+        }
+        else if (atype == IRLGradType::NATGB)
+        {
+            gradient = GpomdpBaseGradient(gGradient);
+        }
+
+
+        gGradient.zeros(dp,dpr);
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, gradient);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * gradient;
+        }
+
+        return nat_grad;
+    }
 
     double objFunction(unsigned int n, const double* x, double* grad)
     {
+
+        ++numberOfEvaluations;
+
+
         arma::vec gradient;
         arma::mat dGradient;
         rewardf.setParameters(n, x);
@@ -566,6 +724,20 @@ public:
         {
             //            std::cout << "GIRL GPOMDP BASE" << std::endl;
             gradient = GpomdpBaseGradient(dGradient);
+        }
+        else if (atype == IRLGradType::ENAC)
+        {
+            gradient = ENACGradient(dGradient);
+        }
+        else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB) ||
+                 (atype == IRLGradType::NATG) || (atype == IRLGradType::NATGB))
+        {
+            gradient = NaturalGradient(dGradient);
+        }
+        else
+        {
+            std::cerr << "GIRL ERROR" << std::endl;
+            abort();
         }
 
         //        std::cerr << gradient.t();
@@ -636,6 +808,9 @@ protected:
     double gamma;
     unsigned int maxSteps;
     IRLGradType atype;
+
+public:
+    int numberOfEvaluations;
 };
 
 template<class ActionC, class StateC>
@@ -984,7 +1159,236 @@ public:
         return gradient_J;
     }
 
+    arma::vec NaturalGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        arma::mat fisher(dp,dp, arma::fill::zeros);
 
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                fisher += localg * localg.t();
+                // ********************** //
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+        }
+        fisher /= nbEpisodes;
+
+        arma::vec gradient;
+        if (atype == IRLGradType::NATR)
+        {
+            gradient = ReinforceGradient(rewardf);
+        }
+        else if (atype == IRLGradType::NATRB)
+        {
+            gradient = ReinforceBaseGradient(rewardf);
+        }
+        else if (atype == IRLGradType::NATG)
+        {
+            gradient = GpomdpGradient(rewardf);
+        }
+        else if (atype == IRLGradType::NATGB)
+        {
+            gradient = GpomdpBaseGradient(rewardf);
+        }
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, gradient);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * gradient;
+        }
+
+        return nat_grad;
+    }
+
+    arma::vec ENACGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        double Rew;
+        arma::vec g(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
+//        double Jpol = 0.0;
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+
+            // *** eNAC CORE *** //
+            double df = 1.0;
+            Rew = 0.0;
+            phi.zeros();
+//    #ifdef AUGMENTED
+            phi(dp) = 1.0;
+//    #endif
+            // ********************** //
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                double creward = rewardf(tr.x, tr.u, tr.xn);
+                Rew += df * creward;
+
+                //Construct basis functions
+                for (unsigned int i = 0; i < dp; ++i)
+                    phi[i] += df * localg[i];
+                // ********************** //
+
+                df *= gamma;
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+            fisher += phi * phi.t();
+            g += Rew * phi;
+
+        }
+
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, g);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * g;
+        }
+
+        return nat_grad.rows(0,dp-1);
+    }
+
+    arma::vec ENACBaseGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        double Rew;
+        arma::vec g(dp+1, arma::fill::zeros), eligibility(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
+        double Jpol = 0.0;
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+
+            // *** eNAC CORE *** //
+            double df = 1.0;
+            Rew = 0.0;
+            phi.zeros();
+//    #ifdef AUGMENTED
+            phi(dp) = 1.0;
+//    #endif
+            // ********************** //
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                double creward = rewardf(tr.x, tr.u, tr.xn);
+                Rew += df * creward;
+
+                //Construct basis functions
+                for (unsigned int i = 0; i < dp; ++i)
+                    phi[i] += df * localg[i];
+                // ********************** //
+
+                df *= gamma;
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+            Jpol += Rew;
+            fisher += phi * phi.t();
+            g += Rew * phi;
+            eligibility += phi;
+
+        }
+
+        // compute mean value
+        fisher /= nbEpisodes;
+        g /= nbEpisodes;
+        eligibility /= nbEpisodes;
+        Jpol /= nbEpisodes;
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            arma::mat tmp = arma::solve(nbEpisodes * fisher - eligibility * eligibility.t(), eligibility);
+            arma::mat Q = (1 + eligibility.t() * tmp) / nbEpisodes;
+            arma::mat b = Q * (Jpol - eligibility.t() * arma::solve(fisher, g));
+            arma::vec grad = g - eligibility * b;
+            nat_grad = arma::solve(fisher, grad);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodes * fisher - eligibility * eligibility.t()) * eligibility)
+                          * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
+            arma::vec grad = g - eligibility * b;
+            nat_grad = H * (grad);
+        }
+
+        return nat_grad.rows(0,dp-1);
+    }
 
     virtual void run()
     {
@@ -1010,10 +1414,30 @@ public:
             {
                 gradients[r] = GpomdpBaseGradient(*(rewardsf[r]));
             }
+            else if (atype == IRLGradType::ENAC)
+            {
+                gradients[r] = ENACGradient(*(rewardsf[r]));
+            }
+            else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB) ||
+                     (atype == IRLGradType::NATG) || (atype == IRLGradType::NATGB))
+            {
+                gradients[r] = NaturalGradient(*(rewardsf[r]));
+            }
+            else
+            {
+                std::cerr << "PGIRL ERROR" << std::endl;
+                abort();
+            }
             A.col(r) = gradients[r];
         }
 
+//        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
+
+//        std::cout << "Grads: \n" << A << std::endl;
+
         arma::mat gramMatrix = A.t() * A;
+
+//        std::cout << "Gram: \n" << gramMatrix << std::endl;
 
         arma::mat X(dr-1, dr);
         for (int r = 0; r < dr-1; ++r)
@@ -1039,6 +1463,7 @@ public:
 
         int np = s.n_elem;
         weights = V.cols(np, V.n_cols-1);
+//        weights.elem( arma::find(weights < 0) ).zeros();
         weights /= arma::norm(weights,1);
 
     }

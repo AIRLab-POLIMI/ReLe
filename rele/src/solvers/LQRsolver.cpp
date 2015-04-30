@@ -29,24 +29,84 @@ using namespace std;
 namespace ReLe
 {
 
-LQRsolver::LQRsolver(LQR& lqr, Features& phi) :
-    lqr(lqr), pi(phi)
+LQRsolver::LQRsolver(LQR& lqr, Features& phi, Type type) :
+    lqr(lqr), pi(phi), weightsRew(lqr.getSettings().rewardDim, arma::fill::zeros),
+    solution_type(type)
 {
-    rewardIndex = 0;
+    weightsRew(0) = 1;
     gamma = lqr.getSettings().gamma;
 }
 
 void LQRsolver::solve()
 {
+
+    arma::mat K = computeOptSolution();
+//    questo fa la vettorizzazione di K.t() [controllare]
+//    arma::vec w(K.n_elem);
+//    for (int r = 0, i = 0;  r < K.n_rows; ++r)
+//    {
+//        for (int c = 0;  c < K.n_cols; ++c)
+//        {
+//            w[i++] = K(r,c);
+//        }
+//    }
+    arma::vec w = arma::vectorise(K.t());
+    pi.setParameters(w);
+}
+
+arma::mat LQRsolver::computeOptSolution()
+{
     mat A = lqr.A;
     mat B = lqr.B;
 
-    mat Q =lqr.Q[rewardIndex];
-    mat R =lqr.R[rewardIndex];
+    mat K;
+    mat Q(lqr.Q[0].n_rows, lqr.Q[0].n_cols, arma::fill::zeros);
+    mat R(lqr.R[0].n_rows, lqr.R[0].n_cols, arma::fill::zeros);
+
+    if (solution_type == MOO)
+    {
+        int dim = lqr.Q.size();
+        assert(weightsRew.n_elem == dim);
+
+        for (int i = 0; i < dim; ++i)
+        {
+            Q += weightsRew[i] * lqr.Q[i];
+            R += weightsRew[i] * lqr.R[i];
+        }
+
+    }
+    else
+    {
+        int dimS = lqr.A.n_cols;
+        int dimA = lqr.B.n_cols;
+        int dim  = lqr.Q.size();
+        assert(weightsRew.n_elem == dim*(dimS*dimS+dimA*dimA));
+
+        int cont = 0;
+        for (int i = 0; i < dim; ++i)
+        {
+            for (int c = 0; c < dimS; ++c)
+            {
+                for (int r = 0; r < dimS; ++r)
+                {
+                    Q(r,c) += weightsRew[cont++];
+                }
+            }
+
+            for (int c = 0; c < dimA; ++c)
+            {
+                for (int r = 0; r < dimA; ++r)
+                {
+                    R(r,c) += weightsRew[cont++];
+                }
+            }
+        }
+
+        std::cout << Q << std::endl;
+        std::cout << R << std::endl;
+    }
 
     mat P(Q.n_rows, Q.n_cols, fill::eye);
-    mat K;
-
     for(unsigned int j = 0; j < 100; j++)
     {
         K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
@@ -56,8 +116,7 @@ void LQRsolver::solve()
 
     K = -gamma*inv((R+gamma*(B.t()*P*B)))*B.t()*P*A;
 
-    arma::vec w = vectorise(K);
-    pi.setParameters(w);
+    return K;
 }
 
 Dataset<DenseAction, DenseState> LQRsolver::test()
@@ -69,5 +128,6 @@ Policy<DenseAction, DenseState>& LQRsolver::getPolicy()
 {
     return pi;
 }
+
 
 }

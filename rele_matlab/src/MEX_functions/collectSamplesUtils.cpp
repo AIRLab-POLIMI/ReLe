@@ -8,7 +8,7 @@
 #include <BasisFunctions.h>
 #include <basis/PolynomialFunction.h>
 #include <basis/IdentityBasis.h>
-#include <basis/GaussianRBF.h>
+#include <basis/GaussianRbf.h>
 #include <basis/ConditionBasedFunction.h>
 #include <LQR.h>
 #include <NLS.h>
@@ -53,7 +53,7 @@ class deep_state_identity: public BasisFunction
 
 
 #define SAMPLES_GATHERING(ActionC, StateC, acdim, stdim) \
-	mdp.setHorizon(maxSteps);\
+	    mdp.setHorizon(maxSteps);\
         PolicyEvalAgent<ActionC,StateC> agent(policy);\
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
         CollectorStrategy<ActionC, StateC> collection;\
@@ -155,7 +155,14 @@ CollectSamplesInContinuousMDP(
     if (strcmp(domain_settings, "lqr") == 0)
     {
         // extract information from the struct
-        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
+        mxArray* array = mxGetField(IN_PAR_STRUCT, 0, "dim");
+        if (array == nullptr)
+        {
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: missing field dim!\n");
+        }
+        int dim = mxGetScalar(array);
+
+        array = mxGetField(IN_PAR_STRUCT, 0, "policyParameters");
         if (array == nullptr)
         {
             mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: missing field policyParameters!\n");
@@ -175,11 +182,17 @@ CollectSamplesInContinuousMDP(
         }
         double stddev = mxGetScalar(array);
 
-        LQR mdp(1,1);
-        PolynomialFunction* pf = new PolynomialFunction(1,1);
-        cout << *pf << endl;
-        DenseFeatures phi(pf);
-        NormalPolicy policy(0.1, phi);
+        LQR mdp(dim,dim);
+        BasisFunctions basis;
+        for (int ll = 0; ll < dim; ++ll)
+            basis.push_back(new IdentityBasis(ll));
+        SparseFeatures phi;
+        phi.setDiagonal(basis);
+        arma::mat cov (dim,dim, arma::fill::eye);
+        cov *= stddev;
+        MVNPolicy policy(phi,cov);
+        if (policy.getParametersSize() != policyParams.n_elem)
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
@@ -279,7 +292,7 @@ CollectSamplesInContinuousMDP(
             for (int i = 0; i < dr; ++i)
             {
                 IndexRT rewardRegressor(i);
-                HessianFromDataWorker<DenseAction,DenseState,NormalPolicy> gdw(data, policy, rewardRegressor, gamma);
+                HessianFromDataWorker<DenseAction,DenseState,MVNPolicy> gdw(data, policy, rewardRegressor, gamma);
                 arma::mat h = gdw.ReinforceHessian();
 
                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
@@ -319,6 +332,8 @@ CollectSamplesInContinuousMDP(
         stdWeights.fill(0.5);
 
         NormalStateDependantStddevPolicy policy(phi, stdPhi, stdWeights);
+        if (policy.getParametersSize() != policyParams.n_elem)
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-NLS: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
         /*
                 arma::vec pp(2);
@@ -404,7 +419,7 @@ CollectSamplesInContinuousMDP(
         }
         Dam mdp(settings);
 
-        PolynomialFunction *pf = new PolynomialFunction(1,0);
+        PolynomialFunction *pf = new PolynomialFunction();
         GaussianRbf* gf1 = new GaussianRbf(0, 50, true);
         GaussianRbf* gf2 = new GaussianRbf(50, 20, true);
         GaussianRbf* gf3 = new GaussianRbf(120, 40, true);
@@ -419,6 +434,8 @@ CollectSamplesInContinuousMDP(
         DenseFeatures phi(basis);
 //     MVNLogisticPolicy policy(phi, 50);
         MVNDiagonalPolicy policy(phi);
+        if (policy.getParametersSize() != policyParams.n_elem)
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
@@ -500,7 +517,7 @@ CollectSamplesInDenseMDP(
             actions.push_back(FiniteAction(i));
 
 //--- policy setup
-        PolynomialFunction* pf0 = new PolynomialFunction(2,0);
+        PolynomialFunction* pf0 = new PolynomialFunction();
         vector<unsigned int> dim = {0,1};
         vector<unsigned int> deg = {1,0};
         PolynomialFunction* pfs1 = new PolynomialFunction(dim,deg);
@@ -527,6 +544,8 @@ CollectSamplesInDenseMDP(
 
         ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
         //---
+        if (policy.getParametersSize() != policyParams.n_elem)
+            mexErrMsgTxt("CollectSamplesInContinuousMDP-DEEP: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(FiniteAction, DenseState, finiteActionDim, continuosStateDim)

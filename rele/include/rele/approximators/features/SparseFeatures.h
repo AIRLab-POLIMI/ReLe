@@ -119,6 +119,39 @@ public:
 
     }
 
+    void setDiagonal(BasisFunctions_<InputC>& basis)
+    {
+        rowsIdxs.clear();
+        colsIdxs.clear();
+        clearBasis();
+
+        int dim = basis.size();
+        n_rows = n_cols = dim;
+
+        for (int i = 0; i < dim; ++i)
+        {
+            rowsIdxs.push_back(i);
+            colsIdxs.push_back(i);
+            values.push_back(basis[i]);
+        }
+    }
+
+    ~SparseFeatures_()
+    {
+    	clearBasis();
+    }
+
+private:
+    void clearBasis()
+    {
+    	for(auto basis : values)
+    	{
+    		delete basis;
+    	}
+
+    	values.clear();
+    }
+
 private:
     //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
     std::vector<unsigned int> rowsIdxs, colsIdxs;

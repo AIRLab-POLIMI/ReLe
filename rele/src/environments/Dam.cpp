@@ -204,6 +204,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
         if (damConfig.isAverageReward)
             reward[i] /= getSettings().horizon;
     }
+//    std::cout << currentState << " | " << action << " | " <<  nextState << std::endl;
 
     currentState = nextState;
     ++nbSteps;

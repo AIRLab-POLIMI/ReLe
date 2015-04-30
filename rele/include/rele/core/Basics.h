@@ -127,6 +127,12 @@ public:
     {
 
     }
+
+    static inline Action generate(std::vector<std::string>::iterator& begin,
+                                  std::vector<std::string>::iterator& end)
+    {
+        return Action();
+    }
 };
 
 class FiniteAction: public Action
@@ -170,6 +176,13 @@ public:
     virtual ~FiniteAction()
     {
 
+    }
+
+    static inline FiniteAction generate(std::vector<std::string>::iterator& begin,
+                                        std::vector<std::string>::iterator& end)
+    {
+        int actionN = std::stoul(*begin);
+        return FiniteAction(actionN);
     }
 
 private:
@@ -237,6 +250,19 @@ public:
 
         return true;
     }
+
+    static inline DenseAction generate(std::vector<std::string>::iterator& begin,
+                                       std::vector<std::string>::iterator& end)
+    {
+        int size = std::distance(begin, end);
+        DenseAction action(size);
+        for(unsigned int i = 0; i < size; i++)
+        {
+            action[i] = std::stod(*(begin +i));
+        }
+
+        return action;
+    }
 };
 
 class State
@@ -273,6 +299,12 @@ public:
 
     }
 
+    static inline State generate(std::vector<std::string>::iterator& begin,
+                                 std::vector<std::string>::iterator& end)
+    {
+        return State();
+    }
+
 private:
     bool absorbing;
 };
@@ -280,9 +312,9 @@ private:
 class FiniteState: public State
 {
 public:
-    FiniteState()
+    FiniteState(unsigned int n = 0)
     {
-        stateN = 0;
+        stateN = n;
     }
 
     operator size_t&()
@@ -318,6 +350,13 @@ public:
     virtual ~FiniteState()
     {
 
+    }
+
+    static inline FiniteState generate(std::vector<std::string>::iterator& begin,
+                                       std::vector<std::string>::iterator& end)
+    {
+        int stateN = std::stoul(*begin);
+        return FiniteState(stateN);
     }
 
 private:
@@ -362,9 +401,36 @@ public:
 
     }
 
+    static inline DenseState generate(std::vector<std::string>::iterator& begin,
+                                      std::vector<std::string>::iterator& end)
+    {
+        int size = std::distance(begin, end);
+        DenseState state(size);
+        for(unsigned int i = 0; i < size; i++)
+        {
+            state[i] = std::stod(*(begin +i));
+        }
+
+        return state;
+    }
+
 };
 
 typedef std::vector<double> Reward;
+inline Reward generate(std::vector<std::string>::iterator& begin,
+                       std::vector<std::string>::iterator& end)
+{
+    Reward reward;
+
+    for(auto it = begin; it != end; it++)
+    {
+        double value = std::stod(*it);
+        reward.push_back(value);
+    }
+
+    return reward;
+
+}
 
 inline std::ostream& operator<<(std::ostream& os, const Action& action)
 {
@@ -380,11 +446,14 @@ inline std::ostream& operator<<(std::ostream& os, const State& state)
 
 inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
-    size_t i;
-    for (i = 0; i + 1 < reward.size(); i++)
-        os << reward[i] << ",";
+    if(!reward.empty())
+    {
+        size_t i;
+        for (i = 0; i + 1 < reward.size(); i++)
+            os << reward[i] << ",";
 
-    os << reward[i];
+        os << reward[i];
+    }
     return os;
 }
 

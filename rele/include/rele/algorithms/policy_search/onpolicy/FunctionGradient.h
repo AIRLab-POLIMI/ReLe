@@ -35,6 +35,7 @@ template<class ActionC, class StateC>
 class GradientFromDataWorker
 {
 public:
+    enum NaturalGradType {NATR, NATRB, NATG, NATGB};
 
     GradientFromDataWorker(Dataset<ActionC,StateC>& dataset,
                            DifferentiablePolicy<ActionC,StateC>& policy,
@@ -375,7 +376,247 @@ public:
         return gradient_J;
     }
 
+    arma::vec ENACGradient()
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        double Rew;
+        arma::vec g(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
+//        double Jpol = 0.0;
 
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+
+            // *** eNAC CORE *** //
+            double df = 1.0;
+            Rew = 0.0;
+            phi.zeros();
+//    #ifdef AUGMENTED
+            phi(dp) = 1.0;
+//    #endif
+            // ********************** //
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                double creward = rewardf->operator ()(tr.r);
+                Rew += df * creward;
+
+                //Construct basis functions
+                for (unsigned int i = 0; i < dp; ++i)
+                    phi[i] += df * localg[i];
+                // ********************** //
+
+                df *= gamma;
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+            fisher += phi * phi.t();
+            g += Rew * phi;
+
+        }
+
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, g);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * g;
+        }
+
+        return nat_grad.rows(0,dp-1);
+    }
+
+    arma::vec ENACBaseGradient()
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        double Rew;
+        arma::vec g(dp+1, arma::fill::zeros), eligibility(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
+        double Jpol = 0.0;
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+
+            // *** eNAC CORE *** //
+            double df = 1.0;
+            Rew = 0.0;
+            phi.zeros();
+//    #ifdef AUGMENTED
+            phi(dp) = 1.0;
+//    #endif
+            // ********************** //
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                double creward = rewardf->operator ()(tr.r);
+                Rew += df * creward;
+
+                //Construct basis functions
+                for (unsigned int i = 0; i < dp; ++i)
+                    phi[i] += df * localg[i];
+                // ********************** //
+
+                df *= gamma;
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+            Jpol += Rew;
+            fisher += phi * phi.t();
+            g += Rew * phi;
+            eligibility += phi;
+
+        }
+
+        // compute mean value
+        fisher /= nbEpisodes;
+        g /= nbEpisodes;
+        eligibility /= nbEpisodes;
+        Jpol /= nbEpisodes;
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        //        std::cout << rnk << " " << fisher << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            arma::mat tmp = arma::solve(nbEpisodes * fisher - eligibility * eligibility.t(), eligibility);
+            arma::mat Q = (1 + eligibility.t() * tmp) / nbEpisodes;
+            arma::mat b = Q * (Jpol - eligibility.t() * arma::solve(fisher, g));
+            arma::vec grad = g - eligibility * b;
+            nat_grad = arma::solve(fisher, grad);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodes * fisher - eligibility * eligibility.t()) * eligibility)
+                          * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
+            arma::vec grad = g - eligibility * b;
+            nat_grad = H * (grad);
+        }
+
+        return nat_grad.rows(0,dp-1);
+    }
+
+    arma::vec NaturalGradient(NaturalGradType atype)
+    {
+        int dp  = policy.getParametersSize();
+        arma::vec localg;
+        arma::mat fisher(dp,dp, arma::fill::zeros);
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** eNAC CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                fisher += localg * localg.t();
+                // ********************** //
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+        }
+        fisher /= nbEpisodes;
+
+        arma::vec gradient;
+        if (atype == NaturalGradType::NATR)
+        {
+            std::cout << "PG NAT R" << std::endl;
+            gradient = ReinforceGradient();
+        }
+        else if (atype == NaturalGradType::NATRB)
+        {
+            std::cout << "PG NAT R BASE" << std::endl;
+            gradient = ReinforceBaseGradient();
+        }
+        else if (atype == NaturalGradType::NATG)
+        {
+            std::cout << "PG NAT G" << std::endl;
+            gradient = GpomdpGradient();
+        }
+        else if (atype == NaturalGradType::NATGB)
+        {
+            std::cout << "PG NAT G BASE" << std::endl;
+            gradient = GpomdpBaseGradient();
+        }
+        else
+        {
+            std::cout << "error" << std::endl;
+            abort();
+        }
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        std::cout << rnk << " " << fisher << std::endl;
+        std::cout << arma::det(fisher) << std::endl;
+        std::cout << gradient.t() << std::endl;
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, gradient);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * gradient;
+        }
+
+        return nat_grad;
+    }
 
     void setPolicy(DifferentiablePolicy<ActionC,StateC>& policy)
     {

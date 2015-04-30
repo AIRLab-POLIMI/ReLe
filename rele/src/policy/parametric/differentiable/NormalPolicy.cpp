@@ -103,15 +103,14 @@ NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 double MVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
     UpdateInternalState(state);
-    std::cout << mMean.t();
-    std::cout << mCinv << std::endl;
-    std::cout << mDeterminant << std::endl;
     return mvnpdfFast(action, mMean, mCinv, mDeterminant);
 }
 
 arma::vec MVNPolicy::operator() (const arma::vec& state)
 {
     UpdateInternalState(state);
+//    std::cout << mMean.t();
+//    std::cout << mCholeskyDec << std::endl;
     return mvnrandFast(mMean, mCholeskyDec);
 }
 
@@ -259,7 +258,7 @@ void MVNDiagonalPolicy::UpdateCovarianceMatrix()
     mDeterminant = 1.0;
     for (unsigned int i = 0; i < stddevParams.n_elem; ++i)
     {
-        mCovariance(i,i) = stddevParams(i) * stddevParams(i);
+        mCovariance(i,i) = std::max(1e-10,stddevParams(i) * stddevParams(i));
         mCinv(i,i) = 1.0 / mCovariance(i,i);
         // check that the covariance is not NaN or Inf
         assert(!std::isnan(mCovariance(i,i)) && !std::isinf(mCovariance(i,i)));

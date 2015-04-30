@@ -7,15 +7,15 @@ dJdtheta = 0;
 
 num_trials = max(size(data));
 parfor trial = 1 : num_trials
-	sumrew = 0;
-	sumdlogPi = 0;
-	
-	for step = 1 : max(size(data(trial).a))
-		sumdlogPi = sumdlogPi + ...
-			policy_logdif(data(trial).s(:,step), data(trial).a(:,step));
-		sumrew = sumrew + gamma^(step-1) * data(trial).r(robj, step);
+    sumrew = 0;
+    sumdlogPi = 0;
+    
+    for step = 1 : max(size(data(trial).a))
+        sumdlogPi = sumdlogPi + ...
+            policy_logdif(data(trial).s(:,step), data(trial).a(:,step));
+        sumrew = sumrew + gamma^(step-1) * data(trial).r(robj, step);
     end
-	dJdtheta = dJdtheta + sumdlogPi * sumrew;
+    dJdtheta = dJdtheta + sumdlogPi * sumrew;
 end
 
 dJdtheta = dJdtheta / num_trials;

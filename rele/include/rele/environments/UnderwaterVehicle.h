@@ -27,6 +27,7 @@
 #include "DenseMDP.h"
 #include "Range.h"
 #include <boost/numeric/odeint.hpp>
+#include "ArmadilloOdeint.h"
 
 
 /**
