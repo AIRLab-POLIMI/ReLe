@@ -22,10 +22,9 @@
  */
 
 #include "Core.h"
-#include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/NormalPolicy.h"
+#include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
-#include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
 #include "basis/GaussianRbf.h"
 #include "basis/PolynomialFunction.h"
@@ -45,13 +44,19 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
+/*
+ * 1. policy type
+ * 2. start point file
+ * 3. nbEpisodes
+ * 4. weights
+ * 5. policy params
+ */
 int main(int argc, char *argv[])
 {
 
-    int nbEpisodes = atof(argv[1]);
-    vec eReward(2);
-    eReward(0) = atof(argv[2]);
-    eReward(1) = atof(argv[3]);
+    int nbEpisodes = atof(argv[3]);
+    vec eReward;
+    eReward.load(argv[4], arma::raw_ascii);
 
 
     FileManager fm("mle_Policy", "test");
@@ -59,8 +64,8 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-
-
+    int dim = 1;
+    assert(eReward.n_elem == 2);
     arma::mat A(1,1), B(1,1), Q(1,1), R(1,1);
     A(0,0) = 1;
     B(0,0) = 1;
@@ -70,25 +75,64 @@ int main(int argc, char *argv[])
     std::vector<arma::mat> Rv(1, R);
     LQR mdp(A,B,Qv,Rv);
 
-    IdentityBasis* pf = new IdentityBasis(0);
-    DenseFeatures phi(pf);
-    NormalPolicy tmpPolicy(1, phi);
 
-    LQRsolver solver(mdp,phi,LQRsolver::Type::CLASSIC);
-    solver.setRewardWeights(eReward);
-    mat K = solver.computeOptSolution();
-    arma::vec p = K.diag();
-    std::cout << "optimal pol: " << p.t();
-    tmpPolicy.setParameters(p);
+    BasisFunctions basisOrig;
+    for (int i = 0; i < dim; ++i)
+    {
+        basisOrig.push_back(new IdentityBasis(i));
+    }
+    SparseFeatures phiOrig;
+    phiOrig.setDiagonal(basisOrig);
+
+    BasisFunctions basispol = PolynomialFunction::generate(2,dim);
+    SparseFeatures phipol(basispol,dim);
+
+    BasisFunctions basisrbf = GaussianRbf::generate({5}, {-4,4});
+    SparseFeatures phirbf(basisrbf,dim);
+
+    arma::mat cov(dim,dim, arma::fill::eye);
+    cov *= 2;
+
+    DifferentiablePolicy<DenseAction, DenseState>* tmpPolicy;
+
+    if (strcmp(argv[1], "mvndiag")==0)
+    {
+        tmpPolicy = new MVNDiagonalPolicy(phiOrig);
+    }
+    else if (strcmp(argv[1], "mvnrbf")==0)
+    {
+        tmpPolicy = new MVNPolicy(phirbf, cov);
+    }
+    else if (strcmp(argv[1], "mvnpoly")==0)
+    {
+        tmpPolicy = new MVNPolicy(phipol, cov);
+    }
+
+    arma::vec ll;
+    ll.load(argv[5], arma::raw_ascii);
+    tmpPolicy->setParameters(ll);
+
+
+//    IdentityBasis* pf = new IdentityBasis(0);
+//    DenseFeatures phi(pf);
+//    NormalPolicy tmpPolicy(1, phi);
+
+
+//    LQRsolver solver(mdp,phi,LQRsolver::Type::CLASSIC);
+//    solver.setRewardWeights(eReward);
+//    mat K = solver.computeOptSolution();
+//    arma::vec p = K.diag();
+//    std::cout << "optimal pol: " << p.t();
+//    tmpPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
     for (int i = 0; i < eReward.n_elem; ++i)
     {
         std::cout << eReward(i) << " ";
     }
-    std::cout << "| Params: " << tmpPolicy.getParameters().t() << std::endl;
+    std::cout << "| Params: " << tmpPolicy->getParameters().t() << std::endl;
 
-    PolicyEvalAgent<DenseAction, DenseState> expert(tmpPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(*tmpPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -106,12 +150,30 @@ int main(int argc, char *argv[])
     data.writeToStream(datafile);
     datafile.close();
 
-    MVNDiagonalPolicy policy(phi);
-    MLE mle(policy, data);
-    double vv[] = {0,6};
-    arma::vec startVal(vv,2);
+    DifferentiablePolicy<DenseAction, DenseState>* policy;
+
+    if (strcmp(argv[1], "mvndiag")==0)
+    {
+        policy = new MVNDiagonalPolicy(phiOrig);
+    }
+    else if (strcmp(argv[1], "mvnrbf")==0)
+    {
+        policy = new MVNPolicy(phirbf, cov);
+    }
+    else if (strcmp(argv[1], "mvnpoly")==0)
+    {
+        policy = new MVNPolicy(phipol, cov);
+    }
+
+
+
+    MLE mle(*policy, data);
+    arma::vec startVal;
+    startVal.load(argv[2], arma::raw_ascii);
     unsigned int nbIter = 100;
     arma::vec pp = mle.solve(startVal, nbIter);
+
+    pp.save(fm.addPath("mleparams.log"), arma::raw_ascii);
 
     unsigned int nval = mle.getFunEvals();
     cout << "Fun Evals: " << nval << endl;
@@ -121,7 +183,7 @@ int main(int argc, char *argv[])
     }
 
     std::cerr << pp.t();
-    policy.setParameters(pp);
+    policy->setParameters(pp);
 
     int count = 0;
     arma::mat F;
@@ -131,14 +193,14 @@ int main(int argc, char *argv[])
         for (int t = 0; t < nbSteps; ++t)
         {
             Transition<DenseAction, DenseState>& tr = data[ep][t];
-            arma::vec aa = policy(tr.x);
+            arma::vec aa = (*policy)(tr.x);
             F = arma::join_horiz(F,aa);
             ++count;
         }
     }
-
     F.save(fm.addPath("datafit.log"), arma::raw_ascii);
 
+    delete policy;
 
     return 0;
 

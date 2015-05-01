@@ -52,8 +52,8 @@ double QuadraticBasis::operator()(const arma::vec& input)
 
     for(int i = 0; i < Qv.size(); i++)
     {
-    	const arma::vec& x = input(spanV[i]);
-    	J += x.t()*Qv[i]*x;
+        const arma::vec& x = input(spanV[i]);
+        J += x.t()*Qv[i]*x;
     }
 
     return J[0];
