@@ -24,7 +24,7 @@
 #ifndef ENACALGORITHM_H_
 #define ENACALGORITHM_H_
 
-#include "PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 namespace ReLe
 {

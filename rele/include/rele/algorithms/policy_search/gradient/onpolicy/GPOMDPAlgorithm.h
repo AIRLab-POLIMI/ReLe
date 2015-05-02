@@ -24,7 +24,7 @@
 #ifndef GPOMDPALGORITHM_H_
 #define GPOMDPALGORITHM_H_
 
-#include "PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 namespace ReLe
 {
@@ -119,6 +119,7 @@ protected:
 
     virtual void updateStep(const Reward& reward)
     {
+        RewardTransformation& rTr = *rewardTr;
 
         int dp = policy.getParametersSize();
 
@@ -126,7 +127,7 @@ protected:
         sumdlogpi += grad;
 
         // store the basic elements used to compute the gradient
-        reward_EpStep(epiCount, stepCount) = df * rewardTr->operator ()(reward);
+        reward_EpStep(epiCount, stepCount) = df * rTr(reward);
 
         for (int p = 0; p < dp; ++p)
         {
@@ -140,7 +141,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                baseline_num(p,stepCount) += df * rewardTr->operator ()(reward) * sumdlogpi(p) * sumdlogpi(p);
+                baseline_num(p,stepCount) += df * rTr(reward) * sumdlogpi(p) * sumdlogpi(p);
             }
 
             for (int p = 0; p < dp; ++p)
@@ -152,7 +153,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                baseline_num1_single(p) += df * rewardTr->operator ()(reward) * sumdlogpi(p);
+                baseline_num1_single(p) += df * rTr(reward) * sumdlogpi(p);
                 baseline_num2_single(p) += sumdlogpi(p);
             }
         }

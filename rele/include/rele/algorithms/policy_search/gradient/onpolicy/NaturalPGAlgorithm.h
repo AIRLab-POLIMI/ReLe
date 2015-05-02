@@ -24,7 +24,7 @@
 #ifndef NATURALPOLICYGRADIENTALGORITHM_H_
 #define NATURALPOLICYGRADIENTALGORITHM_H_
 
-#include "PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 namespace ReLe
 {

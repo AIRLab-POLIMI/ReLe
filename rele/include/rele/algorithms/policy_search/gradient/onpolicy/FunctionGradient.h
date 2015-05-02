@@ -25,7 +25,7 @@
 #define FUNCTIONGRADIENT_H_
 
 #include "Transition.h"
-#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 #include "RewardTransformation.h"
 
 namespace ReLe

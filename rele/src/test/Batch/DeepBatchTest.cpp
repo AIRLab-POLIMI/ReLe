@@ -25,7 +25,7 @@
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 #include "parametric/differentiable/GibbsPolicy.h"
-#include "policy_search/offpolicy/OffPolicyREINFORCE.h"
+#include "policy_search/gradient/offpolicy/OffPolicyREINFORCE.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"

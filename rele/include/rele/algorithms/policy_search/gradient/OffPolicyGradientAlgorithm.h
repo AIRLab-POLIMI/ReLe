@@ -31,7 +31,7 @@
 #include "BasicFunctions.h"
 #include <cassert>
 #include <iomanip>
-#include "policy_search/offpolicy/OffGradientOutputData.h"
+#include "policy_search/gradient/offpolicy/OffGradientOutputData.h"
 #include "policy_search/step_rules/StepRules.h"
 
 namespace ReLe

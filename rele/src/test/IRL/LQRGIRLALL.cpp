@@ -38,8 +38,8 @@
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
-#include "policy_search/onpolicy/FunctionGradient.h"
-#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/onpolicy/FunctionGradient.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>
 

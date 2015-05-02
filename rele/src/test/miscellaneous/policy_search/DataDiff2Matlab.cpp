@@ -38,9 +38,9 @@
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
-#include "policy_search/onpolicy/FunctionGradient.h"
-#include "policy_search/onpolicy/FunctionHessian.h"
-#include "policy_search/onpolicy/PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/onpolicy/FunctionGradient.h"
+#include "policy_search/gradient/onpolicy/FunctionHessian.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 using namespace std;
 using namespace ReLe;

@@ -24,7 +24,7 @@
 #ifndef REINFORCEALGORITHM_H_
 #define REINFORCEALGORITHM_H_
 
-#include "PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 namespace ReLe
 {

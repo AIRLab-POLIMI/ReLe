@@ -2,7 +2,7 @@
 #define OFFGRADIENTOUTPUTDATA_H_
 
 #include "Basics.h"
-#include "policy_search/onpolicy/GradientOutputData.h"
+#include "policy_search/gradient/onpolicy/GradientOutputData.h"
 
 namespace ReLe
 {

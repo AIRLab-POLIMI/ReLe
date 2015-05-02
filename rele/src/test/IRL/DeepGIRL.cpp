@@ -38,9 +38,9 @@
 #include "RandomGenerator.h"
 #include "FileManager.h"
 
-#include "policy_search/onpolicy/FunctionGradient.h"
-#include "policy_search/onpolicy/GPOMDPAlgorithm.h"
-#include "policy_search/onpolicy/REINFORCEAlgorithm.h"
+#include "policy_search/gradient/onpolicy/FunctionGradient.h"
+#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
 
 using namespace std;
 using namespace ReLe;

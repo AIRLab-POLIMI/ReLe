@@ -28,7 +28,7 @@
 #include "Policy.h"
 #include "Basics.h"
 #include "BasicFunctions.h"
-#include "policy_search/onpolicy/GradientOutputData.h"
+#include "policy_search/gradient/onpolicy/GradientOutputData.h"
 #include "policy_search/step_rules/StepRules.h"
 #include "RewardTransformation.h"
 #include <cassert>
@@ -118,7 +118,8 @@ public:
         updateStep(reward);
 
         //calculate current J value
-        Jep += df * rewardTr->operator ()(reward);
+        RewardTransformation& rTr = *rewardTr;
+        Jep += df * rTr(reward);
         //update discount factor
         df *= this->task.gamma;
 
@@ -134,7 +135,8 @@ public:
         updateStep(reward);
 
         //add last contribute
-        Jep += df * rewardTr->operator ()(reward);
+        RewardTransformation& rTr = *rewardTr;
+        Jep += df * rTr(reward);
 
         //perform remaining operation
         this->endEpisode();

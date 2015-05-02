@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/offpolicy/OffGradientOutputData.h"
+#include "policy_search/gradient/offpolicy/OffGradientOutputData.h"
 #include "CSV.h"
 
 using namespace std;
