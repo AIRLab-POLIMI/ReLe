@@ -8,6 +8,7 @@ if(catkin_FOUND)
 	catkin_package(INCLUDE_DIRS include
 	                            include/rele/core
 	                            include/rele/policy
+	                            include/rele/options
                                 include/rele/utils
                                 include/rele/generators
                                 include/rele/algorithms
@@ -30,6 +31,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 include_directories(include/rele/core
                     include/rele/policy
+                    include/rele/options
                     include/rele/utils
                     include/rele/generators
                     include/rele/algorithms
@@ -203,6 +205,9 @@ target_link_libraries(dynamic_programming_test rele)
 add_executable(rocky_REPS src/test/Rocky/RockyTest.cpp
                           src/test/Rocky/RockyPolicy.cpp)
 target_link_libraries(rocky_REPS rele)
+
+add_executable(rocky_hierarchical src/test/Rocky/HierarchicalRockyTest.cpp)
+target_link_libraries(rocky_hierarchical rele)
 
 #REPS test
 add_executable(lqr_REPS src/test/REPS/LqrREPSTest.cpp)
