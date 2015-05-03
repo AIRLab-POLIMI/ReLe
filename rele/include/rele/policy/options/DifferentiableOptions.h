@@ -47,7 +47,14 @@ public:
 
     virtual Option<ActionC, StateC>& operator ()(const StateC& state)
     {
-        unsigned int index = policy(state);
+    	unsigned int index;
+
+    	do
+    	{
+    		index = policy(state);
+    	}
+        while(!options[index]->canStart(state));
+
         return *options[index];
     }
 

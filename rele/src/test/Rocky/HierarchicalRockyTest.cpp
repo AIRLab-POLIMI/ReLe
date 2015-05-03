@@ -74,11 +74,11 @@ int main(int argc, char *argv[])
     options.push_back(&feed);
     options.push_back(&escape);
 
-    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 1);
+    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 5);
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
 
     //-- agent
-    int nbepperpol = 100, nbstep = 50;
+    int nbepperpol = 25, nbstep = 10000;
     AdaptiveStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<DenseAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule);
 

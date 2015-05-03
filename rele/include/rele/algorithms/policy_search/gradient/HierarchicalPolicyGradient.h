@@ -202,7 +202,6 @@ protected:
 
 #define USE_HPGA_MEMBERS                                           \
     typedef HierarchicalPolicyGradient<ActionC, StateC> Base;      \
-    /*using Base::policy;*/                                            \
     using Base::nbEpisodesToEvalPolicy;                            \
     using Base::runCount;                                          \
     using Base::epiCount;                                          \
