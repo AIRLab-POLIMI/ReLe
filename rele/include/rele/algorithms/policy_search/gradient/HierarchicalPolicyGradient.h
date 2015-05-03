@@ -27,7 +27,7 @@
 #include "HierarchicalAlgorithm.h"
 #include "policy_search/gradient/onpolicy/GradientOutputData.h"
 #include "policy_search/step_rules/StepRules.h"
-#include "parametric/differentiable/DifferentiableOptions.h"
+#include "options/DifferentiableOptions.h"
 #include "RewardTransformation.h"
 
 namespace ReLe

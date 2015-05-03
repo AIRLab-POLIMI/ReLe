@@ -41,18 +41,8 @@ public:
 
     virtual void sampleAction(const StateC& state, ActionC& action)
     {
-        auto& currentOption = *stack.back();
-
-        if(currentOption.getOptionType() == Normal)
-        {
-            stack.push_back(&currentOption(state));
-            sampleAction(state, action);
-        }
-        else
-        {
-            currentOption(state, action);
-        }
-
+    	checkMultipleOptionTermination(state);
+        sampleOptionAction(state, action);
     }
 
     virtual void initEpisode(const StateC& state, ActionC& action) = 0;
@@ -66,6 +56,45 @@ public:
     virtual ~HierarchicalAlgorithm()
     {
 
+    }
+
+protected:
+    void sampleOptionAction(const StateC& state, ActionC& action)
+    {
+
+        auto& currentOption = *stack.back();
+
+        if(currentOption.getOptionType() == Normal)
+        {
+            stack.push_back(&currentOption(state));
+            sampleOptionAction(state, action);
+        }
+        else
+        {
+            currentOption(state, action);
+        }
+    }
+
+    bool checkOptionTermination(const StateC& state)
+    {
+        auto& currentOption = *stack.back();
+
+        if(currentOption.hasEnded(state))
+        {
+        	if(stack.size() > 1)
+        		stack.pop_back();
+            return true;
+        }
+
+        return false;
+    }
+
+    void checkMultipleOptionTermination(const StateC& state)
+    {
+        if(checkOptionTermination(state) && stack.size() > 1)
+        {
+            checkMultipleOptionTermination(state);
+        }
     }
 
 protected:

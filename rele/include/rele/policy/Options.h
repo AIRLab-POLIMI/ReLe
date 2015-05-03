@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_CORE_OPTIONS_H_
 
 #include "Basics.h"
+#include "RandomGenerator.h"
 
 namespace ReLe
 {
@@ -52,6 +53,12 @@ public:
 
     virtual bool canStart(const StateC& state) = 0;
     virtual double terminationProbability(const StateC& state) = 0;
+
+    virtual bool hasEnded(const StateC& state)
+    {
+        double pT = terminationProbability(state);
+        return state.isAbsorbing() || RandomGenerator::sampleEvent(pT);
+    }
 
     virtual inline OptionType getOptionType()
     {
