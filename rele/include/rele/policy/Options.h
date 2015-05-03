@@ -43,6 +43,8 @@ class Option
 
 public:
     virtual Option<ActionC, StateC>& operator ()(const StateC& state) = 0;
+    virtual bool canStart(const StateC& state) = 0;
+    virtual double terminationProbability(const StateC& state) = 0;
 
     virtual void operator ()(const StateC& state, ActionC& action)
     {
@@ -50,9 +52,6 @@ public:
         Option<ActionC, StateC>& child = self(state);
         child(state, action);
     }
-
-    virtual bool canStart(const StateC& state) = 0;
-    virtual double terminationProbability(const StateC& state) = 0;
 
     virtual bool hasEnded(const StateC& state)
     {
@@ -82,8 +81,6 @@ public:
         throw std::logic_error("Basic options cannot generate sub options");
     }
 
-    virtual inline void generateReward(const StateC& state, const ActionC& action, Reward& reward) { }
-
     virtual inline OptionType getOptionType()
     {
         return Basic;
@@ -102,8 +99,6 @@ public:
     {
         throw std::logic_error("Fixed options cannot generate sub options");
     }
-
-    virtual inline void generateReward(const StateC& state, const ActionC& action, Reward& reward) { }
 
     virtual inline OptionType getOptionType()
     {

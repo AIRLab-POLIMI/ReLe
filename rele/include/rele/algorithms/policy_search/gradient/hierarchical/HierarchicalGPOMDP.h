@@ -93,7 +93,7 @@ protected:
     virtual void init()
     {
         unsigned int dp = this->getPolicy().getParametersSize();
-        HierarchicalGPOMDPAlgorithm<ActionC, StateC>::init();
+        HierarchicalPolicyGradient<ActionC, StateC>::init();
         history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
         sumdlogpi.set_size(dp);
 

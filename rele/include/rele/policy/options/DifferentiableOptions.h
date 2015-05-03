@@ -34,7 +34,8 @@ class DifferentiableOption : public Option<ActionC, StateC>
 {
 public:
     DifferentiableOption(DifferentiablePolicy<FiniteAction, StateC>& policy,
-                         std::vector<Option<ActionC, StateC>*> options) : policy(policy)
+                         std::vector<Option<ActionC, StateC>*> options)
+        : policy(policy), options(options)
     {
 
     }

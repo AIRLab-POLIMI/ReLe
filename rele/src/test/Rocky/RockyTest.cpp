@@ -98,11 +98,8 @@ int main(int argc, char *argv[])
 
     delete core.getSettings().loggerStrategy;
 
-
-
-
-
     cout << "Parameters" << endl;
+    cout << setprecision(OS_PRECISION);
     cout << dist.getParameters() << endl;
 
     return 0;

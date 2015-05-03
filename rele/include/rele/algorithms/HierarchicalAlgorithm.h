@@ -41,7 +41,7 @@ public:
 
     virtual void sampleAction(const StateC& state, ActionC& action)
     {
-    	checkMultipleOptionTermination(state);
+        checkMultipleOptionTermination(state);
         sampleOptionAction(state, action);
     }
 
@@ -81,8 +81,8 @@ protected:
 
         if(currentOption.hasEnded(state))
         {
-        	if(stack.size() > 1)
-        		stack.pop_back();
+            if(stack.size() > 1)
+                stack.pop_back();
             return true;
         }
 

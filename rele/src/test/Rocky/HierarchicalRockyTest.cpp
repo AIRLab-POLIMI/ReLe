@@ -28,11 +28,13 @@
 #include "policy_search/gradient/hierarchical/HierarchicalGPOMDP.h"
 
 #include "parametric/differentiable/GibbsPolicy.h"
-#include "features/SparseFeatures.h"
+#include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"
+
+#include "RockyOptions.h"
 
 #include <iostream>
 
@@ -43,7 +45,7 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("Rocky", "REPS");
+    FileManager fm("Rocky", "HPG");
     fm.createDir();
     fm.cleanDir();
 
@@ -52,7 +54,7 @@ int main(int argc, char *argv[])
 
     //-- Features
     BasisFunctions basis = IdentityBasis::generate(rocky.getSettings().continuosStateDim);
-    SparseFeatures phi(basis, rocky.getSettings().continuosActionDim);
+    DenseFeatures phi(basis);
 
 
     //-- options
@@ -60,7 +62,17 @@ int main(int argc, char *argv[])
     for(int i = 0; i < 4; ++i)
         actions.push_back(FiniteAction(i));
 
+
+    Eat eat;
+    Home home;
+    Feed feed;
+    Escape escape;
+
     vector<Option<DenseAction, DenseState>*> options;
+    options.push_back(&eat);
+    options.push_back(&home);
+    options.push_back(&feed);
+    options.push_back(&escape);
 
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 1);
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
