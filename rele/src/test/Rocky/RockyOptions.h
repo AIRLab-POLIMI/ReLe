@@ -37,6 +37,9 @@ public:
 
 protected:
 	arma::vec wayPointPolicy(const arma::vec& state, double ox, double oy);
+	double angularDistance(const arma::vec& state, double ox, double oy);
+	bool objectiveFree(const arma::vec& state, double ox, double oy);
+	double rockyRelRotation(const arma::vec& state);
 
 protected:
     enum StateComponents
