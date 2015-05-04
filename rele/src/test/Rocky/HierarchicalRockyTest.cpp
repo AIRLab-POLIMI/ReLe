@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
 
     //-- agent
-    int nbepperpol = 25, nbstep = 10000;
+    int nbepperpol = 25, nbstep = 20000;
     AdaptiveStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<DenseAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule);
 

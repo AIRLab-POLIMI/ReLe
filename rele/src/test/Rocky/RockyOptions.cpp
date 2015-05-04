@@ -78,8 +78,8 @@ bool Eat::canStart(const DenseState& state)
 double Eat::terminationProbability(const DenseState& state)
 {
 
-	if(state[food] == 0)
-		return 1;
+    if(state[food] == 0)
+        return 1;
     if(state[energy] >= 100)
         return 1;
     else if(norm(state(span(xr, yr))) < 0.2)
@@ -90,7 +90,7 @@ double Eat::terminationProbability(const DenseState& state)
 
 void Eat::operator ()(const DenseState& state, DenseAction& action)
 {
-	assert(state[food] == 1);
+    assert(state[food] == 1);
     vec pi(3);
 
     pi[0] = 0;

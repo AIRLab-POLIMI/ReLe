@@ -53,6 +53,25 @@ public:
         child(state, action);
     }
 
+    virtual void accumulateReward(const Reward& newReward, double dF)
+    {
+        if(reward.size() != newReward.size())
+        {
+            reward.resize(newReward.size(), 0);
+        }
+
+        for(int i = 0; i < reward.size(); i++)
+        {
+            reward[i] += dF*newReward[i];
+        }
+    }
+
+    virtual void getReward(Reward& r)
+    {
+        r = reward;
+        reward.clear();
+    }
+
     virtual bool hasEnded(const StateC& state)
     {
         double pT = terminationProbability(state);

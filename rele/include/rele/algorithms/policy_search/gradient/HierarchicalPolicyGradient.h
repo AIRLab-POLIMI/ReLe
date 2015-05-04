@@ -38,7 +38,12 @@ template<class ActionC, class StateC>
 class HierarchicalPolicyGradient: public HierarchicalAlgorithm<ActionC, StateC>
 {
 
-    using HierarchicalAlgorithm<ActionC, StateC>::stack;
+	using Base = HierarchicalAlgorithm<ActionC, StateC>;
+    using Base::stack;
+    using Base::getCurrentOption;
+    using Base::sampleOptionAction;
+    using Base::checkOptionTermination;
+    using Base::forceCurrentOptionTermination;
 
 public:
     HierarchicalPolicyGradient(Option<ActionC, StateC>& rootOption,
@@ -105,7 +110,17 @@ public:
                       ActionC& action)
     {
 
-        updateStep(reward);
+        auto& currentOption = getCurrentOption();
+        currentOption.accumulateReward(reward, df);
+
+        //FIXME real hierarchical update
+        if(checkOptionTermination(nextState))
+        {
+            Reward r;
+            currentOption.getReward(r);
+            updateStep(r); //FIXME real hierarchical update
+        }
+
 
         //calculate current J value
         RewardTransformation& rTr = *rewardTr;
@@ -113,7 +128,7 @@ public:
         //update discount factor
         df *= this->task.gamma;
 
-        HierarchicalAlgorithm<ActionC, StateC>::sampleAction(nextState, action);
+        sampleOptionAction(nextState, action);
 
         // save state and action for late use
         currentState = nextState;
@@ -122,7 +137,13 @@ public:
 
     virtual void endEpisode(const Reward& reward)
     {
-        updateStep(reward);
+    	//FIXME real hierarchical update
+        auto& currentOption = getCurrentOption();
+        currentOption.accumulateReward(reward, df);
+        Reward r;
+        currentOption.getReward(r);
+        updateStep(r);
+        forceCurrentOptionTermination();
 
         //add last contribute
         RewardTransformation& rTr = *rewardTr;

@@ -142,10 +142,6 @@ protected:
             for (int p = 0; p < dp; ++p)
             {
                 baseline_num(p,stepCount) += df * rTr(reward) * sumdlogpi(p) * sumdlogpi(p);
-            }
-
-            for (int p = 0; p < dp; ++p)
-            {
                 baseline_den(p,stepCount) += sumdlogpi(p) * sumdlogpi(p);
             }
         }

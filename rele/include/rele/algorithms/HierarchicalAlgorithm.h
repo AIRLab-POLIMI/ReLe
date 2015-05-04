@@ -97,6 +97,16 @@ protected:
         }
     }
 
+    Option<ActionC, StateC>& getCurrentOption()
+    {
+    	return *stack.back();
+    }
+
+    void forceCurrentOptionTermination()
+    {
+    	stack.pop_back();
+    }
+
 protected:
     OptionStack<ActionC, StateC> stack;
 };
