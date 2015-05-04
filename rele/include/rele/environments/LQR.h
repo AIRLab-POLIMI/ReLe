@@ -33,6 +33,8 @@ class LQR: public ContinuousMDP
 {
     friend class LQRsolver;
 public:
+    enum S0Type {FIXED, RANDOM};
+
     LQR(unsigned int dimension, unsigned int reward_dimension,
         double eps = 0.1, double gamma = 0.9, unsigned int horizon = 50);
     LQR(arma::mat& A, arma::mat& B, std::vector<arma::mat>& Q, std::vector<arma::mat>& R,
@@ -56,6 +58,8 @@ public:
     std::vector<arma::mat> Q, R;
 
     arma::vec initialState;
+
+    S0Type startType;
 
 };
 

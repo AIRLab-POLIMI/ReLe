@@ -139,7 +139,7 @@ public:
             {
                 grad[i] = gradient(i) / counter;
             }
-            std::cout << gradient << std::endl;
+//            std::cout << gradient << std::endl;
         }
 
         return logLikelihood;

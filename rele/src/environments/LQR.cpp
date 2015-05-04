@@ -33,7 +33,8 @@ namespace ReLe
 
 LQR::LQR(unsigned int dimension, unsigned int reward_dimension, double eps, double gamma, unsigned int horizon) :
     ContinuousMDP(dimension, dimension, reward_dimension, true, true, gamma, horizon),
-    A(dimension,dimension), B(dimension,dimension), initialState(dimension)
+    A(dimension,dimension), B(dimension,dimension), initialState(dimension),
+    startType (S0Type::FIXED)
 {
     initialize(dimension, reward_dimension, eps);
 
@@ -42,7 +43,8 @@ LQR::LQR(unsigned int dimension, unsigned int reward_dimension, double eps, doub
 
 LQR::LQR(arma::mat &A, arma::mat &B, std::vector<arma::mat> &Q, std::vector<arma::mat> &R, double gamma, unsigned int horizon) :
     ContinuousMDP(A.n_cols, B.n_cols, Q.size(), true, true, gamma, horizon),
-    A(A), B(B), Q(Q), R(R)
+    A(A), B(B), Q(Q), R(R),
+    startType (S0Type::FIXED)
 {
     initialState.set_size(A.n_cols);
     assert(Q.size() == R.size());
@@ -67,9 +69,16 @@ void LQR::step(const DenseAction& action,
 void LQR::getInitialState(DenseState& state)
 {
     arma::vec& x = currentState;
-    for (unsigned int i = 0; i < initialState.n_elem; ++i)
+    if (startType == S0Type::RANDOM)
     {
-        x(i) = RandomGenerator::sampleUniform(-3,3);//initialState;
+        for (unsigned int i = 0; i < initialState.n_elem; ++i)
+        {
+            x(i) = RandomGenerator::sampleUniform(-3,3);
+        }
+    }
+    else
+    {
+        x = initialState;
     }
     currentState.setAbsorbing(false);
 
@@ -80,8 +89,7 @@ void LQR::setInitialState()
 {
     for (unsigned int i = 0; i < initialState.n_elem; ++i)
     {
-//        initialState[i] = RandomGenerator::sampleUniform(-3,3);//-10.0;
-        initialState[i] = -10.0;
+        initialState[i] = 10.0;
     }
 }
 
