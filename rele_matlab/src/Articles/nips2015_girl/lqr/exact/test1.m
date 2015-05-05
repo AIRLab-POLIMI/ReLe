@@ -31,7 +31,7 @@ for dim = [2, 5]
     
     W = [];
     for i = 1:nbWEIGHTS
-        W = [W; randSimplex(dim)']
+        W = [W; randSimplex(dim)'];
     end
     
     clear i
