@@ -30,3 +30,15 @@ test5.m
 % 100 weights
 % rbf policy
 % 10, 50, 100, 500, 1000, 2000, 3000 ep
+
+test6.m
+% PGIRL with 5d lqr
+% 100 weights
+% optimal policy
+% 500, 1000, 2000, 5000, 7500, 10000 ep
+
+test7.m
+% PGIRL with 1d lqr
+% 100 weights
+% polynomial 2d policy
+% 500, 1000, 2000, 5000, 7500, 10000 ep

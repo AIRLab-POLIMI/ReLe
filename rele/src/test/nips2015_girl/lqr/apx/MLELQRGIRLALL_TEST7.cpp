@@ -208,35 +208,12 @@ int main(int argc, char *argv[])
 
     /******/
 
-    FileManager fm("lqr", "MLEGIRLALL");
+    FileManager fm("lqr", "GIRLNIPS_TEST7");
     fm.createDir();
     //    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     /* Learn lqr correct policy */
-#if 0
-
-    arma::mat A(1,1), B(1,1), Q(1,1), R(1,1);
-    A(0,0) = 1;
-    B(0,0) = 1;
-    Q(0,0) = 0.2;
-    R(0,0) = 0.8;
-    std::vector<arma::mat> Qv(1, Q);
-    std::vector<arma::mat> Rv(1, R);
-    LQR mdp(A,B,Qv,Rv);
-    //    vec initialState(1);
-    //    initialState[0] = -5;
-    //    mdp.setInitialState(initialState);
-
-    IdentityBasis* pf = new IdentityBasis(0);
-    DenseFeatures phi(pf);
-    NormalPolicy expertPolicy(1, phi);
-
-    vec eReward(2);
-    eReward(0) = Q(0,0);
-    eReward(1) = R(0,0);
-#else
-
     int dim = eReward.n_elem;
     LQR mdp(dim, dim);
     mdp.startType = LQR::S0Type::RANDOM;
@@ -251,13 +228,6 @@ int main(int argc, char *argv[])
     phi.setDiagonal(basis);
 
     MVNPolicy tmpPolicy(phi);
-
-    //    vec eReward(dim);
-    //    eReward(0) = 0.05;
-    //    eReward(1) = 0.7;
-    //    eReward(2) = 0.25;
-#endif
-
 
 
     /*** solve the problem in exact way ***/
@@ -299,8 +269,6 @@ int main(int argc, char *argv[])
     cov *= 2;
 
     MVNPolicy policy(phin,cov);
-
-//    MVNPolicy policy(phi, cov);
 
     ofstream timerFileMLE(fm.addPath("girl_mle_time.log"), std::ofstream::out);
 
