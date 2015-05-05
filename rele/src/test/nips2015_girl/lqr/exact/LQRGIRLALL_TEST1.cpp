@@ -219,6 +219,7 @@ int main(int argc, char *argv[])
 
     int dim = eReward.n_elem;
     LQR mdp(dim, dim);
+    mdp.startType = LQR::S0Type::RANDOM;
 
     BasisFunctions basis;
     for (int i = 0; i < dim; ++i)
