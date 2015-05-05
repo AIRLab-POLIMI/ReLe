@@ -283,6 +283,7 @@ int main(int argc, char *argv[])
     timerFileMLE.close();
 
     std::cerr << pp.t();
+    pp.save(fm.addPath("girl_mle_params.log"), arma::raw_ascii);
     policy.setParameters(pp);
 
 
