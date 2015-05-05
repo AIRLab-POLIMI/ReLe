@@ -265,6 +265,15 @@ target_link_libraries(lqr_GIRLNIPS_TEST1 rele)
 add_executable(lqr_GIRLNIPS_TEST2 src/test/nips2015_girl/lqr/exact/LQRGIRLALL_TEST2.cpp)
 target_link_libraries(lqr_GIRLNIPS_TEST2 rele)
 
+add_executable(lqr_GIRLNIPS_TEST3 src/test/nips2015_girl/lqr/apx/MLELQRGIRLALL1D_TEST3.cpp)
+target_link_libraries(lqr_GIRLNIPS_TEST3 rele)
+
+add_executable(lqr_GIRLNIPS_TEST4 src/test/nips2015_girl/lqr/apx/MLELQRGIRLALL1D_TEST4.cpp)
+target_link_libraries(lqr_GIRLNIPS_TEST4 rele)
+
+add_executable(lqr_GIRLNIPS_TEST5 src/test/nips2015_girl/lqr/apx/MLELQRGIRLALL1D_TEST5.cpp)
+target_link_libraries(lqr_GIRLNIPS_TEST5 rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)
