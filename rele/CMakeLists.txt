@@ -258,6 +258,13 @@ target_link_libraries(nls_off rele)
 add_executable(nls_OptParams src/test/Others/NlsOptimalParamsTest.cpp)
 target_link_libraries(nls_OptParams rele)
 
+#NIPS 2015 GIRL
+add_executable(lqr_GIRLNIPS_TEST1 src/test/nips2015_girl/lqr/exact/LQRGIRLALL_TEST1.cpp)
+target_link_libraries(lqr_GIRLNIPS_TEST1 rele)
+
+add_executable(lqr_GIRLNIPS_TEST2 src/test/nips2015_girl/lqr/exact/LQRGIRLALL_TEST2.cpp)
+target_link_libraries(lqr_GIRLNIPS_TEST2 rele)
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)
