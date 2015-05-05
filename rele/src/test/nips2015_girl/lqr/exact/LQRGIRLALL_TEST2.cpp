@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
     FileManager fm("lqr", "GIRLNIPS_TEST2");
     fm.createDir();
-    //    fm.cleanDir();
+    fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     /* Learn lqr correct policy */
@@ -311,10 +311,10 @@ int main(int argc, char *argv[])
         }
 
         /* Learn weight with GIRL */
-        LQR_ND_WS rewardRegressor(mdp);
+//        LQR_ND_WS rewardRegressor(mdp);
         assert(mdp.getSettings().gamma == 0.9);
-        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                            mdp.getSettings().gamma, atype);
+//        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+//                                            mdp.getSettings().gamma, atype);
 
 
         char namet[100];
@@ -323,31 +323,32 @@ int main(int argc, char *argv[])
 
 
         //Run GIRL
-        cpu_timer timer;
-        timer.start();
-        irlAlg.run();
-        timer.stop();
-        arma::vec gnormw = irlAlg.getWeights();
+//        cpu_timer timer;
+//        timer.start();
+//        irlAlg.run();
+//        timer.stop();
+//        arma::vec gnormw = irlAlg.getWeights();
 
-        timefile << timer.format(10, "%w") << std::endl;
+//        timefile << timer.format(10, "%w") << std::endl;
 
-        cout << "Weights (gnorm): " << gnormw.t();
+//        cout << "Weights (gnorm): " << gnormw.t();
 
         char name[100];
-        sprintf(name, "girl_gnorm_%s.log", gtypestr);
-        ofstream outf(fm.addPath(name), std::ofstream::out);
-        outf << std::setprecision(OS_PRECISION);
-        for (int i = 0; i < gnormw.n_elem; ++i)
-        {
-            outf << gnormw[i] << " ";
-        }
-        outf.close();
+        ofstream outf;
+//        sprintf(name, "girl_gnorm_%s.log", gtypestr);
+//        ofstream outf(fm.addPath(name), std::ofstream::out);
+//        outf << std::setprecision(OS_PRECISION);
+//        for (int i = 0; i < gnormw.n_elem; ++i)
+//        {
+//            outf << gnormw[i] << " ";
+//        }
+//        outf.close();
 
-        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
-        outf.open(fm.addPath(name), std::ofstream::out);
-        outf << std::setprecision(OS_PRECISION);
-        outf << irlAlg.getFunEvals();
-        outf.close();
+//        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
+//        outf.open(fm.addPath(name), std::ofstream::out);
+//        outf << std::setprecision(OS_PRECISION);
+//        outf << irlAlg.getFunEvals();
+//        outf.close();
 
 
         std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
@@ -370,7 +371,7 @@ int main(int argc, char *argv[])
         cout << "Weights (plane): " << pgirl.getWeights().t();
 
         sprintf(name, "girl_plane_%s.log", gtypestr);
-        outf.open(fm.addPath(name), std::ofstream::out | std::ofstream::app);
+        outf.open(fm.addPath(name), std::ofstream::out);
         outf << std::setprecision(OS_PRECISION);
         arma::vec planew = pgirl.getWeights();
         for (int i = 0; i < planew.n_elem; ++i)
