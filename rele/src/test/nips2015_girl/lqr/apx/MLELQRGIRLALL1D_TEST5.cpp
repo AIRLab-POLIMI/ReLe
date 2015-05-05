@@ -213,7 +213,7 @@ int main(int argc, char *argv[])
 
     /******/
 
-    FileManager fm("lqr", "GIRLNIPS_TEST3");
+    FileManager fm("lqr", "GIRLNIPS_TEST5");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
