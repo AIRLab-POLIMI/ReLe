@@ -1,5 +1,6 @@
 TODO:
 
+### 6 May 2015
 SISTEMARE GLI ENVIRONMENT PER ESSERE PIU' FLESSIBILI
 
 MOUNTAIN CAR AGGIUNGERE STATI DI PARTENZA (SUTTON, KLEIN, RANDOM)
@@ -8,7 +9,7 @@ DISCUTERE IMPLEMENTAZIONE ALGORITMI BATCH (vedasi LSPI and batch gradients)
 MLE con LASSO
 CPIRL
 
-
+### older
 0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
 0e) aggiungere condizione di termine agli algoritmi
 
