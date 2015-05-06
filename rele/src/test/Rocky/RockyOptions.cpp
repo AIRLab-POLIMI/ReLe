@@ -197,12 +197,12 @@ double Escape1::terminationProbability(const DenseState& state)
         return 1;
     else
         return norm(state(span(xr, yr)));*/
-	return 0.2;
+    return 0.2;
 }
 
 void Escape1::operator ()(const DenseState& state, DenseAction& action)
 {
-	action.resize(3);
+    action.resize(3);
     action[0] = maxV;
     action[1] = M_PI;
     action[2] = 0;
@@ -210,7 +210,7 @@ void Escape1::operator ()(const DenseState& state, DenseAction& action)
 
 bool Escape2::canStart(const DenseState& state)
 {
-	return norm(state(span(xr, yr))) < 1;
+    return norm(state(span(xr, yr))) < 1;
 }
 
 double Escape2::terminationProbability(const DenseState& state)
@@ -225,12 +225,12 @@ double Escape2::terminationProbability(const DenseState& state)
         return 1;
     else
         return norm(state(span(xr, yr)));*/
-	return 0.2;
+    return 0.2;
 }
 
 void Escape2::operator ()(const DenseState& state, DenseAction& action)
 {
-	action.resize(3);
+    action.resize(3);
     action[0] = maxV;
     action[1] = -M_PI;
     action[2] = 0;
@@ -238,7 +238,7 @@ void Escape2::operator ()(const DenseState& state, DenseAction& action)
 
 bool Escape3::canStart(const DenseState& state)
 {
-	return norm(state(span(xr, yr))) < 1;
+    return norm(state(span(xr, yr))) < 1;
 }
 
 double Escape3::terminationProbability(const DenseState& state)
@@ -253,12 +253,12 @@ double Escape3::terminationProbability(const DenseState& state)
         return 1;
     else
         return norm(state(span(xr, yr)));*/
-	return 0.2;
+    return 0.2;
 }
 
 void Escape3::operator ()(const DenseState& state, DenseAction& action)
 {
-	action.resize(3);
+    action.resize(3);
     action[0] = maxV;
     action[1] = state[thetar]/dt;
     action[2] = 0;

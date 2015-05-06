@@ -123,10 +123,6 @@ void Rocky::computeRockyControl(double& vr, double& omegar)
     {
         vr = maxVr;
     }
-
-    //FIXME levami
-    /*vr = 0;
-    omegar = 0;*/
 }
 
 void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
