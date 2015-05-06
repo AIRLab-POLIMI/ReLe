@@ -109,8 +109,8 @@ protected:
 
     void forceCurrentOptionTermination()
     {
-    	if(stack.size() > 1)
-    		stack.pop_back();
+        if(stack.size() > 1)
+            stack.pop_back();
     }
 
 protected:
