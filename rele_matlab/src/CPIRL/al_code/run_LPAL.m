@@ -7,8 +7,8 @@ F = make_F;
 % Setup the other parameters
 GAMMA = 0.9;
 E = [5.25, 4.15, 5];
-%E = [7.5, 5, 5];
-%E = [0, 0, 0];
+% E = [7.5, 5, 5];
+% E = [0, 0, 0];
 [NA, N] = size(THETA);
 A = NA / N;
 

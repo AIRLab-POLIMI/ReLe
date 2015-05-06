@@ -31,7 +31,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [PP, MM, ITER, TT] = MWAL(THETA, F, GAMMA, T, E, INIT_FLAG, query_function)
+function [PP, MM, ITER, TT, WW] = CPIRL(THETA, F, GAMMA, T, E, INIT_FLAG, query_function)
 
 [N, K] = size(F);
 mu_expert = E;
@@ -57,7 +57,7 @@ for i=1:T
 
     %% Add cutting plane to polyhedron
     featdiff = (M - mu_expert);
-    av = featdiff(1:end-1) - repmat(featdiff(end),1,dim-1);
+    av = featdiff(1:end-1) - repmat(featdiff(end),1,K-1);
     bv = -featdiff(end);
         
     A = [A; av];
@@ -90,5 +90,10 @@ for i=1:T
     end
     PP(i, :) = P;
     MM(i, :) = M;
-    disp(['w diff norm = ', num2str(norm(w - (W ./ sum(W))))]);
+    WW(i, :) = W;
+    dnorm = norm(w - (W ./ sum(W)));
+    disp(['w diff norm = ', num2str(dnorm)]);
+    if dnorm <= 1e-6
+        break;
+    end
 end
