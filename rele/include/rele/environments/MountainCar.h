@@ -37,7 +37,6 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
-private:
     enum StateLabel
     {
         velocity = 0, position = 1

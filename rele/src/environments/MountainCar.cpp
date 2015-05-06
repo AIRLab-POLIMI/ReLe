@@ -21,7 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/MountainCar.h"
+#include "MountainCar.h"
+#include "RandomGenerator.h"
 
 using namespace std;
 
@@ -29,7 +30,10 @@ namespace ReLe
 {
 
 MountainCar::MountainCar() :
-    DenseMDP(2, 3, 1, false, true)
+    //Sutton's article
+//    DenseMDP(2, 3, 1, false, true)
+    //Klein's articles
+    DenseMDP(2, 3, 1, false, true, 0.9, 100)
 {
 
 }
@@ -46,19 +50,30 @@ void MountainCar::step(const FiniteAction& action,
     currentState[velocity] = min(max(computedVelocity, -0.07), 0.07);
     currentState[position] = min(max(computedPosition, -1.2), 0.6);
 
-    if (currentState[position] <= -1.2)
-    {
-        currentState[velocity] = 0;
-    }
+    //Sutton's article
+//    if (currentState[position] <= -1.2)
+//    {
+//        currentState[velocity] = 0;
+//    }
+//    if (currentState[position] >= 0.6)
+//    {
+//        reward[0] = 0;
+//        currentState.setAbsorbing();
+//    }
+//    else
+//    {
+//        reward[0] = -1;
+//    }
 
-    if (currentState[position] >= 0.6)
+    //Klein's article
+    if (currentState[position] >= 0.5)
     {
-        reward[0] = 0;
+        reward[0] = 1;
         currentState.setAbsorbing();
     }
     else
     {
-        reward[0] = -1;
+        reward[0] = 0;
     }
 
     nextState = currentState;
@@ -66,8 +81,14 @@ void MountainCar::step(const FiniteAction& action,
 
 void MountainCar::getInitialState(DenseState& state)
 {
-    currentState[0] = -0.5;
-    currentState[1] = 0.0;
+    //Sutton's article
+//    currentState[position] = -0.5;
+//    currentState[velocity] = 0.0;
+
+    //Klein's article
+    currentState[position] = RandomGenerator::sampleUniform(-1.2,-0.9);
+    currentState[velocity] = RandomGenerator::sampleUniform(-0.07,0.0);
+
     currentState.setAbsorbing(false);
 
     state = currentState;

@@ -34,16 +34,17 @@
 namespace ReLe
 {
 
+template<class ActionC, class StateC>
 class MLE
 {
 public:
-    MLE(DifferentiablePolicy<DenseAction,DenseState>& policy, Dataset<DenseAction,DenseState>& ds)
+    MLE(DifferentiablePolicy<ActionC,StateC>& policy, Dataset<ActionC,StateC>& ds)
         : policy(policy), data(ds)
     {
     }
 
-    arma::vec solve(arma::vec starting = arma::vec(),
-                    unsigned int maxFunEvals = 0)
+    virtual arma::vec solve(arma::vec starting = arma::vec(),
+                            unsigned int maxFunEvals = 0)
     {
         int dp = policy.getParametersSize();
         assert(dp > 0);
@@ -62,7 +63,7 @@ public:
 
         nlopt::opt optimizator;
         optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dp);
-        optimizator.set_max_objective(MLE::wrapper, this);
+        optimizator.set_max_objective(MLE<ActionC, StateC>::wrapper, this);
         optimizator.set_xtol_rel(1e-10);
         optimizator.set_ftol_rel(1e-10);
         optimizator.set_ftol_abs(1e-10);
@@ -95,7 +96,7 @@ public:
         }
     }
 
-    double objFunction(unsigned int n, const double* x, double* grad)
+    virtual double objFunction(unsigned int n, const double* x, double* grad)
     {
         ++nbFunEvals;
 
@@ -113,7 +114,7 @@ public:
             int nbSteps = data[ep].size();
             for (int t = 0; t < nbSteps; ++t)
             {
-                Transition<DenseAction, DenseState>& tr = data[ep][t];
+                Transition<ActionC, StateC>& tr = data[ep][t];
 
                 // compute probability
                 double prob = policy(tr.x,tr.u);
@@ -149,18 +150,154 @@ public:
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        return reinterpret_cast<MLE*>(o)->objFunction(n, x, grad);
+        return reinterpret_cast<MLE<ActionC,StateC>*>(o)->objFunction(n, x, grad);
     }
 
-    unsigned int getFunEvals()
+    virtual unsigned int getFunEvals()
     {
         return nbFunEvals;
     }
 
-private:
-    DifferentiablePolicy<DenseAction,DenseState>& policy;
-    Dataset<DenseAction,DenseState>& data;
+protected:
+    DifferentiablePolicy<ActionC,StateC>& policy;
+    Dataset<ActionC,StateC>& data;
     unsigned int nbFunEvals;
+};
+
+/**
+ * Ridge Regularization
+ */
+template<class ActionC, class StateC>
+class RidgeRegularizedMLE : public MLE<ActionC, StateC>
+{
+    using MLE<ActionC, StateC>::policy;
+    using MLE<ActionC, StateC>::data;
+    using MLE<ActionC, StateC>::nbFunEvals;
+
+public:
+    RidgeRegularizedMLE(DifferentiablePolicy<ActionC,StateC>& policy,
+                        Dataset<ActionC,StateC>& ds,
+                        double lambda = 1.0)
+        : MLE<ActionC, StateC>(policy, ds), lambda(lambda)
+    {
+        assert(lambda >= 0.0);
+    }
+
+    virtual arma::vec solve(arma::vec starting = arma::vec(),
+                            unsigned int maxFunEvals = 0)
+    {
+        int dp = policy.getParametersSize();
+        assert(dp > 0);
+
+        if (starting.n_elem == 0)
+        {
+            starting.zeros(dp);
+        }
+        else
+        {
+            assert(dp == starting.n_elem);
+        }
+
+        if (maxFunEvals == 0)
+            maxFunEvals = std::min(30*dp, 600);
+
+        nlopt::opt optimizator;
+        optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dp);
+        optimizator.set_max_objective(RidgeRegularizedMLE<ActionC, StateC>::wrapper, this);
+        optimizator.set_xtol_rel(1e-10);
+        optimizator.set_ftol_rel(1e-10);
+        optimizator.set_ftol_abs(1e-10);
+        optimizator.set_maxeval(maxFunEvals);
+
+        //optimize the function
+        std::vector<double> parameters(dp, 0.0);
+        for (int i = 0; i < dp; ++i)
+            parameters[i] = starting[i];
+        double minf;
+
+        // reset function evaluation counter
+        nbFunEvals = 0;
+        if (optimizator.optimize(parameters, minf) < 0)
+        {
+            printf("nlopt failed!\n");
+            abort();
+        }
+        else
+        {
+            printf("found minimum = %0.10g\n", minf);
+
+            arma::vec finalP(dp);
+            for(int i = 0; i < dp; ++i)
+            {
+                finalP(i) = parameters[i];
+            }
+
+            return finalP;
+        }
+    }
+
+    virtual double objFunction(unsigned int n, const double* x, double* grad)
+    {
+        ++nbFunEvals;
+
+        int dp = policy.getParametersSize();
+        assert(dp == n);
+        arma::vec params(x, dp);
+        policy.setParameters(params);
+
+        int nbEpisodes = data.size();
+        double logLikelihood = 0.0;
+        int counter = 0;
+        arma::vec gradient(dp, arma::fill::zeros);
+        for (int ep = 0; ep < nbEpisodes; ++ep)
+        {
+            int nbSteps = data[ep].size();
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[ep][t];
+
+                // compute probability
+                double prob = policy(tr.x,tr.u);
+                prob = std::max(1e-8,prob);
+                logLikelihood += log(prob);
+
+                // compute gradient
+                if (grad != nullptr)
+                {
+                    gradient += policy.difflog(tr.x, tr.u);
+                }
+
+                // increment counter of number of samples
+                ++counter;
+            }
+        }
+
+        // compute average value
+        logLikelihood /= counter;
+        double l2normParams = arma::norm(params,2);
+        logLikelihood -= lambda * l2normParams;
+        if (grad != nullptr)
+        {
+            arma::vec L2RegGradient = params / l2normParams;
+            for (int i = 0; i < dp; ++i)
+            {
+                grad[i] = gradient(i) / counter - lambda * L2RegGradient(i);
+            }
+//            std::cout << gradient << std::endl;
+        }
+
+        return logLikelihood;
+    }
+
+
+    static double wrapper(unsigned int n, const double* x, double* grad,
+                          void* o)
+    {
+        return reinterpret_cast<MLE<ActionC,StateC>*>(o)->objFunction(n, x, grad);
+    }
+
+protected:
+    double lambda;
 };
 
 } //end namespace
