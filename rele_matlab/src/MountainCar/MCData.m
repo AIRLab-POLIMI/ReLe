@@ -1,10 +1,12 @@
-%% Rocky data visualizer
+%% Mountain Car data visualizer
+clc; clear all;
 addpath('../Statistics');
 
 %% Read data
 
 disp('Reading data trajectories...')
 csv = csvread('/tmp/ReLe/mc/GIRL/data.log');
+% csv = csvread('/tmp/ReLe/mc/GIRL/mletraining.log');
 
 disp('Organizing data in episodes...')
 episodes = readDataset(csv);
@@ -36,3 +38,44 @@ for i = 1:length(episodes)
         pause(0.1);
     end
 end
+
+%% Read mle data
+
+disp('Reading data trajectories...')
+csv = csvread('/tmp/ReLe/mc/GIRL/mledata.log');
+
+disp('Organizing data in episodes...')
+mleEpisodes = readDataset(csv);
+clearvars csv
+
+%% compare trajectories
+
+idx = 1;
+figure(2);
+subplot(4,1,1); hold on;
+plot(episodes(idx).x(:,2));
+plot(mleEpisodes(idx).x(:,2));
+legend('hand','mle');
+ylabel('position');
+grid on; hold off;
+
+subplot(4,1,2); hold on;
+plot(episodes(idx).x(:,1));
+plot(mleEpisodes(idx).x(:,1));
+legend('hand','mle');
+ylabel('velocity');
+grid on; hold off;
+
+subplot(4,1,3); hold on;
+plot(episodes(idx).u(:));
+plot(mleEpisodes(idx).u(:));
+legend('hand','mle');
+ylabel('actions');
+grid on; hold off;
+
+subplot(4,1,4); hold on;
+plot(episodes(idx).r(:));
+plot(mleEpisodes(idx).r(:));
+legend('hand','mle');
+ylabel('reward');
+grid on; hold off;
