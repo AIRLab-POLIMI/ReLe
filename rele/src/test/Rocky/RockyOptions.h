@@ -92,7 +92,23 @@ private:
 	 arma::vec spot;
 };
 
-class Escape : public RockyOption
+class Escape1 : public RockyOption
+{
+public:
+	 virtual bool canStart(const DenseState& state);
+	 virtual double terminationProbability(const DenseState& state);
+	 virtual void operator ()(const DenseState& state, DenseAction& action);
+};
+
+class Escape2 : public RockyOption
+{
+public:
+	 virtual bool canStart(const DenseState& state);
+	 virtual double terminationProbability(const DenseState& state);
+	 virtual void operator ()(const DenseState& state, DenseAction& action);
+};
+
+class Escape3 : public RockyOption
 {
 public:
 	 virtual bool canStart(const DenseState& state);

@@ -39,7 +39,6 @@ public:
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
 
-private:
     enum StateComponents
     {
         //robot state
@@ -56,6 +55,9 @@ private:
         //state size
         STATESIZE
     };
+
+private:
+
 
     class Predictor
     {

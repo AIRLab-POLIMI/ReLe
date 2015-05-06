@@ -72,27 +72,27 @@ arma::vec RockyOption::wayPointPolicy(const arma::vec& state, double ox, double 
 
 double RockyOption::angularDistance(const arma::vec& state, double ox, double oy)
 {
-	double waypointDir = atan2(oy - state[y], ox - state[x]);
-	return utils::wrapToPi(waypointDir - state[theta]);
+    double waypointDir = atan2(oy - state[y], ox - state[x]);
+    return utils::wrapToPi(waypointDir - state[theta]);
 }
 
 bool RockyOption::objectiveFree(const arma::vec& state, double ox, double oy)
 {
-	vec deltaPos(2);
-	deltaPos[0] = ox - state[x];
-	deltaPos[1] = oy - state[y];
+    vec deltaPos(2);
+    deltaPos[0] = ox - state[x];
+    deltaPos[1] = oy - state[y];
 
-	vec deltaPosR(2);
-	deltaPosR[0] = ox - state[x] - state[xr];
-	deltaPosR[1] = oy - state[y] - state[yr];
+    vec deltaPosR(2);
+    deltaPosR[0] = ox - state[x] - state[xr];
+    deltaPosR[1] = oy - state[y] - state[yr];
 
-	return norm(deltaPos) < norm(deltaPosR);
+    return norm(deltaPos) < norm(deltaPosR);
 
 }
 
 double RockyOption::rockyRelRotation(const arma::vec& state)
 {
-	return utils::wrapToPi(atan2(state[yr],state[xr]));
+    return utils::wrapToPi(atan2(state[yr],state[xr]));
 }
 
 bool Eat::canStart(const DenseState& state)
@@ -180,58 +180,89 @@ void Feed::operator ()(const DenseState& state, DenseAction& action)
     //cout << action << endl;
 }
 
-bool Escape::canStart(const DenseState& state)
+bool Escape1::canStart(const DenseState& state)
 {
-    return true;
+    return norm(state(span(xr, yr))) < 1;
 }
 
-double Escape::terminationProbability(const DenseState& state)
+double Escape1::terminationProbability(const DenseState& state)
 {
-    if(norm(state(span(xr, yr))) > 1)
+    /*if(norm(state(span(xr, yr))) > 1)
         return 1;
     if(rockyRelRotation(state) > M_PI/2)
-    	return 1;
+        return 1;
     else if(angularDistance(state, 0, 0) < M_PI/4 && objectiveFree(state, 0, 0))
-    	return 1;
+        return 1;
     else if(angularDistance(state, 5, 0) < M_PI/4 && objectiveFree(state, 5, 0))
         return 1;
     else
-        return norm(state(span(xr, yr)));
+        return norm(state(span(xr, yr)));*/
+	return 0.2;
 }
 
-void Escape::operator ()(const DenseState& state, DenseAction& action)
+void Escape1::operator ()(const DenseState& state, DenseAction& action)
 {
-    vec we =
-    {
-        11.3530,
-        -24.0812,
-        -5.2888,
-        6.3575,
-        11.5793,
-        -6.1634,
-        5.3837,
-        -5.9982,
-        -5.0773,
-        -9.1568,
-        5.1742,
-        -3.8392
-    };
-
-    mat phi(12, 3, fill::zeros);
-
-    phi(span(0, 2), span(0)) = state(span(x, theta));
-    phi(span(3, 5), span(0)) = state(span(xr, thetar));
-
-    phi(span(5, 7), span(1)) = state(span(x, theta));
-    phi(span(8, 10), span(1)) = state(span(xr, thetar));
-
-    vec pi = phi.t()*we;
-
-    vec& x = action;
-    x = pi;
+	action.resize(3);
+    action[0] = maxV;
+    action[1] = M_PI;
+    action[2] = 0;
 }
 
+bool Escape2::canStart(const DenseState& state)
+{
+	return norm(state(span(xr, yr))) < 1;
+}
 
+double Escape2::terminationProbability(const DenseState& state)
+{
+    /*if(norm(state(span(xr, yr))) > 1)
+        return 1;
+    if(rockyRelRotation(state) > M_PI/2)
+        return 1;
+    else if(angularDistance(state, 0, 0) < M_PI/4 && objectiveFree(state, 0, 0))
+        return 1;
+    else if(angularDistance(state, 5, 0) < M_PI/4 && objectiveFree(state, 5, 0))
+        return 1;
+    else
+        return norm(state(span(xr, yr)));*/
+	return 0.2;
+}
+
+void Escape2::operator ()(const DenseState& state, DenseAction& action)
+{
+	action.resize(3);
+    action[0] = maxV;
+    action[1] = -M_PI;
+    action[2] = 0;
+}
+
+bool Escape3::canStart(const DenseState& state)
+{
+	return norm(state(span(xr, yr))) < 1;
+}
+
+double Escape3::terminationProbability(const DenseState& state)
+{
+    /*if(norm(state(span(xr, yr))) > 1)
+        return 1;
+    if(rockyRelRotation(state) > M_PI/2)
+        return 1;
+    else if(angularDistance(state, 0, 0) < M_PI/4 && objectiveFree(state, 0, 0))
+        return 1;
+    else if(angularDistance(state, 5, 0) < M_PI/4 && objectiveFree(state, 5, 0))
+        return 1;
+    else
+        return norm(state(span(xr, yr)));*/
+	return 0.2;
+}
+
+void Escape3::operator ()(const DenseState& state, DenseAction& action)
+{
+	action.resize(3);
+    action[0] = maxV;
+    action[1] = state[thetar]/dt;
+    action[2] = 0;
+}
 
 
 
