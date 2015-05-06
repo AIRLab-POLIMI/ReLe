@@ -259,10 +259,12 @@ int main(int argc, char *argv[])
     vec pos_linspace = linspace<vec>(-1.2,0.6,7);
     vec vel_linspace = linspace<vec>(-0.07,0.07,7);
 
+    //-- meshgrid
     arma::mat xrow = vectorise(pos_linspace).t();
     arma::mat ycol = vectorise(vel_linspace);
-    arma::vec xx_pos = repmat(xrow, ycol.n_rows, ycol.n_cols);
-    arma::vec yy_vel = repmat(ycol, xrow.n_rows, xrow.n_cols);
+    arma::mat xx_pos = repmat(xrow, ycol.n_rows, ycol.n_cols);
+    arma::mat yy_vel = repmat(ycol, xrow.n_rows, xrow.n_cols);
+    //--
 
     arma::vec pos_mesh = vectorise(xx_pos);
     arma::vec vel_mesh = vectorise(yy_vel);
