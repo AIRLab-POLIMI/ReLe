@@ -99,12 +99,18 @@ protected:
 
     Option<ActionC, StateC>& getCurrentOption()
     {
-    	return *stack.back();
+        return *stack.back();
+    }
+
+    Option<ActionC, StateC>& getRootOption()
+    {
+        return *stack[0];
     }
 
     void forceCurrentOptionTermination()
     {
-    	stack.pop_back();
+    	if(stack.size() > 1)
+    		stack.pop_back();
     }
 
 protected:

@@ -37,6 +37,9 @@ public:
 
 protected:
 	arma::vec wayPointPolicy(const arma::vec& state, double ox, double oy);
+	double angularDistance(const arma::vec& state, double ox, double oy);
+	bool objectiveFree(const arma::vec& state, double ox, double oy);
+	double rockyRelRotation(const arma::vec& state);
 
 protected:
     enum StateComponents
@@ -89,7 +92,23 @@ private:
 	 arma::vec spot;
 };
 
-class Escape : public RockyOption
+class Escape1 : public RockyOption
+{
+public:
+	 virtual bool canStart(const DenseState& state);
+	 virtual double terminationProbability(const DenseState& state);
+	 virtual void operator ()(const DenseState& state, DenseAction& action);
+};
+
+class Escape2 : public RockyOption
+{
+public:
+	 virtual bool canStart(const DenseState& state);
+	 virtual double terminationProbability(const DenseState& state);
+	 virtual void operator ()(const DenseState& state, DenseAction& action);
+};
+
+class Escape3 : public RockyOption
 {
 public:
 	 virtual bool canStart(const DenseState& state);

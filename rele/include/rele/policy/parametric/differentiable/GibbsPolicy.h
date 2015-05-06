@@ -5,6 +5,10 @@
 #include "regressors/LinearApproximator.h"
 #include "RandomGenerator.h"
 
+#include <stdexcept>
+
+//#define DEBUG_GIBBS
+
 namespace ReLe
 {
 
@@ -125,10 +129,12 @@ public:
     {
         return approximator.getParameters();
     }
+
     virtual inline const unsigned int getParametersSize() const
     {
         return approximator.getParametersSize();
     }
+
     virtual inline void setParameters(arma::vec& w)
     {
         approximator.setParameters(w);
@@ -167,14 +173,18 @@ public:
             arma::mat loc_phi = basis(tuple);
             double val = exp(IT*pref[0]);
             distribution[k] = val;
-//            if ((isnan(val))||isinf(val))
-//            {
-//                distribution[k] = 1;
-//            }
-//            else
-//            {
-//                distribution[k] = val;
-//            }
+
+#ifdef DEBUG_GIBBS
+            if (isinf(val))
+            {
+                throw std::runtime_error("Distribution is infinite");
+            }
+            else if(isnan(val))
+            {
+                throw std::runtime_error("Distribution is NaN");
+            }
+#endif
+
             sumexp = sumexp + distribution[k];
             sumpref = sumpref + IT*loc_phi*distribution[k];
         }

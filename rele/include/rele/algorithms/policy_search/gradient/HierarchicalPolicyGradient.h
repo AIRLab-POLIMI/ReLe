@@ -38,7 +38,7 @@ template<class ActionC, class StateC>
 class HierarchicalPolicyGradient: public HierarchicalAlgorithm<ActionC, StateC>
 {
 
-	using Base = HierarchicalAlgorithm<ActionC, StateC>;
+    using Base = HierarchicalAlgorithm<ActionC, StateC>;
     using Base::stack;
     using Base::getCurrentOption;
     using Base::sampleOptionAction;
@@ -95,7 +95,7 @@ public:
         }
         //---
 
-        HierarchicalAlgorithm<ActionC, StateC>::sampleAction(state, action);
+        sampleOptionAction(state, action);
 
         // save state and action for late use
         currentState = state;
@@ -137,7 +137,7 @@ public:
 
     virtual void endEpisode(const Reward& reward)
     {
-    	//FIXME real hierarchical update
+        //FIXME real hierarchical update
         auto& currentOption = getCurrentOption();
         currentOption.accumulateReward(reward, df);
         Reward r;
@@ -156,7 +156,6 @@ public:
 
     virtual void endEpisode()
     {
-
         //save policy value
         history_J[epiCount] = Jep;
 
@@ -222,11 +221,10 @@ protected:
 };
 
 #define USE_HPGA_MEMBERS                                           \
-    typedef HierarchicalPolicyGradient<ActionC, StateC> Base;      \
+    using Base = HierarchicalPolicyGradient<ActionC, StateC>;      \
     using Base::nbEpisodesToEvalPolicy;                            \
     using Base::runCount;                                          \
     using Base::epiCount;                                          \
-    using Base::df;                                                \
     using Base::Jep;                                               \
     using Base::stepLength;                                        \
     using Base::rewardTr;                                          \

@@ -127,7 +127,7 @@ protected:
         sumdlogpi += grad;
 
         // store the basic elements used to compute the gradient
-        reward_EpStep(epiCount, stepCount) = df * rTr(reward);
+        reward_EpStep(epiCount, stepCount) = rTr(reward);
 
         for (int p = 0; p < dp; ++p)
         {
@@ -141,7 +141,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                baseline_num(p,stepCount) += df * rTr(reward) * sumdlogpi(p) * sumdlogpi(p);
+                baseline_num(p,stepCount) += rTr(reward) * sumdlogpi(p) * sumdlogpi(p);
                 baseline_den(p,stepCount) += sumdlogpi(p) * sumdlogpi(p);
             }
         }
@@ -149,7 +149,7 @@ protected:
         {
             for (int p = 0; p < dp; ++p)
             {
-                baseline_num1_single(p) += df * rTr(reward) * sumdlogpi(p);
+                baseline_num1_single(p) += rTr(reward) * sumdlogpi(p);
                 baseline_num2_single(p) += sumdlogpi(p);
             }
         }
