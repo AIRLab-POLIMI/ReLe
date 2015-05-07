@@ -26,6 +26,7 @@
 
 #include "Basics.h"
 #include "RandomGenerator.h"
+#include "BasicsTraits.h"
 
 namespace ReLe
 {
@@ -43,7 +44,7 @@ class Option
 
 public:
     virtual Option<ActionC, StateC>& operator ()(const StateC& state) = 0;
-    virtual bool canStart(const StateC& state) = 0;
+    virtual bool canStart(typename state_type<StateC>::const_type_ref state) = 0;
     virtual double terminationProbability(const StateC& state) = 0;
 
     virtual void operator ()(const StateC& state, ActionC& action)

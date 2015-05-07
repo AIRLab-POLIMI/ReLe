@@ -95,7 +95,7 @@ double RockyOption::rockyRelRotation(const arma::vec& state)
     return utils::wrapToPi(atan2(state[yr],state[xr]));
 }
 
-bool Eat::canStart(const DenseState& state)
+bool Eat::canStart(const arma::vec& state)
 {
     return state[energy] < 100 && state[food] == 1;
 }
@@ -126,7 +126,7 @@ void Eat::operator ()(const DenseState& state, DenseAction& action)
     x = pi;
 }
 
-bool Home::canStart(const DenseState& state)
+bool Home::canStart(const arma::vec& state)
 {
     return state[energy] > 0;
 }
@@ -155,7 +155,7 @@ Feed::Feed() : spot(2)
 }
 
 
-bool Feed::canStart(const DenseState& state)
+bool Feed::canStart(const arma::vec& state)
 {
     return state[energy] < 100;
 }
@@ -180,7 +180,7 @@ void Feed::operator ()(const DenseState& state, DenseAction& action)
     //cout << action << endl;
 }
 
-bool Escape1::canStart(const DenseState& state)
+bool Escape1::canStart(const arma::vec& state)
 {
     return norm(state(span(xr, yr))) < 1;
 }
@@ -208,7 +208,7 @@ void Escape1::operator ()(const DenseState& state, DenseAction& action)
     action[2] = 0;
 }
 
-bool Escape2::canStart(const DenseState& state)
+bool Escape2::canStart(const arma::vec& state)
 {
     return norm(state(span(xr, yr))) < 1;
 }
@@ -236,7 +236,7 @@ void Escape2::operator ()(const DenseState& state, DenseAction& action)
     action[2] = 0;
 }
 
-bool Escape3::canStart(const DenseState& state)
+bool Escape3::canStart(const arma::vec& state)
 {
     return norm(state(span(xr, yr))) < 1;
 }

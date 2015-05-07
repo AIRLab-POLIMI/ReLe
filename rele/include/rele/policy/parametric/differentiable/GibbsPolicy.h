@@ -29,6 +29,11 @@ public:
     {
     }
 
+    inline void setTemperature(double temperature)
+    {
+        tau = temperature;
+    }
+
 
     // Policy interface
 public:
@@ -53,7 +58,7 @@ public:
     {
         int statesize = state.size(), nactions = mActions.size();
         arma::vec tuple(1+statesize);
-        //const std::vector<bool>& mask = this->getMask(state, nactions);
+        const std::vector<bool>& mask = this->getMask(state, nactions);
 
 
         for (unsigned int i = 0; i < statesize; ++i)
@@ -65,16 +70,16 @@ public:
         {
             tuple[statesize] = mActions[k].getActionN();
             arma::vec preference = approximator(tuple);
-            den += exp(preference[0]/tau);
+            den += mask[k]*exp(preference[0]/tau);
         }
 
         tuple[statesize] = action;
 
-        double num = 1.0;
+        double num = mask[0]*1.0;
         if (action != mActions[nactions - 1].getActionN())
         {
             arma::vec preference = approximator(tuple);
-            num = exp(preference[0]/tau);
+            num = mask[action]*exp(preference[0]/tau);
         }
 
         return num/den;
@@ -84,7 +89,7 @@ public:
     {
         double den = 1.0;
         int count = 0, nactions = mActions.size();
-        //const vector<bool>& mask = getMask(state, nactions);
+        const std::vector<bool>& mask = this->getMask(state, nactions);
 
         int statesize = state.size();
         arma::vec tuple(1+statesize);
@@ -98,7 +103,7 @@ public:
             tuple[statesize] = mActions[k].getActionN();
 
             arma::vec preference = approximator(tuple);
-            double val = exp(preference[0]/tau);
+            double val = mask[k]*exp(preference[0]/tau);
             den += val;
             distribution[count++] = val;
         }
@@ -161,6 +166,7 @@ public:
         double sumexp = 0;
         arma::mat sumpref(this->getParametersSize(),1,arma::fill::zeros); // sum of the preferences
         unsigned int nactions = mActions.size();
+        const std::vector<bool>& mask = this->getMask(state, nactions);
 
         int statesize = state.size();
         arma::vec tuple(1+statesize);
@@ -175,7 +181,7 @@ public:
             tuple[statesize] = mActions[k].getActionN();
             arma::vec pref = approximator(tuple);
             arma::mat loc_phi = basis(tuple);
-            double val = exp(pref[0]/tau);
+            double val = mask[k]*exp(pref[0]/tau);
             distribution[k] = val;
 
 #ifdef DEBUG_GIBBS
@@ -212,8 +218,6 @@ protected:
     std::vector<double> distribution;
     double tau;
     LinearApproximator approximator;
-public:
-    double inverseTemperature;
 
 };
 

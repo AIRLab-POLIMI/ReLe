@@ -33,20 +33,20 @@ template<class StateC, class OutputC>
 class ActionMask
 {
 public:
-	ActionMask(unsigned int size) : size(size)
-	{
+    ActionMask(unsigned int size) : size(size)
+    {
 
-	}
+    }
 
-	virtual std::vector<OutputC> getMask(const StateC& state) = 0;
+    virtual std::vector<OutputC> getMask(typename state_type<StateC>::const_type_ref state) = 0;
 
-	virtual ~ActionMask()
-	{
+    virtual ~ActionMask()
+    {
 
-	}
+    }
 
 protected:
-	unsigned int size;
+    unsigned int size;
 };
 
 }

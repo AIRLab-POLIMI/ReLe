@@ -67,7 +67,7 @@ protected:
 class Eat : public RockyOption
 {
 public:
-	 virtual bool canStart(const DenseState& state);
+	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
 };
@@ -75,7 +75,7 @@ public:
 class Home : public RockyOption
 {
 public:
-	 virtual bool canStart(const DenseState& state);
+	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
 };
@@ -84,7 +84,7 @@ class Feed : public RockyOption
 {
 public:
 	Feed();
-	 virtual bool canStart(const DenseState& state);
+	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
 
@@ -95,7 +95,7 @@ private:
 class Escape1 : public RockyOption
 {
 public:
-	 virtual bool canStart(const DenseState& state);
+	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
 };
@@ -103,7 +103,7 @@ public:
 class Escape2 : public RockyOption
 {
 public:
-	 virtual bool canStart(const DenseState& state);
+	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
 };
@@ -111,7 +111,7 @@ public:
 class Escape3 : public RockyOption
 {
 public:
-	 virtual bool canStart(const DenseState& state);
+	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
 };

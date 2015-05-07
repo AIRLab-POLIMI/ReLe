@@ -211,14 +211,8 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
     BasisFunctions basis = PolynomialFunction::generate(1,mdp.getSettings().continuosStateDim);
     //Replicate each basis for the actions (action-1 because the last is linearly dependent on the others)
-    BasisFunctions bfs;
-    for (int i = 0, ie = actions.size()-1; i < ie; ++i)
-    {
-        for (int k = 0, ke = basis.size(); k < ke; ++k)
-        {
-            bfs.push_back(new AndConditionBasisFunction(basis[k],2,i));
-        }
-    }
+    BasisFunctions bfs = AndConditionBasisFunction::generate(basis, 2, actions.size()-1);
+
     //create basis vector
     DenseFeatures phi(bfs);
     //create policy
@@ -259,7 +253,7 @@ int main(int argc, char *argv[])
     std::cerr << pp.t();
     mlePolicy.setParameters(pp);
 
-    mlePolicy.inverseTemperature = 0.05;
+    mlePolicy.setTemperature(1.0/0.05);
 
 #if 1//EVAL_MLE
     /*** get mlePolicy trajectories ***/

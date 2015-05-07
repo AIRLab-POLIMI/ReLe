@@ -32,6 +32,7 @@
 #include "basis/IdentityBasis.h"
 #include "basis/SubspaceBasis.h"
 #include "basis/GaussianRbf.h"
+#include "basis/ConditionBasedFunction.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"
@@ -53,34 +54,6 @@ int main(int argc, char *argv[])
 
     Rocky rocky;
 
-
-    //-- Features
-    BasisFunctions radialBasis1 = GaussianRbf::generate(8,
-    {
-        -10, 10,
-        -10, 10,
-        -M_PI, M_PI
-    });
-
-    BasisFunctions radialBasis2 = GaussianRbf::generate(8,
-    {
-        -10, 10,
-        -10, 10,
-        -M_PI, M_PI
-    });
-
-    BasisFunctions basis;
-    BasisFunctions basis1 = SubspaceBasis::generate(radialBasis1, span(Rocky::x, Rocky::theta));
-    BasisFunctions basis2 = SubspaceBasis::generate(radialBasis2, span(Rocky::xr, Rocky::thetar));
-    basis.insert(basis.end(), basis1.begin(), basis1.end());
-    basis.insert(basis.end(), basis2.begin(), basis2.end());
-    basis.push_back(new IdentityBasis(Rocky::energy));
-    basis.push_back(new IdentityBasis(Rocky::food));
-
-    DenseFeatures phi(basis);
-    cout << "Features size: " << phi.rows() << endl;
-
-
     //-- options
     Eat eat;
     Home home;
@@ -100,6 +73,34 @@ int main(int argc, char *argv[])
     vector<FiniteAction> actions;
     for(int i = 0; i < options.size(); ++i)
         actions.push_back(FiniteAction(i));
+
+    //-- Features
+    BasisFunctions radialBasis1 = GaussianRbf::generate(4,
+    {
+        -10, 10,
+        -10, 10,
+        -M_PI, M_PI
+    });
+
+    BasisFunctions radialBasis2 = GaussianRbf::generate(4,
+    {
+        -10, 10,
+        -10, 10,
+        -M_PI, M_PI
+    });
+
+    BasisFunctions basis;
+    BasisFunctions basis1 = SubspaceBasis::generate(radialBasis1, span(Rocky::x, Rocky::theta));
+    BasisFunctions basis2 = SubspaceBasis::generate(radialBasis2, span(Rocky::xr, Rocky::thetar));
+    basis.insert(basis.end(), basis1.begin(), basis1.end());
+    basis.insert(basis.end(), basis2.begin(), basis2.end());
+    basis.push_back(new IdentityBasis(Rocky::energy));
+    basis.push_back(new IdentityBasis(Rocky::food));
+
+
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size());
+    DenseFeatures phi(basisGibbs);
+    cout << "Features size: " << phi.rows() << endl;
 
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 1);
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);

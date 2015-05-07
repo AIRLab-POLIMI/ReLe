@@ -41,9 +41,9 @@ class Policy
 
 public:
     Policy()
-	{
-    	actionMask = nullptr;
-	}
+    {
+        actionMask = nullptr;
+    }
 
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) = 0;
     virtual double operator() (typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
@@ -56,7 +56,7 @@ public:
 
     void setMask(ActionMask<StateC, bool>* mask)
     {
-    	this->actionMask = mask;
+        this->actionMask = mask;
     }
 
     virtual ~Policy()
@@ -65,12 +65,12 @@ public:
     }
 
 protected:
-    std::vector<bool> getMask(const StateC& state, unsigned int size)
+    std::vector<bool> getMask(typename state_type<StateC>::const_type_ref state, unsigned int size)
     {
-    	if(actionMask)
-    		return actionMask->getMask(state);
+        if(actionMask)
+            return actionMask->getMask(state);
 
-    	return std::vector<bool>(size, true);
+        return std::vector<bool>(size, true);
     }
 
 protected:

@@ -37,7 +37,7 @@ public:
                          std::vector<Option<ActionC, StateC>*> options)
         : ActionMask<StateC, bool>(options.size()), policy(policy), options(options)
     {
-    	policy.setMask(this);
+        policy.setMask(this);
     }
 
     inline DifferentiablePolicy<FiniteAction, StateC>& getPolicy()
@@ -60,22 +60,22 @@ public:
 
     }
 
-    virtual std::vector<bool> getMask(const StateC& state)
-	{
-    	std::vector<bool> mask(options.size(), false);
+    virtual std::vector<bool> getMask(typename state_type<StateC>::const_type_ref state)
+    {
+        std::vector<bool> mask(options.size(), false);
 
-    	for(unsigned int i = 0; i < options.size(); i++)
-    	{
-    		if(options[i]->canStart(state))
-    		{
-    			mask[i] = true;
-    		}
-    	}
+        for(unsigned int i = 0; i < options.size(); i++)
+        {
+            if(options[i]->canStart(state))
+            {
+                mask[i] = true;
+            }
+        }
 
-    	return mask;
-	}
+        return mask;
+    }
 
-    virtual bool canStart(const StateC& state)
+    virtual bool canStart(typename state_type<StateC>::const_type_ref state)
     {
         return true;
     }

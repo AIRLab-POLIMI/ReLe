@@ -11,9 +11,14 @@ clf(1)
 figure(2)
 clf(2)
 %% Choose file
-basedir = '/tmp/ReLe/Rocky/REPS/';
+hpg = true;
+if(hpg)
+    basedir = '/tmp/ReLe/Rocky/HPG/';
+else
+    basedir = '/tmp/ReLe/Rocky/REPS/';
+end
 trajectoryFile = [basedir 'Rocky.log'];
-gradientFile = [basedir 'Rocky_agentData.log'];
+agentFile = [basedir 'Rocky_agentData.log'];
 
 %% Read data
 
@@ -25,7 +30,12 @@ episodes = readDataset(csv);
 clearvars csv
 
 %% Plot J
-plotREPS(1, gradientFile);
+if(hpg)
+    plotGradient(1, agentFile);
+else
+    plotREPS(1, agentFile);
+end
+
 
 %% Display Data
 

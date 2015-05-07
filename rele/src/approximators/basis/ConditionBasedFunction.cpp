@@ -101,14 +101,17 @@ void AndConditionBasisFunction::readFromStream(std::istream &in)
 
 BasisFunctions AndConditionBasisFunction::generate(BasisFunctions& basis, unsigned int index, unsigned int values)
 {
-	BasisFunctions newBasis;
+    BasisFunctions newBasis;
 
-	for (int i = 0; i < values -1; ++i)
-	{
-		newBasis.push_back(new AndConditionBasisFunction(basis[i], index, i));
-	}
+    for (int i = 0; i < values; ++i)
+    {
+        for(int j = 0; j < basis.size(); j++)
+        {
+            newBasis.push_back(new AndConditionBasisFunction(basis[j], index, i));
+        }
+    }
 
-	return newBasis;
+    return newBasis;
 }
 
 
