@@ -105,6 +105,14 @@ disp('Organizing data in episodes...')
 lspiEpisodes = readDataset(csv);
 clearvars csv
 
+X =[];
+for i = 1:length(lspiEpisodes)
+    X = [X;lspiEpisodes(i).u(1:end-1)];
+end
+length(find(X==0))
+length(find(X==1))
+length(find(X==2))
+
 %% Read final data
 
 disp('Reading data trajectories...')

@@ -144,6 +144,9 @@ target_link_libraries(pol2mat rele)
 add_executable(mle_Policy src/test/miscellaneous/MLEPolicyTest.cpp)
 target_link_libraries(mle_Policy rele)
 
+add_executable(rand_Policy src/test/miscellaneous/RandomPolicyTest.cpp)
+target_link_libraries(rand_Policy rele)
+
 #miscellaneous/policy_search tests
 add_executable(datadiff2mat src/test/miscellaneous/policy_search/DataDiff2Matlab.cpp)
 target_link_libraries(datadiff2mat rele)
