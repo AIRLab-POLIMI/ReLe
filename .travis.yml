@@ -5,6 +5,8 @@ compiler:
 script: mkdir -p build && cd build && cmake ../rele && make
 
 #dependencies
+sudo: required
+
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -y libarmadillo-dev
