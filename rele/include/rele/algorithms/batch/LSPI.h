@@ -33,21 +33,19 @@ template<class ActionC>
 class LSPI
 {
 public:
-    LSPI(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy, double gamma) :
-        data(data), policy(policy), evalAlg(data, policy, gamma), gamma(gamma)
+    LSPI(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+         Features_<arma::vec>& phi, double gamma) :
+        critic(data, policy, phi, gamma)
     {
     }
 
 
     void run(unsigned int maxiterations, double epsilon = 0.1)
     {
-        //get policy regressor
-        LinearApproximator* policyRegressor = dynamic_cast<LinearApproximator*>(policy.getQ());
-
         /*** Initialize policy iteration ***/
         unsigned int iteration = 0;
         double distance = 10 * epsilon;
-        arma::vec old_weights = policyRegressor->getParameters();
+        arma::vec old_weights = critic.getQ().getParameters();
 
 
         /*** Main LSPI loop ***/
@@ -61,18 +59,18 @@ public:
             std::cout << "LSPI iteration : " << iteration << std::endl;
 
             //Evaluate the current policy (and implicitly improve)
-            arma::vec policy_weights = evalAlg.run(firsttime);
-            policyRegressor->setParameters(policy_weights);
+            arma::vec Q_weights = critic.run(firsttime);
+            critic.getQ().setParameters(Q_weights);
 
             //Compute the distance between the current and the previous policy
-            double LMAXnorm = arma::norm(policy_weights - old_weights, "inf");
-            double L2norm   = arma::norm(policy_weights - old_weights, 2);
+            double LMAXnorm = arma::norm(Q_weights - old_weights, "inf");
+            double L2norm   = arma::norm(Q_weights - old_weights, 2);
             distance = L2norm;
             std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
                       "   L2 : " << L2norm << std::endl;
 
             firsttime = false;
-            old_weights = policy_weights;
+            old_weights = Q_weights;
         }
 
         /*** Display some info ***/
@@ -87,10 +85,7 @@ public:
 
 
 protected:
-    Dataset<ActionC, DenseState>& data;
-    e_GreedyApproximate& policy;
-    LSTDQ<ActionC> evalAlg;
-    double gamma;
+    LSTDQ<ActionC> critic;
 
 };
 

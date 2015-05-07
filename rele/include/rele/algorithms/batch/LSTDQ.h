@@ -123,6 +123,11 @@ public:
         return w;
     }
 
+    LinearApproximator& getQ()
+    {
+        return Q;
+    }
+
 protected:
     Dataset<ActionC, DenseState>& data;
     LinearApproximator Q;
