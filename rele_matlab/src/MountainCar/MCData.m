@@ -5,8 +5,8 @@ addpath('../Statistics');
 %% Read data
 
 disp('Reading data trajectories...')
-csv = csvread('/tmp/ReLe/mc/GIRL/data.log');
-% csv = csvread('/tmp/ReLe/mc/GIRL/mletraining.log');
+% csv = csvread('/tmp/ReLe/mc/GIRL/data.log');
+csv = csvread('/tmp/ReLe/mc/GIRL/mletraining.log');
 
 disp('Organizing data in episodes...')
 episodes = readDataset(csv);

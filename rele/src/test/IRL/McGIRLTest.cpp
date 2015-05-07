@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    int nbMLEEpisodes = 2;
+    int nbMLEEpisodes = 100;
     int nbEpisodes = nbMLEEpisodes;
 
     MountainCar mdp(MountainCar::ConfigurationsLabel::Klein);
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 
     /*** get only trailing info ***/
     Dataset<FiniteAction,DenseState> dataExpert;
-    int budget = 80;//nbMLEEpisodes*nbMLESamplesPerEp;
+    int budget = 300;//nbMLEEpisodes*nbMLESamplesPerEp;
     for (int ep = 0; ep < data.size() && budget > 0; ++ep)
     {
         Episode<FiniteAction,DenseState> episodeExpert;
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
     std::cerr << pp.t();
     mlePolicy.setParameters(pp);
 
-//    mlePolicy.inverseTemperature = 10;
+    mlePolicy.inverseTemperature = 0.05;
 
 #if 1//EVAL_MLE
     /*** get mlePolicy trajectories ***/
@@ -282,8 +282,8 @@ int main(int argc, char *argv[])
 
     /*** recover reward by IRL (PGIRL) ***/
     std::vector<IRLParametricReward<FiniteAction,DenseState>*> rewards;
-    vec pos_linspace = linspace<vec>(-1.2,0.6,7);
-    vec vel_linspace = linspace<vec>(-0.07,0.07,7);
+    vec pos_linspace = linspace<vec>(-1.2,0.6,1);
+    vec vel_linspace = linspace<vec>(-0.07,0.07,1);
 
     //-- meshgrid
     arma::mat xrow = vectorise(pos_linspace).t();
@@ -324,9 +324,9 @@ int main(int argc, char *argv[])
 
     vec rewWeights = pgirl.getWeights();
     cout << "Weights (plane): " << rewWeights.t();
-    rewWeights = abs(rewWeights);
-//    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
-//    rewWeights = rewWeights / norm(rewWeights,1);
+//    rewWeights = abs(rewWeights);
+    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
+    rewWeights = rewWeights / norm(rewWeights,1);
 
 
     vec pos_linspace2 = linspace<vec>(-1.2,0.6,20);
@@ -365,6 +365,19 @@ int main(int argc, char *argv[])
         }
         rewfilename.close();
     }
+
+
+    ofstream dasdsa(fm.addPath("poll.log"), ios_base::out);
+    for (int i = 0, ie = pos_mesh2.n_rows; i < ie; ++i)
+    {
+        s(MountainCar::StateLabel::position) = pos_mesh2(i);
+        s(MountainCar::StateLabel::velocity) = vel_mesh2(i);
+        FiniteAction dd;
+        dd.setActionN(1);
+        double val = mlePolicy(s,dd);
+        dasdsa << vel_mesh2(i) << "\t" << pos_mesh2(i) << "\t" << val << endl;
+    }
+    dasdsa.close();
 
 
 
