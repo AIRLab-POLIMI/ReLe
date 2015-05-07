@@ -301,9 +301,9 @@ int main(int argc, char *argv[])
 
 
     /*** LSPI ***/
-//    e_GreedyApproximate lspiPolicy;
-//    lspiPolicy.setEpsilon(0);
-//    lspiPolicy.setNactions(actions.size());
+    e_GreedyApproximate lspiPolicy;
+    lspiPolicy.setEpsilon(0);
+    lspiPolicy.setNactions(actions.size());
 //    LSPI<FiniteAction> lspi(lspiData,lspiPolicy, mdp.getSettings().gamma);
 
 
