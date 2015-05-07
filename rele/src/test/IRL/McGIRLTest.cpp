@@ -229,13 +229,13 @@ int main(int argc, char *argv[])
 
     /*** get only trailing info ***/
     Dataset<FiniteAction,DenseState> dataExpert;
-    int budget = 50;//nbMLEEpisodes*nbMLESamplesPerEp;
+    int budget = 80;//nbMLEEpisodes*nbMLESamplesPerEp;
     for (int ep = 0; ep < data.size() && budget > 0; ++ep)
     {
         Episode<FiniteAction,DenseState> episodeExpert;
         int nbSamples = data[ep].size();
 //        for (int t = nbSamples-nbMLESamplesPerEp; t < nbSamples && budget > 0; ++t)
-        for (int t = 0; t < nbSamples-1 && budget > 0; ++t)
+        for (int t = 0; t < nbSamples && budget > 0; ++t)
         {
             episodeExpert.push_back(data[ep][t]);
             --budget;
