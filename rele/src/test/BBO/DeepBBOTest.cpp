@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi(bfs);
 
-    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1e8);
+    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1.0/1e8);
     //---
 
     //--- distribution setup

@@ -30,14 +30,14 @@ namespace ReLe
 
 
 template<class ActionC, class StateC>
-class DifferentiableOption : public Option<ActionC, StateC>
+class DifferentiableOption : public Option<ActionC, StateC>, private ActionMask<StateC, bool>
 {
 public:
     DifferentiableOption(DifferentiablePolicy<FiniteAction, StateC>& policy,
                          std::vector<Option<ActionC, StateC>*> options)
-        : policy(policy), options(options)
+        : ActionMask<StateC, bool>(options.size()), policy(policy), options(options)
     {
-
+    	policy.setMask(this);
     }
 
     inline DifferentiablePolicy<FiniteAction, StateC>& getPolicy()
@@ -49,11 +49,8 @@ public:
     {
         unsigned int index;
 
-        do
-        {
-            index = policy(state);
-        }
-        while(!options[index]->canStart(state));
+        index = policy(state);
+
 
         return *options[index];
     }
@@ -62,6 +59,21 @@ public:
     {
 
     }
+
+    virtual std::vector<bool> getMask(const StateC& state)
+	{
+    	std::vector<bool> mask(options.size(), false);
+
+    	for(unsigned int i = 0; i < options.size(); i++)
+    	{
+    		if(options[i]->canStart(state))
+    		{
+    			mask[i] = true;
+    		}
+    	}
+
+    	return mask;
+	}
 
     virtual bool canStart(const StateC& state)
     {

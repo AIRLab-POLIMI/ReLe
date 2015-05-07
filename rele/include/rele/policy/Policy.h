@@ -26,6 +26,7 @@
 
 #include "BasicsTraits.h"
 #include "Interfaces.h"
+#include "ActionMask.h"
 
 #include <string>
 
@@ -39,6 +40,11 @@ class Policy
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
 public:
+    Policy()
+	{
+    	actionMask = nullptr;
+	}
+
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) = 0;
     virtual double operator() (typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
 
@@ -48,10 +54,27 @@ public:
 
     virtual Policy<ActionC, StateC>* clone() = 0;
 
+    void setMask(ActionMask<StateC, bool>* mask)
+    {
+    	this->actionMask = mask;
+    }
+
     virtual ~Policy()
     {
 
     }
+
+protected:
+    std::vector<bool> getMask(const StateC& state, unsigned int size)
+    {
+    	if(actionMask)
+    		return actionMask->getMask(state);
+
+    	return std::vector<bool>(size, true);
+    }
+
+protected:
+    ActionMask<StateC, bool>* actionMask; //FIXME add template parameter if needed, or enable if
 };
 
 template<class ActionC, class StateC>

@@ -115,7 +115,7 @@ double Eat::terminationProbability(const DenseState& state)
 
 void Eat::operator ()(const DenseState& state, DenseAction& action)
 {
-    assert(state[food] == 1);
+    //assert(state[food] == 1);
     vec pi(3);
 
     pi[0] = 0;
