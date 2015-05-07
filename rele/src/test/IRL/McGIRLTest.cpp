@@ -158,7 +158,9 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    int nbEpisodes = 1;
+    int nbMLEEpisodes = 3;
+    int nbMLESamplesPerEp = 3;
+    int nbEpisodes = nbMLEEpisodes;
 
     MountainCar mdp;
 
@@ -205,20 +207,19 @@ int main(int argc, char *argv[])
 
 
     /*** get only trailing info ***/
-    int nbSampleMLE = 27;
     Dataset<FiniteAction,DenseState> dataExpert;
-    Episode<FiniteAction,DenseState> episodeExpert;
-    int budget = nbSampleMLE;
+    int budget = nbMLEEpisodes*nbMLESamplesPerEp;
     for (int ep = 0; ep < data.size() && budget > 0; ++ep)
     {
+        Episode<FiniteAction,DenseState> episodeExpert;
         int nbSamples = data[ep].size();
-        for (int t = nbSamples-1; t > nbSamples - 50 && t > 0 && budget > 0; --t)
+        for (int t = nbSamples-nbMLESamplesPerEp; t < nbSamples && budget > 0; ++t)
         {
             episodeExpert.push_back(data[ep][t]);
             --budget;
         }
+        dataExpert.push_back(episodeExpert);
     }
-    dataExpert.push_back(episodeExpert);
 
     /*** save MLE data ***/
     datafile.open(fm.addPath("mletraining.log"), ios_base::out);
