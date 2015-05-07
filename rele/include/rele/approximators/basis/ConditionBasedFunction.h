@@ -43,6 +43,8 @@ public:
     void writeOnStream(std::ostream& out);
     void readFromStream(std::istream& in);
 
+    static BasisFunctions generate(BasisFunctions& basis, unsigned int index, unsigned int value);
+
 private:
     BasisFunction* basis;
     std::vector<unsigned int> idxs;
