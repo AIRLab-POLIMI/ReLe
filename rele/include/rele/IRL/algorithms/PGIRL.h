@@ -653,9 +653,9 @@ public:
             A.col(r) = gradients[r];
         }
 
-//        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
+        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
 
-//        std::cout << "Grads: \n" << A << std::endl;
+        std::cout << "Grads: \n" << A << std::endl;
 
         arma::mat gramMatrix = A.t() * A;
 
@@ -670,6 +670,7 @@ public:
             }
         }
 //        std::cerr << std::endl << "X: " << X;
+        X.save("/tmp/ReLe/lqr/GIRL/X.log", arma::raw_ascii);
 
         //        arma::mat X2(2,3);
         //        X2 << 1  <<   2 << 3<< arma::endr
@@ -679,9 +680,9 @@ public:
         arma::mat U, V;
         arma::vec s;
         arma::svd(U, s, V, X);
-        //        std::cout << "U: " << U << std::endl;
-        //        std::cout << "s: " << s << std::endl;
-        //        std::cout << "V: " << V << std::endl;
+//                std::cout << "U: " << U << std::endl;
+//                std::cout << "s: " << s << std::endl;
+//                std::cout << "V: " << V << std::endl;
 
         int np = s.n_elem;
         weights = V.cols(np, V.n_cols-1);

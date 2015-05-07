@@ -212,6 +212,8 @@ protected:
     std::vector<double> distribution;
     double tau;
     LinearApproximator approximator;
+public:
+    double inverseTemperature;
 
 };
 

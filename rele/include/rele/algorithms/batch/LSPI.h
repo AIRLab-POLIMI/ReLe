@@ -39,7 +39,7 @@ template<class ActionC>
 class LSPI
 {
 public:
-    LSPI(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+    LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
          Features_<arma::vec>& phi, double gamma) :
         critic(data, policy, phi, gamma)
     {

@@ -39,7 +39,7 @@ class LSTDQ_
 {
 public:
 
-    LSTDQ_(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+    LSTDQ_(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
            Features_<arma::vec>& phi, double gamma) :
         data(data), Q(phi), policy(policy), gamma(gamma)
     {
@@ -64,7 +64,7 @@ public:
         int df = basis.rows(); //number of features
         arma::mat PiPhihat(nbSamples, df, arma::fill::zeros);
         arma::mat A(df, df, arma::fill::zeros);
-        arma::mat b(df, arma::fill::zeros);
+        arma::vec b(df, arma::fill::zeros);
 
         /*** Precompute Phihat and Rhat for all subsequent iterations ***/
         if (firstTime == true)
@@ -79,7 +79,10 @@ public:
                 for (auto tr : episode)
                 {
                     //evaluate basis in input = [x; u]
-                    arma::vec input = arma::join_vert(tr.x,tr.u);
+                    arma::vec s = tr.x;
+                    arma::vec a(1);
+                    a(0) = tr.u;
+                    arma::vec input = arma::join_vert(s, a);
                     arma::mat phi = basis(input);
                     Phihat.row(idx) = phi.t();
                     Rhat(idx) = tr.r[0];
@@ -102,7 +105,10 @@ public:
                     /*** Compute the policy and the corresponding basis at the next state ***/
                     typename action_type<ActionC>::type nextAction = policy(tr.xn);
                     //evaluate basis in input = [x; u]
-                    arma::vec input = arma::join_vert(tr.xn, nextAction);
+                    arma::vec s = tr.x;
+                    arma::vec a(1);
+                    a(0) = nextAction;
+                    arma::vec input = arma::join_vert(s, a);
                     arma::mat nextPhi = basis(input);
                     PiPhihat.row(idx) = nextPhi.t();
 
@@ -115,7 +121,7 @@ public:
         /*** Compute the matrices A and b ***/
         //        arma::mat A = Phihat.t() * (Phihat - gamma * PiPhihat);
         //        arma::vec b = Phihat.t() * Rhat;
-        computeAandB(A, b);
+        computeAandB(PiPhihat, A, b);
 
         /*** Solve the system to find w ***/
         arma::vec w;
@@ -161,7 +167,7 @@ class LSTDQ : public LSTDQ_<ActionC>
     using Base::Rhat;
 
 public:
-    LSTDQ(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+    LSTDQ(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
           Features_<arma::vec>& phi, double gamma)
         : LSTDQ_<ActionC>(data, policy, phi, gamma)
     {
@@ -270,7 +276,7 @@ class LSTDQBe : public LSTDQ_<ActionC>
     using Base::Rhat;
 
 public:
-    LSTDQBe(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+    LSTDQBe(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
             Features_<arma::vec>& phi, double gamma)
         : LSTDQ_<ActionC>(data, policy, phi, gamma)
     {
