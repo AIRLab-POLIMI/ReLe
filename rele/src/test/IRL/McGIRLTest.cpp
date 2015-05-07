@@ -180,8 +180,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    int nbMLEEpisodes = 20;
-    int nbMLESamplesPerEp = 40;
+    int nbMLEEpisodes = 2;
     int nbEpisodes = nbMLEEpisodes;
 
     MountainCar mdp(MountainCar::ConfigurationsLabel::Klein);
@@ -230,13 +229,13 @@ int main(int argc, char *argv[])
 
     /*** get only trailing info ***/
     Dataset<FiniteAction,DenseState> dataExpert;
-    int budget = 100;//nbMLEEpisodes*nbMLESamplesPerEp;
+    int budget = 50;//nbMLEEpisodes*nbMLESamplesPerEp;
     for (int ep = 0; ep < data.size() && budget > 0; ++ep)
     {
         Episode<FiniteAction,DenseState> episodeExpert;
         int nbSamples = data[ep].size();
 //        for (int t = nbSamples-nbMLESamplesPerEp; t < nbSamples && budget > 0; ++t)
-        for (int t = 0; t < nbSamples && budget > 0; ++t)
+        for (int t = 0; t < nbSamples-1 && budget > 0; ++t)
         {
             episodeExpert.push_back(data[ep][t]);
             --budget;
