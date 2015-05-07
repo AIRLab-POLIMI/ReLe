@@ -1,18 +1,12 @@
-%% Script to read REPS statistics
-addpath('..');
-
-%clear old data
-clear
-
-%clear old figures
-figure(1)
-clf(1)
+function plotREPS( fig, file )
+%PLOTREPS Read cvs gradient file and plot data in figure fig
+%   Reads a REPS dataset and plot the J inside the specified figure
+figure(fig)
+clf(fig)
 
 
 %% Read data
-
-disp('Reading agent data...')
-csv = csvread('/tmp/ReLe/Rocky/REPS/Rocky_agentData.log');
+csv = csvread(file);
 
 disp('Organizing data...')
 
@@ -35,3 +29,6 @@ end
 
 plot(J);
 axis tight
+
+end
+

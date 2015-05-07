@@ -1,20 +1,11 @@
-%% Script to read REPS statistics
-addpath('..');
+function plotGradient( fig, file )
+%PLOTGRADIENT Read cvs gradient file and plot data in figure fig
+%   Reads a gradient dataset and plot the J inside the specified figure
 
-%clear old data
-clear
+figure(fig)
+clf(fig)
 
-%clear old figures
-figure(1)
-clf(1)
-
-
-%% Read data
-
-disp('Reading agent data...')
-csv = csvread('/tmp/ReLe/Portfolio/PG/Portfolio_agentData.log');
-
-disp('Organizing data...')
+csv = csvread(file);
 
 index = 1;
 ep = 1;
@@ -34,5 +25,9 @@ for i=1:size(data,2)
 end
 
 plot(J);
-% plot(J);
+
 axis tight
+
+
+end
+
