@@ -35,14 +35,48 @@ namespace ReLe
 {
 
 template<class ActionC>
-class LSTDQ
+class LSTDQ_
 {
 public:
-    LSTDQ(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
-          Features_<arma::vec>& phi, double gamma) :
+
+    LSTDQ_(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+           Features_<arma::vec>& phi, double gamma) :
         data(data), Q(phi), policy(policy), gamma(gamma)
     {
         policy.setQ(&Q);
+    }
+
+    LinearApproximator& getQ()
+    {
+        return Q;
+    }
+protected:
+    Dataset<ActionC, DenseState>& data;
+    LinearApproximator Q;
+    e_GreedyApproximate& policy;
+    double gamma;
+};
+
+/**
+ * Least-Squares Policy Iteration
+ * Michail G. Lagoudakis and Ronald Parr
+ * Journal of Machine Learning Research, 4, 2003, pp. 1107-1149.
+ * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
+ */
+template<class ActionC>
+class LSTDQ : public LSTDQ_<ActionC>
+{
+    typedef LSTDQ_<ActionC> Base;
+    using Base::data;
+    using Base::Q;
+    using Base::policy;
+    using Base::gamma;
+
+public:
+    LSTDQ(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+          Features_<arma::vec>& phi, double gamma)
+        : LSTDQ_<ActionC>(data, policy, phi, gamma)
+    {
     }
 
     arma::vec run(bool firstTime)
@@ -123,19 +157,117 @@ public:
         return w;
     }
 
-    LinearApproximator& getQ()
-    {
-        return Q;
-    }
-
 protected:
-    Dataset<ActionC, DenseState>& data;
-    LinearApproximator Q;
-    e_GreedyApproximate& policy;
-    double gamma;
     arma::mat Phihat;
     arma::vec Rhat;
 
+};
+
+/**
+ * Least-Squares Policy Iteration
+ * Michail G. Lagoudakis and Ronald Parr
+ * Journal of Machine Learning Research, 4, 2003, pp. 1107-1149.
+ * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
+ */
+template<class ActionC>
+class LSTDQBe : public LSTDQ_<ActionC>
+{
+    typedef LSTDQ_<ActionC> Base;
+    using Base::data;
+    using Base::Q;
+    using Base::policy;
+    using Base::gamma;
+
+public:
+    LSTDQBe(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+            Features_<arma::vec>& phi, double gamma)
+        : LSTDQ_<ActionC>(data, policy, phi, gamma)
+    {
+    }
+
+    arma::vec run(bool firstTime)
+    {
+        /*** Initialize variables ***/
+        int nbEpisodes = data.size();
+        //compute the overall number of samples
+        int nbSamples = 0;
+        for (int k = 0; k < nbEpisodes; ++k)
+            nbSamples += data[k].size();
+
+        Features_<arma::vec>& basis = Q.getBasis();
+        int df = basis.rows(); //number of features
+        arma::mat PiPhihat(nbSamples, df, arma::fill::zeros);
+
+        /*** Precompute Phihat and Rhat for all subsequent iterations ***/
+        if (firstTime == true)
+        {
+            Phihat.zeros(nbSamples,df);
+            Rhat.zeros(nbSamples);
+
+            //scan the entire data set
+            unsigned int idx = 0;
+            for (auto episode : data)
+            {
+                for (auto tr : episode)
+                {
+                    //evaluate basis in input = [x; u]
+                    arma::vec input = arma::join_vert(tr.x,tr.u);
+                    arma::mat phi = basis(input);
+                    Phihat.row(idx) = phi.t();
+                    Rhat(idx) = tr.r[0];
+
+                    // increment sample counter
+                    ++idx;
+                }
+            }
+        }
+
+        /*** Loop through the samples ***/
+        unsigned int idx = 0;
+        for (auto episode : data)
+        {
+            for (auto tr : episode)
+            {
+                //Make sure the nextstate is not an absorbing state
+                if (!tr.xn.isAbsorbing())
+                {
+                    /*** Compute the policy and the corresponding basis at the next state ***/
+                    typename action_type<ActionC>::type nextAction = policy(tr.xn);
+                    //evaluate basis in input = [x; u]
+                    arma::vec input = arma::join_vert(tr.xn, nextAction);
+                    arma::mat nextPhi = basis(input);
+                    PiPhihat.row(idx) = nextPhi.t();
+
+                    // increment sample counter
+                    ++idx;
+                }
+            }
+        }
+
+        /*** Compute the matrices A and b ***/
+        arma::mat tmp = Phihat - gamma * PiPhihat;
+        arma::mat A = tmp.t() * tmp;
+        arma::vec b = tmp.t() * Rhat;
+
+        /*** Solve the system to find w ***/
+        arma::vec w;
+        int rank = arma::rank(A);
+        if (rank == df)
+        {
+            w = arma::solve(A,b);
+        }
+        else
+        {
+            std::cout<< "WARNING: A is lower rank!!! Should be " << df << std::endl;
+            w = arma::pinv(A)*b;
+        }
+
+        return w;
+    }
+
+protected:
+    arma::mat Phihat;
+    arma::vec Rhat;
 };
 
 }//end namespace

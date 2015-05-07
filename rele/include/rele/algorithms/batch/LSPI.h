@@ -29,6 +29,12 @@
 namespace ReLe
 {
 
+/**
+ * Least-Squares Policy Iteration
+ * Michail G. Lagoudakis and Ronald Parr
+ * Journal of Machine Learning Research, 4, 2003, pp. 1107-1149.
+ * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
+ */
 template<class ActionC>
 class LSPI
 {

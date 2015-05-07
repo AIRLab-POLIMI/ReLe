@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 //    MVNDiagonalPolicy policy(phi);
 //    NormalPolicy policy(2,phi);
 
-    MLE mle(policy, data);
+    MLE<DenseAction,DenseState> mle(policy, data);
     double vv[] = {0,6};
     arma::vec startVal(vv,2);
     arma::vec pp = mle.solve(startVal);
