@@ -166,10 +166,10 @@ int main(int argc, char *argv[])
     //--- define policy (low level)
     BasisFunctions basis = GaussianRbf::generate(
     {
-        10,
-        10,
-        30,
-        5
+        3,
+        3,
+        6,
+        2
     },
     {
         0.0, 150.0,
@@ -194,14 +194,14 @@ int main(int argc, char *argv[])
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "portfolio_r.log");
+        sprintf(outputname, "ship_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule), rewardId);
-        sprintf(outputname, "portfolio_g.log");
+        sprintf(outputname, "ship_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
     {
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "portfolio_rb.log");
+        sprintf(outputname, "ship_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
                 mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
                 rewardId);
-        sprintf(outputname, "portfolio_gb.log");
+        sprintf(outputname, "ship_gb.log");
     }
     else if (strcmp(alg, "gsb") == 0)
     {
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
                 mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
                 rewardId);
-        sprintf(outputname, "portfolio_gsb.log");
+        sprintf(outputname, "ship_gsb.log");
     }
     else if (strcmp(alg, "natg") == 0)
     {
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new NaturalGPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "portfolio_natg.log");
+        sprintf(outputname, "ship_natg.log");
     }
     else if (strcmp(alg, "natr") == 0)
     {
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new NaturalREINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "portfolio_natr.log");
+        sprintf(outputname, "ship_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
     {
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "portfolio_enac.log");
+        sprintf(outputname, "ship_enac.log");
     }
     else
     {
@@ -263,10 +263,7 @@ int main(int argc, char *argv[])
 
     ReLe::Core<DenseAction, DenseState> core(mdp, *agent);
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath(outputname),
-        WriteStrategy<DenseAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
+        fm.addPath(outputname), WriteStrategy<DenseAction, DenseState>::AGENT, true);
 
     core.getSettings().episodeLenght = 5000;
 
@@ -296,20 +293,16 @@ int main(int argc, char *argv[])
         core.runEpisode();
     }
 
-    //    int nbTestEpisodes = 1000;
-    //    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
-    //    core.getSettings().testEpisodeN = 1000;
-    //    cout << core.runBatchTest() << endl;
+    delete core.getSettings().loggerStrategy;
 
-    //    //--- collect some trajectories
-    //    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-    //        fm.addPath("portfolioFinal.log"),
-    //        WriteStrategy<FiniteAction, DenseState>::TRANS,
-    //        true /*delete file*/
-    //    );
-    //    for (int n = 0; n < 100; ++n)
-    //        core.runTestEpisode();
-    //    //---
+    //--- collect some trajectories
+    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+        fm.addPath(outputname),  WriteStrategy<DenseAction, DenseState>::TRANS,false);
+
+    core.runTestEpisode();
+    //---
+
+    delete core.getSettings().loggerStrategy;
 
     return 0;
 }
