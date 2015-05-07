@@ -38,12 +38,11 @@ template<class ActionC>
 class LSTDQ
 {
 public:
-    LSTDQ(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy, double gamma) :
-        data(data), policy(policy),
-        basis(dynamic_cast<LinearApproximator*>(policy.getQ())->getBasis()),
-        gamma(gamma)
+    LSTDQ(Dataset<ActionC, DenseState> data, e_GreedyApproximate& policy,
+          Features_<arma::vec>& phi, double gamma) :
+        data(data), Q(phi), policy(policy), gamma(gamma)
     {
-        assert(basis.cols() == 1);
+        policy.setQ(&Q);
     }
 
     arma::vec run(bool firstTime)
@@ -55,6 +54,7 @@ public:
         for (int k = 0; k < nbEpisodes; ++k)
             nbSamples += data[k].size();
 
+        Features_<arma::vec>& basis = Q.getBasis();
         int df = basis.rows(); //number of features
         arma::mat PiPhihat(nbSamples, df, arma::fill::zeros);
 
@@ -125,8 +125,8 @@ public:
 
 protected:
     Dataset<ActionC, DenseState>& data;
+    LinearApproximator Q;
     e_GreedyApproximate& policy;
-    Features_<arma::vec>& basis;
     double gamma;
     arma::mat Phihat;
     arma::vec Rhat;
