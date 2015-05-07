@@ -145,7 +145,7 @@ class StochasticDiscretePolicy: public virtual Policy<ActionC,StateC>
 {
 protected:
     std::vector<ActionC> mActions;
-    double* distribution;
+    arma::vec distribution;
 public:
 
     /**
@@ -157,9 +157,9 @@ public:
      * @param actionDim the dimension of each action
      */
     StochasticDiscretePolicy(std::vector<ActionC> actions) :
-        mActions(actions), distribution(new double[actions->size()])
+        mActions(actions), distribution(actions.size())
     {
-        int nbel = mActions.size();
+        double nbel = mActions.size();
         double p = 1/nbel;
         for (int i = 0; i < nbel; ++i)
         {
@@ -180,7 +180,7 @@ public:
      * @param dist an array storing the discrete distribution
      */
     StochasticDiscretePolicy(std::vector<ActionC> actions, double* dist) :
-        mActions(actions), distribution(new double[mActions->size()])
+        mActions(actions), distribution(mActions.size())
     {
         double tot = 0.0;
         for (int i = 0; i < mActions.size(); ++i)
@@ -198,7 +198,7 @@ public:
 
     virtual ~StochasticDiscretePolicy()
     {
-        delete [] distribution;
+//        delete [] distribution;
     }
 
     std::string getPolicyName()
@@ -221,8 +221,8 @@ public:
      * @copydoc DiscreteActionPolicy::pi()
      */
     virtual double operator() (
-        typename state_type<StateC>::const_type state,
-        typename state_type<ActionC>::const_type action)
+        typename state_type<StateC>::const_type_ref state,
+        typename action_type<ActionC>::const_type_ref action)
     {
         int idx = findAction(action);
         return distribution[idx];
@@ -231,18 +231,20 @@ public:
     /**
      * @copydoc DiscreteActionPolicy::sampleAction()
      */
-    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type state)
+    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state)
     {
-        double random = RandomGenerator::sampleUniform(0,1);
-        double sum = 0.0;
-        int i, ie;
-        for (i = 0, ie = mActions.size(); i < ie; ++i)
-        {
-            sum += distribution[i];
-            if (sum >= random)
-                return mActions[i];
-        }
-        return mActions[ie-1];
+        std::size_t idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
+        return mActions[idx];
+//        double random = RandomGenerator::sampleUniform(0,1);
+//        double sum = 0.0;
+//        int i, ie;
+//        for (i = 0, ie = mActions.size(); i < ie; ++i)
+//        {
+//            sum += distribution[i];
+//            if (sum >= random)
+//                return mActions[i];
+//        }
+//        return mActions[ie-1];
     }
 
     virtual StochasticDiscretePolicy<ActionC, StateC>* clone()
@@ -251,17 +253,19 @@ public:
     }
 
 private:
-    int findAction(ActionC& action)
+    int findAction(typename action_type<ActionC>::const_type action)
     {
+        typename action_type<ActionC>::type a1 = action;
         for (int i = 0, ie = mActions.size(); i < ie; ++i)
         {
-            if(action.isEqual(mActions[i]))
+            typename action_type<ActionC>::type a2 = mActions[i];
+            if(a1 == a2)
             {
                 return i;
             }
         }
         std::cerr << "Error: unknown action" << std::endl;
-        std::cerr << "Action:" << action << std::endl;
+        std::cerr << "Action: " << action << std::endl;
         abort();
         // return;
     }
@@ -324,21 +328,27 @@ public:
             assert(fabs(tot-1.0) <= 1e-8);
         }
         // chose an action
-        double random = RandomGenerator::sampleUniform(0,1);
-        double sum = 0.0;
-        for (i = 0, ie = mActions.size(); i < ie; ++i)
-        {
-            sum += distribution[i];
-            if (sum >= random)
-            {
-                prev = mActions[i];
-                prevActionId = i;
-                return prev;
-            }
-        }
-        prev = mActions[ie - 1];
-        prevActionId = ie - 1;
+
+        std::size_t idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
+        prev = mActions[idx];
+        prevActionId = idx;
         return prev;
+
+//        double random = RandomGenerator::sampleUniform(0,1);
+//        double sum = 0.0;
+//        for (i = 0, ie = mActions.size(); i < ie; ++i)
+//        {
+//            sum += distribution[i];
+//            if (sum >= random)
+//            {
+//                prev = mActions[i];
+//                prevActionId = i;
+//                return prev;
+//            }
+//        }
+//        prev = mActions[ie - 1];
+//        prevActionId = ie - 1;
+//        return prev;
     }
 
     virtual RandomDiscreteBiasPolicy<ActionC, StateC>* clone()

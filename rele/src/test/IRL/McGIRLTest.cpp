@@ -42,6 +42,7 @@
 #include "MLE.h"
 #include "batch/LSPI.h"
 #include "algorithms/PGIRL.h"
+#include "nonparametric/RandomPolicy.h"
 
 #include <boost/timer/timer.hpp>
 
@@ -94,11 +95,36 @@ public:
     }
 };
 
+class mc_basis : public BasisFunction
+{
+public:
+    mc_basis(arma::vec mu, double sigma_position, double sigma_velocity)
+        : mu(mu), sigma_position(sigma_position), sigma_velocity(sigma_velocity)
+    {
+    }
+
+    virtual void readFromStream(std::istream& in) {}
+    virtual void writeOnStream(std::ostream& out) {}
+
+    virtual double operator()(const arma::vec& s)
+    {
+        int posIdx = MountainCar::StateLabel::position;
+        int velIdx = MountainCar::StateLabel::velocity;
+        double A = - (s[posIdx] - mu[posIdx]) * (s[posIdx] - mu[posIdx]) / sigma_position;
+        double B = - (s[velIdx] - mu[velIdx]) * (s[velIdx] - mu[velIdx]) / sigma_velocity;
+        double val = exp(A + B);
+        return val;
+    }
+protected:
+    arma::vec mu;
+    double sigma_position, sigma_velocity;
+};
+
 class mc_reward : public IRLParametricReward<FiniteAction, DenseState>
 {
 public:
     mc_reward(arma::vec mu, double sigma_position, double sigma_velocity, unsigned int actionIdx)
-        : mu(mu), sigma_position(sigma_position), sigma_velocity(sigma_velocity), actionIdx(actionIdx)
+        : basis(mu, sigma_position, sigma_velocity), actionIdx(actionIdx)
     {
     }
 
@@ -107,11 +133,8 @@ public:
     {
         if (a.getActionN() != actionIdx)
             return 0;
-        int posIdx = MountainCar::StateLabel::position;
-        int velIdx = MountainCar::StateLabel::velocity;
-        double A = - (s[posIdx] - mu[posIdx]) * (s[posIdx] - mu[posIdx]) / sigma_position;
-        double B = - (s[velIdx] - mu[velIdx]) * (s[velIdx] - mu[velIdx]) / sigma_velocity;
-        double val = exp(A + B);
+
+        double val = basis(s);
         return val;
     }
 
@@ -121,8 +144,7 @@ public:
     }
 
 protected:
-    arma::vec mu;
-    double sigma_position, sigma_velocity;
+    mc_basis basis;
     unsigned int actionIdx;
 };
 
@@ -158,11 +180,11 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    int nbMLEEpisodes = 3;
-    int nbMLESamplesPerEp = 3;
+    int nbMLEEpisodes = 20;
+    int nbMLESamplesPerEp = 40;
     int nbEpisodes = nbMLEEpisodes;
 
-    MountainCar mdp;
+    MountainCar mdp(MountainCar::ConfigurationsLabel::Klein);
 
     /*** define expert's policy ***/
     mountain_car_manual_policy expertPolicy;
@@ -208,12 +230,13 @@ int main(int argc, char *argv[])
 
     /*** get only trailing info ***/
     Dataset<FiniteAction,DenseState> dataExpert;
-    int budget = nbMLEEpisodes*nbMLESamplesPerEp;
+    int budget = 100;//nbMLEEpisodes*nbMLESamplesPerEp;
     for (int ep = 0; ep < data.size() && budget > 0; ++ep)
     {
         Episode<FiniteAction,DenseState> episodeExpert;
         int nbSamples = data[ep].size();
-        for (int t = nbSamples-nbMLESamplesPerEp; t < nbSamples && budget > 0; ++t)
+//        for (int t = nbSamples-nbMLESamplesPerEp; t < nbSamples && budget > 0; ++t)
+        for (int t = 0; t < nbSamples && budget > 0; ++t)
         {
             episodeExpert.push_back(data[ep][t]);
             --budget;
@@ -229,6 +252,7 @@ int main(int argc, char *argv[])
 
 
     /*** compute MLE ***/
+//    RidgeRegularizedMLE<FiniteAction,DenseState> mle(mlePolicy, dataExpert, 0.01);
     MLE<FiniteAction,DenseState> mle(mlePolicy, dataExpert);
     arma::vec startVal(mlePolicy.getParametersSize(),arma::fill::ones);
     arma::vec pp = mle.solve(startVal);
@@ -236,7 +260,9 @@ int main(int argc, char *argv[])
     std::cerr << pp.t();
     mlePolicy.setParameters(pp);
 
-#if EVAL_MLE
+//    mlePolicy.inverseTemperature = 10;
+
+#if 1//EVAL_MLE
     /*** get mlePolicy trajectories ***/
     PolicyEvalAgent<FiniteAction, DenseState> mleEval(mlePolicy);
     Core<FiniteAction, DenseState> mleCore(mdp, mleEval);
@@ -277,7 +303,7 @@ int main(int argc, char *argv[])
     {
         for (int i = 0, ie = pos_mesh.n_rows; i < ie; ++i)
         {
-            assert(ie == 49);
+//            assert(ie == 49);
             arma::vec mu(2);
             mu(MountainCar::StateLabel::position) = pos_mesh(i);
             mu(MountainCar::StateLabel::velocity) = vel_mesh(i);
@@ -286,7 +312,7 @@ int main(int argc, char *argv[])
         rewards.push_back(new mc_reward_one(na));
     }
 
-    assert(rewards.size() == 150);
+//    assert(rewards.size() == 150);
 
     IRLGradType atype = IRLGradType::RB;
     PlaneGIRL<FiniteAction,DenseState> pgirl(dataExpert, mlePolicy, rewards,
@@ -297,15 +323,147 @@ int main(int argc, char *argv[])
     timer2.stop();
 //    timefile << timer2.format(10, "%w") << std::endl;
 
-    cout << "Weights (plane): " << pgirl.getWeights().t();
+    vec rewWeights = pgirl.getWeights();
+    cout << "Weights (plane): " << rewWeights.t();
+    rewWeights = abs(rewWeights);
+//    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
+//    rewWeights = rewWeights / norm(rewWeights,1);
+
+
+    vec pos_linspace2 = linspace<vec>(-1.2,0.6,20);
+    vec vel_linspace2 = linspace<vec>(-0.07,0.07,20);
+
+    //-- meshgrid
+    arma::mat xrow2 = vectorise(pos_linspace2).t();
+    arma::mat ycol2 = vectorise(vel_linspace2);
+    arma::mat xx_pos2 = repmat(xrow2, ycol2.n_rows, ycol2.n_cols);
+    arma::mat yy_vel2 = repmat(ycol2, xrow2.n_rows, xrow2.n_cols);
+    //--
+    arma::vec pos_mesh2 = vectorise(xx_pos2);
+    arma::vec vel_mesh2 = vectorise(yy_vel2);
+
+    DenseState s(2), sn(2);
+    FiniteAction a;
+    for(int na = 0, nae = actions.size(); na < nae; ++na)
+    {
+        a.setActionN(na);
+        char gg[100];
+        sprintf(gg, "learnedRew_action%d.log", na);
+        ofstream rewfilename(fm.addPath(gg), ios_base::out);
+        for (int i = 0, ie = pos_mesh2.n_rows; i < ie; ++i)
+        {
+            s(MountainCar::StateLabel::position) = pos_mesh2(i);
+            s(MountainCar::StateLabel::velocity) = vel_mesh2(i);
+            vec obj(rewards.size());
+            for (int r = 0; r < rewards.size(); ++r)
+            {
+                IRLParametricReward<FiniteAction,DenseState>& rw = *(rewards[r]);
+                obj(r) = rw(s,a,sn);
+            }
+
+            double val = dot(obj,rewWeights);
+            rewfilename << vel_mesh2(i) << "\t" << pos_mesh2(i) << "\t" << val << endl;
+        }
+        rewfilename.close();
+    }
 
 
 
     /*** LSPI ***/
+    //define basis for Q-function
+    BasisFunctions qbasis;
+    for (int i = 0, ie = pos_mesh.n_rows; i < ie; ++i)
+    {
+        arma::vec mu(2);
+        mu(MountainCar::StateLabel::position) = pos_mesh(i);
+        mu(MountainCar::StateLabel::velocity) = vel_mesh(i);
+        qbasis.push_back(new mc_basis(mu, sigma_position, sigma_speed));
+    }
+    qbasis.push_back(new PolynomialFunction());
+    BasisFunctions qbasisrep;
+    for (int i = 0, ie = actions.size(); i < ie; ++i)
+    {
+        for (int k = 0, ke = qbasis.size(); k < ke; ++k)
+        {
+            qbasisrep.push_back(new AndConditionBasisFunction(qbasis[k],2,i));
+        }
+    }
+    //create basis vector
+    DenseFeatures qphi(qbasisrep);
+    //create random policy
+    StochasticDiscretePolicy<FiniteAction,DenseState> randomPolicy(actions);
+
+    //set random start
+    mdp.s0type = MountainCar::ConfigurationsLabel::Random;
+
+    //create data per lspi
+    PolicyEvalAgent<FiniteAction, DenseState> lspiEval(randomPolicy);
+    Core<FiniteAction, DenseState> lspiCore(mdp, lspiEval);
+    CollectorStrategy<FiniteAction, DenseState> collectionlspi;
+    lspiCore.getSettings().loggerStrategy = &collectionlspi;
+    lspiCore.getSettings().episodeLenght = 5;
+    lspiCore.getSettings().testEpisodeN = 1000;
+    lspiCore.runTestEpisodes();
+
+
+    /*** save data ***/
+    Dataset<FiniteAction,DenseState>& dataLSPI = collectionlspi.data;
+    //update with computed reward
+    for (auto ep : dataLSPI)
+    {
+        for (auto tr : ep)
+        {
+            vec obj(rewards.size());
+            for (int r = 0; r < rewards.size(); ++r)
+            {
+                IRLParametricReward<FiniteAction,DenseState>& rw = *(rewards[r]);
+                obj(r) = rw(tr.x, tr.u, tr.xn);
+            }
+
+            double val = dot(obj,rewWeights);
+            tr.r[0] = val;
+        }
+    }
+
+    datafile.open(fm.addPath("lspidata.log"), ios_base::out);
+    datafile << std::setprecision(OS_PRECISION);
+    dataLSPI.writeToStream(datafile);
+    datafile.close();
+
     e_GreedyApproximate lspiPolicy;
     lspiPolicy.setEpsilon(0);
     lspiPolicy.setNactions(actions.size());
-//    LSPI<FiniteAction> lspi(lspiData,lspiPolicy, mdp.getSettings().gamma);
+    LSPI<FiniteAction> lspi(dataLSPI, lspiPolicy, qphi, mdp.getSettings().gamma);
+    lspi.run(40,0.0001);
+
+
+    //create data per lspi
+    PolicyEvalAgent<FiniteAction, DenseState> finalEval(lspiPolicy);
+    Core<FiniteAction, DenseState> finalCore(mdp, finalEval);
+    CollectorStrategy<FiniteAction, DenseState> collectionFinal;
+    finalCore.getSettings().loggerStrategy = &collectionFinal;
+    finalCore.getSettings().episodeLenght = 50;
+    finalCore.getSettings().testEpisodeN = 1000;
+    finalCore.runTestEpisodes();
+
+
+    /*** save data ***/
+    Dataset<FiniteAction,DenseState>& dataFinal = collectionFinal.data;
+    datafile.open(fm.addPath("finaldata.log"), ios_base::out);
+    datafile << std::setprecision(OS_PRECISION);
+    dataFinal.writeToStream(datafile);
+    datafile.close();
+
+    ofstream policyFile(fm.addPath("finalpol.log"), ios_base::out);
+    for (int i = 0, ie = pos_mesh2.n_rows; i < ie; ++i)
+    {
+        s(MountainCar::StateLabel::position) = pos_mesh2(i);
+        s(MountainCar::StateLabel::velocity) = vel_mesh2(i);
+        unsigned int act = lspiPolicy(s);
+        policyFile << vel_mesh2(i) << "\t" << pos_mesh2(i) << "\t" << act << endl;
+    }
+    policyFile.close();
+
 
 
     return 0;

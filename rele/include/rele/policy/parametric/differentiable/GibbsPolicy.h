@@ -206,8 +206,9 @@ public:
 protected:
     std::vector<FiniteAction> mActions;
     std::vector<double> distribution;
-    double inverseTemperature;
     LinearApproximator approximator;
+public:
+    double inverseTemperature;
 
 };
 
