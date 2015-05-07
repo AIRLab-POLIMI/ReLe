@@ -77,14 +77,14 @@ void ShipSteering::step(const DenseAction& action, DenseState& nextState,
 
 void ShipSteering::getInitialState(DenseState& state)
 {
-	currentState[x] = 0;
-	currentState[y] = 0;
-	currentState[theta] = 0;
-	currentState[omega] = 0;
+    currentState[x] = 0;
+    currentState[y] = 0;
+    currentState[theta] = 0;
+    currentState[omega] = 0;
 
-	currentState.setAbsorbing(false);
+    currentState.setAbsorbing(false);
 
-	state = currentState;
+    state = currentState;
 }
 
 bool ShipSteering::throughGate(const vec& start, const vec& end)
