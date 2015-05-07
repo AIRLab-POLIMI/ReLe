@@ -59,6 +59,11 @@ public:
         this->Q = Q;
     }
 
+    inline typename q_type<StateC>::type getQ()
+    {
+        return this->Q;
+    }
+
     inline void setNactions(unsigned int nactions)
     {
         this->nactions = nactions;

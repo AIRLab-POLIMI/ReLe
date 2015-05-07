@@ -192,6 +192,9 @@ target_link_libraries(dam_GIRL rele)
 add_executable(simple_chain_MWAL src/test/IRL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
 
+add_executable(mc_GIRL src/test/IRL/McGIRLTest.cpp)
+target_link_libraries(mc_GIRL rele)
+
 #Solvers tests
 add_executable(lqr_solver_test src/test/solvers/LQRsolverTest.cpp)
 target_link_libraries(lqr_solver_test rele)
