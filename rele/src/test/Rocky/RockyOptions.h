@@ -36,9 +36,9 @@ public:
 	RockyOption();
 
 protected:
-	arma::vec wayPointPolicy(const arma::vec& state, double ox, double oy);
-	double angularDistance(const arma::vec& state, double ox, double oy);
-	bool objectiveFree(const arma::vec& state, double ox, double oy);
+	arma::vec wayPointPolicy(const arma::vec& state, const arma::vec& target);
+	double angularDistance(const arma::vec& state, const arma::vec& target);
+	//bool objectiveFree(const arma::vec& state, double ox, double oy);
 	double rockyRelRotation(const arma::vec& state);
 
 protected:
@@ -75,9 +75,13 @@ public:
 class Home : public RockyOption
 {
 public:
+	Home();
 	 virtual bool canStart(const arma::vec& state);
 	 virtual double terminationProbability(const DenseState& state);
 	 virtual void operator ()(const DenseState& state, DenseAction& action);
+
+private:
+	 arma::vec home;
 };
 
 class Feed : public RockyOption

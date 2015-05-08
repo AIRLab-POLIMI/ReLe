@@ -140,6 +140,11 @@ public:
 
     virtual void computeAandB(const arma::mat& PiPhihat, arma::mat& A, arma::vec& b) = 0;
 
+    virtual ~LSTDQ_()
+	{
+
+	}
+
 protected:
     Dataset<ActionC, DenseState>& data;
     LinearApproximator Q;
@@ -177,6 +182,11 @@ public:
     {
         A = Phihat.t() * (Phihat - gamma * PiPhihat);
         b = Phihat.t() * Rhat;
+    }
+
+    virtual ~LSTDQ()
+    {
+
     }
 
     //    arma::vec run(bool firstTime)

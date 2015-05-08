@@ -47,6 +47,11 @@ public:
     virtual bool canStart(typename state_type<StateC>::const_type_ref state) = 0;
     virtual double terminationProbability(const StateC& state) = 0;
 
+    virtual FiniteAction getLastChoice() //TODO support continuos options?
+    {
+    	return lastChoice;
+    }
+
     virtual void operator ()(const StateC& state, ActionC& action)
     {
         Option<ActionC, StateC>& self = *this;
@@ -88,6 +93,7 @@ public:
 
 protected:
     Reward reward;
+    FiniteAction lastChoice;
 
 };
 

@@ -50,7 +50,7 @@ public:
         unsigned int index;
 
         index = policy(state);
-
+        this->lastChoice = index;
 
         return *options[index];
     }

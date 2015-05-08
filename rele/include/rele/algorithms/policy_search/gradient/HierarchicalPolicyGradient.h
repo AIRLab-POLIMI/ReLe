@@ -99,7 +99,7 @@ public:
 
         // save state and action for late use
         currentState = state;
-        currentAction = this->getPolicy()(state); //FIXME
+        currentAction = getCurrentOption().getLastChoice();
     }
 
     virtual void initTestEpisode()
@@ -132,7 +132,7 @@ public:
 
         // save state and action for late use
         currentState = nextState;
-        currentAction = this->getPolicy()(nextState); //FIXME
+        currentAction = currentOption.getLastChoice(); //FIXME
     }
 
     virtual void endEpisode(const Reward& reward)

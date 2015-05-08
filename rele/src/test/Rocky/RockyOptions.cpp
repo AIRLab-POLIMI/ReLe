@@ -38,10 +38,12 @@ RockyOption::RockyOption() : maxV(1), dt(0.01)
 
 }
 
-arma::vec RockyOption::wayPointPolicy(const arma::vec& state, double ox, double oy)
+arma::vec RockyOption::wayPointPolicy(const arma::vec& state, const arma::vec& target)
 {
+	double ox = target[0];
+	double oy = target[1];
     double waypointDir = atan2(oy - state[y], ox - state[x]);
-    double deltaTheta = angularDistance(state, ox, oy);
+    double deltaTheta = angularDistance(state, target);
     double omega = deltaTheta / dt;
     double v;
 
@@ -70,25 +72,12 @@ arma::vec RockyOption::wayPointPolicy(const arma::vec& state, double ox, double 
     return pi;
 }
 
-double RockyOption::angularDistance(const arma::vec& state, double ox, double oy)
+double RockyOption::angularDistance(const arma::vec& state, const arma::vec& target)
 {
-    double waypointDir = atan2(oy - state[y], ox - state[x]);
+    double waypointDir = atan2(target[1] - state[y], target[0] - state[x]);
     return utils::wrapToPi(waypointDir - state[theta]);
 }
 
-bool RockyOption::objectiveFree(const arma::vec& state, double ox, double oy)
-{
-    vec deltaPos(2);
-    deltaPos[0] = ox - state[x];
-    deltaPos[1] = oy - state[y];
-
-    vec deltaPosR(2);
-    deltaPosR[0] = ox - state[x] - state[xr];
-    deltaPosR[1] = oy - state[y] - state[yr];
-
-    return norm(deltaPos) < norm(deltaPosR);
-
-}
 
 double RockyOption::rockyRelRotation(const arma::vec& state)
 {
@@ -97,25 +86,23 @@ double RockyOption::rockyRelRotation(const arma::vec& state)
 
 bool Eat::canStart(const arma::vec& state)
 {
-    return state[energy] < 100 && state[food] == 1;
+    return state[energy] < 100 && state[food] == 1.0;
 }
 
 double Eat::terminationProbability(const DenseState& state)
 {
-
-    if(state[food] == 0)
-        return 1;
     if(state[energy] >= 100)
         return 1;
-    else if(norm(state(span(xr, yr))) < 0.3)
-        return 1;
-    else
-        return state[energy] / 100.0;
+
+    double distP = min(1.0, norm(state(span(xr, yr))));
+    double energyP = state[energy] / 100;
+
+    return std::max(distP, energyP);
 }
 
 void Eat::operator ()(const DenseState& state, DenseAction& action)
 {
-    //assert(state[food] == 1);
+    assert(state[food] == 1);
     vec pi(3);
 
     pi[0] = 0;
@@ -131,9 +118,15 @@ bool Home::canStart(const arma::vec& state)
     return state[energy] > 0;
 }
 
+Home::Home() : home(2)
+{
+	home[0] = 0;
+	home[1] = 0;
+}
+
 double Home::terminationProbability(const DenseState& state)
 {
-    if(state[energy] == 0 || norm(state(span(xr, yr))) < 0.3)
+    if(state[energy] == 0 || norm(state(span(x, y)) - home) < 0.4)
         return 1;
     else
         return 0;
@@ -142,7 +135,7 @@ double Home::terminationProbability(const DenseState& state)
 
 void Home::operator ()(const DenseState& state, DenseAction& action)
 {
-    arma::vec pi = wayPointPolicy(state, 0, 0);
+    arma::vec pi = wayPointPolicy(state, home);
 
     vec& x = action;
     x = pi;
@@ -157,27 +150,23 @@ Feed::Feed() : spot(2)
 
 bool Feed::canStart(const arma::vec& state)
 {
-    return state[energy] < 100;
+    return state[energy] < 100 && norm(state(span(x,y))- spot) > 0.5;
 }
 
 double Feed::terminationProbability(const DenseState& state)
 {
     if(norm(state(span(x, y)) - spot) < 0.5)
         return 1;
-    else if(norm(state(span(xr, yr))) < 0.3)
-        return 1;
     else
-        return 0;
+    	return min(1.0, 0.4/norm(state(span(xr,yr))));
 }
 
 void Feed::operator ()(const DenseState& state, DenseAction& action)
 {
-    arma::vec pi = wayPointPolicy(state, spot[0], spot[1]);
+    arma::vec pi = wayPointPolicy(state, spot);
 
     vec& x = action;
     x = pi;
-
-    //cout << action << endl;
 }
 
 bool Escape1::canStart(const arma::vec& state)
@@ -187,17 +176,7 @@ bool Escape1::canStart(const arma::vec& state)
 
 double Escape1::terminationProbability(const DenseState& state)
 {
-    /*if(norm(state(span(xr, yr))) > 1)
-        return 1;
-    if(rockyRelRotation(state) > M_PI/2)
-        return 1;
-    else if(angularDistance(state, 0, 0) < M_PI/4 && objectiveFree(state, 0, 0))
-        return 1;
-    else if(angularDistance(state, 5, 0) < M_PI/4 && objectiveFree(state, 5, 0))
-        return 1;
-    else
-        return norm(state(span(xr, yr)));*/
-    return 0.2;
+	return min(1.0, 0.8*norm(state(span(xr, yr))));
 }
 
 void Escape1::operator ()(const DenseState& state, DenseAction& action)
@@ -215,17 +194,7 @@ bool Escape2::canStart(const arma::vec& state)
 
 double Escape2::terminationProbability(const DenseState& state)
 {
-    /*if(norm(state(span(xr, yr))) > 1)
-        return 1;
-    if(rockyRelRotation(state) > M_PI/2)
-        return 1;
-    else if(angularDistance(state, 0, 0) < M_PI/4 && objectiveFree(state, 0, 0))
-        return 1;
-    else if(angularDistance(state, 5, 0) < M_PI/4 && objectiveFree(state, 5, 0))
-        return 1;
-    else
-        return norm(state(span(xr, yr)));*/
-    return 0.2;
+	return min(1.0, 0.8*norm(state(span(xr, yr))));
 }
 
 void Escape2::operator ()(const DenseState& state, DenseAction& action)
@@ -243,17 +212,7 @@ bool Escape3::canStart(const arma::vec& state)
 
 double Escape3::terminationProbability(const DenseState& state)
 {
-    /*if(norm(state(span(xr, yr))) > 1)
-        return 1;
-    if(rockyRelRotation(state) > M_PI/2)
-        return 1;
-    else if(angularDistance(state, 0, 0) < M_PI/4 && objectiveFree(state, 0, 0))
-        return 1;
-    else if(angularDistance(state, 5, 0) < M_PI/4 && objectiveFree(state, 5, 0))
-        return 1;
-    else
-        return norm(state(span(xr, yr)));*/
-    return 0.2;
+	return min(1.0, 0.8*norm(state(span(xr, yr))));
 }
 
 void Escape3::operator ()(const DenseState& state, DenseAction& action)
