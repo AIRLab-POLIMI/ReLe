@@ -10,7 +10,9 @@ To properly compile the ReLe library you must install
 - [Boost](http://www.boost.org/) (>= 1.53)
 
 For example, in Ubuntu Linux you can use the package manager to install them
-`apt-get install libboost-dev libboost-all-dev libnlopt-dev liblapack-dev libarmadillo-dev` <br\>
+```
+apt-get install libboost-dev libboost-all-dev libnlopt-dev liblapack-dev libarmadillo-dev
+```
 
 COMPILING
 ---------
