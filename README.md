@@ -9,9 +9,15 @@ To properly compile the ReLe library you must install
 - [NLopt](http://ab-initio.mit.edu/wiki/index.php/NLopt)
 - [Boost](http://www.boost.org/) (>= 1.53)
 
-For example, in Ubuntu Linux you can use the package manager to install them
+For example, in many Linux distributions you can use the package manager to install them.
+
+**Ubuntu**
 ```
 apt-get install libboost-dev libboost-all-dev libnlopt-dev liblapack-dev libarmadillo-dev
+```
+**Fedora**
+```
+yum install boost-devel armadillo-devel openblas-devel lapack-devel
 ```
 
 COMPILING
