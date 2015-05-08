@@ -75,7 +75,7 @@ public:
 
         tuple[statesize] = action;
 
-        double num = mask[0]*1.0;
+        double num = mask[action]*1.0;
         if (action != mActions[nactions - 1].getActionN())
         {
             arma::vec preference = approximator(tuple);

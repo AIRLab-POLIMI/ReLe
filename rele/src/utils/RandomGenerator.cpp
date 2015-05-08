@@ -22,8 +22,6 @@
  */
 
 #include "RandomGenerator.h"
-#include <ctime>
 
-//std::mt19937 ReLe::RandomGenerator::gen(std::time(0));
 std::random_device ReLe::RandomGenerator::rd;
 ReLe::RngGenerators ReLe::RandomGenerator::gen(ReLe::RandomGenerator::rd());

@@ -70,12 +70,6 @@ public:
         return dist(gen.gen);
     }
 
-    /*inline static double sampleUniform()
-     {
-     std::uniform_01<> dist();
-     return dist(gen.gen);
-     }*/
-
     /**
      * ATTENZIONE IL VALORE HI E' ESCLUSO
      */
@@ -86,7 +80,7 @@ public:
     }
 
     /**
-     * ATTENZIONE IL VALORE HI E' ESCLUSO
+     * ATTENZIONE IL VALORE HI E' INCLUSO
      */
     inline static std::size_t sampleUniformInt(const int lo, const int hi)
     {
@@ -121,7 +115,6 @@ public:
 
 private:
     //random generators
-//    static std::mt19937 gen;
     static std::random_device rd;
     static RngGenerators gen;
 
