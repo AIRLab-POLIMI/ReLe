@@ -30,6 +30,9 @@
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
+#include "basis/SubspaceBasis.h"
+#include "basis/GaussianRbf.h"
+#include "basis/ConditionBasedFunction.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"
@@ -51,37 +54,63 @@ int main(int argc, char *argv[])
 
     Rocky rocky;
 
-
-    //-- Features
-    BasisFunctions basis = IdentityBasis::generate(rocky.getSettings().continuosStateDim);
-    DenseFeatures phi(basis);
-
-
     //-- options
-    vector<FiniteAction> actions;
-    for(int i = 0; i < 4; ++i)
-        actions.push_back(FiniteAction(i));
-
-
     Eat eat;
     Home home;
     Feed feed;
-    Escape escape;
+    Escape1 escape1;
+    Escape2 escape2;
+    //Escape3 escape3;
 
     vector<Option<DenseAction, DenseState>*> options;
     options.push_back(&eat);
     options.push_back(&home);
     options.push_back(&feed);
-    options.push_back(&escape);
+    options.push_back(&escape1);
+    options.push_back(&escape2);
+    //options.push_back(&escape3);
 
-    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 5);
+    vector<FiniteAction> actions;
+    for(int i = 0; i < options.size(); ++i)
+        actions.push_back(FiniteAction(i));
+
+    //-- Features
+    /*BasisFunctions radialBasis1 = GaussianRbf::generate(3,
+    {
+        -10, 10,
+        -10, 10,
+        -M_PI, M_PI
+    });
+
+    BasisFunctions radialBasis2 = GaussianRbf::generate(3,
+    {
+        -10, 10,
+        -10, 10,
+        -M_PI, M_PI
+    });*/
+
+
+    /*BasisFunctions basis1 = SubspaceBasis::generate(radialBasis1, span(Rocky::x, Rocky::theta));
+    BasisFunctions basis2 = SubspaceBasis::generate(radialBasis2, span(Rocky::xr, Rocky::thetar));
+    basis.insert(basis.end(), basis1.begin(), basis1.end());
+    basis.insert(basis.end(), basis2.begin(), basis2.end());
+    basis.push_back(new IdentityBasis(Rocky::energy));
+    basis.push_back(new IdentityBasis(Rocky::food));*/
+
+    BasisFunctions basis = IdentityBasis::generate(Rocky::STATESIZE);
+
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size()-1);
+    DenseFeatures phi(basisGibbs);
+
+    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 0.5);
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
+    //--
 
     //-- agent
-    int nbepperpol = 5, nbstep = 10000;
-    AdaptiveStep stepRule(0.005);
+    int nbepperpol = 10, nbstep = 10000;
+    AdaptiveStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<DenseAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
-    			HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+            HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::MULTI);
 
     Core<DenseAction, DenseState> core(rocky, agent);
     //--

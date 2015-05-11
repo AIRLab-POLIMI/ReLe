@@ -185,6 +185,11 @@ public:
         return FiniteAction(actionN);
     }
 
+    inline virtual bool isAlmostEqual(const FiniteAction& other) const
+    {
+        return this->getActionN() == other.getActionN();
+    }
+
 private:
     unsigned int actionN;
 };

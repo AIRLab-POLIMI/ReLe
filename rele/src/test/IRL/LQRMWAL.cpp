@@ -47,10 +47,10 @@ int main(int argc, char *argv[])
     mat A, B, q1, r1, q2, r2;
     A = 1;
     B = 1;
-    q1 = 100;
+    q1 = 10;
     r1 = 1;
     q2 = 1;
-    r2 = 100;
+    r2 = 10;
     vector<mat> Q, R;
     Q.push_back(q1);
     R.push_back(r1);
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
     cout << "Optimal Policy: " << endl << expertPolicy.printPolicy() << endl;
 
     /* Generate LQR expert dataset */
-    optimalSolver.setTestParams(50, 1000);
+    optimalSolver.setTestParams(5000, 50);
     Dataset<DenseAction, DenseState>&& dataset = optimalSolver.test();
 
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     arma::vec muE = dataset.computefeatureExpectation(rewardPhi, mdp.getSettings().gamma);
 
     IRL_LQRSolver solver(mdp, rewardPhi, phi);
-    solver.setTestParams(1000, 50);
+    solver.setTestParams(5000, 50);
 
     //Run MWAL
     unsigned int T = 1000;

@@ -5,6 +5,10 @@
 #include "regressors/LinearApproximator.h"
 #include "RandomGenerator.h"
 
+#include <stdexcept>
+
+//#define DEBUG_GIBBS
+
 namespace ReLe
 {
 
@@ -15,15 +19,19 @@ class ParametricGibbsPolicy : public DifferentiablePolicy<FiniteAction, StateC>
 public:
 
     ParametricGibbsPolicy(std::vector<FiniteAction> actions,
-                          Features& phi, double inverseTemp) :
+                          Features& phi, double temperature) :
         mActions(actions), distribution(actions.size(),0),
-        approximator(phi),
-        inverseTemperature(inverseTemp)
+        approximator(phi), tau(temperature)
     {
     }
 
     virtual ~ParametricGibbsPolicy()
     {
+    }
+
+    inline void setTemperature(double temperature)
+    {
+        tau = temperature;
     }
 
 
@@ -50,6 +58,9 @@ public:
     {
         int statesize = state.size(), nactions = mActions.size();
         arma::vec tuple(1+statesize);
+        const std::vector<bool>& mask = this->getMask(state, nactions);
+
+
         for (unsigned int i = 0; i < statesize; ++i)
         {
             tuple[i] = state[i];
@@ -59,16 +70,16 @@ public:
         {
             tuple[statesize] = mActions[k].getActionN();
             arma::vec preference = approximator(tuple);
-            den += exp(inverseTemperature*preference[0]);
+            den += mask[k]*exp(preference[0]/tau);
         }
 
         tuple[statesize] = action;
 
-        double num = 1.0;
+        double num = mask[action]*1.0;
         if (action != mActions[nactions - 1].getActionN())
         {
             arma::vec preference = approximator(tuple);
-            num = exp(inverseTemperature*preference[0]);
+            num = mask[action]*exp(preference[0]/tau);
         }
 
         return num/den;
@@ -78,6 +89,7 @@ public:
     {
         double den = 1.0;
         int count = 0, nactions = mActions.size();
+        const std::vector<bool>& mask = this->getMask(state, nactions);
 
         int statesize = state.size();
         arma::vec tuple(1+statesize);
@@ -91,7 +103,7 @@ public:
             tuple[statesize] = mActions[k].getActionN();
 
             arma::vec preference = approximator(tuple);
-            double val = exp(inverseTemperature*preference[0]);
+            double val = mask[k]*exp(preference[0]/tau);
             den += val;
             distribution[count++] = val;
         }
@@ -100,14 +112,17 @@ public:
 
         for (unsigned int k = 0, ke = nactions; k < ke; ++k)
         {
-            if ((isnan(distribution[k]))||isinf(distribution[k]))
+#ifdef DEBUG_GIBBS
+            if (isinf(val))
             {
-                distribution[k] = 1;
+                throw std::runtime_error("Distribution is infinite");
             }
-            else
+            else if(isnan(val))
             {
-                distribution[k] /= den;
+                throw std::runtime_error("Distribution is NaN");
             }
+#endif
+            distribution[k] /= den;
         }
 
         unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
@@ -125,10 +140,12 @@ public:
     {
         return approximator.getParameters();
     }
+
     virtual inline const unsigned int getParametersSize() const
     {
         return approximator.getParametersSize();
     }
+
     virtual inline void setParameters(arma::vec& w)
     {
         approximator.setParameters(w);
@@ -145,12 +162,11 @@ public:
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
                               typename action_type<FiniteAction>::const_type_ref action)
     {
-        double IT = inverseTemperature; //inverse temperature
-
         // Compute the sum of all the preferences
         double sumexp = 0;
         arma::mat sumpref(this->getParametersSize(),1,arma::fill::zeros); // sum of the preferences
         unsigned int nactions = mActions.size();
+        const std::vector<bool>& mask = this->getMask(state, nactions);
 
         int statesize = state.size();
         arma::vec tuple(1+statesize);
@@ -165,18 +181,22 @@ public:
             tuple[statesize] = mActions[k].getActionN();
             arma::vec pref = approximator(tuple);
             arma::mat loc_phi = basis(tuple);
-            double val = exp(IT*pref[0]);
+            double val = mask[k]*exp(pref[0]/tau);
             distribution[k] = val;
-//            if ((isnan(val))||isinf(val))
-//            {
-//                distribution[k] = 1;
-//            }
-//            else
-//            {
-//                distribution[k] = val;
-//            }
+
+#ifdef DEBUG_GIBBS
+            if (isinf(val))
+            {
+                throw std::runtime_error("Distribution is infinite");
+            }
+            else if(isnan(val))
+            {
+                throw std::runtime_error("Distribution is NaN");
+            }
+#endif
+
             sumexp = sumexp + distribution[k];
-            sumpref = sumpref + IT*loc_phi*distribution[k];
+            sumpref = sumpref + loc_phi*distribution[k]/tau;
         }
         sumexp = sumexp + 1;
         sumpref = sumpref / sumexp;
@@ -188,7 +208,7 @@ public:
         {
             tuple[statesize] = action;
             arma::mat loc_phi = basis(tuple);
-            gradient = IT*loc_phi - sumpref;
+            gradient = loc_phi/tau - sumpref;
         }
         return gradient;
     }
@@ -196,7 +216,7 @@ public:
 protected:
     std::vector<FiniteAction> mActions;
     std::vector<double> distribution;
-    double inverseTemperature;
+    double tau;
     LinearApproximator approximator;
 
 };

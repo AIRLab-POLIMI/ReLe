@@ -33,13 +33,13 @@ namespace ReLe
 class RngGenerators
 {
 public:
-    RngGenerators(long int seed) : gen(seed)
+    RngGenerators(unsigned int seed) : gen(seed)
     {
         srand(seed);
         arma::arma_rng::set_seed(seed);
     }
 
-    void seed(long int seed)
+    void seed(unsigned int seed)
     {
         srand(seed);
         arma::arma_rng::set_seed(seed);
@@ -70,18 +70,18 @@ public:
         return dist(gen.gen);
     }
 
-    /*inline static double sampleUniform()
-     {
-     std::uniform_01<> dist();
-     return dist(gen.gen);
-     }*/
-
+    /**
+     * ATTENZIONE IL VALORE HI E' ESCLUSO
+     */
     inline static double sampleUniform(const double lo, const double hi)
     {
         std::uniform_real_distribution<> dist(lo, hi);
         return dist(gen.gen);
     }
 
+    /**
+     * ATTENZIONE IL VALORE HI E' INCLUSO
+     */
     inline static std::size_t sampleUniformInt(const int lo, const int hi)
     {
         std::uniform_int_distribution<> dist(lo, hi);
@@ -108,14 +108,14 @@ public:
         return dist(gen.gen) < prob;
     }
 
-    inline static void seed(long int seed)
+    inline static void seed(unsigned int seed)
     {
         gen.seed(seed);
     }
 
 private:
     //random generators
-//    static std::mt19937 gen;
+    static std::random_device rd;
     static RngGenerators gen;
 
 };

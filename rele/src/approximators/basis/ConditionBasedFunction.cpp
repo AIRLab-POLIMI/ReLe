@@ -99,5 +99,20 @@ void AndConditionBasisFunction::readFromStream(std::istream &in)
     //TOFIX manca un factory per le basis (come faccio a leggere la basis function?)
 }
 
+BasisFunctions AndConditionBasisFunction::generate(BasisFunctions& basis, unsigned int index, unsigned int values)
+{
+    BasisFunctions newBasis;
+
+    for (int i = 0; i < values; ++i)
+    {
+        for(int j = 0; j < basis.size(); j++)
+        {
+            newBasis.push_back(new AndConditionBasisFunction(basis[j], index, i));
+        }
+    }
+
+    return newBasis;
+}
+
 
 }//end namespace

@@ -10,18 +10,32 @@ clf(1)
 
 figure(2)
 clf(2)
-
-figure(3)
-clf(3)
+%% Choose file
+hpg = true;
+if(hpg)
+    basedir = '/tmp/ReLe/Rocky/HPG/';
+else
+    basedir = '/tmp/ReLe/Rocky/REPS/';
+end
+trajectoryFile = [basedir 'Rocky.log'];
+agentFile = [basedir 'Rocky_agentData.log'];
 
 %% Read data
 
 disp('Reading data trajectories...')
-csv = csvread('/tmp/ReLe/Rocky/REPS/Rocky.log');
+csv = csvread(trajectoryFile);
 
 disp('Organizing data in episodes...')
 episodes = readDataset(csv);
 clearvars csv
+
+%% Plot J
+if(hpg)
+    plotGradient(1, agentFile);
+else
+    plotREPS(1, agentFile);
+end
+
 
 %% Display Data
 
@@ -34,25 +48,14 @@ for i=1:100:size(episodes, 1)
     traj = x(:, 1:2);
     rockytraj = traj + x(:, 6:7);
 
-    figure(1)
+    figure(2)
     hold on;
     plot(traj(:, 1), traj(:, 2), 'b');
     plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
 end
 
-figure(1)
-axis equal
-
-disp('Plotting mean reward...')
-r = zeros(size(episodes, 1), 1);
-for i=1:size(episodes, 1)
-    r(i) = sum(episodes(i).r)/ size(episodes(i).r, 1);
-end
-
 figure(2)
-plot(r);
-
-axis tight
+axis equal
 
 disp('Starting visualization...')
 
@@ -62,7 +65,7 @@ plot(traj(:, 1), traj(:, 2), 'b');
 plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
 axis auto;
 lim = axis;
-pause(3)
+pause(2)
 clf(3)
 figure(3)
 H = uicontrol('Style', 'PushButton', ...

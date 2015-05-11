@@ -144,6 +144,9 @@ target_link_libraries(pol2mat rele)
 add_executable(mle_Policy src/test/miscellaneous/MLEPolicyTest.cpp)
 target_link_libraries(mle_Policy rele)
 
+add_executable(rand_Policy src/test/miscellaneous/RandomPolicyTest.cpp)
+target_link_libraries(rand_Policy rele)
+
 #miscellaneous/policy_search tests
 add_executable(datadiff2mat src/test/miscellaneous/policy_search/DataDiff2Matlab.cpp)
 target_link_libraries(datadiff2mat rele)
@@ -191,6 +194,9 @@ target_link_libraries(dam_GIRL rele)
 
 add_executable(simple_chain_MWAL src/test/IRL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
+
+add_executable(mc_GIRL src/test/IRL/McGIRLTest.cpp)
+target_link_libraries(mc_GIRL rele)
 
 #Solvers tests
 add_executable(lqr_solver_test src/test/solvers/LQRsolverTest.cpp)
@@ -246,6 +252,9 @@ target_link_libraries(deep_PG rele)
 
 add_executable(dam_PG src/test/PG/DamPGTest.cpp)
 target_link_libraries(dam_PG rele)
+
+add_executable(ship_PG src/test/PG/ShipSteeringPGTest.cpp)
+target_link_libraries(ship_PG rele)
 
 #Batch test
 add_executable(deep_off src/test/Batch/DeepBatchTest.cpp)

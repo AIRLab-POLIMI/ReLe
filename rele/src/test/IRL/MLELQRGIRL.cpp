@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 //    MVNDiagonalPolicy policy(phi);
 
 
-    MLE mle(policy, data);
+    MLE<DenseAction,DenseState> mle(policy, data);
     double vv[] = {0,0,0,0,0};
     arma::vec startVal(vv,5);
 //    double vv[] = {0,0,0,0};

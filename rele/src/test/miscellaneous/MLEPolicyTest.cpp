@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
 
 
-    MLE mle(*policy, data);
+    MLE<DenseAction,DenseState> mle(*policy, data);
     arma::vec startVal;
     startVal.load(argv[2], arma::raw_ascii);
     unsigned int nbIter = 100;

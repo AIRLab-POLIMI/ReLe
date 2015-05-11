@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < nactions(0); ++i)
             actions.push_back(FiniteAction(i));
 
-        ParametricGibbsPolicy<DenseState> policy(actions, phi, inverseT(0));
+        ParametricGibbsPolicy<DenseState> policy(actions, phi, 1.0/inverseT(0));
         policy.setParameters(params);
 
         cout << policy.getPolicyName() << endl;

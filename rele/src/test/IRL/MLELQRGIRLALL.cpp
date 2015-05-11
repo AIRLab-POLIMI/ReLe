@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
 
 //    MVNPolicy policy(phi, cov);
 
-    MLE mle(policy, data);
+    MLE<DenseAction,DenseState> mle(policy, data);
     arma::vec startVal(policy.getParametersSize(),arma::fill::ones);
     arma::vec pp = mle.solve(startVal);
 
