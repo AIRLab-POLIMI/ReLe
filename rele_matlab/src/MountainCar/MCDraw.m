@@ -1,5 +1,5 @@
 function MCDraw(episodes)
-clc; close all;
+close all;
 figure(1);
 x = -1.3:0.05:1;
 h = Hill(x);

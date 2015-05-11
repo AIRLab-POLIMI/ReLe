@@ -40,8 +40,8 @@ RockyOption::RockyOption() : maxV(1), dt(0.01)
 
 arma::vec RockyOption::wayPointPolicy(const arma::vec& state, const arma::vec& target)
 {
-	double ox = target[0];
-	double oy = target[1];
+    double ox = target[0];
+    double oy = target[1];
     double waypointDir = atan2(oy - state[y], ox - state[x]);
     double deltaTheta = angularDistance(state, target);
     double omega = deltaTheta / dt;
@@ -120,8 +120,8 @@ bool Home::canStart(const arma::vec& state)
 
 Home::Home() : home(2)
 {
-	home[0] = 0;
-	home[1] = 0;
+    home[0] = 0;
+    home[1] = 0;
 }
 
 double Home::terminationProbability(const DenseState& state)
@@ -158,7 +158,7 @@ double Feed::terminationProbability(const DenseState& state)
     if(norm(state(span(x, y)) - spot) < 0.5)
         return 1;
     else
-    	return min(1.0, 0.4/norm(state(span(xr,yr))));
+        return min(1.0, 0.4/norm(state(span(xr,yr))));
 }
 
 void Feed::operator ()(const DenseState& state, DenseAction& action)
@@ -176,7 +176,7 @@ bool Escape1::canStart(const arma::vec& state)
 
 double Escape1::terminationProbability(const DenseState& state)
 {
-	return min(1.0, 0.8*norm(state(span(xr, yr))));
+    return min(1.0, 0.8*norm(state(span(xr, yr))));
 }
 
 void Escape1::operator ()(const DenseState& state, DenseAction& action)
@@ -194,7 +194,7 @@ bool Escape2::canStart(const arma::vec& state)
 
 double Escape2::terminationProbability(const DenseState& state)
 {
-	return min(1.0, 0.8*norm(state(span(xr, yr))));
+    return min(1.0, 0.8*norm(state(span(xr, yr))));
 }
 
 void Escape2::operator ()(const DenseState& state, DenseAction& action)
@@ -212,7 +212,7 @@ bool Escape3::canStart(const arma::vec& state)
 
 double Escape3::terminationProbability(const DenseState& state)
 {
-	return min(1.0, 0.8*norm(state(span(xr, yr))));
+    return min(1.0, 0.8*norm(state(span(xr, yr))));
 }
 
 void Escape3::operator ()(const DenseState& state, DenseAction& action)

@@ -25,6 +25,7 @@
 #define LSPI_H_
 
 #include "batch/LSTDQ.h"
+#include "RandomGenerator.h"
 
 namespace ReLe
 {
@@ -65,7 +66,14 @@ public:
             std::cout << "LSPI iteration : " << iteration << std::endl;
 
             //Evaluate the current policy (and implicitly improve)
+            //            RandomGenerator::seed(1000);
             arma::vec Q_weights = critic.run(firsttime);
+            //            RandomGenerator::seed(1000);
+            //            arma::vec Q_weights2 = critic.run_slow();
+            //            arma::mat X = arma::join_horiz(Q_weights,Q_weights2);
+            //            std::cout << X << std::endl;
+            //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
+
             critic.getQ().setParameters(Q_weights);
 
             //Compute the distance between the current and the previous policy
