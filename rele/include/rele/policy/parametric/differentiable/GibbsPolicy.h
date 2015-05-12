@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-//#define DEBUG_GIBBS
+#define DEBUG_GIBBS
 
 namespace ReLe
 {
@@ -110,9 +110,11 @@ public:
         distribution[nactions-1] = 1.0;
 
 
+        double new_den = 0.0;
         for (unsigned int k = 0, ke = nactions; k < ke; ++k)
         {
 #ifdef DEBUG_GIBBS
+            double val = den;
             if (isinf(val))
             {
                 throw std::runtime_error("Distribution is infinite");
@@ -123,6 +125,19 @@ public:
             }
 #endif
             distribution[k] /= den;
+            if (isnan(distribution[k]) || isinf(distribution[k]))
+            {
+                distribution[k] = 1;
+            }
+            new_den += distribution[k];
+        }
+
+        if (!(abs(new_den - 1.0) < 1e-5))
+        {
+            for (unsigned int k = 0, ke = nactions; k < ke; ++k)
+            {
+                distribution[k] /= new_den;
+            }
         }
 
         unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
@@ -181,7 +196,7 @@ public:
             tuple[statesize] = mActions[k].getActionN();
             arma::vec pref = approximator(tuple);
             arma::mat loc_phi = basis(tuple);
-            double val = mask[k]*exp(pref[0]/tau);
+            double val = mask[k]*std::min(exp(pref[0]/tau), 1e200);
             distribution[k] = val;
 
 #ifdef DEBUG_GIBBS

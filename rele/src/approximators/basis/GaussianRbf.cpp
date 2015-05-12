@@ -195,6 +195,19 @@ BasisFunctions GaussianRbf::generate(std::initializer_list<unsigned int> n_cente
     return GaussianRbf::generate(centerDim, range);
 }
 
+BasisFunctions GaussianRbf::generate(arma::mat& centers, arma::mat& widths)
+{
+    assert(centers.n_rows == widths.n_rows);
+    assert(centers.n_cols == widths.n_cols);
+    int ncols = centers.n_cols;
+    BasisFunctions basis;
+    for (int i = 0; i < ncols; i++)
+    {
+        basis.push_back(new GaussianRbf(centers.col(i), widths.col(i)));
+    }
+    return basis;
+}
+
 void GaussianRbf::writeOnStream(std::ostream &out)
 {
     unsigned int dim = mean.n_rows;

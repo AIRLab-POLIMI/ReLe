@@ -34,6 +34,8 @@
 namespace ReLe
 {
 
+//#define REMOVE_LAST
+
 template<class ActionC>
 class LSTDQ_
 {
@@ -44,6 +46,10 @@ public:
         data(data), Q(phi), policy(policy), gamma(gamma)
     {
         policy.setQ(&Q);
+        //        arma::vec xi = {0,0.2,0};
+        //        Features_<arma::vec>& rr = Q.getBasis();
+        //        std::cout << rr(xi) << std::endl;
+        //        std::cout << std::endl;
     }
 
     LinearApproximator& getQ()
@@ -69,21 +75,23 @@ public:
         /*** Precompute Phihat and Rhat for all subsequent iterations ***/
         if (firstTime == true)
         {
-            Phihat.zeros(nbSamples,df);
-            Rhat.zeros(nbSamples);
+            Phihat.set_size(nbSamples,df);
+            Rhat.set_size(nbSamples);
 
             //scan the entire data set
+            arma::vec a(1);
+            arma::mat phi;
             unsigned int idx = 0;
             for (auto episode : data)
             {
                 for (auto tr : episode)
                 {
-                    //evaluate basis in input = [x; u]
-                    arma::vec s = tr.x;
-                    arma::vec a(1);
+                    //compute basis in current state-action pair
                     a(0) = tr.u;
-                    arma::vec input = arma::join_vert(s, a);
-                    arma::mat phi = basis(input);
+                    arma::vec input = arma::join_vert(tr.x, a);
+                    phi = basis(input);
+
+                    //update matricies
                     Phihat.row(idx) = phi.t();
                     Rhat(idx) = tr.r[0];
 
@@ -95,26 +103,29 @@ public:
 
         /*** Loop through the samples ***/
         unsigned int idx = 0;
+        arma::vec a(1), input;
+        arma::mat nextPhi;
         for (auto episode : data)
         {
             for (auto tr : episode)
             {
                 //Make sure the nextstate is not an absorbing state
+#ifdef REMOVE_LAST
                 if (!tr.xn.isAbsorbing())
                 {
+#endif
                     /*** Compute the policy and the corresponding basis at the next state ***/
                     typename action_type<ActionC>::type nextAction = policy(tr.xn);
                     //evaluate basis in input = [x; u]
-                    arma::vec s = tr.x;
-                    arma::vec a(1);
                     a(0) = nextAction;
-                    arma::vec input = arma::join_vert(s, a);
-                    arma::mat nextPhi = basis(input);
+                    input = arma::join_vert(tr.xn, a);
+                    nextPhi = basis(input);
                     PiPhihat.row(idx) = nextPhi.t();
-
-                    // increment sample counter
-                    ++idx;
+#ifdef REMOVE_LAST
                 }
+#endif
+                // increment sample counter
+                ++idx;
             }
         }
 
@@ -132,11 +143,14 @@ public:
         }
         else
         {
+            std::cout << "Matrix is not invertible" << std::endl;
             w = arma::pinv(A)*b;
         }
 
         return w;
     }
+
+    virtual arma::vec run_slow() = 0;
 
     virtual void computeAandB(const arma::mat& PiPhihat, arma::mat& A, arma::vec& b) = 0;
 
@@ -164,9 +178,9 @@ template<class ActionC>
 class LSTDQ : public LSTDQ_<ActionC>
 {
     typedef LSTDQ_<ActionC> Base;
-//    using Base::data;
-//    using Base::Q;
-//    using Base::policy;
+    using Base::data;
+    using Base::Q;
+    using Base::policy;
     using Base::gamma;
     using Base::Phihat;
     using Base::Rhat;
@@ -189,83 +203,69 @@ public:
 
     }
 
-    //    arma::vec run(bool firstTime)
-    //    {
-    //        /*** Initialize variables ***/
-    //        int nbEpisodes = data.size();
-    //        //compute the overall number of samples
-    //        int nbSamples = 0;
-    //        for (int k = 0; k < nbEpisodes; ++k)
-    //            nbSamples += data[k].size();
 
-    //        Features_<arma::vec>& basis = Q.getBasis();
-    //        int df = basis.rows(); //number of features
-    //        arma::mat PiPhihat(nbSamples, df, arma::fill::zeros);
+    arma::vec run_slow()
+    {
+        /*** Initialize variables ***/
+        int nbEpisodes = data.size();
+        //compute the overall number of samples
+        int nbSamples = 0;
+        for (int k = 0; k < nbEpisodes; ++k)
+            nbSamples += data[k].size();
 
-    //        /*** Precompute Phihat and Rhat for all subsequent iterations ***/
-    //        if (firstTime == true)
-    //        {
-    //            Phihat.zeros(nbSamples,df);
-    //            Rhat.zeros(nbSamples);
+        Features_<arma::vec>& basis = Q.getBasis();
+        int df = basis.rows(); //number of features
+        arma::mat A(df, df, arma::fill::zeros);
+        arma::vec b(df, arma::fill::zeros);
 
-    //            //scan the entire data set
-    //            unsigned int idx = 0;
-    //            for (auto episode : data)
-    //            {
-    //                for (auto tr : episode)
-    //                {
-    //                    //evaluate basis in input = [x; u]
-    //                    arma::vec input = arma::join_vert(tr.x,tr.u);
-    //                    arma::mat phi = basis(input);
-    //                    Phihat.row(idx) = phi.t();
-    //                    Rhat(idx) = tr.r[0];
+        arma::vec a(1), input;
+        arma::mat phi, nextPhi;
+        for (auto episode : data)
+        {
+            for (auto tr : episode)
+            {
+                //compute basis in current state-action pair
+                a(0) = tr.u;
+                input = arma::join_vert(tr.x, a);
+                phi = basis(input);
 
-    //                    // increment sample counter
-    //                    ++idx;
-    //                }
-    //            }
-    //        }
+                //compute basis in next state with action selected by the greedy policy
+#ifdef REMOVE_LAST
+                if (!tr.xn.isAbsorbing())
+                {
+#endif
+                    typename action_type<ActionC>::type nextAction = policy(tr.xn);
+                    a(0) = nextAction;
+                    input = arma::join_vert(tr.xn, a);
+                    nextPhi = basis(input);
+#ifdef REMOVE_LAST
+                }
+                else
+                {
+                    nextPhi.zeros(phi.n_rows,1);
+                }
+#endif
 
-    //        /*** Loop through the samples ***/
-    //        unsigned int idx = 0;
-    //        for (auto episode : data)
-    //        {
-    //            for (auto tr : episode)
-    //            {
-    //                //Make sure the nextstate is not an absorbing state
-    //                if (!tr.xn.isAbsorbing())
-    //                {
-    //                    /*** Compute the policy and the corresponding basis at the next state ***/
-    //                    typename action_type<ActionC>::type nextAction = policy(tr.xn);
-    //                    //evaluate basis in input = [x; u]
-    //                    arma::vec input = arma::join_vert(tr.xn, nextAction);
-    //                    arma::mat nextPhi = basis(input);
-    //                    PiPhihat.row(idx) = nextPhi.t();
+                A += phi * (phi - gamma * nextPhi).t();
+                b += phi * tr.r[0];
+            }
+        }
+        /*** Solve the system to find w ***/
+        arma::vec w;
+        int rank = arma::rank(A);
+        if (rank == df)
+        {
+            w = arma::solve(A,b);
+        }
+        else
+        {
+            std::cout << "Matrix is not invertible" << std::endl;
+            w = arma::pinv(A)*b;
+        }
 
-    //                    // increment sample counter
-    //                    ++idx;
-    //                }
-    //            }
-    //        }
+        return w;
+    }
 
-    //        /*** Compute the matrices A and b ***/
-    //        arma::mat A = Phihat.t() * (Phihat - gamma * PiPhihat);
-    //        arma::vec b = Phihat.t() * Rhat;
-
-    //        /*** Solve the system to find w ***/
-    //        arma::vec w;
-    //        int rank = arma::rank(A);
-    //        if (rank == df)
-    //        {
-    //            w = arma::solve(A,b);
-    //        }
-    //        else
-    //        {
-    //            w = arma::pinv(A)*b;
-    //        }
-
-    //        return w;
-    //    }
 };
 
 /**
@@ -278,9 +278,9 @@ template<class ActionC>
 class LSTDQBe : public LSTDQ_<ActionC>
 {
     typedef LSTDQ_<ActionC> Base;
-//    using Base::data;
-//    using Base::Q;
-//    using Base::policy;
+    using Base::data;
+    using Base::Q;
+    using Base::policy;
     using Base::gamma;
     using Base::Phihat;
     using Base::Rhat;
@@ -299,6 +299,58 @@ public:
         arma::mat tmp = Phihat - gamma * PiPhihat;
         A = tmp.t() * tmp;
         b = tmp.t() * Rhat;
+    }
+
+    virtual arma::vec run_slow()
+    {
+        /*** Initialize variables ***/
+        int nbEpisodes = data.size();
+        //compute the overall number of samples
+        int nbSamples = 0;
+        for (int k = 0; k < nbEpisodes; ++k)
+            nbSamples += data[k].size();
+
+        Features_<arma::vec>& basis = Q.getBasis();
+        int df = basis.rows(); //number of features
+        arma::mat A(df, df, arma::fill::zeros);
+        arma::vec b(df, arma::fill::zeros);
+
+        arma::vec a(1), input;
+        arma::mat phi, nextPhi;
+        for (auto episode : data)
+        {
+            for (auto tr : episode)
+            {
+                //compute basis in current state-action pair
+                a(0) = tr.u;
+                input = arma::join_vert(tr.x, a);
+                phi = basis(input);
+
+                //compute basis in next state with action selected by the greedy policy
+                typename action_type<ActionC>::type nextAction = policy(tr.xn);
+                a(0) = nextAction;
+                input = arma::join_vert(tr.xn, a);
+                nextPhi = basis(input);
+
+
+                A += (phi - gamma * nextPhi) * (phi - gamma * nextPhi).t();
+                b += (phi - gamma * nextPhi) * tr.r[0];
+            }
+        }
+        /*** Solve the system to find w ***/
+        arma::vec w;
+        int rank = arma::rank(A);
+        if (rank == df)
+        {
+            w = arma::solve(A,b);
+        }
+        else
+        {
+            std::cout << "Matrix is not invertible" << std::endl;
+            w = arma::pinv(A)*b;
+        }
+
+        return w;
     }
 
 };

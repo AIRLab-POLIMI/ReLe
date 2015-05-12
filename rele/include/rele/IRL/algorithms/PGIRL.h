@@ -154,6 +154,8 @@ public:
 
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
+                for (int p = 0; p < dp; ++p)
+                    assert(!isinf(localg(p)));
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 // ********************** //
@@ -183,6 +185,7 @@ public:
             {
                 baseline_J_num(p) += Rew * sumGradLog(p) * sumGradLog(p);
                 baseline_den(p) += sumGradLog(p) * sumGradLog(p);
+                assert(!isinf(baseline_J_num(p)));
             }
 
             // ********************** //
@@ -203,6 +206,11 @@ public:
 
             for (int ep = 0; ep < nbEpisodes; ++ep)
             {
+                double a =return_J_ObjEp(ep);
+                double b = sumGradLog_CompEp(p,ep);
+                assert(!isnan(a));
+                assert(!isnan(b));
+                assert(!isnan(baseline_J));
                 gradient_J[p] += (return_J_ObjEp(ep) - baseline_J) * sumGradLog_CompEp(p,ep);
             }
         }
