@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_ENVIRONMENTS_ROCKY_H_
 
 #include "ContinuousMDP.h"
+#include "Range.h"
 
 #include <vector>
 
@@ -62,7 +63,7 @@ private:
     class Predictor
     {
     public:
-        Predictor(double dt, double limitX, double limitY);
+        Predictor(double dt, Range limitX, Range limitY);
         void reset();
         void saveLastValues(double thetaM, double v);
         void predict(const DenseState& state, double& xhat, double& yhat, double& thetaDirhat);
@@ -75,20 +76,21 @@ private:
         double v;
 
         //walls
-        const double limitX;
-        const double limitY;
+        const Range limitX;
+        const Range limitY;
 
     };
 
 private:
     std::vector<arma::vec2> foodSpots;
     const double dt;
-    const double maxOmega;
-    const double maxV;
-    const double maxOmegar;
-    const double maxVr;
-    const double limitX;
-    const double limitY;
+    const Range maxOmega;
+    const Range maxV;
+    const Range maxOmegar;
+    const Range maxVr;
+    const Range limitX;
+    const Range limitY;
+    const Range maxEnergy;
 
     //Predictor for rocky
     Predictor predictor;

@@ -23,7 +23,7 @@
 
 #include "RockyOptions.h"
 
-#include "Utils.h"
+#include "ModularRange.h"
 
 #include <cassert>
 
@@ -75,13 +75,13 @@ arma::vec RockyOption::wayPointPolicy(const arma::vec& state, const arma::vec& t
 double RockyOption::angularDistance(const arma::vec& state, const arma::vec& target)
 {
     double waypointDir = atan2(target[1] - state[y], target[0] - state[x]);
-    return utils::wrapToPi(waypointDir - state[theta]);
+    return RangePi::bound(waypointDir - state[theta]);
 }
 
 
 double RockyOption::rockyRelRotation(const arma::vec& state)
 {
-    return utils::wrapToPi(atan2(state[yr],state[xr]));
+    return RangePi::bound(atan2(state[yr],state[xr]));
 }
 
 bool Eat::canStart(const arma::vec& state)
@@ -176,10 +176,10 @@ bool Escape1::canStart(const arma::vec& state)
 
 double Escape1::terminationProbability(const DenseState& state)
 {
-	double distanceP = min(1.0, norm(state(span(xr, yr))));
-	double angularDistance = abs(utils::wrapToPi(state[theta]-state[thetar]));
-	double angleP = angularDistance/M_1_PI;
-	return max(distanceP, angleP);
+    double distanceP = min(1.0, norm(state(span(xr, yr))));
+    double angularDistance = abs(RangePi::bound(state[theta]-state[thetar]));
+    double angleP = angularDistance/M_1_PI;
+    return max(distanceP, angleP);
 }
 
 void Escape1::operator ()(const DenseState& state, DenseAction& action)
@@ -198,7 +198,7 @@ bool Escape2::canStart(const arma::vec& state)
 double Escape2::terminationProbability(const DenseState& state)
 {
     double distanceP = min(1.0, norm(state(span(xr, yr))));
-    double angularDistance = abs(utils::wrapToPi(state[theta]-state[thetar]));
+    double angularDistance = abs(RangePi::bound(state[theta]-state[thetar]));
     double angleP = angularDistance/M_1_PI;
     return max(distanceP, angleP);
 }
@@ -219,7 +219,7 @@ bool Escape3::canStart(const arma::vec& state)
 double Escape3::terminationProbability(const DenseState& state)
 {
     double distanceP = min(1.0, norm(state(span(xr, yr))));
-    double angularDistance = abs(utils::wrapToPi(state[theta]-state[thetar]));
+    double angularDistance = abs(RangePi::bound(state[theta]-state[thetar]));
     double angleP = angularDistance/M_1_PI;
     return max(distanceP, angleP);
 }

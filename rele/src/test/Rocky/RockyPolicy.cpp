@@ -23,7 +23,7 @@
 
 #include "RockyPolicy.h"
 
-#include "Utils.h"
+#include "ModularRange.h"
 
 using namespace arma;
 using namespace std;
@@ -134,7 +134,7 @@ arma::vec RockyPolicy::escapePolicy(const arma::vec& state)
 arma::vec RockyPolicy::wayPointPolicy(const arma::vec& state, double ox, double oy)
 {
     double waypointDir = atan2(oy - state[y], ox - state[x]);
-    double deltaTheta = utils::wrapToPi(waypointDir - state[theta]);
+    double deltaTheta = RangePi::bound(waypointDir - state[theta]);
     double omega = deltaTheta / dt;
     double v;
 

@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     int episodes = 3000;
     core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
-            WriteStrategy<DenseAction, DenseState>::outType::AGENT);
+            WriteStrategy<DenseAction, DenseState>::AGENT);
 
 
     ConsoleManager console(episodes, 1);
@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 
     console.printInfo("Starting evaluation episode");
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
-            WriteStrategy<DenseAction, DenseState>::outType::TRANS);
+            WriteStrategy<DenseAction, DenseState>::TRANS);
     core.runTestEpisode();
 
     delete core.getSettings().loggerStrategy;
