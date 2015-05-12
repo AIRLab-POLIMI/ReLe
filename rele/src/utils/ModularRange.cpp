@@ -63,7 +63,9 @@ Range2Pi::Range2Pi() : ModularRange(0.0, 2*M_PI)
 
 }
 
-double Range2Pi::bound(double value)
+const Range2Pi Range2Pi::range;
+
+double Range2Pi::wrap(double value)
 {
 	return range.bound(value);
 }
@@ -73,11 +75,11 @@ RangePi::RangePi() : ModularRange(-M_PI, M_PI)
 
 }
 
-double RangePi::bound(double value)
+double RangePi::wrap(double value)
 {
 	return range.bound(value);
 }
 
-
+const RangePi RangePi::range;
 
 }

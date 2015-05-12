@@ -75,13 +75,13 @@ arma::vec RockyOption::wayPointPolicy(const arma::vec& state, const arma::vec& t
 double RockyOption::angularDistance(const arma::vec& state, const arma::vec& target)
 {
     double waypointDir = atan2(target[1] - state[y], target[0] - state[x]);
-    return RangePi::bound(waypointDir - state[theta]);
+    return RangePi::wrap(waypointDir - state[theta]);
 }
 
 
 double RockyOption::rockyRelRotation(const arma::vec& state)
 {
-    return RangePi::bound(atan2(state[yr],state[xr]));
+    return RangePi::wrap(atan2(state[yr],state[xr]));
 }
 
 bool Eat::canStart(const arma::vec& state)
@@ -177,7 +177,7 @@ bool Escape1::canStart(const arma::vec& state)
 double Escape1::terminationProbability(const DenseState& state)
 {
     double distanceP = min(1.0, norm(state(span(xr, yr))));
-    double angularDistance = abs(RangePi::bound(state[theta]-state[thetar]));
+    double angularDistance = abs(RangePi::wrap(state[theta]-state[thetar]));
     double angleP = angularDistance/M_1_PI;
     return max(distanceP, angleP);
 }
@@ -198,7 +198,7 @@ bool Escape2::canStart(const arma::vec& state)
 double Escape2::terminationProbability(const DenseState& state)
 {
     double distanceP = min(1.0, norm(state(span(xr, yr))));
-    double angularDistance = abs(RangePi::bound(state[theta]-state[thetar]));
+    double angularDistance = abs(RangePi::wrap(state[theta]-state[thetar]));
     double angleP = angularDistance/M_1_PI;
     return max(distanceP, angleP);
 }
@@ -219,7 +219,7 @@ bool Escape3::canStart(const arma::vec& state)
 double Escape3::terminationProbability(const DenseState& state)
 {
     double distanceP = min(1.0, norm(state(span(xr, yr))));
-    double angularDistance = abs(RangePi::bound(state[theta]-state[thetar]));
+    double angularDistance = abs(RangePi::wrap(state[theta]-state[thetar]));
     double angleP = angularDistance/M_1_PI;
     return max(distanceP, angleP);
 }

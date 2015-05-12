@@ -109,7 +109,7 @@ void Rocky::computeRockyControl(double& vr, double& omegar)
     predictor.predict(currentState, xhat, yhat, thetaDirhat);
 
     //Compute rocky control signals
-    double deltaTheta = RangePi::bound(thetaDirhat - currentState[thetar]);
+    double deltaTheta = RangePi::wrap(thetaDirhat - currentState[thetar]);
     double omegarOpt = deltaTheta / dt;
 
     omegar = maxOmegar.bound(omegarOpt);
@@ -135,7 +135,7 @@ void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
     vec2 rockyRelPosition = currentState.rows(span(xr, yr));
 
     double thetarM = (2 * currentState[thetar] + omegar * dt) / 2;
-    currentState[thetar] = RangePi::bound(
+    currentState[thetar] = RangePi::wrap(
                                currentState[thetar] + omegar * dt);
     xrabs = chickenPosition[0] + rockyRelPosition[0] + vr * cos(thetarM) * dt;
     yrabs = chickenPosition[1] + rockyRelPosition[1] + vr * sin(thetarM) * dt;
@@ -155,7 +155,7 @@ void Rocky::updateChickenPose(double v, double omega)
     currentState[x] = limitX.bound(currentState[x]);
     currentState[y] = limitY.bound(currentState[y]);
 
-    currentState[theta] = RangePi::bound(
+    currentState[theta] = RangePi::wrap(
                               currentState[theta] + omega * dt);
 
     predictor.saveLastValues(thetaM, v);
@@ -233,7 +233,7 @@ void Rocky::Predictor::predict(const DenseState& state, double& xhat, double& yh
     xhat = limitX.bound(xhat);
     yhat = limitY.bound(yhat);
 
-    thetaDirhat = RangePi::bound(atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr])));
+    thetaDirhat = RangePi::wrap(atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr])));
 }
 
 }

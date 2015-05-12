@@ -134,7 +134,7 @@ arma::vec RockyPolicy::escapePolicy(const arma::vec& state)
 arma::vec RockyPolicy::wayPointPolicy(const arma::vec& state, double ox, double oy)
 {
     double waypointDir = atan2(oy - state[y], ox - state[x]);
-    double deltaTheta = RangePi::bound(waypointDir - state[theta]);
+    double deltaTheta = RangePi::wrap(waypointDir - state[theta]);
     double omega = deltaTheta / dt;
     double v;
 

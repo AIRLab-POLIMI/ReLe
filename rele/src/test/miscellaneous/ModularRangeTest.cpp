@@ -37,6 +37,6 @@ int main()
 	for(int i = 0; i < 32; i++)
 	{
 		double angle = i*M_PI/4.0;
-		cout << "angle: " << angle << " = " << range1.bound(angle) << " = " << range2.bound(angle) << endl;
+		cout << "angle: " << angle << " = " << range1.wrap(angle) << " = " << range2.wrap(angle) << endl;
 	}
 }

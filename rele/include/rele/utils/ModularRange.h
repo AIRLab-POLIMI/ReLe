@@ -45,20 +45,20 @@ class Range2Pi : public ModularRange
 {
 public:
     Range2Pi();
-    static double bound(double value);
+    static double wrap(double value);
 
 
 private:
-    static ReLe::Range2Pi range;
+    static const ReLe::Range2Pi range;
 };
 
 class RangePi : public ModularRange
 {
 public:
     RangePi();
-    static double bound(double value);
+    static double wrap(double value);
 private:
-    static ReLe::RangePi range;
+    static const ReLe::RangePi range;
 };
 
 
