@@ -141,9 +141,9 @@ public:
     virtual void computeAandB(const arma::mat& PiPhihat, arma::mat& A, arma::vec& b) = 0;
 
     virtual ~LSTDQ_()
-	{
+    {
 
-	}
+    }
 
 protected:
     Dataset<ActionC, DenseState>& data;
