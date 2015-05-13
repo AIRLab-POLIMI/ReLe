@@ -29,14 +29,14 @@ using namespace ReLe;
 
 int main()
 {
-	cout << "Modular Range Test" << endl;
+    cout << "Modular Range Test" << endl;
 
-	RangePi range1;
-	Range2Pi range2;
+    RangePi range1;
+    Range2Pi range2;
 
-	for(int i = 0; i < 32; i++)
-	{
-		double angle = i*M_PI/4.0;
-		cout << "angle: " << angle << " = " << range1.wrap(angle) << " = " << range2.wrap(angle) << endl;
-	}
+    for(int i = 0; i < 32; i++)
+    {
+        double angle = i*M_PI/4.0;
+        cout << "angle: " << angle << " = " << range1.wrap(angle) << " = " << range2.wrap(angle) << endl;
+    }
 }
