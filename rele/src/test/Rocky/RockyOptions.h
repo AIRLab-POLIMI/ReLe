@@ -76,9 +76,9 @@ class Home : public RockyOption
 {
 public:
 	Home();
-	 virtual bool canStart(const arma::vec& state);
-	 virtual double terminationProbability(const DenseState& state);
-	 virtual void operator ()(const DenseState& state, DenseAction& action);
+	virtual bool canStart(const arma::vec& state);
+	virtual double terminationProbability(const DenseState& state);
+	virtual void operator ()(const DenseState& state, DenseAction& action);
 
 private:
 	 arma::vec home;

@@ -11,7 +11,7 @@ clf(1)
 figure(2)
 clf(2)
 %% Choose file
-hpg = true;
+hpg = false;
 if(hpg)
     basedir = '/tmp/ReLe/Rocky/HPG/';
 else
@@ -63,7 +63,7 @@ figure(3)
 hold on
 plot(traj(:, 1), traj(:, 2), 'b');
 plot(rockytraj(:, 1), rockytraj(:, 2), 'm');
-axis auto;
+axis equal;
 lim = axis;
 pause(2)
 clf(3)

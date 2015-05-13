@@ -30,8 +30,7 @@
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
-#include "basis/SubspaceBasis.h"
-#include "basis/GaussianRbf.h"
+#include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
 
 #include "FileManager.h"
@@ -75,32 +74,13 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
 
     //-- Features
-    /*BasisFunctions radialBasis1 = GaussianRbf::generate(3,
-    {
-        -10, 10,
-        -10, 10,
-        -M_PI, M_PI
-    });
-
-    BasisFunctions radialBasis2 = GaussianRbf::generate(3,
-    {
-        -10, 10,
-        -10, 10,
-        -M_PI, M_PI
-    });*/
-
-
-    /*BasisFunctions basis1 = SubspaceBasis::generate(radialBasis1, span(Rocky::x, Rocky::theta));
-    BasisFunctions basis2 = SubspaceBasis::generate(radialBasis2, span(Rocky::xr, Rocky::thetar));
-    basis.insert(basis.end(), basis1.begin(), basis1.end());
-    basis.insert(basis.end(), basis2.begin(), basis2.end());
-    basis.push_back(new IdentityBasis(Rocky::energy));
-    basis.push_back(new IdentityBasis(Rocky::food));*/
 
     BasisFunctions basis = IdentityBasis::generate(Rocky::STATESIZE);
+    //BasisFunctions basis = PolynomialFunction::generate(2, Rocky::STATESIZE);
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
+    cout << phi.rows() << endl;
 
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 0.5);
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
@@ -119,7 +99,7 @@ int main(int argc, char *argv[])
     int episodes = 3000;
     core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
-            WriteStrategy<DenseAction, DenseState>::outType::AGENT);
+            WriteStrategy<DenseAction, DenseState>::AGENT);
 
 
     ConsoleManager console(episodes, 1);
@@ -134,10 +114,12 @@ int main(int argc, char *argv[])
 
     console.printInfo("Starting evaluation episode");
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
-            WriteStrategy<DenseAction, DenseState>::outType::TRANS);
+            WriteStrategy<DenseAction, DenseState>::TRANS);
     core.runTestEpisode();
 
     delete core.getSettings().loggerStrategy;
+
+    cout << "last option: " << rootOption.getLastChoice() << endl;
 
     return 0;
 
