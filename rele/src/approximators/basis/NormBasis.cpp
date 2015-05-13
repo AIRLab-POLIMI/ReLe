@@ -73,8 +73,9 @@ void InfiniteNorm::writeOnStream (std::ostream& out)
 
 void InfiniteNorm::readFromStream(std::istream& in)
 {
-
+    //TODO implement
 }
+
 
 
 }

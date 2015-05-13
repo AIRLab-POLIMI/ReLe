@@ -30,7 +30,9 @@
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
+#include "basis/SubspaceBasis.h"
+#include "basis/NormBasis.h"
+#include "basis/ModularBasis.h"
 #include "basis/ConditionBasedFunction.h"
 
 #include "FileManager.h"
@@ -74,9 +76,9 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
 
     //-- Features
-
     BasisFunctions basis = IdentityBasis::generate(Rocky::STATESIZE);
-    //BasisFunctions basis = PolynomialFunction::generate(2, Rocky::STATESIZE);
+    basis.push_back(new SubspaceBasis(new NormBasis(), span(Rocky::xr, Rocky::yr)));
+    basis.push_back(new ModularDifference(Rocky::theta, Rocky::thetar, RangePi()));
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);

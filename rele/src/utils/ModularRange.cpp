@@ -35,22 +35,22 @@ ModularRange::ModularRange(const double lo, const double hi) : Range(lo, hi)
 
 bool ModularRange::contains(const double d) const
 {
-	return !std::isnan(d) && !std::isinf(d);
+    return !std::isnan(d) && !std::isinf(d);
 }
 
 double ModularRange::bound(const double& value) const
 {
-	if(contains(value))
-	{
-		double tmp = value - lo();
-		tmp = std::fmod(tmp, width());
-		return tmp + lo();
-	}
-	else
-	{
-		//TODO throw exception?
-		return value;
-	}
+    if(contains(value))
+    {
+        double tmp = value - lo();
+        tmp = std::fmod(tmp, width());
+        return tmp + lo();
+    }
+    else
+    {
+        //TODO throw exception?
+        return value;
+    }
 }
 
 ModularRange::~ModularRange()
@@ -67,7 +67,7 @@ const Range2Pi Range2Pi::range;
 
 double Range2Pi::wrap(double value)
 {
-	return range.bound(value);
+    return range.bound(value);
 }
 
 RangePi::RangePi() : ModularRange(-M_PI, M_PI)
@@ -77,7 +77,7 @@ RangePi::RangePi() : ModularRange(-M_PI, M_PI)
 
 double RangePi::wrap(double value)
 {
-	return range.bound(value);
+    return range.bound(value);
 }
 
 const RangePi RangePi::range;
