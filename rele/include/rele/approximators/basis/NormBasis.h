@@ -57,15 +57,6 @@ private:
     std::string type;
 };
 
-class FrobeniusNorm : public BasisFunction
-{
-public:
-    virtual double operator() (const arma::vec& input);
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
-
-};
-
 }
 
 

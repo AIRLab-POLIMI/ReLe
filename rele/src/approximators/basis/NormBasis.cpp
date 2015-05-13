@@ -76,20 +76,6 @@ void InfiniteNorm::readFromStream(std::istream& in)
     //TODO implement
 }
 
-double FrobeniusNorm::operator() (const arma::vec& input)
-{
-    return arma::norm(input, "fro");
-}
-
-void FrobeniusNorm::writeOnStream (std::ostream& out)
-{
-    cout << "Frobenius norm basis" << endl;
-}
-
-void FrobeniusNorm::readFromStream(std::istream& in)
-{
-    //TODO implement
-}
 
 
 }
