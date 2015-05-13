@@ -42,8 +42,8 @@ end
 %% Read mle data
 
 disp('Reading data trajectories...')
-% csv = csvread('/tmp/ReLe/mc/GIRL/mledata.log');
-csv = csvread('/tmp/ReLe/mc/GIRL/lspidata.log');
+csv = csvread('/tmp/ReLe/mc/GIRL/mledata.log');
+% csv = csvread('/tmp/ReLe/mc/GIRL/lspidata.log');
 
 disp('Organizing data in episodes...')
 mleEpisodes = readDataset(csv);
@@ -51,7 +51,7 @@ clearvars csv
 
 %% compare trajectories
 
-for idx = 1:20;
+for idx = 1:20
     figure(2);
     subplot(4,1,1); hold on;
     plot(episodes(idx).x(:,2));
@@ -94,14 +94,38 @@ for i = 0%:2
     xlabel('velocity');
     ylabel('position');
     zlabel('reward');
-    xlim([-0.07,0.07]);
-    ylim([-1.2,0.6]);
+%     xlim([-0.07,0.07]);
+%     ylim([-1.2,0.6]);
     title(['action ', num2str(i)]);
 end
 
+rw = dlmread('/tmp/ReLe/mc/GIRL/rewards.log');
+
+%% load gradients and gram matrix
+grads = dlmread('/tmp/ReLe/lqr/GIRL/grad.log');
+Gr = grads' * grads;
+
+X = Gr(1:end-1,:) - repmat(Gr(end,:),size(Gr,1)-1,1);
+Xc = dlmread('/tmp/ReLe/lqr/GIRL/X.log');
+assert(max(max(abs(X - Xc))) <= 1e-8);
+ns = null(X)
+
+[U,S,V] = svd(X,0);
+Uc = dlmread('/tmp/ReLe/lqr/GIRL/X.log');
+Sc = dlmread('/tmp/ReLe/lqr/GIRL/s.log');
+Vc = dlmread('/tmp/ReLe/lqr/GIRL/V.log');
+Y = dlmread('/tmp/ReLe/lqr/GIRL/Y.log');
+
+[Q,R] = qr(X');
+Q = dlmread('/tmp/ReLe/lqr/GIRL/Q.log');
+R = dlmread('/tmp/ReLe/lqr/GIRL/R.log');
+
+
+
 %% load reward basis
 A = dlmread('/tmp/ReLe/mc/GIRL/basis.txt');
-[X,Y] = meshgrid(-0.07:0.005:0.07, -1.2:0.05:0.6);
+% [X,Y] = meshgrid(-0.07:0.005:0.07, -1.2:0.05:0.6);
+[X,Y] = meshgrid(-0.2:0.01:0.2, -3:0.1:2);
 V = [X(:),Y(:)];
 close all;
 figure(10);

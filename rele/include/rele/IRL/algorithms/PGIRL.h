@@ -465,7 +465,7 @@ public:
         double Rew;
         arma::vec g(dp+1, arma::fill::zeros), phi(dp+1);
         arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
-//        double Jpol = 0.0;
+        //        double Jpol = 0.0;
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -478,9 +478,9 @@ public:
             double df = 1.0;
             Rew = 0.0;
             phi.zeros();
-//    #ifdef AUGMENTED
+            //    #ifdef AUGMENTED
             phi(dp) = 1.0;
-//    #endif
+            //    #endif
             // ********************** //
 
             //iterate the episode
@@ -552,9 +552,9 @@ public:
             double df = 1.0;
             Rew = 0.0;
             phi.zeros();
-//    #ifdef AUGMENTED
+            //    #ifdef AUGMENTED
             phi(dp) = 1.0;
-//    #endif
+            //    #endif
             // ********************** //
 
             //iterate the episode
@@ -667,38 +667,67 @@ public:
 
         arma::mat gramMatrix = A.t() * A;
 
-//        std::cout << "Gram: \n" << gramMatrix << std::endl;
+        //        std::cout << "Gram: \n" << gramMatrix << std::endl;
 
-        arma::mat X(dr-1, dr);
-        for (int r = 0; r < dr-1; ++r)
-        {
-            for (int r2 = 0; r2 < dr; ++r2)
-            {
-                X(r, r2) = gramMatrix(r2, r) - gramMatrix(r2, dr-1);
-            }
-        }
-//        std::cerr << std::endl << "X: " << X;
+        //        arma::mat X(dr-1, dr);
+        //        for (int r = 0; r < dr-1; ++r)
+        //        {
+        //            for (int r2 = 0; r2 < dr; ++r2)
+        //            {
+        //                X(r, r2) = gramMatrix(r2, r) - gramMatrix(r2, dr-1);
+        //            }
+        //        }
+        arma::mat X = gramMatrix.rows(0,dr-2) - arma::repmat(gramMatrix.row(dr-1), dr-1, 1);
+        //        std::cerr << std::endl << "X: " << X;
         X.save("/tmp/ReLe/lqr/GIRL/X.log", arma::raw_ascii);
 
-        //        arma::mat X2(2,3);
-        //        X2 << 1  <<   2 << 3<< arma::endr
-        //        << 5  <<   6 << 7;
-        //        std::cerr << std::endl << X2;
 
-        arma::mat U, V;
-        arma::vec s;
-        arma::svd(U, s, V, X);
-//                std::cout << "U: " << U << std::endl;
-//                std::cout << "s: " << s << std::endl;
-//                std::cout << "V: " << V << std::endl;
+        arma::mat Y = null(X);
+        std::cout << "Y: " << Y << std::endl;
+        Y.save("/tmp/ReLe/lqr/GIRL/Y.log", arma::raw_ascii);
 
-        int np = s.n_elem;
-        weights = V.cols(np, V.n_cols-1);
-//        weights.elem( arma::find(weights < 0) ).zeros();
-        weights /= arma::norm(weights,1);
+
+        //        arma::mat U, V;
+        //        arma::vec s;
+        //        arma::svd(U, s, V, X);
+        //        //std::cout << "U: " << U << std::endl;
+        //        //std::cout << "s: " << s << std::endl;
+        //        //std::cout << "V: " << V << std::endl;
+        //        arma::uvec q1 = arma::find(s > 1e-12);
+        //        int np = q1.n_elem;
+        //        weights = V.cols(np, V.n_cols-1);
+        //        std::cout << "weights: " << weights << std::endl;
+        //        //weights.elem( arma::find(weights < 0) ).zeros();
+        //        weights /= arma::norm(weights,1);
 
     }
 
+private:
+    arma::mat null(arma::mat& A)
+    {
+        int m = A.n_rows;
+        int n = A.n_cols;
+
+        arma::mat U, V;
+        arma::vec s;
+        if (m <= n)
+        {
+            arma::svd(U, s, V, A);
+        }
+        else
+        {
+            arma::svd_econ(U, s, V, A);
+        }
+
+        // U.save("/tmp/ReLe/lqr/GIRL/U.log", arma::raw_ascii);
+        // s.save("/tmp/ReLe/lqr/GIRL/s.log", arma::raw_ascii);
+        // V.save("/tmp/ReLe/lqr/GIRL/V.log", arma::raw_ascii);
+
+        double tol = std::max(m,n) * max(s) * 2.2204e-16; //look at matlab implementation
+        arma::uvec tmp = arma::find(s > tol);
+        unsigned int r = tmp.n_elem;
+        return V.cols(r, n-1);
+    }
 
 protected:
     Dataset<ActionC,StateC>& data;

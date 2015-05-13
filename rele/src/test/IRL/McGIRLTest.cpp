@@ -56,11 +56,18 @@ class mountain_car_manual_policy : public Policy<FiniteAction, DenseState>
 public:
     unsigned int operator()(const arma::vec& state)
     {
-        double speed = state(MountainCar::StateLabel::velocity);
-        if (speed <= 0)
-            return 0;
+        if (RandomGenerator::sampleEvent(0.4))
+        {
+            return RandomGenerator::sampleUniformInt(0,1);
+        }
         else
-            return 2;
+        {
+            double speed = state(MountainCar::StateLabel::velocity);
+            if (speed <= 0)
+                return 0;
+            else
+                return 2;
+        }
     }
 
     double operator()(const arma::vec& state, const unsigned int& action)
@@ -242,6 +249,7 @@ int main(int argc, char *argv[])
     datafile << std::setprecision(OS_PRECISION);
     data.writeToStream(datafile);
     datafile.close();
+    cout << "ended writing expert's data..." << endl;
 
     /*** define policy for MLE ***/
     vector<FiniteAction> actions;
@@ -281,15 +289,15 @@ int main(int argc, char *argv[])
 
 
     /*** compute MLE ***/
-    RidgeRegularizedMLE<FiniteAction,DenseState> mle(mlePolicy, dataExpert, 0.1);
-    //    MLE<FiniteAction,DenseState> mle(mlePolicy, dataExpert);
+    //    RidgeRegularizedMLE<FiniteAction,DenseState> mle(mlePolicy, dataExpert, 0.1);
+    MLE<FiniteAction,DenseState> mle(mlePolicy, dataExpert);
     arma::vec startVal(mlePolicy.getParametersSize(),arma::fill::ones);
     arma::vec pp = mle.solve(startVal);
 
     std::cerr << pp.t();
     mlePolicy.setParameters(pp);
 
-    //    mlePolicy.setTemperature(1.0/0.9);
+//    mlePolicy.setTemperature(1.0/0.9);
 
 #if 1//EVAL_MLE
     /*** get mlePolicy trajectories ***/
@@ -312,8 +320,8 @@ int main(int argc, char *argv[])
 
     /*** recover reward by IRL (PGIRL) ***/
     std::vector<IRLParametricReward<FiniteAction,DenseState>*> rewards;
-    vec pos_linspace = linspace<vec>(-1.1,0.5,4);
-    vec vel_linspace = linspace<vec>(-0.06,0.06,4);
+    vec pos_linspace = linspace<vec>(-1.8,1,3);
+    vec vel_linspace = linspace<vec>(-0.1,0.1,3);
 
     //-- meshgrid
     arma::mat xrow = vectorise(pos_linspace).t();
@@ -327,8 +335,8 @@ int main(int argc, char *argv[])
     arma::mat XX = arma::join_horiz(vel_mesh,pos_mesh);
 
 
-    double sigma_position = 2*pow((0.6+1.2)/8.0,2);
-    double sigma_speed    = 2*pow((0.07+0.07)/8.0,2);
+    double sigma_position = 2*pow((0.6+1.2)/4.0,2);
+    double sigma_speed    = 2*pow((0.07+0.07)/4.0,2);
     arma::vec widths = {sigma_speed, sigma_position};
     arma::mat WW = repmat(widths, 1, XX.n_rows);
     arma::mat XT = XX.t();
@@ -358,7 +366,7 @@ int main(int argc, char *argv[])
     //    }
     bfile.close();
 
-    IRLGradType atype = IRLGradType::RB;
+    IRLGradType atype = IRLGradType::ENAC;
     PlaneGIRL<FiniteAction,DenseState> pgirl(dataExpert, mlePolicy, rewards,
             mdp.getSettings().gamma, atype);
     cpu_timer timer2;
@@ -368,14 +376,17 @@ int main(int argc, char *argv[])
     //    timefile << timer2.format(10, "%w") << std::endl;
 
     vec rewWeights = pgirl.getWeights();
+    rewWeights.save(fm.addPath("rewards.log"),arma::raw_ascii);
     cout << "Weights (plane): " << rewWeights.t();
-    //    rewWeights = abs(rewWeights);
-    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
-    rewWeights = rewWeights / norm(rewWeights,1);
+    rewWeights = abs(rewWeights);
+    //    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
+    //    rewWeights = rewWeights / norm(rewWeights,1);
 
 
-    vec pos_linspace2 = linspace<vec>(-1.2,0.6,20);
-    vec vel_linspace2 = linspace<vec>(-0.07,0.07,20);
+    return 1;
+
+    vec pos_linspace2 = linspace<vec>(-2.5,1.5,30);
+    vec vel_linspace2 = linspace<vec>(-0.2,0.2,30);
 
     //-- meshgrid
     arma::mat xrow2 = vectorise(pos_linspace2).t();
