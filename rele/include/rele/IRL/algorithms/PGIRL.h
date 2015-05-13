@@ -612,7 +612,7 @@ public:
 
             arma::mat H = arma::pinv(fisher);
             arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodes * fisher - eligibility * eligibility.t()) * eligibility)
-                          * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
+                    * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
             arma::vec grad = g - eligibility * b;
             nat_grad = H * (grad);
         }
@@ -664,6 +664,11 @@ public:
         A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
 
         std::cout << "Grads: \n" << A << std::endl;
+
+        arma::mat Asub;
+        arma::uvec as = rref(A, Asub);
+        std::cout << "Asub: \n" << Asub << std::endl;
+        std::cout << "idx: \n" << as.t()  << std::endl;
 
         arma::mat gramMatrix = A.t() * A;
 
@@ -729,6 +734,123 @@ private:
         arma::uvec tmp = arma::find(s > tol);
         unsigned int r = tmp.n_elem;
         return V.cols(r, n-1);
+    }
+
+    //    arma::uvec licols(const arma::mat& X, arma::mat& Xsub, double tol = 1e-10)
+    //    {
+    //        arma::uvec idx;
+    //        arma::uvec a = arma::find(X==0);
+    //        if (a.n_elem == X.n_elem)
+    //        {
+    //            Xsub.set_size(0,0);
+    //            return idx;
+    //        }
+
+    //        int m = X.n_rows;
+    //        int n = X.n_cols;
+
+    //        arma::mat Q, R;
+    //        if (m <= n)
+    //        {
+    //            arma::qr(Q,R,X);
+    //        }
+    //        else
+    //        {
+    //            arma::qr_econ( Q, R, X );
+    //        }
+
+    //        arma::vec diagr;
+    ////        //        if ((R.n_rows > 1) && (R.n_cols > 1))
+    ////        //        {
+    //        diagr = abs(R.diag());
+    ////        //        }
+    ////        //        else
+    ////        //        {
+    ////        //            diagr = R(0);
+    ////        //        }
+
+    //        std::cerr << R;
+
+    //        arma::vec absdiag = abs(diagr);
+    //        arma::uvec E = arma::sort_index(absdiag,"descend");
+
+
+    //        //rank estimation
+    //        arma::uvec rv = arma::find(diagr >= tol*diagr(0)); //rank estimation
+    //        int r = rv.n_elem;
+
+    //        arma::uvec e = E.rows(0,r-1);
+    //        idx = arma::sort(e);
+
+    //        Xsub = X.cols(idx);
+    //        std::cerr << Xsub;
+
+    //        return idx;
+    //    }
+
+    arma::uvec rref(const arma::mat& X, arma::mat& A, double tol = -1)
+    {
+        int m = X.n_rows;
+        int n = X.n_cols;
+
+        if (tol == -1)
+        {
+            tol = std::max(m,n)*2.220446049250313e-16*arma::norm(X,"inf");
+        }
+
+        unsigned int i = 0, j = 0;
+        arma::uvec jb;
+        A = X;
+        while ((i < m) && (j < n))
+        {
+            //Find value and index of largest element in the remainder of column j.
+            arma::vec tmp = A(arma::span(i,m-1), arma::span(j,j));
+            tmp = abs(tmp);
+            arma::uword k;
+            double p = tmp.max(k);
+            k = k+i;
+            if (p <= tol)
+            {
+                //The column is negligible, zero it out.
+                A(arma::span(i,m-1), arma::span(j,j)).zeros();
+                ++j;
+            }
+            else
+            {
+                //Remember column index
+                arma::uvec u = {j};
+                jb = arma::join_vert(jb,u);
+                // Swap i-th and k-th rows.
+                arma::uvec idx = {i,k};
+                arma::uvec idx2 = {k,i};
+                arma::uvec aaa(n-j);
+                int ii = 0;
+                for (int u = j; u < n;++u)
+                    aaa(ii++) = u;
+                A.submat(idx,aaa) = A.submat(idx2,aaa);
+
+                //Divide the pivot row by the pivot element.
+                A(arma::span(i,i),arma::span(j,n-1)) = A(arma::span(i,i),arma::span(j,n-1))/A(i,j);
+
+                //Subtract multiples of the pivot row from all the other rows.
+
+                std::vector<int> vv;
+                for (int u = 0; u < i-1;++u)
+                    vv.push_back(u);
+                for (int u = i; u < m;++u)
+                    vv.push_back(u);
+
+                for (auto k : vv)
+                {
+                    A(k,arma::span(j,n-1)) = A(k,arma::span(j,n-1)) - A(k,j)*A(i,arma::span(j,n-1));
+                }
+                i = i + 1;
+                j = j + 1;
+
+            }
+        }
+        return jb;
+
     }
 
 protected:
