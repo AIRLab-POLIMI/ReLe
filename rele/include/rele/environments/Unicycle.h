@@ -45,6 +45,25 @@ public:
     virtual void ReadFromStream(std::istream& in);
 };
 
+/**
+ * References:
+ * http://www.diva-portal.se/smash/get/diva2:662268/FULLTEXT01.pdf
+ * http://cdn.intechopen.com/pdfs-wm/44029.pdf
+ *
+ * \hat{e}(t) = [x(t) - x_g; y(t) - y_g; \theta(t) - \theta_g]^{T}
+ * e(t) = \begin{bmatrix} e_x(t)\\e_y(t)\\ e_\theta(t)\end{bmatrix}
+ *      = \begin{bmatrix}  cos\theta_g & sin\theta_g & 0\\
+ *                        -sin\theta_g & cos\theta_g & 0\\
+ *                         0 & 0 & 1
+ *        \end{bmatrix} \hat{e}(t)
+ * \rho   = \sqrt(e_x^2+e_y^2)
+ * \gamma = atan2(e_y,e_x) - e_\theta + \pi
+ * \delta = \gamma + e_\theta
+ *
+ * Optimal control law:
+ * v = k_1 \rho cos\gamma
+ * w = k_2 \gamma + k_1 sin\gamma cos\gamma (gamma + k_3 \delta) / gamma
+ */
 class UnicyclePolar: public ContinuousMDP
 {
 

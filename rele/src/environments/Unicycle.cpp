@@ -72,9 +72,9 @@ void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_typ
         const double /* t */)
 {
     //Status and actions
-    const double rho   = x[0];
-    const double gamma = x[1];
-    const double delta = x[2];
+    const double rho   = std::max(x[0], 1e-6); //avoid numerical instability
+    const double gamma = std::max(x[1], 1e-6);
+    const double delta = std::max(x[2], 1e-6);
 
     //dinamics
     const double drho = -v * cos(gamma);
@@ -127,6 +127,11 @@ void UnicyclePolar::step(const DenseAction& action, DenseState& nextState, Rewar
     arma::vec& vecState = nextState;
     double dist = arma::norm(vecState,2);
     reward[0] = -dist;
+
+    if (dist < 0.1)
+    {
+
+    }
 
 }
 
