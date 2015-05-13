@@ -11,7 +11,7 @@ clf(1)
 figure(2)
 clf(2)
 %% Choose file
-hpg = false;
+hpg = true;
 if(hpg)
     basedir = '/tmp/ReLe/Rocky/HPG/';
 else

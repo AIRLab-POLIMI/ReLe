@@ -32,7 +32,7 @@ namespace ReLe
 class SubspaceBasis : public BasisFunction
 {
 public:
-    SubspaceBasis(BasisFunction* basis, arma::span& span);
+    SubspaceBasis(BasisFunction* basis, const arma::span& span);
     SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& spanVector);
     ~SubspaceBasis();
 

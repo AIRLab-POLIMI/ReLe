@@ -33,7 +33,7 @@ SubspaceBasis::SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& span
     assert(spanVector.size() >= 1);
 }
 
-SubspaceBasis::SubspaceBasis(BasisFunction* basis, arma::span& span)
+SubspaceBasis::SubspaceBasis(BasisFunction* basis, const arma::span& span)
     : basis(basis)
 {
     spanVector.push_back(span);
