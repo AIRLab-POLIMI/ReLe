@@ -269,6 +269,9 @@ target_link_libraries(deep_off rele)
 add_executable(nls_off src/test/Batch/NlsBatchTest.cpp)
 target_link_libraries(nls_off rele)
 
+add_executable(mc_LSPI src/test/Batch/McLSPITest.cpp)
+target_link_libraries(mc_LSPI rele)
+
 #Others tests
 add_executable(nls_OptParams src/test/Others/NlsOptimalParamsTest.cpp)
 target_link_libraries(nls_OptParams rele)

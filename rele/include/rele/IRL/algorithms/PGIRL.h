@@ -700,6 +700,8 @@ public:
         //        //weights.elem( arma::find(weights < 0) ).zeros();
         //        weights /= arma::norm(weights,1);
 
+        weights = Y;
+
     }
 
 private:

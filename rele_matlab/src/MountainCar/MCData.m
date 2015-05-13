@@ -124,8 +124,8 @@ R = dlmread('/tmp/ReLe/lqr/GIRL/R.log');
 
 %% load reward basis
 A = dlmread('/tmp/ReLe/mc/GIRL/basis.txt');
-% [X,Y] = meshgrid(-0.07:0.005:0.07, -1.2:0.05:0.6);
-[X,Y] = meshgrid(-0.2:0.01:0.2, -3:0.1:2);
+[X,Y] = meshgrid(-0.07:0.005:0.07, -1.2:0.05:0.7);
+% [X,Y] = meshgrid(-0.2:0.01:0.2, -3:0.1:2);
 V = [X(:),Y(:)];
 close all;
 figure(10);
@@ -181,6 +181,7 @@ end
 
 disp('Reading data trajectories...')
 csv = csvread('/tmp/ReLe/mc/GIRL/finaldata.log');
+% csv = csvread('/tmp/ReLe/mc/LSPI/finaldata.log');
 
 disp('Organizing data in episodes...')
 finalEpisodes = readDataset(csv);
@@ -188,7 +189,7 @@ clearvars csv
 
 X = [];
 for i = 1:length(finalEpisodes)
-    X = [X; length(finalEpisodes(i).x(1:end-1))];
+    X = [X; length(finalEpisodes(i).x(1:end-1,1))];
 end
 mean(X)
 std(X)

@@ -156,7 +156,16 @@ public:
 
     virtual ~LSTDQ_()
     {
+    }
 
+    Dataset<ActionC, DenseState>& getData()
+    {
+        return data;
+    }
+
+    e_GreedyApproximate& getPolicy()
+    {
+        return policy;
     }
 
 protected:

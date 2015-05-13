@@ -52,7 +52,7 @@ public:
         /*** Initialize policy iteration ***/
         unsigned int iteration = 0;
         double distance = 10 * epsilon;
-        arma::vec old_weights = critic.getQ().getParameters();
+        arma::vec old_weights(critic.getQ().getParametersSize(), arma::fill::zeros);
 
 
         /*** Main LSPI loop ***/
@@ -75,6 +75,9 @@ public:
             //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
 
             critic.getQ().setParameters(Q_weights);
+            //            char ddd[100];
+            //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
+            //            Q_weights.save(ddd, arma::raw_ascii);
 
             //Compute the distance between the current and the previous policy
             double LMAXnorm = arma::norm(Q_weights - old_weights, "inf");
