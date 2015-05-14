@@ -212,4 +212,9 @@ std::string Range::toString() const
     return convert.str();
 }
 
+Range::~Range()
+{
+
+}
+
 }//end namespace ReLe

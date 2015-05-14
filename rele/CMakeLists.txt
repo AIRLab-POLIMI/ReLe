@@ -147,6 +147,9 @@ target_link_libraries(mle_Policy rele)
 add_executable(rand_Policy src/test/miscellaneous/RandomPolicyTest.cpp)
 target_link_libraries(rand_Policy rele)
 
+add_executable(range_test src/test/miscellaneous/ModularRangeTest.cpp)
+target_link_libraries(range_test rele)
+
 #miscellaneous/policy_search tests
 add_executable(datadiff2mat src/test/miscellaneous/policy_search/DataDiff2Matlab.cpp)
 target_link_libraries(datadiff2mat rele)
@@ -197,6 +200,9 @@ target_link_libraries(simple_chain_MWAL rele)
 
 add_executable(mc_GIRL src/test/IRL/McGIRLTest.cpp)
 target_link_libraries(mc_GIRL rele)
+
+add_executable(hw_GIRL src/test/IRL/HwGIRLTest.cpp)
+target_link_libraries(hw_GIRL rele)
 
 #Solvers tests
 add_executable(lqr_solver_test src/test/solvers/LQRsolverTest.cpp)
@@ -262,6 +268,9 @@ target_link_libraries(deep_off rele)
 
 add_executable(nls_off src/test/Batch/NlsBatchTest.cpp)
 target_link_libraries(nls_off rele)
+
+add_executable(mc_LSPI src/test/Batch/McLSPITest.cpp)
+target_link_libraries(mc_LSPI rele)
 
 #Others tests
 add_executable(nls_OptParams src/test/Others/NlsOptimalParamsTest.cpp)

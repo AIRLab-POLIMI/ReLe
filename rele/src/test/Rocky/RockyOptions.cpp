@@ -23,7 +23,7 @@
 
 #include "RockyOptions.h"
 
-#include "Utils.h"
+#include "ModularRange.h"
 
 #include <cassert>
 
@@ -40,8 +40,8 @@ RockyOption::RockyOption() : maxV(1), dt(0.01)
 
 arma::vec RockyOption::wayPointPolicy(const arma::vec& state, const arma::vec& target)
 {
-	double ox = target[0];
-	double oy = target[1];
+    double ox = target[0];
+    double oy = target[1];
     double waypointDir = atan2(oy - state[y], ox - state[x]);
     double deltaTheta = angularDistance(state, target);
     double omega = deltaTheta / dt;
@@ -75,13 +75,13 @@ arma::vec RockyOption::wayPointPolicy(const arma::vec& state, const arma::vec& t
 double RockyOption::angularDistance(const arma::vec& state, const arma::vec& target)
 {
     double waypointDir = atan2(target[1] - state[y], target[0] - state[x]);
-    return utils::wrapToPi(waypointDir - state[theta]);
+    return RangePi::wrap(waypointDir - state[theta]);
 }
 
 
 double RockyOption::rockyRelRotation(const arma::vec& state)
 {
-    return utils::wrapToPi(atan2(state[yr],state[xr]));
+    return RangePi::wrap(atan2(state[yr],state[xr]));
 }
 
 bool Eat::canStart(const arma::vec& state)
@@ -94,7 +94,7 @@ double Eat::terminationProbability(const DenseState& state)
     if(state[energy] >= 100)
         return 1;
 
-    double distP = min(1.0, norm(state(span(xr, yr))));
+    double distP = min(1.0, 0.3/norm(state(span(xr, yr))));
     double energyP = state[energy] / 100;
 
     return std::max(distP, energyP);
@@ -102,7 +102,7 @@ double Eat::terminationProbability(const DenseState& state)
 
 void Eat::operator ()(const DenseState& state, DenseAction& action)
 {
-    assert(state[food] == 1);
+    assert(state[food] == 1.0);
     vec pi(3);
 
     pi[0] = 0;
@@ -120,8 +120,8 @@ bool Home::canStart(const arma::vec& state)
 
 Home::Home() : home(2)
 {
-	home[0] = 0;
-	home[1] = 0;
+    home[0] = 0;
+    home[1] = 0;
 }
 
 double Home::terminationProbability(const DenseState& state)
@@ -158,7 +158,7 @@ double Feed::terminationProbability(const DenseState& state)
     if(norm(state(span(x, y)) - spot) < 0.5)
         return 1;
     else
-    	return min(1.0, 0.4/norm(state(span(xr,yr))));
+        return min(1.0, 0.4/norm(state(span(xr,yr))));
 }
 
 void Feed::operator ()(const DenseState& state, DenseAction& action)
@@ -171,12 +171,15 @@ void Feed::operator ()(const DenseState& state, DenseAction& action)
 
 bool Escape1::canStart(const arma::vec& state)
 {
-    return norm(state(span(xr, yr))) < 1;
+    return true;
 }
 
 double Escape1::terminationProbability(const DenseState& state)
 {
-	return min(1.0, 0.8*norm(state(span(xr, yr))));
+    double distanceP = min(1.0, norm(state(span(xr, yr))));
+    double angularDistance = abs(RangePi::wrap(state[theta]-state[thetar]));
+    double angleP = angularDistance/M_1_PI;
+    return max(distanceP, angleP);
 }
 
 void Escape1::operator ()(const DenseState& state, DenseAction& action)
@@ -189,12 +192,15 @@ void Escape1::operator ()(const DenseState& state, DenseAction& action)
 
 bool Escape2::canStart(const arma::vec& state)
 {
-    return norm(state(span(xr, yr))) < 1;
+    return true;
 }
 
 double Escape2::terminationProbability(const DenseState& state)
 {
-	return min(1.0, 0.8*norm(state(span(xr, yr))));
+    double distanceP = min(1.0, norm(state(span(xr, yr))));
+    double angularDistance = abs(RangePi::wrap(state[theta]-state[thetar]));
+    double angleP = angularDistance/M_1_PI;
+    return max(distanceP, angleP);
 }
 
 void Escape2::operator ()(const DenseState& state, DenseAction& action)
@@ -207,12 +213,15 @@ void Escape2::operator ()(const DenseState& state, DenseAction& action)
 
 bool Escape3::canStart(const arma::vec& state)
 {
-    return norm(state(span(xr, yr))) < 1;
+    return true;
 }
 
 double Escape3::terminationProbability(const DenseState& state)
 {
-	return min(1.0, 0.8*norm(state(span(xr, yr))));
+    double distanceP = min(1.0, norm(state(span(xr, yr))));
+    double angularDistance = abs(RangePi::wrap(state[theta]-state[thetar]));
+    double angleP = angularDistance/M_1_PI;
+    return max(distanceP, angleP);
 }
 
 void Escape3::operator ()(const DenseState& state, DenseAction& action)

@@ -134,9 +134,9 @@ unsigned int e_GreedyApproximate::operator()(const arma::vec& state)
             if (qmax < qvalue[0])
             {
                 optimal_actions.clear();
-                optimal_actions.push_back(un);
                 qmax = qvalue[0];
                 un = i;
+                optimal_actions.push_back(un);
             }
             else if (qmax == qvalue[0])
             {
@@ -146,6 +146,7 @@ unsigned int e_GreedyApproximate::operator()(const arma::vec& state)
         unsigned int index = RandomGenerator::sampleUniformInt(0,
                              optimal_actions.size() - 1);
         un = optimal_actions[index];
+        // un = optimal_actions[0];//--------------------- RIMUOVERE
     }
 
     return un;

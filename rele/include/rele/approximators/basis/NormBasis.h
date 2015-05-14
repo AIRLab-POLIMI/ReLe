@@ -21,35 +21,45 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_SUBSPACEBASIS_H_
-#define INCLUDE_RELE_APPROXIMATORS_BASIS_SUBSPACEBASIS_H_
+#ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_NORMBASIS_H_
+#define INCLUDE_RELE_APPROXIMATORS_BASIS_NORMBASIS_H_
 
 #include "BasisFunctions.h"
+
+#include <string>
 
 namespace ReLe
 {
 
-class SubspaceBasis : public BasisFunction
+class NormBasis : public BasisFunction
 {
 public:
-    SubspaceBasis(BasisFunction* basis, const arma::span& span);
-    SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& spanVector);
-    ~SubspaceBasis();
+    NormBasis(unsigned int p = 2);
 
-    double operator() (const arma::vec& input);
-    void writeOnStream (std::ostream& out);
-    void readFromStream(std::istream& in);
-
-    static BasisFunctions generate(BasisFunctions& basisVector, std::vector<arma::span>& spanVector);
-    static BasisFunctions generate(BasisFunctions& basisVector, arma::span span);
+    virtual double operator() (const arma::vec& input);
+    virtual void writeOnStream (std::ostream& out);
+    virtual void readFromStream(std::istream& in);
 
 private:
-    BasisFunction* basis;
-    std::vector<arma::span> spanVector;
+    unsigned int p;
 };
 
+class InfiniteNorm : public BasisFunction
+{
+public:
+    InfiniteNorm(bool max = true);
 
+    virtual double operator() (const arma::vec& input);
+    virtual void writeOnStream (std::ostream& out);
+    virtual void readFromStream(std::istream& in);
+
+private:
+    std::string type;
+};
 
 }
 
-#endif /* INCLUDE_RELE_APPROXIMATORS_BASIS_SUBSPACEBASIS_H_ */
+
+
+
+#endif /* INCLUDE_RELE_APPROXIMATORS_BASIS_NORMBASIS_H_ */

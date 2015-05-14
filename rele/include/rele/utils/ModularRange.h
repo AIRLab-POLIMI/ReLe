@@ -21,35 +21,49 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_SUBSPACEBASIS_H_
-#define INCLUDE_RELE_APPROXIMATORS_BASIS_SUBSPACEBASIS_H_
+#ifndef INCLUDE_RELE_UTILS_MODULARRANGE_H_
+#define INCLUDE_RELE_UTILS_MODULARRANGE_H_
 
-#include "BasisFunctions.h"
+#include "Range.h"
 
 namespace ReLe
 {
 
-class SubspaceBasis : public BasisFunction
+
+class ModularRange : public Range
 {
 public:
-    SubspaceBasis(BasisFunction* basis, const arma::span& span);
-    SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& spanVector);
-    ~SubspaceBasis();
+    ModularRange(const double lo, const double hi);
 
-    double operator() (const arma::vec& input);
-    void writeOnStream (std::ostream& out);
-    void readFromStream(std::istream& in);
+    virtual bool contains(const double d) const;
+    virtual double bound(const double& value) const;
 
-    static BasisFunctions generate(BasisFunctions& basisVector, std::vector<arma::span>& spanVector);
-    static BasisFunctions generate(BasisFunctions& basisVector, arma::span span);
+    virtual ~ModularRange();
+};
+
+class Range2Pi : public ModularRange
+{
+public:
+    Range2Pi();
+    static double wrap(double value);
+
 
 private:
-    BasisFunction* basis;
-    std::vector<arma::span> spanVector;
+    static const ReLe::Range2Pi range;
+};
+
+class RangePi : public ModularRange
+{
+public:
+    RangePi();
+    static double wrap(double value);
+private:
+    static const ReLe::RangePi range;
 };
 
 
 
 }
 
-#endif /* INCLUDE_RELE_APPROXIMATORS_BASIS_SUBSPACEBASIS_H_ */
+
+#endif /* INCLUDE_RELE_UTILS_MODULARRANGE_H_ */

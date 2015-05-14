@@ -186,14 +186,30 @@ void testDenseDataset(unsigned int episodes, unsigned int transitions)
         cout << "Test failed!" << endl;
 }
 
+void testHW()
+{
+    Dataset<DenseAction, DenseState> dataset;
+    ifstream is("/tmp/ReLe/datahw.dat");
+    dataset.readFromStream(is);
+    ofstream os ("/tmp/ReLe/datahw_gen.dat");
+    os << std::setprecision(OS_PRECISION);
+    dataset.writeToStream(os);
+    os.close();
+    is.close();
+}
+
 int main(int argc, char *argv[])
 {
     unsigned int episodes = 5;
     unsigned int transitions = 6;
 
-    cout << endl << "# Testing Finite action/state dataset #" << endl << endl;
-    testFiniteDataset(episodes, transitions);
+//    cout << endl << "# Testing Finite action/state dataset #" << endl << endl;
+//    testFiniteDataset(episodes, transitions);
 
-    cout << endl << "# Testing Dense action/state dataset #" << endl << endl;
-    testDenseDataset(episodes, transitions);
+//    cout << endl << "# Testing Dense action/state dataset #" << endl << endl;
+//    testDenseDataset(episodes, transitions);
+
+    cout << endl << "# Testing HumanWalk dataset #" << endl << endl;
+    testHW();
+
 }

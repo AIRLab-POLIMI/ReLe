@@ -89,7 +89,7 @@ public:
     */
     double mid() const;
 
-    double bound(const double& value) const;
+    virtual double bound(const double& value) const;
 
     /**
     * Expands this range to include another range.
@@ -177,7 +177,7 @@ public:
     *
     * @param d Point to check.
     */
-    bool contains(const double d) const;
+    virtual bool contains(const double d) const;
 
     /**
     * Determines if another range overlaps with this one.
@@ -198,6 +198,8 @@ public:
         out << range.toString();
         return out;
     }
+
+    virtual ~Range();
 
 };
 

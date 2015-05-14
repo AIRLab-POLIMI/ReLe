@@ -23,7 +23,7 @@
 
 #include "../../include/rele/environments/Rocky.h"
 
-#include "Utils.h"
+#include "ModularRange.h"
 
 using namespace arma;
 using namespace std;
@@ -33,7 +33,10 @@ namespace ReLe
 
 Rocky::Rocky() :
     ContinuousMDP(STATESIZE, 3, 1, false, true, 0.9999), dt(0.01),
-    maxOmega(M_PI), maxV(1), maxOmegar(M_PI-M_PI/12), maxVr(1), limitX(10), limitY(10), predictor(dt, limitX, limitY)
+    maxOmega(-M_PI, M_PI), maxV(0, 1),
+    maxOmegar(-(M_PI-M_PI/12), M_PI-M_PI/12), maxVr(0, 1),
+    limitX(-10, 10), limitY(-10, 10),
+    maxEnergy(0, 100), predictor(dt, limitX, limitY)
 {
     //TODO parameter in the constructor
     vec2 spot;
@@ -46,8 +49,8 @@ void Rocky::step(const DenseAction& action, DenseState& nextState,
                  Reward& reward)
 {
     //action threshold
-    double v = utils::threshold(action[0], maxV);
-    double omega = utils::threshold(action[1], maxOmega);
+    double v = maxV.bound(action[0]);
+    double omega = maxOmega.bound(action[1]);
     bool eat = (action[2] > 0 && v == 0 && omega == 0) ? true : false;
 
     //Compute rocky control using chicken pose prediction
@@ -106,10 +109,10 @@ void Rocky::computeRockyControl(double& vr, double& omegar)
     predictor.predict(currentState, xhat, yhat, thetaDirhat);
 
     //Compute rocky control signals
-    double deltaTheta = utils::wrapToPi(thetaDirhat - currentState[thetar]);
+    double deltaTheta = RangePi::wrap(thetaDirhat - currentState[thetar]);
     double omegarOpt = deltaTheta / dt;
 
-    omegar = utils::threshold(omegarOpt, maxOmegar);
+    omegar = maxOmegar.bound(omegarOpt);
 
     if (abs(deltaTheta) > M_PI / 2)
     {
@@ -117,11 +120,11 @@ void Rocky::computeRockyControl(double& vr, double& omegar)
     }
     else if (abs(deltaTheta) > M_PI / 4)
     {
-        vr = maxVr / 2;
+        vr = maxVr.hi() / 2;
     }
     else
     {
-        vr = maxVr;
+        vr = maxVr.hi();
     }
 }
 
@@ -132,14 +135,14 @@ void Rocky::updateRockyPose(double vr, double omegar, double& xrabs,
     vec2 rockyRelPosition = currentState.rows(span(xr, yr));
 
     double thetarM = (2 * currentState[thetar] + omegar * dt) / 2;
-    currentState[thetar] = utils::wrapToPi(
+    currentState[thetar] = RangePi::wrap(
                                currentState[thetar] + omegar * dt);
     xrabs = chickenPosition[0] + rockyRelPosition[0] + vr * cos(thetarM) * dt;
     yrabs = chickenPosition[1] + rockyRelPosition[1] + vr * sin(thetarM) * dt;
 
     //Anelastic walls
-    xrabs = utils::threshold(xrabs, limitX);
-    yrabs = utils::threshold(yrabs, limitY);
+    xrabs = limitX.bound(xrabs);
+    yrabs = limitY.bound(yrabs);
 }
 
 void Rocky::updateChickenPose(double v, double omega)
@@ -149,10 +152,10 @@ void Rocky::updateChickenPose(double v, double omega)
     currentState[y] += v * sin(thetaM) * dt;
 
     //Anelastic walls
-    currentState[x] = utils::threshold(currentState[x], limitX);
-    currentState[y] = utils::threshold(currentState[y], limitY);
+    currentState[x] = limitX.bound(currentState[x]);
+    currentState[y] = limitY.bound(currentState[y]);
 
-    currentState[theta] = utils::wrapToPi(
+    currentState[theta] = RangePi::wrap(
                               currentState[theta] + omega * dt);
 
     predictor.saveLastValues(thetaM, v);
@@ -162,7 +165,7 @@ void Rocky::computeSensors(bool eat)
 {
     vec2 chickenPosition = currentState.rows(span(x, y));
 
-    currentState[energy] = utils::threshold(currentState[energy] - 0.01, 0, 100);
+    currentState[energy] = maxEnergy.bound(currentState[energy] - 0.01);
     currentState[food] = 0;
 
     for (auto& spot : foodSpots)
@@ -173,8 +176,7 @@ void Rocky::computeSensors(bool eat)
 
             if (eat)
             {
-                currentState[energy] = utils::threshold(
-                                           currentState[energy] + 5, 0, 100);
+                currentState[energy] = maxEnergy.bound(currentState[energy] + 5);
             }
 
             break;
@@ -204,7 +206,7 @@ void Rocky::computeReward(Reward& reward)
     }
 }
 
-Rocky::Predictor::Predictor(double dt, double limitX, double limitY) :
+Rocky::Predictor::Predictor(double dt, Range limitX, Range limitY) :
     dt(dt), limitX(limitX), limitY(limitY)
 {
     reset();
@@ -228,10 +230,10 @@ void Rocky::Predictor::predict(const DenseState& state, double& xhat, double& yh
     yhat = state[y] + v * sin(thetaM) * dt;
 
     //Anelastic walls
-    xhat = utils::threshold(xhat, limitX);
-    yhat = utils::threshold(yhat, limitY);
+    xhat = limitX.bound(xhat);
+    yhat = limitY.bound(yhat);
 
-    thetaDirhat = utils::wrapToPi(atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr])));
+    thetaDirhat = RangePi::wrap(atan2(yhat - (state[y] + state[yr]), xhat - (state[x] + state[xr])));
 }
 
 }

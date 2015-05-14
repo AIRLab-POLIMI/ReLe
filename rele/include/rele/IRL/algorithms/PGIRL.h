@@ -28,6 +28,7 @@
 #include "Policy.h"
 #include "Transition.h"
 #include "GIRL.h"
+#include "ArmadilloExtensions.h"
 
 #include <nlopt.hpp>
 #include <cassert>
@@ -154,6 +155,8 @@ public:
 
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
+                for (int p = 0; p < dp; ++p)
+                    assert(!isinf(localg(p)));
                 sumGradLog += localg;
                 Rew += df * rewardf(tr.x, tr.u, tr.xn);
                 // ********************** //
@@ -183,6 +186,7 @@ public:
             {
                 baseline_J_num(p) += Rew * sumGradLog(p) * sumGradLog(p);
                 baseline_den(p) += sumGradLog(p) * sumGradLog(p);
+                assert(!isinf(baseline_J_num(p)));
             }
 
             // ********************** //
@@ -203,6 +207,11 @@ public:
 
             for (int ep = 0; ep < nbEpisodes; ++ep)
             {
+                double a =return_J_ObjEp(ep);
+                double b = sumGradLog_CompEp(p,ep);
+                assert(!isnan(a));
+                assert(!isnan(b));
+                assert(!isnan(baseline_J));
                 gradient_J[p] += (return_J_ObjEp(ep) - baseline_J) * sumGradLog_CompEp(p,ep);
             }
         }
@@ -457,7 +466,7 @@ public:
         double Rew;
         arma::vec g(dp+1, arma::fill::zeros), phi(dp+1);
         arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
-//        double Jpol = 0.0;
+        //        double Jpol = 0.0;
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -470,9 +479,9 @@ public:
             double df = 1.0;
             Rew = 0.0;
             phi.zeros();
-//    #ifdef AUGMENTED
+            //    #ifdef AUGMENTED
             phi(dp) = 1.0;
-//    #endif
+            //    #endif
             // ********************** //
 
             //iterate the episode
@@ -544,9 +553,9 @@ public:
             double df = 1.0;
             Rew = 0.0;
             phi.zeros();
-//    #ifdef AUGMENTED
+            //    #ifdef AUGMENTED
             phi(dp) = 1.0;
-//    #endif
+            //    #endif
             // ********************** //
 
             //iterate the episode
@@ -653,44 +662,176 @@ public:
             A.col(r) = gradients[r];
         }
 
-        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
+        A.save("/tmp/ReLe/grad.log", arma::raw_ascii);
 
         std::cout << "Grads: \n" << A << std::endl;
 
-        arma::mat gramMatrix = A.t() * A;
-
-//        std::cout << "Gram: \n" << gramMatrix << std::endl;
-
-        arma::mat X(dr-1, dr);
-        for (int r = 0; r < dr-1; ++r)
+        ////////////////////////////////////////////////
+        /// PRE-PROCESSING
+        ////////////////////////////////////////////////
+        arma::mat Ared;         //reduced gradient matrix
+        arma::uvec nonZeroIdx;  //nonzero elements of the reward weights
+        int rnkG = rank(A);
+        if ( rnkG < dr && A.n_rows >= A.n_cols )
         {
-            for (int r2 = 0; r2 < dr; ++r2)
+            // select linearly independent columns
+            arma::mat Asub;
+            nonZeroIdx = rref(A, Asub);
+            std::cout << "Asub: \n" << Asub << std::endl;
+            std::cout << "idx: \n" << nonZeroIdx.t()  << std::endl;
+            Ared = A.cols(nonZeroIdx);
+            assert(rank(Ared) == Ared.n_cols);
+            //            //save idxs to be set to zero
+            //            arma::vec tmp(A.n_cols);
+            //            std::iota (std::begin(tmp), std::end(tmp), 0);
+            //            std::vector<int> diff;
+            //            std::set_difference(tmp.begin(), tmp.end(), nonZeroIdx.begin(), nonZeroIdx.end(),
+            //                                   std::inserter(diff, diff.begin()));
+            //            zeroIdx.set_size(diff.size());
+            //            for (unsigned int i = 0, ie = diff.size(); i < ie; ++i)
+            //            {
+            //                zeroIdx(i) = diff[i];
+            //            }
+        }
+        else
+        {
+            Ared = A;
+            nonZeroIdx.set_size(A.n_cols);
+            std::iota (std::begin(nonZeroIdx), std::end(nonZeroIdx), 0);
+        }
+
+
+        Ared.save("/tmp/ReLe/gradRed.log", arma::raw_ascii);
+
+        ////////////////////////////////////////////////
+        /// GRAM MATRIX AND NORMAL
+        ////////////////////////////////////////////////
+        arma::mat gramMatrix = Ared.t() * Ared;
+        //        std::cout << "Gram: \n" << gramMatrix << std::endl;
+        //        arma::mat X(dr-1, dr);
+        //        for (int r = 0; r < dr-1; ++r)
+        //        {
+        //            for (int r2 = 0; r2 < dr; ++r2)
+        //            {
+        //                X(r, r2) = gramMatrix(r2, r) - gramMatrix(r2, dr-1);
+        //            }
+        //        }
+        arma::mat X = gramMatrix.rows(0,dr-2) - arma::repmat(gramMatrix.row(dr-1), dr-1, 1);
+        //        std::cerr << std::endl << "X: " << X;
+        X.save("/tmp/ReLe/GM.log", arma::raw_ascii);
+
+
+        // COMPUTE NULL SPACE
+        Y = null(X);
+        std::cout << "Y: " << Y << std::endl;
+        Y.save("/tmp/ReLe/NullS.log", arma::raw_ascii);
+
+
+        // prepare the output
+        // reset weights
+        weights.zeros(A.n_cols);
+
+
+        if (Y.n_cols > 1)
+        {
+            ////////////////////////////////////////////////
+            /// POST-PROCESSING (IF MULTIPLE SOLUTIONS)
+            ////////////////////////////////////////////////
+
+            //setup optimization algorithm
+            nlopt::opt optimizator;
+            int nbOptParams = Y.n_cols;
+            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+            optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+
+
+            unsigned int maxFunEvals = 0;
+            nbFunEvals = 0;
+            if (maxFunEvals == 0)
+                maxFunEvals = std::min(50*nbOptParams, 600);
+
+
+            optimizator.set_xtol_rel(1e-8);
+            optimizator.set_ftol_rel(1e-8);
+            optimizator.set_ftol_abs(1e-8);
+            optimizator.set_maxeval(maxFunEvals);
+
+            optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
+
+            //optimize function
+            std::vector<double> parameters(nbOptParams,0);
+            double minf;
+            if (optimizator.optimize(parameters, minf) < 0)
             {
-                X(r, r2) = gramMatrix(r2, r) - gramMatrix(r2, dr-1);
+                printf("nlopt failed!\n");
+                abort();
+            }
+            else
+            {
+                //            printf("found minimum = %0.10g\n", minf);
+                arma::vec finalP(nbOptParams);
+                for(int i = 0; i < nbOptParams; ++i)
+                {
+                    finalP(i) = parameters[i];
+                }
+
+                weights(nonZeroIdx) = Y*finalP;
             }
         }
-//        std::cerr << std::endl << "X: " << X;
-        X.save("/tmp/ReLe/lqr/GIRL/X.log", arma::raw_ascii);
-
-        //        arma::mat X2(2,3);
-        //        X2 << 1  <<   2 << 3<< arma::endr
-        //        << 5  <<   6 << 7;
-        //        std::cerr << std::endl << X2;
-
-        arma::mat U, V;
-        arma::vec s;
-        arma::svd(U, s, V, X);
-//                std::cout << "U: " << U << std::endl;
-//                std::cout << "s: " << s << std::endl;
-//                std::cout << "V: " << V << std::endl;
-
-        int np = s.n_elem;
-        weights = V.cols(np, V.n_cols-1);
-//        weights.elem( arma::find(weights < 0) ).zeros();
-        weights /= arma::norm(weights,1);
+        else
+        {
+            weights(nonZeroIdx) = Y;
+        }
 
     }
 
+    ////////////////////////////////////////////////////////////////
+    /// FUNCTIONS FOR THE OPTIMIZATION STEP
+    ////////////////////////////////////////////////////////////////
+    static double wrapper_constr(unsigned int n, const double* x, double* grad,
+                                 void* o)
+    {
+        return reinterpret_cast<PlaneGIRL*>(o)->oneSumConstraint(n, x, grad);
+    }
+
+    double oneSumConstraint(unsigned int n, const double *x, double *grad)
+    {
+        grad = nullptr;
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+        double val = arma::norm(p,1) - 1.0;
+        return val;
+    }
+
+    static double wrapper(unsigned int n, const double* x, double* grad,
+                          void* o)
+    {
+        return reinterpret_cast<PlaneGIRL*>(o)->objFunction(n, x, grad);
+    }
+
+    double objFunction(unsigned int n, const double* x, double* grad)
+    {
+
+        ++nbFunEvals;
+
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+
+        if (grad != nullptr)
+        {
+            abort();
+        }
+
+        double norm1_2 = 0.0;
+        for (unsigned int i = 0, ie = p.n_elem; i < ie; ++i)
+        {
+            norm1_2 += sqrt(abs(p(i)));
+        }
+        norm1_2 *= norm1_2;
+        //        std::cerr << norm1_2 << std::endl;
+        return norm1_2;
+
+    }
 
 protected:
     Dataset<ActionC,StateC>& data;
@@ -699,6 +840,8 @@ protected:
     double gamma;
     arma::vec weights;
     IRLGradType atype;
+    unsigned int nbFunEvals;
+    arma::mat Y;
 
 };
 

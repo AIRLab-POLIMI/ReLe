@@ -47,6 +47,7 @@ public:
 
     static BasisFunctions generate(unsigned int n_centers, std::initializer_list<double> l);
     static BasisFunctions generate(std::initializer_list<unsigned int> n_centers, std::initializer_list<double> l);
+    static BasisFunctions generate(arma::mat& centers, arma::mat& widths);
 
 
     virtual void writeOnStream (std::ostream& out);

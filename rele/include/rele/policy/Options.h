@@ -49,7 +49,7 @@ public:
 
     virtual FiniteAction getLastChoice() //TODO support continuos options?
     {
-    	return lastChoice;
+        return lastChoice;
     }
 
     virtual void operator ()(const StateC& state, ActionC& action)

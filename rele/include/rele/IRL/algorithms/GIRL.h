@@ -135,7 +135,7 @@ public:
         optimizator.set_xtol_rel(1e-6);
         optimizator.set_ftol_rel(1e-6);
         optimizator.set_ftol_abs(1e-6);
-        optimizator.set_maxeval(200*dpr);
+        optimizator.set_maxeval(maxFunEvals);
 
         std::vector<double> lowerBounds(dpr, 0.0);
         std::vector<double> upperBounds(dpr, 1.0);
