@@ -107,7 +107,7 @@ public:
             den += val;
             distribution[count++] = val;
         }
-        distribution[nactions-1] = 1.0;
+        distribution[nactions-1] = mActions[nactions-1]*1.0;
 
 
         double new_den = 0.0;
