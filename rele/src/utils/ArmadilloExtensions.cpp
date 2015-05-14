@@ -97,4 +97,56 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
     return jb;
 }
 
+//    arma::uvec licols(const arma::mat& X, arma::mat& Xsub, double tol = 1e-10)
+//    {
+//        arma::uvec idx;
+//        arma::uvec a = arma::find(X==0);
+//        if (a.n_elem == X.n_elem)
+//        {
+//            Xsub.set_size(0,0);
+//            return idx;
+//        }
+
+//        int m = X.n_rows;
+//        int n = X.n_cols;
+
+//        arma::mat Q, R;
+//        if (m <= n)
+//        {
+//            arma::qr(Q,R,X);
+//        }
+//        else
+//        {
+//            arma::qr_econ( Q, R, X );
+//        }
+
+//        arma::vec diagr;
+////        //        if ((R.n_rows > 1) && (R.n_cols > 1))
+////        //        {
+//        diagr = abs(R.diag());
+////        //        }
+////        //        else
+////        //        {
+////        //            diagr = R(0);
+////        //        }
+
+//        std::cerr << R;
+
+//        arma::vec absdiag = abs(diagr);
+//        arma::uvec E = arma::sort_index(absdiag,"descend");
+
+
+//        //rank estimation
+//        arma::uvec rv = arma::find(diagr >= tol*diagr(0)); //rank estimation
+//        int r = rv.n_elem;
+
+//        arma::uvec e = E.rows(0,r-1);
+//        idx = arma::sort(e);
+
+//        Xsub = X.cols(idx);
+//        std::cerr << Xsub;
+
+//        return idx;
+//    }
+
 }

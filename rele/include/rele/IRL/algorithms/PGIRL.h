@@ -669,21 +669,35 @@ public:
         ////////////////////////////////////////////////
         /// PRE-PROCESSING
         ////////////////////////////////////////////////
-        arma::mat Ared;
+        arma::mat Ared;         //reduced gradient matrix
+        arma::uvec nonZeroIdx;  //nonzero elements of the reward weights
         int rnkG = rank(A);
         if ( rnkG < dr && A.n_rows >= A.n_cols )
         {
             // select linearly independent columns
             arma::mat Asub;
-            arma::uvec as = rref(A, Asub);
+            nonZeroIdx = rref(A, Asub);
             std::cout << "Asub: \n" << Asub << std::endl;
-            std::cout << "idx: \n" << as.t()  << std::endl;
-            Ared = A.cols(as);
+            std::cout << "idx: \n" << nonZeroIdx.t()  << std::endl;
+            Ared = A.cols(nonZeroIdx);
             assert(rank(Ared) == Ared.n_cols);
+            //            //save idxs to be set to zero
+            //            arma::vec tmp(A.n_cols);
+            //            std::iota (std::begin(tmp), std::end(tmp), 0);
+            //            std::vector<int> diff;
+            //            std::set_difference(tmp.begin(), tmp.end(), nonZeroIdx.begin(), nonZeroIdx.end(),
+            //                                   std::inserter(diff, diff.begin()));
+            //            zeroIdx.set_size(diff.size());
+            //            for (unsigned int i = 0, ie = diff.size(); i < ie; ++i)
+            //            {
+            //                zeroIdx(i) = diff[i];
+            //            }
         }
         else
         {
             Ared = A;
+            nonZeroIdx.set_size(A.n_cols);
+            std::iota (std::begin(nonZeroIdx), std::end(nonZeroIdx), 0);
         }
 
 
@@ -693,9 +707,7 @@ public:
         /// GRAM MATRIX AND NORMAL
         ////////////////////////////////////////////////
         arma::mat gramMatrix = Ared.t() * Ared;
-
         //        std::cout << "Gram: \n" << gramMatrix << std::endl;
-
         //        arma::mat X(dr-1, dr);
         //        for (int r = 0; r < dr-1; ++r)
         //        {
@@ -709,55 +721,67 @@ public:
         X.save("/tmp/ReLe/GM.log", arma::raw_ascii);
 
 
+        // COMPUTE NULL SPACE
         Y = null(X);
         std::cout << "Y: " << Y << std::endl;
         Y.save("/tmp/ReLe/NullS.log", arma::raw_ascii);
 
 
-
-        ////////////////////////////////////////////////
-        /// POST-PROCESSING
-        ////////////////////////////////////////////////
-
-        //setup optimization algorithm
-        nlopt::opt optimizator;
-        int nbOptParams = Y.n_cols;
-        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
-        optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+        // prepare the output
+        // reset weights
+        weights.zeros(A.n_cols);
 
 
-        unsigned int maxFunEvals = 0;
-        nbFunEvals = 0;
-        if (maxFunEvals == 0)
-            maxFunEvals = std::min(30*nbOptParams, 600);
-
-
-        optimizator.set_xtol_rel(1e-6);
-        optimizator.set_ftol_rel(1e-6);
-        optimizator.set_ftol_abs(1e-6);
-        optimizator.set_maxeval(maxFunEvals);
-
-        optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
-
-        //optimize function
-        std::vector<double> parameters(nbOptParams,0);
-        double minf;
-        if (optimizator.optimize(parameters, minf) < 0)
+        if (Y.n_cols > 1)
         {
-            printf("nlopt failed!\n");
-            abort();
+            ////////////////////////////////////////////////
+            /// POST-PROCESSING (IF MULTIPLE SOLUTIONS)
+            ////////////////////////////////////////////////
+
+            //setup optimization algorithm
+            nlopt::opt optimizator;
+            int nbOptParams = Y.n_cols;
+            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+            optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+
+
+            unsigned int maxFunEvals = 0;
+            nbFunEvals = 0;
+            if (maxFunEvals == 0)
+                maxFunEvals = std::min(50*nbOptParams, 600);
+
+
+            optimizator.set_xtol_rel(1e-8);
+            optimizator.set_ftol_rel(1e-8);
+            optimizator.set_ftol_abs(1e-8);
+            optimizator.set_maxeval(maxFunEvals);
+
+            optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
+
+            //optimize function
+            std::vector<double> parameters(nbOptParams,0);
+            double minf;
+            if (optimizator.optimize(parameters, minf) < 0)
+            {
+                printf("nlopt failed!\n");
+                abort();
+            }
+            else
+            {
+                //            printf("found minimum = %0.10g\n", minf);
+                arma::vec finalP(nbOptParams);
+                for(int i = 0; i < nbOptParams; ++i)
+                {
+                    finalP(i) = parameters[i];
+                }
+
+                weights(nonZeroIdx) = Y*finalP;
+            }
         }
         else
         {
-            //            printf("found minimum = %0.10g\n", minf);
-            arma::vec finalP(nbOptParams);
-            for(int i = 0; i < nbOptParams; ++i)
-            {
-                finalP(i) = parameters[i];
-            }
-            weights = Y*finalP;
+            weights(nonZeroIdx) = Y;
         }
-
 
     }
 
@@ -808,60 +832,6 @@ public:
         return norm1_2;
 
     }
-
-private:
-
-    //    arma::uvec licols(const arma::mat& X, arma::mat& Xsub, double tol = 1e-10)
-    //    {
-    //        arma::uvec idx;
-    //        arma::uvec a = arma::find(X==0);
-    //        if (a.n_elem == X.n_elem)
-    //        {
-    //            Xsub.set_size(0,0);
-    //            return idx;
-    //        }
-
-    //        int m = X.n_rows;
-    //        int n = X.n_cols;
-
-    //        arma::mat Q, R;
-    //        if (m <= n)
-    //        {
-    //            arma::qr(Q,R,X);
-    //        }
-    //        else
-    //        {
-    //            arma::qr_econ( Q, R, X );
-    //        }
-
-    //        arma::vec diagr;
-    ////        //        if ((R.n_rows > 1) && (R.n_cols > 1))
-    ////        //        {
-    //        diagr = abs(R.diag());
-    ////        //        }
-    ////        //        else
-    ////        //        {
-    ////        //            diagr = R(0);
-    ////        //        }
-
-    //        std::cerr << R;
-
-    //        arma::vec absdiag = abs(diagr);
-    //        arma::uvec E = arma::sort_index(absdiag,"descend");
-
-
-    //        //rank estimation
-    //        arma::uvec rv = arma::find(diagr >= tol*diagr(0)); //rank estimation
-    //        int r = rv.n_elem;
-
-    //        arma::uvec e = E.rows(0,r-1);
-    //        idx = arma::sort(e);
-
-    //        Xsub = X.cols(idx);
-    //        std::cerr << Xsub;
-
-    //        return idx;
-    //    }
 
 protected:
     Dataset<ActionC,StateC>& data;
