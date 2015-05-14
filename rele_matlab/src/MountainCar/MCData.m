@@ -110,15 +110,21 @@ Xc = dlmread('/tmp/ReLe/lqr/GIRL/X.log');
 assert(max(max(abs(X - Xc))) <= 1e-8);
 ns = null(X)
 
-[U,S,V] = svd(X,0);
-Uc = dlmread('/tmp/ReLe/lqr/GIRL/X.log');
-Sc = dlmread('/tmp/ReLe/lqr/GIRL/s.log');
-Vc = dlmread('/tmp/ReLe/lqr/GIRL/V.log');
-Y = dlmread('/tmp/ReLe/lqr/GIRL/Y.log');
+% [U,S,V] = svd(X,0);
+% Uc = dlmread('/tmp/ReLe/lqr/GIRL/X.log');
+% Sc = dlmread('/tmp/ReLe/lqr/GIRL/s.log');
+% Vc = dlmread('/tmp/ReLe/lqr/GIRL/V.log');
+% Y = dlmread('/tmp/ReLe/lqr/GIRL/Y.log');
+% 
+% [Q,R] = qr(X');
+% Q = dlmread('/tmp/ReLe/lqr/GIRL/Q.log');
+% R = dlmread('/tmp/ReLe/lqr/GIRL/R.log');
 
-[Q,R] = qr(X');
-Q = dlmread('/tmp/ReLe/lqr/GIRL/Q.log');
-R = dlmread('/tmp/ReLe/lqr/GIRL/R.log');
+[Xsub,idx] = licols(grads)
+
+[Q,R,E] = qr(X,0)
+diag(R)
+
 
 
 

@@ -28,6 +28,7 @@
 #include "Policy.h"
 #include "Transition.h"
 #include "GIRL.h"
+#include "ArmadilloExtensions.h"
 
 #include <nlopt.hpp>
 #include <cassert>
@@ -661,14 +662,52 @@ public:
             A.col(r) = gradients[r];
         }
 
-        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
+        A.save("/tmp/ReLe/grad.log", arma::raw_ascii);
 
         std::cout << "Grads: \n" << A << std::endl;
 
-        arma::mat gramMatrix = A.t() * A;
+        ////////////////////////////////////////////////
+        /// PRE-PROCESSING
+        ////////////////////////////////////////////////
+        arma::mat Ared;         //reduced gradient matrix
+        arma::uvec nonZeroIdx;  //nonzero elements of the reward weights
+        int rnkG = rank(A);
+        if ( rnkG < dr && A.n_rows >= A.n_cols )
+        {
+            // select linearly independent columns
+            arma::mat Asub;
+            nonZeroIdx = rref(A, Asub);
+            std::cout << "Asub: \n" << Asub << std::endl;
+            std::cout << "idx: \n" << nonZeroIdx.t()  << std::endl;
+            Ared = A.cols(nonZeroIdx);
+            assert(rank(Ared) == Ared.n_cols);
+            //            //save idxs to be set to zero
+            //            arma::vec tmp(A.n_cols);
+            //            std::iota (std::begin(tmp), std::end(tmp), 0);
+            //            std::vector<int> diff;
+            //            std::set_difference(tmp.begin(), tmp.end(), nonZeroIdx.begin(), nonZeroIdx.end(),
+            //                                   std::inserter(diff, diff.begin()));
+            //            zeroIdx.set_size(diff.size());
+            //            for (unsigned int i = 0, ie = diff.size(); i < ie; ++i)
+            //            {
+            //                zeroIdx(i) = diff[i];
+            //            }
+        }
+        else
+        {
+            Ared = A;
+            nonZeroIdx.set_size(A.n_cols);
+            std::iota (std::begin(nonZeroIdx), std::end(nonZeroIdx), 0);
+        }
 
+
+        Ared.save("/tmp/ReLe/gradRed.log", arma::raw_ascii);
+
+        ////////////////////////////////////////////////
+        /// GRAM MATRIX AND NORMAL
+        ////////////////////////////////////////////////
+        arma::mat gramMatrix = Ared.t() * Ared;
         //        std::cout << "Gram: \n" << gramMatrix << std::endl;
-
         //        arma::mat X(dr-1, dr);
         //        for (int r = 0; r < dr-1; ++r)
         //        {
@@ -679,56 +718,119 @@ public:
         //        }
         arma::mat X = gramMatrix.rows(0,dr-2) - arma::repmat(gramMatrix.row(dr-1), dr-1, 1);
         //        std::cerr << std::endl << "X: " << X;
-        X.save("/tmp/ReLe/lqr/GIRL/X.log", arma::raw_ascii);
+        X.save("/tmp/ReLe/GM.log", arma::raw_ascii);
 
 
-        arma::mat Y = null(X);
+        // COMPUTE NULL SPACE
+        Y = null(X);
         std::cout << "Y: " << Y << std::endl;
-        Y.save("/tmp/ReLe/lqr/GIRL/Y.log", arma::raw_ascii);
+        Y.save("/tmp/ReLe/NullS.log", arma::raw_ascii);
 
 
-        //        arma::mat U, V;
-        //        arma::vec s;
-        //        arma::svd(U, s, V, X);
-        //        //std::cout << "U: " << U << std::endl;
-        //        //std::cout << "s: " << s << std::endl;
-        //        //std::cout << "V: " << V << std::endl;
-        //        arma::uvec q1 = arma::find(s > 1e-12);
-        //        int np = q1.n_elem;
-        //        weights = V.cols(np, V.n_cols-1);
-        //        std::cout << "weights: " << weights << std::endl;
-        //        //weights.elem( arma::find(weights < 0) ).zeros();
-        //        weights /= arma::norm(weights,1);
+        // prepare the output
+        // reset weights
+        weights.zeros(A.n_cols);
 
-        weights = Y;
 
-    }
-
-private:
-    arma::mat null(arma::mat& A)
-    {
-        int m = A.n_rows;
-        int n = A.n_cols;
-
-        arma::mat U, V;
-        arma::vec s;
-        if (m <= n)
+        if (Y.n_cols > 1)
         {
-            arma::svd(U, s, V, A);
+            ////////////////////////////////////////////////
+            /// POST-PROCESSING (IF MULTIPLE SOLUTIONS)
+            ////////////////////////////////////////////////
+
+            //setup optimization algorithm
+            nlopt::opt optimizator;
+            int nbOptParams = Y.n_cols;
+            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+            optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+
+
+            unsigned int maxFunEvals = 0;
+            nbFunEvals = 0;
+            if (maxFunEvals == 0)
+                maxFunEvals = std::min(50*nbOptParams, 600);
+
+
+            optimizator.set_xtol_rel(1e-8);
+            optimizator.set_ftol_rel(1e-8);
+            optimizator.set_ftol_abs(1e-8);
+            optimizator.set_maxeval(maxFunEvals);
+
+            optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
+
+            //optimize function
+            std::vector<double> parameters(nbOptParams,0);
+            double minf;
+            if (optimizator.optimize(parameters, minf) < 0)
+            {
+                printf("nlopt failed!\n");
+                abort();
+            }
+            else
+            {
+                //            printf("found minimum = %0.10g\n", minf);
+                arma::vec finalP(nbOptParams);
+                for(int i = 0; i < nbOptParams; ++i)
+                {
+                    finalP(i) = parameters[i];
+                }
+
+                weights(nonZeroIdx) = Y*finalP;
+            }
         }
         else
         {
-            arma::svd_econ(U, s, V, A);
+            weights(nonZeroIdx) = Y;
         }
 
-        // U.save("/tmp/ReLe/lqr/GIRL/U.log", arma::raw_ascii);
-        // s.save("/tmp/ReLe/lqr/GIRL/s.log", arma::raw_ascii);
-        // V.save("/tmp/ReLe/lqr/GIRL/V.log", arma::raw_ascii);
+    }
 
-        double tol = std::max(m,n) * max(s) * 2.2204e-16; //look at matlab implementation
-        arma::uvec tmp = arma::find(s > tol);
-        unsigned int r = tmp.n_elem;
-        return V.cols(r, n-1);
+    ////////////////////////////////////////////////////////////////
+    /// FUNCTIONS FOR THE OPTIMIZATION STEP
+    ////////////////////////////////////////////////////////////////
+    static double wrapper_constr(unsigned int n, const double* x, double* grad,
+                                 void* o)
+    {
+        return reinterpret_cast<PlaneGIRL*>(o)->oneSumConstraint(n, x, grad);
+    }
+
+    double oneSumConstraint(unsigned int n, const double *x, double *grad)
+    {
+        grad = nullptr;
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+        double val = arma::norm(p,1) - 1.0;
+        return val;
+    }
+
+    static double wrapper(unsigned int n, const double* x, double* grad,
+                          void* o)
+    {
+        return reinterpret_cast<PlaneGIRL*>(o)->objFunction(n, x, grad);
+    }
+
+    double objFunction(unsigned int n, const double* x, double* grad)
+    {
+
+        ++nbFunEvals;
+
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+
+        if (grad != nullptr)
+        {
+            abort();
+        }
+
+        double norm1_2 = 0.0;
+        for (unsigned int i = 0, ie = p.n_elem; i < ie; ++i)
+        {
+            norm1_2 += sqrt(abs(p(i)));
+        }
+        norm1_2 *= norm1_2;
+        //        std::cerr << norm1_2 << std::endl;
+        return norm1_2;
+
     }
 
 protected:
@@ -738,6 +840,8 @@ protected:
     double gamma;
     arma::vec weights;
     IRLGradType atype;
+    unsigned int nbFunEvals;
+    arma::mat Y;
 
 };
 

@@ -218,7 +218,7 @@ protected:
 
 int main(int argc, char *argv[])
 {
-    //    RandomGenerator::seed(4265674);
+    RandomGenerator::seed(4265436624);
 
     FileManager fm("mc", "GIRL");
     fm.createDir();
@@ -255,9 +255,15 @@ int main(int argc, char *argv[])
     vector<FiniteAction> actions;
     for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
         actions.push_back(FiniteAction(i));
+#if 0
     BasisFunctions basis = PolynomialFunction::generate(1,mdp.getSettings().continuosStateDim);
     //Replicate each basis for the actions (action-1 because the last is linearly dependent on the others)
     BasisFunctions bfs = AndConditionBasisFunction::generate(basis, 2, actions.size()-1);
+#else
+    BasisFunctions basis = IdentityBasis::generate(1);
+    BasisFunctions bfs = AndConditionBasisFunction::generate(basis, 2, actions.size()-1);
+#endif
+
     //create basis vector
     DenseFeatures phi(bfs);
     //create policy
@@ -320,8 +326,11 @@ int main(int argc, char *argv[])
 
     /*** recover reward by IRL (PGIRL) ***/
     std::vector<IRLParametricReward<FiniteAction,DenseState>*> rewards;
-    vec pos_linspace = linspace<vec>(-1.8,1,3);
-    vec vel_linspace = linspace<vec>(-0.1,0.1,3);
+//    vec pos_linspace = linspace<vec>(-1.8,1,3);
+//    vec vel_linspace = linspace<vec>(-0.1,0.1,3);
+
+    vec pos_linspace = {0.4, 0.0};
+    vec vel_linspace = {-0.02,0.02};
 
     //-- meshgrid
     arma::mat xrow = vectorise(pos_linspace).t();
@@ -378,12 +387,11 @@ int main(int argc, char *argv[])
     vec rewWeights = pgirl.getWeights();
     rewWeights.save(fm.addPath("rewards.log"),arma::raw_ascii);
     cout << "Weights (plane): " << rewWeights.t();
-    rewWeights = abs(rewWeights);
+//    rewWeights = abs(rewWeights);
     //    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
     //    rewWeights = rewWeights / norm(rewWeights,1);
 
 
-    return 1;
 
     vec pos_linspace2 = linspace<vec>(-2.5,1.5,30);
     vec vel_linspace2 = linspace<vec>(-0.2,0.2,30);
@@ -423,6 +431,8 @@ int main(int argc, char *argv[])
     rewfilename.close();
     //    }
 
+
+    return 1;
 
     ofstream dasdsa(fm.addPath("poll.log"), ios_base::out);
     for (int i = 0, ie = pos_mesh2.n_rows; i < ie; ++i)
