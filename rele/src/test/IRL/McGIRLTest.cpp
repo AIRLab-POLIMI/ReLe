@@ -218,7 +218,7 @@ protected:
 
 int main(int argc, char *argv[])
 {
-        RandomGenerator::seed(4265436624);
+    RandomGenerator::seed(4265436624);
 
     FileManager fm("mc", "GIRL");
     fm.createDir();

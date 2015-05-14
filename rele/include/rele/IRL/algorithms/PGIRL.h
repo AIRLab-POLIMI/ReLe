@@ -612,7 +612,7 @@ public:
 
             arma::mat H = arma::pinv(fisher);
             arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodes * fisher - eligibility * eligibility.t()) * eligibility)
-                    * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
+                          * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
             arma::vec grad = g - eligibility * b;
             nat_grad = H * (grad);
         }
@@ -661,16 +661,37 @@ public:
             A.col(r) = gradients[r];
         }
 
-        A.save("/tmp/ReLe/lqr/GIRL/grad.log", arma::raw_ascii);
+        A.save("/tmp/ReLe/grad.log", arma::raw_ascii);
 
         std::cout << "Grads: \n" << A << std::endl;
 
-        arma::mat Asub;
-        arma::uvec as = rref(A, Asub);
-        std::cout << "Asub: \n" << Asub << std::endl;
-        std::cout << "idx: \n" << as.t()  << std::endl;
+        ////////////////////////////////////////////////
+        /// PRE-PROCESSING
+        ////////////////////////////////////////////////
+        arma::mat Ared;
+        int rnkG = rank(A);
+        if ( rnkG < dr && A.n_rows >= A.n_cols )
+        {
+            // select linearly independent columns
+            arma::mat Asub;
+            arma::uvec as = rref(A, Asub);
+            std::cout << "Asub: \n" << Asub << std::endl;
+            std::cout << "idx: \n" << as.t()  << std::endl;
+            Ared = A.cols(as);
+            assert(rank(Ared) == Ared.n_cols);
+        }
+        else
+        {
+            Ared = A;
+        }
 
-        arma::mat gramMatrix = A.t() * A;
+
+        Ared.save("/tmp/ReLe/gradRed.log", arma::raw_ascii);
+
+        ////////////////////////////////////////////////
+        /// GRAM MATRIX AND NORMAL
+        ////////////////////////////////////////////////
+        arma::mat gramMatrix = Ared.t() * Ared;
 
         //        std::cout << "Gram: \n" << gramMatrix << std::endl;
 
@@ -684,28 +705,106 @@ public:
         //        }
         arma::mat X = gramMatrix.rows(0,dr-2) - arma::repmat(gramMatrix.row(dr-1), dr-1, 1);
         //        std::cerr << std::endl << "X: " << X;
-        X.save("/tmp/ReLe/lqr/GIRL/X.log", arma::raw_ascii);
+        X.save("/tmp/ReLe/GM.log", arma::raw_ascii);
 
 
-        arma::mat Y = null(X);
+        Y = null(X);
         std::cout << "Y: " << Y << std::endl;
-        Y.save("/tmp/ReLe/lqr/GIRL/Y.log", arma::raw_ascii);
+        Y.save("/tmp/ReLe/NullS.log", arma::raw_ascii);
 
 
-        //        arma::mat U, V;
-        //        arma::vec s;
-        //        arma::svd(U, s, V, X);
-        //        //std::cout << "U: " << U << std::endl;
-        //        //std::cout << "s: " << s << std::endl;
-        //        //std::cout << "V: " << V << std::endl;
-        //        arma::uvec q1 = arma::find(s > 1e-12);
-        //        int np = q1.n_elem;
-        //        weights = V.cols(np, V.n_cols-1);
-        //        std::cout << "weights: " << weights << std::endl;
-        //        //weights.elem( arma::find(weights < 0) ).zeros();
-        //        weights /= arma::norm(weights,1);
 
-        weights = Y;
+        ////////////////////////////////////////////////
+        /// POST-PROCESSING
+        ////////////////////////////////////////////////
+
+        //setup optimization algorithm
+        nlopt::opt optimizator;
+        int nbOptParams = Y.n_cols;
+        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+        optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+
+
+        unsigned int maxFunEvals = 0;
+        nbFunEvals = 0;
+        if (maxFunEvals == 0)
+            maxFunEvals = std::min(30*nbOptParams, 600);
+
+
+        optimizator.set_xtol_rel(1e-6);
+        optimizator.set_ftol_rel(1e-6);
+        optimizator.set_ftol_abs(1e-6);
+        optimizator.set_maxeval(maxFunEvals);
+
+        optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
+
+        //optimize function
+        std::vector<double> parameters(nbOptParams,0);
+        double minf;
+        if (optimizator.optimize(parameters, minf) < 0)
+        {
+            printf("nlopt failed!\n");
+            abort();
+        }
+        else
+        {
+            //            printf("found minimum = %0.10g\n", minf);
+            arma::vec finalP(nbOptParams);
+            for(int i = 0; i < nbOptParams; ++i)
+            {
+                finalP(i) = parameters[i];
+            }
+            weights = Y*finalP;
+        }
+
+
+    }
+
+    ////////////////////////////////////////////////////////////////
+    /// FUNCTIONS FOR THE OPTIMIZATION STEP
+    ////////////////////////////////////////////////////////////////
+    static double wrapper_constr(unsigned int n, const double* x, double* grad,
+                                 void* o)
+    {
+        return reinterpret_cast<PlaneGIRL*>(o)->oneSumConstraint(n, x, grad);
+    }
+
+    double oneSumConstraint(unsigned int n, const double *x, double *grad)
+    {
+        grad = nullptr;
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+        double val = arma::norm(p,1) - 1.0;
+        return val;
+    }
+
+    static double wrapper(unsigned int n, const double* x, double* grad,
+                          void* o)
+    {
+        return reinterpret_cast<PlaneGIRL*>(o)->objFunction(n, x, grad);
+    }
+
+    double objFunction(unsigned int n, const double* x, double* grad)
+    {
+
+        ++nbFunEvals;
+
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+
+        if (grad != nullptr)
+        {
+            abort();
+        }
+
+        double norm1_2 = 0.0;
+        for (unsigned int i = 0, ie = p.n_elem; i < ie; ++i)
+        {
+            norm1_2 += sqrt(abs(p(i)));
+        }
+        norm1_2 *= norm1_2;
+        //        std::cerr << norm1_2 << std::endl;
+        return norm1_2;
 
     }
 
@@ -813,6 +912,7 @@ private:
             {
                 //The column is negligible, zero it out.
                 A(arma::span(i,m-1), arma::span(j,j)).zeros();
+                // std::cerr << A << std::endl;
                 ++j;
             }
             else
@@ -825,32 +925,33 @@ private:
                 arma::uvec idx2 = {k,i};
                 arma::uvec aaa(n-j);
                 int ii = 0;
-                for (int u = j; u < n;++u)
+                for (int u = j; u < n; ++u)
                     aaa(ii++) = u;
                 A.submat(idx,aaa) = A.submat(idx2,aaa);
+                // std::cerr << A << std::endl;
 
                 //Divide the pivot row by the pivot element.
                 A(arma::span(i,i),arma::span(j,n-1)) = A(arma::span(i,i),arma::span(j,n-1))/A(i,j);
+                // std::cerr << A << std::endl;
 
                 //Subtract multiples of the pivot row from all the other rows.
 
                 std::vector<int> vv;
-                for (int u = 0; u < i-1;++u)
+                for (int u = 0, ue = i; u < ue; ++u)
                     vv.push_back(u);
-                for (int u = i; u < m;++u)
+                for (int u = i+1, ue = m; u < ue; ++u)
                     vv.push_back(u);
 
                 for (auto k : vv)
                 {
                     A(k,arma::span(j,n-1)) = A(k,arma::span(j,n-1)) - A(k,j)*A(i,arma::span(j,n-1));
                 }
+                // std::cerr << A << std::endl;
                 i = i + 1;
                 j = j + 1;
-
             }
         }
         return jb;
-
     }
 
 protected:
@@ -860,6 +961,8 @@ protected:
     double gamma;
     arma::vec weights;
     IRLGradType atype;
+    unsigned int nbFunEvals;
+    arma::mat Y;
 
 };
 
