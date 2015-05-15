@@ -33,6 +33,12 @@ arma::mat null(const arma::mat& A, double tol = -1);
 
 arma::uvec rref(const arma::mat& X, arma::mat& A, double tol = -1);
 
+double wrapTo2Pi(double lambda);
+arma::vec wrapTo2Pi(const arma::vec& lambda);
+
+double wrapToPi(double lambda);
+arma::vec wrapToPi(const arma::vec& lambda);
+
 }
 
 #endif //ARMADILLO_EXTENSIONS_H_

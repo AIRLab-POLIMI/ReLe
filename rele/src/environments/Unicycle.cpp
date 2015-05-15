@@ -23,12 +23,17 @@
 
 #include "Unicycle.h"
 #include "RandomGenerator.h"
+#include "ArmadilloExtensions.h"
 
 using namespace std;
 using namespace boost::numeric::odeint;
 
 namespace ReLe
 {
+
+//=====================================================================================
+// UnicyclePolarSettings SETTINGS
+//-------------------------------------------------------------------------------------
 
 UnicyclePolarSettings::UnicyclePolarSettings()
 {
@@ -49,8 +54,9 @@ void UnicyclePolarSettings::defaultSettings(UnicyclePolarSettings& settings)
     settings.isEpisodic = true;
     settings.horizon = 300;
 
-    //UWV Parameters
+    //Unicycle Parameters
     settings.dt = 0.03; //s
+    settings.reward_th = 0.1;
 }
 
 UnicyclePolarSettings::~UnicyclePolarSettings()
@@ -72,9 +78,9 @@ void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_typ
         const double /* t */)
 {
     //Status and actions
-    const double rho   = std::max(x[0], 1e-6); //avoid numerical instability
-    const double gamma = std::max(x[1], 1e-6);
-    const double delta = std::max(x[2], 1e-6);
+    const double rho   = std::max(x[StateLabel::rho], 1e-6); //avoid numerical instability
+    const double gamma = std::max(x[StateLabel::gamma], 1e-6);
+    const double delta = std::max(x[StateLabel::delta], 1e-6);
 
     //dinamics
     const double drho = -v * cos(gamma);
@@ -84,15 +90,15 @@ void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_typ
     const double ddelta = sin(gamma) * v / rho;
 
     dx.resize(3);
-    dx[0] = drho;
-    dx[1] = dgamma;
-    dx[2] = ddelta;
+    dx[StateLabel::rho]   = drho;
+    dx[StateLabel::gamma] = dgamma;
+    dx[StateLabel::delta] = ddelta;
 
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// UnicyclePolar ENVIRONMENT
-///////////////////////////////////////////////////////////////////////////////////////
+//=====================================================================================
+// UnicyclePolar ENVIRONMENT
+//-------------------------------------------------------------------------------------
 
 UnicyclePolar::UnicyclePolar()
     : ContinuousMDP(new UnicyclePolarSettings()), cleanConfig(true),
@@ -111,36 +117,46 @@ UnicyclePolar::UnicyclePolar(UnicyclePolarSettings& config)
 
 void UnicyclePolar::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 {
-    double v = action[0];
-    double w = action[1];
+    double v = action[linearVel];
+    double w = action[angularVel];
 
-    //ODEINT (BOOST 1.53+)
+    //ODEINT (BOOST 1.53+) -- integrate
     unicycleode.v = v;
     unicycleode.w = w;
     double t0 = 0;
     double t1 = unicycleConfig->dt;
-    integrate_adaptive(controlled_stepper , unicycleode , currentState, t0 , t1 , t1/1000.0);
+    integrate_adaptive(controlled_stepper , unicycleode , currentState, t0 , t1 , t1/100.0);
 
+    // wrap to [-pi,pi]
+    currentState[gamma] = wrapToPi(currentState[gamma]);
+    currentState[delta] = wrapToPi(currentState[delta]);
+
+    // update next state
     nextState = currentState;
 
     //compute reward
-    arma::vec& vecState = nextState;
-    double dist = arma::norm(vecState,2);
-    reward[0] = -dist;
+//    arma::vec& vecState = nextState;
+//    double dist = arma::norm(vecState,2);
+    double dist = (abs(nextState(0)) + 10 * abs(nextState(1)) + 10 * abs(nextState(2)));
+    reward[0] = -dist - 0.1 * w*w - 0.05 * v*v;
 
-    if (dist < 0.1)
+    if (dist < unicycleConfig->reward_th)
     {
-
+        nextState.setAbsorbing(true);
     }
 
 }
 
-void UnicyclePolar::getInitialState(DenseState &state)
+void UnicyclePolar::getInitialState(DenseState& state)
 {
     double goal[] = {0,0,0}; // rad
     double x = RandomGenerator::sampleUniform(-4,4);
     double y = RandomGenerator::sampleUniform(-4,4);
     double theta = RandomGenerator::sampleUniform(-M_PI,M_PI);
+
+    x = 4;
+    y = 4;
+    theta = M_PI;
 
     arma::mat Tr(3,3);
     Tr <<  cos(goal[2]) << sin(goal[2]) << 0.0 << arma::endr
@@ -154,13 +170,65 @@ void UnicyclePolar::getInitialState(DenseState &state)
 
     e = Tr * e;
 
-    currentState[0] = sqrt(e(0) * e(0) + e(1) * e(1));
-    currentState[1] = atan2(e(1),e(0)) - e(2) + M_PI;
-    currentState[2] = currentState[1] + e(2);
+    // set initial state
+    currentState[rho]   = sqrt(e(0) * e(0) + e(1) * e(1));
+    currentState[gamma] = atan2(e(1), e(0)) - e(2) + M_PI;
+    currentState[delta] = currentState[gamma] + e(2);
+
+    // wrap to [-pi,pi]
+    currentState[gamma] = wrapToPi(currentState[gamma]);
+    currentState[delta] = wrapToPi(currentState[delta]);
+
+    // set not absorbing
     currentState.setAbsorbing(false);
     state = currentState;
 }
 
+//=====================================================================================
+// UnicycleControlLaw POLICY
+//-------------------------------------------------------------------------------------
+arma::vec UnicycleControlLaw::operator()(const arma::vec &state)
+{
+    arma::vec action(2);
+    double k1 = params(0), k2 = params(1), k3 = params(2);
 
+    double rho   = state(UnicyclePolar::StateLabel::rho);
+    double gamma = state(UnicyclePolar::StateLabel::gamma);
+    double delta = state(UnicyclePolar::StateLabel::delta);
+
+    action(UnicyclePolar::ActionLabel::linearVel)  = k1 * rho * cos(gamma);
+    action(UnicyclePolar::ActionLabel::angularVel) = k2 * gamma + k1 * sin(gamma) * cos(gamma) * (gamma + k3 * delta) / gamma;
+
+    return action;
+}
+
+double UnicycleControlLaw::operator()(const arma::vec& state, const arma::vec& action)
+{
+    arma::vec realAction = (*this)(state);
+    if ((action(0) == realAction(0)) && (action(1) == realAction(1)))
+        return 1;
+    return 0;
+}
+
+Policy<DenseAction, DenseState>* UnicycleControlLaw::clone()
+{
+    return new UnicycleControlLaw(this->getParameters());
+}
+
+arma::vec UnicycleControlLaw::getParameters() const
+{
+    return params;
+}
+
+const unsigned int UnicycleControlLaw::getParametersSize() const
+{
+    return params.n_elem;
+}
+
+void UnicycleControlLaw::setParameters(arma::vec& w)
+{
+    assert(params.n_elem == w.n_elem);
+    params = w;
+}
 
 }

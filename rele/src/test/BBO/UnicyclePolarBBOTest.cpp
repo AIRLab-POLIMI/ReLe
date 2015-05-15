@@ -40,7 +40,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "Segway.h"
+#include "Unicycle.h"
 
 using namespace std;
 using namespace ReLe;
@@ -189,21 +189,18 @@ int main(int argc, char *argv[])
     //---
 
 
-    FileManager fm("segway", "BBO");
+    FileManager fm("ucp", "BBO");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
 
-    Segway mdp;
-
-    BasisFunctions basis = GaussianRbf::generate({3,3,3}, {-M_PI/18, M_PI/18, -1, 1, -1,1});
-    DenseFeatures phi(basis);
-    DetLinearPolicy<DenseState> policy(phi);
+    UnicyclePolar mdp;
+    UnicycleControlLaw policy;
     //---
 
     //--- distribution setup
-    int nparams = phi.rows();
+    int nparams = policy.getParametersSize();
     arma::vec mean(nparams, fill::zeros);
     DifferentiableDistribution* dist;
 
@@ -246,7 +243,7 @@ int main(int argc, char *argv[])
         PGPE<DenseAction, DenseState>* agent = new PGPE<DenseAction, DenseState>
         (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "seg_pgpe_%s.log", polType);
+        sprintf(outputname, "ucp_pgpe_%s.log", polType);
     }
     else if (strcmp(alg, "nes") == 0)
     {
@@ -254,7 +251,7 @@ int main(int argc, char *argv[])
         NES<DenseAction, DenseState>* agent = new NES<DenseAction, DenseState>
         (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "seg_nes_%s.log", polType);
+        sprintf(outputname, "ucp_nes_%s.log", polType);
     }
     else if (strcmp(alg, "enes") == 0)
     {
@@ -266,7 +263,7 @@ int main(int argc, char *argv[])
         eNES<DenseAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<DenseAction, DenseState, ParametricCholeskyNormal>
         (*distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "seg_enes.log");
+        sprintf(outputname, "ucp_enes.log");
     }
     else if (strcmp(alg, "reps") == 0)
     {
@@ -277,7 +274,7 @@ int main(int argc, char *argv[])
         (*distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
-        sprintf(outputname, "seg_reps.log");
+        sprintf(outputname, "ucp_reps.log");
     }
     else
     {
@@ -325,15 +322,17 @@ int main(int argc, char *argv[])
 
 
 
+
     //        PolicyEvalAgent<DenseAction, DenseState> agent(policy);
     //        Core<DenseAction, DenseState> core(mdp, agent);
-    WriteStrategy<DenseAction, DenseState> collection(fm.addPath("seqway_final.log"),
+    WriteStrategy<DenseAction, DenseState> collection(fm.addPath("ucp_final.log"),
             WriteStrategy<DenseAction, DenseState>::TRANS,
             true /*delete file*/);
     core->getSettings().loggerStrategy = &collection;
     core->getSettings().episodeLenght = mdp.getSettings().horizon;
     core->getSettings().testEpisodeN = 1;
     core->runTestEpisodes();
+    std::cout << policy.getParameters().t();
 
     //    int nbTestEpisodes = 1000;
     //    cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
