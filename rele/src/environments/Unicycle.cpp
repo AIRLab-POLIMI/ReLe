@@ -154,9 +154,9 @@ void UnicyclePolar::getInitialState(DenseState& state)
     double y = RandomGenerator::sampleUniform(-4,4);
     double theta = RandomGenerator::sampleUniform(-M_PI,M_PI);
 
-    x = 4;
-    y = 4;
-    theta = M_PI;
+//    x = 4;
+//    y = 4;
+//    theta = M_PI;
 
     arma::mat Tr(3,3);
     Tr <<  cos(goal[2]) << sin(goal[2]) << 0.0 << arma::endr

@@ -23,7 +23,7 @@ arma::mat null(const arma::mat &A, double tol)
     // s.save("/tmp/ReLe/lqr/GIRL/s.log", arma::raw_ascii);
     // V.save("/tmp/ReLe/lqr/GIRL/V.log", arma::raw_ascii);
 
-    if (tol == -1)
+    if (tol < 0)
     {
         tol = std::max(m,n) * max(s) * 2.220446049250313e-16; //look at matlab implementation
     }
@@ -38,7 +38,7 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
     int m = X.n_rows;
     int n = X.n_cols;
 
-    if (tol == -1)
+    if (tol < 0)
     {
         tol = std::max(m,n) * 2.220446049250313e-16 * arma::norm(X,"inf");
     }
