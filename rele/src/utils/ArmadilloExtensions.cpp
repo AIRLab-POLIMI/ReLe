@@ -23,7 +23,7 @@ arma::mat null(const arma::mat &A, double tol)
     // s.save("/tmp/ReLe/lqr/GIRL/s.log", arma::raw_ascii);
     // V.save("/tmp/ReLe/lqr/GIRL/V.log", arma::raw_ascii);
 
-    if (tol == -1)
+    if (tol < 0)
     {
         tol = std::max(m,n) * max(s) * 2.220446049250313e-16; //look at matlab implementation
     }
@@ -38,7 +38,7 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
     int m = X.n_rows;
     int n = X.n_cols;
 
-    if (tol == -1)
+    if (tol < 0)
     {
         tol = std::max(m,n) * 2.220446049250313e-16 * arma::norm(X,"inf");
     }
@@ -95,6 +95,47 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
         }
     }
     return jb;
+}
+
+double wrapTo2Pi(double lambda)
+{
+    double val = fmod(lambda, 2.0*M_PI);
+    if ((lambda > 0) && (val == 0.0))
+    {
+        return 2*M_PI;
+    }
+    return val;
+}
+
+arma::vec wrapTo2Pi(const arma::vec& lambda)
+{
+    unsigned int n = lambda.n_elem;
+    arma::vec tmp(n);
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        tmp(i) = wrapTo2Pi(lambda(i));
+    }
+    return tmp;
+}
+
+double wrapToPi(double lambda)
+{
+    if ((lambda < -M_PI) || (M_PI < lambda))
+    {
+        return wrapTo2Pi(lambda + M_PI) - M_PI;
+    }
+    return lambda;
+}
+
+arma::vec wrapToPi(const arma::vec& lambda)
+{
+    unsigned int n = lambda.n_elem;
+    arma::vec ret(n);
+    for (unsigned int i = 0; i < n; ++i)
+    {
+        ret(i) = wrapTo2Pi(lambda(i) + M_PI) - M_PI;
+    }
+    return ret;
 }
 
 //    arma::uvec licols(const arma::mat& X, arma::mat& Xsub, double tol = 1e-10)

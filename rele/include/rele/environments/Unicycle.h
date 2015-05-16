@@ -27,6 +27,7 @@
 #include "ContinuousMDP.h"
 #include <boost/numeric/odeint.hpp>
 #include "ArmadilloOdeint.h"
+#include "Policy.h"
 
 namespace ReLe
 {
@@ -40,6 +41,7 @@ public:
 
 public:
     double dt;
+    double reward_th;
 
     virtual void WriteToStream(std::ostream& out) const;
     virtual void ReadFromStream(std::istream& in);
@@ -66,6 +68,17 @@ public:
  */
 class UnicyclePolar: public ContinuousMDP
 {
+public:
+    enum StateLabel
+    {
+        rho = 0, gamma = 1, delta = 2
+    };
+
+    enum ActionLabel
+    {
+        linearVel = 0, angularVel = 1
+    };
+
 
     typedef arma::vec state_type;
 
@@ -113,6 +126,55 @@ private:
     controlled_stepper_type controlled_stepper;
     //]
 
+};
+
+
+//=================================================
+// Unicycle policy
+//-------------------------------------------------
+class UnicycleControlLaw : public ParametricPolicy<DenseAction, DenseState>
+{
+public:
+    UnicycleControlLaw()
+        : params(3, arma::fill::zeros)
+    {
+    }
+    UnicycleControlLaw(arma::vec p)
+        : params(p)
+    {
+        assert(p.n_elem == 3);
+    }
+
+    // Policy interface
+public:
+    arma::vec operator() (const arma::vec& state);
+    double operator() (const arma::vec& state, const arma::vec& action);
+
+    inline std::string getPolicyName()
+    {
+        return "UnicycleControlLaw";
+    }
+
+    inline std::string getPolicyHyperparameters()
+    {
+        return " ";
+    }
+
+    inline std::string printPolicy()
+    {
+        return " ";
+    }
+
+    Policy<DenseAction, DenseState>* clone();
+
+    // ParametricPolicy interface
+public:
+    arma::vec getParameters() const;
+    const unsigned int getParametersSize() const;
+    void setParameters(arma::vec &w);
+
+protected:
+    arma::vec params;
 };
 
 }

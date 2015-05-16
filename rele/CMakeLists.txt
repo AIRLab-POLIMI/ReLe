@@ -243,6 +243,9 @@ target_link_libraries(nls_BBO rele)
 add_executable(segway_BBO src/test/BBO/SegwayBBOTest.cpp)
 target_link_libraries(segway_BBO rele)
 
+add_executable(ucp_BBO src/test/BBO/UnicyclePolarBBOTest.cpp)
+target_link_libraries(ucp_BBO rele)
+
 #PG test
 add_executable(nls_PG src/test/PG/NlsPGTest.cpp)
 target_link_libraries(nls_PG rele)
