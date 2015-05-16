@@ -1,31 +1,30 @@
-%% TEST1.m
+%% TEST7.m
 % Tests for NIPS
-%  PGIRL with 10d and 20d lqr
-%  100 weights
-%  10, 50, 100, 500, 1000, 2000 ep
+% PGIRL with 1d lqr
+% 100 weights
+% polynomial 2d policy
+% 500, 1000, 2000, 5000, 7500, 10000 ep
 
 clear all; close all; clc;
-
-rng('shuffle');
 addpath('../../../../miscellaneous/');
 
-gtypes{1} = 'r';
-gtypes{2} = 'rb';
-gtypes{3} = 'g';
-gtypes{4} = 'gb';
-gtypes{5} = 'enac';
+rng('shuffle');
+
+gtypes{1} = 'rb';
+gtypes{2} = 'gb';
+gtypes{3} = 'enac';
 
 nbWEIGHTS = 100;
 
-tmpFolder = '/tmp/ReLe/lqr/GIRLNIPS_TEST2/';
-cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRLNIPS_TEST2';
+tmpFolder = '/tmp/ReLe/lqr/GIRLNIPS_TEST7/';
+cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRLNIPS_TEST7';
 
-mkdir('tmpTEST2');
+mkdir('tmpTEST7');
 
-tmpPrefix = 'tmpTEST2/NIPSTEST2';
-prefix = 'NIPSTEST2';
+tmpPrefix = 'tmpTEST7/NIPSTEST7';
+prefix = 'NIPSTEST7';
 
-for dim = [10, 20]
+for dim = [5]
     
     clear test
     
@@ -48,7 +47,7 @@ for dim = [10, 20]
         
         i = 0;
         
-        for nbEpisodes = [10, 50, 100, 500, 1000, 2000]
+        for nbEpisodes = [500, 1000, 2000, 5000, 7500, 10000]
             
             i = i + 1;
             
@@ -57,7 +56,10 @@ for dim = [10, 20]
             
             for kk = 1:length(gtypes)
                 results(i).plane{kk} = [];
+                %                  results(i).gnorm{kk} = [];
                 results(i).plane_time{kk} = [];
+                %                  results(i).gnorm_time{kk} = [];
+                %                  results(i).gnorm_eval{kk} = [];
             end
             
             for run = 1
@@ -79,15 +81,26 @@ for dim = [10, 20]
                 fprintf('Time GIRL C++: %f\n', tcpp);
                 
                 %% READ RESULTS
+                mletime   = dlmread([tmpFolder,'girl_mle_time.log']);
+                mleparams = dlmread([tmpFolder,'girl_mle_params.log']);
+                results(i).mle_time = mletime;
+                results(i).mle_params = mleparams;
+                
                 for kk = 1:length(gtypes)
                     algorithm = gtypes{kk};
                     plane_R = dlmread([tmpFolder,'girl_plane_',algorithm,'.log']);
+                    %                      gnorm_R = dlmread([tmpFolder,'girl_gnorm_',algorithm,'.log']);
+                    %                      gnorm_eval = dlmread([tmpFolder,'girl_gnorm_',algorithm,'_neval.log']);
                     
                     A = dlmread([tmpFolder,'girl_time_',algorithm,'.log']);
+                    %                      gnorm_T = A(1,:);
                     plane_T = A(1,:);
                     clear A;
                     results(i).plane{kk} = [results(i).plane{kk};plane_R];
                     results(i).plane_time{kk} = [results(i).plane_time{kk};plane_T];
+                    %                      results(i).gnorm{kk} = [results(i).gnorm{kk};gnorm_R];
+                    %                      results(i).gnorm_time{kk} = [results(i).gnorm_time{kk};gnorm_T];
+                    %                      results(i).gnorm_eval{kk} = [results(i).gnorm_eval{kk}; gnorm_eval];
                 end
                 
                 

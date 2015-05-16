@@ -24,9 +24,11 @@
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/NormalPolicy.h"
-#include "features/SparseFeatures.h"
+#include "features/DenseFeatures.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
+#include "basis/GaussianRbf.h"
+#include "basis/PolynomialFunction.h"
 
 #include "LQR.h"
 #include "LQRsolver.h"
@@ -42,6 +44,8 @@
 #include "policy_search/gradient/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>
+
+#include "MLE.h"
 
 using namespace boost::timer;
 using namespace std;
@@ -177,10 +181,9 @@ private:
     LQR& lqr;
 };
 
-
 void help()
 {
-    cout << "lqr_GIRLNIPS_TEST2 seed episodes nbReward reward" << endl;
+    cout << "lqr_GIRLNIPS_TEST3 seed episodes 2 reward1 reward2" << endl;
 }
 
 int main(int argc, char *argv[])
@@ -191,10 +194,9 @@ int main(int argc, char *argv[])
     vec eReward;
     int nbEpisodes;
 
-    if (argc < 5)
+    if (argc < 6)
     {
         help();
-        abort();
     }
 
     long int seed = atol(argv[1]);
@@ -204,50 +206,49 @@ int main(int argc, char *argv[])
     nbEpisodes = atoi(argv[2]);
     cout << "Episodes: " << nbEpisodes << endl;
     int nw = atoi(argv[3]);
+    assert(nw == 2);
     eReward.set_size(nw);
     for (int i = 0; i < nw; ++i)
         eReward(i) = atof(argv[4+i]);
 
     /******/
 
-    FileManager fm("lqr", "GIRLNIPS_TEST2");
+    FileManager fm("lqr", "GIRLNIPS_TEST4");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     /* Learn lqr correct policy */
-
-    int dim = eReward.n_elem;
-    LQR mdp(dim, dim);
+    arma::mat A(1,1), B(1,1), Q(1,1), R(1,1);
+    A(0,0) = 1;
+    B(0,0) = 1;
+    Q(0,0) = eReward(0);
+    R(0,0) = eReward(1);
+    std::vector<arma::mat> Qv(1, Q);
+    std::vector<arma::mat> Rv(1, R);
+    LQR mdp(A,B,Qv,Rv);
     mdp.startType = LQR::S0Type::RANDOM;
 
-    BasisFunctions basis;
-    for (int i = 0; i < dim; ++i)
-    {
-        basis.push_back(new IdentityBasis(i));
-    }
+    IdentityBasis* pf = new IdentityBasis(0);
+    DenseFeatures phi(pf);
+    NormalPolicy tmpPolicy(1, phi);
 
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
-
-    MVNPolicy expertPolicy(phi);
-
-    /*** solve the problem in exact way ***/
-    LQRsolver solver(mdp,phi);
+    LQRsolver solver(mdp,phi,LQRsolver::Type::CLASSIC);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
-    expertPolicy.setParameters(p);
+    std::cout << "optimal pol: " << p.t();
+    tmpPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
     for (int i = 0; i < eReward.n_elem; ++i)
     {
         std::cout << eReward(i) << " ";
     }
-    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
+    std::cout << "| Params: " << tmpPolicy.getParameters().t() << std::endl;
 
 
-    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(tmpPolicy);
 
     /* Generate LQR expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -265,39 +266,63 @@ int main(int argc, char *argv[])
     data.writeToStream(datafile);
     datafile.close();
 
+    BasisFunctions basis = PolynomialFunction::generate(3,1);
+    DenseFeatures phin(basis);
+    arma::mat cov(1,1);
+    cov(0,0) = 2;
+
+    MVNPolicy policy(phin,cov);
+
+    ofstream timerFileMLE(fm.addPath("girl_mle_time.log"), std::ofstream::out);
+
+    MLE mle(policy, data);
+    arma::vec startVal(policy.getParametersSize(),arma::fill::ones);
+    cpu_timer timerMLE;
+    timerMLE.start();
+    arma::vec pp = mle.solve(startVal);
+    timerMLE.stop();
+
+    timerFileMLE << timerMLE.format(10, "%w") << std::endl;
+    timerFileMLE.close();
+
+    std::cerr << pp.t();
+    pp.save(fm.addPath("girl_mle_params.log"), arma::raw_ascii);
+    policy.setParameters(pp);
+
 
     char gtypestr[10];
-    for (int i = 0; i < 5; ++i)
+    for (int i = 0; i < 3; ++i)
     {
 
-        expertPolicy.setParameters(p);
+        policy.setParameters(pp);
 
         IRLGradType atype;
+//        if (i == 0)
+//        {
+//            cout << "GIRL REINFORCE";
+//            atype = IRLGradType::R;
+//            strcpy(gtypestr, "r");
+//        }
+//        else
         if (i == 0)
-        {
-            cout << "GIRL REINFORCE";
-            atype = IRLGradType::R;
-            strcpy(gtypestr, "r");
-        }
-        else if (i == 1)
         {
             cout << "GIRL REINFORCE BASE";
             atype = IRLGradType::RB;
             strcpy(gtypestr, "rb");
         }
-        else if (i == 2)
-        {
-            cout << "GIRL GPOMDP";
-            atype = IRLGradType::G;
-            strcpy(gtypestr, "g");
-        }
-        else if (i == 3)
+//        else if (i == 2)
+//        {
+//            cout << "GIRL GPOMDP";
+//            atype = IRLGradType::G;
+//            strcpy(gtypestr, "g");
+//        }
+        else if (i == 1)
         {
             cout << "GIRL GPOMDP BASE";
             atype = IRLGradType::GB;
             strcpy(gtypestr, "gb");
         }
-        else if (i == 4)
+        else if (i == 2)
         {
             cout << "GIRL ENAC";
             atype = IRLGradType::ENAC;
@@ -311,7 +336,11 @@ int main(int argc, char *argv[])
         }
 
         /* Learn weight with GIRL */
+//#if 0
+//        LQR_IRL_Reward rewardRegressor;
+//#else
 //        LQR_ND_WS rewardRegressor(mdp);
+//#endif
         assert(mdp.getSettings().gamma == 0.9);
 //        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
 //                                            mdp.getSettings().gamma, atype);
@@ -322,7 +351,7 @@ int main(int argc, char *argv[])
         ofstream timefile(fm.addPath(namet));
 
 
-        //Run GIRL
+//        //Run GIRL
 //        cpu_timer timer;
 //        timer.start();
 //        irlAlg.run();
@@ -347,18 +376,25 @@ int main(int argc, char *argv[])
 //        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
 //        outf.open(fm.addPath(name), std::ofstream::out);
 //        outf << std::setprecision(OS_PRECISION);
-//        outf << irlAlg.getFunEvals();
+//        outf << irlAlg.numberOfEvaluations;
 //        outf.close();
 
 
         std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
+#if 1
+        LQR_1D_R1 r1;
+        LQR_1D_R2 r2;
+        rewards.push_back(&r1);
+        rewards.push_back(&r2);
+#else
         for (int i = 0; i < dim; ++i)
         {
             rewards.push_back(new LQR_ND_R(mdp, i));
         }
+#endif
 
         //Run PLANE GIRL
-        PlaneGIRL<DenseAction,DenseState> pgirl(data, expertPolicy, rewards,
+        PlaneGIRL<DenseAction,DenseState> pgirl(data, policy, rewards,
                                                 mdp.getSettings().gamma, atype);
 
         cpu_timer timer2;

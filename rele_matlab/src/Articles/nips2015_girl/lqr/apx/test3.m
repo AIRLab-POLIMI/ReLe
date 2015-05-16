@@ -1,111 +1,124 @@
-%% TEST1.m
+%% TEST3.m
 % Tests for NIPS
-%  PGIRL with 10d and 20d lqr
-%  100 weights
-%  10, 50, 100, 500, 1000, 2000 ep
+% PGIRL with 1d lqr
+% 100 weights
+% Optimal policy
+% 10, 50, 100, 500, 1000, 2000, 3000 ep
 
 clear all; close all; clc;
-
-rng('shuffle');
 addpath('../../../../miscellaneous/');
 
-gtypes{1} = 'r';
-gtypes{2} = 'rb';
-gtypes{3} = 'g';
-gtypes{4} = 'gb';
-gtypes{5} = 'enac';
+rng('shuffle');
+
+gtypes{1} = 'rb';
+gtypes{2} = 'gb';
+gtypes{3} = 'enac';
 
 nbWEIGHTS = 100;
 
-tmpFolder = '/tmp/ReLe/lqr/GIRLNIPS_TEST2/';
-cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRLNIPS_TEST2';
+tmpFolder = '/tmp/ReLe/lqr/GIRLNIPS_TEST3/';
+cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/lqr_GIRLNIPS_TEST3';
 
-mkdir('tmpTEST2');
+mkdir('tmpTEST3');
 
-tmpPrefix = 'tmpTEST2/NIPSTEST2';
-prefix = 'NIPSTEST2';
+tmpPrefix = 'tmpTEST3/NIPSTEST3';
+prefix = 'NIPSTEST3';
 
-for dim = [10, 20]
+dim = 1;
+dimr = 2;
+
+clear test
+
+W = [];
+for i = 1:nbWEIGHTS
+    W = [W; randSimplex(dimr)'];
+end
+
+clear i
+
+%%
+for k = 1:size(W,1)
     
-    clear test
     
-    W = [];
-    for i = 1:nbWEIGHTS
-        W = [W; randSimplex(dim)'];
-    end
+    eReward = W(k,:);
     
-    clear i
+    test(k).rew = eReward;
     
-    %%
-    for k = 1:size(W,1)
+    clear results;
+    
+    i = 0;
+    
+    for nbEpisodes = [10, 50, 100, 500, 1000, 2000, 3000]
         
+        i = i + 1;
         
-        eReward = W(k,:);
+        results(i).ep = nbEpisodes;
+        results(i).seed = [];
         
-        test(k).rew = eReward;
+        for kk = 1:length(gtypes)
+            results(i).plane{kk} = [];
+            %                  results(i).gnorm{kk} = [];
+            results(i).plane_time{kk} = [];
+            %                  results(i).gnorm_time{kk} = [];
+            %                  results(i).gnorm_eval{kk} = [];
+        end
         
-        clear results;
-        
-        i = 0;
-        
-        for nbEpisodes = [10, 50, 100, 500, 1000, 2000]
+        for run = 1
             
-            i = i + 1;
+            random_seed = randi([1000,2^30],1);
+            results(i).seed = [results(i).seed;random_seed];
             
-            results(i).ep = nbEpisodes;
-            results(i).seed = [];
+            delete([tmpFolder, '*']);
+            
+            strval = '';
+            for oo = 1:length(eReward)
+                strval = [strval, ' ', num2str(eReward(oo))];
+            end
+            
+            tic;
+            status = system([cmd, ' ' num2str(random_seed) ' ' num2str(nbEpisodes), ...
+                ' ', num2str(length(eReward)), ' ', strval]);
+            tcpp = toc;
+            fprintf('Time GIRL C++: %f\n', tcpp);
+            
+            %% READ RESULTS
+            mletime   = dlmread([tmpFolder,'girl_mle_time.log']);
+            mleparams = dlmread([tmpFolder,'girl_mle_params.log']);
+            results(i).mle_time = mletime;
+            results(i).mle_params = mleparams;
             
             for kk = 1:length(gtypes)
-                results(i).plane{kk} = [];
-                results(i).plane_time{kk} = [];
+                algorithm = gtypes{kk};
+                plane_R = dlmread([tmpFolder,'girl_plane_',algorithm,'.log']);
+                %                      gnorm_R = dlmread([tmpFolder,'girl_gnorm_',algorithm,'.log']);
+                %                      gnorm_eval = dlmread([tmpFolder,'girl_gnorm_',algorithm,'_neval.log']);
+                
+                A = dlmread([tmpFolder,'girl_time_',algorithm,'.log']);
+                %                      gnorm_T = A(1,:);
+                plane_T = A(1,:);
+                clear A;
+                results(i).plane{kk} = [results(i).plane{kk};plane_R];
+                results(i).plane_time{kk} = [results(i).plane_time{kk};plane_T];
+                %                      results(i).gnorm{kk} = [results(i).gnorm{kk};gnorm_R];
+                %                      results(i).gnorm_time{kk} = [results(i).gnorm_time{kk};gnorm_T];
+                %                      results(i).gnorm_eval{kk} = [results(i).gnorm_eval{kk}; gnorm_eval];
             end
             
-            for run = 1
-                
-                random_seed = randi([1000,2^30],1);
-                results(i).seed = [results(i).seed;random_seed];
-                
-                delete([tmpFolder, '*']);
-                
-                strval = '';
-                for oo = 1:length(eReward)
-                    strval = [strval, ' ', num2str(eReward(oo))];
-                end
-                
-                tic;
-                status = system([cmd, ' ' num2str(random_seed) ' ' num2str(nbEpisodes), ...
-                    ' ', num2str(length(eReward)), ' ', strval]);
-                tcpp = toc;
-                fprintf('Time GIRL C++: %f\n', tcpp);
-                
-                %% READ RESULTS
-                for kk = 1:length(gtypes)
-                    algorithm = gtypes{kk};
-                    plane_R = dlmread([tmpFolder,'girl_plane_',algorithm,'.log']);
-                    
-                    A = dlmread([tmpFolder,'girl_time_',algorithm,'.log']);
-                    plane_T = A(1,:);
-                    clear A;
-                    results(i).plane{kk} = [results(i).plane{kk};plane_R];
-                    results(i).plane_time{kk} = [results(i).plane_time{kk};plane_T];
-                end
-                
-                
-                fprintf('\n -------------- \n\n');
-                
-            end
             
-            sss = [tmpPrefix,'_D_',num2str(dim),'_W',num2str(k),'_ep',num2str(nbEpisodes),'.mat'];
-            save(sss);
+            fprintf('\n -------------- \n\n');
             
         end
         
-        test(k).results = results;
+        sss = [tmpPrefix,'_D_',num2str(dim),'_W',num2str(k),'_ep',num2str(nbEpisodes),'.mat'];
+        save(sss);
+        
     end
     
-    sss = [prefix,'_D_',num2str(dim),'.mat'];
-    save(sss);
+    test(k).results = results;
 end
+
+sss = [prefix,'_D_',num2str(dim),'.mat'];
+save(sss);
 
 %%
 if 0
