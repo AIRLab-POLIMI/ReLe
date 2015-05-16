@@ -79,6 +79,23 @@ double wrapToPi(double lambda);
  */
 arma::vec wrapToPi(const arma::vec& lambda);
 
+/**
+ * @brief Rectangular grid in 2-D space
+ * @param x Grid vector specifying a series of grid point coordinates in the x direction
+ * @param y Grid vector specifying a series of grid point coordinates in the y direction
+ * @param xx Output matrix that specifies the full grid components in the x direction
+ * @param yy Output matrix that specifies the full grid components in the y direction
+ *
+ * meshgrid(xgv,ygv, X, Y) replicates the grid vectors xgv and ygv to produce a full grid stored in X and Y.
+ * This grid is represented by the output coordinate arrays X and Y.
+ * The output coordinate arrays X and Y contain copies of the grid vectors xgv and ygv respectively.
+ * The sizes of the output arrays are determined by the length of the grid vectors.
+ * For grid vectors xgv and ygv of length M and N respectively, X and Y will have N rows and M columns.
+ */
+void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& xx, arma::mat& yy);
+
+//void meshgrid(const arma::vec& x, const arma::vec& y, const arma::vec& z, arma::mat& xx, arma::mat& yy, arma::mat& zz);
+
 }
 
 #endif //ARMADILLO_EXTENSIONS_H_
