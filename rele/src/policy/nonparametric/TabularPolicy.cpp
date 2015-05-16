@@ -66,7 +66,7 @@ std::string TabularPolicy::printPolicy()
     ss << "- Policy" << std::endl;
     for (unsigned int i = 0; i < pi.n_rows; i++)
     {
-        unsigned int policy;
+        arma::uword policy;
         pi.row(i).max(policy);
         ss << "policy(" << i << ") = " << policy << std::endl;
     }

@@ -112,14 +112,6 @@ protected:
     BasisFunction& phi;
 };
 
-void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& X, arma::mat& Y)
-{
-    arma::mat xrow = vectorise(x).t();
-    arma::mat ycol = vectorise(y);
-    X = repmat(xrow, ycol.n_rows, ycol.n_cols);
-    Y = repmat(ycol, xrow.n_rows, xrow.n_cols);
-}
-
 int main(int argc, char *argv[])
 {
     FileManager fm("mc", "LSPI");

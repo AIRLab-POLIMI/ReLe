@@ -138,6 +138,42 @@ arma::vec wrapToPi(const arma::vec& lambda)
     return ret;
 }
 
+void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& xx, arma::mat& yy)
+{
+    if ((x.n_elem == 0) || (y.n_elem == 0))
+    {
+        xx.set_size(0,0);
+        yy.set_size(0,0);
+    }
+    else
+    {
+        arma::mat xrow = x.t();
+        xx = arma::repmat(x, y.n_rows, y.n_cols);
+        yy = arma::repmat(y, xrow.n_rows, xrow.n_cols);
+    }
+}
+
+//void meshgrid(const arma::vec &x, const arma::vec &y, const arma::vec &z, arma::mat &xx, arma::mat &yy, arma::mat &zz)
+//{
+//    if ((x.n_elem == 0) || (y.n_elem == 0) || (z.n_elem == 0))
+//    {
+//        xx.set_size(0,0);
+//        yy.set_size(0,0);
+//        zz.set_size(0,0);
+//    }
+//    else
+//    {
+//        int nx = x.n_elem;
+//        int ny = y.n_elem;
+//        int nz = z.n_elem;
+//        xx = arma::reshape(x, 1, nx, 1);
+//        yy = arma::reshape(y, ny, 1, 1);
+//        zz = arma::reshape(y, 1, 1, nz);
+
+//        //manca repmat 3D
+//    }
+//}
+
 //    arma::uvec licols(const arma::mat& X, arma::mat& Xsub, double tol = 1e-10)
 //    {
 //        arma::uvec idx;

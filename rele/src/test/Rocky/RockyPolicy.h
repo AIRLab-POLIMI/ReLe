@@ -33,7 +33,7 @@ class RockyPolicy : public ParametricPolicy<DenseAction, DenseState>
 {
 public:
 
-	RockyPolicy(double dt);
+    RockyPolicy(double dt);
 
     //Policy
     virtual arma::vec operator() (const arma::vec& state);
@@ -67,45 +67,45 @@ public:
 
     virtual void setParameters(arma::vec& w)
     {
-    	this->w = w;
+        this->w = w;
     }
 
     virtual RockyPolicy* clone()
     {
-       	return new RockyPolicy(*this);
+        return new RockyPolicy(*this);
     }
 
 
 private:
     enum Objective
-	{
-    	escape, feed, eat, home
-	};
+    {
+        escape, feed, eat, home
+    };
 
     enum StateComponents
     {
-		//robot state
-		x = 0,
-		y,
-		theta,
+        //robot state
+        x = 0,
+        y,
+        theta,
 
-		//robot sensors
-		energy,
-		food,
+        //robot sensors
+        energy,
+        food,
 
-		//rocky state
-		xr,
-		yr,
-		thetar
+        //rocky state
+        xr,
+        yr,
+        thetar
     };
 
     enum ParameterComponents
     {
-    	escapeThreshold = 0,
-		energyThreshold = 1,
-		escapeParamsStart = 2,
-		escapeParamsEnd = 13,
-		PARAM_SIZE = 14
+        escapeThreshold = 0,
+        energyThreshold = 1,
+        escapeParamsStart = 2,
+        escapeParamsEnd = 13,
+        PARAM_SIZE = 14
     };
 
 

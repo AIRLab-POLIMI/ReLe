@@ -88,7 +88,7 @@ private:
         ss << "- Policy" << std::endl;
         for (unsigned int i = 0; i < Q->n_rows; i++)
         {
-            unsigned int policy;
+            arma::uword policy;
             Q->row(i).max(policy);
             ss << "policy(" << i << ") = " << policy << std::endl;
         }
