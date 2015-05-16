@@ -43,6 +43,7 @@
 #include "batch/LSPI.h"
 #include "algorithms/PGIRL.h"
 #include "nonparametric/RandomPolicy.h"
+#include "ArmadilloExtensions.h"
 
 #include <boost/timer/timer.hpp>
 
@@ -331,13 +332,8 @@ int main(int argc, char *argv[])
 
     vec pos_linspace = {0.4, 0.0};
     vec vel_linspace = {-0.02,0.02};
-
-    //-- meshgrid
-    arma::mat xrow = vectorise(pos_linspace).t();
-    arma::mat ycol = vectorise(vel_linspace);
-    arma::mat xx_pos = repmat(xrow, ycol.n_rows, ycol.n_cols);
-    arma::mat yy_vel = repmat(ycol, xrow.n_rows, xrow.n_cols);
-    //--
+    arma::mat yy_vel, xx_pos;
+    meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
 
     arma::vec pos_mesh = vectorise(xx_pos);
     arma::vec vel_mesh = vectorise(yy_vel);
@@ -397,13 +393,11 @@ int main(int argc, char *argv[])
     vec vel_linspace2 = linspace<vec>(-0.2,0.2,30);
 
     //-- meshgrid
-    arma::mat xrow2 = vectorise(pos_linspace2).t();
-    arma::mat ycol2 = vectorise(vel_linspace2);
-    arma::mat xx_pos2 = repmat(xrow2, ycol2.n_rows, ycol2.n_cols);
-    arma::mat yy_vel2 = repmat(ycol2, xrow2.n_rows, xrow2.n_cols);
-    //--
+    arma::mat xx_pos2, yy_vel2;
+    meshgrid(vel_linspace2, pos_linspace2, yy_vel2, xx_pos2);
     arma::vec pos_mesh2 = vectorise(xx_pos2);
     arma::vec vel_mesh2 = vectorise(yy_vel2);
+    //--
 
     DenseState s(2), sn(2);
     FiniteAction a;
