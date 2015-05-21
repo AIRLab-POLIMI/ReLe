@@ -265,6 +265,9 @@ target_link_libraries(dam_PG rele)
 add_executable(ship_PG src/test/PG/ShipSteeringPGTest.cpp)
 target_link_libraries(ship_PG rele)
 
+add_executable(taxi_PG src/test/PG/TaxiFuelPGTest.cpp)
+target_link_libraries(taxi_PG rele)
+
 #Batch test
 add_executable(deep_off src/test/Batch/DeepBatchTest.cpp)
 target_link_libraries(deep_off rele)
