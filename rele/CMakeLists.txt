@@ -279,6 +279,11 @@ target_link_libraries(mc_LSPI rele)
 add_executable(nls_OptParams src/test/Others/NlsOptimalParamsTest.cpp)
 target_link_libraries(nls_OptParams rele)
 
+#MultiHeat tests
+add_executable(mh_test src/test/MultiHeat/MultiHeatTest.cpp)
+target_link_libraries(mh_test rele)
+
+
 # ------------------------ INSTALLATION ------------------------
 
 if(catkin_FOUND)
