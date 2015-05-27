@@ -716,7 +716,8 @@ public:
         //                X(r, r2) = gramMatrix(r2, r) - gramMatrix(r2, dr-1);
         //            }
         //        }
-        arma::mat X = gramMatrix.rows(0,dr-2) - arma::repmat(gramMatrix.row(dr-1), dr-1, 1);
+        unsigned int lastr = gramMatrix.n_rows;
+        arma::mat X = gramMatrix.rows(0, lastr-2) - arma::repmat(gramMatrix.row(lastr-1), lastr-1, 1);
         //        std::cerr << std::endl << "X: " << X;
         X.save("/tmp/ReLe/GM.log", arma::raw_ascii);
 
