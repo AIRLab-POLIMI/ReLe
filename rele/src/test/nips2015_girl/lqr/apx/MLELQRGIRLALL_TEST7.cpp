@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 
     ofstream timerFileMLE(fm.addPath("girl_mle_time.log"), std::ofstream::out);
 
-    MLE mle(policy, data);
+    MLE<DenseAction,DenseState> mle(policy, data);
     arma::vec startVal(policy.getParametersSize(),arma::fill::ones);
     cpu_timer timerMLE;
     timerMLE.start();

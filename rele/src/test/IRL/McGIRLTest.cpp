@@ -330,8 +330,16 @@ int main(int argc, char *argv[])
 //    vec pos_linspace = linspace<vec>(-1.8,1,3);
 //    vec vel_linspace = linspace<vec>(-0.1,0.1,3);
 
+#ifdef ARMA_DONT_USE_CXX11
+    arma::vec pos_linspace(2), vel_linspace(2);
+    pos_linspace(0) = 0.4;
+    pos_linspace(1) = 0.0;
+    vel_linspace(0) = -0.02;
+    vel_linspace(1) = 0.02;
+#else
     vec pos_linspace = {0.4, 0.0};
     vec vel_linspace = {-0.02,0.02};
+#endif
     arma::mat yy_vel, xx_pos;
     meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
 
@@ -342,7 +350,14 @@ int main(int argc, char *argv[])
 
     double sigma_position = 2*pow((0.6+1.2)/4.0,2);
     double sigma_speed    = 2*pow((0.07+0.07)/4.0,2);
+
+#ifdef ARMA_DONT_USE_CXX11
+    arma::vec widths(2);
+    widths(0) = sigma_speed;
+    widths(1) = sigma_position;
+#else
     arma::vec widths = {sigma_speed, sigma_position};
+#endif
     arma::mat WW = repmat(widths, 1, XX.n_rows);
     arma::mat XT = XX.t();
 
@@ -526,7 +541,14 @@ int main(int argc, char *argv[])
         ofstream asdsa(fm.addPath(ff), ios_base::out);
         for (int i = 0, ie = pos_mesh2.n_rows; i < ie; ++i)
         {
-            vec inp = {vel_mesh2(i), pos_mesh2(i), na};
+#ifdef ARMA_DONT_USE_CXX11
+            vec inp(3);
+            inp(0) = vel_mesh2(i);
+            inp(1) = pos_mesh2(i);
+            inp(2) = static_cast<double>(na);
+#else
+            vec inp = {vel_mesh2(i), pos_mesh2(i), static_cast<double>(na)};
+#endif
             arma::mat val = la(inp);
             asdsa << vel_mesh2(i) << "\t" << pos_mesh2(i) << "\t" << val(0,0) <<std::endl;
         }
