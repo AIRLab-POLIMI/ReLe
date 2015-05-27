@@ -45,7 +45,7 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    RandomGenerator::seed(65458);
+    RandomGenerator::seed(0);
 
     FileManager fm("multiheat", "test");
     fm.createDir();
@@ -59,12 +59,17 @@ int main(int argc, char *argv[])
     FiniteAction action;
     Reward reward(mdp.getSettings().rewardDim);
 
-    cstate(0) = 11;
+    cstate(0) = 0;
+    cstate(1) = 19.75;
+    cstate(2) = 22;
     action.setActionN(0);
 
+    mdp.getInitialState(cstate);
     mdp.setCurrentState(cstate);
     mdp.step(action, nextstate, reward);
 
+    cout << "CurrentState: " << cstate << endl;
+    cout << "Action: " << action << endl;
     cout << "NextState: " << nextstate << endl;
     cout << "Reward: " << reward[0] << endl;
     return 0;

@@ -77,12 +77,16 @@ public:
     }
 
 private:
+    unsigned int const mode = 0;
+
     void computeTransitionMatrix();
 
-protected:
+public:
     MultiHeatSettings* config;
     bool cleanConfig;
+
     arma::mat Xi;
+    arma::vec Gamma;
 };
 
 }

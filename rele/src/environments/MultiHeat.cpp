@@ -25,6 +25,7 @@
 #include "RandomGenerator.h"
 
 using namespace std;
+using namespace arma;
 
 namespace ReLe
 {
@@ -36,32 +37,36 @@ MultiHeatSettings::MultiHeatSettings()
 
 void MultiHeatSettings::defaultSettings(MultiHeatSettings& settings)
 {
-    //Environment Parameters
-    settings.gamma = 0.99;
-    settings.continuosStateDim = 3;
-    settings.continuosActionDim = 1;
-    settings.rewardDim = 1;
-    settings.finiteStateDim = 0;
-    settings.finiteActionDim = 0;
-    settings.isFiniteHorizon = false;
-    settings.isAverageReward = false;
-    settings.isEpisodic = true;
-    settings.horizon = 300;
-
     //MultiHeat Parameters
-    settings.Nr;
-    settings.Ta;
-    settings.dt;
-    settings.a;
-    settings.s2n;
+    settings.Nr = 2;
+    settings.Ta = 6;
+    settings.dt = 0.1;
+    settings.a = 0.8;
+    settings.s2n = 1;
 
     settings.A.zeros(settings.Nr,settings.Nr);
-    settings.A(0,0) = 4;
-    settings.B;
-    settings.C;
+    settings.A.diag(1).fill(0.33*settings.dt);
+    settings.A.diag(-1).fill(0.33*settings.dt);
+    settings.B.zeros(settings.Nr,1);
+    settings.B.fill(0.25*settings.dt);
+    settings.C.zeros(settings.Nr,1);
+    settings.C.fill(12*settings.dt);
 
-    settings.TUB;
-    settings.TLB;
+    settings.TUB = 22;
+    settings.TLB = 17.5;
+
+
+    //Environment Parameters
+    settings.gamma = 0.95;
+    settings.continuosStateDim = settings.Nr+1;
+    settings.continuosActionDim = 0;
+    settings.rewardDim = 1;
+    settings.finiteStateDim = 0;
+    settings.finiteActionDim = settings.Nr+1;
+    settings.isFiniteHorizon = false;
+    settings.isAverageReward = false;
+    settings.isEpisodic = false;
+    settings.horizon = 300;
 }
 
 MultiHeatSettings::~MultiHeatSettings()
@@ -105,21 +110,50 @@ MultiHeat::MultiHeat(MultiHeatSettings& config)
 void MultiHeat::step(const FiniteAction& action,
                      DenseState& nextState, Reward& reward)
 {
+    // Mode Transition
+    double randExtr = RandomGenerator::sampleUniform(0, 1);
+    bool success = (randExtr <= config->a) ? true : false;
+    if (action != currentState(mode) && success)
+    {
+        currentState(mode) = action;
+    }
+
+    // Continuous State Transition
+    vec noise = sqrt(config->s2n*config->dt)*randn<vec>(config->Nr);
+    currentState.rows(1,config->Nr) += Xi*currentState.rows(1,config->Nr)+Gamma + noise;
+    if (currentState(mode) > 0)
+    {
+        currentState(currentState(mode)) += config->C(currentState(mode)-1);
+    }
 
 
+    // Compute Reward
+    arma::vec R = (currentState.rows(1,config->Nr)-config->TLB)%(currentState.rows(1,config->Nr)-config->TUB);
+    arma::vec maxR = arma::max(R,arma::zeros(config->Nr,1));
+    reward[0] = -arma::sum(maxR);
+
+
+    // Assign Next State
     nextState = currentState;
 }
+
 
 void MultiHeat::getInitialState(DenseState& state)
 {
     currentState.setAbsorbing(false);
-    currentState(0) = 4;
+
+    // Extract Initial State
+    currentState(mode) = 0;
+    currentState.rows(1,config->Nr) = (26-13.5)*randu<vec>(config->Nr)+13.5;
+
     state = currentState;
 }
 
 void MultiHeat::computeTransitionMatrix()
 {
-    Xi(9) = config->s2n * config->dt;
+    Xi = config->A;
+    Xi.diag() -= config->B + sum(config->A,1);
+    Gamma = config->B * config->Ta;
 }
 
 }
