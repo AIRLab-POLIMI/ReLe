@@ -783,6 +783,8 @@ public:
             weights(nonZeroIdx) = Y;
         }
 
+        weights = arma::normalise(weights);
+
     }
 
     ////////////////////////////////////////////////////////////////
