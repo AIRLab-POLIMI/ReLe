@@ -814,8 +814,8 @@ public:
 
         ++nbFunEvals;
 
-        arma::vec w(x,n);
-        arma::vec p = Y*w;
+        arma::vec w(x,n);   //create vector using double pointer
+        arma::vec p = Y*w;  //make linear combination
 
         if (grad != nullptr)
         {
