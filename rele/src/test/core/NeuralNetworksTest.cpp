@@ -21,23 +21,31 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TaxiFuel.h"
-
-#include <iostream>
+#include "basis/IdentityBasis.h"
+#include "features/DenseFeatures.h"
+#include "regressors/FFNeuralNetwork.h"
 
 using namespace std;
 using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    TaxiFuel mdp;
-    DenseState test;
-    mdp.getInitialState(test);
+    cout << "## Neural Network Test ##" << endl;
 
-    cout << test << endl;
+    arma::vec input = {1.0, 1.0};
 
-    Reward r(1);
-    mdp.step(FiniteAction(0), test, r);
+    BasisFunctions basis = IdentityBasis::generate(input.size());
+    DenseFeatures phi(basis);
 
-    cout << test << endl;
+    FFNeuralNetwork net(phi, 3, 1);
+    arma::vec p = net.getParameters();
+
+    arma::vec out1 = net(input);
+    cout << out1 << endl;
+
+    p.fill(1.0);
+    net.setParameters(p);
+    arma::vec out2 = net(input);
+    cout << out2 << endl;
+
 }

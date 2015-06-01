@@ -131,6 +131,9 @@ target_link_libraries(pr_mdp rele)
 add_executable(dataset_test src/test/core/DatasetTest.cpp)
 target_link_libraries(dataset_test rele)
 
+add_executable(nn_test src/test/core/NeuralNetworksTest.cpp)
+target_link_libraries(nn_test rele)
+
 #Matlab tests (miscellaneous)
 add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)

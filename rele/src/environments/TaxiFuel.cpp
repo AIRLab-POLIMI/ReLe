@@ -103,45 +103,45 @@ void TaxiFuel::step(const FiniteAction& action, DenseState& nextState,
 
 arma::vec2 TaxiFuel::extractTarget(int targetN)
 {
-	arma::vec2 target;
-	switch (targetN)
-	{
-		case 0:
-			target = G;
-			break;
-		case 1:
-			target = Y;
-			break;
-		case 2:
-			target = B;
-			break;
-		case 3:
-			target = R;
-			break;
-		default:
-			std::cerr << "Error occurred!" << std::endl;
-			break;
-	}
-	return target;
+    arma::vec2 target;
+    switch (targetN)
+    {
+    case 0:
+        target = G;
+        break;
+    case 1:
+        target = Y;
+        break;
+    case 2:
+        target = B;
+        break;
+    case 3:
+        target = R;
+        break;
+    default:
+        std::cerr << "Error occurred!" << std::endl;
+        break;
+    }
+    return target;
 }
 
 bool TaxiFuel::atLocation()
 {
     int targetN = currentState[location];
-	arma::vec2 target = extractTarget(targetN);
+    arma::vec2 target = extractTarget(targetN);
     return target[x] == currentState[x] && target[y] == currentState[y];
 }
 
 bool TaxiFuel::atDestination()
 {
-	int targetN = currentState[destination];
-	arma::vec2 target = extractTarget(targetN);
-	return target[x] == currentState[x] && target[y] == currentState[y];
+    int targetN = currentState[destination];
+    arma::vec2 target = extractTarget(targetN);
+    return target[x] == currentState[x] && target[y] == currentState[y];
 }
 
 bool TaxiFuel::atFuelStation()
 {
-	return F[x] == currentState[x] && F[y] == currentState[y];
+    return F[x] == currentState[x] && F[y] == currentState[y];
 }
 
 void TaxiFuel::getInitialState(DenseState& state)

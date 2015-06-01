@@ -76,7 +76,7 @@ private:
     bool atLocation();
     bool atDestination();
     bool atFuelStation();
-	arma::vec2 extractTarget(int targetN);
+    arma::vec2 extractTarget(int targetN);
 
 private:
     arma::vec2 G;
