@@ -1,4 +1,4 @@
-function [PP, MM, ITER, TT, c] = run_MWAL
+function [PP, MM, ITER, TT, c] = run_MWAL(E)
 
 % Make the feature value matrix and the transition matrix 
 F = make_F;
@@ -7,9 +7,9 @@ THETA = make_THETA;
 % Setup the other parameters
 GAMMA = 0.9;
 T = 500;
-E = [5.25, 4.15, 5];
-%E = [7.5, 5, 5];
-%E = [9.5, -0.8967, 0];
+% E = [5.25, 4.15, 5];
+% E = [7.5, 5, 5];
+% E = [9.5, -0.8967, 0];
 
 % Run the MWAL algorithm
 [PP, MM, ITER, TT] = MWAL(THETA, F, GAMMA, T, E, 'first');
