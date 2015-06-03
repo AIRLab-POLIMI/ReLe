@@ -161,7 +161,7 @@ void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& xx, arma::mat& 
     else
     {
         arma::mat xrow = x.t();
-        xx = arma::repmat(x, y.n_rows, y.n_cols);
+        xx = arma::repmat(xrow, y.n_rows, y.n_cols);
         yy = arma::repmat(y, xrow.n_rows, xrow.n_cols);
     }
 }

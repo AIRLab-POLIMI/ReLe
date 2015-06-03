@@ -327,8 +327,8 @@ int main(int argc, char *argv[])
 
     /*** recover reward by IRL (PGIRL) ***/
     std::vector<IRLParametricReward<FiniteAction,DenseState>*> rewards;
-    vec pos_linspace = linspace<vec>(-1.2,0.6,3);
-    vec vel_linspace = linspace<vec>(-0.07,0.07,3);
+    vec pos_linspace = linspace<vec>(-1.2,0.6,7);
+    vec vel_linspace = linspace<vec>(-0.07,0.07,7);
 
 //    vec pos_linspace = {0.4, 0.0};
 //    vec vel_linspace = {-0.02,0.02};
@@ -338,6 +338,8 @@ int main(int argc, char *argv[])
     arma::vec pos_mesh = vectorise(xx_pos);
     arma::vec vel_mesh = vectorise(yy_vel);
     arma::mat XX = arma::join_horiz(vel_mesh,pos_mesh);
+    cerr << pos_mesh.t() << endl;
+    cerr << vel_mesh.t() << endl;
     cerr << XX << endl;
 
 
@@ -373,7 +375,7 @@ int main(int argc, char *argv[])
     //    }
     bfile.close();
 
-    IRLGradType atype = IRLGradType::ENAC;
+    IRLGradType atype = IRLGradType::GB;
     PlaneGIRL<FiniteAction,DenseState> pgirl(dataExpert, mlePolicy, rewards,
             mdp.getSettings().gamma, atype);
     cpu_timer timer2;
@@ -385,14 +387,14 @@ int main(int argc, char *argv[])
     vec rewWeights = pgirl.getWeights();
     rewWeights.save(fm.addPath("rewards.log"),arma::raw_ascii);
     cout << "Weights (plane): " << rewWeights.t();
-//    rewWeights = abs(rewWeights);
+    rewWeights = abs(rewWeights);
     //    rewWeights.elem( arma::find(rewWeights < 0) ).zeros();
-    //    rewWeights = rewWeights / norm(rewWeights,1);
+//    rewWeights = rewWeights / norm(rewWeights,1);
 
 
 
-    vec pos_linspace2 = linspace<vec>(-2.5,1.5,30);
-    vec vel_linspace2 = linspace<vec>(-0.2,0.2,30);
+    vec pos_linspace2 = linspace<vec>(-1.2,0.6,30);
+    vec vel_linspace2 = linspace<vec>(-0.07,0.07,30);
 
     //-- meshgrid
     arma::mat xx_pos2, yy_vel2;
@@ -428,7 +430,7 @@ int main(int argc, char *argv[])
     //    }
 
 
-    return 1;
+//    return 1;
 
     ofstream dasdsa(fm.addPath("poll.log"), ios_base::out);
     for (int i = 0, ie = pos_mesh2.n_rows; i < ie; ++i)
@@ -516,7 +518,7 @@ int main(int argc, char *argv[])
     lspiPolicy.setEpsilon(0.01);
     lspiPolicy.setNactions(actions.size());
     LSPI<FiniteAction> lspi(dataLSPI, lspiPolicy, qphi, mdp.getSettings().gamma);
-    lspi.run(40,1e-8);
+    lspi.run(120,1e-8);
 
     cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 
