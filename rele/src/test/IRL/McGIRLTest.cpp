@@ -219,7 +219,7 @@ protected:
 
 int main(int argc, char *argv[])
 {
-    RandomGenerator::seed(4265436624);
+//    RandomGenerator::seed(4265436624);
 
     FileManager fm("mc", "GIRL");
     fm.createDir();
@@ -327,17 +327,18 @@ int main(int argc, char *argv[])
 
     /*** recover reward by IRL (PGIRL) ***/
     std::vector<IRLParametricReward<FiniteAction,DenseState>*> rewards;
-//    vec pos_linspace = linspace<vec>(-1.8,1,3);
-//    vec vel_linspace = linspace<vec>(-0.1,0.1,3);
+    vec pos_linspace = linspace<vec>(-1.2,0.6,3);
+    vec vel_linspace = linspace<vec>(-0.07,0.07,3);
 
-    vec pos_linspace = {0.4, 0.0};
-    vec vel_linspace = {-0.02,0.02};
+//    vec pos_linspace = {0.4, 0.0};
+//    vec vel_linspace = {-0.02,0.02};
     arma::mat yy_vel, xx_pos;
     meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
 
     arma::vec pos_mesh = vectorise(xx_pos);
     arma::vec vel_mesh = vectorise(yy_vel);
     arma::mat XX = arma::join_horiz(vel_mesh,pos_mesh);
+    cerr << XX << endl;
 
 
     double sigma_position = 2*pow((0.6+1.2)/4.0,2);
@@ -345,6 +346,7 @@ int main(int argc, char *argv[])
     arma::vec widths = {sigma_speed, sigma_position};
     arma::mat WW = repmat(widths, 1, XX.n_rows);
     arma::mat XT = XX.t();
+    cerr << XT << endl;
 
     BasisFunctions rewardBasis = GaussianRbf::generate(XT, WW);
     rewards = mc_reward_bf::generate(rewardBasis);
