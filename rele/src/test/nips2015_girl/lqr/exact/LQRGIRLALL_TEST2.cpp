@@ -185,7 +185,7 @@ void help()
 
 int main(int argc, char *argv[])
 {
-//        RandomGenerator::seed(4434224);
+    //        RandomGenerator::seed(4434224);
 
     /*** check inputs ***/
     vec eReward;
@@ -219,7 +219,8 @@ int main(int argc, char *argv[])
 
     int dim = eReward.n_elem;
     LQR mdp(dim, dim);
-    mdp.startType = LQR::S0Type::RANDOM;
+    //    mdp.startType = LQR::S0Type::RANDOM;
+    mdp.startType = LQR::S0Type::FIXED;
 
     BasisFunctions basis;
     for (int i = 0; i < dim; ++i)
@@ -311,10 +312,10 @@ int main(int argc, char *argv[])
         }
 
         /* Learn weight with GIRL */
-//        LQR_ND_WS rewardRegressor(mdp);
+        //        LQR_ND_WS rewardRegressor(mdp);
         assert(mdp.getSettings().gamma == 0.9);
-//        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-//                                            mdp.getSettings().gamma, atype);
+        //        GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+        //                                            mdp.getSettings().gamma, atype);
 
 
         char namet[100];
@@ -323,32 +324,32 @@ int main(int argc, char *argv[])
 
 
         //Run GIRL
-//        cpu_timer timer;
-//        timer.start();
-//        irlAlg.run();
-//        timer.stop();
-//        arma::vec gnormw = irlAlg.getWeights();
+        //        cpu_timer timer;
+        //        timer.start();
+        //        irlAlg.run();
+        //        timer.stop();
+        //        arma::vec gnormw = irlAlg.getWeights();
 
-//        timefile << timer.format(10, "%w") << std::endl;
+        //        timefile << timer.format(10, "%w") << std::endl;
 
-//        cout << "Weights (gnorm): " << gnormw.t();
+        //        cout << "Weights (gnorm): " << gnormw.t();
 
         char name[100];
         ofstream outf;
-//        sprintf(name, "girl_gnorm_%s.log", gtypestr);
-//        ofstream outf(fm.addPath(name), std::ofstream::out);
-//        outf << std::setprecision(OS_PRECISION);
-//        for (int i = 0; i < gnormw.n_elem; ++i)
-//        {
-//            outf << gnormw[i] << " ";
-//        }
-//        outf.close();
+        //        sprintf(name, "girl_gnorm_%s.log", gtypestr);
+        //        ofstream outf(fm.addPath(name), std::ofstream::out);
+        //        outf << std::setprecision(OS_PRECISION);
+        //        for (int i = 0; i < gnormw.n_elem; ++i)
+        //        {
+        //            outf << gnormw[i] << " ";
+        //        }
+        //        outf.close();
 
-//        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
-//        outf.open(fm.addPath(name), std::ofstream::out);
-//        outf << std::setprecision(OS_PRECISION);
-//        outf << irlAlg.getFunEvals();
-//        outf.close();
+        //        sprintf(name, "girl_gnorm_%s_neval.log", gtypestr);
+        //        outf.open(fm.addPath(name), std::ofstream::out);
+        //        outf << std::setprecision(OS_PRECISION);
+        //        outf << irlAlg.getFunEvals();
+        //        outf.close();
 
 
         std::vector<IRLParametricReward<DenseAction,DenseState>*> rewards;
