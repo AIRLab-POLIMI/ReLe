@@ -30,6 +30,7 @@
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
 #include "basis/GaussianRbf.h"
+#include "basis/AffineFunction.h"
 #include "features/DenseFeatures.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
@@ -198,9 +199,30 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
 
     //--- policy setup
-    BasisFunctions basis = GaussianRbf::generate({3,4,4}, {0,2,13.5,26,13.5,26});
-    BasisFunctions bfs = AndConditionBasisFunction::generate(basis,mdp.getSettings().continuosStateDim,actions.size()-1);
+    //input = [modo, t1, t2, azione]
+    mat affineMtx(3,4);
+    affineMtx << 0 << 1 << 0 << 0 << arma::endr
+              << 0 << 0 << 1 << 0 << arma::endr
+              << 1 << 0 << 0 << 0 << arma::endr;
+    // crea redial basis function a griglia per t1 e t2
+    BasisFunctions basis = GaussianRbf::generate({4,4}, {13.5,26,13.5,26});
+    // replica le RBFs per ogni modo
+    BasisFunctions repbasis = AndConditionBasisFunction::generate(basis,mdp.getSettings().continuosStateDim-1,mdp.getSettings().continuosStateDim);
+    // transformate input for the replicated basis
+    BasisFunctions abasis = AffineFunction::generate(repbasis, affineMtx);
+    // replicate basis for each action
+    BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().continuosStateDim,actions.size()-1);
+    // create feature vector
     DenseFeatures phi(bfs);
+
+    // testare basis
+    vec inputtest = {0, 14, 21, 1};
+    vec outputtest = phi(inputtest);
+
+    cout << outputtest.t();
+
+    return 0;
+
     ParametricGibbsPolicy<DenseState> policy(actions, phi, 1.0);
     //---
 

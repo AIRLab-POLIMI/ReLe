@@ -27,11 +27,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [P, M, VV, ITER] = opt_policy_and_feat_exp(THETA, F, GAMMA, w, INIT_FLAG, VV)
+function [P, M, VV, ITER] = opt_policy_and_feat_exp(THETA, F, GAMMA, w, INIT_FLAG, VV, tol)
 
 %tol = max([0.001 * abs(sum(w)), 0.001]);
-tol = 0.001;
-disp(['tol = ', num2str(tol)]);
+if nargin < 7
+    tol = 0.0001;
+end
+% disp(['tol = ', num2str(tol)]);
 [NA, N] = size(THETA);
 A = NA/N;
 if (strcmp(INIT_FLAG, 'first'))
@@ -79,7 +81,7 @@ while (delta > tol)
     VV = sparse(VV);
 
     delta = max(abs(V - V_new));
-    disp(['tol = ', num2str(tol), '; ValIter delta = ' num2str(delta)]);
+%     disp(['tol = ', num2str(tol), '; ValIter delta = ' num2str(delta)]);
 
     V = full(V_new);
 

@@ -1,6 +1,4 @@
-function [PP, MM, ITER, TT] = run_CPIRL
-addpath('cpirl/');
-addpath(genpath('solvers/tbxmanager/'));
+function [PP, MM, ITER, TT] = run_CPIRL(E)
 % Make the feature value matrix and the transition matrix 
 F = make_F;
 THETA = make_THETA;
@@ -8,9 +6,9 @@ THETA = make_THETA;
 % Setup the other parameters
 GAMMA = 0.9;
 T = 100;
-E = [5.25, 4.15, 5];
-%E = [7.5, 5, 5];
-%E = [9.5, -0.8967, 0];
+% E = [5.25, 4.15, 5];
+% E = [7.5, 5, 5];
+% E = [9.5, -0.8967, 0];
 
 % algs = @(A,b) CG(A, b, nbpoints);
 % algs = @MVIE;

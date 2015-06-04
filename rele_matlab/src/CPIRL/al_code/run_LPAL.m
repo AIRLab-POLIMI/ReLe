@@ -1,4 +1,4 @@
-function [MA, TT] = run_LPAL
+function [MA, TT] = run_LPAL(E)
 
 % Make the feature value matrix and the transition matrix 
 THETA = make_THETA;
@@ -6,7 +6,7 @@ F = make_F;
 
 % Setup the other parameters
 GAMMA = 0.9;
-E = [5.25, 4.15, 5];
+% E = [5.25, 4.15, 5];
 % E = [7.5, 5, 5];
 % E = [0, 0, 0];
 [NA, N] = size(THETA);
