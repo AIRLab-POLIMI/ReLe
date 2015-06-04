@@ -41,11 +41,13 @@ int main(int argc, char *argv[])
     arma::vec p = net.getParameters();
 
     arma::vec out1 = net(input);
-    cout << out1 << endl;
+    cout << "f(1.0, 1.0) =" << out1 << endl;
 
     p.fill(1.0);
     net.setParameters(p);
     arma::vec out2 = net(input);
-    cout << out2 << endl;
+    cout << "f(1.0, 1.0) =" << out2 << endl;
 
+    arma::vec diff = net.diff(input);
+    cout << "f'(1.0, 1.0) =" << diff << endl;
 }

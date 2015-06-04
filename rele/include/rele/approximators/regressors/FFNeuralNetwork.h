@@ -49,6 +49,13 @@ public:
 
         w = arma::vec(calculateParamSize(), arma::fill::zeros);
 
+        h.push_back(arma::vec());
+
+        for(unsigned int i = 0; i < layerFunction.size(); i++)
+        {
+            a.push_back(arma::vec(layerInputs[i], arma::fill::zeros));
+            h.push_back(arma::vec(layerInputs[i], arma::fill::zeros));
+        }
     }
 
     ~FFNeuralNetwork_()
@@ -61,47 +68,16 @@ public:
 
     arma::vec operator()(const InputC& input)
     {
-        arma::vec In = basis(input);
-
-        unsigned int start = 0;
-
-        for(unsigned int layer = 0; layer < layerFunction.size(); layer++)
-        {
-            arma::vec In_1(layerInputs[layer], arma::fill::zeros);
-
-            //Add input * weight
-            for(unsigned int i = 0; i < In.n_elem; i++)
-            {
-                unsigned int end = start + layerInputs[layer];
-                const arma::vec& wi = w(arma::span(start, end - 1));
-                In_1 += wi*In[i];
-
-                start = end;
-            }
-
-            //Add bias
-            unsigned int end = start + layerInputs[layer];
-            const arma::vec& wb = w(arma::span(start, end - 1));
-            In_1 += wb;
-
-            start = end;
-
-            //Apply layer function
-            Function& f = *layerFunction[layer];
-            In.set_size(In_1.n_elem);
-
-            for(unsigned int i = 0; i < In.n_elem; i++)
-                In[i] = f(In_1[i]);
-
-        }
-
-        return In;
+		forwardComputation(input);
+        return h.back();
     }
 
     arma::vec diff(const InputC& input)
     {
-        //FIXME implement
-        return arma::vec(w.n_elem);
+        forwardComputation(input);
+        arma::vec g(layerInputs.back(), arma::fill::ones);
+
+        return backPropagation(g);
     }
 
     inline Features& getBasis()
@@ -138,10 +114,84 @@ private:
         return paramN;
     }
 
+	void forwardComputation(const InputC& input)
+	{
+		h[0] = basis(input);
+		unsigned int start = 0;
+		for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
+		{
+			a[layer].zeros();
+			//Add input * weight
+			for (unsigned int i = 0; i < h[layer].n_elem; i++)
+			{
+				unsigned int end = start + layerInputs[layer];
+				const arma::vec& wi = w(arma::span(start, end - 1));
+				a[layer] += wi * h[layer][i];
+				start = end;
+			}
+			//Add bias
+			unsigned int end = start + layerInputs[layer];
+			const arma::vec& wb = w(arma::span(start, end - 1));
+			a[layer] += wb;
+			start = end;
+			//Apply layer function
+			Function& f = *layerFunction[layer];
+			for (unsigned int i = 0; i < a[layer].n_elem; i++)
+				h[layer + 1][i] = f(a[layer][i]);
+		}
+	}
+
+	arma::vec backPropagation(arma::vec g)
+	{
+		unsigned int end1 = w.n_elem - 1;
+		unsigned int end2 = w.n_elem - 1;
+
+		arma::vec gradW(w.n_elem, arma::fill::zeros);
+
+		for (unsigned int k = a.size(); k >= 1; k--)
+		{
+			unsigned int layer = k - 1;
+			Function& f = *layerFunction[layer];
+
+			//Convert the gradient on the layer’s output into a gradient into the pre-nonlinearity activation
+			for (unsigned int i = 0; i < a[layer].n_elem; i++)
+				g[i] = g[i] * f.diff(a[layer][i]);
+
+			//Compute gradients on bias
+			unsigned int start = end1 - g.size() + 1;
+			gradW(arma::span(start, end1)) = g;
+			end1 = start - 1;
+
+			//Compute gradients on weights
+			for (unsigned int i = 0; i < g.size(); i++)
+			{
+				unsigned int start = end1 - h[layer].n_elem + 1;
+				gradW(arma::span(start, end1)) = g[i] * h[layer];
+				end1 = start - 1;
+			}
+
+			//Propagate the gradients w.r.t. the next lower-level hidden layer’s activations
+			arma::vec gn(h[layer].n_elem);
+			for (unsigned int i = 0; i < gn.n_elem; i++)
+			{
+				unsigned int start = end2 - g.size();
+				arma::vec&& Wki = w(arma::span(start, end2 - 1));
+				gn[i] = as_scalar(Wki.t() * g);
+				end2 = start - 1;
+			}
+
+			g = gn;
+			end2 = end1;
+		}
+
+		return gradW;
+	}
+
     class Function
     {
     public:
         virtual double operator() (double x) = 0;
+        virtual double diff(double x) = 0;
     };
 
     class Sigmoid : public Function
@@ -150,6 +200,12 @@ private:
         virtual double operator() (double x)
         {
             return 1.0 / ( 1.0 + exp(-x));
+        }
+
+        virtual double diff(double x)
+        {
+            Sigmoid& f = *this;
+            return f(1 - f(x));
         }
     };
 
@@ -166,11 +222,21 @@ private:
             return alpha*x;
         }
 
+        virtual double diff(double x)
+        {
+            return alpha;
+        }
+
     private:
         double alpha;
     };
 
 private:
+    //Computation results
+    std::vector<arma::vec> a;
+    std::vector<arma::vec> h;
+
+    //Network data
     std::vector<unsigned int> layerInputs;
     std::vector<Function*> layerFunction;
     arma::vec w;
