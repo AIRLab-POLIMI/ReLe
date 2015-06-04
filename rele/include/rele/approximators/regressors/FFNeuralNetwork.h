@@ -35,7 +35,7 @@ namespace ReLe
 {
 
 template<class InputC, bool denseOutput = true>
-class FFNeuralNetwork_ :  public ParametricRegressor_<InputC, denseOutput>
+class FFNeuralNetwork_ :  public ParametricRegressor_<InputC, denseOutput>, public BatchRegressor_<InputC, arma::vec>
 {
 public:
     FFNeuralNetwork_(Features_<InputC, denseOutput>& bfs, unsigned int neurons, unsigned int outputs)
@@ -68,7 +68,7 @@ public:
 
     arma::vec operator()(const InputC& input)
     {
-		forwardComputation(input);
+        forwardComputation(input);
         return h.back();
     }
 
@@ -101,6 +101,56 @@ public:
         return w.n_elem;
     }
 
+    void train(const BatchData<InputC, arma::vec>& dataset)
+    {
+        //TODO implement
+
+        //L2 norm, no regularization, gradient descend
+        //TODO add options
+        double alpha = 0.01;
+
+        arma::vec g(w.n_elem, arma::fill::zeros);
+
+        for(unsigned k = 0; k < 1000; k++)
+        {
+            g.zeros();
+
+            for(unsigned int i = 0; i < dataset.size(); i++)
+            {
+                const InputC& x = dataset.getInput(i);
+                const arma::vec& y = dataset.getOutput(i);
+
+                forwardComputation(x);
+                arma::vec yhat = h.back();
+
+                //std::cerr << "y =" << y << std::endl;
+                //std::cerr << "yhat =" << yhat << std::endl;
+
+                arma::vec gs = y - yhat;
+                g += backPropagation(gs);
+
+            }
+
+            w += alpha*g;
+
+
+            arma::vec J(dataset.getOutput(0).n_elem, arma::fill::zeros);
+
+            for(unsigned int i = 0; i < dataset.size(); i++)
+            {
+                const InputC& x = dataset.getInput(i);
+                const arma::vec& y = dataset.getOutput(i);
+
+                forwardComputation(x);
+                arma::vec yhat = h.back();
+                J += arma::norm(y - yhat)/2;
+            }
+
+            std::cerr << "J =" << J << std::endl;
+        }
+
+    }
+
 private:
     unsigned int calculateParamSize()
     {
@@ -114,78 +164,78 @@ private:
         return paramN;
     }
 
-	void forwardComputation(const InputC& input)
-	{
-		h[0] = basis(input);
-		unsigned int start = 0;
-		for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
-		{
-			a[layer].zeros();
-			//Add input * weight
-			for (unsigned int i = 0; i < h[layer].n_elem; i++)
-			{
-				unsigned int end = start + layerInputs[layer];
-				const arma::vec& wi = w(arma::span(start, end - 1));
-				a[layer] += wi * h[layer][i];
-				start = end;
-			}
-			//Add bias
-			unsigned int end = start + layerInputs[layer];
-			const arma::vec& wb = w(arma::span(start, end - 1));
-			a[layer] += wb;
-			start = end;
-			//Apply layer function
-			Function& f = *layerFunction[layer];
-			for (unsigned int i = 0; i < a[layer].n_elem; i++)
-				h[layer + 1][i] = f(a[layer][i]);
-		}
-	}
+    void forwardComputation(const InputC& input)
+    {
+        h[0] = basis(input);
+        unsigned int start = 0;
+        for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
+        {
+            a[layer].zeros();
+            //Add input * weight
+            for (unsigned int i = 0; i < h[layer].n_elem; i++)
+            {
+                unsigned int end = start + layerInputs[layer];
+                const arma::vec& wi = w(arma::span(start, end - 1));
+                a[layer] += wi * h[layer][i];
+                start = end;
+            }
+            //Add bias
+            unsigned int end = start + layerInputs[layer];
+            const arma::vec& wb = w(arma::span(start, end - 1));
+            a[layer] += wb;
+            start = end;
+            //Apply layer function
+            Function& f = *layerFunction[layer];
+            for (unsigned int i = 0; i < a[layer].n_elem; i++)
+                h[layer + 1][i] = f(a[layer][i]);
+        }
+    }
 
-	arma::vec backPropagation(arma::vec g)
-	{
-		unsigned int end1 = w.n_elem - 1;
-		unsigned int end2 = w.n_elem - 1;
+    arma::vec backPropagation(arma::vec g)
+    {
+        unsigned int end1 = w.n_elem - 1;
+        unsigned int end2 = w.n_elem - 1;
 
-		arma::vec gradW(w.n_elem, arma::fill::zeros);
+        arma::vec gradW(w.n_elem, arma::fill::zeros);
 
-		for (unsigned int k = a.size(); k >= 1; k--)
-		{
-			unsigned int layer = k - 1;
-			Function& f = *layerFunction[layer];
+        for (unsigned int k = a.size(); k >= 1; k--)
+        {
+            unsigned int layer = k - 1;
+            Function& f = *layerFunction[layer];
 
-			//Convert the gradient on the layer’s output into a gradient into the pre-nonlinearity activation
-			for (unsigned int i = 0; i < a[layer].n_elem; i++)
-				g[i] = g[i] * f.diff(a[layer][i]);
+            //Convert the gradient on the layer’s output into a gradient into the pre-nonlinearity activation
+            for (unsigned int i = 0; i < a[layer].n_elem; i++)
+                g[i] = g[i] * f.diff(a[layer][i]);
 
-			//Compute gradients on bias
-			unsigned int start = end1 - g.size() + 1;
-			gradW(arma::span(start, end1)) = g;
-			end1 = start - 1;
+            //Compute gradients on bias
+            unsigned int start = end1 - g.size() + 1;
+            gradW(arma::span(start, end1)) = g;
+            end1 = start - 1;
 
-			//Compute gradients on weights
-			for (unsigned int i = 0; i < g.size(); i++)
-			{
-				unsigned int start = end1 - h[layer].n_elem + 1;
-				gradW(arma::span(start, end1)) = g[i] * h[layer];
-				end1 = start - 1;
-			}
+            //Compute gradients on weights
+            for (unsigned int i = 0; i < g.size(); i++)
+            {
+                unsigned int start = end1 - h[layer].n_elem + 1;
+                gradW(arma::span(start, end1)) = g[i] * h[layer];
+                end1 = start - 1;
+            }
 
-			//Propagate the gradients w.r.t. the next lower-level hidden layer’s activations
-			arma::vec gn(h[layer].n_elem);
-			for (unsigned int i = 0; i < gn.n_elem; i++)
-			{
-				unsigned int start = end2 - g.size();
-				arma::vec&& Wki = w(arma::span(start, end2 - 1));
-				gn[i] = as_scalar(Wki.t() * g);
-				end2 = start - 1;
-			}
+            //Propagate the gradients w.r.t. the next lower-level hidden layer’s activations
+            arma::vec gn(h[layer].n_elem);
+            for (unsigned int i = 0; i < gn.n_elem; i++)
+            {
+                unsigned int start = end2 - g.size();
+                arma::vec&& Wki = w(arma::span(start, end2 - 1));
+                gn[i] = as_scalar(Wki.t() * g);
+                end2 = start - 1;
+            }
 
-			g = gn;
-			end2 = end1;
-		}
+            g = gn;
+            end2 = end1;
+        }
 
-		return gradW;
-	}
+        return gradW;
+    }
 
     class Function
     {

@@ -50,4 +50,39 @@ int main(int argc, char *argv[])
 
     arma::vec diff = net.diff(input);
     cout << "f'(1.0, 1.0) =" << diff << endl;
+
+
+
+    FFNeuralNetwork atan2Net(phi, 3, 1);
+    BatchDataPlain<arma::vec, arma::vec> dataset;
+
+    for(int i = 0; i < 101; i++)
+    {
+        double step = 0.01;
+        double angle = step*i;
+
+        arma::vec input = {sin(angle), cos(angle)};
+        arma::vec output = {atan2(sin(angle), cos(angle))};
+
+        cout << atan2(sin(angle), cos(angle)) << endl;
+
+        dataset.addSample(input, output);
+
+    }
+
+    atan2Net.train(dataset);
+
+    arma::vec test(2);
+    test(0) = sin(M_PI/4);
+    test(1) = cos(M_PI/4);
+    cout << "net =" << atan2Net(test) << "gt =" << atan2(test(0), test(1)) << endl;
+
+    test(0) = sin(M_PI/3);
+    test(1) = cos(M_PI/3);
+    cout << "net =" << atan2Net(test) << "gt =" << atan2(test(0), test(1)) <<  endl;
+
+    cout << "w = " << atan2Net.getParameters() << endl;
+
+
 }
+
