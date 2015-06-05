@@ -123,9 +123,16 @@ BasisFunctions GaussianRbf::generate(arma::vec& numb_centers, arma::mat& range)
         b(i) = (range(i,1) - range(i,0))*(range(i,1) - range(i,0)) / (n_centers*n_centers*n_centers);
         double m = fabs(range(i,1) - range(i,0)) / n_centers;
         if (n_centers == 1)
+        {
+            // when the number of centers is 1, linspace returns the upper bound
+            // we want the average value
             c[i] = (range(i,1) + range(i,0))/2.0;
+        }
         else
+        {
+
             c[i] = arma::linspace<arma::vec>(-m * 0.1 + range(i,0), range(i,1) + m * 0.1, n_centers);
+        }
         totpoints *= n_centers;
     }
 
