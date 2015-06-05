@@ -57,6 +57,8 @@ BasisFunctions AffineFunction::generate(BasisFunctions& basis, arma::mat& A)
     {
         newBasis.push_back(new AffineFunction(basis[i], A));
     }
+
+    return newBasis;
 }
 
 }//end namespace
