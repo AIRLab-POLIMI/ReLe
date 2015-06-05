@@ -94,12 +94,78 @@ public:
 
 typedef NonParametricRegressor_<arma::vec> NonParametricRegressor;
 
-template<class ActionC, class StateC>
-class BatchRegressor
+template<class InputC, class OutputC>
+class BatchData
+{
+public:
+    virtual const InputC& getInput(unsigned int index) const = 0;
+    virtual const OutputC& getOutput(unsigned int index) const = 0;
+    virtual size_t size() const = 0;
+
+    virtual ~BatchData()
+    {
+
+    }
+};
+
+template<class InputC, class OutputC>
+class BatchDataPlain : public BatchData<InputC, OutputC>
+{
+public:
+    BatchDataPlain()
+    {
+
+    }
+
+    BatchDataPlain(std::vector<InputC> inputs,
+                   std::vector<OutputC> outputs) : inputs(inputs), outputs(outputs)
+    {
+        assert(inputs.size() == outputs.size());
+    }
+
+    void addSample(InputC& input, OutputC& output)
+    {
+        inputs.push_back(input);
+        outputs.push_back(output);
+    }
+
+    virtual const InputC& getInput(unsigned int index) const
+    {
+        return inputs[index];
+    }
+
+    virtual const OutputC& getOutput(unsigned int index) const
+    {
+        return outputs[index];
+    }
+
+    virtual size_t size() const
+    {
+        return inputs.size();
+    }
+
+    virtual ~BatchDataPlain()
+    {
+
+    }
+
+private:
+    std::vector<InputC> inputs;
+    std::vector<OutputC> outputs;
+
+};
+
+template<class InputC, class OutputC>
+class BatchRegressor_
 {
 
 public:
-    void train(Dataset<ActionC, StateC>& dataset) = 0;
+    virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
+
+    virtual ~BatchRegressor_()
+    {
+
+    }
 };
 
 }
