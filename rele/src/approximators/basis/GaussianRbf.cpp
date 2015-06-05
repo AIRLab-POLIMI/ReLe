@@ -122,9 +122,10 @@ BasisFunctions GaussianRbf::generate(arma::vec& numb_centers, arma::mat& range)
         int n_centers = numb_centers[i];
         b(i) = (range(i,1) - range(i,0))*(range(i,1) - range(i,0)) / (n_centers*n_centers*n_centers);
         double m = fabs(range(i,1) - range(i,0)) / n_centers;
-        c[i] = arma::linspace<arma::vec>(-m * 0.1 + range(i,0), range(i,1) + m * 0.1, n_centers);
         if (n_centers == 1)
-            c[i] /= 2;
+            c[i] = (range(i,1) + range(i,0))/2.0;
+        else
+            c[i] = arma::linspace<arma::vec>(-m * 0.1 + range(i,0), range(i,1) + m * 0.1, n_centers);
         totpoints *= n_centers;
     }
 
