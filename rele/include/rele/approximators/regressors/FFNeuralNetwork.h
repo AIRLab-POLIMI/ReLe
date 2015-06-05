@@ -31,12 +31,32 @@
 #include <algorithm>
 #include "Regressors.h"
 
+#include "nn/ActivationFunctions.h"
+#include "nn/Regularization.h"
+
 namespace ReLe
 {
 
 template<class InputC, bool denseOutput = true>
 class FFNeuralNetwork_ :  public ParametricRegressor_<InputC, denseOutput>, public BatchRegressor_<InputC, arma::vec>
 {
+
+public:
+    enum algorithm
+    {
+        GradientDescend, StochasticGradientDescend
+    };
+
+    struct OptimizationParameters
+    {
+        algorithm alg;
+        double alpha;
+        double lambda;
+        unsigned int maxIterations;
+        unsigned int minibatchSize;
+    };
+
+
 public:
     FFNeuralNetwork_(Features_<InputC, denseOutput>& bfs, unsigned int neurons, unsigned int outputs)
         : ParametricRegressor(outputs), basis(bfs)
@@ -56,6 +76,15 @@ public:
             a.push_back(arma::vec(layerInputs[i], arma::fill::zeros));
             h.push_back(arma::vec(layerInputs[i], arma::fill::zeros));
         }
+
+        Omega = new L2_Regularization();
+
+        //Default parameters
+        params.alg = GradientDescend;
+        params.alpha = 0.1;
+        params.lambda = 0.0;
+        params.minibatchSize = 100;
+        params.maxIterations = 10000;
     }
 
     ~FFNeuralNetwork_()
@@ -103,53 +132,36 @@ public:
 
     void train(const BatchData<InputC, arma::vec>& dataset)
     {
-        //TODO implement
+        assert(dataset.size() > 0);
 
-        //L2 norm, no regularization, gradient descend
-        //TODO add options
-        double alpha = 0.01;
+        //L2 norm, stochastic gradient descend
 
-        arma::vec g(w.n_elem, arma::fill::zeros);
+        stochasticGradientDescend(dataset);
+    }
 
-        for(unsigned k = 0; k < 1000; k++)
+    arma::vec computeJ(const BatchData<InputC, arma::vec>& dataset,
+                       double lambda)
+    {
+        arma::vec J(dataset.getOutput(0).n_elem, arma::fill::zeros);
+        for (unsigned int i = 0; i < dataset.size(); i++)
         {
-            g.zeros();
-
-            for(unsigned int i = 0; i < dataset.size(); i++)
-            {
-                const InputC& x = dataset.getInput(i);
-                const arma::vec& y = dataset.getOutput(i);
-
-                forwardComputation(x);
-                arma::vec yhat = h.back();
-
-                //std::cerr << "y =" << y << std::endl;
-                //std::cerr << "yhat =" << yhat << std::endl;
-
-                arma::vec gs = y - yhat;
-                g += backPropagation(gs);
-
-            }
-
-            w += alpha*g;
-
-
-            arma::vec J(dataset.getOutput(0).n_elem, arma::fill::zeros);
-
-            for(unsigned int i = 0; i < dataset.size(); i++)
-            {
-                const InputC& x = dataset.getInput(i);
-                const arma::vec& y = dataset.getOutput(i);
-
-                forwardComputation(x);
-                arma::vec yhat = h.back();
-                J += arma::norm(y - yhat)/2;
-            }
-
-            std::cerr << "J =" << J << std::endl;
+            const InputC& x = dataset.getInput(i);
+            const arma::vec& y = dataset.getOutput(i);
+            forwardComputation(x);
+            arma::vec yhat = h.back();
+            J += arma::norm(y - yhat) / 2 + lambda * Omega->cost(w);
         }
 
+        J /= dataset.size();
+
+        return J;
     }
+
+    OptimizationParameters& getParameters()
+    {
+        return params;
+    }
+
 
 private:
     unsigned int calculateParamSize()
@@ -171,6 +183,7 @@ private:
         for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
         {
             a[layer].zeros();
+
             //Add input * weight
             for (unsigned int i = 0; i < h[layer].n_elem; i++)
             {
@@ -179,11 +192,13 @@ private:
                 a[layer] += wi * h[layer][i];
                 start = end;
             }
+
             //Add bias
             unsigned int end = start + layerInputs[layer];
             const arma::vec& wb = w(arma::span(start, end - 1));
             a[layer] += wb;
             start = end;
+
             //Apply layer function
             Function& f = *layerFunction[layer];
             for (unsigned int i = 0; i < a[layer].n_elem; i++)
@@ -191,12 +206,15 @@ private:
         }
     }
 
-    arma::vec backPropagation(arma::vec g)
+    arma::vec backPropagation(arma::vec g, double lambda = 0.0)
     {
         unsigned int end1 = w.n_elem - 1;
         unsigned int end2 = w.n_elem - 1;
 
         arma::vec gradW(w.n_elem, arma::fill::zeros);
+
+        //Compute normalization derivative
+        arma::vec&& dOmega = lambda*Omega->diff(w);
 
         for (unsigned int k = a.size(); k >= 1; k--)
         {
@@ -209,14 +227,14 @@ private:
 
             //Compute gradients on bias
             unsigned int start = end1 - g.size() + 1;
-            gradW(arma::span(start, end1)) = g;
+            gradW(arma::span(start, end1)) = g + dOmega(arma::span(start, end1));
             end1 = start - 1;
 
             //Compute gradients on weights
             for (unsigned int i = 0; i < g.size(); i++)
             {
                 unsigned int start = end1 - h[layer].n_elem + 1;
-                gradW(arma::span(start, end1)) = g[i] * h[layer];
+                gradW(arma::span(start, end1)) = g[i] * h[layer] + dOmega(arma::span(start, end1));
                 end1 = start - 1;
             }
 
@@ -237,49 +255,47 @@ private:
         return gradW;
     }
 
-    class Function
+    void computeGradient(const BatchData<InputC, arma::vec>& dataset,
+                         double lambda, arma::vec& g)
     {
-    public:
-        virtual double operator() (double x) = 0;
-        virtual double diff(double x) = 0;
-    };
+        g.zeros();
+        for (unsigned int i = 0; i < dataset.size(); i++)
+        {
+            const InputC& x = dataset.getInput(i);
+            const arma::vec& y = dataset.getOutput(i);
+            forwardComputation(x);
+            arma::vec yhat = h.back();
+            arma::vec gs = yhat - y;
+            g += backPropagation(gs, lambda);
+        }
 
-    class Sigmoid : public Function
+        g /= static_cast<double>(dataset.size());
+        //std::cerr << "||g|| = " << arma::norm(g) << std::endl;
+    }
+
+    void stochasticGradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
-    public:
-        virtual double operator() (double x)
+        arma::vec g(w.n_elem, arma::fill::zeros);
+        for (unsigned k = 0; k < 10000; k++)
         {
-            return 1.0 / ( 1.0 + exp(-x));
+            const BatchData<InputC, arma::vec>* miniBatch =
+                dataset.getMiniBatch(m);
+            computeGradient(*miniBatch, lambda, g);
+            w -= alpha * g;
+            delete miniBatch;
         }
+    }
 
-        virtual double diff(double x)
-        {
-            Sigmoid& f = *this;
-            return f(1 - f(x));
-        }
-    };
-
-    class Linear : public Function
+    void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
-    public:
-        Linear(double alpha = 1) : alpha(alpha)
+        //L2 norm, stochastic gradient descend
+        arma::vec g(w.n_elem, arma::fill::zeros);
+        for (unsigned k = 0; k < 10000; k++)
         {
-
+            computeGradient(dataset, lambda, g);
+            w -= alpha * g;
         }
-
-        virtual double operator() (double x)
-        {
-            return alpha*x;
-        }
-
-        virtual double diff(double x)
-        {
-            return alpha;
-        }
-
-    private:
-        double alpha;
-    };
+    }
 
 private:
     //Computation results
@@ -290,7 +306,11 @@ private:
     std::vector<unsigned int> layerInputs;
     std::vector<Function*> layerFunction;
     arma::vec w;
+    Regularization* Omega;
     Features_<InputC, denseOutput>& basis;
+
+    //Optimizaion data
+    OptimizationParameters params;
 };
 
 typedef FFNeuralNetwork_<arma::vec> FFNeuralNetwork;

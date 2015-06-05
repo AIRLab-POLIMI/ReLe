@@ -52,19 +52,17 @@ int main(int argc, char *argv[])
     cout << "f'(1.0, 1.0) =" << diff << endl;
 
 
-
-    FFNeuralNetwork atan2Net(phi, 3, 1);
+    //Train atan2
+    FFNeuralNetwork atan2Net(phi, 5, 1);
     BatchDataPlain<arma::vec, arma::vec> dataset;
 
-    for(int i = 0; i < 101; i++)
+    for(int i = 0; i < 300; i++)
     {
         double step = 0.01;
         double angle = step*i;
 
-        arma::vec input = {sin(angle), cos(angle)};
-        arma::vec output = {atan2(sin(angle), cos(angle))};
-
-        cout << atan2(sin(angle), cos(angle)) << endl;
+        arma::vec input = {cos(angle), sin(angle)};
+        arma::vec output = {atan2(cos(angle), sin(angle))};
 
         dataset.addSample(input, output);
 
@@ -81,8 +79,36 @@ int main(int argc, char *argv[])
     test(1) = cos(M_PI/3);
     cout << "net =" << atan2Net(test) << "gt =" << atan2(test(0), test(1)) <<  endl;
 
-    cout << "w = " << atan2Net.getParameters() << endl;
+    cout << "J = " << atan2Net.computeJ(dataset, 0);
 
+
+    //Train xor
+    FFNeuralNetwork xorNet(phi, 3, 1);
+    BatchDataPlain<arma::vec, arma::vec> datasetXor;
+
+    arma::vec i0 = {0.0, 0.0};
+    arma::vec i1 = {1.0, 0.0};
+    arma::vec i2 = {0.0, 1.0};
+    arma::vec i3 = {1.0, 1.0};
+
+    arma::vec o0 = {0.0};
+    arma::vec o1 = {1.0};
+
+    datasetXor.addSample(i0, o0);
+    datasetXor.addSample(i1, o1);
+    datasetXor.addSample(i2, o1);
+    datasetXor.addSample(i3, o0);
+
+    arma::vec p_0(xorNet.getParametersSize(), arma::fill::ones);
+    xorNet.setParameters(p_0);
+    xorNet.train(datasetXor);
+
+    cout << "xor(0, 0) =" << xorNet(i0) << "gt =" << "0" << endl;
+    cout << "xor(1, 0) =" << xorNet(i1) << "gt =" << "1" <<  endl;
+    cout << "xor(0, 1) =" << xorNet(i2) << "gt =" << "1" << endl;
+    cout << "xor(1, 1) =" << xorNet(i3) << "gt =" << "0" <<  endl;
+
+    cout << "J = " << xorNet.computeJ(dataset, 0);
 
 }
 
