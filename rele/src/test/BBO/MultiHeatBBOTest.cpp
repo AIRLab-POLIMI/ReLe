@@ -206,6 +206,11 @@ int main(int argc, char *argv[])
               << 1 << 0 << 0 << 0 << arma::endr;
     // crea redial basis function a griglia per t1 e t2
     BasisFunctions basis = GaussianRbf::generate({4,4}, {13.5,26,13.5,26});
+    for (unsigned int i = 0; i < basis.size(); ++i)
+    {
+        GaussianRbf* rbf = (GaussianRbf*) basis[i];
+        cout << rbf->getCenter().t() << " , " << rbf->getWidth().t() << endl;
+    }
     // replica le RBFs per ogni modo
     BasisFunctions repbasis = AndConditionBasisFunction::generate(basis,mdp.getSettings().continuosStateDim-1,mdp.getSettings().continuosStateDim);
     // transformate input for the replicated basis
