@@ -5,8 +5,8 @@ addpath('../Toolbox/');
 %clear old data
 clear
 
-cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/segway_BBO';
-status = system(cmd);
+% cmd = '/home/mpirotta/Projects/github/ReLe/rele-build/segway_BBO';
+% status = system(cmd);
 
 %% Read data
 
