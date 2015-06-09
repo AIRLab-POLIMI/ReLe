@@ -339,7 +339,7 @@ private:
 
             w += deltaW;
 
-            std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
+            //std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
 
             delete miniBatch;
         }
