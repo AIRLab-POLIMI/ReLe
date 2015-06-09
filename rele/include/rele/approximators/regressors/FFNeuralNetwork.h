@@ -67,27 +67,17 @@ public:
         layerFunction.push_back(new Sigmoid());
         layerFunction.push_back(new Linear());
 
-        layerInputs.push_back(neurons);
-        layerInputs.push_back(outputs);
+        layerNeurons.push_back(neurons);
+        layerNeurons.push_back(outputs);
 
-        w = arma::vec(calculateParamSize(), arma::fill::zeros);
+        setupNetwork();
+    }
 
-        h.push_back(arma::vec());
-
-        for (unsigned int i = 0; i < layerFunction.size(); i++)
-        {
-            a.push_back(arma::vec(layerInputs[i], arma::fill::zeros));
-            h.push_back(arma::vec(layerInputs[i], arma::fill::zeros));
-        }
-
-        Omega = new L2_Regularization();
-
-        //Default parameters
-        params.alg = GradientDescend;
-        params.alpha = 0.1;
-        params.lambda = 0.0;
-        params.minibatchSize = 100;
-        params.maxIterations = 10000;
+    FFNeuralNetwork_(Features_<InputC, denseOutput>& bfs, std::vector<unsigned int>& layerNeurons,
+                     std::vector<Function*>& layerFunction) :
+        ParametricRegressor(layerNeurons.back()), basis(bfs), layerFunction(layerFunction), layerNeurons(layerNeurons)
+    {
+        setupNetwork();
     }
 
     ~FFNeuralNetwork_()
@@ -107,7 +97,7 @@ public:
     arma::vec diff(const InputC& input)
     {
         forwardComputation(input);
-        arma::vec g(layerInputs.back(), arma::fill::ones);
+        arma::vec g(layerNeurons.back(), arma::fill::ones);
 
         return backPropagation(g);
     }
@@ -182,13 +172,35 @@ public:
     }
 
 private:
+    void setupNetwork()
+    {
+        w = arma::vec(calculateParamSize(), arma::fill::zeros);
+
+        h.push_back(arma::vec());
+
+        for (unsigned int i = 0; i < layerFunction.size(); i++)
+        {
+            a.push_back(arma::vec(layerNeurons[i], arma::fill::zeros));
+            h.push_back(arma::vec(layerNeurons[i], arma::fill::zeros));
+        }
+
+        Omega = new L2_Regularization();
+
+        //Default parameters
+        params.alg = GradientDescend;
+        params.alpha = 0.1;
+        params.lambda = 0.0;
+        params.minibatchSize = 100;
+        params.maxIterations = 10000;
+    }
+
     unsigned int calculateParamSize()
     {
-        unsigned int paramN = (basis.rows() + 1) * layerInputs[0];
+        unsigned int paramN = (basis.rows() + 1) * layerNeurons[0];
 
-        for (unsigned int layer = 1; layer < layerInputs.size(); layer++)
+        for (unsigned int layer = 1; layer < layerNeurons.size(); layer++)
         {
-            paramN += (layerInputs[layer - 1] + 1) * layerInputs[layer];
+            paramN += (layerNeurons[layer - 1] + 1) * layerNeurons[layer];
         }
 
         return paramN;
@@ -205,14 +217,14 @@ private:
             //Add input * weight
             for (unsigned int i = 0; i < h[layer].n_elem; i++)
             {
-                unsigned int end = start + layerInputs[layer];
+                unsigned int end = start + layerNeurons[layer];
                 const arma::vec& wi = w(arma::span(start, end - 1));
                 a[layer] += wi * h[layer][i];
                 start = end;
             }
 
             //Add bias
-            unsigned int end = start + layerInputs[layer];
+            unsigned int end = start + layerNeurons[layer];
             const arma::vec& wb = w(arma::span(start, end - 1));
             a[layer] += wb;
             start = end;
@@ -352,7 +364,7 @@ private:
     std::vector<arma::vec> h;
 
     //Network data
-    std::vector<unsigned int> layerInputs;
+    std::vector<unsigned int> layerNeurons;
     std::vector<Function*> layerFunction;
     arma::vec w;
     Regularization* Omega;
