@@ -67,6 +67,21 @@ public:
     }
 };
 
+class Rectifier : public Function
+{
+public:
+    inline virtual double operator() (double x)
+    {
+        return std::log(1 - std::exp(x));
+    }
+
+    inline virtual double diff(double x)
+    {
+        return 1.0 / ( 1.0 + std::exp(-x));
+    }
+};
+
+
 class Linear : public Function
 {
 public:
@@ -88,6 +103,5 @@ public:
 private:
     double alpha;
 };
-
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NN_ACTIVATIONFUNCTIONS_H_ */

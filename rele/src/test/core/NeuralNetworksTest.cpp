@@ -57,11 +57,12 @@ int main(int argc, char *argv[])
     BatchDataPlain<arma::vec, arma::vec> dataset;
 
     //Config parameters
-    atan2Net.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    atan2Net.getHyperParameters().alpha = 0.005;
-    atan2Net.getHyperParameters().maxIterations = 10000;
+    atan2Net.getHyperParameters().alg = FFNeuralNetwork::Adadelta;
+    atan2Net.getHyperParameters().epsilon = 0.01;
+    atan2Net.getHyperParameters().rho = 0.1;
+    atan2Net.getHyperParameters().maxIterations = 2500;
     atan2Net.getHyperParameters().lambda = 0;
-    //atan2Net.getHyperParameters().minibatchSize = 100;
+    atan2Net.getHyperParameters().minibatchSize = dataset.size();
 
     for(int i = 0; i < 300; i++)
     {
