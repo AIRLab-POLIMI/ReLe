@@ -1,24 +1,22 @@
-%%% Gaussian with linear mean and constant covariance.
-%%% Mean is learned, variance is fixed.
-classdef gaussian_policy
+%%% Gaussian with linear mean and fixed covariance: N(K*phi,S).
+%%% Params: mean.
+classdef gaussian_fixedvar < policy
     
     properties(GetAccess = 'public', SetAccess = 'private')
         basis;
         dim;
-        dim_variance_params;
     end
     
     properties(GetAccess = 'public', SetAccess = 'public')
-        theta;
         sigma;
     end
     
     methods
         
-        function obj = gaussian_policy(basis, dim, init_k, init_sigma)
+        function obj = gaussian_fixedvar(basis, dim, init_k, init_sigma)
             assert(isscalar(dim))
-            assert(feval(basis) == size(init_k,1))
-            assert(dim == size(init_k,2))
+            assert(feval(basis) == size(init_k,2))
+            assert(dim == size(init_k,1))
             assert(size(init_sigma,1) == dim)
             assert(size(init_sigma,2) == dim)
 
@@ -43,15 +41,14 @@ classdef gaussian_policy
             action = mvnrnd(mu,obj.sigma)';
         end
         
-        % differential entropy, can be negative
-        function H = entropy(obj, state)
-            H = .5*log(2*pi*exp(obj.dim))*det(obj.sigma);
+        %%% Differential entropy, can be negative
+        function S = entropy(obj, state)
+            S = .5*log(2*pi*exp(obj.dim))*det(obj.sigma);
         end
         
-        % derivative of the logarithm of the policy
+        %%% Derivative of the logarithm of the policy
         function dlpdt = dlogPidtheta(obj, state, action)
             if (nargin == 1)
-                % Return the dimension of the vector theta
                 dlpdt = size(obj.theta,1);
                 return
             end
@@ -61,13 +58,16 @@ classdef gaussian_policy
             dlpdt = dlpdt(:);
         end
         
-        % hessian matrix of the logarithm of the policy
+        %%% Hessian matrix of the logarithm of the policy
         function hlpdt = hlogPidtheta(obj, state, action)
+            if nargin == 1
+                hlpdt = size(obj.theta,1);
+                return
+            end
+            
             phi = feval(obj.basis, state);
-            dlogpdt = inv(obj.sigma);
-            kr_1 = kron(phi, dlogpdt);
-            kr_2 = kron(phi', eye(length(action)));
-            hlpdt = -kr_1*kr_2;
+            phimat = kron(eye(obj.dim),phi');
+            hlpdt = -phimat' / obj.sigma * phimat;
         end
         
         function obj = update(obj, direction)
@@ -80,7 +80,6 @@ classdef gaussian_policy
         
         function phi = phi(obj, state)
             if (nargin == 1)
-                % Return the dimension of the vector of basis functions
                 phi = feval(obj.basis);
                 return
             end

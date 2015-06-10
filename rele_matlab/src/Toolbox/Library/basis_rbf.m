@@ -5,17 +5,22 @@ function Phi = basis_rbf(n_centers, range, state)
 % overlapping and confidence between 95-99%.
 %
 % Inputs:
-%
 %  - n_centers        : number of centers (same for all dimensions)
 %  - range            : N-by-2 matrix with min and max values for the
 %                       N-dimensional input state
 %  - state (optional) : the state to evaluate
 %
-% Output:
-%
+% Outputs:
 %  - Phi              : if a state is provided as input, the function 
 %                       returns the feature vector representing it; 
 %                       otherwise it returns the size of such vector
+%
+% Example:
+% basis_rbf(2, [0,1; 0,1], [0.2, 0.1]')
+%    0.9066
+%    0.0647
+%    0.0268
+%    0.0019
 
 persistent centers
 
@@ -56,8 +61,8 @@ else
         x = state - centers(:,i);
         Phi(i) = exp(-x' * B * x);
     end
-    Phi = Phi ./ sum(Phi);
-    
+%     Phi = Phi ./ sum(Phi);
+
 end
 
 %%% Plotting

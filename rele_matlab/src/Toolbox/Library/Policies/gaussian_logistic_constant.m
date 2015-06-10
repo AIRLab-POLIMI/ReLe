@@ -1,21 +1,19 @@
-%%% Gaussian with constant mean and logistic covariance.
-%%% Both mean and variance are learned.
-classdef constant_logistic_gaussian_policy
+%%% Gaussian with constant mean and logistic covariance: N(K,S).
+%%% Params: mean and logistic weights (S = tau/(1+exp(-w)).
+classdef gaussian_logistic_constant < policy
     
     properties(GetAccess = 'public', SetAccess = 'private')
         dim;
-        tau;
-        dim_variance_params;
     end
     
     properties(GetAccess = 'public', SetAccess = 'public')
-        theta;
+        tau;
     end
     
     methods
         
         function obj = ...
-                constant_logistic_gaussian_policy(dim, init_mean, init_sigma_w, max_variance)
+                gaussian_logistic_constant(dim, init_mean, init_sigma_w, max_variance)
             assert(isscalar(dim))
             assert(size(init_mean,1) == dim)
             assert(size(init_mean,2) == 1)
@@ -45,6 +43,7 @@ classdef constant_logistic_gaussian_policy
             action = mvnrnd(MU, SIGMA)';
         end
         
+        %%% Derivative of the logarithm of the policy
         function dlpdt = dlogPidtheta(obj, action)
             if (nargin == 1)
                 % Return the dimension of the vector theta
@@ -73,11 +72,11 @@ classdef constant_logistic_gaussian_policy
             obj.theta = obj.theta + direction;
         end
         
-        % differential entropy, can be negative
-        function H = entropy(obj, state)
+        %%% Differential entropy, can be negative
+        function S = entropy(obj)
             logv  = logistic(obj.theta(end-obj.dim+1:end), obj.tau);
             SIGMA = diag(logv);
-            H = 0.5*log( (2*pi*exp(1))^obj.dim * det(SIGMA) );
+            S = 0.5*log( (2*pi*exp(1))^obj.dim * det(SIGMA) );
         end
         
         function obj = makeDeterministic(obj)
@@ -93,15 +92,15 @@ classdef constant_logistic_gaussian_policy
             params.Sigma = sigma;
         end
         
-        function obj = weightedMLUpdate(obj, d, Theta)
-            d = d / sum(d);
-            mu = Theta * d;
+        function obj = weightedMLUpdate(obj, weights, Action)
+            weights = weights / sum(weights);
+            mu = Action * weights;
             logv = zeros(obj.dim,1);
             
             for j = 1 : obj.dim
                 tmp = 0;
-                for k = 1 : size(Theta,2)
-                    tmp = tmp + (d(k) * (Theta(j,k) - mu(j)).^2);
+                for k = 1 : size(Action,2)
+                    tmp = tmp + (weights(k) * (Action(j,k) - mu(j)).^2);
                 end
                 
                 logv(j) = -log( obj.tau(j) / tmp - 1 );
@@ -111,7 +110,35 @@ classdef constant_logistic_gaussian_policy
         end
         
         function obj = randomize(obj, factor)
-            obj.theta(end-obj.dim+1:end) = obj.theta(end-obj.dim+1:end) * factor;
+            obj.theta(end-obj.dim+1:end) = obj.theta(end-obj.dim+1:end) .* factor;
+        end
+        
+        function areEq = eq(obj1, obj2)
+            areEq = eq@policy(obj1,obj2);
+            if max(areEq)
+                areEqTau = bsxfun( @and, [obj1(:).tau], [obj2(:).tau] );
+                if size(areEq,1) ~= size(areEqTau,1)
+                    areEqTau = areEqTau';
+                end
+                areEq = bitand( areEq, areEqTau);
+            else
+                return;
+            end
+        end
+        
+        function plot(obj)
+            params = obj.getParams;
+            mu = params.mu;
+            Sigma = params.Sigma;
+            figure; hold all
+            xlabel 'x_i'
+            ylabel 'Policy density'
+            x = max(abs(mu)) + 2*max(abs(Sigma(:)));
+            range = -x: 0.1 : x;
+            for i = 1 : length(mu)
+                norm = normpdf(range, mu(i), Sigma(i,i));
+                plot(range, norm)
+            end            
         end
         
     end
