@@ -50,13 +50,13 @@ double g(unsigned int n, const double* x, double* grad, void*)
 	double b = x[1];
 	double c = x[2];
 
-	grad[0] = 2*(a - 3)*std::exp((a - 3)*(a - 3) - b*b + c*c) - 2*(a - 3)*std::exp(-(a - 3)*(a - 3) + b*b - c*c + 100);
-	grad[1] = -2*b*std::exp((a - 3)*(a - 3) - b*b + c*c) + 2*b*std::exp(-(a - 3)*(a - 3) + b*b - c*c + 100);
-	grad[2] = 2*c*std::exp((a - 3)*(a - 3) - b*b + c*c) - 2*c*std::exp(-(a - 3)*(a - 3) + b*b - c*c + 100);
+	grad[0] = 2*(a - 3)*std::exp((a - 3)*(a - 3) - b*b + c*c) - 2*(a - 3)*std::exp(-(a - 3)*(a - 3) + b*b - c*c + 3);
+	grad[1] = -2*b*std::exp((a - 3)*(a - 3) - b*b + c*c) + 2*b*std::exp(-(a - 3)*(a - 3) + b*b - c*c + 3);
+	grad[2] = 2*c*std::exp((a - 3)*(a - 3) - b*b + c*c) - 2*c*std::exp(-(a - 3)*(a - 3) + b*b - c*c + 3);
 
 	std::cout << it++ << std::endl;
 
-	return std::exp((a - 3)*(a - 3) - b*b + c*c) + std::exp(-(a - 3)*(a - 3) + b*b - c*c + 100);
+	return std::exp((a - 3)*(a - 3) - b*b + c*c) + std::exp(-(a - 3)*(a - 3) + b*b - c*c + 3);
 
 }
 
@@ -64,19 +64,19 @@ int main()
 {
 	nlopt::opt optimizator;
 	int size = 3;
-	optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, size);
-	//optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, size);
+	//optimizator = nlopt::opt(nlopt::algorithm::LD_LBFGS, size);
+	optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, size);
 	//optimizator.set_min_objective(f, NULL);
 	optimizator.set_min_objective(g, NULL);
 	optimizator.set_xtol_rel(1e-8);
 	optimizator.set_ftol_rel(1e-12);
-	optimizator.set_maxeval(5);
+	optimizator.set_maxeval(200);
 
-	std::vector<double> x(size, 1);
+	std::vector<double> x(size, 10);
 	double J;
 	optimizator.optimize(x, J);
 
 	std::cout << "x = " << x[0] << ", " << x[1] << ", " << x[2] << std::endl;
-	std::cout << "J = " << J;
+	std::cout << "J = " << J << std::endl;
 
 }
