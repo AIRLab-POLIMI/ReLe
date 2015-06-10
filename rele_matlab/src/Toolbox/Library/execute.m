@@ -1,24 +1,25 @@
-function [new_results, totdrew, toturew, entropy] = execute(domain, ...
-    initial_state, simulator, policy, maxsteps, is_avg, gamma)
+function [new_results, totrew, totentropy] = execute( ...
+    domain, initial_state, simulator, policy, maxsteps )
   
-  %%% Get MDP characteristics
+  % Get MDP characteristics
   mdpconfig = [domain '_mdpvariables'];
   mdp_vars = feval(mdpconfig);
   nvar_state = mdp_vars.nvar_state;
   nvar_action = mdp_vars.nvar_action;
   nvar_reward = mdp_vars.nvar_reward;
+  gamma = mdp_vars.gamma;
+  is_avg = mdp_vars.is_avg;
   
-  %%% Initialize variables
-  totdrew = zeros(nvar_reward,1);
-  toturew = zeros(nvar_reward,1);
-  entropy = 0;
+  % Initialize variables
+  totrew = zeros(nvar_reward,1);
+  totentropy = 0;
   steps = 0;
   endsim = 0;
   
-  %%% Set initial state
+  % Set initial state
   state = initial_state;
   
-  %%% Initialize storage for new samples 
+  % Allocate memory for new samples 
   results.s = -9999*ones(nvar_state, maxsteps+1);
   results.nexts = -9999*ones(nvar_state, maxsteps+1);
   results.a = -9999*ones(nvar_action, maxsteps+1);
@@ -26,50 +27,48 @@ function [new_results, totdrew, toturew, entropy] = execute(domain, ...
   results.terminal = -9999*ones(1, maxsteps+1);
   results.s(:,1) = state;
 
-  %%% Run the episode
+  % Run the episodes
   while ( (steps < maxsteps) && (~endsim) )
 
     steps = steps + 1;
 
-    %%% Select action 
+    % Select action 
     action = policy.drawAction(state);
     
-    %%% Compute entropy
-    entropy = entropy + policy.entropy(state);
+    % Compute entropy
+    totentropy = totentropy + policy.entropy(state);
 
-    %%% Simulate
+    % Simulate
     [nextstate, reward, endsim] = feval(simulator, state, action);
     
-    %%% Record sample
+    % Record sample
  	results.a(:,steps) = action;
  	results.r(:,steps) = reward;
 	results.s(:,steps+1) = nextstate;
  	results.nexts(:,steps) = nextstate;
     results.terminal(:,steps) = endsim;
     
-    %%% Update the total reward(s)
-    totdrew = totdrew + (gamma)^(steps-1) * reward;
-    toturew = toturew + reward;
+    % Update the total reward
+    totrew = totrew + (gamma)^(steps-1) * reward;
 
-    %%% Continue
+    % Continue
     state = nextstate;
     
   end
     
-  %%% Return the results
+  % Return the results
   new_results.s = results.s(:, 1:steps);
   new_results.a = results.a(:, 1:steps);
   new_results.r = results.r(:, 1:steps);
   new_results.nexts = results.nexts(:, 1:steps);
   new_results.terminal = results.terminal(:, 1:steps);
   
-  %%% If we are in the average reward setting, then normalize the total
-  %%% reward
-  if is_avg
-      toturew = toturew / steps;
+  % If we are in the average reward setting, then normalize the return
+  if is_avg && gamma == 1
+      totrew = totrew / steps;
   end
   
-  entropy = entropy / steps;
+  totentropy = totentropy / steps;
   
   return
   

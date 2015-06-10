@@ -31,7 +31,7 @@ classdef REPS_Solver < handle
             update(obj, d, Delta);
         end
         
-        function [d, divKL,eta] = optimize(obj, J)
+        function [d, divKL] = optimize(obj, J)
             % Optimization problem settings
             options = optimset('GradObj', 'on', ...
                 'Display', 'off', ...
@@ -59,7 +59,6 @@ classdef REPS_Solver < handle
             obj.policy = obj.policy.weightedMLUpdate(weights, Delta);
         end
 
-        
         %% DUAL FUNCTION
         function [g, gd] = dual(obj, eta, J)
             % Numerical trick

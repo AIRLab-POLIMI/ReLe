@@ -1,21 +1,16 @@
-%%% Gaussian with linear mean (with offset) and constant covariance.
-%%% Both mean and variance are learned.
-classdef full_smart_gaussian_policy
+%%% Gaussian with linear mean (with offset) and constant covariance: N(k+K*phi,S).
+%%% Params: mean and covariance.
+classdef gaussian_linear_full < policy
     
     properties(GetAccess = 'public', SetAccess = 'private')
         basis;
         dim;
-        dim_variance_params;
-    end
-    
-    properties(GetAccess = 'public', SetAccess = 'public')
-        theta;
     end
     
     methods
         
         function obj = ...
-                full_smart_gaussian_policy(basis, dim, init_mean, init_k, init_sigma)
+                gaussian_linear_full(basis, dim, init_mean, init_k, init_sigma)
             assert(isscalar(dim))
             assert(feval(basis) == size(init_k,2))
             assert(dim == size(init_k,1))
@@ -50,17 +45,16 @@ classdef full_smart_gaussian_policy
             action = mvnrnd(mu,sigma)';
         end
         
-        % differential entropy, can be negative
-        function H = entropy(obj, state)
+        %%% Differential entropy, can be negative
+        function S = entropy(obj, state)
             n_k = obj.dim*feval(obj.basis)+obj.dim;
             sigma = vec2mat(obj.theta(n_k+1:end),obj.dim);
-            H = 0.5*log( (2*pi*exp(1))^obj.dim * det(sigma) );
+            S = 0.5*log( (2*pi*exp(1))^obj.dim * det(sigma) );
         end
         
-        % derivative of the logarithm of the policy
+        %%% Derivative of the logarithm of the policy
         function dlogpdt = dlogPidtheta(obj, state, action)
             if (nargin == 1)
-                % Return the dimension of the vector theta
                 dlogpdt = size(obj.theta,1);
                 return
             end
@@ -94,26 +88,25 @@ classdef full_smart_gaussian_policy
         
         function phi = phi(obj, state)
             if (nargin == 1)
-                % Return the dimension of the vector of basis functions
                 phi = feval(obj.basis);
                 return
             end
             phi = feval(obj.basis, state);
         end
         
-        function obj = weightedMLUpdate(obj, d, Theta, Phi)
-            N = size(Theta,1);
-            D = diag(d);
+        function obj = weightedMLUpdate(obj, weights, Action, Phi)
+            N = size(Action,1);
+            D = diag(weights);
             S = [ones(N,1), Phi];
-            W = (S' * D * S + 1e-8 * eye(size(S,2))) \ S' * D * Theta;
+            W = (S' * D * S + 1e-8 * eye(size(S,2))) \ S' * D * Action;
             a = W(1,:)';
             A = W(2:end,:)';
             Sigma = zeros(obj.dim);
             for k = 1 : N
                 mu = a + A * Phi(k,:)';
-                Sigma = Sigma + (d(k) * (Theta(k,:)' - mu) * (Theta(k,:)' - mu)');
+                Sigma = Sigma + (weights(k) * (Action(k,:)' - mu) * (Action(k,:)' - mu)');
             end
-            Z = (sum(d)^2 - sum(d.^2)) / sum(d);
+            Z = (sum(weights)^2 - sum(weights.^2)) / sum(weights);
             Sigma = Sigma / Z;
             Sigma = nearestSPD(Sigma);
             obj.theta = [a; A(:); Sigma(:)];
@@ -131,7 +124,7 @@ classdef full_smart_gaussian_policy
         
         function obj = randomize(obj, factor)
             n_k = obj.dim*feval(obj.basis)+obj.dim;
-            obj.theta(n_k+1:end) = obj.theta(n_k+1:end) * factor;
+            obj.theta(n_k+1:end) = obj.theta(n_k+1:end) .* factor;
         end
         
     end

@@ -1,21 +1,15 @@
-%%% Gaussian with constant mean and covariance.
-%%% Both mean and variance are learned.
-%%% The covariance is represented using the Cholesky decomposition.
+%%% Gaussian with constant mean and covariance: N(K,S).
+%%% Params: mean and Cholesky decomposition (S = A'A).
 %%% Reference: Sun, Efficient Natural Evolution Strategies, 2009
-classdef constant_chol_gaussian_policy
+classdef gaussian_chol_constant < policy
     
     properties(GetAccess = 'public', SetAccess = 'private')
         dim;
-        dim_variance_params;
-    end
-    
-    properties(GetAccess = 'public', SetAccess = 'public')
-        theta;
     end
     
     methods
         
-        function obj = constant_chol_gaussian_policy(dim, init_mean, init_cholA)
+        function obj = gaussian_chol_constant(dim, init_mean, init_cholA)
             assert(isscalar(dim))
             assert(size(init_mean,1) == dim)
             assert(size(init_mean,2) == 1)
@@ -30,12 +24,12 @@ classdef constant_chol_gaussian_policy
             obj.dim_variance_params = length(init_cholA(:));
         end
         
-        function probability = evaluate(obj, theta)
+        function probability = evaluate(obj, action)
             mu = obj.theta(1:obj.dim);
             indices = triu(ones(obj.dim));
             cholA = indices;
             cholA(indices == 1) = obj.theta(obj.dim+1:end);
-            probability = mvnpdf(theta, mu, cholA'*cholA);
+            probability = mvnpdf(action, mu, cholA'*cholA);
         end
         
         function action = drawAction(obj)
@@ -46,18 +40,16 @@ classdef constant_chol_gaussian_policy
             action = mvnrnd(mu,cholA'*cholA)';
         end
         
-        % differential entropy, can be negative
-        function H = entropy(obj, state)
+        %%% Differential entropy, can be negative
+        function S = entropy(obj)
             indices = triu(ones(obj.dim));
             cholA = indices;
             cholA(indices == 1) = obj.theta(obj.dim+1:end);
-            H = 0.5*log( (2*pi*exp(1))^obj.dim * det(cholA'*cholA) );
+            S = 0.5*log( (2*pi*exp(1))^obj.dim * det(cholA'*cholA) );
         end
         
-        % derivative of the logarithm of the policy
-        function dlogpdt = dlogPidtheta(obj, theta)
+        function dlogpdt = dlogPidtheta(obj, action)
             if (nargin == 1)
-                % Return the dimension of the vector theta
                 dlogpdt = size(obj.theta,1);
                 return
             end
@@ -67,9 +59,9 @@ classdef constant_chol_gaussian_policy
             cholA(indices == 1) = obj.theta(obj.dim+1:end);
             invsigma = cholA \ eye(size(cholA)) / cholA';
             
-            dlogpdt_k = invsigma * (theta - mu);
+            dlogpdt_k = invsigma * (action - mu);
             
-            R = cholA' \ (theta - mu) * (theta - mu)' * invsigma;
+            R = cholA' \ (action - mu) * (action - mu)' * invsigma;
             dlogpdt_sigma = zeros(obj.dim);
             for i = 1 : obj.dim
                 for j = i : obj.dim
@@ -87,14 +79,7 @@ classdef constant_chol_gaussian_policy
             dlogpdt = [dlogpdt_k(:); dlogpdt_sigma(:)];
         end
         
-        function obj = update(obj, direction)
-            obj.theta = obj.theta + direction;
-        end
-        
-        function obj = makeDeterministic(obj)
-            obj.theta(obj.dim+1:end) = 1e-8;
-        end
-        
+        %%% Fisher information matrix
         function F = fisher(obj)
             indices = triu(ones(obj.dim));
             cholA = indices;
@@ -102,8 +87,6 @@ classdef constant_chol_gaussian_policy
             invsigma = cholA \ eye(size(cholA)) / cholA';
             F_blocks = cell(obj.dim,1);
             for k = 1 : obj.dim
-%                 index = obj.dim + 1 - k;
-%                 tmp = invsigma(end-index+1:end, end-index+1:end);
                 tmp = invsigma(k:end, k:end);
                 tmp(1,1) = tmp(1,1) + 1 / cholA(k,k)^2;
                 F_blocks{k} = tmp;
@@ -111,6 +94,7 @@ classdef constant_chol_gaussian_policy
             F = blkdiag(invsigma, F_blocks{:});
         end
         
+        %%% Inverse Fisher information matrix
         function invF = inverseFisher(obj)
             indices = triu(ones(obj.dim));
             cholA = indices;
@@ -127,6 +111,14 @@ classdef constant_chol_gaussian_policy
             invF = blkdiag(sigma, invF_blocks{:});
         end
         
+        function obj = update(obj, direction)
+            obj.theta = obj.theta + direction;
+        end
+        
+        function obj = makeDeterministic(obj)
+            obj.theta(obj.dim+1:end) = 1e-8;
+        end
+        
         function params = getParams(obj)
             mu = obj.theta(1:obj.dim);
             indices = triu(ones(obj.dim));
@@ -139,7 +131,7 @@ classdef constant_chol_gaussian_policy
         end
         
         function obj = randomize(obj, factor)
-            obj.theta(obj.dim+1:end) = obj.theta(obj.dim+1:end) * factor;
+            obj.theta(obj.dim+1:end) = obj.theta(obj.dim+1:end) .* factor;
         end
         
     end

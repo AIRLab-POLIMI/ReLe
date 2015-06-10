@@ -1,25 +1,23 @@
-%%% Gaussian with linear mean and logistic covariance.
-%%% Both mean and variance are learned.
-classdef logistic_gaussian_policy
+%%% Gaussian with linear mean and logistic covariance: N(K*phi,S).
+%%% Params: mean and logistic weights (S = tau/(1+exp(-w)).
+classdef gaussian_logistic_linear < policy
     
     properties(GetAccess = 'public', SetAccess = 'private')
         basis;
         dim;
-        dim_variance_params;
-        tau;
     end
-    
+
     properties(GetAccess = 'public', SetAccess = 'public')
-        theta;
+        tau;
     end
     
     methods
         
         function obj = ...
-                logistic_gaussian_policy(basis, dim, init_k, init_sigma_w, max_variance)
+                gaussian_logistic_linear(basis, dim, init_k, init_sigma_w, max_variance)
             assert(isscalar(dim))
-            assert(feval(basis) == size(init_k,1))
-            assert(dim == size(init_k,2))
+            assert(feval(basis) == size(init_k,2))
+            assert(dim == size(init_k,1))
             assert(size(init_sigma_w,1) == dim)
             assert(size(init_sigma_w,2) == 1)
             assert(size(max_variance,1) == size(init_sigma_w,1));
@@ -55,10 +53,10 @@ classdef logistic_gaussian_policy
             MU     = k * phi;
             action = mvnrnd(MU, SIGMA)';
         end
-        
+
+        %%% Derivative of the logarithm of the policy
         function dlpdt = dlogPidtheta(obj, state, action)
             if (nargin == 1)
-                % Return the dimension of the vector theta
                 dlpdt = size(obj.theta,1);
                 return
             end
@@ -89,11 +87,11 @@ classdef logistic_gaussian_policy
             obj.theta = obj.theta + direction;
         end
         
-        % differential entropy, can be negative
-        function H = entropy(obj, state)
+        %%% Differential entropy, can be negative
+        function S = entropy(obj, state)
             logv  = logistic(obj.theta(end-obj.dim+1:end), obj.tau);
             SIGMA = diag(logv);
-            H = 0.5*log( (2*pi*exp(1))^obj.dim * det(SIGMA) );
+            S = 0.5*log( (2*pi*exp(1))^obj.dim * det(SIGMA) );
         end
         
         function obj = makeDeterministic(obj)
@@ -102,7 +100,6 @@ classdef logistic_gaussian_policy
         
         function phi = phi(obj, state)
             if (nargin == 1)
-                % Return the dimension of the vector of basis functions
                 phi = feval(obj.basis);
                 return
             end
@@ -119,7 +116,20 @@ classdef logistic_gaussian_policy
         end
         
         function obj = randomize(obj, factor)
-            obj.theta(end-obj.dim+1:end) = obj.theta(end-obj.dim+1:end) * factor;
+            obj.theta(end-obj.dim+1:end) = obj.theta(end-obj.dim+1:end) .* factor;
+        end
+        
+        function areEq = eq(obj1, obj2)
+            areEq = eq@policy(obj1,obj2);
+            if max(areEq)
+                areEqTau = bsxfun( @and, [obj1(:).tau], [obj2(:).tau] );
+                if size(areEq,1) ~= size(areEqTau,1)
+                    areEqTau = areEqTau';
+                end
+                areEq = bitand( areEq, areEqTau);
+            else
+                return;
+            end
         end
         
     end

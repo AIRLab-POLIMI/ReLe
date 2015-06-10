@@ -1,12 +1,10 @@
 %%% Gibbs (soft-max) policy with preferences on all action.
 %%% The temperature is fixed.
-classdef gibbs_policy_allpref
+classdef gibbs_allpref < policy
     
     properties(GetAccess = 'public', SetAccess = 'private')
         basis;
-        theta;
         action_list;
-        dim_variance_params;
     end
     
     properties(GetAccess = 'public', SetAccess = 'public')
@@ -15,7 +13,7 @@ classdef gibbs_policy_allpref
     
     methods
         
-        function obj = gibbs_policy_allpref(bfs, theta, action_list)
+        function obj = gibbs_allpref(bfs, theta, action_list)
             % Class constructor
             obj.basis = bfs;
             obj.theta = theta;
@@ -43,11 +41,11 @@ classdef gibbs_policy_allpref
             for i = 1 : length(obj.action_list)
                 act = obj.action_list(i);
                 local_phi = feval(obj.basis, state, act);
-                sumexp = sumexp + exp(IT*obj.theta'*local_phi);
+                sumexp = sumexp + min(exp(IT*obj.theta'*local_phi),1e200);
             end
             
             % Compute action probability
-            probability = exp(IT*lin_prod)/sumexp;
+            probability = min(exp(IT*lin_prod),1e200) / sumexp;
         end
         
         function action = drawAction(obj, state)
@@ -64,22 +62,18 @@ classdef gibbs_policy_allpref
             for i = 1 : nactions
                 act = obj.action_list(i);
                 loc_phi = feval(obj.basis, state, act);
-                prob_list(i) = exp(IT*obj.theta'*loc_phi);
-                sumexp = sumexp + exp(IT*obj.theta'*loc_phi);
+                exp_term = min(exp(IT*obj.theta'*loc_phi),1e200);
+                prob_list(i) = exp_term;
+                sumexp = sumexp + exp_term;
             end
             prob_list = prob_list / sumexp;
             prob_list(isnan(prob_list)) = 1;
             prob_list(isinf(prob_list)) = 1;
-            try 
-                AV = mnrnd(1,prob_list);
-                aidx = sum(AV.*obj.action_list);
-            catch
-                aidx = discretesample(prob_list, 1);
-            end
-            action = obj.action_list(aidx);
+            prob_list = prob_list / sum(prob_list);
+            [~, action] = find(mnrnd(1, prob_list));
         end
         
-        function H = entropy(obj, state)
+        function S = entropy(obj, state)
             assert(size(state,2) == 1);
             
             IT = obj.inverse_temperature;
@@ -92,23 +86,23 @@ classdef gibbs_policy_allpref
             for i = 1 : nactions
                 act = obj.action_list(i);
                 loc_phi = feval(obj.basis, state, act);
-                prob_list(i) = exp(IT*obj.theta'*loc_phi);
-                sumexp = sumexp + exp(IT*obj.theta'*loc_phi);
+                exp_term = min(exp(IT*obj.theta'*loc_phi),1e200);
+                prob_list(i) = exp_term;
+                sumexp = sumexp + exp_term;
             end
             prob_list = prob_list / sumexp;
-            H = 0;
+            S = 0;
             for i = 1 : nactions
-                if isinf(prob_list(i)) || isnan(prob_list(i))
-                    prob_list(i) = 1;
+                if ~(isinf(prob_list(i)) || isnan(prob_list(i)) || prob_list(i) == 0)
+                    S = S + (-prob_list(i)*log2(prob_list(i)));
                 end
-                H = H + (-prob_list(i)*log2(prob_list(i)));
             end
-            H = H / log2(nactions);
+            S = S / log2(nactions);
         end
         
+        %%% Derivative of the logarithm of the policy
         function dlpdt = dlogPidtheta(obj, state, action)
             if (nargin == 1)
-                % Return the dimension of the vector theta
                 dlpdt = size(obj.theta,1);
                 return
             end
@@ -123,14 +117,15 @@ classdef gibbs_policy_allpref
             
             % Compute the sum of all the preferences
             sumexp = 0;
-            sumpref = 0; % sum of the preferences
+            sumpref = 0;
             nactions = length(obj.action_list);
             prob_list = zeros(nactions, 1);
             for i = 1 : nactions
                 act = obj.action_list(i);
                 loc_phi = feval(obj.basis, state, act);
-                prob_list(i) = exp(IT*obj.theta'*loc_phi) ;
-                sumexp = sumexp + exp(IT*obj.theta'*loc_phi);
+                exp_term = min(exp(IT*obj.theta'*loc_phi),1e200);
+                prob_list(i) = exp_term;
+                sumexp = sumexp + exp_term;
                 sumpref = sumpref + IT*loc_phi*prob_list(i);
             end
             sumpref = sumpref / sumexp;
@@ -148,7 +143,20 @@ classdef gibbs_policy_allpref
         end
         
         function obj = randomize(obj, factor)
-            obj.theta = obj.theta * factor;
+            obj.theta = obj.theta ./ factor;
+        end
+        
+        function areEq = eq(obj1, obj2)
+            areEq = eq@policy(obj1,obj2);
+            if max(areEq)
+                areEqTemp = bsxfun( @and, [obj1(:).inverse_temperature], [obj2(:).inverse_temperature] );
+                if size(areEq,1) ~= size(areEqTemp,1)
+                    areEqTemp = areEqTemp';
+                end
+                areEq = bitand( areEq, areEqTemp);
+            else
+                return;
+            end
         end
         
     end

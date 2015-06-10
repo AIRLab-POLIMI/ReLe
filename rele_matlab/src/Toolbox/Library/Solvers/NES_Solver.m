@@ -5,7 +5,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 classdef NES_Solver < handle
     
-    % Natural Evolutionary Strategies
+    % Natural Evolution Strategies
     
     properties(GetAccess = 'public', SetAccess = 'private')
         lrate;
@@ -75,22 +75,20 @@ classdef NES_Solver < handle
             % If we can compute the FIM inverse in closed form, use it
             if ismethod(obj.policy,'inverseFisher')
                 invF = obj.policy.inverseFisher;
-                lambda = sqrt(grad' * (invF * grad) / (4 * obj.lrate));
-                lambda = max(lambda,1e-8); % to avoid numerical problems
-                nat_grad = invF * grad / (2 * lambda);
+                nat_grad = invF * grad;
             elseif rank(F) == size(F,1)
-                lambda = sqrt(grad' * (F \ grad) / (4 * obj.lrate));
-                lambda = max(lambda,1e-8);
-                nat_grad = F \ grad / (2 * lambda);
+                nat_grad = F \ grad;
             else
                 str = sprintf('WARNING: F is lower rank (rank = %d)!!! Should be %d', rank(F), size(F,1));
                 disp(str);
-                lambda = sqrt(grad' * (pinv(F) * grad) / (4 * obj.lrate));
-                lambda = max(lambda,1e-8);
-                nat_grad = pinv(F) * grad / (2 * lambda);
+                nat_grad = pinv(F) * grad;
             end
+            lambda = sqrt(grad' * nat_grad / (4 * obj.lrate));
+            lambda = max(lambda,1e-8); % to avoid numerical problems
+            stepsize = 1 / (2 * lambda);
             
             div = norm(nat_grad);
+            nat_grad = nat_grad * stepsize;
         end
         
         function update(obj, gradient)

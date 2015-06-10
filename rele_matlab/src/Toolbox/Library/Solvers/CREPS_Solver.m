@@ -5,7 +5,6 @@ classdef CREPS_Solver < handle
     properties(GetAccess = 'public', SetAccess = 'private')
         epsilon; % KL divergence bound
         N;       % number of rollouts per iteration
-        N_eval;  % number of rollouts to evaluate the policy
         N_MAX;   % how many rollouts (including the ones from previous
                  % distributions) will be used for the update step
         policy;  % distribution for sampling the episodes
@@ -15,10 +14,9 @@ classdef CREPS_Solver < handle
     methods
         
         %% CLASS CONSTRUCTOR
-        function obj = CREPS_Solver(epsilon, N, N_eval, N_MAX, policy, basis)
+        function obj = CREPS_Solver(epsilon, N, N_MAX, policy, basis)
             obj.epsilon = epsilon;
             obj.N = N;
-            obj.N_eval = N_eval;
             obj.N_MAX = N_MAX;
             obj.policy = policy;
             obj.basis = basis;
@@ -63,16 +61,16 @@ classdef CREPS_Solver < handle
                     maxAdvantage = max(advantage);
                     
                     % Compute the weights
-                    d = exp( (advantage - maxAdvantage) / eta )';
+                    d = exp( (advantage - maxAdvantage) / eta );
                     
                     % Check conditions
-                    qWeighting = ones(obj.N_MAX,1);
+                    qWeighting = ones(1,obj.N_MAX);
                     pWeighting = d;
                     pWeighting = pWeighting / sum(pWeighting);
                     divKL = getKL(pWeighting, qWeighting);
                     error = divKL - obj.epsilon;
                     validKL = error < 0.1 * obj.epsilon;
-                    featureDiff = sum(bsxfun(@times, PhiVfun, pWeighting)) - mean(PhiVfun);
+                    featureDiff = sum(bsxfun(@times, PhiVfun, pWeighting')) - mean(PhiVfun);
                     validSF = max(abs(featureDiff)) < 0.1;
                     numStepsNoKL = numStepsNoKL + 1;
                 end
@@ -86,16 +84,16 @@ classdef CREPS_Solver < handle
                     maxAdvantage = max(advantage);
                     
                     % Compute the weights
-                    d = exp( (advantage - maxAdvantage) / eta )';
+                    d = exp( (advantage - maxAdvantage) / eta );
                     
                     % Check conditions
-                    qWeighting = ones(obj.N_MAX,1);
+                    qWeighting = ones(1,obj.N_MAX);
                     pWeighting = d;
                     pWeighting = pWeighting / sum(pWeighting);
                     divKL = getKL(pWeighting, qWeighting);
                     error = divKL - obj.epsilon;
                     validKL = error < 0.1 * obj.epsilon;
-                    featureDiff = sum(bsxfun(@times, PhiVfun, pWeighting)) - mean(PhiVfun);
+                    featureDiff = sum(bsxfun(@times, PhiVfun, pWeighting')) - mean(PhiVfun);
                     validSF = max(abs(featureDiff)) < 0.1;
                 end
                 
@@ -109,7 +107,6 @@ classdef CREPS_Solver < handle
             obj.policy = obj.policy.weightedMLUpdate(weights, Delta, PhiPolicy);
         end
 
-        
         %% DUAL FUNCTIONS
         function [g, gd] = dual_full(obj, params, J, Phi)
             theta = params(1:end-1);
@@ -127,7 +124,7 @@ classdef CREPS_Solver < handle
             
             % dual function
             g = eta * obj.epsilon + theta' * meanFeatures + eta * log(sumWeights/n) + maxAdvantage;
-            % gradient wrt to theta and to eta
+            % gradient wrt theta and eta
             gd = [meanFeatures - sumWeightsPhi / sumWeights;
                 obj.epsilon + log(sumWeights/n) - sumWeightsV / (eta * sumWeights)];
         end
@@ -140,15 +137,15 @@ classdef CREPS_Solver < handle
             weights = exp( ( advantage - maxAdvantage ) / eta ); % numerical trick
             sumWeights = sum(weights);
             sumWeightsV = sum( weights .* (advantage - maxAdvantage) );
-            sumWeightsV2 = sum( weights .* (advantage - maxAdvantage).^2 );
+            sumWeightsVSquare = sum( weights .* (advantage - maxAdvantage).^2 );
             meanFeatures = mean(Phi)';
             
             % dual function
             g = eta * obj.epsilon + theta' * meanFeatures + eta * log(sumWeights/n) + maxAdvantage;
-            % gradient wrt to eta
+            % gradient wrt eta
             gd = obj.epsilon + log(sumWeights/n) - sumWeightsV / (eta * sumWeights);
             % hessian
-            h = ( sumWeightsV2 * sumWeights + eta * sumWeightsV * sumWeights + sumWeightsV^2 ) / ( eta^3 * sumWeightsV^2 );
+            h = ( sumWeightsVSquare * sumWeights + eta * sumWeightsV * sumWeights + sumWeightsV^2 ) / ( eta^3 * sumWeightsV^2 );
         end
         
         function [g, gd, h] = dual_theta(obj, theta, eta, J, Phi)
@@ -165,7 +162,7 @@ classdef CREPS_Solver < handle
             
             % dual function
             g = eta * obj.epsilon + theta' * meanFeatures + eta * log(sumWeights/n) + maxAdvantage;
-            % gradient wrt to theta
+            % gradient wrt theta
             gd = meanFeatures - sumWeightsPhi / sumWeights;
             % hessian
             h = ( sumPhiWeightsPhi * sumWeights - sumPhiWeights * sumWeightsPhi') / sumWeights^2 / eta;
