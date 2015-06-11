@@ -44,7 +44,7 @@ struct BlackBoxPolicyIndividual
 };
 
 template<class IndividualsClass>
-class BlackBoxOutputData: public AgentOutputData
+class BlackBoxOutputData: virtual public AgentOutputData
 {
 
 public:

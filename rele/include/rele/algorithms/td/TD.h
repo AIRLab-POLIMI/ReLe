@@ -32,7 +32,7 @@
 namespace ReLe
 {
 
-class FiniteTDOutput : public AgentOutputData
+class FiniteTDOutput : virtual public AgentOutputData
 {
 public:
     FiniteTDOutput(double gamma,
@@ -52,7 +52,7 @@ protected:
     arma::mat Q;
 };
 
-class LinearTDOutput : public AgentOutputData
+class LinearTDOutput : virtual public AgentOutputData
 {
 public:
     LinearTDOutput(double gamma,

@@ -25,7 +25,7 @@
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICALPOLICYGRADIENT_H_
 
 #include "HierarchicalAlgorithm.h"
-#include "policy_search/gradient/onpolicy/GradientOutputData.h"
+#include "policy_search/gradient/hierarchical/HierarchicalGradientOutputData.h"
 #include "policy_search/step_rules/StepRules.h"
 #include "options/DifferentiableOptions.h"
 #include "RewardTransformation.h"
@@ -89,7 +89,7 @@ public:
         //--- set up agent output
         if (epiCount == 0)
         {
-            currentItStats = new GradientIndividual();
+            currentItStats = new HierarchicalGradientOutputData();
             DifferentiablePolicy<FiniteAction, StateC>& policy = getPolicy(); //FIXME
             currentItStats->policy_parameters = policy.getParameters();
         }
@@ -104,6 +104,7 @@ public:
 
     virtual void initTestEpisode()
     {
+    	currentItStats = new HierarchicalGradientOutputData();
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
@@ -199,6 +200,11 @@ protected:
         return static_cast<DifferentiableOption<ActionC, StateC>&>(option).getPolicy();
     }
 
+    virtual HierarchicalOutputData* getCurrentIterationStat()
+    {
+    	return currentItStats;
+    }
+
     virtual void initializeVariables() = 0;
     virtual void updateStep(const Reward& reward) = 0;
     virtual void updateAtEpisodeEnd() = 0;
@@ -214,7 +220,7 @@ protected:
 
     std::vector<double> history_J;
     bool useBaseline, output2LogReady;
-    GradientIndividual* currentItStats;
+    HierarchicalGradientOutputData* currentItStats;
 
     FiniteAction currentAction; //FIXME
     StateC currentState;

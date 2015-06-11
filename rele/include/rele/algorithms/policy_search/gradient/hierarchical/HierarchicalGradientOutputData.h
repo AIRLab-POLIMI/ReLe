@@ -21,42 +21,30 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ALGORITHMS_HIERARCHICALOUTPUTDATA_H_
-#define INCLUDE_RELE_ALGORITHMS_HIERARCHICALOUTPUTDATA_H_
+#ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_
+#define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_
 
-#include "Basics.h"
+#include "HierarchicalOutputData.h"
+#include "policy_search/gradient/onpolicy/GradientOutputData.h"
 
 namespace ReLe
 {
 
-class HierarchicalOutputData : virtual public AgentOutputData
+class HierarchicalGradientOutputData : public HierarchicalOutputData, public GradientIndividual
 {
-
-public: //FIXME implement this
-    HierarchicalOutputData()
-    {
-        traces.resize(1);
-    }
-
+public:
     virtual void writeData(std::ostream& os)
     {
-
+        GradientIndividual::writeData(os);
+        HierarchicalOutputData::writeData(os);
     }
 
     virtual void writeDecoratedData(std::ostream& os)
     {
-
+        this->writeData(os);
     }
-
-    void addNewTrace()
-    {
-        traces.resize(traces.size() + 1);
-    }
-
-    std::vector<std::vector<int>> traces;
 };
 
 }
 
-
-#endif /* INCLUDE_RELE_ALGORITHMS_HIERARCHICALOUTPUTDATA_H_ */
+#endif /* INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_ */
