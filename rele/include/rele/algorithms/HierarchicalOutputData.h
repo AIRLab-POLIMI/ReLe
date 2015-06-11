@@ -32,28 +32,19 @@ namespace ReLe
 class HierarchicalOutputData : virtual public AgentOutputData
 {
 
-public: //FIXME implement this
-    HierarchicalOutputData()
-    {
-        traces.resize(1);
-    }
+public:
+    HierarchicalOutputData();
 
-    virtual void writeData(std::ostream& os)
-    {
+    virtual void writeData(std::ostream& os);
+    virtual void writeDecoratedData(std::ostream& os);
 
-    }
+    void addOptionCall(unsigned int option);
+    void addLowLevelCommand(); //TODO add
 
-    virtual void writeDecoratedData(std::ostream& os)
-    {
-
-    }
-
-    void addNewTrace()
-    {
-        traces.resize(traces.size() + 1);
-    }
-
+private:
     std::vector<std::vector<int>> traces;
+    std::vector<unsigned int> traceCount;
+    bool bottomReached;
 };
 
 }

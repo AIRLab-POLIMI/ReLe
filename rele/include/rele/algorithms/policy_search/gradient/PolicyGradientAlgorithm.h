@@ -103,8 +103,8 @@ public:
 
     virtual void initTestEpisode()
     {
-    	currentItStats = new GradientIndividual();
-    	currentItStats->policy_parameters = policy.getParameters();
+        currentItStats = new GradientIndividual();
+        currentItStats->policy_parameters = policy.getParameters();
     }
 
     virtual void sampleAction(const StateC& state, ActionC& action)

@@ -71,11 +71,12 @@ protected:
         if(currentOption.getOptionType() == Normal)
         {
             stack.push_back(&currentOption(state));
-            sampleOptionAction(state, action);
 
             //Add choice to option trace
             auto stats = getCurrentIterationStat();
-            stats->traces.back().push_back(currentOption.getLastChoice());
+            stats->addOptionCall(currentOption.getLastChoice());
+
+            sampleOptionAction(state, action);
         }
         else
         {
@@ -83,7 +84,7 @@ protected:
 
             //Add new trace
             auto stats = getCurrentIterationStat();
-            stats->addNewTrace();
+            stats->addLowLevelCommand();
         }
     }
 

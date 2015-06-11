@@ -104,7 +104,7 @@ public:
 
     virtual void initTestEpisode()
     {
-    	currentItStats = new HierarchicalGradientOutputData();
+        currentItStats = new HierarchicalGradientOutputData();
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
@@ -157,6 +157,9 @@ public:
 
     virtual void endEpisode()
     {
+    	//FIXME real hierarchical termination
+    	forceCurrentOptionTermination();
+
         //save policy value
         history_J[epiCount] = Jep;
 
@@ -202,7 +205,7 @@ protected:
 
     virtual HierarchicalOutputData* getCurrentIterationStat()
     {
-    	return currentItStats;
+        return currentItStats;
     }
 
     virtual void initializeVariables() = 0;

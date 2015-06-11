@@ -21,35 +21,61 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_
-#define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_
-
 #include "HierarchicalOutputData.h"
-#include "policy_search/gradient/onpolicy/GradientOutputData.h"
+#include "CSV.h"
+
+#include <cassert>
+
+using namespace std;
 
 namespace ReLe
 {
 
-class HierarchicalGradientOutputData : public HierarchicalOutputData, public GradientIndividual
+HierarchicalOutputData::HierarchicalOutputData()
 {
-public:
-	HierarchicalGradientOutputData() : HierarchicalOutputData(), GradientIndividual()
+    bottomReached = true;
+}
+
+
+void HierarchicalOutputData::writeData(std::ostream& os)
+{
+	os << traces.size() << endl;
+
+	for(auto& trace : traces)
 	{
-
+		os << trace.size() << ",";
+		CSVutils::vectorToCSV(trace, os);
 	}
-
-    virtual void writeData(std::ostream& os)
-    {
-        GradientIndividual::writeData(os);
-        HierarchicalOutputData::writeData(os);
-    }
-
-    virtual void writeDecoratedData(std::ostream& os)
-    {
-        this->writeData(os);
-    }
-};
 
 }
 
-#endif /* INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_ */
+void HierarchicalOutputData::writeDecoratedData(std::ostream& os)
+{
+	//TODO decorated
+	writeData(os);
+}
+
+void HierarchicalOutputData::addOptionCall(unsigned int option)
+{
+	if(bottomReached)
+	{
+		assert(traces.size() == 0 || traces.back().size() > 0);
+		traces.resize(traces.size() + 1);
+		traceCount.resize(traces.size() + 1, 0);
+		bottomReached = false;
+	}
+
+	traces.back().push_back(option);
+}
+
+void HierarchicalOutputData::addLowLevelCommand()
+{
+	bottomReached = true;
+	traceCount.back()++;
+}
+
+
+
+
+
+}
