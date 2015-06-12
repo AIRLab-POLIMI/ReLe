@@ -1,5 +1,5 @@
 clear all
-domain = 'deep';
+domain = 'heat';
 robj = 1;
 [n_obj, pol_low] = settings(domain);
 
@@ -12,15 +12,15 @@ sigma0 = 1 * eye(n_params); % change according to the domain
 tau = 50 * ones(size(diag(sigma0)));
 
 % pol_high = constant_logistic_gaussian_policy(n_params,mu0,diag(sigma0),tau);
-% pol_high = constant_smart_gaussian_policy(n_params,mu0,sigma0);
-pol_high = constant_chol_gaussian_policy(n_params,mu0,chol(sigma0));
+pol_high = constant_smart_gaussian_policy(n_params,mu0,sigma0);
+% pol_high = constant_chol_gaussian_policy(n_params,mu0,chol(sigma0));
 % pol_high = constant_diag_gaussian_policy(n_params,mu0,sqrt(diag(sigma0)));
 
 N = 10;
 N_MAX = 300;
 
-% solver = REPS_Solver(0.9,N,N_MAX,pol_high);
-solver = NES_Solver(.1,N,N_MAX,pol_high);
+solver = REPS_Solver(0.9,N,N_MAX,pol_high);
+% solver = NES_Solver(.1,N,N_MAX,pol_high);
 
 J = zeros(N_MAX,n_obj);
 Theta = zeros(pol_high.dim,N_MAX);
@@ -69,3 +69,28 @@ figure; shadedErrorBar(1:size(J_history,2), ...
     {'LineWidth', 2'}, 1);
 xlabel('Iterations')
 ylabel('Average return')
+
+%% Get Trajectories
+
+maxepisodes = 1;
+[n_obj, pol_low, ~, steps] = settings(domain);
+pol_low = pol_low.makeDeterministic;
+pol_high = solver.policy;
+
+J = zeros(maxepisodes,n_obj);
+dim_theta = pol_high.dim;
+Theta = zeros(dim_theta,maxepisodes);
+
+
+parfor k = 1 : maxepisodes
+    
+    % Draw theta from the high-level policy and perform a rollout
+    pol_tmp = pol_low;
+    theta = pol_high.drawAction;
+    pol_tmp.theta(1:dim_theta) = theta;
+    Theta(:,k) = theta;
+
+    [~, J_ep] = collect_samples(domain, 1, steps, pol_tmp);    
+    J(k,:) = J_ep;
+    
+end

@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-#define DEBUG_GIBBS
+//#define DEBUG_GIBBS
 
 namespace ReLe
 {

@@ -8,7 +8,7 @@ n_cells = 0;
 for i = 0 : stepsize : 1
     for j = 0 : stepsize : 1
         state = [i; j];
-        dist = puddleworld_reward_distance(state);
+        dist = puddle_reward_distance(state);
         map(int64(1+i/stepsize),int64(1+j/stepsize)) = dist;
         n_cells = n_cells + 1;
     end

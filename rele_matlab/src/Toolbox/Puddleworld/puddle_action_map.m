@@ -1,6 +1,6 @@
 % Plots a map of the distribution of each action on the environment.
 
-policy = gibbs_policy(@puddleworld_basis_pol,theta,[1,2,3,4]);
+[~, policy] = settings('puddle'); % change policy to plot
 
 step = 0.05;
 

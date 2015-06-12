@@ -7,13 +7,16 @@ function outv = multiheat_basis(s,a)
 	nmodes = ndim+1;
 	nactions = ndim+1;
 	nbasis = nb^ndim;
+
+	nmodes = 1;		% Da decommentare in caso di non distinzione tra i modi
 	
 	phi = zeros(nbasis*nmodes*(nactions-1),1);
     if nargin < 1
         outv = length(phi);
+		return
     end
 	
-% 	nmodes = 1;		% Da decommentare in caso di non distinzione tra i modi
+
 	if nmodes ~= ndim+1
 		s(1) = 0;
 	end

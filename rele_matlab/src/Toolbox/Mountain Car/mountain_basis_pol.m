@@ -1,6 +1,6 @@
 function phi = mountain_basis_pol(state, action)
 
-mdp_vars = deep_mdpvariables();
+mdp_vars = mountain_mdpvariables();
 
 numfeatures = 3;
 
