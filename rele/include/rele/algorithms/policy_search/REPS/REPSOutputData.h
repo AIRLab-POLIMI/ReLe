@@ -31,7 +31,7 @@
 namespace ReLe
 {
 
-class AbstractREPSOutputData: public AgentOutputData
+class AbstractREPSOutputData: virtual public AgentOutputData
 {
 public:
     AbstractREPSOutputData(int N, double eps, const std::string& policyName, bool final);
@@ -90,7 +90,7 @@ private:
 
 };*/
 
-class REPSOutputData : public BlackBoxOutputData<BlackBoxPolicyIndividual>
+class REPSOutputData : virtual public BlackBoxOutputData<BlackBoxPolicyIndividual>
 {
 public:
     REPSOutputData(unsigned int nbIndividual, unsigned int nbParams,

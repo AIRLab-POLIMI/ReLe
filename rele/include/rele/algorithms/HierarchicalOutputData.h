@@ -29,15 +29,22 @@
 namespace ReLe
 {
 
-class HierarchicalIndividual
+class HierarchicalOutputData : virtual public AgentOutputData
 {
 
+public:
+    HierarchicalOutputData();
 
-};
+    virtual void writeData(std::ostream& os);
+    virtual void writeDecoratedData(std::ostream& os);
 
-class HierarchicalOutputData : public AgentOutputData
-{
+    void addOptionCall(unsigned int option);
+    void addLowLevelCommand(); //TODO add
 
+private:
+    std::vector<std::vector<int>> traces;
+    std::vector<unsigned int> traceCount;
+    bool bottomReached;
 };
 
 }

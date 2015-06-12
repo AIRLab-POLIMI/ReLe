@@ -6,7 +6,7 @@
 namespace ReLe
 {
 
-class GradientIndividual : public AgentOutputData
+class GradientIndividual : virtual public AgentOutputData
 {
 public:
 

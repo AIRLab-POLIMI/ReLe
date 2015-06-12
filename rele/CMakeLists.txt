@@ -117,6 +117,9 @@ else()
                                    ${Boost_LIBRARIES})
 endif()
 
+#nlopt
+add_executable(nlopt_test src/test/nlopt.cpp)
+target_link_libraries(nlopt_test  ${NLOPT_LIBRARY})
 
 #Core test
 add_executable(features_test src/test/core/FeaturesTest.cpp)

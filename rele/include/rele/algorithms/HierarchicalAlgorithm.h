@@ -26,6 +26,7 @@
 
 #include "Agent.h"
 #include "Options.h"
+#include "HierarchicalOutputData.h"
 
 namespace ReLe
 {
@@ -59,6 +60,9 @@ public:
     }
 
 protected:
+    virtual HierarchicalOutputData* getCurrentIterationStat() = 0;
+
+protected:
     void sampleOptionAction(const StateC& state, ActionC& action)
     {
 
@@ -67,11 +71,20 @@ protected:
         if(currentOption.getOptionType() == Normal)
         {
             stack.push_back(&currentOption(state));
+
+            //Add choice to option trace
+            auto stats = getCurrentIterationStat();
+            stats->addOptionCall(currentOption.getLastChoice());
+
             sampleOptionAction(state, action);
         }
         else
         {
             currentOption(state, action);
+
+            //Add new trace
+            auto stats = getCurrentIterationStat();
+            stats->addLowLevelCommand();
         }
     }
 
@@ -115,6 +128,7 @@ protected:
 
 protected:
     OptionStack<ActionC, StateC> stack;
+
 };
 
 

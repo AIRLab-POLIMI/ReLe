@@ -31,7 +31,7 @@ clearvars csv
 
 %% Plot J
 if(hpg)
-    plotGradient(1, agentFile);
+    plotHierarchicalGradient(1, agentFile);
 else
     plotREPS(1, agentFile);
 end
