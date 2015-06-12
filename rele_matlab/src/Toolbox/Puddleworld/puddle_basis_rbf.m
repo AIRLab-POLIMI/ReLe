@@ -1,9 +1,11 @@
-function phi = resource_basis_pol(state, action)
+function phi = puddle_basis_rbf(state, action)
 
-mdp_vars = resource_mdpvariables();
+env = puddle_environment();
+mdp_vars = puddle_mdpvariables();
+n_centers = 10;
 n_actions = length(mdp_vars.action_list);
-degree = 2;
-numfeatures = basis_poly(degree, mdp_vars.nvar_state, 1);
+range = [env.xmin,env.xmax;env.ymin,env.ymax];
+numfeatures = basis_rbf(n_centers,range);
 dim_phi = numfeatures * (n_actions - 1);
 
 %%% If no arguments just return the number of basis functions
@@ -13,7 +15,7 @@ if nargin == 0
 end
 
 %%% Full second degree polynomial
-phi = basis_poly(degree, mdp_vars.nvar_state, 1, state);
+phi = basis_rbf(n_centers,range,state);
 
 %%% Basis depending only on the state
 if nargin == 1
@@ -27,4 +29,4 @@ i = action - 1;
 tmp(base*i+1:base*i+base) = phi;
 phi = tmp;
 
-return
+return;

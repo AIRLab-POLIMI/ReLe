@@ -1,6 +1,6 @@
 % Plots a map of the distribution of each action on the environment.
 
-policy = gibbs_policy(@resource_basis_pol,theta,[1,2,3,4]);
+[~, policy] = settings('resource'); % change policy to plot
 
 map1 = cell(5);
 map2 = cell(5);
