@@ -10,9 +10,9 @@ J = zeros(maxepisodes,n_obj);
 dim_theta = pol_high.dim;
 Theta = zeros(dim_theta,maxepisodes);
 
-%%%%%%%%%%%%%%%%%%%
-[mexParams, gamma, max_obj] = getMexParams(domain);
-%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%
+% [mexParams, gamma, max_obj] = getMexParams(domain);
+% %%%%%%%%%%%%%%%%%%%
 
 parfor k = 1 : maxepisodes
     
@@ -22,14 +22,14 @@ parfor k = 1 : maxepisodes
     pol_tmp.theta(1:dim_theta) = theta;
     Theta(:,k) = theta;
 
-%     [~, J_ep] = collect_samples(domain, 1, steps, pol_tmp);
+    [~, J_ep] = collect_samples(domain, 1, steps, pol_tmp);
 
-%%%%%%%%%%%%%%%%%%%
-    mm = mexParams;
-    mm.policyParameters = pol_tmp.theta;
-    [~, J_ep] = collectSamples(domain, 1, steps, gamma, mm);
-    J_ep = mean(J_ep,1) .* abs(max_obj)';
-%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%
+%     mm = mexParams;
+%     mm.policyParameters = pol_tmp.theta;
+%     [~, J_ep] = collectSamples(domain, 1, steps, gamma, mm);
+%     J_ep = mean(J_ep,1) .* abs(max_obj)';
+% %%%%%%%%%%%%%%%%%%%
     
     J(k,:) = J_ep;
     

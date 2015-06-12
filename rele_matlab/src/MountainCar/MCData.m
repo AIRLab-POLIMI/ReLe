@@ -184,6 +184,10 @@ for i = 0:2
     title(['action ', num2str(i)]);
 end
 %% Read final data
+VV = [];
+for i = 1:10
+    
+    system('/home/matteo/Projects/github/ReLe/rele-build/mc_GIRL');
 
 disp('Reading data trajectories...')
 csv = csvread('/tmp/ReLe/mc/GIRL/finaldata.log');
@@ -197,11 +201,14 @@ X = [];
 for i = 1:length(finalEpisodes)
     X = [X; length(finalEpisodes(i).x(1:end-1,1))];
 end
-mean(X)
-std(X)
+fprintf('\nmean ep length: %f\n', mean(X))
+fprintf('\nstd: %f\n', std(X)/sqrt(length(finalEpisodes)))
 median(X)
 
-MCDraw(finalEpisodes);
+VV = [VV;mean(X)];
+end
+
+% MCDraw(finalEpisodes);
 
 %% Read LSPI policy
 % close all;

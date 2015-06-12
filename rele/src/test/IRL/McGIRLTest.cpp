@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 
     /*** get only trailing info ***/
     Dataset<FiniteAction,DenseState> dataExpert;
-#if 0
+#if 1
     for (int ep = 0; ep < data.size() && budget > 0; ++ep)
     {
         Episode<FiniteAction,DenseState> episodeExpert;
@@ -343,8 +343,8 @@ int main(int argc, char *argv[])
     cerr << XX << endl;
 
 
-    double sigma_position = 2*pow((0.6+1.2)/4.0,2);
-    double sigma_speed    = 2*pow((0.07+0.07)/4.0,2);
+    double sigma_position = 2*pow((0.6+1.2)/10.0,2);
+    double sigma_speed    = 2*pow((0.07+0.07)/10.0,2);
     arma::vec widths = {sigma_speed, sigma_position};
     arma::mat WW = repmat(widths, 1, XX.n_rows);
     arma::mat XT = XX.t();
@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
     lspiPolicy.setEpsilon(0.01);
     lspiPolicy.setNactions(actions.size());
     LSPI<FiniteAction> lspi(dataLSPI, lspiPolicy, qphi, mdp.getSettings().gamma);
-    lspi.run(120,1e-8);
+    lspi.run(160,1e-8);
 
     cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 

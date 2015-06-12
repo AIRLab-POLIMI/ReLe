@@ -1,9 +1,11 @@
-function outv = multiheat_basis(s,a)
+function phi = heat_basis_rbf_v1(s,a)
 
-	ndim = 2;
-	nb = 5;
-	range = [14.5 25];
+% 	ndim = 2;
+% 	nb = 5;
+% 	range = [14.5 25];
 	
+    mdp_vars = heat_mdpvariables()
+    
 	nmodes = ndim+1;
 	nactions = ndim+1;
 	nbasis = nb^ndim;
@@ -12,7 +14,7 @@ function outv = multiheat_basis(s,a)
 	
 	phi = zeros(nbasis*nmodes*(nactions-1),1);
     if nargin < 1
-        outv = length(phi);
+        phi = length(phi);
 		return
     end
 	
@@ -22,5 +24,4 @@ function outv = multiheat_basis(s,a)
 	end
 	phi((1:nbasis)+s(1)*nbasis+a*(nbasis*nmodes),1) = basis_rbf(nb,repmat(range,ndim,1),s(2:end));
 
-	outv = phi;
 end

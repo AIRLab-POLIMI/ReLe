@@ -181,9 +181,9 @@ int main(int argc, char *argv[])
         // default configuration if no arguments are specified
         strcpy(alg, "nes");
         strcpy(polType, "diag");
-        config.nbRuns      = 100;
+        config.nbRuns      = 200;
         config.nbPolicies  = 300;
-        config.stepLength  = 0.01;
+        config.stepLength  = 0.11;
         config.steprule = new AdaptiveStep(config.stepLength);
     }
     //---
@@ -205,30 +205,30 @@ int main(int argc, char *argv[])
               << 0 << 0 << 1 << 0 << arma::endr
               << 1 << 0 << 0 << 0 << arma::endr;
     // crea redial basis function a griglia per t1 e t2
-    BasisFunctions basis = GaussianRbf::generate({4,4}, {13.5,26,13.5,26});
+    BasisFunctions basis = GaussianRbf::generate({5,5}, {15,22,15,22});
     for (unsigned int i = 0; i < basis.size(); ++i)
     {
         GaussianRbf* rbf = (GaussianRbf*) basis[i];
         cout << rbf->getCenter().t() << " , " << rbf->getWidth().t() << endl;
     }
     // replica le RBFs per ogni modo
-    BasisFunctions repbasis = AndConditionBasisFunction::generate(basis,mdp.getSettings().continuosStateDim-1,mdp.getSettings().continuosStateDim);
+//    BasisFunctions repbasis = AndConditionBasisFunction::generate(basis,mdp.getSettings().continuosStateDim-1,mdp.getSettings().continuosStateDim);
     // transformate input for the replicated basis
-    BasisFunctions abasis = AffineFunction::generate(repbasis, affineMtx);
+    BasisFunctions abasis = AffineFunction::generate(basis, affineMtx);
     // replicate basis for each action
     BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().continuosStateDim,actions.size()-1);
     // create feature vector
     DenseFeatures phi(bfs);
 
-    // testare basis
-    vec inputtest = {0, 14, 21, 1};
-    vec outputtest = phi(inputtest);
+//    // testare basis
+//    vec inputtest = {0, 14, 21, 1};
+//    vec outputtest = phi(inputtest);
 
-    cout << outputtest.t();
+//    cout << outputtest.t();
 
-    return 0;
+//    return 0;
 
-    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1.0);
+    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1.0/1e8);
     //---
 
     //--- distribution setup
