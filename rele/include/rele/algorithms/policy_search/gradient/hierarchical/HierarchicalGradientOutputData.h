@@ -41,7 +41,7 @@ public:
     virtual void writeData(std::ostream& os)
     {
         GradientIndividual::writeData(os);
-        HierarchicalOutputData::writeData(os);
+        //HierarchicalOutputData::writeData(os);
     }
 
     virtual void writeDecoratedData(std::ostream& os)

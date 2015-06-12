@@ -5,11 +5,8 @@ addpath('../Statistics');
 clear
 
 %clear old figures
-figure(1)
-clf(1)
+close all
 
-figure(2)
-clf(2)
 %% Choose file
 hpg = true;
 if(hpg)
@@ -31,7 +28,7 @@ clearvars csv
 
 %% Plot J
 if(hpg)
-    plotHierarchicalGradient(1, agentFile);
+    plotGradient(1, agentFile);
 else
     plotREPS(1, agentFile);
 end
