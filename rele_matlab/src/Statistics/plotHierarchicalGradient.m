@@ -4,14 +4,14 @@ function plotHierarchicalGradient( fig, file )
 figure(fig)
 clf(fig)
 
-csv = csvread(file);
+csv = csvWrapper(file);
 
 index = 1;
 ep = 1;
 
-while(index < size(csv, 1))
-    [data(ep), index, ~] = ReadHierarchicalGradientStatistics(csv, index);
-    ep = ep + 1;
+while(index < csv.size())
+    [data(ep), index] = ReadHierarchicalGradientStatistics(csv, index);
+    ep = ep + 1
 end
 
 clearvars csv

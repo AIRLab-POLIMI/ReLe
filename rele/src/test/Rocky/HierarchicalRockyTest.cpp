@@ -76,7 +76,9 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
 
     //-- Features
-    BasisFunctions basis = IdentityBasis::generate(Rocky::STATESIZE);
+    BasisFunctions basis;
+    basis.push_back(new IdentityBasis(Rocky::energy));
+    basis.push_back(new IdentityBasis(Rocky::food));
     basis.push_back(new SubspaceBasis(new NormBasis(), span(Rocky::xr, Rocky::yr)));
     basis.push_back(new ModularDifference(Rocky::theta, Rocky::thetar, RangePi()));
 
@@ -123,6 +125,13 @@ int main(int argc, char *argv[])
 
     cout << "last option: " << rootOption.getLastChoice() << endl;
 
+    arma::vec x(Rocky::STATESIZE, arma::fill::zeros);
+    for(int i = 0; i < options.size(); i++)
+    {
+    	cout << i << ": " << rootPolicyOption(x, i) << endl;
+    }
+
+    cout << "p" << rootPolicyOption.getParameters();
     return 0;
 
 }
