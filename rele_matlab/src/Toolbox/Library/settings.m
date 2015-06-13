@@ -86,10 +86,19 @@ elseif strcmp('heat',domain)
     
     mdp_vars = heat_mdpvariables();
     policy = gibbs(@heat_basis_rbf_v1, ...
-        zeros(mce_basis_rbf_v1,1), ...
+        zeros(heat_basis_rbf_v1,1), ...
         mdp_vars.action_list);
     episodes = 200;
     steps = 200;
+    
+elseif strcmp('uwv',domain)
+    
+    mdp_vars = uwv_mdpvariables();
+    policy = gibbs(@uwv_basis_pol_v1, ...
+        zeros(uwv_basis_pol_v1,1), ...
+        mdp_vars.action_list);
+    episodes = 200;
+    steps = 800;
     
 else
     

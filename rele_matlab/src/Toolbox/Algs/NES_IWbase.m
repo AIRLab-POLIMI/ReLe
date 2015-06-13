@@ -1,10 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Reference: D Wierstra, T Schaul, T Glasmachers, Y Sun, J Peters, 
-% J Schmidhuber (2014)
-% Natural Evolution Strategy
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-function [nat_grad, stepsize] = NESbase (pol_high, J, Theta, lrate)
+function [nat_grad, stepsize] = NES_IWbase (pol_high, J, Theta, W, lrate)
 
 n_episodes = length(J);
 
@@ -17,8 +11,8 @@ for k = 1 : n_episodes
     
     dlogPidtheta(:,k) = pol_high.dlogPidtheta(Theta(:,k));
     
-    num = num + dlogPidtheta(:,k).^2 * J(k);
-    den = den + dlogPidtheta(:,k).^2;
+    num = num + dlogPidtheta(:,k).^2 * J(k) * W(k)^2;
+    den = den + dlogPidtheta(:,k).^2 * W(k)^2;
     
 end
 
@@ -30,11 +24,11 @@ b(isnan(b)) = 0;
 grad = 0;
 F = 0;
 for k = 1 : n_episodes
-    grad = grad + dlogPidtheta(:,k) .* (J(k) - b);
-    F = F + dlogPidtheta(:,k) * dlogPidtheta(:,k)';
+    grad = grad + dlogPidtheta(:,k) .* (J(k) - b) * W(k);
+    F = F + dlogPidtheta(:,k) * dlogPidtheta(:,k)' * W(k);
 end
-grad = grad / n_episodes;
-F = F / n_episodes;
+grad = grad / sum(W);
+F = F / sum(W);
 
 % If we can compute the FIM in closed form, use it
 if ismethod(pol_high,'fisher')
@@ -52,7 +46,7 @@ else
     nat_grad = pinv(F) * grad;
 end
 
-if nargin >= 4
+if nargin >= 5
     lambda = sqrt(grad' * nat_grad / (4 * lrate));
     lambda = max(lambda,1e-8); % to avoid numerical problems
     stepsize = 1 / (2 * lambda);

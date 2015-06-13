@@ -36,11 +36,6 @@ classdef gmm_constant
             weights = max(weights,1e-8);
             weights = weights / sum(weights);
             [~, gmm] = emgm(Action, weights, obj.gmax);
-%             [~, gmm] = vbgm(Action, weights, obj.gmax);
-%             model.mu = obj.mu';
-%             model.Sigma = obj.Sigma;
-%             model.ComponentProportion = obj.p';
-%             [~, gmm] = emgm(Action, weights, model);
             obj.p = gmm.ComponentProportion';
             obj.mu = gmm.mu';
             obj.Sigma = gmm.Sigma;

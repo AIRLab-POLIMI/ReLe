@@ -22,6 +22,8 @@ if strcmp('deep',domain)
     
     if outPlot
         hold on; plot(front(:,1), front(:,2),'bo')
+        xlabel 'Treasures'
+        ylabel 'Time'
     end
     
 elseif strcmp('puddle',domain)
@@ -172,6 +174,8 @@ elseif strcmp('puddle',domain)
     
     if outPlot
         hold on; plot(front(:,1), front(:,2),'bo')
+        xlabel 'Steps'
+        ylabel 'Puddle Penalty'
     end
     
 elseif strcmp('resource',domain)
@@ -188,6 +192,9 @@ elseif strcmp('resource',domain)
     
     if outPlot
         hold on; scatter3(front(:,1), front(:,2), front(:,3),'bo')
+        xlabel 'Fight Penalty'
+        ylabel 'Gold'
+        zlabel 'Gems'
     end
     
 elseif strcmp('lqr',domain) && n_obj == 2 % starting from [10, 10]
@@ -204,6 +211,8 @@ elseif strcmp('lqr',domain) && n_obj == 2 % starting from [10, 10]
     
     if outPlot
         hold on; plot(front(:,1), front(:,2),'bo')
+        xlabel 'Obj 1'
+        ylabel 'Obj 2'
     end
     
 elseif strcmp('lqr',domain) && n_obj == 3 % starting from [10, 10, 10]
@@ -222,6 +231,9 @@ elseif strcmp('lqr',domain) && n_obj == 3 % starting from [10, 10, 10]
     
     if outPlot
         hold on; scatter3(front(:,1), front(:,2), front(:,3), 'bo')
+        xlabel 'Obj 1'
+        ylabel 'Obj 2'
+        zlabel 'Obj 3'
     end
 
 elseif strcmp('dam',domain) && n_obj == 2
@@ -255,6 +267,8 @@ elseif strcmp('dam',domain) && n_obj == 2
     
     if outPlot
         hold on; plot(front(:,1), front(:,2),'bo','DisplayName','SDP approximation')
+        xlabel 'Flooding'
+        ylabel 'Water Demand'
     end
 
 elseif strcmp('dam',domain) && n_obj == 3
@@ -316,6 +330,9 @@ elseif strcmp('dam',domain) && n_obj == 3
     
     if outPlot
         hold on; scatter3(front(:,1),front(:,2),front(:,3),'bo','DisplayName','SDP approximation')
+        xlabel 'Flooding'
+        ylabel 'Water Demand'
+        zlabel 'Hydroelectric Demand'
     end
     
 elseif strcmp('dam',domain) && n_obj == 4

@@ -1,62 +1,82 @@
+%% Init
 clear all
+reset(symengine)
+
 domain = 'lqr';
-robj = 1;
-iter = 5;
-
-[N, pol, episodes, steps, gamma, is_avg] = settings(domain);
-
 dim = 2;
-LQR = init_lqr(dim);
-g = LQR.g;
-A = LQR.A;
-B = LQR.B;
-Q1 = LQR.Q{1};
-R1 = LQR.R{1};
-Q2 = LQR.Q{2};
-R2 = LQR.R{2};
-x0 = LQR.x0;
+robj = 1;
+
+[N, pol, ~, steps] = settings(domain);
+
+LQR   = init_lqr(dim);
+g     = LQR.g;
+Q     = LQR.Q;
+R     = LQR.R;
+x0    = LQR.x0;
 Sigma = LQR.Sigma;
 
-syms J1 J2 J P1 P2 k1 k2 k3 k4
+J = sym('J',[1,dim]);
+K = sym('k',[dim,dim]);
+% k1_2 = 0;
+% k2_1 = 0;
+% K = subs(K);
 
-K = [k1 0; 0 k4];
-K_full = [k1 k2; k3 k4];
-
-% simplified closed form for P when A = B = I
-P1 = (Q1+K*R1*K)*(eye(dim)-g*(eye(dim)+2*K+K^2))^-1;
-P2 = (Q2+K*R2*K)*(eye(dim)-g*(eye(dim)+2*K+K^2))^-1;
-
-J1 = transpose(x0)*P1*x0 + (1/(1-g))*trace(Sigma*(R1+g*transpose(B)*P1*B));
-J2 = transpose(x0)*P2*x0 + (1/(1-g))*trace(Sigma*(R2+g*transpose(B)*P2*B));
-J = [J1; J2];
+for i = 1 : dim
+    P = (Q{i}+K*R{i}*K)*(eye(dim)-g*(eye(dim)+2*K+K^2))^-1; % Only when A = B = I
+    J(i) = -transpose(x0)*P*x0 + (1/(1-g))*trace(Sigma*(R{i}+g*P));
+end
 J = J(robj);
 
-D_j = transpose(jacobian(J,K_full(:)));
-H_j = hessian(J,K_full(:)); % = jacobian(D_j, K_full(:));
+D_theta_J = transpose(jacobian(J,K(:)));
+H_theta_J = hessian(J,K(:));
 
+
+%% Run
 clc
+trials = 2;
+episodes = 10000;
 
-for i = 1 : iter
-
-    [ds, uJ, dJ] = collect_samples(domain,episodes,steps,pol,is_avg,gamma);
+for i = 1 : trials
     
-    disp('-------------------')
-    disp(['-------- ' num2str(i) ' --------'])
-    disp('-------------------')
-    disp('---- hessian')
-    hess_est = HessianRF(pol,ds,gamma,robj)
-    hess_ex = double(subs(H_j,K_full(:),pol.theta))
-
-%     disp('---- gradient')
-%     grad_est_reinf = eREINFORCE(pol, ds, gamma, robj)
-%     grad_est_gpomdp = GPOMDP(pol, ds, gamma, robj)
-%     tmp = subs(D_j(:),K_full(:),pol.theta);
-%     grad_ex = double(tmp(:))
-%     
-%     disp('---- total reward')
-%     j_est = dJ
-%     j_ex = double(subs([J1;J2],K(:),pol.theta))
+    [ds, J_est] = collect_samples(domain, episodes, steps, pol);
     
-    disp('')
+    hess_est = HessianRF(pol, ds, gamma, robj);
+    hess_ex = double(subs(H_theta_J,K(:),pol.theta));
+    fprintf('\n ******* HESSIAN / TRIAL: %d *******\n\n', i)
+    fprintf('Estimated:')
+    fprintfmat(hess_est,size(hess_est,1),size(hess_est,2))
+    fprintf('Exact:')
+    fprintfmat(hess_ex,size(hess_ex,1),size(hess_ex,2))
+    H(:,:,i) = hess_est;
+    
+    grad_est = GPOMDPbase(pol, ds, gamma, robj);
+    grad_ex = double(subs(D_theta_J,K(:),pol.theta));
+    fprintf('\n ******* GRADIENT / TRIAL: %d *******\n\n', i)
+    fprintf('Estimated:')
+    fprintfmat(grad_est,size(grad_est,1),size(grad_est,2))
+    fprintf('Exact:')
+    fprintfmat(grad_ex,size(grad_ex,1),size(grad_ex,2))
+    G(:,i) = grad_est;
+    
+    J_ex = double(subs(J,K(:),pol.theta));
+    fprintf('\n ******* RETURN / TRIAL: %d *******\n\n', i)
+    fprintf('Estimated: %.3f \n', J_est)
+    fprintf('Exact: %.3f \n', J_ex)
+    JR(i) = J_est(robj);
+    
+    fprintf('\n:::::::::::::::::::::::::::::::::::::::::\n\n')
     
 end
+
+%%
+fprintf('\n /////// STD - HESSIAN /////// \n')
+str = num2str(std(H,1,3));
+disp(str);
+
+fprintf('\n /////// STD - GRADIENT /////// \n')
+str = num2str(std(G,1,2));
+disp(str);
+
+fprintf('\n /////// STD - RETURN /////// \n')
+str = num2str(std(JR,1));
+disp(str);

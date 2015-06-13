@@ -1,4 +1,4 @@
-function [grad, stepsize] = PGPEbase (pol_high, J, Theta, lrate)
+function [grad, stepsize] = PGPE_IWbase (pol_high, J, Theta, W, lrate)
 
 n_episodes = length(J);
 
@@ -11,8 +11,8 @@ for k = 1 : n_episodes
     
     dlogPidtheta(:,k) = pol_high.dlogPidtheta(Theta(:,k));
     
-    num = num + dlogPidtheta(:,k).^2 * J(k);
-    den = den + dlogPidtheta(:,k).^2;
+    num = num + dlogPidtheta(:,k).^2 * J(k) * W(k)^2;
+    den = den + dlogPidtheta(:,k).^2 * W(k)^2;
     
 end
 
@@ -23,11 +23,11 @@ b(isnan(b)) = 0;
 % Estimate gradient
 grad = 0;
 for k = 1 : n_episodes
-    grad = grad + dlogPidtheta(:,k) .* (J(k) - b);
+    grad = grad + dlogPidtheta(:,k) .* (J(k) - b) * W(k);
 end
 grad = grad / n_episodes;
 
-if nargin >= 4
+if nargin >= 5
     T = eye(length(grad));
     lambda = sqrt(grad' * T * grad / (4 * lrate));
     lambda = max(lambda,1e-8); % to avoid numerical problems
