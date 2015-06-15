@@ -2,13 +2,14 @@ function phi = heat_basis_rbf_v1(s,a)
 	
     mdp_vars = heat_mdpvariables();
     nb = 5;
-    range = [14.5 25];
+    range = [13.5 26];
     
     ndim = mdp_vars.Nr;
     nactions = length(mdp_vars.action_list);
 	nbasis = nb^ndim;
 
-	nmodes = 1;		% Da commentare in caso di distinzione tra i modi
+	nmodes = ndim+1;
+% 	nmodes = 1;		% Da commentare in caso di distinzione tra i modi
 	
 	phi = zeros(nbasis*nmodes*(nactions-1),1);
     if nargin < 1

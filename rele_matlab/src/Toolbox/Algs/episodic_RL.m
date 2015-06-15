@@ -8,11 +8,11 @@ robj = 1;
 % pol_high = gaussian_chol_constant(n_params,mu0,chol(sigma0));
 pol_high = gaussian_diag_constant(n_params,mu0,sqrt(diag(sigma0)));
 
-N = 10;
+N = 40;
 N_MAX = N*10;
 
-% solver = REPS_Solver(0.9,N,N_MAX,pol_high);
-solver = NES_Solver(1,N,N_MAX,pol_high);
+solver = REPS_Solver(0.9,N,N_MAX,pol_high);
+% solver = NES_Solver(1,N,N_MAX,pol_high);
 
 J = zeros(N_MAX,n_obj);
 Theta = zeros(pol_high.dim,N_MAX);

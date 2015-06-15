@@ -29,6 +29,8 @@ end
 
 nextState=state;
 
+action = mdp_vars.action_list(action);
+
 if action~=state(1) && rand<=mdp_vars.a
     nextState(1) = action;
 end
@@ -38,15 +40,15 @@ noise = randn(mdp_vars.Nr,1) * sqrt(mdp_vars.s2n * mdp_vars.dt);
 
 nextState(2:end) = (eye(mdp_vars.Nr)+mdp_vars.Xi) * state(2:end) + mdp_vars.Gam + noise;
 
-if nextState(1)>1   
-    nextState(nextState(1)) = nextState(nextState(1)) + mdp_vars.C(nextState(1)-1);
+if nextState(1) > 0   
+    nextState(nextState(1)+1) = nextState(nextState(1)+1) + mdp_vars.C(nextState(1));
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute reward
 %--------------------------------------
 
-reward = sum(max((nextState(2:end)-mdp_vars.TUB).*(nextState(2:end)-mdp_vars.TLB),0));
+reward = -sum(max((nextState(2:end)-mdp_vars.TUB).*(nextState(2:end)-mdp_vars.TLB),0));
 absorb = false;
 
 end % heat_simulator()
