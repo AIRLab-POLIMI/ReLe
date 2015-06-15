@@ -1,5 +1,5 @@
-clear all
-domain = 'uwv';
+% clear all
+domain = 'heat';
 robj = 1;
 
 [n_obj, n_params, mu0, sigma0] = settings_episodic(domain,1);
