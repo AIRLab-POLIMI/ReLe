@@ -14,8 +14,10 @@
 #include <NLS.h>
 #include <Dam.h>
 #include <DeepSeaTreasure.h>
-#include <policy_search/onpolicy/FunctionGradient.h>
-#include <policy_search/onpolicy/FunctionHessian.h>
+#include <policy_search/gradient/onpolicy/FunctionGradient.h>
+#include <policy_search/gradient/onpolicy/FunctionHessian.h>
+#include <features/DenseFeatures.h>
+#include <features/SparseFeatures.h>
 #include "RewardTransformation.h"
 
 using namespace std;
