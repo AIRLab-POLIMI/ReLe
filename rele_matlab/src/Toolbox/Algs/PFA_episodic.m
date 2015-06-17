@@ -8,37 +8,29 @@
 
 clear all
 
-tic
-
 verboseOut = true; % to print output messages
 
-domain = 'dam';
-[N_obj, pol_low] = settings(domain);
+domain = 'deep';
+makeDet = 0; % evaluate only deterministic policies?
+[n_obj, n_params, mu0, sigma0] = settings_episodic(domain,1);
 
-% If the policy has a learnable variance, we don't want to learn it and
-% we make it deterministic (see 'collect_episodes')
-dim_theta = size(pol_low.theta,1) - pol_low.dim_variance_params;
+% init_pol = gaussian_constant(n_params,mu0,sigma0);
+% init_pol = gaussian_chol_constant(n_params,mu0,chol(sigma0));
+init_pol = gaussian_diag_constant(n_params,mu0,sqrt(diag(sigma0)));
 
-mu0 = zeros(dim_theta,1);
-sigma0 = 10 * eye(dim_theta); % change according to the domain
-
-% init_pol = constant_smart_gaussian_policy(dim_theta,mu0,sigma0);
-% init_pol = constant_chol_gaussian_policy(dim_theta,mu0,chol(sigma0));
-init_pol = constant_diag_gaussian_policy(dim_theta,mu0,sqrt(diag(sigma0)));
 N_params = size(init_pol.theta,1);
 
-N_episodes = 50;
-tolerance_step = 0.1; % tolerance on the norm of the gradient (stopping condition) during the optimization step
-tolerance_corr = 0.1; % the same, but during the correction step
-normalize_step = true; % normalize gradients during an optimization step?
-lrate_single = 1; % lrate during single-objective optimization phase
-lrate_step = 1; % lrate during optimization step
-lrate_corr = 1; % lrate during correction step
+N_episodes = 150;
+tolerance_step = 0.01; % tolerance on the norm of the gradient (stopping condition) during the optimization step
+tolerance_corr = 0.05; % the same, but during the correction step
+lrate_single = 0.5; % lrate during single-objective optimization phase
+lrate_step = 0.5; % lrate during optimization step
+lrate_corr = 5; % lrate during correction step
+maxIter = 200; % max iterations per optimization
+maxCorrection = 200; % max iterations during the correction
+minS = 1.5; % min entropy of the policy (with Gaussian policies the (differential) entropy can be negative)
 
-front_J = []; % Pareto-frontier solutions
 front_pol = [];
-inter_J = []; % intermediate solutions (during correction phase)
-inter_pol = [];
 
 n_iterations = 0; % total number of iterations (policy evaluations)
 
@@ -48,103 +40,106 @@ while true
 
     n_iterations = n_iterations + 1;
     [J_init, Theta_init] = collect_episodes(domain, N_episodes, init_pol);
-    nat_grad = NESbase(init_pol, J_init(:,N_obj), Theta_init, 1);
+    S = init_pol.entropy;
+    
+    [nat_grad, stepsize_single] = NESbase(init_pol, J_init(:,n_obj), Theta_init, lrate_single);
     dev = norm(nat_grad);
+    
     str = strtrim(sprintf('%.4f, ', mean(J_init)));
     str(end) = [];
-    if verboseOut, fprintf('J: [ %s ], Norm: %.4f\n', str, dev); end
-    if dev < tolerance_step
+    if verboseOut, fprintf('Norm: %.4f, S: %.2f, J: [ %s ]\n', dev, S, str); end
+
+    if dev < tolerance_step || S < minS || n_iterations > maxIter
         break
     end
-    if normalize_step
-        nat_grad = nat_grad / max(norm(nat_grad),1e-8); % to avoid problems when norm = 0
-    end
-    init_pol = init_pol.update(nat_grad * lrate_single);
+    init_pol = init_pol.update(stepsize_single * nat_grad);
     
 end
 
-avgRew = mean(J_init);
-% save the first solution, i.e. one extreme point of the frontier
-front_pol = [front_pol; init_pol];
-front_J = [front_J; avgRew];
-
-str = strtrim(sprintf('%.4f, ', avgRew));
+inter_pol = init_pol;
+str = strtrim(sprintf('%.4f, ', mean(J_init,1)));
 str(end) = [];
 if verboseOut, fprintf('Initial Pareto solution found: [ %s ]\n', str); end
 
 %% Learn the remaining objectives
-for obj = N_obj-1 : 1 % for all the remaining objectives ...
+for obj = -[-(n_obj-1) : -1] % for all the remaining objectives ...
 
-    current_front_pol = front_pol;
-
-    num_policy = numel(current_front_pol);
+    front_J = evaluate_policies_episodic([front_pol; inter_pol], domain, makeDet);
+    [front_J, front_pol] = pareto(front_J, [front_pol; inter_pol]);
+    inter_pol = [];
     
+    num_policy = numel(front_pol);
+    
+    %% Loop for i-th objective
     for i = 1 : num_policy % ... for all the Pareto-optimal solutions found so far ...
 
-        current_pol = current_front_pol(i);
-        current_pol = current_pol.randomize(10); % SEE README!
+        current_pol = front_pol(i);
+        current_pol = current_pol.randomize(2); % SEE README!
         current_iter = 0; % number of steps for the single-objective optimization
 
         if verboseOut, fprintf('\n\nOptimizing objective %d ...\n', obj); end
         
-        %% i-th objective optimization
+        %% Loop for j-th policy
         while true % ... perform policy gradient optimization
 
             n_iterations = n_iterations + 1;
             current_iter = current_iter + 1;
     
             [J_step, Theta_step] = collect_episodes(domain, N_episodes, current_pol);
-            avgRew = mean(J_step);
-            nat_grad_step = NESbase(current_pol, J_step(:,obj), Theta_step, 1);
+            S = current_pol.entropy;
+
+            [nat_grad_step, stepsize_step] = NESbase(current_pol, J_step(:,obj), Theta_step, lrate_step);
             dev = norm(nat_grad_step);
             
-            if verboseOut, fprintf('%d / %d ) ... moving ... Norm: %.4f \n', i, num_policy, dev); end
+            if verboseOut, fprintf('%d / %d ) Iter: %d, Norm: %.4f, S: %.2f \n', i, num_policy, current_iter, dev, S); end
             
-            if dev < tolerance_step % stopping conditions
-                front_pol = [front_pol; current_pol]; % save Pareto solution
-                front_J = [front_J; avgRew];
-                
-                str = strtrim(sprintf('%.4f, ', avgRew));
+            if dev < tolerance_step || current_iter > maxIter % stopping conditions
+                str = strtrim(sprintf('%.4f, ', mean(J_step,1)));
                 str(end) = [];
                 if verboseOut, fprintf('Objective %d optimized! [ %s ] \n-------------\n', obj, str); end
-                
                 break
             end
             
-            if normalize_step
-                nat_grad_step = nat_grad_step / max(norm(nat_grad_step),0);
+            if S < minS
+                current_pol = current_pol.randomize(10); % SEE README!
+                if verboseOut, fprintf('RANDOMIZING! \n' ); end
+                continue
             end
-            current_pol = current_pol.update(nat_grad_step * lrate_step); % perform an optimization step
+            
+            current_pol = current_pol.update(stepsize_step * nat_grad_step); % perform an optimization step
+            inter_pol = [inter_pol; current_pol]; % save intermediate solution
             
             iter_correction = 0;
             
             while true % correction phase
                 
                 [J_step, Theta_step] = collect_episodes(domain, N_episodes, current_pol);
-                avgRew = mean(J_step);
+                S = current_pol.entropy;
 
-                M = zeros(N_params,N_obj);
-                for j = 1 : N_obj
+                M = zeros(N_params,n_obj);
+                for j = 1 : n_obj
                     nat_grad = NESbase(current_pol, J_step(:,j), Theta_step, 1);
-                    M(:,j) = nat_grad / max(norm(nat_grad),1e-8); % always normalize during correction
+                    M(:,j) = nat_grad / max(norm(nat_grad),1e-8); % always normalize during the correction
                 end
-                pareto_dir = paretoAscentDir(N_obj, M); % minimal-norm Pareto-ascent direction
+                pareto_dir = paretoAscentDir(n_obj, M); % minimal-norm Pareto-ascent direction
                 dev = norm(pareto_dir);
                 
-                str = strtrim(sprintf('%.4f, ', avgRew));
+                str = strtrim(sprintf('%.4f, ', mean(J_step,1)));
                 str(end) = [];
-                if verboseOut, fprintf('... correcting ... Norm: %.4f, J: [ %s ]\n', dev, str); end
+                if verboseOut, fprintf('   Correction %d, Norm: %.4f, S: %.2f, J: [ %s ]\n', iter_correction, dev, S, str); end
                 
-                if dev < tolerance_corr % if on the frontier
-                    front_pol = [front_pol; current_pol]; % save Pareto solution
-                    front_J = [front_J; avgRew];
+                if dev < tolerance_corr || iter_correction > maxCorrection % if on the frontier
                     break
                 end
                 
+                if S < minS % deterministic policy not on the frontier
+                    if verboseOut, fprintf('RANDOMIZING! \n' ); end
+                    current_pol = current_pol.randomize(10); % SEE README!
+                    break
+                end
+                
+                current_pol = current_pol.update(lrate_corr * pareto_dir); % move towards the frontier
                 inter_pol = [inter_pol; current_pol]; % save intermediate solution
-                inter_J = [inter_J; avgRew];
-
-                current_pol = current_pol.update(pareto_dir * lrate_corr); % move towards the frontier
 
                 n_iterations = n_iterations + 1;
                 iter_correction = iter_correction + 1;
@@ -157,22 +152,18 @@ for obj = N_obj-1 : 1 % for all the remaining objectives ...
     
 end
 
-toc
 
 %% Plot
+fr = evaluate_policies_episodic([front_pol; inter_pol], domain, makeDet);
+[f, p] = pareto(fr, [front_pol; inter_pol]);
+
 figure; hold all
-[f, p] = pareto(front_J, front_pol);
-[f_i, p_i] = pareto(inter_J, inter_pol);
-if N_obj == 2
+if n_obj == 2
     plot(f(:,1),f(:,2),'g+')
-    plot(f_i(:,1),f_i(:,2),'r+')
-    xlabel('J_1'); ylabel('J_2');
 end
 
-if N_obj == 3
+if n_obj == 3
     scatter3(f(:,1),f(:,2),f(:,3),'g+')
-    scatter3(f_i(:,1),f_i(:,2),f_i(:,3),'r+')
-    xlabel('J_1'); ylabel('J_2'); zlabel('J_3');
 end
 
-plot_reference_fronts(domain);
+getReferenceFront(domain,1);

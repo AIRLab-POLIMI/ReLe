@@ -25,15 +25,14 @@ classdef SMSEMOA_Solver < Genetic_Solver
         function values = getFitness ( obj, J )
         % In SMS-EMOA, a solution is ranked higher if removing it from the 
         % population the fitness decreases.
-            population_size = size(J,1);
-            values = zeros(population_size,1);
-            
-            for i = 1 : population_size
-                front_tmp = J;
+            [uniqueJ, ~, idx] = unique(J,'rows');
+            fitnessUnique = zeros(size(uniqueJ,1),1);
+            for i = 1 : size(uniqueJ,1)
+                front_tmp = uniqueJ;
                 front_tmp(i,:) = []; % Remove the i-th element from the pool
-                front_tmp = pareto(front_tmp); % Get the Pareto front
-                values(i) = obj.fitness(front_tmp); % Evaluate the fitness
+                fitnessUnique(i) = obj.fitness(pareto(front_tmp)); % Evaluate the fitness
             end
+            values = fitnessUnique(idx);
         end
         
     end

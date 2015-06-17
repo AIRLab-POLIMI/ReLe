@@ -9,10 +9,15 @@ function R = nds(P)
 % Outputs:
 % - R : N-by-3 matrix. First column has the number of solutions by which
 %       each solution is weakly dominated. Second column has the sub-front
-%       where each solution belongs. Third column has the crowding
-%       distance, i.e., the average Euclidean distance between each
-%       solution and the solutions belonging to the same sub-front (NB: as
-%       we prefer sparse solutions, the distance is negated).
+%       where each solution belongs. Third column has a crowding
+%       distance.
+%
+% NB: The crowding distance used in this code is not exactly the one
+% described in NSGA-II. In this implementation, it is the average Euclidean 
+% distance between each solution and the solutions belonging to the same 
+% sub-front.
+% Also notice that the distance is negated to sort the solution correctly 
+% (as we prefer sparse solution, the higher the distance the better).
 %
 % Reference: K Deb, A Pratap, S Agarwal, T Meyarivan,
 % "A fast and elitist multiobjective genetic algorithm: NSGA-II",
@@ -43,7 +48,8 @@ function R = nds(P)
 % [Rs, idx] = sortrows(R);
 % Ps = P(idx,:);
 % 
-% Here is an analysis of [Rs, Ps] components:
+% Here is an analysis of [Rs, Ps] components and how solutions are sorted 
+% according to the algorithm:
 %
 %              Rs                     Ps
 %     #dom  subf  avg dist  |    Obj1      Obj2
@@ -84,6 +90,7 @@ while ~isempty(tmp)
     
     % Assign the crowding distance
     subfront = P(idx_P,:); % Include duplicates for correct indexing
+    subfront = bsxfun(@times,1./max(subfront),subfront); % Normalize the objectives
     C = mat2cell(subfront,ones(size(subfront,1),1),d);
     subdist = cellfun( ...
         @(X)mean( nonzeros( sqrt( sum( bsxfun(@plus, X, -subfront).^2, 2) ) ) ), ...

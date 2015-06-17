@@ -1,26 +1,18 @@
-clear all
+% clear all
 domain = 'heat';
 robj = 1;
-[n_obj, pol_low] = settings(domain);
 
-% If the policy has a learnable variance, we don't want to learn it and
-% we make it deterministic (see 'collect_episodes')
-n_params = size(pol_low.theta,1) - pol_low.dim_variance_params;
+[n_obj, n_params, mu0, sigma0] = settings_episodic(domain,1);
 
-mu0 = zeros(n_params,1);
-sigma0 = 1 * eye(n_params); % change according to the domain
-tau = 50 * ones(size(diag(sigma0)));
+% pol_high = gaussian_constant(n_params,mu0,sigma0);
+% pol_high = gaussian_chol_constant(n_params,mu0,chol(sigma0));
+pol_high = gaussian_diag_constant(n_params,mu0,sqrt(diag(sigma0)));
 
-% pol_high = constant_logistic_gaussian_policy(n_params,mu0,diag(sigma0),tau);
-pol_high = constant_smart_gaussian_policy(n_params,mu0,sigma0);
-% pol_high = constant_chol_gaussian_policy(n_params,mu0,chol(sigma0));
-% pol_high = constant_diag_gaussian_policy(n_params,mu0,sqrt(diag(sigma0)));
-
-N = 10;
-N_MAX = 300;
+N = 40;
+N_MAX = N*10;
 
 solver = REPS_Solver(0.9,N,N_MAX,pol_high);
-% solver = NES_Solver(.1,N,N_MAX,pol_high);
+% solver = NES_Solver(1,N,N_MAX,pol_high);
 
 J = zeros(N_MAX,n_obj);
 Theta = zeros(pol_high.dim,N_MAX);
@@ -82,7 +74,7 @@ dim_theta = pol_high.dim;
 Theta = zeros(dim_theta,maxepisodes);
 
 
-parfor k = 1 : maxepisodes
+for k = 1 : maxepisodes
     
     % Draw theta from the high-level policy and perform a rollout
     pol_tmp = pol_low;
@@ -90,7 +82,7 @@ parfor k = 1 : maxepisodes
     pol_tmp.theta(1:dim_theta) = theta;
     Theta(:,k) = theta;
 
-    [~, J_ep] = collect_samples(domain, 1, steps, pol_tmp);    
+    [data(k), J_ep(k)] = collect_samples(domain, 1, steps, pol_tmp);    
     J(k,:) = J_ep;
     
 end

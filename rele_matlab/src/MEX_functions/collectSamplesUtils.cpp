@@ -14,8 +14,10 @@
 #include <NLS.h>
 #include <Dam.h>
 #include <DeepSeaTreasure.h>
-#include <policy_search/onpolicy/FunctionGradient.h>
-#include <policy_search/onpolicy/FunctionHessian.h>
+#include <policy_search/gradient/onpolicy/FunctionGradient.h>
+#include <policy_search/gradient/onpolicy/FunctionHessian.h>
+#include <features/DenseFeatures.h>
+#include <features/SparseFeatures.h>
 #include "RewardTransformation.h"
 
 using namespace std;
@@ -62,8 +64,8 @@ class deep_state_identity: public BasisFunction
         oncore.getSettings().testEpisodeN = nbEpisodes;\
         oncore.runTestEpisodes();\
         Dataset<ActionC,StateC>& data = collection.data;\
-        int ds = mdp.getSettings().stdim;\
-        int da = mdp.getSettings().acdim;\
+        int ds = stdim;\
+        int da = acdim;\
         int dr = mdp.getSettings().rewardDim;\
         MEX_DATA_FIELDS(fieldnames);\
         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);\
@@ -195,7 +197,7 @@ CollectSamplesInContinuousMDP(
             mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+        SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
 //         //////////////////////////////////////////////// METTERE IN UNA DEFINE
 //
 //         PolicyEvalAgent
@@ -341,7 +343,7 @@ CollectSamplesInContinuousMDP(
                 pp(1) = 0.4;
                 meanRegressor.setParameters(pp);*/
 
-        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+        SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
     }
     else if (strcmp(domain_settings, "dam") == 0)
     {
@@ -438,7 +440,7 @@ CollectSamplesInContinuousMDP(
             mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+        SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
 
         if (nlhs > 2)
         {
@@ -548,7 +550,40 @@ CollectSamplesInDenseMDP(
             mexErrMsgTxt("CollectSamplesInContinuousMDP-DEEP: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(FiniteAction, DenseState, finiteActionDim, continuosStateDim)
+        SAMPLES_GATHERING(FiniteAction, DenseState, 1, mdp.getSettings().continuosStateDim)
+	
+	
+        if (nlhs > 2)
+        {
+            int dp = policy.getParametersSize();
+            GRADS = mxCreateDoubleMatrix(dp, dr, mxREAL);
+            double* gptr = mxGetPr(GRADS);
+            for (int i = 0; i < dr; ++i)
+            {
+                IndexRT rewardRegressor(i);
+                GradientFromDataWorker<FiniteAction,DenseState> gdw(data, policy, rewardRegressor, gamma);
+                arma::vec g = gdw.GpomdpBaseGradient();
+                for (int ll = 0; ll < dp; ++ll)
+                    gptr[i*dp+ll] = g[ll];
+            }
+        }
+//         if (nlhs > 3)
+//         {
+//             unsigned int dp = policy.getParametersSize();
+//             long unsigned int dims[] = {dr};
+//             HESS = mxCreateCellArray(1, dims);
+//             for (int i = 0; i < dr; ++i)
+//             {
+//                 IndexRT rewardRegressor(i);
+//                 HessianFromDataWorker<FiniteAction,DenseState,MVNPolicy> gdw(data, policy, rewardRegressor, gamma);
+//                 arma::mat h = gdw.ReinforceHessian();
+// 
+//                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
+//                 double* gptr = mxGetPr(hmat);
+//                 memcpy(gptr, h.memptr(), sizeof(double)*dp*dp);
+//                 mxSetCell(HESS, i, hmat);
+//             }
+//         }
     }
     else
     {

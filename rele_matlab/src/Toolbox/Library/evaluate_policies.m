@@ -15,11 +15,7 @@ end
 N_pol = numel(policies);
 J = zeros(N_pol, n_obj);
 
-%%%%%%%%%%%%
-[mexParams, gamma, max_obj] = getMexParams(domain);
-%%%%%%%%%%%%
-
-parfor i = 1 : N_pol
+for i = 1 : N_pol
     
 %     fprintf('Evaluating policy %d of %d ...\n', i, N_pol)
     
@@ -30,13 +26,7 @@ parfor i = 1 : N_pol
     end
     
 %     [~, J_sample] = collect_samples(domain, episodes, steps, policy);
-    
-%%%%%%%%%%%%
-    mm = mexParams;
-    mm.policyParameters = policy.theta;
-    [~, J_sample] = collectSamples(domain, episodes, steps, gamma, mm);
-    J_sample = mean(J_sample,1) .* abs(max_obj)';
-%%%%%%%%%%%%
+    [~, J_sample] = collect_samples_rele(domain, episodes, steps, policy);
     
     J(i,:) = J_sample;
 
