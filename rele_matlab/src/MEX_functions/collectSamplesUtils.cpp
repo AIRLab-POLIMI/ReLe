@@ -551,6 +551,39 @@ CollectSamplesInDenseMDP(
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(FiniteAction, DenseState, finiteActionDim, continuosStateDim)
+	
+	
+        if (nlhs > 2)
+        {
+            int dp = policy.getParametersSize();
+            GRADS = mxCreateDoubleMatrix(dp, dr, mxREAL);
+            double* gptr = mxGetPr(GRADS);
+            for (int i = 0; i < dr; ++i)
+            {
+                IndexRT rewardRegressor(i);
+                GradientFromDataWorker<FiniteAction,DenseState> gdw(data, policy, rewardRegressor, gamma);
+                arma::vec g = gdw.GpomdpBaseGradient();
+                for (int ll = 0; ll < dp; ++ll)
+                    gptr[i*dp+ll] = g[ll];
+            }
+        }
+//         if (nlhs > 3)
+//         {
+//             unsigned int dp = policy.getParametersSize();
+//             long unsigned int dims[] = {dr};
+//             HESS = mxCreateCellArray(1, dims);
+//             for (int i = 0; i < dr; ++i)
+//             {
+//                 IndexRT rewardRegressor(i);
+//                 HessianFromDataWorker<FiniteAction,DenseState,MVNPolicy> gdw(data, policy, rewardRegressor, gamma);
+//                 arma::mat h = gdw.ReinforceHessian();
+// 
+//                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
+//                 double* gptr = mxGetPr(hmat);
+//                 memcpy(gptr, h.memptr(), sizeof(double)*dp*dp);
+//                 mxSetCell(HESS, i, hmat);
+//             }
+//         }
     }
     else
     {
