@@ -33,10 +33,10 @@ namespace ReLe
 class HierarchicalGradientOutputData : public HierarchicalOutputData, public GradientIndividual
 {
 public:
-	HierarchicalGradientOutputData() : HierarchicalOutputData(), GradientIndividual()
-	{
+    HierarchicalGradientOutputData() : HierarchicalOutputData(), GradientIndividual()
+    {
 
-	}
+    }
 
     virtual void writeData(std::ostream& os)
     {

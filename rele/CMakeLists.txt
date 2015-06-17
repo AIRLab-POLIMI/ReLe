@@ -226,6 +226,12 @@ add_executable(rocky_hierarchical src/test/Rocky/HierarchicalRockyTest.cpp
                                   src/test/Rocky/RockyOptions.cpp)
 target_link_libraries(rocky_hierarchical rele)
 
+#Hierarchical test
+add_executable(taxi_hierarchical src/test/hierarchical/taxi/TaxiFuelTest.cpp
+                                 src/test/hierarchical/taxi/TaxiOptions.cpp)
+target_link_libraries(taxi_hierarchical rele)
+
+
 #REPS test
 add_executable(lqr_REPS src/test/REPS/LqrREPSTest.cpp)
 target_link_libraries(lqr_REPS rele)

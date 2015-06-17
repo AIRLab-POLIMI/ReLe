@@ -99,7 +99,7 @@ public:
 
         // save state and action for late use
         currentState = state;
-        currentAction = getCurrentOption().getLastChoice();
+        currentAction = this->getRootOption().getLastChoice();
     }
 
     virtual void initTestEpisode()
@@ -133,7 +133,7 @@ public:
 
         // save state and action for late use
         currentState = nextState;
-        currentAction = currentOption.getLastChoice(); //FIXME
+        currentAction = this->getRootOption().getLastChoice(); //FIXME
     }
 
     virtual void endEpisode(const Reward& reward)
@@ -157,8 +157,8 @@ public:
 
     virtual void endEpisode()
     {
-    	//FIXME real hierarchical termination
-    	forceCurrentOptionTermination();
+        //FIXME real hierarchical termination
+        forceCurrentOptionTermination();
 
         //save policy value
         history_J[epiCount] = Jep;

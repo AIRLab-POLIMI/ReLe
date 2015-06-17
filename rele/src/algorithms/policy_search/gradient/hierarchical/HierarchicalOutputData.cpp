@@ -39,39 +39,39 @@ HierarchicalOutputData::HierarchicalOutputData()
 
 void HierarchicalOutputData::writeData(std::ostream& os)
 {
-	os << traces.size() << endl;
+    os << traces.size() << endl;
 
-	for(auto& trace : traces)
-	{
-		os << trace.size() << ",";
-		CSVutils::vectorToCSV(trace, os);
-	}
+    for(auto& trace : traces)
+    {
+        os << trace.size() << ",";
+        CSVutils::vectorToCSV(trace, os);
+    }
 
 }
 
 void HierarchicalOutputData::writeDecoratedData(std::ostream& os)
 {
-	//TODO decorated
-	writeData(os);
+    //TODO decorated
+    writeData(os);
 }
 
 void HierarchicalOutputData::addOptionCall(unsigned int option)
 {
-	if(bottomReached)
-	{
-		assert(traces.size() == 0 || traces.back().size() > 0);
-		traces.resize(traces.size() + 1);
-		traceCount.resize(traces.size() + 1, 0);
-		bottomReached = false;
-	}
+    if(bottomReached)
+    {
+        assert(traces.size() == 0 || traces.back().size() > 0);
+        traces.resize(traces.size() + 1);
+        traceCount.resize(traces.size() + 1, 0);
+        bottomReached = false;
+    }
 
-	traces.back().push_back(option);
+    traces.back().push_back(option);
 }
 
 void HierarchicalOutputData::addLowLevelCommand()
 {
-	bottomReached = true;
-	traceCount.back()++;
+    bottomReached = true;
+    traceCount.back()++;
 }
 
 

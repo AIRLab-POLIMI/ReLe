@@ -190,6 +190,14 @@ public:
         return this->getActionN() == other.getActionN();
     }
 
+    inline static std::vector<FiniteAction> generate(size_t actionN)
+    {
+        std::vector<FiniteAction> actions;
+        for(int i = 0; i < actionN; ++i)
+            actions.push_back(FiniteAction(i));
+        return actions;
+    }
+
 private:
     unsigned int actionN;
 };
