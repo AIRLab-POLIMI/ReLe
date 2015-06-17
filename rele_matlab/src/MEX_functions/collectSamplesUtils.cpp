@@ -64,8 +64,8 @@ class deep_state_identity: public BasisFunction
         oncore.getSettings().testEpisodeN = nbEpisodes;\
         oncore.runTestEpisodes();\
         Dataset<ActionC,StateC>& data = collection.data;\
-        int ds = mdp.getSettings().stdim;\
-        int da = mdp.getSettings().acdim;\
+        int ds = stdim;\
+        int da = acdim;\
         int dr = mdp.getSettings().rewardDim;\
         MEX_DATA_FIELDS(fieldnames);\
         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);\
@@ -197,7 +197,7 @@ CollectSamplesInContinuousMDP(
             mexErrMsgTxt("CollectSamplesInContinuousMDP-LQR: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+        SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
 //         //////////////////////////////////////////////// METTERE IN UNA DEFINE
 //
 //         PolicyEvalAgent
@@ -343,7 +343,7 @@ CollectSamplesInContinuousMDP(
                 pp(1) = 0.4;
                 meanRegressor.setParameters(pp);*/
 
-        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+        SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
     }
     else if (strcmp(domain_settings, "dam") == 0)
     {
@@ -440,7 +440,7 @@ CollectSamplesInContinuousMDP(
             mexErrMsgTxt("CollectSamplesInContinuousMDP-DAM: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(DenseAction, DenseState, continuosActionDim, continuosStateDim)
+        SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
 
         if (nlhs > 2)
         {
@@ -550,7 +550,7 @@ CollectSamplesInDenseMDP(
             mexErrMsgTxt("CollectSamplesInContinuousMDP-DEEP: wrong number of policy parameters!\n");
         policy.setParameters(policyParams);
 
-        SAMPLES_GATHERING(FiniteAction, DenseState, finiteActionDim, continuosStateDim)
+        SAMPLES_GATHERING(FiniteAction, DenseState, 1, mdp.getSettings().continuosStateDim)
 	
 	
         if (nlhs > 2)
