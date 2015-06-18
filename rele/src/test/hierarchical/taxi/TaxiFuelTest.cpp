@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Rocky.h"
+#include "TaxiFuel.h"
 
 #include "Core.h"
 
@@ -30,15 +30,14 @@
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
-#include "basis/SubspaceBasis.h"
-#include "basis/NormBasis.h"
-#include "basis/ModularBasis.h"
+#include "basis/PolynomialFunction.h"
+#include "basis/GaussianRbf.h"
 #include "basis/ConditionBasedFunction.h"
 
 #include "FileManager.h"
 #include "ConsoleManager.h"
 
-#include "RockyOptions.h"
+#include "TaxiOptions.h"
 
 #include <iostream>
 
@@ -49,59 +48,60 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("Rocky", "HPG");
+    FileManager fm("TaxiFuel", "HPG");
     fm.createDir();
     fm.cleanDir();
 
-    Rocky rocky;
+    TaxiFuel taxiMDP;
+
+
+    auto&& locations = taxiMDP.getLocations();
 
     //-- options
-    Eat eat;
-    Home home;
-    Feed feed;
-    Escape1 escape1;
-    Escape2 escape2;
-    //Escape3 escape3;
 
-    vector<Option<DenseAction, DenseState>*> options;
-    options.push_back(&eat);
-    options.push_back(&home);
-    options.push_back(&feed);
-    options.push_back(&escape1);
-    options.push_back(&escape2);
-    //options.push_back(&escape3);
+
+    vector<Option<FiniteAction, DenseState>*> options;
+    /*for(auto& location : locations)
+    {
+    	options.push_back(new TaxiLocationOption(location));
+    }*/
+
+    options.push_back(new TaxiLocationOption(locations.back()));
+
+    //options.push_back(new TaxiDropOffOption());
+    //options.push_back(new TaxiPickupOption());
+    options.push_back(new TaxiFillUpOption());
 
     vector<FiniteAction> actions = FiniteAction::generate(options.size());
 
     //-- Features
-    BasisFunctions basis;// = IdentityBasis::generate(Rocky::STATESIZE);
-    basis.push_back(new IdentityBasis(Rocky::energy));
-    basis.push_back(new IdentityBasis(Rocky::food));
-    basis.push_back(new SubspaceBasis(new NormBasis(), span(Rocky::xr, Rocky::yr)));
-    basis.push_back(new ModularDifference(Rocky::theta, Rocky::thetar, RangePi()));
+    //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
+    //BasisFunctions basis = PolynomialFunction::generate(3, TaxiFuel::STATESIZE);
+    BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
 
-    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size()-1);
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 10);
-    DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
+    double temperature = 0.5;
+    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
+    DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 
     //-- agent
-    int nbepperpol = 10, nbstep = 10000;
+    int nbepperpol = 10, nbstep = 100;
     AdaptiveStep stepRule(0.01);
-    HierarchicalGPOMDPAlgorithm<DenseAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
+    HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
             HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::MULTI);
 
-    Core<DenseAction, DenseState> core(rocky, agent);
+    Core<FiniteAction, DenseState> core(taxiMDP, agent);
     //--
 
 
-    int episodes = 3000;
-    core.getSettings().episodeLenght = 10000;
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
-            WriteStrategy<DenseAction, DenseState>::AGENT);
+    int episodes = 1000;
+    core.getSettings().episodeLenght = 100;
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
+            WriteStrategy<FiniteAction, DenseState>::AGENT);
 
 
     ConsoleManager console(episodes, 1);
@@ -110,25 +110,24 @@ int main(int argc, char *argv[])
     {
         console.printProgress(i);
         core.runEpisode();
-        //cout << "p" << rootPolicyOption.getParameters().t();
+        /*if(temperature > 0.1)
+        {
+        	temperature *= 0.9999;
+        	cout << "temperature: " << temperature << endl;
+        	rootPolicyOption.setTemperature(temperature);
+        }*/
     }
 
     delete core.getSettings().loggerStrategy;
 
     console.printInfo("Starting evaluation episode");
-    core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
-            WriteStrategy<DenseAction, DenseState>::TRANS);
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
+            WriteStrategy<FiniteAction, DenseState>::TRANS);
     core.runTestEpisode();
 
     delete core.getSettings().loggerStrategy;
 
     cout << "last option: " << rootOption.getLastChoice() << endl;
-
-    arma::vec x(Rocky::STATESIZE, arma::fill::zeros);
-    for(int i = 0; i < options.size(); i++)
-    {
-        cout << i << ": " << rootPolicyOption(x, i) << endl;
-    }
 
     cout << "p" << rootPolicyOption.getParameters().t();
     return 0;

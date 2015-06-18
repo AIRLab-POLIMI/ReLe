@@ -42,23 +42,6 @@ protected:
     double rockyRelRotation(const arma::vec& state);
 
 protected:
-    enum StateComponents
-    {
-        //robot state
-        x = 0,
-        y,
-        theta,
-
-        //robot sensors
-        energy,
-        food,
-
-        //rocky state
-        xr,
-        yr,
-        thetar
-    };
-
     double dt;
     const double maxV;
 
