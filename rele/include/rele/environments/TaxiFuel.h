@@ -75,15 +75,15 @@ public:
 
     inline std::vector<arma::vec2> getLocations()
     {
-    	 std::vector<arma::vec2> locations;
+        std::vector<arma::vec2> locations;
 
-    	 locations.push_back(G);
-    	 locations.push_back(Y);
-    	 locations.push_back(B);
-    	 locations.push_back(R);
-    	 locations.push_back(F);
+        locations.push_back(G);
+        locations.push_back(Y);
+        locations.push_back(B);
+        locations.push_back(R);
+        locations.push_back(F);
 
-    	 return locations;
+        return locations;
     }
 
 

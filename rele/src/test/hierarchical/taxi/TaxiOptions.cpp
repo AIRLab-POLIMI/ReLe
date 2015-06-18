@@ -32,27 +32,10 @@ using an=TaxiFuel::ActionNames;
 
 TaxiLocationOption::TaxiLocationOption(arma::vec location) : location(location)
 {
-
+	terminate = false;
 }
 
-bool TaxiLocationOption::canStart(const arma::vec& state)
-{
-    if(state(sc::x) == location(0) && state(sc::y) == location(1))
-        return false;
-    else
-        return true;
-
-}
-
-double TaxiLocationOption::terminationProbability(const DenseState& state)
-{
-    if(state(sc::x) == location(0) && state(sc::y) == location(1))
-        return 1;
-    else
-        return 0;
-}
-
-void TaxiLocationOption::operator ()(const DenseState& state, FiniteAction& action)
+void TaxiLocationOption::goToLocation(const DenseState& state, FiniteAction& action)
 {
     if(state(sc::x) > location(0))
         action.setActionN(an::left);
@@ -65,51 +48,73 @@ void TaxiLocationOption::operator ()(const DenseState& state, FiniteAction& acti
 }
 
 
-/*bool TaxiPickupOption::canStart(const arma::vec& state)
+bool TaxiLocationOption::canStart(const arma::vec& state)
 {
     return true;
 }
 
-double TaxiPickupOption::terminationProbability(const DenseState& state)
+double TaxiLocationOption::terminationProbability(const DenseState& state)
 {
-    return 1.0;
+    return terminate;
 }
 
 void TaxiPickupOption::operator ()(const DenseState& state, FiniteAction& action)
 {
-    action.setActionN(an::pickup);
-}
-
-bool TaxiDropOffOption::canStart(const arma::vec& state)
-{
-    return true;
-}
-
-double TaxiDropOffOption::terminationProbability(const DenseState& state)
-{
-    return 1.0;
+    if(state[sc::x] == location[0] && state[sc::y] == location[1])
+    {
+    	terminate = false;
+        action.setActionN(an::pickup);
+    }
+    else
+    {
+    	terminate = true;
+        goToLocation(state, action);
+    }
 }
 
 void TaxiDropOffOption::operator ()(const DenseState& state, FiniteAction& action)
 {
-    action.setActionN(an::dropoff);
-}*/
-
-bool TaxiFillUpOption::canStart(const arma::vec& state)
-{
-    return true;
-}
-
-double TaxiFillUpOption::terminationProbability(const DenseState& state)
-{
-    return 1.0;
+    if(state[sc::x] == location[0] && state[sc::y] == location[1])
+    {
+    	terminate = false;
+        action.setActionN(an::dropoff);
+    }
+    else
+    {
+    	terminate = true;
+        goToLocation(state, action);
+    }
 }
 
 void TaxiFillUpOption::operator ()(const DenseState& state, FiniteAction& action)
 {
-    action.setActionN(an::fillup);
+    if(state[sc::x] == location[0] && state[sc::y] == location[1])
+    {
+    	terminate = false;
+        action.setActionN(an::fillup);
+    }
+    else
+    {
+    	terminate = true;
+    	goToLocation(state, action);
+    }
+
 }
 
+TaxiPickupOption::TaxiPickupOption(arma::vec location) : TaxiLocationOption(location)
+{
+
+}
+
+TaxiFillUpOption::TaxiFillUpOption(arma::vec location) : TaxiLocationOption(location)
+{
+
+}
+
+TaxiDropOffOption::TaxiDropOffOption(arma::vec location) : TaxiLocationOption(location)
+{
+
+}
 
 
 

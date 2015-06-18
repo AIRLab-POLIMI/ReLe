@@ -35,49 +35,39 @@ public:
 	TaxiLocationOption(arma::vec location);
 	virtual bool canStart(const arma::vec& state);
 	virtual double terminationProbability(const DenseState& state);
-	virtual void operator ()(const DenseState& state, FiniteAction& action);
+
+protected:
+	void goToLocation(const DenseState& state, FiniteAction& action);
 
 protected:
 	arma::vec location;
+	bool terminate;
 };
 
 
-/*class TaxiPickupOption : public TaxiLocationOption
+class TaxiPickupOption : public TaxiLocationOption
 {
 public:
-	virtual bool canStart(const arma::vec& state);
-	virtual double terminationProbability(const DenseState& state);
-	virtual void operator ()(const DenseState& state, FiniteAction& action);
 	TaxiPickupOption(arma::vec location);
-
-
-
+	virtual void operator ()(const DenseState& state, FiniteAction& action);
 };
 
 class TaxiDropOffOption : public TaxiLocationOption
 {
 public:
-	virtual bool canStart(const arma::vec& state);
-	virtual double terminationProbability(const DenseState& state);
-	virtual void operator ()(const DenseState& state, FiniteAction& action);
 	TaxiDropOffOption(arma::vec location);
+	virtual void operator ()(const DenseState& state, FiniteAction& action);
 
+};
 
-private:
-	arma::vec location;
-};*/
-
-class TaxiFillUpOption : public FixedOption<FiniteAction, DenseState>
+class TaxiFillUpOption : public TaxiLocationOption
 {
 public:
-	virtual bool canStart(const arma::vec& state);
-	virtual double terminationProbability(const DenseState& state);
+	TaxiFillUpOption(arma::vec location);
 	virtual void operator ()(const DenseState& state, FiniteAction& action);
 	//TaxiFillUpOption(arma::vec location);
 
 
-private:
-	arma::vec location;
 };
 
 
