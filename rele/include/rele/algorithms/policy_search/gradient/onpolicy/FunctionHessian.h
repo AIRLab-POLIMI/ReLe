@@ -120,100 +120,101 @@ public:
         return hessian_J;
     }
 
-//    arma::mat ReinforceBaseHessian()
-//    {
-//        int dp  = policy.getParametersSize();
-//        int nbEpisodes = data.size();
+    arma::mat ReinforceBaseHessian()
+    {
+        int dp  = policy.getParametersSize();
+        int nbEpisodes = data.size();
 
-//        arma::vec sumGradLog(dp), localg;
-//        arma::vec gradient_J(dp, arma::fill::zeros);
-//        double Rew;
+        arma::vec sumGradLog(dp), localg;
+        arma::mat sumHessLog(dp,dp), localh;
+        arma::mat hessian_J(dp, dp, arma::fill::zeros);
+        double Rew;
 
-//        arma::vec baseline_J_num(dp, arma::fill::zeros);
-//        arma::vec baseline_den(dp, arma::fill::zeros);
-//        arma::vec return_J_ObjEp(nbEpisodes);
-//        arma::mat sumGradLog_CompEp(dp,nbEpisodes);
+        arma::mat baseline_J_num(dp, dp, arma::fill::zeros);
+        arma::mat baseline_den(dp, dp, arma::fill::zeros);
+        arma::vec return_J_ObjEp(nbEpisodes);
+        std::vector<arma::mat> sumHessLog_CompEp(nbEpisodes, arma::mat(dp,dp));
 
-//        for (int i = 0; i < nbEpisodes; ++i)
-//        {
-//            //core setup
-//            int nbSteps = data[i].size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
 
 
-//            // *** REINFORCE CORE *** //
-//            sumGradLog.zeros();
-//            double df = 1.0;
-//            Rew = 0.0;
-//            // ********************** //
+            // *** REINFORCE CORE *** //
+            sumGradLog.zeros();
+            sumHessLog.zeros();
+            double df = 1.0;
+            Rew = 0.0;
+            // ********************** //
 
-//            //iterate the episode
-//            for (int t = 0; t < nbSteps; ++t)
-//            {
-//                Transition<ActionC, StateC>& tr = data[i][t];
-//                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
-//                // *** REINFORCE CORE *** //
-//                localg = diffLogWorker(tr.x, tr.u, policy);
-//                sumGradLog += localg;
-//                Rew += df * rewardf->operator ()(tr.r);
-//                // ********************** //
+                // *** REINFORCE CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                localh = policy.diff2log(tr.x, tr.u);
+                sumGradLog += localg;
+                sumHessLog += localh;
+                Rew += df * rewardf->operator ()(tr.r);
+                // ********************** //
 
-//                df *= gamma;
+                df *= gamma;
 
-//                if (tr.xn.isAbsorbing())
-//                {
-//                    assert(nbSteps == t+1);
-//                    break;
-//                }
-//            }
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
 
-//            // *** REINFORCE BASE CORE *** //
+            // *** REINFORCE BASE CORE *** //
 
-//            // store the basic elements used to compute the gradients
+            // store the basic elements used to compute the gradients
 
-//            return_J_ObjEp(i) = Rew;
+            return_J_ObjEp(i) = Rew;
+            arma::mat tmpmtx = sumGradLog * sumGradLog.t() + sumHessLog;
+            sumHessLog_CompEp[i] = tmpmtx;
 
-//            for (int p = 0; p < dp; ++p)
-//            {
-//                sumGradLog_CompEp(p,i) = sumGradLog(p);
-//            }
+            // compute the baselines
+            tmpmtx = tmpmtx % tmpmtx;
+            baseline_J_num += Rew * tmpmtx;
+            baseline_den += tmpmtx;
 
-//            // compute the baselines
-//            for (int p = 0; p < dp; ++p)
-//            {
-//                baseline_J_num(p) += Rew * sumGradLog(p) * sumGradLog(p);
-//                baseline_den(p) += sumGradLog(p) * sumGradLog(p);
-//            }
+            // ********************** //
 
-//            // ********************** //
+        }
 
-//        }
+        // *** REINFORCE BASE CORE *** //
 
-//        // *** REINFORCE BASE CORE *** //
+        // compute the gradients
+        for (int r = 0; r < dp; ++r)
+        {
+            for (int c = 0; c < dp; ++c)
+            {
+                double baseline_J = 0;
+                if (baseline_den(r,c) != 0)
+                {
+                    baseline_J = baseline_J_num(r,c) / baseline_den(r,c);
+                }
 
-//        // compute the gradients
-//        for (int p = 0; p < dp; ++p)
-//        {
+                for (int ep = 0; ep < nbEpisodes; ++ep)
+                {
+                    hessian_J(r,c) += (return_J_ObjEp(ep) - baseline_J) * sumHessLog_CompEp[ep](r,c);
+                }
+            }
+        }
 
-//            double baseline_J = 0;
-//            if (baseline_den(p) != 0)
-//            {
-//                baseline_J = baseline_J_num(p) / baseline_den(p);
-//            }
+        // ********************** //
 
-//            for (int ep = 0; ep < nbEpisodes; ++ep)
-//            {
-//                gradient_J[p] += (return_J_ObjEp(ep) - baseline_J) * sumGradLog_CompEp(p,ep);
-//            }
-//        }
+        // compute mean values
+        hessian_J /= nbEpisodes;
 
-//        // ********************** //
-
-//        // compute mean values
-//        gradient_J /= nbEpisodes;
-
-//        return gradient_J;
-//    }
+        return hessian_J;
+    }
 
     void setPolicy(DifferentiablePolicy<ActionC,StateC>& policy)
     {
