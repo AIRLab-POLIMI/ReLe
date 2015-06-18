@@ -1,4 +1,4 @@
-%% Rocky data visualizer
+%% Taxi data visualizer
 addpath('../Statistics');
 
 %clear old data

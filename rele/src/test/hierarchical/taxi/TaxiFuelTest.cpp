@@ -61,26 +61,27 @@ int main(int argc, char *argv[])
 
 
     vector<Option<FiniteAction, DenseState>*> options;
+
+    options.push_back(new TaxiFillUpOption(locations.back()));
     for(auto& location : locations)
     {
-    	options.push_back(new TaxiPickupOption(location));
-    	options.push_back(new TaxiDropOffOption(location));
-    	options.push_back(new TaxiFillUpOption(location));
+        options.push_back(new TaxiPickupOption(location));
+        options.push_back(new TaxiDropOffOption(location));
+
     }
-
-    //options.push_back(new TaxiLocationOption(locations[0]));
-    //options.push_back(new TaxiLocationOption(locations.back()));
-
-    //options.push_back(new TaxiDropOffOption());
-    //options.push_back(new TaxiPickupOption());
-    //options.push_back(new TaxiFillUpOption());
 
     vector<FiniteAction> actions = FiniteAction::generate(options.size());
 
     //-- Features
     //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
-    //BasisFunctions basis = PolynomialFunction::generate(3, TaxiFuel::STATESIZE);
-    BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
+    BasisFunctions basis = PolynomialFunction::generate(1, TaxiFuel::STATESIZE);
+    //BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
+
+    for(auto base : basis)
+    {
+        auto& bf = *base;
+        std::cout << bf << std::endl;
+    }
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
@@ -92,8 +93,9 @@ int main(int argc, char *argv[])
     //--
 
     //-- agent
-    int nbepperpol = 100, nbstep = 100;
-    AdaptiveStep stepRule(0.01);
+    int nbepperpol = 10, nbstep = 100;
+    //AdaptiveStep stepRule(0.01);
+    ConstantStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
             HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::MULTI);
 
@@ -102,7 +104,7 @@ int main(int argc, char *argv[])
 
 
     int episodes = 10000;
-    core.getSettings().episodeLenght = 10;
+    core.getSettings().episodeLenght = 100;
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
             WriteStrategy<FiniteAction, DenseState>::AGENT);
 
@@ -126,7 +128,12 @@ int main(int argc, char *argv[])
     console.printInfo("Starting evaluation episode");
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
             WriteStrategy<FiniteAction, DenseState>::TRANS);
-    core.runTestEpisode();
+
+    for(int i = 0; i < 10; i++)
+    {
+        cout << "# " << i + 1 << "/10" << endl;
+        core.runTestEpisode();
+    }
 
     delete core.getSettings().loggerStrategy;
 

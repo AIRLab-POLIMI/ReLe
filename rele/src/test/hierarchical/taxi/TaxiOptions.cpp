@@ -32,7 +32,7 @@ using an=TaxiFuel::ActionNames;
 
 TaxiLocationOption::TaxiLocationOption(arma::vec location) : location(location)
 {
-	terminate = false;
+    terminate = false;
 }
 
 void TaxiLocationOption::goToLocation(const DenseState& state, FiniteAction& action)
@@ -62,12 +62,12 @@ void TaxiPickupOption::operator ()(const DenseState& state, FiniteAction& action
 {
     if(state[sc::x] == location[0] && state[sc::y] == location[1])
     {
-    	terminate = false;
+        terminate = true;
         action.setActionN(an::pickup);
     }
     else
     {
-    	terminate = true;
+        terminate = false;
         goToLocation(state, action);
     }
 }
@@ -76,12 +76,12 @@ void TaxiDropOffOption::operator ()(const DenseState& state, FiniteAction& actio
 {
     if(state[sc::x] == location[0] && state[sc::y] == location[1])
     {
-    	terminate = false;
+        terminate = true;
         action.setActionN(an::dropoff);
     }
     else
     {
-    	terminate = true;
+        terminate = false;
         goToLocation(state, action);
     }
 }
@@ -90,13 +90,13 @@ void TaxiFillUpOption::operator ()(const DenseState& state, FiniteAction& action
 {
     if(state[sc::x] == location[0] && state[sc::y] == location[1])
     {
-    	terminate = false;
+        terminate = true;
         action.setActionN(an::fillup);
     }
     else
     {
-    	terminate = true;
-    	goToLocation(state, action);
+        terminate = false;
+        goToLocation(state, action);
     }
 
 }

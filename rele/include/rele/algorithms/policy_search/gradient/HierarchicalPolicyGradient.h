@@ -80,6 +80,9 @@ public:
 public:
     virtual void initEpisode(const StateC& state, ActionC& action)
     {
+        //Ensure empty option stack
+        forceCurrentOptionTermination();
+
         df = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
 
@@ -105,6 +108,9 @@ public:
     virtual void initTestEpisode()
     {
         currentItStats = new HierarchicalGradientOutputData();
+
+        //Ensure empty option stack
+        forceCurrentOptionTermination();
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
