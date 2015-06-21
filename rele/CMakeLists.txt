@@ -137,6 +137,9 @@ target_link_libraries(dataset_test rele)
 add_executable(nn_test src/test/core/NeuralNetworksTest.cpp)
 target_link_libraries(nn_test rele)
 
+add_executable(trees_test src/test/core/TreesTest.cpp)
+target_link_libraries(trees_test rele)
+
 #Matlab tests (miscellaneous)
 add_executable(chol_FIM src/test/miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)

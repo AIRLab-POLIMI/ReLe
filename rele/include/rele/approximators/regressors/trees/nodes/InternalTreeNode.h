@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_INTERNALTREENODE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_INTERNALTREENODE_H_
 
-#include "trees/nodes/TreeNode.h"
+#include "regressors/trees/nodes/TreeNode.h"
 
 namespace ReLe
 {
@@ -38,15 +38,17 @@ namespace ReLe
  * The splitting value is of type double.
  */
 template<class InputC, class OutputC>
-class InternalTreeNode : public TreeNode<InputC, OutputC>
+class InternalTreeNode: public TreeNode<InputC, OutputC>
 {
 public:
 
     /**
      * Empty constructor
      */
-    InternalTreeNode() : axis(-1), split(0), left(nullptr), right(nullptr)
-    {}
+    InternalTreeNode() :
+        axis(-1), split(0), left(nullptr), right(nullptr)
+    {
+    }
 
     /**
      * Basic contructor
@@ -55,9 +57,11 @@ public:
      * @param l the pointer to left child
      * @param r the pointer to right child
      */
-    InternalTreeNode(int a, double s, TreeNode<InputC, OutputC>* l, TreeNode<InputC, OutputC>* r)
-        : axis(a ), split(s), left(l), right(r)
-    {}
+    InternalTreeNode(int a, double s, TreeNode<InputC, OutputC>* l,
+                     TreeNode<InputC, OutputC>* r) :
+        axis(a), split(s), left(l), right(r)
+    {
+    }
 
     /**
      * Get axis, axis is the index of the split
@@ -78,6 +82,22 @@ public:
     }
 
     /**
+     * Get the value of the subtree
+     * @return the value
+     */
+    virtual OutputC getValue(const InputC& input)
+    {
+        if (input[axis] < split)
+        {
+            return left->getValue(input);
+        }
+        else
+        {
+            return right->getValue(input);
+        }
+    }
+
+    /**
      * Get Left Child
      * @return a pointer to the left chid node
      */
@@ -87,10 +107,10 @@ public:
     }
 
     /**
-      * Get Right Child
-      * @return a pointer to the right child node
-      */
-    virtual TreeNode<InputC,OutputC>* getRight()
+     * Get Right Child
+     * @return a pointer to the right child node
+     */
+    virtual TreeNode<InputC, OutputC>* getRight()
     {
         return right;
     }
@@ -172,18 +192,18 @@ public:
     /**
      *
      */
-    virtual void writeOnStream(ofstream& out)
+    virtual void writeOnStream(std::ofstream& out)
     {
-        out << "N" << endl;
+        out << "N" << std::endl;
         out << axis << " " << split;
-        out << endl;
+        out << std::endl;
         if (left)
         {
             out << *left;
         }
         else
         {
-            out << "Empty" << endl;
+            out << "Empty" << std::endl;
         }
         if (right)
         {
@@ -191,50 +211,16 @@ public:
         }
         else
         {
-            out << "Empty" << endl;
+            out << "Empty" << std::endl;
         }
     }
 
     /**
      *
      */
-    virtual void readFromStream (ifstream& in)
+    virtual void readFromStream(std::ifstream& in)
     {
         //TODO implement
-        /*string type;
-        TreeNode<InputC>* children[2];
-        in >> axis >> split;
-        for (unsigned int i = 0; i < 2; i++)
-        {
-            in >> type;
-            if ("L" == type)
-            {
-                children[i] = new rtLeaf();
-            }
-            else if ("LS" == type)
-            {
-                children[i] = new rtLeafSample();
-            }
-            else if ("LLI" == type)
-            {
-                children[i] = new rtLeafLinearInterp();
-            }
-            else if ("N" == type)
-            {
-                children[i] = new InternalTreeNode();
-            }
-            else
-            {
-                children[i] = 0;
-            }
-
-            if (children[i])
-            {
-                in >> *children[i];
-            }
-        }
-        left = children[0];
-        right = children[1];*/
     }
 
 private:
@@ -244,8 +230,6 @@ private:
     TreeNode<InputC, OutputC>* right;  // pointer to left child
 };
 
-
 }
-
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_INTERNALTREENODE_H_ */

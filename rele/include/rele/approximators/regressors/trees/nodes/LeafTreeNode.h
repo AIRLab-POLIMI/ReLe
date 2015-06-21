@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_LEAFTREENODE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_LEAFTREENODE_H_
 
-#include "trees/nodes/TreeNode.h"
+#include "regressors/trees/nodes/TreeNode.h"
 
 namespace ReLe
 {
@@ -32,7 +32,7 @@ namespace ReLe
 /**
  * LeafTreeNode is a template class that represents a leaf of a
  * regression tree.
- * This class extends rtANode and contains methods to set/get the value
+ * This class extends TreeNode and contains methods to set/get the value
  * saved in the node, this value is of type OutputC.
  */
 template<class InputC, class OutputC>
@@ -75,7 +75,7 @@ public:
      * Get the value
      * @return the value
      */
-    virtual OutputC getValue(InputC& input);
+    virtual OutputC getValue(InputC& input) = 0;
 
     /**
      * This method is used to determine if the object is a leaf or an
@@ -84,7 +84,7 @@ public:
      */
     virtual bool isLeaf()
     {
-    	return true;
+        return true;
     }
 
     /**

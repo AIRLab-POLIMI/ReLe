@@ -69,14 +69,10 @@ public:
     }
 
     /**
-     * Get Split
-     * @return the split value
+     * Get the value of the subtree
+     * @return the value
      */
-    //FIXME wrong doc
-    virtual OutputC getValue(InputC& input)
-    {
-        return -1;
-    }
+    virtual OutputC getValue(const InputC& input) = 0;
 
     /**
      * Get Split

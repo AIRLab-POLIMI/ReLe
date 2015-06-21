@@ -25,6 +25,9 @@
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 
 #include "Regressors.h"
+#include "nodes/TreeNode.h"
+#include "nodes/LeafTreeNode.h"
+#include "nodes/InternalTreeNode.h"
 
 namespace ReLe
 {
@@ -35,9 +38,19 @@ class RegressionTree : public BatchRegressor_<InputC, OutputC>
 public:
     virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
 
+    /**
+     * Get the root of the tree
+     * @return a pointer to the root
+     */
+    TreeNode<InputC, OutputC>* getRoot()
+    {
+        return root;
+    }
+
     virtual ~RegressionTree()
     {
-
+        if(root != nullptr)
+            delete root;
     }
 
 protected:

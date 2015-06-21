@@ -79,7 +79,7 @@ template<class InputC, class OutputC>
 class MiniBatchData : public BatchData<InputC, OutputC>
 {
 public:
-    MiniBatchData(const BatchData<InputC, OutputC>* data, std::vector<unsigned int>& indexes) :
+    MiniBatchData(const BatchData<InputC, OutputC>* data, const std::vector<unsigned int>& indexes) :
         data(*data), indexes(indexes)
     {
 
