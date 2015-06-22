@@ -116,22 +116,6 @@ public:
     }
 
     /**
-     * Get Child
-     * @return a pointer to the right child node
-     */
-    virtual TreeNode<InputC, OutputC>* getChild(double* values)
-    {
-        if (values[axis] < split)
-        {
-            return left;
-        }
-        else
-        {
-            return right;
-        }
-    }
-
-    /**
      * Set te axis
      * @param a the axis
      */
@@ -166,13 +150,6 @@ public:
     {
         right = r;
     }
-
-    /**
-     * This method is used to determine if the object is a leaf or an
-     * internal node
-     * @return true if it is a leaf, false otherwise
-     */
-    virtual bool isLeaf();
 
     /**
      * Empty destructor

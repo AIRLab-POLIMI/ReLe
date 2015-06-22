@@ -102,17 +102,6 @@ public:
     }
 
     /**
-     * Get Child
-     * @return a pointer to the right child node
-     */
-    virtual TreeNode<InputC, OutputC>* getChild(double* values = 0)
-    {
-        if (values == 0)
-            return nullptr;
-        return nullptr;
-    }
-
-    /**
      *
      */
     virtual void writeOnStream (std::ofstream& out) = 0;

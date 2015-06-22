@@ -85,8 +85,21 @@ public:
 
     }
 
+    MiniBatchData(const BatchData<InputC, OutputC>& data, const std::vector<unsigned int>& indexes) :
+        data(data), indexes(indexes)
+    {
+
+    }
+
     MiniBatchData(const BatchData<InputC, OutputC>* data) :
         data(*data)
+
+    {
+
+    }
+
+    MiniBatchData(const BatchData<InputC, OutputC>& data) :
+        data(data)
 
     {
 

@@ -50,6 +50,7 @@ template<class InputC, class OutputC>
 class KDTree: public RegressionTree<InputC, OutputC>
 {
     using RegressionTree<InputC, OutputC>::root;
+    using RegressionTree<InputC, OutputC>::emptyNode;
 
 public:
 
@@ -57,8 +58,9 @@ public:
      * Basic constructor
      * @param nm nmin, the minimum number of tuples for splitting
      */
-    KDTree(unsigned int input_size = 1, unsigned int output_size = 1,
-           int nm = 2) : input_size(input_size)
+    KDTree(const EmptyTreeNode<InputC, OutputC>& emptyNode,
+           unsigned int input_size = 1, unsigned int output_size = 1,
+           int nm = 2) : RegressionTree<InputC, OutputC>(emptyNode), input_size(input_size)
     {
         mNMin = nm;
     }
@@ -94,7 +96,7 @@ public:
      */
     virtual void train(const BatchData<InputC, OutputC>& dataset)
     {
-
+        buildKDTree(dataset, 0);
     }
 
     /**
@@ -125,7 +127,7 @@ public:
      */
     virtual void writeOnStream(std::ofstream& out)
     {
-
+        out << *root;
     }
 
     /**
@@ -133,7 +135,7 @@ public:
      */
     virtual void readFromStream(std::ifstream& in)
     {
-
+        //TODO implement
     }
 
     /**
@@ -235,7 +237,7 @@ private:
             if (size == 0)
             {
                 // if true -> empty leaf
-                return nullptr;	//EMPTYLEAF
+                return &emptyNode;
             }
             else
             {
@@ -291,8 +293,8 @@ private:
         MiniBatchData<InputC, OutputC> highEx(ds,indexesLow);
 
         // recall the method for left and right child
-        TreeNode<InputC, OutputC>* left = BuildKDTree(lowEx, (cutDir + 1) % input_size, store_sample);
-        TreeNode<InputC, OutputC>* right = BuildKDTree(highEx, (cutDir + 1) % input_size, store_sample);
+        TreeNode<InputC, OutputC>* left = buildKDTree(lowEx, (cutDir + 1) % input_size, store_sample);
+        TreeNode<InputC, OutputC>* right = buildKDTree(highEx, (cutDir + 1) % input_size, store_sample);
 
         // return the current node
         return new InternalTreeNode<InputC, OutputC>(cutDir, cutPoint, left, right);

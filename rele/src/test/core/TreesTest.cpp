@@ -28,5 +28,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    KDTree<arma::vec, arma::vec> tree;
+    arma::vec defaultValue = {0};
+    EmptyTreeNode<arma::vec, arma::vec> defaultNode(defaultValue);
+    KDTree<arma::vec, arma::vec> tree(defaultNode);
 }

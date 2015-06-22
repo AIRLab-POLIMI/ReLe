@@ -60,7 +60,10 @@ public:
     /**
      *
      */
-    virtual ~LeafTreeNode();
+    virtual ~LeafTreeNode()
+    {
+
+    }
 
     /**
      * Set the value
@@ -75,7 +78,10 @@ public:
      * Get the value
      * @return the value
      */
-    virtual OutputC getValue(InputC& input) = 0;
+    virtual OutputC getValue(const InputC& input)
+    {
+        return mValue;
+    }
 
     /**
      * This method is used to determine if the object is a leaf or an
@@ -90,7 +96,7 @@ public:
     /**
      *
      */
-    virtual void WriteOnStream(std::ofstream& out)
+    virtual void writeOnStream(std::ofstream& out)
     {
         out << "L" << std::endl;
         out << mValue << std::endl;
@@ -100,7 +106,7 @@ public:
     /**
      *
      */
-    virtual void ReadFromStream(std::ifstream& in)
+    virtual void readFromStream(std::ifstream& in)
     {
         //TODO implement
     }

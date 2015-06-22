@@ -28,6 +28,7 @@
 #include "nodes/TreeNode.h"
 #include "nodes/LeafTreeNode.h"
 #include "nodes/InternalTreeNode.h"
+#include "nodes/EmptyTreeNode.h"
 
 namespace ReLe
 {
@@ -36,6 +37,11 @@ template<class InputC, class OutputC>
 class RegressionTree : public BatchRegressor_<InputC, OutputC>
 {
 public:
+    RegressionTree(const EmptyTreeNode<InputC, OutputC>& emptyNode) : root(nullptr), emptyNode(emptyNode)
+    {
+
+    }
+
     virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
 
     /**
@@ -55,6 +61,7 @@ public:
 
 protected:
     TreeNode<InputC, OutputC>* root;
+    EmptyTreeNode<InputC, OutputC> emptyNode;
 
 };
 
