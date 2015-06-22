@@ -37,8 +37,8 @@ namespace ReLe
  * and right childs of the node (binary trees).
  * The splitting value is of type double.
  */
-template<class InputC, class OutputC>
-class InternalTreeNode: public TreeNode<InputC, OutputC>
+template<class OutputC>
+class InternalTreeNode: public TreeNode<OutputC>
 {
 public:
 
@@ -57,8 +57,8 @@ public:
      * @param l the pointer to left child
      * @param r the pointer to right child
      */
-    InternalTreeNode(int a, double s, TreeNode<InputC, OutputC>* l,
-                     TreeNode<InputC, OutputC>* r) :
+    InternalTreeNode(int a, double s, TreeNode<OutputC>* l,
+                     TreeNode<OutputC>* r) :
         axis(a), split(s), left(l), right(r)
     {
     }
@@ -85,7 +85,7 @@ public:
      * Get the value of the subtree
      * @return the value
      */
-    virtual OutputC getValue(const InputC& input)
+    virtual OutputC getValue(const arma::vec& input)
     {
         if (input[axis] < split)
         {
@@ -101,7 +101,7 @@ public:
      * Get Left Child
      * @return a pointer to the left chid node
      */
-    virtual TreeNode<InputC, OutputC>* getLeft()
+    virtual TreeNode<OutputC>* getLeft()
     {
         return left;
     }
@@ -110,7 +110,7 @@ public:
      * Get Right Child
      * @return a pointer to the right child node
      */
-    virtual TreeNode<InputC, OutputC>* getRight()
+    virtual TreeNode<OutputC>* getRight()
     {
         return right;
     }
@@ -137,16 +137,15 @@ public:
      * Set the left child
      * @param l a pointer to the left child node
      */
-    void setLeft(TreeNode<InputC, OutputC>* l)
+    void setLeft(TreeNode<OutputC>* l)
     {
         left = l;
     }
 
     /**
-     * Set the right child
-     * @param r a pointer to the right child node
+     * Set the right child     * @param r a pointer to the right child node
      */
-    void setRight(TreeNode<InputC, OutputC>* r)
+    void setRight(TreeNode<OutputC>* r)
     {
         right = r;
     }
@@ -156,11 +155,11 @@ public:
      */
     virtual ~InternalTreeNode()
     {
-        if (left != nullptr)
+        if (left != nullptr && !left->isEmpty())
         {
             delete left;
         }
-        if (right != nullptr)
+        if (right != nullptr && !right->isEmpty())
         {
             delete right;
         }
@@ -203,8 +202,8 @@ public:
 private:
     int axis;  // the axis of split
     double split;  // the value of split
-    TreeNode<InputC, OutputC>* left;  // pointer to right child
-    TreeNode<InputC, OutputC>* right;  // pointer to left child
+    TreeNode<OutputC>* left;  // pointer to right child
+    TreeNode<OutputC>* right;  // pointer to left child
 };
 
 }

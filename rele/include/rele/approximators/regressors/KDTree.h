@@ -49,6 +49,7 @@ namespace ReLe
 template<class InputC, class OutputC>
 class KDTree: public RegressionTree<InputC, OutputC>
 {
+    using RegressionTree<InputC, OutputC>::phi;
     using RegressionTree<InputC, OutputC>::root;
     using RegressionTree<InputC, OutputC>::emptyNode;
 
@@ -58,9 +59,9 @@ public:
      * Basic constructor
      * @param nm nmin, the minimum number of tuples for splitting
      */
-    KDTree(const EmptyTreeNode<InputC, OutputC>& emptyNode,
+    KDTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
            unsigned int input_size = 1, unsigned int output_size = 1,
-           int nm = 2) : RegressionTree<InputC, OutputC>(emptyNode), input_size(input_size)
+           int nm = 2) : RegressionTree<InputC, OutputC>(phi, emptyNode)
     {
         mNMin = nm;
     }
@@ -96,7 +97,8 @@ public:
      */
     virtual void train(const BatchData<InputC, OutputC>& dataset)
     {
-        buildKDTree(dataset, 0);
+    	this->cleanTree();
+        root = buildKDTree(dataset, 0);
     }
 
     /**
@@ -111,7 +113,7 @@ public:
             throw std::runtime_error("Empty tree evaluated");
         }
 
-        return root->getValue(input);
+        return root->getValue(phi(input));
     }
 
     /**
@@ -156,7 +158,7 @@ private:
 
         for (unsigned int i = 0; i < ds.size(); i++)
         {
-            auto& element = ds.getInput(i);
+            auto&& element = phi(ds.getInput(i));
             tmp.push_back(element[cutDir]);
         }
 
@@ -175,7 +177,7 @@ private:
         // split inputs in two subsets
         for (unsigned int i = 0; i < ds.size(); i++)
         {
-            auto& element = ds.getInput(i);
+            auto&& element = phi(ds.getInput(i));
             double tmp = element[cutDir];
 
             if (tmp < cutPoint)
@@ -196,11 +198,11 @@ private:
             return true;
         }
 
-        auto& element = ds.getInput(0);
+        auto&& element = phi(ds.getInput(0));
         double val = element[cutDir];
         for (unsigned int i = 1; i < ds.size(); i++)
         {
-            auto& newElement = ds.getInput(i);
+            auto&& newElement = phi(ds.getInput(i));
             double newVal = newElement[cutDir];
             if (std::abs(val - newVal) > THRESHOLD)
             {
@@ -218,8 +220,8 @@ private:
      * @param store_sample allow to store samples into leaves
      * @return a pointer to the root
      */
-    TreeNode<InputC, OutputC>* buildKDTree(const BatchData<InputC, OutputC>& ds,
-                                           int cutDir, bool store_sample = false)
+    TreeNode<OutputC>* buildKDTree(const BatchData<InputC, OutputC>& ds,
+                                   int cutDir, bool store_sample = false)
     {
         unsigned int size = ds.size();
         /*****************part 1: end conditions*********************/
@@ -250,7 +252,7 @@ private:
         bool equal = false;
         while (fixedInput(ds, cutTmp) && !equal)
         {
-            cutTmp = (cutTmp + 1) % input_size;
+            cutTmp = (cutTmp + 1) % phi.rows();
             if (cutTmp == cutDir)
             {
                 equal = true;
@@ -285,15 +287,14 @@ private:
         MiniBatchData<InputC, OutputC> highEx(ds,indexesLow);
 
         // recall the method for left and right child
-        TreeNode<InputC, OutputC>* left = buildKDTree(lowEx, (cutDir + 1) % input_size, store_sample);
-        TreeNode<InputC, OutputC>* right = buildKDTree(highEx, (cutDir + 1) % input_size, store_sample);
+        TreeNode<OutputC>* left = buildKDTree(lowEx, (cutDir + 1) % phi.rows(), store_sample);
+        TreeNode<OutputC>* right = buildKDTree(highEx, (cutDir + 1) % phi.rows(), store_sample);
 
         // return the current node
-        return new InternalTreeNode<InputC, OutputC>(cutDir, cutPoint, left, right);
+        return new InternalTreeNode<OutputC>(cutDir, cutPoint, left, right);
     }
 
 private:
-    const unsigned int input_size;
     unsigned int mNMin;  // minimum number of tuples for splitting
 
     static constexpr double THRESHOLD = 0.00000001;

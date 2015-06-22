@@ -76,10 +76,12 @@ int main(int argc, char *argv[])
     //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
     //BasisFunctions basis = PolynomialFunction::generate(1, TaxiFuel::STATESIZE);
     //BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
-    BasisFunctions basisSpace = VectorFiniteIdentityBasis::generate(2, 5);
+    BasisFunctions basisSpace = VectorFiniteIdentityBasis::generate(1, 5);
 
     vector<unsigned int> indexes;
     vector<unsigned int> values;
+    indexes.push_back(TaxiFuel::y);
+    values.push_back(4);
     indexes.push_back(TaxiFuel::onBoard);
     values.push_back(2);
     indexes.push_back(TaxiFuel::location);

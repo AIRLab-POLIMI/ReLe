@@ -27,8 +27,8 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC>
-class EmptyTreeNode : public TreeNode<InputC, OutputC>
+template<class OutputC>
+class EmptyTreeNode : public TreeNode<OutputC>
 {
 public:
     EmptyTreeNode(const OutputC& defaultValue) : defaultValue(defaultValue)
@@ -40,7 +40,7 @@ public:
      * Get the value
      * @return the value
      */
-    virtual OutputC getValue(const InputC& input)
+    virtual OutputC getValue(const arma::vec& input)
     {
         return defaultValue;
     }
@@ -51,6 +51,15 @@ public:
      * @return true if it is a leaf, false otherwise
      */
     virtual bool isLeaf()
+    {
+        return true;
+    }
+
+    /**
+     * This method is used to determine if the object is an empty node leaf or not
+     * @return true if it is an empty leaf, false otherwise
+     */
+    virtual bool isEmpty()
     {
         return true;
     }

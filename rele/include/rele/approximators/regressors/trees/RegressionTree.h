@@ -29,6 +29,7 @@
 #include "nodes/LeafTreeNode.h"
 #include "nodes/InternalTreeNode.h"
 #include "nodes/EmptyTreeNode.h"
+#include "Features.h"
 
 namespace ReLe
 {
@@ -37,7 +38,8 @@ template<class InputC, class OutputC>
 class RegressionTree : public BatchRegressor_<InputC, OutputC>
 {
 public:
-    RegressionTree(const EmptyTreeNode<InputC, OutputC>& emptyNode) : root(nullptr), emptyNode(emptyNode)
+    RegressionTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode)
+        : phi(phi), root(nullptr), emptyNode(emptyNode)
     {
 
     }
@@ -48,20 +50,28 @@ public:
      * Get the root of the tree
      * @return a pointer to the root
      */
-    TreeNode<InputC, OutputC>* getRoot()
+    TreeNode<OutputC>* getRoot()
     {
         return root;
     }
 
     virtual ~RegressionTree()
     {
-        if(root != nullptr)
-            delete root;
+		cleanTree();
     }
 
 protected:
-    TreeNode<InputC, OutputC>* root;
-    EmptyTreeNode<InputC, OutputC> emptyNode;
+	void cleanTree()
+	{
+		if (root != nullptr && !root->isEmpty())
+			delete root;
+	}
+
+
+protected:
+    Features_<InputC>& phi;
+    TreeNode<OutputC>* root;
+    EmptyTreeNode<OutputC> emptyNode;
 
 };
 

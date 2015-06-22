@@ -36,7 +36,7 @@ namespace ReLe
  * saved in the node, this value is of type OutputC.
  */
 template<class InputC, class OutputC>
-class LeafTreeNode : public TreeNode<InputC, OutputC>
+class LeafTreeNode : public TreeNode<OutputC>
 {
 public:
 
@@ -78,7 +78,7 @@ public:
      * Get the value
      * @return the value
      */
-    virtual OutputC getValue(const InputC& input)
+    virtual OutputC getValue(const arma::vec& input)
     {
         return mValue;
     }

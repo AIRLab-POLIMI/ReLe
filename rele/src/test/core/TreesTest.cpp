@@ -22,6 +22,10 @@
  */
 
 #include "regressors/KDTree.h"
+#include "basis/IdentityBasis.h"
+#include "features/DenseFeatures.h"
+
+#include <iostream>
 
 using namespace std;
 using namespace ReLe;
@@ -29,6 +33,18 @@ using namespace ReLe;
 int main(int argc, char *argv[])
 {
     arma::vec defaultValue = {0};
-    EmptyTreeNode<arma::vec, arma::vec> defaultNode(defaultValue);
-    KDTree<arma::vec, arma::vec> tree(defaultNode);
+    BasisFunctions basis = IdentityBasis::generate(1);
+    DenseFeatures phi(basis);
+
+    EmptyTreeNode<arma::vec> defaultNode(defaultValue);
+    KDTree<arma::vec, arma::vec> tree(phi, defaultNode);
+
+    BatchDataPlain<arma::vec, arma::vec> dataset;
+    tree.train(dataset);
+
+
+    //Test the tree
+    arma::vec input1 = {0};
+    cout << "tree({0}) =" << endl;
+    cout << tree.evaluate(input1) << endl;
 }

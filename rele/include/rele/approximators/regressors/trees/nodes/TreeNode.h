@@ -34,7 +34,7 @@ namespace ReLe
  * tree. The method isLeaf() is used to determine if it is a leaf or an
  * internal node.
  */
-template<class InputC, class OutputC>
+template<class OutputC>
 class TreeNode
 {
 public:
@@ -60,6 +60,15 @@ public:
     }
 
     /**
+     * This method is used to determine if the object is an empty node leaf or not
+     * @return true if it is an empty leaf, false otherwise
+     */
+    virtual bool isEmpty()
+    {
+        return false;
+    }
+
+    /**
      * Get axis, axis is the index of the split
      * @return the axis
      */
@@ -72,7 +81,7 @@ public:
      * Get the value of the subtree
      * @return the value
      */
-    virtual OutputC getValue(const InputC& input) = 0;
+    virtual OutputC getValue(const arma::vec& input) = 0;
 
     /**
      * Get Split
@@ -87,7 +96,7 @@ public:
      * Get Left Child
      * @return a pointer to the left child node
      */
-    virtual TreeNode<InputC, OutputC>* getLeft()
+    virtual TreeNode<OutputC>* getLeft()
     {
         return nullptr;
     }
@@ -96,7 +105,7 @@ public:
      * Get Right Child
      * @return a pointer to the right child node
      */
-    virtual TreeNode<InputC, OutputC>* getRight()
+    virtual TreeNode<OutputC>* getRight()
     {
         return nullptr;
     }
@@ -114,7 +123,7 @@ public:
     /**
      *
      */
-    friend std::ofstream& operator<< (std::ofstream& out, TreeNode<InputC, OutputC>& n)
+    friend std::ofstream& operator<< (std::ofstream& out, TreeNode<OutputC>& n)
     {
         n.writeOnStream(out);
         return out;
@@ -123,7 +132,7 @@ public:
     /**
      *
      */
-    friend std::ifstream& operator>> (std::ifstream& in, TreeNode<InputC, OutputC>& n)
+    friend std::ifstream& operator>> (std::ifstream& in, TreeNode<OutputC>& n)
     {
         n.readFromStream(in);
         return in;
