@@ -57,15 +57,15 @@ public:
 
     virtual ~RegressionTree()
     {
-		cleanTree();
+        cleanTree();
     }
 
 protected:
-	void cleanTree()
-	{
-		if (root != nullptr && !root->isEmpty())
-			delete root;
-	}
+    void cleanTree()
+    {
+        if (root != nullptr && !root->isEmpty())
+            delete root;
+    }
 
 
 protected:

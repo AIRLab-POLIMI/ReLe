@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -97,7 +97,7 @@ public:
      */
     virtual void train(const BatchData<InputC, OutputC>& dataset)
     {
-    	this->cleanTree();
+        this->cleanTree();
         root = buildKDTree(dataset, 0);
     }
 
