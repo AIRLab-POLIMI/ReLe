@@ -23,23 +23,26 @@
 
 #include "basis/ConditionBasedFunction.h"
 
+#include <cassert>
+
 using namespace arma;
+using namespace std;
 
 namespace ReLe
 {
 
 AndConditionBasisFunction::AndConditionBasisFunction(
     BasisFunction *bfs,
-    std::vector<unsigned int> idxs,
-    std::vector<double> condition_vals)
+    const vector<unsigned int>& idxs,
+    const vector<double>& condition_vals)
     : basis(bfs), idxs(idxs), values(condition_vals)
 {
 }
 
 AndConditionBasisFunction::AndConditionBasisFunction(
     BasisFunction *bfs,
-    std::initializer_list<unsigned int> idxs,
-    std::initializer_list<double> condition_vals)
+    initializer_list<unsigned int> idxs,
+    initializer_list<double> condition_vals)
     : basis(bfs), idxs(idxs), values(condition_vals)
 {
 }
@@ -63,7 +66,7 @@ double AndConditionBasisFunction::operator()(const arma::vec &input)
     return (*basis)(input);
 }
 
-void AndConditionBasisFunction::writeOnStream(std::ostream &out)
+void AndConditionBasisFunction::writeOnStream(ostream &out)
 {
     out << "AndConditionBasisFunction";
     unsigned int i, nbcond = idxs.size();
@@ -81,7 +84,7 @@ void AndConditionBasisFunction::writeOnStream(std::ostream &out)
     out << *basis;
 }
 
-void AndConditionBasisFunction::readFromStream(std::istream &in)
+void AndConditionBasisFunction::readFromStream(istream &in)
 {
     unsigned int i, nbcond, val;
     in >> nbcond;
@@ -99,7 +102,8 @@ void AndConditionBasisFunction::readFromStream(std::istream &in)
     //TOFIX manca un factory per le basis (come faccio a leggere la basis function?)
 }
 
-BasisFunctions AndConditionBasisFunction::generate(BasisFunctions& basis, unsigned int index, unsigned int values)
+BasisFunctions AndConditionBasisFunction::generate(BasisFunctions& basis, unsigned int index,
+        unsigned int values)
 {
     BasisFunctions newBasis;
 
@@ -112,6 +116,44 @@ BasisFunctions AndConditionBasisFunction::generate(BasisFunctions& basis, unsign
     }
 
     return newBasis;
+}
+
+BasisFunctions AndConditionBasisFunction::generate(BasisFunctions& basis, vector<unsigned int> indexes,
+        vector<unsigned int> valuesVector)
+{
+    assert(valuesVector.size() == indexes.size());
+
+    BasisFunctions newBasis;
+    vector<double> currentValues(valuesVector.size());
+
+    generateRecursive(basis, indexes, valuesVector, currentValues, 0, newBasis);
+
+    return newBasis;
+}
+
+void AndConditionBasisFunction::generateRecursive(BasisFunctions& basis,
+        const std::vector<unsigned int>& indexes, const std::vector<unsigned int>& valuesVector,
+        std::vector<double>& currentValues, unsigned int currentIndex, BasisFunctions& newBasis)
+{
+    if(currentIndex == valuesVector.size())
+    {
+        for(unsigned int i = 0; i < basis.size(); i++)
+        {
+            newBasis.push_back(new AndConditionBasisFunction(basis[i], indexes, currentValues));
+        }
+    }
+    else
+    {
+        unsigned int values = valuesVector[currentIndex];
+
+        for(unsigned int value = 0; value < values; value++)
+        {
+            currentValues[currentIndex] = value;
+            generateRecursive(basis, indexes, valuesVector, currentValues, currentIndex + 1, newBasis);
+        }
+
+    }
+
 }
 
 

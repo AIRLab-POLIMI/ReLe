@@ -117,14 +117,6 @@ public:
     /**
      *
      */
-    virtual Regressor* getNewRegressor()
-    {
-        //TODO serve???
-    }
-
-    /**
-     *
-     */
     virtual void writeOnStream(std::ofstream& out)
     {
         out << *root;

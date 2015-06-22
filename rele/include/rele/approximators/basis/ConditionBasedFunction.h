@@ -32,8 +32,8 @@ namespace ReLe
 class AndConditionBasisFunction: public BasisFunction
 {
 public:
-    AndConditionBasisFunction(BasisFunction* bfs, std::vector<unsigned int> idxs,
-                              std::vector<double> condition_vals);
+    AndConditionBasisFunction(BasisFunction* bfs, const std::vector<unsigned int>& idxs,
+                              const std::vector<double>& condition_vals);
 
     AndConditionBasisFunction(BasisFunction* bfs, std::initializer_list<unsigned int>  idxs,
                               std::initializer_list<double> condition_vals);
@@ -44,6 +44,15 @@ public:
     void readFromStream(std::istream& in);
 
     static BasisFunctions generate(BasisFunctions& basis, unsigned int index, unsigned int value);
+    static BasisFunctions generate(BasisFunctions& basis, std::vector<unsigned int> indexes,
+                                   std::vector<unsigned int> valuesVector);
+
+private:
+    static void generateRecursive(BasisFunctions& basis,
+                                  const std::vector<unsigned int>& indexes,
+                                  const std::vector<unsigned int>& valuesVector,
+                                  std::vector<double>& currentValues, unsigned int currentindex,
+                                  BasisFunctions& newBasis);
 
 private:
     BasisFunction* basis;

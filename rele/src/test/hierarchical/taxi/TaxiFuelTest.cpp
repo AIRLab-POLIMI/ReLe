@@ -62,32 +62,38 @@ int main(int argc, char *argv[])
 
     vector<Option<FiniteAction, DenseState>*> options;
 
-    options.push_back(new TaxiFillUpOption(locations.back()));
+    options.push_back(new TaxiFillUpOption());
+    options.push_back(new TaxiDropOffOption());
+    options.push_back(new TaxiPickupOption());
     for(auto& location : locations)
     {
-        options.push_back(new TaxiPickupOption(location));
-        options.push_back(new TaxiDropOffOption(location));
-
+        options.push_back(new TaxiLocationOption(location));
     }
 
     vector<FiniteAction> actions = FiniteAction::generate(options.size());
 
     //-- Features
     //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
-    BasisFunctions basis = PolynomialFunction::generate(1, TaxiFuel::STATESIZE);
+    //BasisFunctions basis = PolynomialFunction::generate(1, TaxiFuel::STATESIZE);
     //BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
+    BasisFunctions basisSpace = VectorFiniteIdentityBasis::generate(2, 5);
 
-    for(auto base : basis)
-    {
-        auto& bf = *base;
-        std::cout << bf << std::endl;
-    }
+    vector<unsigned int> indexes;
+    vector<unsigned int> values;
+    indexes.push_back(TaxiFuel::onBoard);
+    values.push_back(2);
+    indexes.push_back(TaxiFuel::location);
+    values.push_back(4);
+    indexes.push_back(TaxiFuel::destination);
+    values.push_back(4);
+    BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
+    basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    double temperature = 0.5;
+    double temperature = 100;
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
@@ -103,7 +109,7 @@ int main(int argc, char *argv[])
     //--
 
 
-    int episodes = 10000;
+    int episodes = 50000;
     core.getSettings().episodeLenght = 100;
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
             WriteStrategy<FiniteAction, DenseState>::AGENT);
@@ -115,12 +121,12 @@ int main(int argc, char *argv[])
     {
         console.printProgress(i);
         core.runEpisode();
-        /*if(temperature > 0.1)
+        if(temperature > 0.1)
         {
-        	temperature *= 0.9999;
-        	cout << "temperature: " << temperature << endl;
-        	rootPolicyOption.setTemperature(temperature);
-        }*/
+            temperature *= 0.9999;
+            cout << "temperature: " << temperature << endl;
+            rootPolicyOption.setTemperature(temperature);
+        }
     }
 
     delete core.getSettings().loggerStrategy;

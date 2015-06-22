@@ -32,7 +32,12 @@ using an=TaxiFuel::ActionNames;
 
 TaxiLocationOption::TaxiLocationOption(arma::vec location) : location(location)
 {
-    terminate = false;
+
+}
+
+void TaxiLocationOption::operator ()(const DenseState& state, FiniteAction& action)
+{
+    goToLocation(state, action);
 }
 
 void TaxiLocationOption::goToLocation(const DenseState& state, FiniteAction& action)
@@ -50,70 +55,40 @@ void TaxiLocationOption::goToLocation(const DenseState& state, FiniteAction& act
 
 bool TaxiLocationOption::canStart(const arma::vec& state)
 {
-    return true;
+    return state(sc::x) != location(0) || state(sc::y) != location(1);
 }
 
 double TaxiLocationOption::terminationProbability(const DenseState& state)
 {
-    return terminate;
+    if (state(sc::x) == location(0) && state(sc::y) == location(1))
+        return 1.0;
+    else
+        return 0.0;
+}
+
+bool TaxiSimpleOption::canStart(const arma::vec& state)
+{
+    return true;
+}
+
+double TaxiSimpleOption::terminationProbability(const DenseState& state)
+{
+    return 1.0;
 }
 
 void TaxiPickupOption::operator ()(const DenseState& state, FiniteAction& action)
 {
-    if(state[sc::x] == location[0] && state[sc::y] == location[1])
-    {
-        terminate = true;
-        action.setActionN(an::pickup);
-    }
-    else
-    {
-        terminate = false;
-        goToLocation(state, action);
-    }
+    action.setActionN(an::pickup);
 }
 
 void TaxiDropOffOption::operator ()(const DenseState& state, FiniteAction& action)
 {
-    if(state[sc::x] == location[0] && state[sc::y] == location[1])
-    {
-        terminate = true;
-        action.setActionN(an::dropoff);
-    }
-    else
-    {
-        terminate = false;
-        goToLocation(state, action);
-    }
+    action.setActionN(an::dropoff);
 }
 
 void TaxiFillUpOption::operator ()(const DenseState& state, FiniteAction& action)
 {
-    if(state[sc::x] == location[0] && state[sc::y] == location[1])
-    {
-        terminate = true;
-        action.setActionN(an::fillup);
-    }
-    else
-    {
-        terminate = false;
-        goToLocation(state, action);
-    }
-
-}
-
-TaxiPickupOption::TaxiPickupOption(arma::vec location) : TaxiLocationOption(location)
-{
-
-}
-
-TaxiFillUpOption::TaxiFillUpOption(arma::vec location) : TaxiLocationOption(location)
-{
-
-}
-
-TaxiDropOffOption::TaxiDropOffOption(arma::vec location) : TaxiLocationOption(location)
-{
-
+    action.setActionN(an::fillup);
 }
 
 

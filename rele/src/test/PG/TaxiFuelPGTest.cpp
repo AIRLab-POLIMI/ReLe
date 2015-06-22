@@ -23,6 +23,20 @@
 
 #include "TaxiFuel.h"
 
+#include "Core.h"
+
+#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+
+#include "parametric/differentiable/GibbsPolicy.h"
+#include "features/DenseFeatures.h"
+#include "basis/IdentityBasis.h"
+#include "basis/PolynomialFunction.h"
+#include "basis/GaussianRbf.h"
+#include "basis/ConditionBasedFunction.h"
+
+#include "FileManager.h"
+#include "ConsoleManager.h"
+
 #include <iostream>
 
 using namespace std;
@@ -30,16 +44,84 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    TaxiFuel mdp;
-    DenseState test;
-    mdp.getInitialState(test);
+    TaxiFuel taxiMDP;
 
-    cout << test << endl;
+    FileManager fm("TaxiFuel", "PG");
+    fm.createDir();
+    fm.cleanDir();
 
-    Reward r(1);
-    mdp.step(FiniteAction(0), test, r);
 
-    cout << test << endl;
+    vector<FiniteAction> actions = FiniteAction::generate(TaxiFuel::ACTIONNUMBER);
 
-    //TODO completare
+    //-- Features
+    //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
+    //BasisFunctions basis = PolynomialFunction::generate(1, TaxiFuel::STATESIZE);
+    //BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
+    BasisFunctions basisSpace = VectorFiniteIdentityBasis::generate(2, 5);
+
+    vector<unsigned int> indexes;
+    vector<unsigned int> values;
+    indexes.push_back(TaxiFuel::onBoard);
+    values.push_back(2);
+    indexes.push_back(TaxiFuel::location);
+    values.push_back(4);
+    indexes.push_back(TaxiFuel::destination);
+    values.push_back(4);
+    BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
+    basis.push_back(new IdentityBasis(TaxiFuel::fuel));
+
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
+    DenseFeatures phi(basisGibbs);
+    cout << phi.rows() << endl;
+
+    double temperature = 100;
+    ParametricGibbsPolicy<DenseState> policy(actions, phi, temperature);
+
+    //-- agent
+    int nbepperpol = 10, nbstep = 100;
+    //AdaptiveStep stepRule(0.01);
+    ConstantStep stepRule(0.01);
+    GPOMDPAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, nbstep, stepRule,
+            GPOMDPAlgorithm<DenseAction, DenseState>::MULTI);
+
+    Core<FiniteAction, DenseState> core(taxiMDP, agent);
+    //--
+
+
+    int episodes = 50000;
+    core.getSettings().episodeLenght = 100;
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
+            WriteStrategy<FiniteAction, DenseState>::AGENT);
+
+
+    ConsoleManager console(episodes, 1);
+    console.printInfo("starting learning");
+    for (int i = 0; i < episodes; i++)
+    {
+        console.printProgress(i);
+        core.runEpisode();
+        if(temperature > 0.1)
+        {
+            temperature *= 0.9999;
+            cout << "temperature: " << temperature << endl;
+            policy.setTemperature(temperature);
+        }
+    }
+
+    delete core.getSettings().loggerStrategy;
+
+    console.printInfo("Starting evaluation episode");
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
+            WriteStrategy<FiniteAction, DenseState>::TRANS);
+
+    for(int i = 0; i < 10; i++)
+    {
+        cout << "# " << i + 1 << "/10" << endl;
+        core.runTestEpisode();
+    }
+
+    delete core.getSettings().loggerStrategy;
+
+    cout << "p" << policy.getParameters().t();
+    return 0;
 }

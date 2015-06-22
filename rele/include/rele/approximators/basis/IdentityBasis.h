@@ -72,6 +72,24 @@ public:
     static BasisFunctions_<size_t> generate(unsigned int stateN);
 };
 
+class VectorFiniteIdentityBasis : public IdentityBasis_<arma::vec>
+{
+public:
+    VectorFiniteIdentityBasis(unsigned int index, double value);
+    virtual ~VectorFiniteIdentityBasis();
+    double operator() (const arma::vec& input);
+
+
+    virtual void writeOnStream (std::ostream& out);
+    virtual void readFromStream(std::istream& in);
+
+    static BasisFunctions generate(std::vector<unsigned int> values);
+    static BasisFunctions generate(unsigned int stateN, unsigned int values);
+
+private:
+    double value;
+};
+
 
 template<class InputC>
 class InverseBasis_ : public BasisFunction_<InputC>

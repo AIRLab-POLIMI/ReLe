@@ -29,7 +29,7 @@
 namespace ReLe
 {
 
-TaxiFuel::TaxiFuel() : DenseMDP(STATESIZE, ACTIONNUMBER, 1, false, true, 0.9), gridDim(0, 5)
+TaxiFuel::TaxiFuel() : DenseMDP(STATESIZE, ACTIONNUMBER, 1, false, true, 0.9), gridDim(0, 4)
 {
     G = {4.0, 4.0};
     Y = {0.0, 0.0};

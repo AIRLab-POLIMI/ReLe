@@ -23,6 +23,8 @@
 
 #include "basis/IdentityBasis.h"
 
+#include <cassert>
+
 using namespace arma;
 
 namespace ReLe
@@ -113,5 +115,57 @@ BasisFunctions_<size_t> FiniteIdentityBasis::generate(unsigned int stateN)
 
     return basis;
 }
+
+
+VectorFiniteIdentityBasis::VectorFiniteIdentityBasis(unsigned int index, double value)
+    : value(value), IdentityBasis_<arma::vec>(index)
+{
+
+}
+
+VectorFiniteIdentityBasis::~VectorFiniteIdentityBasis()
+{
+
+}
+
+double VectorFiniteIdentityBasis::operator()(const arma::vec& input)
+{
+    return input[index] == value;
+}
+
+void VectorFiniteIdentityBasis::writeOnStream(std::ostream& out)
+{
+    out << "Finite Identity" << endl;
+    out << index << "," << value << endl;
+}
+
+void VectorFiniteIdentityBasis::readFromStream(std::istream& in)
+{
+    //TODO implement
+}
+
+BasisFunctions VectorFiniteIdentityBasis::generate(std::vector<unsigned int> valuesVector)
+{
+    BasisFunctions basis;
+
+    for(int i = 0; i < valuesVector.size(); i++)
+    {
+        unsigned int values = valuesVector[i];
+
+        for(int j = 0; j < values; j++)
+        {
+            basis.push_back(new VectorFiniteIdentityBasis(i, j));
+        }
+    }
+
+    return basis;
+}
+
+BasisFunctions VectorFiniteIdentityBasis::generate(unsigned int stateN, unsigned int values)
+{
+    std::vector<unsigned int> valuesVector(stateN, values);
+    return generate(valuesVector);
+}
+
 
 }//end namespace
