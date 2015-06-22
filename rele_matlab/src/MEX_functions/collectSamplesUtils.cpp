@@ -295,7 +295,7 @@ CollectSamplesInContinuousMDP(
             {
                 IndexRT rewardRegressor(i);
                 HessianFromDataWorker<DenseAction,DenseState,MVNPolicy> gdw(data, policy, rewardRegressor, gamma);
-                arma::mat h = gdw.ReinforceBaseHessian();
+                arma::mat h = gdw.GpomdpHessian();
 
                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
                 double* gptr = mxGetPr(hmat);
@@ -465,7 +465,7 @@ CollectSamplesInContinuousMDP(
             {
                 IndexRT rewardRegressor(i);
                 HessianFromDataWorker<DenseAction,DenseState,MVNDiagonalPolicy> gdw(data, policy, rewardRegressor, gamma);
-                arma::mat h = gdw.ReinforceBaseHessian();
+                arma::mat h = gdw.GpomdpHessian();
 
                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
                 double* gptr = mxGetPr(hmat);
@@ -576,7 +576,7 @@ CollectSamplesInDenseMDP(
 //             {
 //                 IndexRT rewardRegressor(i);
 //                 HessianFromDataWorker<FiniteAction,DenseState,MVNPolicy> gdw(data, policy, rewardRegressor, gamma);
-//                 arma::mat h = gdw.ReinforceBaseHessian();
+//                 arma::mat h = gdw.GpomdpHessian();
 //
 //                 mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
 //                 double* gptr = mxGetPr(hmat);

@@ -216,6 +216,62 @@ public:
         return hessian_J;
     }
 
+    arma::vec GpomdpHessian()
+    {
+        int dp  = policy.getParametersSize();
+        int nbEpisodes = data.size();
+
+        arma::vec sumGradLog(dp), localg;
+        arma::mat sumHessLog(dp,dp), localh;
+        arma::mat hessian_J(dp, dp, arma::fill::zeros);
+        double Rew;
+
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+
+
+            // *** GPOMDP CORE *** //
+            sumGradLog.zeros();
+            sumHessLog.zeros();
+            double df = 1.0;
+            Rew = 0.0;
+            // ********************** //
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Transition<ActionC, StateC>& tr = data[i][t];
+                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+
+                // *** GPOMDP CORE *** //
+                localg = policy.difflog(tr.x, tr.u);
+                localh = policy.diff2log(tr.x, tr.u);
+                sumGradLog += localg;
+                sumHessLog += localh;
+                double creward = rewardf->operator ()(tr.r);
+
+                // compute the hessian
+                hessian_J += df * creward * (sumGradLog * sumGradLog.t() + sumHessLog);
+                // ********************** //
+
+                df *= gamma;
+
+                if (tr.xn.isAbsorbing())
+                {
+                    assert(nbSteps == t+1);
+                    break;
+                }
+            }
+
+        }
+        // compute mean values
+        hessian_J /= nbEpisodes;
+
+        return hessian_J;
+    }
+
     void setPolicy(DifferentiablePolicy<ActionC,StateC>& policy)
     {
         this->policy = policy;

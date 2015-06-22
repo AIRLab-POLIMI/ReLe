@@ -215,7 +215,6 @@ public:
         int dp  = policy.getParametersSize();
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
-        double Rew;
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -227,7 +226,6 @@ public:
             // *** GPOMDP CORE *** //
             sumGradLog.zeros();
             double df = 1.0;
-            Rew = 0.0;
             // ********************** //
 
             //iterate the episode
@@ -240,10 +238,8 @@ public:
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 double creward = rewardf->operator ()(tr.r);
-                Rew += df * creward;
 
                 // compute the gradients
-                Rew += df * creward;
                 for (int p = 0; p < dp; ++p)
                 {
                     gradient_J[p] += df * creward * sumGradLog(p);
