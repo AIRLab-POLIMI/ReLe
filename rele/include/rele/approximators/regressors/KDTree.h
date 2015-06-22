@@ -53,6 +53,8 @@ class KDTree: public RegressionTree<InputC, OutputC>
     using RegressionTree<InputC, OutputC>::root;
     using RegressionTree<InputC, OutputC>::emptyNode;
 
+    using RegressionTree<InputC, OutputC>::mNMin;
+
 public:
 
     /**
@@ -61,9 +63,9 @@ public:
      */
     KDTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
            unsigned int input_size = 1, unsigned int output_size = 1,
-           int nm = 2) : RegressionTree<InputC, OutputC>(phi, emptyNode)
+           int nm = 2) : RegressionTree<InputC, OutputC>(phi, emptyNode, nm)
     {
-        mNMin = nm;
+
     }
 
     /**
@@ -72,15 +74,6 @@ public:
     virtual ~KDTree()
     {
 
-    }
-
-    /**
-     * Set nmin
-     * @param nm the minimum number of inputs for splitting
-     */
-    void setNMin(int nm)
-    {
-        mNMin = nm;
     }
 
     /**
@@ -99,21 +92,6 @@ public:
     {
         this->cleanTree();
         root = buildKDTree(dataset, 0);
-    }
-
-    /**
-     * Evaluate the tree
-     * @return OutputC
-     * @param  input The input data on which the model is evaluated
-     */
-    virtual OutputC evaluate(const InputC& input)
-    {
-        if (root == NULL)
-        {
-            throw std::runtime_error("Empty tree evaluated");
-        }
-
-        return root->getValue(phi(input));
     }
 
     /**
@@ -295,8 +273,6 @@ private:
     }
 
 private:
-    unsigned int mNMin;  // minimum number of tuples for splitting
-
     static constexpr double THRESHOLD = 0.00000001;
 
 };

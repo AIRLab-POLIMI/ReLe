@@ -35,13 +35,38 @@ namespace ReLe
 {
 
 template<class InputC, class OutputC>
-class RegressionTree : public BatchRegressor_<InputC, OutputC>
+class RegressionTree: public BatchRegressor_<InputC, OutputC>
 {
 public:
-    RegressionTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode)
-        : phi(phi), root(nullptr), emptyNode(emptyNode)
+    RegressionTree(Features_<InputC>& phi,
+                   const EmptyTreeNode<OutputC>& emptyNode, unsigned int mNMin = 2) :
+        phi(phi), root(nullptr), emptyNode(emptyNode), mNMin(mNMin)
     {
 
+    }
+
+    /**
+     * Evaluate the tree
+     * @return OutputC
+     * @param  input The input data on which the model is evaluated
+     */
+    virtual OutputC evaluate(const InputC& input)
+    {
+        if (root == NULL)
+        {
+            throw std::runtime_error("Empty tree evaluated");
+        }
+
+        return root->getValue(phi(input));
+    }
+
+    /**
+     * Set nmin
+     * @param nm the minimum number of inputs for splitting
+     */
+    void setNMin(int nm)
+    {
+        mNMin = nm;
     }
 
     virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
@@ -67,17 +92,14 @@ protected:
             delete root;
     }
 
-
 protected:
     Features_<InputC>& phi;
     TreeNode<OutputC>* root;
     EmptyTreeNode<OutputC> emptyNode;
 
+    unsigned int mNMin;  // minimum number of tuples for splitting
 };
 
-
 }
-
-
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_ */
