@@ -422,10 +422,18 @@ CollectSamplesInContinuousMDP(
         Dam mdp(settings);
 
         PolynomialFunction *pf = new PolynomialFunction();
-        GaussianRbf* gf1 = new GaussianRbf(0, 50, true);
-        GaussianRbf* gf2 = new GaussianRbf(50, 20, true);
-        GaussianRbf* gf3 = new GaussianRbf(120, 40, true);
-        GaussianRbf* gf4 = new GaussianRbf(160, 50, true);
+        //         GaussianRbf* gf1 = new GaussianRbf(-4, 1/0.0013, false);
+//         GaussianRbf* gf2 = new GaussianRbf(52, 1/0.0013, false);
+//         GaussianRbf* gf3 = new GaussianRbf(108, 1/0.0013, false);
+//         GaussianRbf* gf4 = new GaussianRbf(164, 1/0.0013, false);
+        GaussianRbf* gf1 = new GaussianRbf(-20, 60, true);
+        GaussianRbf* gf2 = new GaussianRbf(50, 60, true);
+        GaussianRbf* gf3 = new GaussianRbf(120, 60, true);
+        GaussianRbf* gf4 = new GaussianRbf(190, 60, true);
+//         GaussianRbf* gf1 = new GaussianRbf(0, 50, true);
+//         GaussianRbf* gf2 = new GaussianRbf(50, 20, true);
+//         GaussianRbf* gf3 = new GaussianRbf(120, 40, true);
+//         GaussianRbf* gf4 = new GaussianRbf(160, 50, true);
         BasisFunctions basis;
         basis.push_back(pf);
         basis.push_back(gf1);
