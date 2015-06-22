@@ -216,7 +216,7 @@ public:
         return hessian_J;
     }
 
-    arma::vec GpomdpHessian()
+    arma::mat GpomdpHessian()
     {
         int dp  = policy.getParametersSize();
         int nbEpisodes = data.size();

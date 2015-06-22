@@ -210,7 +210,7 @@ public:
         return gradient_J;
     }
 
-    arma::mat GpomdpGradient()
+    arma::vec GpomdpGradient()
     {
         int dp  = policy.getParametersSize();
         arma::vec sumGradLog(dp), localg;
