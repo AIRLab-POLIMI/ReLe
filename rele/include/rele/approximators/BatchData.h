@@ -32,13 +32,67 @@
 namespace ReLe
 {
 
+//Traits to handle output
+template<class OutputC>
+struct output_traits
+{
+    static arma::mat square(const OutputC& o)
+    {
+        return arma::mat();
+    }
+
+    static bool isAlmostEqual(const OutputC& o1, const OutputC& o2)
+    {
+        return o1 == o2;
+    }
+
+};
+
+template<>
+struct output_traits<arma::vec>
+{
+    static arma::mat square(const arma::vec& o)
+    {
+        return o*o.t();
+    }
+
+    static bool isAlmostEqual(const arma::vec& o1, const arma::vec& o2)
+    {
+        return arma::norm(o1 - o2) < 1e-7;
+    }
+
+};
+
+template<>
+struct output_traits<unsigned int>
+{
+    static arma::mat square(const unsigned int& o)
+    {
+    	arma::mat m;
+    	m = o*o;
+        return m;
+    }
+
+    static bool isAlmostEqual(const unsigned int& o1, const unsigned int& o2)
+    {
+        return std::abs(o1 - o2) < 1e-7;
+    }
+};
+
+
 template<class InputC, class OutputC>
 class MiniBatchData;
 
 template<class InputC, class OutputC>
 class BatchData
 {
+
 public:
+    BatchData()
+    {
+    	computed = false;
+    }
+
     virtual const InputC& getInput(unsigned int index) const = 0;
     virtual const OutputC& getOutput(unsigned int index) const = 0;
     virtual size_t size() const = 0;
@@ -69,10 +123,61 @@ public:
         return new MiniBatchData<InputC, OutputC>(this, indexes);
     }
 
+    OutputC getMean() const
+    {
+    	if(!computed)
+    	{
+    		computeMeanVariance();
+    		computed = true;
+    	}
+
+        return mean;
+    }
+
+    arma::mat getVariance() const
+    {
+    	if(!computed)
+    	{
+    		computeMeanVariance();
+    		computed = true;
+    	}
+
+        return variance;
+    }
+
     virtual ~BatchData()
     {
 
     }
+
+protected:
+    void computeMeanVariance() const
+    {
+        if (size() == 0)
+        {
+            return;
+        }
+
+        const OutputC& output = getOutput(0);
+        mean = output;
+        arma::mat m2 = output_traits<OutputC>::square(output);
+
+        for (int i = 1; i < size(); i++)
+        {
+            const OutputC& output = getOutput(i);
+            mean += output;
+            m2 += output_traits<OutputC>::square(output);
+        }
+
+        mean /= size();
+        m2 /= size();
+        variance = m2 - output_traits<OutputC>::square(mean);
+    }
+
+private:
+    mutable bool computed;
+    mutable arma::mat variance;
+    mutable OutputC mean;
 };
 
 template<class InputC, class OutputC>
@@ -189,33 +294,7 @@ private:
 
 };
 
-//Traits to handle output comparison
-template<class OutputC>
-struct output_traits
-{
-    static bool isAlmostEqual(const OutputC& o1, const OutputC& o2)
-    {
-        return o1 == o2;
-    }
-};
 
-template<>
-struct output_traits<arma::vec>
-{
-    static bool isAlmostEqual(const arma::vec& o1, const arma::vec& o2)
-    {
-        return arma::norm(o1 - o2) < 1e-7;
-    }
-};
-
-template<>
-struct output_traits<unsigned int>
-{
-    static bool isAlmostEqual(const unsigned int& o1, const unsigned int& o2)
-    {
-        return std::abs(o1 - o2) < 1e-7;
-    }
-};
 
 
 

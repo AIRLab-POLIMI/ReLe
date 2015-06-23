@@ -49,6 +49,7 @@ enum LeafType
 template<class InputC, class OutputC>
 class LeafTreeNode : public TreeNode<OutputC>
 {
+
 public:
 
     /**
@@ -65,7 +66,7 @@ public:
      */
     LeafTreeNode(const BatchData<InputC, OutputC>& data)
     {
-
+        fit(data);
     }
 
     /**
@@ -82,7 +83,8 @@ public:
      */
     virtual void fit(const BatchData<InputC, OutputC>& data)
     {
-        //TODO implement
+    	value = data.getMean();
+    	variance = data.getVariance();
     }
 
     /**
@@ -91,7 +93,7 @@ public:
      */
     virtual OutputC getValue(const arma::vec& input)
     {
-        return mValue;
+        return value;
     }
 
     /**
@@ -110,8 +112,8 @@ public:
     virtual void writeOnStream(std::ofstream& out)
     {
         out << "L" << std::endl;
-        out << mValue << std::endl;
-        out << mVariance << std::endl;
+        out << value << std::endl;
+        out << variance << std::endl;
     }
 
     /**
@@ -123,8 +125,20 @@ public:
     }
 
 protected:
-    OutputC mValue; // The value
-    OutputC mVariance;
+    OutputC value; // The value
+    arma::mat variance; //The variance
+
+};
+
+template<class InputC, class OutputC>
+class SampleLeafTreeNode : public LeafTreeNode<InputC, OutputC>
+{
+
+};
+
+template<class InputC, class OutputC>
+class LinearLeafTreeNode : public LeafTreeNode<InputC, OutputC>
+{
 
 };
 

@@ -63,9 +63,9 @@ public:
                   5, int nmin = 2, double score_th = 0.0)
         : RegressionTree<InputC, OutputC>(phi, emptyNode, nmin), leafType(leafType)
     {
-        mNumSplits = k;
-        mFeatureRelevance = nullptr;
-        mScoreThreshold = score_th;
+        numSplits = k;
+        featureRelevance = nullptr;
+        scoreThreshold = score_th;
     }
 
     /**
@@ -81,13 +81,13 @@ public:
      */
     void initFeatureRanks()
     {
-        if (mFeatureRelevance == nullptr)
+        if (featureRelevance == nullptr)
         {
-            mFeatureRelevance = new double[phi.rows()];
+            featureRelevance = new double[phi.rows()];
         }
         for (unsigned int i = 0; i < phi.rows(); i++)
         {
-            mFeatureRelevance[i] = 0.0;
+            featureRelevance[i] = 0.0;
         }
     }
 
@@ -125,7 +125,7 @@ public:
      */
     double* evaluateFeatures()
     {
-        return mFeatureRelevance;
+        return featureRelevance;
     }
 
 private:
@@ -138,7 +138,7 @@ private:
         /*************** part 1 - END CONDITIONS ********************/
         int size = ds.size(); //size of dataset
         // END CONDITION 1: return a leaf if |ex| is less than nmin
-        if (size < mNMin)
+        if (size < nMin)
         {
             if (size == 0)
             {
@@ -163,7 +163,7 @@ private:
         }
         if (eq)
         {
-        	return this->buildLeaf(ds, leafType);
+            return this->buildLeaf(ds, leafType);
         }
 
         unsigned int attnum = phi.rows(); //number of attributes
@@ -190,7 +190,7 @@ private:
         // END CONDITION 3: return a leaf if all input variables are equals
         if (eq)
         {
-        	return this->buildLeaf(ds, leafType);
+            return this->buildLeaf(ds, leafType);
         }
 
         /************** part 2 - TREE GENERATIONS *******************/
@@ -218,7 +218,7 @@ private:
         //them will be candidate to split, else they will randomly
         //selected
         unsigned int candidates_size =
-            selectable <= mNumSplits ? selectable : mNumSplits;
+            selectable <= numSplits ? selectable : numSplits;
         std::vector<unsigned int> candidates(candidates_size);
         unsigned int num_candidates = candidates_size;
 
@@ -280,13 +280,13 @@ private:
         }
 
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
-        if (bestscore < mScoreThreshold)
+        if (bestscore < scoreThreshold)
         {
-        	return this->buildLeaf(ds, leafType);
+            return this->buildLeaf(ds, leafType);
         }
         else
         {
-            if (mFeatureRelevance != nullptr)
+            if (featureRelevance != nullptr)
             {
                 double variance_reduction = varianceReduction(ds, bestLow,
                                             bestHigh) /* ds.size() * ds->Variance()*/;
@@ -296,10 +296,10 @@ private:
                 set<int>::iterator it;
                 for (it = mSplittedAttributes.begin(); it != mSplittedAttributes.end(); ++it)
                 {
-                    mFeatureRelevance[*it] += variance_reduction / (double)mSplittedAttributes.size();
+                    featureRelevance[*it] += variance_reduction / (double)mSplittedAttributes.size();
                 }
 #else
-                mFeatureRelevance[bestattribute] += variance_reduction;
+                featureRelevance[bestattribute] += variance_reduction;
 #endif
             }
 
@@ -308,7 +308,7 @@ private:
             TreeNode<OutputC>* right = BuildExtraTree(bestHigh);
 
 #ifdef FEATURE_PROPAGATION
-            if (mFeatureRelevance != NULL)
+            if (featureRelevance != NULL)
             {
                 mSplittedAttributesCount.erase(mSplittedAttributesCount.find(bestattribute));
                 if (mSplittedAttributesCount.find(bestattribute) == mSplittedAttributesCount.end())
@@ -352,15 +352,16 @@ private:
                 max = tmp;
             }
         }
+
         //return a value in (min, max]
         return RandomGenerator::sampleUniformHigh(min, max);
 #else
-        unsigned int r = rand() % ds->size();
-        double value = ds->at(r)->GetInput(attsplit);
+        unsigned int r = RandomGenerator::sampleUniform(0, ds->size());
+        double value = phi(ds.getInput(r))[attsplit];
         double previous = value, next = value;
-        for (unsigned int c = 0; c < ds->size(); c++)
+        for (unsigned int c = 0; c < ds.size(); c++)
         {
-            double tmp = ds->at(c)->GetInput(attsplit);
+            double tmp = phi(ds.getInput(c))[attsplit];
             if (tmp < value && tmp > previous)
             {
                 previous = tmp;
@@ -378,7 +379,8 @@ private:
                 next = tmp;
             }
         }
-//   cout << "R = " << r << " out of " << ds->size() << endl;
+
+        //return a value in (previous, next]
         return RandomGenerator::sampleUniformHigh(previous, next);
 #endif
     }
@@ -397,17 +399,17 @@ private:
         // VARIANCE REDUCTION
         double corr_fact_dsl = 1.0, corr_fact_dsr = 1.0, corr_fact_ds = 1.0;
 #ifdef VAR_RED_CORR
-        if (dsl->size() > 1)
+        if (dsl.size() > 1)
         {
-            corr_fact_dsl = (double)(dsl->size() / (dsl->size() - 1));
+            corr_fact_dsl = static_cast<double>(dsl.size() / (dsl.size() - 1));
             corr_fact_dsl *= corr_fact_dsl;
         }
-        if (dsr->size() > 1)
+        if (dsr.size() > 1)
         {
-            corr_fact_dsr = (double)(dsr->size() / (dsr->size() - 1));
+            corr_fact_dsr = static_cast<double>(dsr.size() / (dsr.size() - 1));
             corr_fact_dsr *= corr_fact_dsr;
         }
-        corr_fact_ds = (double)(ds->size() / (ds->size() - 1));
+        corr_fact_ds = static_cast<double>(ds.size() / (ds.size() - 1));
         corr_fact_ds *= corr_fact_ds;
 #endif
         if (ds.size() == 0 /*|| ds->Variance() == 0.0*/)
@@ -416,8 +418,11 @@ private:
         }
         else
         {
-            //FIXME
-            return 1 ;//- ((double)corr_fact_dsl * dsl->size() * dsl->Variance() + (double)corr_fact_dsr * dsr->size() * dsr->Variance()) / ((double)corr_fact_ds * ds->size() * ds->Variance());
+        	arma::mat varDS = corr_fact_ds * ds.size() * ds.getVariance();
+        	arma::mat varDSL = corr_fact_dsl * dsl.size() * dsl.getVariance();
+        	arma::mat varDSR = corr_fact_dsr * dsr.size() * dsr.getVariance();
+            arma::mat I = arma::eye(varDS.n_rows, varDS.n_cols);
+            return arma::det(I - (varDSL + varDSR) * arma::inv(varDS)); //TODO check
         }
     }
 
@@ -518,9 +523,9 @@ private:
 
 private:
     LeafType leafType;
-    int mNumSplits; //number of selectable attributes to be randomly picked
-    double* mFeatureRelevance; //array of relevance values of input feature
-    double mScoreThreshold;
+    int numSplits; //number of selectable attributes to be randomly picked
+    double* featureRelevance; //array of relevance values of input feature
+    double scoreThreshold;
     //multiset<int> mSplittedAttributesCount; FIXME
     //set<int> mSplittedAttributes; FIXME
 };

@@ -169,7 +169,7 @@ private:
     {
         unsigned int size = ds.size();
         /*****************part 1: end conditions*********************/
-        if (size < mNMin)
+        if (size < nMin)
         {
             // if true -> leaf
             if (size == 0)
@@ -179,7 +179,7 @@ private:
             }
             else
             {
-               return this->buildLeaf(ds, store_sample ? Samples : Constant);
+                return this->buildLeaf(ds, store_sample ? Samples : Constant);
             }
         }
 
@@ -198,7 +198,7 @@ private:
         // if constants create a leaf
         if (equal)
         {
-        	return this->buildLeaf(ds, store_sample ? Samples : Constant);
+            return this->buildLeaf(ds, store_sample ? Samples : Constant);
         }
 
         /****************part 2: generate the tree**************/

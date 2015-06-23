@@ -40,7 +40,7 @@ class RegressionTree: public BatchRegressor_<InputC, OutputC>
 public:
     RegressionTree(Features_<InputC>& phi,
                    const EmptyTreeNode<OutputC>& emptyNode, unsigned int mNMin = 2) :
-        phi(phi), root(nullptr), emptyNode(emptyNode), mNMin(mNMin)
+        phi(phi), root(nullptr), emptyNode(emptyNode), nMin(mNMin)
     {
 
     }
@@ -61,12 +61,12 @@ public:
     }
 
     /**
-     * Set nmin
+     * Set nMin
      * @param nm the minimum number of inputs for splitting
      */
     void setNMin(int nm)
     {
-        mNMin = nm;
+        nMin = nm;
     }
 
     /**
@@ -74,7 +74,7 @@ public:
      */
     int getNMin()
     {
-        return mNMin;
+        return nMin;
     }
 
     virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
@@ -144,7 +144,7 @@ protected:
     TreeNode<OutputC>* root;
     EmptyTreeNode<OutputC> emptyNode;
 
-    unsigned int mNMin;  // minimum number of tuples for splitting
+    unsigned int nMin;  // minimum number of tuples for splitting
 };
 
 #define USE_REGRESSION_TREE_MEMBERS               \
@@ -152,7 +152,7 @@ protected:
 	using Base::phi;                              \
     using Base::root;                             \
     using Base::emptyNode;                        \
-    using Base::mNMin;
+    using Base::nMin;
 
 }
 
