@@ -49,11 +49,7 @@ namespace ReLe
 template<class InputC, class OutputC>
 class KDTree: public RegressionTree<InputC, OutputC>
 {
-    using RegressionTree<InputC, OutputC>::phi;
-    using RegressionTree<InputC, OutputC>::root;
-    using RegressionTree<InputC, OutputC>::emptyNode;
-
-    using RegressionTree<InputC, OutputC>::mNMin;
+    USE_REGRESSION_TREE_MEMBERS
 
 public:
 
@@ -74,14 +70,6 @@ public:
     virtual ~KDTree()
     {
 
-    }
-
-    /**
-     * Get nmin
-     */
-    int getNMin()
-    {
-        return mNMin;
     }
 
     /**
@@ -191,15 +179,7 @@ private:
             }
             else
             {
-                if (store_sample)
-                {
-                    //return new rtLeafSample(ds->Clone());
-                    return nullptr; //FIXME implement
-                }
-                else
-                {
-                    return new LeafTreeNode<InputC, OutputC>(ds);
-                }
+               return this->buildLeaf(ds, store_sample ? Samples : Constant);
             }
         }
 
@@ -218,15 +198,7 @@ private:
         // if constants create a leaf
         if (equal)
         {
-            if (store_sample)
-            {
-                //return new rtLeafSample(ds->Clone());
-                return nullptr; //FIXME implement
-            }
-            else
-            {
-                return new LeafTreeNode<InputC, OutputC>(ds);
-            }
+        	return this->buildLeaf(ds, store_sample ? Samples : Constant);
         }
 
         /****************part 2: generate the tree**************/

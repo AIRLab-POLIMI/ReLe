@@ -30,6 +30,17 @@ namespace ReLe
 {
 
 /**
+ * LeafType is an enum that list all possible leaf types for a tree
+ */
+
+enum LeafType
+{
+    Constant,
+    Linear,
+    Samples
+};
+
+/**
  * LeafTreeNode is a template class that represents a leaf of a
  * regression tree.
  * This class extends TreeNode and contains methods to set/get the value

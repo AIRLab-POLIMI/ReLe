@@ -22,6 +22,7 @@
  */
 
 #include "regressors/KDTree.h"
+#include "regressors/ExtraTree.h"
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
 

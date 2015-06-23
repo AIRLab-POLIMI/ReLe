@@ -43,7 +43,7 @@ namespace ReLe
 template<class InputC, class OutputC>
 class ExtraTree: public RegressionTree<InputC, OutputC>
 {
-    using RegressionTree<InputC, OutputC>::root;
+    USE_REGRESSION_TREE_MEMBERS
 
     enum AttributeState
     {
@@ -59,12 +59,11 @@ public:
      * @param k number of selectable attributes to be randomly picked
      * @param nmin minimum number of tuples in a leaf
      */
-    ExtraTree(unsigned int input_size = 1, unsigned int output_size = 1, int k =
+    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant, unsigned int output_size = 1, int k =
                   5, int nmin = 2, double score_th = 0.0)
+        : RegressionTree<InputC, OutputC>(phi, emptyNode, nmin), leafType(leafType)
     {
-        root = NULL;
         mNumSplits = k;
-        mNMin = nmin;
         mFeatureRelevance = nullptr;
         mScoreThreshold = score_th;
     }
@@ -99,7 +98,7 @@ public:
      it can be more efficient to reuse some structures.
      This can be done by setting this parameter to false
      */
-    virtual void train(const BatchDataset_<InputC, OutpuC>& ds)
+    virtual void train(const BatchData<InputC, OutputC>& ds)
     {
         this->cleanTree();
         root = buildExtraTree(ds);
@@ -141,22 +140,13 @@ private:
         // END CONDITION 1: return a leaf if |ex| is less than nmin
         if (size < mNMin)
         {
-            // 		cout << "size = " << size << endl;
             if (size == 0)
             {
-                return 0;    //EMPTYLEAF
+                return &emptyNode;    //EMPTYLEAF
             }
             else
             {
-                if (mLeafType == CONSTANT)
-                {
-                    return new LeafTreeNode<InputC, OutputC>(ds);
-                }
-                else
-                {
-                    //return new rtLeafLinearInterp(ds);
-                    //TODO implement
-                }
+                return this->buildLeaf(ds, leafType);
             }
         }
         // END CONDITION 2: return a leaf if all output variables are equals
@@ -173,15 +163,7 @@ private:
         }
         if (eq)
         {
-            if (mLeafType == CONSTANT)
-            {
-                return new LeafTreeNode<InputC, OutputC>(ds);
-            }
-            else
-            {
-                //return new rtLeafLinearInterp(ds);
-                //TODO implement
-            }
+        	return this->buildLeaf(ds, leafType);
         }
 
         unsigned int attnum = phi.rows(); //number of attributes
@@ -208,14 +190,7 @@ private:
         // END CONDITION 3: return a leaf if all input variables are equals
         if (eq)
         {
-            if (mLeafType == CONSTANT)
-            {
-                return new rtLeaf(ds);
-            }
-            else
-            {
-                return new rtLeafLinearInterp(ds);
-            }
+        	return this->buildLeaf(ds, leafType);
         }
 
         /************** part 2 - TREE GENERATIONS *******************/
@@ -298,8 +273,8 @@ private:
             {
                 bestscore = s;
                 bestsplit = split;
-                bestSl = low;
-                bestSr = high;
+                bestLow = low;
+                bestHigh = high;
                 bestattribute = candidates[c];
             }
         }
@@ -307,15 +282,7 @@ private:
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
         if (bestscore < mScoreThreshold)
         {
-            if (mLeafType == CONSTANT)
-            {
-                return new LeafTreeNode<InputC, OutputC>(ds);
-            }
-            else
-            {
-                //return new rtLeafLinearInterp(ds);
-                //TODO implement
-            }
+        	return this->buildLeaf(ds, leafType);
         }
         else
         {
@@ -363,7 +330,7 @@ private:
      * @param attsplit number of attribute to split
      * @return the split value
      */
-    double pickRandomSplit(const BatchData<InputC, outputC>& ds, int attsplit)
+    double pickRandomSplit(const BatchData<InputC, OutputC>& ds, int attsplit)
     {
 #ifdef SPLIT_UNIFORM
         double min, max, tmp;
@@ -386,7 +353,7 @@ private:
             }
         }
         //return a value in (min, max]
-        return sampleUniformHigh(min, max);
+        return RandomGenerator::sampleUniformHigh(min, max);
 #else
         unsigned int r = rand() % ds->size();
         double value = ds->at(r)->GetInput(attsplit);
@@ -412,7 +379,7 @@ private:
             }
         }
 //   cout << "R = " << r << " out of " << ds->size() << endl;
-        return sampleUniformHigh(previous, next);
+        return RandomGenerator::sampleUniformHigh(previous, next);
 #endif
     }
 
@@ -424,8 +391,8 @@ private:
      * @return the percentage of variance
      */
     double varianceReduction(const BatchData<InputC, OutputC>& ds,
-    						 const BatchData<InputC, OutputC>& dsl,
-							 const BatchData<InputC, OutputC>& dsr)
+                             const BatchData<InputC, OutputC>& dsl,
+                             const BatchData<InputC, OutputC>& dsr)
     {
         // VARIANCE REDUCTION
         double corr_fact_dsl = 1.0, corr_fact_dsr = 1.0, corr_fact_ds = 1.0;
@@ -449,7 +416,7 @@ private:
         }
         else
         {
-        	//FIXME
+            //FIXME
             return 1 ;//- ((double)corr_fact_dsl * dsl->size() * dsl->Variance() + (double)corr_fact_dsr * dsr->size() * dsr->Variance()) / ((double)corr_fact_ds * ds->size() * ds->Variance());
         }
     }
@@ -462,8 +429,8 @@ private:
      * @return the probability value
      */
     double probabilityDifferentMeans(const BatchData<InputC, OutputC>& ds,
-				 const BatchData<InputC, OutputC>& dsl,
-				 const BatchData<InputC, OutputC>& dsr)
+                                     const BatchData<InputC, OutputC>& dsl,
+                                     const BatchData<InputC, OutputC>& dsr)
     {
         if (ds.size() == 0)
             return 0.0;
@@ -538,7 +505,9 @@ private:
      * @param sr the right partition of the observations set
      * @return the score
      */
-    double score(Dataset* ds, Dataset* dsl, Dataset* dsr)
+    double score(const BatchData<InputC, OutputC>& ds,
+                 const BatchData<InputC, OutputC>& dsl,
+                 const BatchData<InputC, OutputC>& dsr)
     {
 #ifdef SPLIT_VARIANCE
         return varianceReduction(ds, dsl, dsr);
@@ -548,12 +517,12 @@ private:
     }
 
 private:
-    int mNMin; //minimum number of tuples for splitting
+    LeafType leafType;
     int mNumSplits; //number of selectable attributes to be randomly picked
     double* mFeatureRelevance; //array of relevance values of input feature
     double mScoreThreshold;
     //multiset<int> mSplittedAttributesCount; FIXME
-    set<int> mSplittedAttributes;
+    //set<int> mSplittedAttributes; FIXME
 };
 
 }

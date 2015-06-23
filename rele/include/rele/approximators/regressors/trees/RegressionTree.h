@@ -69,6 +69,14 @@ public:
         mNMin = nm;
     }
 
+    /**
+     * Get nmin
+     */
+    int getNMin()
+    {
+        return mNMin;
+    }
+
     virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
 
     /**
@@ -114,6 +122,23 @@ protected:
         }
     }
 
+    TreeNode<OutputC>* buildLeaf(const BatchData<InputC, OutputC>& ds, LeafType type)
+    {
+        switch(type)
+        {
+        case Constant:
+            return new LeafTreeNode<InputC, OutputC>(ds);
+        case Linear:
+            return nullptr; //TODO implement
+        case Samples:
+            return nullptr; //TODO implement
+        default:
+            return nullptr;
+        }
+    }
+
+
+
 protected:
     Features_<InputC>& phi;
     TreeNode<OutputC>* root;
@@ -121,6 +146,13 @@ protected:
 
     unsigned int mNMin;  // minimum number of tuples for splitting
 };
+
+#define USE_REGRESSION_TREE_MEMBERS               \
+	typedef RegressionTree<InputC, OutputC> Base; \
+	using Base::phi;                              \
+    using Base::root;                             \
+    using Base::emptyNode;                        \
+    using Base::mNMin;
 
 }
 
