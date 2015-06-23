@@ -68,8 +68,8 @@ struct output_traits<unsigned int>
 {
     static arma::mat square(const unsigned int& o)
     {
-    	arma::mat m;
-    	m = o*o;
+        arma::mat m;
+        m = o*o;
         return m;
     }
 
@@ -90,7 +90,7 @@ class BatchData
 public:
     BatchData()
     {
-    	computed = false;
+        computed = false;
     }
 
     virtual const InputC& getInput(unsigned int index) const = 0;
@@ -125,22 +125,22 @@ public:
 
     OutputC getMean() const
     {
-    	if(!computed)
-    	{
-    		computeMeanVariance();
-    		computed = true;
-    	}
+        if(!computed)
+        {
+            computeMeanVariance();
+            computed = true;
+        }
 
         return mean;
     }
 
     arma::mat getVariance() const
     {
-    	if(!computed)
-    	{
-    		computeMeanVariance();
-    		computed = true;
-    	}
+        if(!computed)
+        {
+            computeMeanVariance();
+            computed = true;
+        }
 
         return variance;
     }
@@ -234,6 +234,11 @@ public:
             return data.size();
 
         return indexes.size();
+    }
+
+    void setIndexes(std::vector<unsigned int>& indexes)
+    {
+        this->indexes = indexes;
     }
 
     virtual ~MiniBatchData()

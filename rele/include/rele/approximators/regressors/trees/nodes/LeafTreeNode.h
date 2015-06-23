@@ -83,8 +83,8 @@ public:
      */
     virtual void fit(const BatchData<InputC, OutputC>& data)
     {
-    	value = data.getMean();
-    	variance = data.getVariance();
+        value = data.getMean();
+        variance = data.getVariance();
     }
 
     /**

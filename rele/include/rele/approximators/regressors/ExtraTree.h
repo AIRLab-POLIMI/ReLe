@@ -59,9 +59,9 @@ public:
      * @param k number of selectable attributes to be randomly picked
      * @param nmin minimum number of tuples in a leaf
      */
-    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant, unsigned int output_size = 1, int k =
-                  5, int nmin = 2, double score_th = 0.0)
-        : RegressionTree<InputC, OutputC>(phi, emptyNode, nmin), leafType(leafType)
+    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
+              unsigned int output_size = 1, int k = 5, unsigned int nmin = 2, double score_th = 0.0)
+        : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nmin), leafType(leafType)
     {
         numSplits = k;
         featureRelevance = nullptr;
@@ -246,38 +246,43 @@ private:
         double bestsplit = pickRandomSplit(ds, candidates[0]); //best split value
 
         // split inputs in two subsets
-        std::vector<unsigned int> indexesLow;
-        std::vector<unsigned int> indexesHigh;
-        this->splitDataset(ds, bestattribute, bestsplit, indexesLow, indexesHigh);
+        std::vector<unsigned int> indexesLowBest;
+        std::vector<unsigned int> indexesHighBest;
 
-        MiniBatchData<InputC, OutputC> bestLow(ds,indexesLow);
-        MiniBatchData<InputC, OutputC> bestHigh(ds,indexesHigh);
+        this->splitDataset(ds, bestattribute, bestsplit, indexesLowBest, indexesHighBest);
 
-        double bestscore = score(ds, bestLow, bestHigh);
+        MiniBatchData<InputC, OutputC> low(ds,indexesLowBest);
+        MiniBatchData<InputC, OutputC> high(ds,indexesHighBest);
+
+        double bestscore = score(ds, low, high);
 
         //generates remaining splits and overwrites the actual best if better one is found
         for (unsigned int c = 1; c < candidates_size; c++)
         {
             double split = pickRandomSplit(ds, candidates[c]);
 
-            indexesLow.clear();
-            indexesHigh.clear();
-            this->splitDataset(ds, bestattribute, bestsplit, indexesLow, indexesHigh);
+            std::vector<unsigned int> indexesLow;
+            std::vector<unsigned int> indexesHigh;
+            this->splitDataset(ds, bestattribute, split, indexesLow, indexesHigh);
 
-            MiniBatchData<InputC, OutputC> low(ds,indexesLow);
-            MiniBatchData<InputC, OutputC> high(ds,indexesHigh);
-
+            low.setIndexes(indexesLow);
+            high.setIndexes(indexesHigh);
             double s = score(ds, low, high);
+
             //check if a better split was found
             if (s > bestscore)
             {
                 bestscore = s;
                 bestsplit = split;
-                bestLow = low;
-                bestHigh = high;
+                indexesLowBest = indexesLow;
+                indexesHighBest = indexesHigh;
                 bestattribute = candidates[c];
             }
         }
+
+        //get the best split of two datasets
+        low.setIndexes(indexesLowBest);
+        high.setIndexes(indexesHighBest);
 
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
         if (bestscore < scoreThreshold)
@@ -288,8 +293,8 @@ private:
         {
             if (featureRelevance != nullptr)
             {
-                double variance_reduction = varianceReduction(ds, bestLow,
-                                            bestHigh) /* ds.size() * ds->Variance()*/;
+                double variance_reduction = varianceReduction(ds, low,
+                                            high) /* ds.size() * ds->Variance()*/; //FIXME toggle comment
 #ifdef FEATURE_PROPAGATION
                 mSplittedAttributes.insert(bestattribute);
                 mSplittedAttributesCount.insert(bestattribute);
@@ -304,8 +309,8 @@ private:
             }
 
             //build the left and the right children
-            TreeNode<OutputC>* left = BuildExtraTree(bestLow);
-            TreeNode<OutputC>* right = BuildExtraTree(bestHigh);
+            TreeNode<OutputC>* left = buildExtraTree(low);
+            TreeNode<OutputC>* right = buildExtraTree(high);
 
 #ifdef FEATURE_PROPAGATION
             if (featureRelevance != NULL)
@@ -418,9 +423,9 @@ private:
         }
         else
         {
-        	arma::mat varDS = corr_fact_ds * ds.size() * ds.getVariance();
-        	arma::mat varDSL = corr_fact_dsl * dsl.size() * dsl.getVariance();
-        	arma::mat varDSR = corr_fact_dsr * dsr.size() * dsr.getVariance();
+            arma::mat varDS = corr_fact_ds * ds.size() * ds.getVariance();
+            arma::mat varDSL = corr_fact_dsl * dsl.size() * dsl.getVariance();
+            arma::mat varDSR = corr_fact_dsr * dsr.size() * dsr.getVariance();
             arma::mat I = arma::eye(varDS.n_rows, varDS.n_cols);
             return arma::det(I - (varDSL + varDSR) * arma::inv(varDS)); //TODO check
         }

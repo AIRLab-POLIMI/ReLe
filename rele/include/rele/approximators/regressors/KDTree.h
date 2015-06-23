@@ -58,8 +58,8 @@ public:
      * @param nm nmin, the minimum number of tuples for splitting
      */
     KDTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
-           unsigned int input_size = 1, unsigned int output_size = 1,
-           int nm = 2) : RegressionTree<InputC, OutputC>(phi, emptyNode, nm)
+           unsigned int output_size = 1, unsigned int nm = 2)
+        : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nm)
     {
 
     }
@@ -223,7 +223,7 @@ private:
     }
 
 private:
-    static constexpr double THRESHOLD = 0.00000001;
+    static constexpr double THRESHOLD = 1e-8;
 
 };
 

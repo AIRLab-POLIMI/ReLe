@@ -35,14 +35,23 @@ namespace ReLe
 {
 
 template<class InputC, class OutputC>
-class RegressionTree: public BatchRegressor_<InputC, OutputC>
+class RegressionTree: public NonParametricRegressor_<InputC>, public BatchRegressor_<InputC, OutputC>
 {
 public:
     RegressionTree(Features_<InputC>& phi,
-                   const EmptyTreeNode<OutputC>& emptyNode, unsigned int mNMin = 2) :
-        phi(phi), root(nullptr), emptyNode(emptyNode), nMin(mNMin)
+                   const EmptyTreeNode<OutputC>& emptyNode,
+                   unsigned int outputDimensions = 1,
+                   unsigned int mNMin = 2)
+        :  NonParametricRegressor_<InputC>(outputDimensions), phi(phi), root(nullptr), emptyNode(emptyNode), nMin(mNMin)
     {
 
+    }
+
+    virtual arma::vec operator() (const InputC& input)
+    {
+        arma::vec output(this->outputDimension);
+        output = evaluate(input);
+        return output;
     }
 
     /**
