@@ -92,6 +92,28 @@ protected:
             delete root;
     }
 
+    void splitDataset(const BatchData<InputC, OutputC>& ds,
+                      int cutDir, double cutPoint,
+                      std::vector<unsigned int>& indexesLow,
+                      std::vector<unsigned int>& indexesHigh)
+    {
+        // split inputs in two subsets
+        for (unsigned int i = 0; i < ds.size(); i++)
+        {
+            auto&& element = phi(ds.getInput(i));
+            double tmp = element[cutDir];
+
+            if (tmp < cutPoint)
+            {
+                indexesLow.push_back(i);
+            }
+            else
+            {
+                indexesHigh.push_back(i);
+            }
+        }
+    }
+
 protected:
     Features_<InputC>& phi;
     TreeNode<OutputC>* root;

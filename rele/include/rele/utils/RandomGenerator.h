@@ -80,6 +80,15 @@ public:
     }
 
     /**
+     * ATTENZIONE IL VALORE LO E' ESCLUSO
+     */
+    inline static double sampleUniformHigh(const double lo, const double hi)
+    {
+        std::uniform_real_distribution<> dist(-hi, -lo);
+        return -dist(gen.gen);
+    }
+
+    /**
      * ATTENZIONE IL VALORE HI E' INCLUSO
      */
     inline static std::size_t sampleUniformInt(const int lo, const int hi)

@@ -147,28 +147,6 @@ private:
 
     }
 
-    void splitDataset(const BatchData<InputC, OutputC>& ds,
-                      int cutDir, double cutPoint,
-                      std::vector<unsigned int>& indexesHigh,
-                      std::vector<unsigned int>& indexesLow)
-    {
-        // split inputs in two subsets
-        for (unsigned int i = 0; i < ds.size(); i++)
-        {
-            auto&& element = phi(ds.getInput(i));
-            double tmp = element[cutDir];
-
-            if (tmp < cutPoint)
-            {
-                indexesLow.push_back(i);
-            }
-            else
-            {
-                indexesHigh.push_back(i);
-            }
-        }
-    }
-
     bool fixedInput(const BatchData<InputC, OutputC>& ds, int cutDir)
     {
         if (ds.size() == 0)
@@ -259,10 +237,10 @@ private:
         std::vector<unsigned int> indexesHigh;
 
         // split inputs in two subsets
-        splitDataset(ds, cutDir, cutPoint, indexesHigh, indexesLow);
+        this->splitDataset(ds, cutDir, cutPoint, indexesLow, indexesHigh);
 
         MiniBatchData<InputC, OutputC> lowEx(ds,indexesLow);
-        MiniBatchData<InputC, OutputC> highEx(ds,indexesLow);
+        MiniBatchData<InputC, OutputC> highEx(ds,indexesHigh);
 
         // recall the method for left and right child
         TreeNode<OutputC>* left = buildKDTree(lowEx, (cutDir + 1) % phi.rows(), store_sample);

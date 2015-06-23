@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_EXTRATREE_H_
 
 #include "trees/RegressionTree.h"
+#include "RandomGenerator.h"
 
 #include <stdexcept>
 
@@ -44,6 +45,13 @@ class ExtraTree: public RegressionTree<InputC, OutputC>
 {
     using RegressionTree<InputC, OutputC>::root;
 
+    enum AttributeState
+    {
+        Selectable,
+        NotSelectable,
+        Selected
+    };
+
 public:
     /**
      * Basic constructor
@@ -57,7 +65,7 @@ public:
         root = NULL;
         mNumSplits = k;
         mNMin = nmin;
-        mFeatureRelevance = 0;
+        mFeatureRelevance = nullptr;
         mScoreThreshold = score_th;
     }
 
@@ -74,11 +82,11 @@ public:
      */
     void initFeatureRanks()
     {
-        if (mFeatureRelevance == 0)
+        if (mFeatureRelevance == nullptr)
         {
-            mFeatureRelevance = new float[mInputSize];
+            mFeatureRelevance = new double[phi.rows()];
         }
-        for (unsigned int i = 0; i < mInputSize; i++)
+        for (unsigned int i = 0; i < phi.rows(); i++)
         {
             mFeatureRelevance[i] = 0.0;
         }
@@ -129,7 +137,7 @@ private:
     TreeNode<InputC>* buildExtraTree(const BatchData<InputC, OutputC>& ds)
     {
         /*************** part 1 - END CONDITIONS ********************/
-        int size = ds->size(); //size of dataset
+        int size = ds.size(); //size of dataset
         // END CONDITION 1: return a leaf if |ex| is less than nmin
         if (size < mNMin)
         {
@@ -153,12 +161,14 @@ private:
         }
         // END CONDITION 2: return a leaf if all output variables are equals
         bool eq = true;
-        double checkOut = ds->at(0)->GetOutput();
+        const OutputC& checkOut = ds.getOutput(0);
         for (int i = 1; i < size && eq; i++)
         {
-            if (fabs(checkOut - ds->at(i)->GetOutput()) > 1e-7)
+            const OutputC& newOut = ds.getOutput(i);
+            if (output_traits<OutputC>::isAlmostEqual(checkOut, newOut))
             {
                 eq = false;
+                break;
             }
         }
         if (eq)
@@ -174,27 +184,19 @@ private:
             }
         }
 
-        int attnum = mInputSize; //number of attributes
-        bool constant[attnum]; //indicates if and attribute is costant (true) or not (false)
-        double inputs[attnum];
+        unsigned int attnum = phi.rows(); //number of attributes
+        std::vector<bool> constant(attnum, true); //indicates if and attribute is costant (true) or not (false)
         int end = attnum; //number of true values in constant
-        Sample* s0 = ds->at(0);
-
-        //initialize the constant vector
-        for (int c = 0; c < attnum; c++)
-        {
-            constant[c] = true;
-            inputs[c] = s0->GetInput(c);
-        }
+        arma::vec&& input = phi(ds.getInput(0));
 
         //check if the attributes are constant and build constant vector
         eq = true;
         for (int i = 1; i < size && end > 0; i++)
         {
-            Sample* si = ds->at(i);
+            arma::vec&& otherInput = phi(ds.getInput(i));
             for (int c = 0; c < attnum; c++)
             {
-                if (constant[c] && inputs[c] != si->GetInput(c))
+                if (constant[c] && input[c] != otherInput[c])
                 {
                     constant[c] = false;
                     end--;
@@ -221,18 +223,18 @@ private:
         //an attribute is constant in every example;
         //selected will indicate if an attribute is selectable to be
         //splitted
-        int selected[attnum];
+        std::vector<AttributeState> attributesState(attnum);
         int selectable = 0;
         for (int c = 0; c < attnum; c++)
         {
             //it will avoid the selection of costant attributes
-            if (constant[c] == true)
+            if (constant[c])
             {
-                selected[c] = NOT_SELECTABLE;
+                attributesState[c] = NotSelectable;
             }
             else
             {
-                selected[c] = SELECTABLE;
+                attributesState[c] = Selectable;
                 selectable++;
             }
         }
@@ -242,67 +244,85 @@ private:
         //selected
         unsigned int candidates_size =
             selectable <= mNumSplits ? selectable : mNumSplits;
-        unsigned int candidates[candidates_size];
+        std::vector<unsigned int> candidates(candidates_size);
         unsigned int num_candidates = candidates_size;
+
         while (num_candidates > 0)
         {
             unsigned int r = (rand() % num_candidates);
             unsigned int sel_attr = 0;
-            while (selected[sel_attr] != SELECTABLE || r > 0)
+            while (attributesState[sel_attr] != Selectable || r > 0)
             {
-                if (selected[sel_attr] == SELECTABLE)
+                if (attributesState[sel_attr] == Selectable)
                 {
                     r--;
                 }
+
                 sel_attr++;
             }
+
             candidates[num_candidates - 1] = sel_attr;
-            selected[sel_attr] = SELECTED;
+            attributesState[sel_attr] = Selected;
             num_candidates--;
         }
+
         //generate the first split
         int bestattribute = candidates[0]; //best attribute (indicated by number) found
-        double bestsplit = PickRandomSplit(ds, candidates[0]); //best split value
-        Dataset bestSl(mInputSize, mOutputSize), bestSr(mInputSize,
-                mOutputSize); //best left and right partitions
-        double bestscore; //score of the best split
-        Partitionate(ds, &bestSl, &bestSr, candidates[0], bestsplit);
-        bestscore = Score(ds, &bestSl, &bestSr);
+        double bestsplit = pickRandomSplit(ds, candidates[0]); //best split value
+
+        // split inputs in two subsets
+        std::vector<unsigned int> indexesLow;
+        std::vector<unsigned int> indexesHigh;
+        this->splitDataset(ds, bestattribute, bestsplit, indexesLow, indexesHigh);
+
+        MiniBatchData<InputC, OutputC> bestLow(ds,indexesLow);
+        MiniBatchData<InputC, OutputC> bestHigh(ds,indexesHigh);
+
+        double bestscore = score(ds, bestLow, bestHigh);
+
         //generates remaining splits and overwrites the actual best if better one is found
         for (unsigned int c = 1; c < candidates_size; c++)
         {
-            double split = PickRandomSplit(ds, candidates[c]);
-            Dataset sl(mInputSize, mOutputSize), sr(mInputSize, mOutputSize);
-            Partitionate(ds, &sl, &sr, candidates[c], split);
-            double s = Score(ds, &sl, &sr);
+            double split = pickRandomSplit(ds, candidates[c]);
+
+            indexesLow.clear();
+            indexesHigh.clear();
+            this->splitDataset(ds, bestattribute, bestsplit, indexesLow, indexesHigh);
+
+            MiniBatchData<InputC, OutputC> low(ds,indexesLow);
+            MiniBatchData<InputC, OutputC> high(ds,indexesHigh);
+
+            double s = score(ds, low, high);
             //check if a better split was found
             if (s > bestscore)
             {
                 bestscore = s;
                 bestsplit = split;
-                bestSl = sl;
-                bestSr = sr;
+                bestSl = low;
+                bestSr = high;
                 bestattribute = candidates[c];
             }
         }
+
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
         if (bestscore < mScoreThreshold)
         {
             if (mLeafType == CONSTANT)
             {
-                return new rtLeaf(ds);
+                return new LeafTreeNode<InputC, OutputC>(ds);
             }
             else
             {
-                return new rtLeafLinearInterp(ds);
+                //return new rtLeafLinearInterp(ds);
+                //TODO implement
             }
         }
         else
         {
-            if (mFeatureRelevance != NULL)
+            if (mFeatureRelevance != nullptr)
             {
-                double variance_reduction = VarianceReduction(ds, &bestSl,
-                                            &bestSr) * ds->size() * ds->Variance();
+                double variance_reduction = varianceReduction(ds, bestLow,
+                                            bestHigh) /* ds.size() * ds->Variance()*/;
 #ifdef FEATURE_PROPAGATION
                 mSplittedAttributes.insert(bestattribute);
                 mSplittedAttributesCount.insert(bestattribute);
@@ -317,8 +337,8 @@ private:
             }
 
             //build the left and the right children
-            rtANode* left = BuildExtraTree(&bestSl);
-            rtANode* right = BuildExtraTree(&bestSr);
+            TreeNode<OutputC>* left = BuildExtraTree(bestLow);
+            TreeNode<OutputC>* right = BuildExtraTree(bestHigh);
 
 #ifdef FEATURE_PROPAGATION
             if (mFeatureRelevance != NULL)
@@ -331,9 +351,10 @@ private:
             }
 #endif
             //return the current node
-            return new rtINode(bestattribute, bestsplit, left, right);
+            return new InternalTreeNode<OutputC>(bestattribute, bestsplit, left, right);
         }
     }
+
 
     /**
      * This method picks a split randomly choosen such that it's greater than the minimum
@@ -342,17 +363,19 @@ private:
      * @param attsplit number of attribute to split
      * @return the split value
      */
-    double pickRandomSplit(Dataset* ds, int attsplit)
+    double pickRandomSplit(const BatchData<InputC, outputC>& ds, int attsplit)
     {
 #ifdef SPLIT_UNIFORM
-        float min, max, tmp;
+        double min, max, tmp;
+
         //initialize min and max with the attribute value of the first observation
-        min = ds->at(0)->GetInput(attsplit);
+        min = phi(ds.getInput(0))[attsplit];
         max = min;
+
         //looking for min and max value of the dataset
-        for (unsigned int c = 1; c < ds->size(); c++)
+        for (unsigned int c = 1; c < ds.size(); c++)
         {
-            tmp = ds->at(c)->GetInput(attsplit);
+            tmp = phi(ds.getInput(c))[attsplit];
             if (tmp < min)
             {
                 min = tmp;
@@ -363,15 +386,14 @@ private:
             }
         }
         //return a value in (min, max]
-        float n = (float)((rand() % 99) + 1) / 100.0;
-        return min + (max - min) * n;
+        return sampleUniformHigh(min, max);
 #else
         unsigned int r = rand() % ds->size();
-        float value = ds->at(r)->GetInput(attsplit);
-        float previous = value, next = value;
+        double value = ds->at(r)->GetInput(attsplit);
+        double previous = value, next = value;
         for (unsigned int c = 0; c < ds->size(); c++)
         {
-            float tmp = ds->at(c)->GetInput(attsplit);
+            double tmp = ds->at(c)->GetInput(attsplit);
             if (tmp < value && tmp > previous)
             {
                 previous = tmp;
@@ -390,56 +412,8 @@ private:
             }
         }
 //   cout << "R = " << r << " out of " << ds->size() << endl;
-        float n = (float)((rand() % 99) + 1) / 100.0;
-        return previous + (next - previous) * n;
+        return sampleUniformHigh(previous, next);
 #endif
-    }
-
-    /**
-     * This method partionates the input dataset in two datasets given an attribute att and a split value v:
-     *  the right partition with elements that have a not greater than v and the left one with observations * with a less than v
-     * @param ex the vector containing the input observations
-     * @param left the partition with elements that have the attribute value less than the split value
-     * @param right the partition with elements that have the attribute value greater (or equal) than the split value
-     * @param attribute number of attribute to split (indicates a)
-     * @param split the split value (indicates v)
-     */
-    void partitionate(Dataset* ds, Dataset* left, Dataset* right, int attribute,
-                      double split)
-    {
-        Sample* bound = 0;
-        unsigned int size = ds->size();
-        for (unsigned int i = 0; i < size; i++)
-        {
-            Sample* s = ds->at(i);
-            double tmp = s->GetInput(attribute);
-            //if attribute value is less than split value, the observation will be added to left partition, else it will
-            //be added to the right one
-            if (tmp < split)
-            {
-                (*left).push_back(s);
-            }
-            else if (tmp > split)
-            {
-                (*right).push_back(s);
-            }
-            else
-            {
-                bound = s;
-            }
-        }
-
-        if (bound != 0)
-        {
-            if (left->size() < right->size())
-            {
-                (*left).push_back(bound);
-            }
-            else
-            {
-                (*right).push_back(bound);
-            }
-        }
     }
 
     /**
@@ -449,7 +423,9 @@ private:
      * @param dsr the other one
      * @return the percentage of variance
      */
-    double varianceReduction(Dataset* ds, Dataset* dsl, Dataset* dsr)
+    double varianceReduction(const BatchData<InputC, OutputC>& ds,
+    						 const BatchData<InputC, OutputC>& dsl,
+							 const BatchData<InputC, OutputC>& dsr)
     {
         // VARIANCE REDUCTION
         double corr_fact_dsl = 1.0, corr_fact_dsr = 1.0, corr_fact_ds = 1.0;
@@ -467,13 +443,14 @@ private:
         corr_fact_ds = (double)(ds->size() / (ds->size() - 1));
         corr_fact_ds *= corr_fact_ds;
 #endif
-        if (ds->size() == 0 || ds->Variance() == 0.0)
+        if (ds.size() == 0 /*|| ds->Variance() == 0.0*/)
         {
             return 0.0;
         }
         else
         {
-            return 1 - ((double)corr_fact_dsl * dsl->size() * dsl->Variance() + (double)corr_fact_dsr * dsr->size() * dsr->Variance()) / ((double)corr_fact_ds * ds->size() * ds->Variance());
+        	//FIXME
+            return 1 ;//- ((double)corr_fact_dsl * dsl->size() * dsl->Variance() + (double)corr_fact_dsr * dsr->size() * dsr->Variance()) / ((double)corr_fact_ds * ds->size() * ds->Variance());
         }
     }
 
@@ -484,69 +461,73 @@ private:
      * @param dsr the other one
      * @return the probability value
      */
-    double probabilityDifferentMeans(Dataset* ds, Dataset* dsl, Dataset* dsr)
+    double probabilityDifferentMeans(const BatchData<InputC, OutputC>& ds,
+				 const BatchData<InputC, OutputC>& dsl,
+				 const BatchData<InputC, OutputC>& dsr)
     {
-        if (ds->size() == 0)
+        if (ds.size() == 0)
             return 0.0;
-        double score = 0.0;
-        // T-STUDENT
-        double mean_diff = fabs(dsl->Mean() - dsr->Mean());
-        //   if (dsl->size() == 0 || dsr->size() == 0)
-        double size_dsl = (double)dsl->size() - 1.0;
-        double size_dsr = (double)dsr->size() - 1.0;
-        if (size_dsl < 1.0 && size_dsr < 1.0)
-        {
-            //     cout << "Score = 0.0 (one set empty)" << endl;
-            return 1.0;
-        }
-        else if (size_dsl < 1.0)
-        {
-            score = 2 * (gsl_cdf_tdist_P (mean_diff / sqrtf(dsr->Variance() / size_dsr), size_dsr) - 0.5);
-            if (score >= 1.0)
-            {
-                score += mean_diff / sqrtf(dsr->Variance() / size_dsr);
-            }
-            //     cout << "Score = " << score << " (empty set)" << endl;
-            return score;
-        }
-        else if (size_dsr < 1.0)
-        {
-            score = 2 * (gsl_cdf_tdist_P (mean_diff / sqrtf(dsl->Variance() / size_dsl), size_dsl) - 0.5);
-            if (score >= 1.0)
-            {
-                score += mean_diff / sqrtf(dsl->Variance() / size_dsl);
-            }
-            //     cout << "Score = " << score << " (empty set)" << endl;
-            return score;
-        }
-        double dsl_mean_variance = dsl->Variance() / size_dsl;
-        double dsr_mean_variance = dsr->Variance() / size_dsr;
-        double mean_diff_variance = dsl_mean_variance + dsr_mean_variance;
-        if (mean_diff_variance < 1e-6)
-        {
-            if (mean_diff > 1e-6)
-            {
-                //       cout << "Score = 1.0 (two constant sets)" << endl;
-                return 1.0;
-            }
-            else
-            {
-                //       cout << "Score = 0.0 (splitting a constant)" << endl;
-                return 0.0;
-            }
-        }
 
-        double dof = mean_diff_variance * mean_diff_variance
-                     / (  dsl_mean_variance * dsl_mean_variance / size_dsl
-                          + dsr_mean_variance * dsr_mean_variance / size_dsr);
-        score = gsl_cdf_tdist_P (mean_diff / sqrtf(mean_diff_variance), dof);
-        score = 2.0 * (score - 0.5);
-        if (score >= 1.0)
-        {
-            score += mean_diff / sqrtf(mean_diff_variance);
-        }
-        //   cout << " mean diff = " << mean_diff << " sqrt mean diff variance = " << sqrtf(mean_diff_variance) << " dof = " << dof << endl;
-        //   cout << "Score = " << score << endl;
+        double score = 0.0;
+        //TODO implement
+//        // T-STUDENT
+//        double mean_diff = fabs(dsl->Mean() - dsr->Mean());
+//        //   if (dsl->size() == 0 || dsr->size() == 0)
+//        double size_dsl = (double)dsl->size() - 1.0;
+//        double size_dsr = (double)dsr->size() - 1.0;
+//        if (size_dsl < 1.0 && size_dsr < 1.0)
+//        {
+//            //     cout << "Score = 0.0 (one set empty)" << endl;
+//            return 1.0;
+//        }
+//        else if (size_dsl < 1.0)
+//        {
+//            score = 2 * (gsl_cdf_tdist_P (mean_diff / sqrtf(dsr->Variance() / size_dsr), size_dsr) - 0.5);
+//            if (score >= 1.0)
+//            {
+//                score += mean_diff / sqrtf(dsr->Variance() / size_dsr);
+//            }
+//            //     cout << "Score = " << score << " (empty set)" << endl;
+//            return score;
+//        }
+//        else if (size_dsr < 1.0)
+//        {
+//            score = 2 * (gsl_cdf_tdist_P (mean_diff / sqrtf(dsl->Variance() / size_dsl), size_dsl) - 0.5);
+//            if (score >= 1.0)
+//            {
+//                score += mean_diff / sqrtf(dsl->Variance() / size_dsl);
+//            }
+//            //     cout << "Score = " << score << " (empty set)" << endl;
+//            return score;
+//        }
+//        double dsl_mean_variance = dsl->Variance() / size_dsl;
+//        double dsr_mean_variance = dsr->Variance() / size_dsr;
+//        double mean_diff_variance = dsl_mean_variance + dsr_mean_variance;
+//        if (mean_diff_variance < 1e-6)
+//        {
+//            if (mean_diff > 1e-6)
+//            {
+//                //       cout << "Score = 1.0 (two constant sets)" << endl;
+//                return 1.0;
+//            }
+//            else
+//            {
+//                //       cout << "Score = 0.0 (splitting a constant)" << endl;
+//                return 0.0;
+//            }
+//        }
+//
+//        double dof = mean_diff_variance * mean_diff_variance
+//                     / (  dsl_mean_variance * dsl_mean_variance / size_dsl
+//                          + dsr_mean_variance * dsr_mean_variance / size_dsr);
+//        score = gsl_cdf_tdist_P (mean_diff / sqrtf(mean_diff_variance), dof);
+//        score = 2.0 * (score - 0.5);
+//        if (score >= 1.0)
+//        {
+//            score += mean_diff / sqrtf(mean_diff_variance);
+//        }
+//        //   cout << " mean diff = " << mean_diff << " sqrt mean diff variance = " << sqrtf(mean_diff_variance) << " dof = " << dof << endl;
+//        //   cout << "Score = " << score << endl;
         return score;
     }
 
@@ -560,9 +541,9 @@ private:
     double score(Dataset* ds, Dataset* dsl, Dataset* dsr)
     {
 #ifdef SPLIT_VARIANCE
-        return VarianceReduction(ds, dsl, dsr);
+        return varianceReduction(ds, dsl, dsr);
 #else
-        return ProbabilityDifferentMeans(ds, dsl, dsr);
+        return probabilityDifferentMeans(ds, dsl, dsr);
 #endif
     }
 
@@ -571,7 +552,7 @@ private:
     int mNumSplits; //number of selectable attributes to be randomly picked
     double* mFeatureRelevance; //array of relevance values of input feature
     double mScoreThreshold;
-    multiset<int> mSplittedAttributesCount;
+    //multiset<int> mSplittedAttributesCount; FIXME
     set<int> mSplittedAttributes;
 };
 

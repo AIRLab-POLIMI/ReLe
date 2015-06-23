@@ -189,6 +189,34 @@ private:
 
 };
 
+//Traits to handle output comparison
+template<class OutputC>
+struct output_traits
+{
+    static bool isAlmostEqual(const OutputC& o1, const OutputC& o2)
+    {
+        return o1 == o2;
+    }
+};
+
+template<>
+struct output_traits<arma::vec>
+{
+    static bool isAlmostEqual(const arma::vec& o1, const arma::vec& o2)
+    {
+        return arma::norm(o1 - o2) < 1e-7;
+    }
+};
+
+template<>
+struct output_traits<unsigned int>
+{
+    static bool isAlmostEqual(const unsigned int& o1, const unsigned int& o2)
+    {
+        return std::abs(o1 - o2) < 1e-7;
+    }
+};
+
 
 
 
