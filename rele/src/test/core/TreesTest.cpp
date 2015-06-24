@@ -23,6 +23,7 @@
 
 #include "regressors/KDTree.h"
 #include "regressors/ExtraTree.h"
+#include "regressors/ExtraTreeEnsemble.h"
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
 
@@ -79,12 +80,28 @@ int main(int argc, char *argv[])
 
 
     double rAngle = RandomGenerator::sampleUniform(0, 2*M_PI);
-    cout << "random Angle" << rAngle << endl;
+    cout << "random Angle: " << rAngle << endl;
     test(0) = sin(rAngle);
     test(1) = cos(rAngle);
     cout << "tree =" << tree(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
 
+    cout << "### ExtraTreeTest ###" << endl;
 
     //ExtraTree test
-    ExtraTree<arma::vec, arma::vec> extraTree(phi, defaultNode);
+    ExtraTreeEnsemble<arma::vec, arma::vec> extraTree(phi, defaultNode);
+
+    extraTree.train(datasetAtan2);
+
+    test(0) = sin(M_PI/4);
+    test(1) = cos(M_PI/4);
+    cout << "extraTree =" << extraTree(test) << "gt = " << atan2(test(0), test(1)) << endl;
+
+    test(0) = sin(M_PI/3);
+    test(1) = cos(M_PI/3);
+    cout << "extraTree =" << extraTree(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
+
+    cout << "random Angle: " << rAngle << endl;
+    test(0) = sin(rAngle);
+    test(1) = cos(rAngle);
+    cout << "extraTree =" << extraTree(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
 }

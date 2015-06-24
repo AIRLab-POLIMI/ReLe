@@ -137,7 +137,7 @@ private:
     {
         /*************** part 1 - END CONDITIONS ********************/
         int size = ds.size(); //size of dataset
-        // END CONDITION 1: return a leaf if |ex| is less than nmin
+        // END CONDITION 1: return a leaf if |ex| is less than nMin
         if (size < nMin)
         {
             if (size == 0)
@@ -155,7 +155,7 @@ private:
         for (int i = 1; i < size && eq; i++)
         {
             const OutputC& newOut = ds.getOutput(i);
-            if (output_traits<OutputC>::isAlmostEqual(checkOut, newOut))
+            if (!output_traits<OutputC>::isAlmostEqual(checkOut, newOut))
             {
                 eq = false;
                 break;
@@ -224,7 +224,7 @@ private:
 
         while (num_candidates > 0)
         {
-            unsigned int r = (rand() % num_candidates);
+            unsigned int r = RandomGenerator::sampleUniformInt(0, num_candidates-1);
             unsigned int sel_attr = 0;
             while (attributesState[sel_attr] != Selectable || r > 0)
             {
@@ -242,50 +242,50 @@ private:
         }
 
         //generate the first split
-        int bestattribute = candidates[0]; //best attribute (indicated by number) found
-        double bestsplit = pickRandomSplit(ds, candidates[0]); //best split value
+        int bestAttribute = candidates[0]; //best attribute (indicated by number) found
+        double bestSplit = pickRandomSplit(ds, candidates[0]); //best split value
 
         // split inputs in two subsets
-        std::vector<unsigned int> indexesLowBest;
-        std::vector<unsigned int> indexesHighBest;
+        std::vector<unsigned int> indexesLeftBest;
+        std::vector<unsigned int> indexesRightBest;
 
-        this->splitDataset(ds, bestattribute, bestsplit, indexesLowBest, indexesHighBest);
+        this->splitDataset(ds, bestAttribute, bestSplit, indexesLeftBest, indexesRightBest);
 
-        MiniBatchData<InputC, OutputC> low(ds,indexesLowBest);
-        MiniBatchData<InputC, OutputC> high(ds,indexesHighBest);
+        MiniBatchData<InputC, OutputC> leftDs(ds,indexesLeftBest);
+        MiniBatchData<InputC, OutputC> rightDs(ds,indexesRightBest);
 
-        double bestscore = score(ds, low, high);
+        double bestScore = score(ds, leftDs, rightDs);
 
         //generates remaining splits and overwrites the actual best if better one is found
         for (unsigned int c = 1; c < candidates_size; c++)
         {
             double split = pickRandomSplit(ds, candidates[c]);
 
-            std::vector<unsigned int> indexesLow;
-            std::vector<unsigned int> indexesHigh;
-            this->splitDataset(ds, bestattribute, split, indexesLow, indexesHigh);
+            std::vector<unsigned int> indexesLeft;
+            std::vector<unsigned int> indexesRight;
+            this->splitDataset(ds, bestAttribute, split, indexesLeft, indexesRight);
 
-            low.setIndexes(indexesLow);
-            high.setIndexes(indexesHigh);
-            double s = score(ds, low, high);
+            leftDs.setIndexes(indexesLeft);
+            rightDs.setIndexes(indexesRight);
+            double s = score(ds, leftDs, rightDs);
 
             //check if a better split was found
-            if (s > bestscore)
+            if (s > bestScore)
             {
-                bestscore = s;
-                bestsplit = split;
-                indexesLowBest = indexesLow;
-                indexesHighBest = indexesHigh;
-                bestattribute = candidates[c];
+                bestScore = s;
+                bestSplit = split;
+                indexesLeftBest = indexesLeft;
+                indexesRightBest = indexesRight;
+                bestAttribute = candidates[c];
             }
         }
 
         //get the best split of two datasets
-        low.setIndexes(indexesLowBest);
-        high.setIndexes(indexesHighBest);
+        leftDs.setIndexes(indexesLeftBest);
+        rightDs.setIndexes(indexesRightBest);
 
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
-        if (bestscore < scoreThreshold)
+        if (bestScore < scoreThreshold)
         {
             return this->buildLeaf(ds, leafType);
         }
@@ -293,37 +293,37 @@ private:
         {
             if (featureRelevance != nullptr)
             {
-                double variance_reduction = varianceReduction(ds, low,
-                                            high) /* ds.size() * ds->Variance()*/; //FIXME toggle comment
+                double variance_reduction = varianceReduction(ds, leftDs,
+                                            rightDs) /* ds.size() * ds->Variance()*/; //FIXME toggle comment
 #ifdef FEATURE_PROPAGATION
-                mSplittedAttributes.insert(bestattribute);
-                mSplittedAttributesCount.insert(bestattribute);
+                mSplittedAttributes.insert(bestAttribute);
+                mSplittedAttributesCount.insert(bestAttribute);
                 set<int>::iterator it;
                 for (it = mSplittedAttributes.begin(); it != mSplittedAttributes.end(); ++it)
                 {
                     featureRelevance[*it] += variance_reduction / (double)mSplittedAttributes.size();
                 }
 #else
-                featureRelevance[bestattribute] += variance_reduction;
+                featureRelevance[bestAttribute] += variance_reduction;
 #endif
             }
 
             //build the left and the right children
-            TreeNode<OutputC>* left = buildExtraTree(low);
-            TreeNode<OutputC>* right = buildExtraTree(high);
+            TreeNode<OutputC>* left = buildExtraTree(leftDs);
+            TreeNode<OutputC>* right = buildExtraTree(rightDs);
 
 #ifdef FEATURE_PROPAGATION
             if (featureRelevance != NULL)
             {
-                mSplittedAttributesCount.erase(mSplittedAttributesCount.find(bestattribute));
-                if (mSplittedAttributesCount.find(bestattribute) == mSplittedAttributesCount.end())
+                mSplittedAttributesCount.erase(mSplittedAttributesCount.find(bestAttribute));
+                if (mSplittedAttributesCount.find(bestAttribute) == mSplittedAttributesCount.end())
                 {
-                    mSplittedAttributes.erase(bestattribute);
+                    mSplittedAttributes.erase(bestAttribute);
                 }
             }
 #endif
             //return the current node
-            return new InternalTreeNode<OutputC>(bestattribute, bestsplit, left, right);
+            return new InternalTreeNode<OutputC>(bestAttribute, bestSplit, left, right);
         }
     }
 
@@ -361,7 +361,7 @@ private:
         //return a value in (min, max]
         return RandomGenerator::sampleUniformHigh(min, max);
 #else
-        unsigned int r = RandomGenerator::sampleUniform(0, ds->size());
+        unsigned int r = RandomGenerator::sampleUniform(0, ds.size());
         double value = phi(ds.getInput(r))[attsplit];
         double previous = value, next = value;
         for (unsigned int c = 0; c < ds.size(); c++)
