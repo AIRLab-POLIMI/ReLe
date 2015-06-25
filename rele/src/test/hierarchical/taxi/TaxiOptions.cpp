@@ -92,5 +92,125 @@ void TaxiFillUpOption::operator ()(const DenseState& state, FiniteAction& action
 }
 
 
+/*
+ * Complex Options
+ */
+
+TaxiComplexOption::TaxiComplexOption(std::vector<arma::vec2>& locations, ActionType action)
+    : actionType(action), locations(locations)
+{
+
+}
+
+bool TaxiComplexOption::canStart(const arma::vec& state)
+{
+    return actionType != DropOff || state(sc::onBoard) == 1;
+}
+
+void TaxiComplexOption::operator ()(const DenseState& state, FiniteAction& action)
+{
+    auto& location = getLocation(state);
+    if(state(sc::x) != location(0) || state(sc::y) != location(1))
+    {
+        goToLocation(state, action);
+    }
+    else
+    {
+        switch(actionType)
+        {
+        case PickUp:
+            action.setActionN(an::pickup);
+            break;
+
+        case DropOff:
+            action.setActionN(an::dropoff);
+            break;
+
+        case FillUp:
+            action.setActionN(an::fillup);
+            break;
+
+        }
+
+
+    }
+}
+
+arma::vec& TaxiComplexOption::getLocation(const DenseState& state)
+{
+    switch(actionType)
+    {
+    case PickUp:
+        return locations[state(sc::location)];
+
+    case DropOff:
+        return locations[state(sc::destination)];
+
+    case FillUp:
+        return locations.back();
+
+    }
+
+}
+
+void TaxiComplexOption::goToLocation(const DenseState& state, FiniteAction& action)
+{
+    auto& location = getLocation(state);
+    if(state(sc::x) > location(0))
+        action.setActionN(an::left);
+    else if(state(sc::x) < location(0))
+        action.setActionN(an::right);
+    else if(state(sc::y) > location(1))
+        action.setActionN(an::down);
+    else
+        action.setActionN(an::up);
+}
+
+
+TaxiComplexPickupOption::TaxiComplexPickupOption(std::vector<arma::vec2>& location)
+    : TaxiComplexOption(location, ActionType::PickUp)
+{
+
+}
+
+double TaxiComplexPickupOption::terminationProbability(const DenseState& state)
+{
+    if(state(sc::onBoard) == 1)
+        return 1;
+    else
+        return 0;
+}
+
+
+TaxiComplexDropOffOption::TaxiComplexDropOffOption(std::vector<arma::vec2>& location)
+    : TaxiComplexOption(location, ActionType::DropOff)
+{
+
+}
+
+double TaxiComplexDropOffOption::terminationProbability(const DenseState& state)
+{
+    if(state(sc::onBoard) == -1)
+        return 1;
+    else
+        return 0;
+}
+
+TaxiComplexFillupOption::TaxiComplexFillupOption(std::vector<arma::vec2>& location)
+	: TaxiComplexOption(location, ActionType::FillUp)
+{
+
+}
+
+double TaxiComplexFillupOption::terminationProbability(const DenseState& state)
+{
+	if (state[sc::fuel] == 12)
+		return 1;
+	else
+		return 0;
+}
+
+
+
 
 }

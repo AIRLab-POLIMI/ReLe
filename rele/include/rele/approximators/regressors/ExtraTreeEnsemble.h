@@ -150,10 +150,10 @@ public:
      */
     void initFeatureRanks()
     {
-    	for(auto tree : ensemble)
-    	{
-    		tree->initFeatureRanks();
-    	}
+        for(auto tree : ensemble)
+        {
+            tree->initFeatureRanks();
+        }
     }
 
 private:

@@ -81,8 +81,8 @@ public:
      */
     void initFeatureRanks()
     {
-    	computeFeaturerelevance = true;
-    	featureRelevance.clear();
+        computeFeaturerelevance = true;
+        featureRelevance.clear();
         featureRelevance.resize(phi.rows(), 0.0);
     }
 

@@ -55,20 +55,20 @@ int main(int argc, char *argv[])
     TaxiFuel taxiMDP;
 
 
-    auto&& locations = taxiMDP.getLocations();
+    auto locations = taxiMDP.getLocations();
 
     //-- options
 
 
     vector<Option<FiniteAction, DenseState>*> options;
 
-    options.push_back(new TaxiFillUpOption());
-    options.push_back(new TaxiDropOffOption());
-    options.push_back(new TaxiPickupOption());
-    for(auto& location : locations)
+    options.push_back(new TaxiComplexFillupOption(locations));
+    options.push_back(new TaxiComplexDropOffOption(locations));
+    options.push_back(new TaxiComplexPickupOption(locations));
+    /*for(auto& location : locations)
     {
         options.push_back(new TaxiLocationOption(location));
-    }
+    }*/
 
     vector<FiniteAction> actions = FiniteAction::generate(options.size());
 
@@ -95,13 +95,13 @@ int main(int argc, char *argv[])
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    double temperature = 100;
+    double temperature = 10;
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 
     //-- agent
-    int nbepperpol = 10, nbstep = 100;
+    int nbepperpol = 100, nbstep = 100;
     //AdaptiveStep stepRule(0.01);
     ConstantStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
@@ -145,9 +145,9 @@ int main(int argc, char *argv[])
 
     delete core.getSettings().loggerStrategy;
 
-    cout << "last option: " << rootOption.getLastChoice() << endl;
+    //cout << "last option: " << rootOption.getLastChoice() << endl;
 
-    cout << "p" << rootPolicyOption.getParameters().t();
+    //cout << "p" << rootPolicyOption.getParameters().t();
     return 0;
 
 }

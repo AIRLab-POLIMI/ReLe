@@ -73,6 +73,56 @@ public:
 
 };
 
+class TaxiComplexOption : public FixedOption<FiniteAction, DenseState>
+{
+protected:
+	enum ActionType
+	{
+		DropOff, PickUp, FillUp
+	};
+
+public:
+	TaxiComplexOption(std::vector<arma::vec2>& location, ActionType action);
+	virtual bool canStart(const arma::vec& state);
+	virtual void operator ()(const DenseState& state, FiniteAction& action);
+
+
+protected:
+	arma::vec& getLocation(const DenseState& state);
+	void goToLocation(const DenseState& state, FiniteAction& action);
+
+protected:
+	std::vector<arma::vec2> locations;
+	ActionType actionType;
+
+
+};
+
+class TaxiComplexPickupOption : public TaxiComplexOption
+{
+public:
+	TaxiComplexPickupOption(std::vector<arma::vec2>& locations);
+	virtual double terminationProbability(const DenseState& state);
+
+};
+
+class TaxiComplexDropOffOption : public TaxiComplexOption
+{
+public:
+	TaxiComplexDropOffOption(std::vector<arma::vec2>& location);
+	virtual double terminationProbability(const DenseState& state);
+
+};
+
+class TaxiComplexFillupOption : public TaxiComplexOption
+{
+public:
+	TaxiComplexFillupOption(std::vector<arma::vec2>& location);
+	virtual double terminationProbability(const DenseState& state);
+
+};
+
+
 
 }
 
