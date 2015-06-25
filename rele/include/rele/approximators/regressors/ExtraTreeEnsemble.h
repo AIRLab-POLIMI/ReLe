@@ -40,7 +40,7 @@ public:
      * @param nMin minimum number of tuples in a leaf
      */
     ExtraTreeEnsemble(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
-                      unsigned int outputSize = 1, unsigned int m = 200,
+                      unsigned int outputSize = 1, unsigned int m = 50,
                       unsigned int k = 5, unsigned int nMin = 2,
                       double scoreThreshold = 0.0, LeafType leafType = Constant)
         : NonParametricRegressor_<InputC>(outputSize),

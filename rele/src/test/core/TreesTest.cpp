@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
 
     //Train with atan2
     BatchDataPlain<arma::vec, arma::vec> datasetAtan2;
-    for(int i = 0; i < 600; i++)
+    for(int i = 0; i < 1200; i++)
     {
-        double step = 0.01;
+        double step = 0.005;
         double angle = step*i;
 
         arma::vec input = {sin(angle), cos(angle)};

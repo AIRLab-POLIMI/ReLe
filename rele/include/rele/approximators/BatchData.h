@@ -174,8 +174,10 @@ protected:
         variance = m2 - output_traits<OutputC>::square(mean);
     }
 
-private:
+protected:
     mutable bool computed;
+
+private:
     mutable arma::mat variance;
     mutable OutputC mean;
 };
@@ -238,6 +240,7 @@ public:
 
     void setIndexes(std::vector<unsigned int>& indexes)
     {
+        this->computed = false;
         this->indexes = indexes;
     }
 

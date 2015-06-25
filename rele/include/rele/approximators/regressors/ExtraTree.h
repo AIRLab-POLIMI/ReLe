@@ -263,7 +263,7 @@ private:
 
             std::vector<unsigned int> indexesLeft;
             std::vector<unsigned int> indexesRight;
-            this->splitDataset(ds, bestAttribute, split, indexesLeft, indexesRight);
+            this->splitDataset(ds, candidates[c], split, indexesLeft, indexesRight);
 
             leftDs.setIndexes(indexesLeft);
             rightDs.setIndexes(indexesRight);
@@ -417,7 +417,7 @@ private:
         corr_fact_ds = static_cast<double>(ds.size() / (ds.size() - 1));
         corr_fact_ds *= corr_fact_ds;
 #endif
-        if (ds.size() == 0 /*|| ds->Variance() == 0.0*/)
+        if (ds.size() == 0 || arma::det(ds.getVariance()) < 1e-8)
         {
             return 0.0;
         }
