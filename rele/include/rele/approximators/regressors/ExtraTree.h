@@ -64,8 +64,8 @@ public:
         : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nmin), leafType(leafType)
     {
         numSplits = k;
-        featureRelevance = nullptr;
         scoreThreshold = score_th;
+        computeFeaturerelevance = false;
     }
 
     /**
@@ -81,14 +81,8 @@ public:
      */
     void initFeatureRanks()
     {
-        if (featureRelevance == nullptr)
-        {
-            featureRelevance = new double[phi.rows()];
-        }
-        for (unsigned int i = 0; i < phi.rows(); i++)
-        {
-            featureRelevance[i] = 0.0;
-        }
+    	computeFeaturerelevance = true;
+        featureRelevance.resize(phi.rows(), 0.0);
     }
 
     /**
@@ -123,7 +117,7 @@ public:
     /**
      *
      */
-    double* evaluateFeatures()
+    std::vector<double> evaluateFeatures()
     {
         return featureRelevance;
     }
@@ -291,10 +285,10 @@ private:
         }
         else
         {
-            if (featureRelevance != nullptr)
+            if (computeFeaturerelevance)
             {
-                double variance_reduction = varianceReduction(ds, leftDs,
-                                            rightDs) /* ds.size() * ds->Variance()*/; //FIXME toggle comment
+                double variance_reduction = varianceReduction(ds, leftDs, rightDs);
+                variance_reduction *= ds.size() * arma::det(ds.getVariance()); //TODO check
 #ifdef FEATURE_PROPAGATION
                 mSplittedAttributes.insert(bestAttribute);
                 mSplittedAttributesCount.insert(bestAttribute);
@@ -529,7 +523,8 @@ private:
 private:
     LeafType leafType;
     int numSplits; //number of selectable attributes to be randomly picked
-    double* featureRelevance; //array of relevance values of input feature
+    std::vector<double> featureRelevance; //array of relevance values of input feature
+    bool computeFeaturerelevance;
     double scoreThreshold;
     //multiset<int> mSplittedAttributesCount; FIXME
     //set<int> mSplittedAttributes; FIXME
