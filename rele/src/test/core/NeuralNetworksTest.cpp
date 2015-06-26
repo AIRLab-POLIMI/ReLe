@@ -25,11 +25,15 @@
 #include "features/DenseFeatures.h"
 #include "regressors/FFNeuralNetwork.h"
 
+#include <fenv.h>
+
 using namespace std;
 using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
+	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+
     cout << "## Neural Network Test ##" << endl;
 
     arma::vec input = {1.0, 1.0};
@@ -87,7 +91,7 @@ int main(int argc, char *argv[])
     test(1) = cos(M_PI/3);
     cout << "net =" << atan2Net(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
 
-    cout << "J = " << atan2Net.computeJ(dataset, 0);
+    cout << "J = " << atan2Net.computeJ(dataset, 0) << endl;
 
 
     //Train xor
@@ -97,7 +101,7 @@ int main(int argc, char *argv[])
     //Config parameters
     xorNet.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
     xorNet.getHyperParameters().alpha = 0.6;
-    xorNet.getHyperParameters().maxIterations = 20000;
+    xorNet.getHyperParameters().maxIterations = 14000;
     xorNet.getHyperParameters().lambda = 0;
 
     arma::vec i0 = {0.0, 0.0};
@@ -122,7 +126,7 @@ int main(int argc, char *argv[])
     cout << "xor(0, 1) =" << xorNet(i2) << "gt = " << "1" << endl;
     cout << "xor(1, 1) =" << xorNet(i3) << "gt = " << "0" <<  endl;
 
-    cout << "J = " << xorNet.computeJ(datasetXor, 0);
+    cout << "J = " << xorNet.computeJ(datasetXor, 0) << endl;
 
 }
 

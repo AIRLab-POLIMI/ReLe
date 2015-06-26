@@ -147,10 +147,10 @@ public:
 
     }
 
-    arma::vec computeJ(const BatchData<InputC, arma::vec>& dataset,
+    double computeJ(const BatchData<InputC, arma::vec>& dataset,
                        double lambda)
     {
-        arma::vec J(dataset.getOutput(0).n_elem, arma::fill::zeros);
+        double J = 0;
 
         for (unsigned int i = 0; i < dataset.size(); i++)
         {
@@ -328,6 +328,8 @@ private:
         {
             computeGradient(dataset, params.lambda, g);
             w -= params.alpha * g;
+
+            //std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
         }
     }
 

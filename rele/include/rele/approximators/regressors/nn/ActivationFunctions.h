@@ -72,7 +72,7 @@ class Rectifier : public Function
 public:
     inline virtual double operator() (double x)
     {
-        return std::log(1 - std::exp(x));
+        return std::log(1 + std::exp(x));
     }
 
     inline virtual double diff(double x)
