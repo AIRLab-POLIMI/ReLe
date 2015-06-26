@@ -25,15 +25,11 @@
 #include "features/DenseFeatures.h"
 #include "regressors/FFNeuralNetwork.h"
 
-#include <fenv.h>
-
 using namespace std;
 using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-
     cout << "## Neural Network Test ##" << endl;
 
     arma::vec input = {1.0, 1.0};

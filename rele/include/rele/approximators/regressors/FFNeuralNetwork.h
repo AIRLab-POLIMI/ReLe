@@ -148,7 +148,7 @@ public:
     }
 
     double computeJ(const BatchData<InputC, arma::vec>& dataset,
-                       double lambda)
+                    double lambda)
     {
         double J = 0;
 

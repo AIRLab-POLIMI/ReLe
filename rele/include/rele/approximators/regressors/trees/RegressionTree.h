@@ -61,7 +61,7 @@ public:
      */
     virtual OutputC evaluate(const InputC& input)
     {
-        if (root == NULL)
+        if (!root)
         {
             throw std::runtime_error("Empty tree evaluated");
         }
@@ -105,7 +105,7 @@ public:
 protected:
     void cleanTree()
     {
-        if (root != nullptr && !root->isEmpty())
+        if (root && !root->isEmpty())
             delete root;
     }
 
@@ -140,7 +140,7 @@ protected:
         case Linear:
             return nullptr; //TODO implement
         case Samples:
-            return nullptr; //TODO implement
+            return new SampleLeafTreeNode<InputC, OutputC>(ds.clone());
         default:
             return nullptr;
         }

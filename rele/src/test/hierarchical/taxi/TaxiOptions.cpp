@@ -197,17 +197,17 @@ double TaxiComplexDropOffOption::terminationProbability(const DenseState& state)
 }
 
 TaxiComplexFillupOption::TaxiComplexFillupOption(std::vector<arma::vec2>& location)
-	: TaxiComplexOption(location, ActionType::FillUp)
+    : TaxiComplexOption(location, ActionType::FillUp)
 {
 
 }
 
 double TaxiComplexFillupOption::terminationProbability(const DenseState& state)
 {
-	if (state[sc::fuel] == 12)
-		return 1;
-	else
-		return 0;
+    if (state[sc::fuel] == 12)
+        return 1;
+    else
+        return 0;
 }
 
 

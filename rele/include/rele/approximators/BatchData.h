@@ -84,6 +84,9 @@ template<class InputC, class OutputC>
 class MiniBatchData;
 
 template<class InputC, class OutputC>
+class BatchDataPlain;
+
+template<class InputC, class OutputC>
 class BatchData
 {
 
@@ -96,6 +99,18 @@ public:
     virtual const InputC& getInput(unsigned int index) const = 0;
     virtual const OutputC& getOutput(unsigned int index) const = 0;
     virtual size_t size() const = 0;
+
+    virtual BatchData* clone() const
+    {
+        BatchDataPlain<InputC, OutputC>* newDataset = new BatchDataPlain<InputC, OutputC>();
+
+        for(int i = 0; i < size(); i++)
+        {
+            newDataset->addSample(getInput(i), getOutput(i));
+        }
+
+        return newDataset;
+    }
 
     const BatchData* getMiniBatch(unsigned int mSize) const
     {
@@ -270,7 +285,7 @@ public:
         assert(inputs.size() == outputs.size());
     }
 
-    void addSample(InputC& input, OutputC& output)
+    void addSample(const InputC& input, const OutputC& output)
     {
         inputs.push_back(input);
         outputs.push_back(output);

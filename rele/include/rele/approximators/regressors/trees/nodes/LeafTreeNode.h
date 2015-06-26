@@ -133,7 +133,20 @@ protected:
 template<class InputC, class OutputC>
 class SampleLeafTreeNode : public LeafTreeNode<InputC, OutputC>
 {
+public:
+    SampleLeafTreeNode(BatchData<InputC, OutputC>* dataSet)
+        : LeafTreeNode<InputC, OutputC>(*dataSet), dataSet(dataSet)
+    {
 
+    }
+
+    ~SampleLeafTreeNode()
+    {
+    	delete dataSet;
+    }
+
+private:
+    BatchData<InputC, OutputC>* dataSet;
 };
 
 template<class InputC, class OutputC>
