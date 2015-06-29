@@ -65,6 +65,7 @@ void SimulatedSnake::publishAction(const ReLe::DenseAction& action)
     motorSpeeds.values.data = arma::conv_to<MotorData>::from(action);
 
     motorSpeedPub.publish(motorSpeeds);
+    triggerSimulation();
 }
 
 void SimulatedSnake::setState(ReLe::DenseState& state)

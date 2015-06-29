@@ -120,7 +120,7 @@ private:
 int main(int argc, char* argv[])
 {
     ros::init(argc, argv, "room_environment_test");
-    ReLe_ROS::SimulatedRoomEnvironment room(20);
+    ReLe_ROS::SimulatedRoomEnvironment room(40);
     FakeAgent agent;
     Core<DenseAction, DenseState> core(room, agent);
 

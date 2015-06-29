@@ -33,6 +33,9 @@
 #include <vrep_common/simRosEnablePublisher.h>
 #include <vrep_common/simRosEnableSubscriber.h>
 #include <vrep_common/simRosGetObjectPose.h>
+#include <vrep_common/simRosSynchronous.h>
+#include <vrep_common/simRosSynchronousTrigger.h>
+#include <vrep_common/simRosSetFloatingParameter.h>
 
 #include <vrep_common/VrepInfo.h>
 #include "RosEnvironment.h"
@@ -58,6 +61,22 @@ public:
         infoSubscriber = n.subscribe("/vrep/info", 1,
                                      &SimulatedEnvironment::infoCallback, this);
         simulationRunning = false;
+
+
+        ros::service::waitForService("/vrep/simRosSynchronous");
+        ros::service::waitForService("/vrep/simRosSetFloatingParameter");
+
+
+        //Use syncronous mode
+        setSynchronousMode(true);
+
+        //set dt
+        vrep_common::simRosSetFloatingParameter srv;
+        srv.request.parameter = sim_floatparam_simulation_time_step;
+        srv.request.parameterValue = 1.0/controlFrequency;
+        ros::service::call("/vrep/simRosSetFloatingParameter", srv);
+
+
     }
 
     void infoCallback(const vrep_common::VrepInfo::ConstPtr& info)
@@ -91,13 +110,26 @@ protected:
 
         ros::service::waitForService("/vrep/simRosStartSimulation");
 
-        vrep_common::simRosStartSimulation srv;
-        ros::service::call("/vrep/simRosStartSimulation", srv);
 
-        if (srv.response.result == -1)
+        vrep_common::simRosStartSimulation srv;
+        do
         {
-            throw std::runtime_error("Simulation could not be started");
+            ros::service::call("/vrep/simRosStartSimulation", srv);
+
+            std::cout << "Start simulation code: " << srv.response.result << std::endl;
+
+            if (srv.response.result == -1)
+            {
+                throw std::runtime_error("Simulation could not be started");
+            }
+
+            if(srv.response.result != 1)
+            {
+                triggerSimulation();
+            }
+
         }
+        while(ros::ok() && srv.response.result != 1);
 
         simulationRunning = true;
 
@@ -118,7 +150,10 @@ protected:
             throw std::runtime_error("Simulation could not be stopped");
         }
 
+        //disable syncronous mode
+		setSynchronousMode(false);
         simulationRunning = false;
+
         std::cout << "Simulation Stopped" << std::endl;
     }
 
@@ -187,10 +222,36 @@ protected:
 
     }
 
+    //Call this method inside publish action
+    void triggerSimulation()
+    {
+        vrep_common::simRosSynchronousTrigger srv;
+        do
+        {
+            ros::service::call("/vrep/simRosSynchronousTrigger", srv);
+        }
+        while(srv.response.result == -1);
+    }
+
+private:
+	void setSynchronousMode(bool on)
+	{
+		//disable syncronous mode
+		vrep_common::simRosSynchronous srv;
+		srv.request.enable = on ? 1 : 0;
+		ros::service::call("/vrep/simRosSynchronous", srv);
+		if (srv.response.result == -1)
+		{
+			throw std::runtime_error("Synchronous mode cannot be enabled");
+		}
+	}
+
 private:
     std::string name;
     ros::Subscriber infoSubscriber;
     bool simulationRunning;
+
+
 };
 
 }

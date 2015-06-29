@@ -62,6 +62,8 @@ void SimulatedRoomEnvironment::publishAction(const ReLe::DenseAction& action)
     motorSpeeds.values.data.push_back(desiredLeftMotorSpeed);
     motorSpeeds.values.data.push_back(desiredRightMotorSpeed);
     motorSpeedPub.publish(motorSpeeds);
+
+    triggerSimulation();
 }
 
 void SimulatedRoomEnvironment::setState(ReLe::DenseState& state)
