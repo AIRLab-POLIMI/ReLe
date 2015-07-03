@@ -88,14 +88,16 @@ int main(int argc, char *argv[])
     values.push_back(4);
     indexes.push_back(TaxiFuel::destination);
     values.push_back(4);
+    indexes.push_back(TaxiFuel::fuel);
+    values.push_back(12);
+
     BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
-    basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    double temperature = 10;
+    double temperature = 100;
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
@@ -105,7 +107,7 @@ int main(int argc, char *argv[])
     //AdaptiveStep stepRule(0.01);
     ConstantStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
-            HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::MULTI);
+            HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::SINGLE);
 
     Core<FiniteAction, DenseState> core(taxiMDP, agent);
     //--
@@ -123,12 +125,10 @@ int main(int argc, char *argv[])
     {
         console.printProgress(i);
         core.runEpisode();
-        if(temperature > 0.1)
-        {
-            temperature *= 0.9999;
-            cout << "temperature: " << temperature << endl;
-            rootPolicyOption.setTemperature(temperature);
-        }
+        cout << "temperature: " << temperature << endl;
+        double tNew = min(temperature, max(0.01, temperature / (0.01 * (i + 1))));
+        cout << "temperature: " << tNew << endl;
+        rootPolicyOption.setTemperature(tNew);
     }
 
     delete core.getSettings().loggerStrategy;

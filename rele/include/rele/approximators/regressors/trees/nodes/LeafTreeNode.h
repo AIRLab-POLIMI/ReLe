@@ -142,7 +142,7 @@ public:
 
     ~SampleLeafTreeNode()
     {
-    	delete dataSet;
+        delete dataSet;
     }
 
 private:

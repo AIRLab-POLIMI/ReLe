@@ -10,7 +10,7 @@ close all
 %% Choose file
 basedir = '/tmp/ReLe/TaxiFuel/HPG/';
 trajectoryFile = [basedir 'TaxiFuel.log'];
-agentFile = [basedir 'TaxiFuel_agentData.log'];
+agentFile = [basedir 'prova.log'];
 
 %% Read data
 
