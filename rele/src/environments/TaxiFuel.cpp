@@ -92,7 +92,7 @@ void TaxiFuel::step(const FiniteAction& action, DenseState& nextState,
 
     }
 
-    if(currentState[fuel] < 0)
+    if(currentState[fuel] < 0 && currentState[onBoard] != -1)
     {
         reward[0] -= 20;
         currentState.setAbsorbing();

@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     vector<unsigned int> indexes;
     vector<unsigned int> values;
     indexes.push_back(TaxiFuel::y);
-    values.push_back(4);
+    values.push_back(5);
     indexes.push_back(TaxiFuel::onBoard);
     values.push_back(2);
     indexes.push_back(TaxiFuel::location);
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     //AdaptiveStep stepRule(0.01);
     ConstantStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
-            HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::SINGLE);
+            HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI);
 
     Core<FiniteAction, DenseState> core(taxiMDP, agent);
     //--
