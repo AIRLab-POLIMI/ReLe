@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     //AdaptiveStep stepRule(0.01);
     ConstantStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
-            HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::SINGLE);
+            HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::SINGLE);
 
     Core<FiniteAction, DenseState> core(taxiMDP, agent);
     //--

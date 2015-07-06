@@ -40,7 +40,7 @@ class HierarchicalGPOMDPAlgorithm: public HierarchicalPolicyGradient<ActionC, St
 
 
 public:
-    enum BaseLineType { MULTI, SINGLE };
+    enum class BaseLineType { MULTI, SINGLE };
 
 
     HierarchicalGPOMDPAlgorithm(DifferentiableOption<ActionC, StateC>& rootOption,
