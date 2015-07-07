@@ -40,7 +40,10 @@ class HierarchicalGPOMDPAlgorithm: public HierarchicalPolicyGradient<ActionC, St
 
 
 public:
-    enum class BaseLineType { MULTI, SINGLE };
+    enum class BaseLineType
+    {
+        MULTI, SINGLE
+    };
 
 
     HierarchicalGPOMDPAlgorithm(DifferentiableOption<ActionC, StateC>& rootOption,
@@ -169,6 +172,9 @@ protected:
             baseline_num_single(p) += baseline_num1_single(p) * baseline_num2_single(p);
             baseline_den_single(p) += baseline_num2_single(p) * baseline_num2_single(p);
         }
+
+        if(this->task.gamma == 1) //TODO LEVAMI
+        	history_J[epiCount] /= stepCount;
     }
 
     virtual void updatePolicy()
@@ -214,7 +220,7 @@ protected:
         gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        arma::mat eMetric = arma::eye(nbParams,nbParams);
+        arma::mat eMetric = arma::mat();//arma::eye(nbParams,nbParams); FIXME
         arma::vec step_size = stepLength.stepLength(gradient, eMetric);
         //---
 

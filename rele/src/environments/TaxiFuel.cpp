@@ -29,7 +29,7 @@
 namespace ReLe
 {
 
-TaxiFuel::TaxiFuel() : DenseMDP(STATESIZE, ACTIONNUMBER, 1, false, true, 0.9), gridDim(0, 4)
+TaxiFuel::TaxiFuel() : DenseMDP(STATESIZE, ACTIONNUMBER, 1, false, true, 1.0), gridDim(0, 4)
 {
     G = {4.0, 4.0};
     Y = {0.0, 0.0};
@@ -71,7 +71,7 @@ void TaxiFuel::step(const FiniteAction& action, DenseState& nextState,
     case dropoff:
         if(currentState[onBoard] == 1.0 && atDestination())
         {
-            currentState[onBoard] = -1;
+            currentState[onBoard] = 2;
             currentState.setAbsorbing();
             reward[0] += 20;
         }
@@ -92,7 +92,7 @@ void TaxiFuel::step(const FiniteAction& action, DenseState& nextState,
 
     }
 
-    if(currentState[fuel] < 0 && currentState[onBoard] != -1)
+    if(currentState[fuel] < 0 && currentState[onBoard] != 2)
     {
         reward[0] -= 20;
         currentState.setAbsorbing();

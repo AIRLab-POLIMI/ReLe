@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     indexes.push_back(TaxiFuel::y);
     values.push_back(5);
     indexes.push_back(TaxiFuel::onBoard);
-    values.push_back(2);
+    values.push_back(3);
     indexes.push_back(TaxiFuel::location);
     values.push_back(4);
     indexes.push_back(TaxiFuel::destination);
@@ -92,12 +92,13 @@ int main(int argc, char *argv[])
     values.push_back(12);
 
     BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
+    //basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    double temperature = 100;
+    double temperature = 50;
     ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
@@ -126,7 +127,8 @@ int main(int argc, char *argv[])
         console.printProgress(i);
         core.runEpisode();
         cout << "temperature: " << temperature << endl;
-        double tNew = min(temperature, max(0.01, temperature / (0.01 * (i + 1))));
+        double tNew = temperature * (static_cast<double>(episodes) - static_cast<double>(i))/static_cast<double>(episodes);
+        tNew = max(tNew, 0.1);
         cout << "temperature: " << tNew << endl;
         rootPolicyOption.setTemperature(tNew);
     }

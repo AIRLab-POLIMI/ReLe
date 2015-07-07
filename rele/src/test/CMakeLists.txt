@@ -5,6 +5,9 @@ add_executable(nlopt_test nlopt.cpp)
 target_link_libraries(nlopt_test  ${NLOPT_LIBRARY})
 
 #Core test
+add_executable(basis_test core/BasisTest.cpp)
+target_link_libraries(basis_test rele)
+
 add_executable(features_test core/FeaturesTest.cpp)
 target_link_libraries(features_test rele)
 
