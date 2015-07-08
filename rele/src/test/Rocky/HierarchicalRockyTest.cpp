@@ -27,7 +27,7 @@
 
 #include "policy_search/gradient/hierarchical/HierarchicalGPOMDP.h"
 
-#include "parametric/differentiable/GibbsPolicy.h"
+#include "parametric/differentiable/NewGibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
 #include "basis/SubspaceBasis.h"
@@ -74,17 +74,18 @@ int main(int argc, char *argv[])
     vector<FiniteAction> actions = FiniteAction::generate(options.size());
 
     //-- Features
-    BasisFunctions basis;// = IdentityBasis::generate(Rocky::STATESIZE);
-    basis.push_back(new IdentityBasis(Rocky::energy));
+    BasisFunctions basis = IdentityBasis::generate(Rocky::STATESIZE);
+    /*basis.push_back(new IdentityBasis(Rocky::energy));
     basis.push_back(new IdentityBasis(Rocky::food));
     basis.push_back(new SubspaceBasis(new NormBasis(), span(Rocky::xr, Rocky::yr)));
-    basis.push_back(new ModularDifference(Rocky::theta, Rocky::thetar, RangePi()));
+    basis.push_back(new ModularDifference(Rocky::theta, Rocky::thetar, RangePi()));*/
 
-    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size()-1);
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, Rocky::STATESIZE, actions.size());
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, 10);
+    double temperature = 1;
+    NewGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<DenseAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 
@@ -98,7 +99,7 @@ int main(int argc, char *argv[])
     //--
 
 
-    int episodes = 3000;
+    int episodes = 10000;
     core.getSettings().episodeLenght = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
             WriteStrategy<DenseAction, DenseState>::AGENT);
@@ -110,7 +111,11 @@ int main(int argc, char *argv[])
     {
         console.printProgress(i);
         core.runEpisode();
-        //cout << "p" << rootPolicyOption.getParameters().t();
+        /*cout << "temperature: " << temperature << endl;
+        double tNew = temperature * (static_cast<double>(episodes) - static_cast<double>(i))/static_cast<double>(episodes);
+        tNew = max(tNew, 0.1);
+        cout << "temperature: " << tNew << endl;
+        rootPolicyOption.setTemperature(tNew);*/
     }
 
     delete core.getSettings().loggerStrategy;

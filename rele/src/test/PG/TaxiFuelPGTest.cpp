@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     //AdaptiveStep stepRule(0.01);
     ConstantStep stepRule(0.01);
     GPOMDPAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, nbstep, stepRule,
-            GPOMDPAlgorithm<DenseAction, DenseState>::MULTI);
+            GPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI);
 
     Core<FiniteAction, DenseState> core(taxiMDP, agent);
     //--

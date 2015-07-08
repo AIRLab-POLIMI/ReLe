@@ -27,6 +27,7 @@
 #include "policy_search/gradient/onpolicy/ENACAlgorithm.h"
 #include "Core.h"
 #include "parametric/differentiable/GibbsPolicy.h"
+#include "parametric/differentiable/NewGibbsPolicy.h"
 #include "BasisFunctions.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/ConditionBasedFunction.h"
@@ -222,6 +223,7 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
+    //NewGibbsPolicy<DenseState> policy(actions, phi, 1);
     //---
 
     AbstractPolicyGradientAlgorithm<FiniteAction, DenseState>* agent;

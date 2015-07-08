@@ -174,7 +174,7 @@ protected:
         }
 
         if(this->task.gamma == 1) //TODO LEVAMI
-        	history_J[epiCount] /= stepCount;
+            history_J[epiCount] /= stepCount;
     }
 
     virtual void updatePolicy()
@@ -220,7 +220,8 @@ protected:
         gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        arma::mat eMetric = arma::mat();//arma::eye(nbParams,nbParams); FIXME
+        //arma::mat eMetric = arma::eye(nbParams,nbParams);
+        arma::mat eMetric = arma::eye(1,1);
         arma::vec step_size = stepLength.stepLength(gradient, eMetric);
         //---
 

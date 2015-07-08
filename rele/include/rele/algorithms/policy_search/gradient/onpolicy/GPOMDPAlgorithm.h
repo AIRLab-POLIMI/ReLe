@@ -40,7 +40,7 @@ class GPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 
 
 public:
-    enum BaseLineType { MULTI, SINGLE };
+    enum class BaseLineType { MULTI, SINGLE };
 
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
