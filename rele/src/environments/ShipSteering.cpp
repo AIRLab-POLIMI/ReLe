@@ -30,7 +30,7 @@ namespace ReLe
 {
 
 ShipSteering::ShipSteering(bool small) :
-    ContinuousMDP(STATESIZE, 1, 1, false, true, 0.99)
+    ContinuousMDP(STATESIZE, 1, 1, false, true, 0.99, 5000)
 {
     double fieldSize = small ? 150 : 1000;
 

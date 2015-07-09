@@ -104,7 +104,6 @@ int main(int argc, char *argv[])
     cout << "phi2(6)" << endl << phi2(inp6).t() << endl;
     cout << "phi2(7)" << endl << phi2(inp7).t() << endl;
 
-
 }
 
 

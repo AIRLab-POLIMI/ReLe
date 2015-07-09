@@ -130,7 +130,7 @@ public:
                            typename action_type<FiniteAction>::const_type_ref action)
     {
         NewGibbsPolicy& pi = *this;
-        return pi(state)*difflog(state, action);
+        return pi(state, action)*difflog(state, action);
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,

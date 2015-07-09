@@ -38,9 +38,19 @@ class GPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 {
     USE_PGA_MEMBERS
 
+private:
+    class BaseLineCalculator
+    {
+
+    };
+
+
 
 public:
-    enum class BaseLineType { MULTI, SINGLE };
+    enum class BaseLineType
+    {
+        MULTI, SINGLE
+    };
 
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
@@ -94,8 +104,8 @@ protected:
     {
         unsigned int dp = policy.getParametersSize();
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
-        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
-        sumdlogpi.set_size(dp);
+        history_sumdLogPi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
+        sumdLogPi.set_size(dp);
 
         // variables for baseline settings
         baseline_num.zeros(dp,maxStepsPerEpisode);
@@ -104,14 +114,14 @@ protected:
         baseline_den_single.zeros(dp);
         baseline_num1_single.zeros(dp);
         baseline_num2_single.zeros(dp);
-        reward_EpStep.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode);
-        sumGradLog_CompEpStep.zeros(dp,nbEpisodesToEvalPolicy,maxStepsPerEpisode);
-        maxsteps_Ep.zeros(nbEpisodesToEvalPolicy);
+        episodeStepReward.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode);
+        sumGradLog.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode, dp);
+        episodeLenght.zeros(nbEpisodesToEvalPolicy);
     }
 
     virtual void initializeVariables()
     {
-        sumdlogpi.zeros();
+        sumdLogPi.zeros();
         stepCount = 0;
         baseline_num1_single.zeros();
         baseline_num2_single.zeros();
@@ -124,34 +134,22 @@ protected:
         int dp = policy.getParametersSize();
 
         arma::vec grad = policy.difflog(currentState, currentAction);
-        sumdlogpi += grad;
+        sumdLogPi += grad;
 
         // store the basic elements used to compute the gradient
-        reward_EpStep(epiCount, stepCount) = df * rTr(reward);
-
-        for (int p = 0; p < dp; ++p)
-        {
-            sumGradLog_CompEpStep(p,epiCount,stepCount) = sumdlogpi(p);
-        }
-        //        std::cout << sumdlogpi.t();
+        episodeStepReward(epiCount, stepCount) = df * rTr(reward);
+        sumGradLog.tube(epiCount,stepCount) = sumdLogPi;
 
         // compute the baseline
-
         if (useBaseline && bType == BaseLineType::MULTI)
         {
-            for (int p = 0; p < dp; ++p)
-            {
-                baseline_num(p,stepCount) += df * rTr(reward) * sumdlogpi(p) * sumdlogpi(p);
-                baseline_den(p,stepCount) += sumdlogpi(p) * sumdlogpi(p);
-            }
+            baseline_num.col(stepCount) += df * rTr(reward) * sumdLogPi % sumdLogPi;
+            baseline_den.col(stepCount) += sumdLogPi % sumdLogPi;
         }
         else if (useBaseline && bType == BaseLineType::SINGLE)
         {
-            for (int p = 0; p < dp; ++p)
-            {
-                baseline_num1_single(p) += df * rTr(reward) * sumdlogpi(p);
-                baseline_num2_single(p) += sumdlogpi(p);
-            }
+            baseline_num1_single += df * rTr(reward) * sumdLogPi;
+            baseline_num2_single += sumdLogPi;
         }
 
         stepCount++;
@@ -159,53 +157,58 @@ protected:
 
     virtual void updateAtEpisodeEnd()
     {
-        maxsteps_Ep(epiCount) = stepCount;
+        episodeLenght(epiCount) = stepCount;
 
         // compute the baseline
-
-        int nbParams = policy.getParametersSize();
-        for (int p = 0; p < nbParams; ++p)
-        {
-            baseline_num_single(p) += baseline_num1_single(p) * baseline_num2_single(p);
-            baseline_den_single(p) += baseline_num2_single(p) * baseline_num2_single(p);
-        }
+        baseline_num_single += baseline_num1_single % baseline_num2_single;
+        baseline_den_single += baseline_num2_single % baseline_num2_single;
     }
 
     virtual void updatePolicy()
     {
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
+
         // compute the gradient
-
-        if (bType == BaseLineType::MULTI)
+        if(useBaseline)
         {
-            for (int p = 0; p < nbParams; ++p)
+            if (bType == BaseLineType::MULTI)
             {
-                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
                 {
-                    for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
+                    for (int t = 0; t < episodeLenght(ep); t++)
                     {
+                        arma::vec baseline = baseline_num.col(t) / baseline_den.col(t);
+                        baseline(arma::find_nonfinite(baseline)).zeros();
+                        const arma::vec& sumGradLog_ep_t = sumGradLog.tube(ep,t);
+                        gradient += (episodeStepReward(ep,t) - baseline) % sumGradLog_ep_t;
+                    }
+                }
 
-                        double baseline = (useBaseline == true && baseline_den(p,t) != 0) ? baseline_num(p,t) / baseline_den(p,t) : 0;
+            }
+            else
+            {
+                arma::vec baseline = baseline_num_single / baseline_den_single;
+                baseline(arma::find_nonfinite(baseline)).zeros();
 
-                        gradient[p] += (reward_EpStep(ep,t) - baseline) * sumGradLog_CompEpStep(p,ep,t);
+                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
+                {
+                    for (int t = 0; t < episodeLenght(ep); t++)
+                    {
+                        const arma::vec& sumGradLog_ep_t = sumGradLog.tube(ep,t);
+                        gradient += (episodeStepReward(ep,t) - baseline) % sumGradLog_ep_t;
                     }
                 }
             }
         }
         else
         {
-            // compute the gradient
-            for (int p = 0; p < nbParams; ++p)
+            for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
             {
-                double baseline =  (useBaseline == true && baseline_den_single(p) != 0) ? baseline_num_single(p) / baseline_den_single(p) : 0;
-
-                for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+                for (int t = 0; t < episodeLenght(ep); t++)
                 {
-                    for (int t = 0, te = maxsteps_Ep(ep); t < te; ++t)
-                    {
-                        gradient[p] += (reward_EpStep(ep,t) - baseline) * sumGradLog_CompEpStep(p,ep,t);
-                    }
+                    const arma::vec& sumGradLog_ep_t = sumGradLog.tube(ep,t);
+                    gradient += episodeStepReward(ep,t) * sumGradLog_ep_t;
                 }
             }
         }
@@ -220,35 +223,30 @@ protected:
 
         //--- save actual policy performance
         currentItStats->history_J = history_J;
-        currentItStats->history_gradients = history_sumdlogpi;
+        currentItStats->history_gradients = history_sumdLogPi;
         currentItStats->estimated_gradient = gradient;
         currentItStats->stepLength = step_size;
         //---
 
         arma::vec newvalues = policy.getParameters() + gradient * step_size;
         policy.setParameters(newvalues);
-        //        std::cout << "new_params: "  << newvalues.t();
 
-        for (int p = 0; p < nbParams; ++p)
-        {
-            baseline_num_single(p) = 0.0;
-            baseline_den_single(p) = 0.0;
-            baseline_num1_single(p) = 0.0;
-            baseline_num2_single(p) = 0.0;
-            for (int t = 0; t < maxStepsPerEpisode; ++t)
-            {
-                baseline_den(p,t) = 0;
-                baseline_num(p,t) = 0;
-            }
-        }
+
+        baseline_num_single.zeros();
+        baseline_den_single.zeros();
+        baseline_num1_single.zeros();
+        baseline_num2_single.zeros();
+        baseline_den.zeros();
+        baseline_num.zeros();
+
     }
 
 protected:
-    std::vector<arma::vec> history_sumdlogpi;
-    arma::vec sumdlogpi;
-    arma::mat reward_EpStep;
-    arma::cube sumGradLog_CompEpStep;
-    arma::ivec maxsteps_Ep;
+    std::vector<arma::vec> history_sumdLogPi;
+    arma::vec sumdLogPi;
+    arma::mat episodeStepReward;
+    arma::cube sumGradLog;
+    arma::ivec episodeLenght;
 
     unsigned int maxStepsPerEpisode, stepCount;
 
