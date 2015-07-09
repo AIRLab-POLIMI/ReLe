@@ -27,7 +27,7 @@
 
 #include "policy_search/gradient/hierarchical/HierarchicalGPOMDP.h"
 
-//#include "parametric/differentiable/GibbsPolicy.h"
+#include "parametric/differentiable/GibbsPolicy.h"
 #include "parametric/differentiable/NewGibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
@@ -95,12 +95,12 @@ int main(int argc, char *argv[])
     BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
     //basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
-    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size());
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size() - 1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
     double temperature = 50;
-    NewGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
+    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 

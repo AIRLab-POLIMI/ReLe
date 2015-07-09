@@ -11,13 +11,13 @@ iteration.J = csv(index, 1:nbepisode);
 
 for i=1:nbepisode
     index = index +1;
-    iteration.histGradient(i).g = csv(index, 1:end); % FIXME error
+    iteration.histGradient(i).g = csv(index, 1:nbparameters); % FIXME error
 end
 
 index = index + 1;
-iteration.params = csv(index, 1:end); % FIXME error
+iteration.params = csv(index, 1:nbparameters); % FIXME error
 index = index + 1;
-iteration.gradient = csv(index, 1:end); % FIXME error
+iteration.gradient = csv(index, 1:nbparameters); % FIXME error
 index = index + 1;
 iteration.stepLength = csv(index, 1);
 

@@ -166,6 +166,12 @@ protected:
 
     virtual void updatePolicy()
     {
+
+    	//std::cerr<< "#############################" << std::endl;
+    	//std::cerr << arma::sum(episodeStepReward, 1).t() << std::endl;
+    	//std::cerr << "#############################" << std::endl;
+    	//std::cerr << episodeStepReward << std::endl;
+    	//std::cerr << "#############################" << std::endl;
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
 
@@ -181,6 +187,9 @@ protected:
                         arma::vec baseline = baseline_num.col(t) / baseline_den.col(t);
                         baseline(arma::find_nonfinite(baseline)).zeros();
                         const arma::vec& sumGradLog_ep_t = sumGradLog.tube(ep,t);
+                        //std::cerr << "t = " << t << std::endl;
+                        //std::cerr << "b = " << baseline.t() << std::endl;
+                        //std::cerr << "g = " << ((episodeStepReward(ep,t) - baseline) % sumGradLog_ep_t).t() << std::endl;
                         gradient += (episodeStepReward(ep,t) - baseline) % sumGradLog_ep_t;
                     }
                 }
@@ -238,6 +247,7 @@ protected:
         baseline_num2_single.zeros();
         baseline_den.zeros();
         baseline_num.zeros();
+        episodeStepReward.zeros(); //TODO levami
 
     }
 

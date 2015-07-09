@@ -6,13 +6,15 @@ addpath(genpath('./GradientTests'));
 clear all;
 clc;
 
-nbEpisodes = 50;
-nbUpdates  = 200;
-stepLength = 0.001;
-algorithm = 'gb';
+nbEpisodes = 400;
+nbUpdates  = 100;
+stepLength = 0.01;
+algorithm = 'r';
 domain = 'deep';
 
-prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_PG'];
+path = '/home/dave/ReLe/devel/lib/rele/';
+%path = '/home/matteo/Projects/github/ReLe/rele-build/';
+prog = [path,domain,'_PG'];
 args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
     ' ', num2str(stepLength)];
 

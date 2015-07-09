@@ -6,14 +6,15 @@ addpath('../');
 clear all;
 clc;
 
-algorithms{1} = 'r';
-algorithms{2} = 'g';
-algorithms{3} = 'rb';
-algorithms{4} = 'gb';
-algorithms{5} = 'gsb';
-algorithms{6} = 'natg';
-algorithms{7} = 'natr';
-algorithms{8} = 'enac';
+% algorithms{1} = 'r';
+% algorithms{2} = 'g';
+% algorithms{3} = 'rb';
+% algorithms{4} = 'gb';
+% algorithms{5} = 'gsb';
+% algorithms{6} = 'natg';
+% algorithms{7} = 'natr';
+% algorithms{8} = 'enac';
+ algorithms{1} = 'gb';
 
 nbEpisodes = 50;
 nbUpdates  = 1000;
@@ -21,7 +22,9 @@ stepLength = 0.001;
 
 domain = 'deep';
 
-prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_PG'];
+path = '/home/dave/ReLe/devel/lib/rele/';
+%path = '/home/matteo/Projects/github/ReLe/rele-build/';
+prog = [path,domain,'_PG'];
 
 
 % figure(1);

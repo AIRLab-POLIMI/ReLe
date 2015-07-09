@@ -104,7 +104,8 @@ TaxiComplexOption::TaxiComplexOption(std::vector<arma::vec2>& locations, ActionT
 
 bool TaxiComplexOption::canStart(const arma::vec& state)
 {
-    return actionType != DropOff || state(sc::onBoard) == 1;
+    //return actionType != DropOff || state(sc::onBoard) == 1; FIXME
+	return true;
 }
 
 void TaxiComplexOption::operator ()(const DenseState& state, FiniteAction& action)
