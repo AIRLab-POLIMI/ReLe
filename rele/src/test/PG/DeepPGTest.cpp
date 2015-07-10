@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 
     BasisFunctions bfs;
 
-    for (int i = 0; i < actions.size() - 1; ++i)
+    for (int i = 0; i < actions.size() /*- 1*/; ++i)
     {
         bfs.push_back(new AndConditionBasisFunction(pf0,2,i));
         bfs.push_back(new AndConditionBasisFunction(pfs1,2,i));
@@ -222,8 +222,8 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi(bfs);
 
-    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
-    //NewGibbsPolicy<DenseState> policy(actions, phi, 1);
+    //ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
+    NewGibbsPolicy<DenseState> policy(actions, phi, 1);
     //---
 
     AbstractPolicyGradientAlgorithm<FiniteAction, DenseState>* agent;

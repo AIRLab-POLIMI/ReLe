@@ -84,12 +84,13 @@ protected:
 
     virtual void updateAtEpisodeEnd()
     {
-        for (int p = 0; p < baseline_num.n_elem; ++p)
+        if(useBaseline)
         {
-            baseline_num[p] += Jep * sumdlogpi[p] * sumdlogpi[p];
-            baseline_den[p] += sumdlogpi[p] * sumdlogpi[p];
-            history_sumdlogpi[epiCount][p] = sumdlogpi[p];
+            baseline_num += Jep * sumdlogpi % sumdlogpi;
+            baseline_den += sumdlogpi % sumdlogpi;
         }
+
+        history_sumdlogpi[epiCount] = sumdlogpi;
     }
 
     virtual void updatePolicy()
@@ -97,14 +98,26 @@ protected:
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
         // In the previous loop I have computed the baseline
-        for (int ep = 0; ep < nbEpisodesToEvalPolicy; ++ep)
+        if(useBaseline)
         {
-            for (int p = 0; p < nbParams; ++p)
+            arma::vec baseline = baseline_num / baseline_den;
+            baseline(arma::find_nonfinite(baseline)).zeros();
+
+            for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
             {
-                double base_el = (useBaseline == false || baseline_den[p] == 0.0) ? 0 : baseline_num[p]/baseline_den[p];
-                gradient[p] += history_sumdlogpi[ep][p] * (history_J[ep] - base_el);
+                gradient += (history_J[ep] - baseline) % history_sumdlogpi[ep];
+            }
+
+        }
+        else
+        {
+            for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
+            {
+                gradient += history_J[ep] * history_sumdlogpi[ep];
             }
         }
+
+
 
         // compute mean value
         gradient /= nbEpisodesToEvalPolicy;
@@ -125,10 +138,10 @@ protected:
         policy.setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
-        for (int i = 0; i < nbParams; ++i)
+        if(useBaseline)
         {
-            baseline_den[i] = 0;
-            baseline_num[i] = 0;
+        	baseline_den.zeros();
+        	baseline_num.zeros();
         }
     }
 
