@@ -167,11 +167,11 @@ protected:
     virtual void updatePolicy()
     {
 
-    	//std::cerr<< "#############################" << std::endl;
-    	//std::cerr << arma::sum(episodeStepReward, 1).t() << std::endl;
-    	//std::cerr << "#############################" << std::endl;
-    	//std::cerr << episodeStepReward << std::endl;
-    	//std::cerr << "#############################" << std::endl;
+        //std::cerr<< "#############################" << std::endl;
+        //std::cerr << arma::sum(episodeStepReward, 1).t() << std::endl;
+        //std::cerr << "#############################" << std::endl;
+        //std::cerr << episodeStepReward << std::endl;
+        //std::cerr << "#############################" << std::endl;
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
 
@@ -226,8 +226,7 @@ protected:
         gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        arma::mat eMetric = arma::eye(nbParams,nbParams);
-        arma::vec step_size = stepLength.stepLength(gradient, eMetric);
+        arma::vec step_size = stepLength.stepLength(gradient);
         //---
 
         //--- save actual policy performance

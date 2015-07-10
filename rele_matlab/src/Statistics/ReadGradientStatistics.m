@@ -3,7 +3,7 @@ function [ iteration, index ] = ReadGradientStatistics(csv, index)
 %   Read all the parameters used by the algorithm and their reward
 
 index = index +1; %skip episode info
-nbparameters = csv(index, 1);
+nbparameters = min(csv(index, 1), size(csv, 2));
 index = index +1;
 nbepisode = csv(index, 1);
 index = index +1;

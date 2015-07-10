@@ -95,19 +95,19 @@ int main(int argc, char *argv[])
     BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
     //basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
-    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size() - 1);
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size());
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
     double temperature = 50;
-    ParametricGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
+    NewGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 
     //-- agent
     int nbepperpol = 100, nbstep = 100;
-    //AdaptiveStep stepRule(0.01);
-    ConstantStep stepRule(0.01);
+    AdaptiveStep stepRule(0.01);
+    //ConstantStep stepRule(0.01);
     HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
             HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI);
 
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     //--
 
 
-    int episodes = 50000;
+    int episodes = 5000;
     core.getSettings().episodeLenght = 100;
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
             WriteStrategy<FiniteAction, DenseState>::AGENT);

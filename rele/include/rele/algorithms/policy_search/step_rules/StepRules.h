@@ -42,6 +42,13 @@ public:
     virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false) = 0;
 
     /**
+     * @brief computes the new step length assuming identity metric
+     * @param gradient the actual gradient
+     * @return
+     */
+    virtual arma::vec stepLength(arma::vec& gradient) = 0;
+
+    /**
      * This function is called in order to reset the internal state of the class
      * @brief reset the internal state of class
      */
@@ -64,7 +71,12 @@ public:
     {
     }
 
-    inline arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
+    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
+    {
+        return stepDirection;
+    }
+
+    virtual arma::vec stepLength(arma::vec& gradient) override
     {
         return stepDirection;
     }
@@ -84,7 +96,7 @@ public:
     {
     }
 
-    inline arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
+    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
     {
         double lambda, step_length;
         if (inverse == true)
@@ -119,6 +131,20 @@ public:
             }
             //---
         }
+        arma::vec output(1);
+        output(0) = step_length;
+        return output;
+    }
+
+    virtual arma::vec stepLength(arma::vec& gradient)
+    {
+        double lambda, step_length;
+
+        double tmp = arma::as_scalar(gradient.t() * gradient);
+        lambda = sqrt(tmp / (4 * stepValue));
+        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
+        step_length = 1.0 / (2.0 * lambda);
+
         arma::vec output(1);
         output(0) = step_length;
         return output;

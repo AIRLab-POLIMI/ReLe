@@ -220,9 +220,7 @@ protected:
         gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-        //arma::mat eMetric = arma::eye(nbParams,nbParams);
-        arma::mat eMetric = arma::eye(1,1);
-        arma::vec step_size = stepLength.stepLength(gradient, eMetric);
+        arma::vec step_size = stepLength.stepLength(gradient);
         //---
 
         //--- save actual policy performance
