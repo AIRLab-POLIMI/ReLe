@@ -38,14 +38,6 @@ class GPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 {
     USE_PGA_MEMBERS
 
-private:
-    class BaseLineCalculator
-    {
-
-    };
-
-
-
 public:
     enum class BaseLineType
     {
@@ -160,8 +152,11 @@ protected:
         episodeLenght(epiCount) = stepCount;
 
         // compute the baseline
-        baseline_num_single += baseline_num1_single % baseline_num2_single;
-        baseline_den_single += baseline_num2_single % baseline_num2_single;
+        if (useBaseline && bType == BaseLineType::SINGLE)
+        {
+        	baseline_num_single += baseline_num1_single % baseline_num2_single;
+        	baseline_den_single += baseline_num2_single % baseline_num2_single;
+        }
     }
 
     virtual void updatePolicy()

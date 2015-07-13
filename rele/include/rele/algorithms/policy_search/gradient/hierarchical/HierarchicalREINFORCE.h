@@ -21,10 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REINFORCEALGORITHM_H_
-#define REINFORCEALGORITHM_H_
+#ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALREINFORCE_H_
+#define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALREINFORCE_H_
 
-#include "policy_search/gradient/PolicyGradientAlgorithm.h"
+#include "policy_search/gradient/HierarchicalPolicyGradient.h"
 
 namespace ReLe
 {
@@ -33,28 +33,28 @@ namespace ReLe
 /// REINFORCE GRADIENT ALGORITHM
 ///////////////////////////////////////////////////////////////////////////////////////
 template<class ActionC, class StateC>
-class REINFORCEAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
+class HierarchicalREINFORCE: public HierarchicalPolicyGradient<ActionC, StateC>
 {
 
-    USE_PGA_MEMBERS
+    USE_HPGA_MEMBERS
 
 public:
-    REINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                       unsigned int nbEpisodes, StepRule& stepL,
-                       bool baseline = true, int reward_obj = 0) :
-        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
+    HierarchicalREINFORCE(DifferentiableOption<ActionC, StateC>& rootOption,
+                          unsigned int nbEpisodes, StepRule& stepL,
+                          bool baseline = true, int reward_obj = 0) :
+        HierarchicalPolicyGradient<ActionC, StateC>(rootOption, nbEpisodes, stepL, baseline, reward_obj)
     {
     }
 
-    REINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                       unsigned int nbEpisodes, StepRule& stepL,
-                       RewardTransformation& reward_tr,
-                       bool baseline = true) :
-        AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)
+    HierarchicalREINFORCE(DifferentiableOption<ActionC, StateC>& rootOption,
+                          unsigned int nbEpisodes, StepRule& stepL,
+                          RewardTransformation& reward_tr,
+                          bool baseline = true) :
+        HierarchicalPolicyGradient<ActionC, StateC>(rootOption, nbEpisodes, stepL, reward_tr, baseline)
     {
     }
 
-    virtual ~REINFORCEAlgorithm()
+    virtual ~HierarchicalREINFORCE()
     {
     }
 
@@ -62,13 +62,16 @@ public:
 protected:
     virtual void init()
     {
-        AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
-        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(policy.getParametersSize()));
+        HierarchicalPolicyGradient<ActionC, StateC>::init();
 
-        baseline_den.zeros(policy.getParametersSize());
-        baseline_num.zeros(policy.getParametersSize());
+        int parameterSize = this->getPolicy().getParametersSize();
 
-        sumdlogpi.set_size(policy.getParametersSize());
+        history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(parameterSize));
+
+        baseline_den.zeros(parameterSize);
+        baseline_num.zeros(parameterSize);
+
+        sumdlogpi.set_size(parameterSize);
     }
 
     virtual void initializeVariables()
@@ -78,7 +81,7 @@ protected:
 
     virtual void updateStep(const Reward& reward)
     {
-        arma::vec grad = policy.difflog(currentState, currentAction);
+        arma::vec grad = this->getPolicy().difflog(currentState, currentAction);
         sumdlogpi += grad;
     }
 
@@ -95,7 +98,7 @@ protected:
 
     virtual void updatePolicy()
     {
-        int nbParams = policy.getParametersSize();
+        int nbParams = this->getPolicy().getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
         // In the previous loop I have computed the baseline
         if(useBaseline)
@@ -134,8 +137,8 @@ protected:
         //---
 
 
-        arma::vec newvalues = policy.getParameters() + gradient * step_size;
-        policy.setParameters(newvalues);
+        arma::vec newvalues = this->getPolicy().getParameters() + gradient * step_size;
+        this->getPolicy().setParameters(newvalues);
         //        std::cout << "new_params: "  << newvalues.t();
 
         if(useBaseline)
@@ -153,4 +156,5 @@ protected:
 
 }// end namespace ReLe
 
-#endif //REINFORCEALGORITHM_H_
+
+#endif /* INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALREINFORCE_H_ */

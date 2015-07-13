@@ -34,7 +34,7 @@ namespace ReLe
 ///////////////////////////////////////////////////////////////////////////////////////
 
 template<class ActionC, class StateC>
-class HierarchicalGPOMDPAlgorithm: public HierarchicalPolicyGradient<ActionC, StateC>
+class HierarchicalGPOMDP: public HierarchicalPolicyGradient<ActionC, StateC>
 {
     USE_HPGA_MEMBERS
 
@@ -46,9 +46,9 @@ public:
     };
 
 
-    HierarchicalGPOMDPAlgorithm(DifferentiableOption<ActionC, StateC>& rootOption,
-                                unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
-                                BaseLineType btype, int reward_obj = 0) :
+    HierarchicalGPOMDP(DifferentiableOption<ActionC, StateC>& rootOption,
+                       unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                       BaseLineType btype, int reward_obj = 0) :
         HierarchicalPolicyGradient<ActionC, StateC>(rootOption, nbEpisodes, stepL, true, reward_obj),
         maxStepsPerEpisode(nbSteps),
         bType(btype)
@@ -56,9 +56,9 @@ public:
         stepCount = 0;
     }
 
-    HierarchicalGPOMDPAlgorithm(DifferentiableOption<ActionC, StateC>& rootOption,
-                                unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
-                                int reward_obj = 0) :
+    HierarchicalGPOMDP(DifferentiableOption<ActionC, StateC>& rootOption,
+                       unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                       int reward_obj = 0) :
         HierarchicalPolicyGradient<ActionC, StateC>(rootOption, nbEpisodes, stepL, false, reward_obj),
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
@@ -67,9 +67,9 @@ public:
     }
 
 
-    HierarchicalGPOMDPAlgorithm(DifferentiableOption<ActionC, StateC>& rootOption,
-                                unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
-                                BaseLineType btype, RewardTransformation& rewardt) :
+    HierarchicalGPOMDP(DifferentiableOption<ActionC, StateC>& rootOption,
+                       unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                       BaseLineType btype, RewardTransformation& rewardt) :
         HierarchicalPolicyGradient<ActionC, StateC>(rootOption, nbEpisodes, stepL, rewardt, true),
         maxStepsPerEpisode(nbSteps),
         bType(btype)
@@ -77,9 +77,9 @@ public:
         stepCount = 0;
     }
 
-    HierarchicalGPOMDPAlgorithm(DifferentiableOption<ActionC, StateC>& rootOption,
-                                unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
-                                RewardTransformation& rewardt) :
+    HierarchicalGPOMDP(DifferentiableOption<ActionC, StateC>& rootOption,
+                       unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                       RewardTransformation& rewardt) :
         HierarchicalPolicyGradient<ActionC, StateC>(rootOption, nbEpisodes, stepL, rewardt, false),
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
@@ -87,7 +87,7 @@ public:
         stepCount = 0;
     }
 
-    virtual ~HierarchicalGPOMDPAlgorithm()
+    virtual ~HierarchicalGPOMDP()
     {
     }
 

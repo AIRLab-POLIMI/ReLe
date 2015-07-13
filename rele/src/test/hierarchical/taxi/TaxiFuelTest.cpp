@@ -26,6 +26,7 @@
 #include "Core.h"
 
 #include "policy_search/gradient/hierarchical/HierarchicalGPOMDP.h"
+#include "policy_search/gradient/hierarchical/HierarchicalREINFORCE.h"
 
 #include "parametric/differentiable/GibbsPolicy.h"
 #include "parametric/differentiable/NewGibbsPolicy.h"
@@ -75,11 +76,11 @@ int main(int argc, char *argv[])
 
     //-- Features
     //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
-    //BasisFunctions basis = PolynomialFunction::generate(1, TaxiFuel::STATESIZE);
+    BasisFunctions basis = PolynomialFunction::generate(3, TaxiFuel::STATESIZE);
     //BasisFunctions basis = IdentityBasis::generate(TaxiFuel::STATESIZE);
-    BasisFunctions basisSpace = VectorFiniteIdentityBasis::generate(1, 5);
+    //BasisFunctions basisSpace = VectorFiniteIdentityBasis::generate(1, 5);
 
-    vector<unsigned int> indexes;
+    /*vector<unsigned int> indexes;
     vector<unsigned int> values;
     indexes.push_back(TaxiFuel::y);
     values.push_back(5);
@@ -92,30 +93,31 @@ int main(int argc, char *argv[])
     indexes.push_back(TaxiFuel::fuel);
     values.push_back(12);
 
-    BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
+    BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);*/
     //basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size());
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
 
-    double temperature = 50;
+    double temperature = 1;
     NewGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 
     //-- agent
-    int nbepperpol = 100, nbstep = 100;
+    int nbepperpol = 100, nbstep = 100, nbupdates = 50;
     AdaptiveStep stepRule(0.01);
     //ConstantStep stepRule(0.01);
-    HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
-            HierarchicalGPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI);
+    //HierarchicalREINFORCE<FiniteAction, DenseState> agent(rootOption, nbepperpol, stepRule);
+    HierarchicalGPOMDP<FiniteAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
+            HierarchicalGPOMDP<FiniteAction, DenseState>::BaseLineType::MULTI);
 
     Core<FiniteAction, DenseState> core(taxiMDP, agent);
     //--
 
 
-    int episodes = 5000;
+    int episodes = nbepperpol*nbupdates;
     core.getSettings().episodeLenght = 100;
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
             WriteStrategy<FiniteAction, DenseState>::AGENT);
@@ -127,11 +129,11 @@ int main(int argc, char *argv[])
     {
         console.printProgress(i);
         core.runEpisode();
-        cout << "temperature: " << temperature << endl;
+        /*cout << "temperature: " << temperature << endl;
         double tNew = temperature * (static_cast<double>(episodes) - static_cast<double>(i))/static_cast<double>(episodes);
         tNew = max(tNew, 0.1);
         cout << "temperature: " << tNew << endl;
-        rootPolicyOption.setTemperature(tNew);
+        rootPolicyOption.setTemperature(tNew);*/
     }
 
     delete core.getSettings().loggerStrategy;

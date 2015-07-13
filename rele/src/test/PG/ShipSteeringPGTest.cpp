@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     }
     //---
 
-    FileManager fm("ShipSteering", "PG");
+    FileManager fm("ship", "PG");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);

@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
     //-- agent
     int nbepperpol = 10, nbstep = 10000;
     AdaptiveStep stepRule(0.01);
-    HierarchicalGPOMDPAlgorithm<DenseAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
-            HierarchicalGPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+    HierarchicalGPOMDP<DenseAction, DenseState> agent(rootOption, nbepperpol, nbstep, stepRule,
+            HierarchicalGPOMDP<DenseAction, DenseState>::BaseLineType::MULTI);
 
     Core<DenseAction, DenseState> core(rocky, agent);
     //--
