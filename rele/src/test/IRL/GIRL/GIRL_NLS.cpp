@@ -26,11 +26,12 @@
 #include "regressors/LinearApproximator.h"
 #include "basis/QuadraticBasis.h"
 #include "basis/IdentityBasis.h"
+#include "Core.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
 
-#include "LQR.h"
-#include "LQRsolver.h"
+#include "NLS.h"
+
 #include "PolicyEvalAgent.h"
 #include "algorithms/GIRL.h"
 
@@ -39,53 +40,6 @@
 using namespace std;
 using namespace arma;
 using namespace ReLe;
-
-class LQR_RewardBasis : public BasisFunction
-{
-public:
-    LQR_RewardBasis(unsigned int i, unsigned int dim)
-    {
-        mat Q(dim, dim);
-        mat R(dim, dim);
-
-        double e = 0.1;
-        for (int j = 0; j < dim; j++)
-        {
-            if (i == j)
-            {
-                Q(j,j) = 1.0 - e;
-                R(j,j) = e;
-            }
-            else
-            {
-                Q(j,j) = e;
-                R(j,j) = 1.0 - e;
-            }
-        }
-
-        bf1 = new QuadraticBasis(Q, span(0, dim-1));
-        bf2 = new QuadraticBasis(R, span(dim,2*dim-1));
-    }
-
-    virtual double operator()(const vec& input)
-    {
-        return -(*bf1)(input)-(*bf2)(input);
-    }
-
-    virtual void writeOnStream(std::ostream& out)
-    {
-
-    }
-
-    virtual void readFromStream(std::istream& in)
-    {
-
-    }
-
-private:
-    BasisFunction* bf1;
-    BasisFunction* bf2;
-};
 
 int main(int argc, char *argv[])
 {
@@ -102,25 +56,25 @@ int main(int argc, char *argv[])
     std::cout << std::setprecision(OS_PRECISION);
 
     /* Learn lqr correct policy */
-    int dim = eReward.n_elem;
-    LQR mdp(dim, dim);
+    NLS mdp;
 
-    BasisFunctions basis;
-    for (int i = 0; i < dim; ++i)
-    {
-        basis.push_back(new IdentityBasis(i));
-    }
+    int dim = mdp.getSettings().continuosStateDim;
 
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
+    BasisFunctions basis = IdentityBasis::generate(dim);
+    DenseFeatures phi(basis);
 
-    MVNPolicy expertPolicy(phi);
+    BasisFunctions stdBasis = IdentityBasis::generate(dim);
+    DenseFeatures stdPhi(stdBasis);
+    arma::vec stdWeights(stdPhi.rows());
+    stdWeights.fill(0.5);
+
+    NormalStateDependantStddevPolicy expertPolicy(phi, stdPhi, stdWeights);
 
     /*** solve the problem in exact way ***/
-    LQRsolver solver(mdp,phi);
-    solver.setRewardWeights(eReward);
-    mat K = solver.computeOptSolution();
-    arma::vec p = K.diag();
+    arma::vec p(2);
+    p(0) = -2.8;
+    p(1) = 7.3;
+
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
@@ -144,9 +98,7 @@ int main(int argc, char *argv[])
 
 
     /* Create parametric reward */
-    BasisFunctions basisReward;
-    for(unsigned int i = 0; i < eReward.n_elem; i++)
-        basisReward.push_back(new LQR_RewardBasis(i, dim));
+    BasisFunctions basisReward = IdentityBasis::generate(dim);
     DenseFeatures phiReward(basisReward);
 
 
