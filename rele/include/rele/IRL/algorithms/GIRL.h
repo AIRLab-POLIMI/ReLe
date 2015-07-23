@@ -34,7 +34,7 @@ namespace ReLe
 {
 
 //TODO togliere, questo e' solo temporaneo
-template<class ActionC, class StateC>
+/*template<class ActionC, class StateC>
 class IRLParametricReward
 {
 public:
@@ -64,7 +64,7 @@ public:
     }
 protected:
     arma::vec weights;
-};
+};*/
 
 enum IRLGradType {R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB};
 

@@ -41,7 +41,7 @@
 #include "MountainCar.h"
 #include "MLE.h"
 #include "batch/LSPI.h"
-#include "algorithms/PGIRL.h"
+#include "ArmadilloExtensions.h"
 #include "nonparametric/RandomPolicy.h"
 
 #include <boost/timer/timer.hpp>
@@ -76,7 +76,7 @@ protected:
     double sigma_position, sigma_velocity;
 };
 
-class mc_reward_bf : public IRLParametricReward<FiniteAction, DenseState>
+/*class mc_reward_bf : public IRLParametricReward<FiniteAction, DenseState>
 {
 public:
     mc_reward_bf(BasisFunction* basis)
@@ -110,7 +110,7 @@ public:
 
 protected:
     BasisFunction& phi;
-};
+};*/
 
 int main(int argc, char *argv[])
 {
