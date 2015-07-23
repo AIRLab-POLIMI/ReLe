@@ -154,8 +154,8 @@ protected:
         // compute the baseline
         if (useBaseline && bType == BaseLineType::SINGLE)
         {
-        	baseline_num_single += baseline_num1_single % baseline_num2_single;
-        	baseline_den_single += baseline_num2_single % baseline_num2_single;
+            baseline_num_single += baseline_num1_single % baseline_num2_single;
+            baseline_den_single += baseline_num2_single % baseline_num2_single;
         }
     }
 

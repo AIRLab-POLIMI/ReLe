@@ -66,6 +66,10 @@ target_link_libraries(mountain_car rele)
 add_executable(lqr_MWAL IRL/LQRMWAL.cpp)
 target_link_libraries(lqr_MWAL rele)
 
+add_executable(lqr_GIRL IRL/GIRL/GIRL_LQR.cpp)
+target_link_libraries(lqr_GIRL rele)
+
+
 #add_executable(lqr_GIRL IRL/LQRGIRL.cpp)
 #target_link_libraries(lqr_GIRL rele)
 
