@@ -24,16 +24,20 @@
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
 #include "regressors/LinearApproximator.h"
-#include "basis/QuadraticBasis.h"
 #include "basis/IdentityBasis.h"
-#include "Core.h"
+#include "basis/PolynomialFunction.h"
+#include "basis/GaussianRbf.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
 
 #include "NLS.h"
 
 #include "PolicyEvalAgent.h"
+#include "Core.h"
+#include "ParametricRewardMDP.h"
 #include "algorithms/GIRL.h"
+#include "policy_search/NES/NES.h"
+#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 
 #include "FileManager.h"
 
@@ -47,8 +51,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::GB;
-    vec eReward = {0.2, 0.7, 0.1};
-    int nbEpisodes = 2000;
+    int nbEpisodes = 100;
 
     FileManager fm("lqr", "GIRL");
     fm.createDir();
@@ -72,18 +75,10 @@ int main(int argc, char *argv[])
 
     /*** solve the problem in exact way ***/
     arma::vec p(2);
-    p(0) = -2.8;
-    p(1) = 7.3;
+    p(0) = 6.5178;
+    p(1) = -2.5994;
 
     expertPolicy.setParameters(p);
-
-    std::cout << "Rewards: ";
-    for (int i = 0; i < eReward.n_elem; ++i)
-    {
-        std::cout << eReward(i) << " ";
-    }
-    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
-
 
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
@@ -98,7 +93,7 @@ int main(int argc, char *argv[])
 
 
     /* Create parametric reward */
-    BasisFunctions basisReward = IdentityBasis::generate(dim);
+    BasisFunctions basisReward = InverseBasis::generate(GaussianRbf::generate({4, 4}, {-10, 10, -10, 10}));
     DenseFeatures phiReward(basisReward);
 
 
@@ -107,11 +102,58 @@ int main(int argc, char *argv[])
                                         mdp.getSettings().gamma, atype);
 
 
+    //Info print
+    std::cout << "Basis size: " << phiReward.rows();
+    std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
+
     //Run GIRL
     irlAlg.run();
     arma::vec gnormw = irlAlg.getWeights();
 
     cout << "Weights (gnorm): " << gnormw.t();
+
+
+    //Try to recover the initial policy
+    int episodesPerPolicy = 1;
+    int policyPerUpdate = 100;
+    int updates = 400;
+    int episodes = episodesPerPolicy*policyPerUpdate*updates;
+
+    NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
+    AdaptiveStep stepRule(0.01);
+    int nparams = phi.rows();
+    arma::vec mean(nparams, fill::zeros);
+    mean[0] = -0.42;
+    mean[1] =  0.42;
+    /*arma::mat cov(nparams, nparams, arma::fill::eye);
+    mat cholMtx = chol(cov);
+    ParametricCholeskyNormal dist(mean, cholMtx);
+    NES<DenseAction, DenseState> imitator(dist, imitatorPolicy, episodesPerPolicy, policyPerUpdate, stepRule, true);*/
+
+    imitatorPolicy.setParameters(mean);
+    GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
+    				mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+
+
+    ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
+    Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
+    EmptyStrategy<DenseAction, DenseState> emptyStrategy;
+    imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
+    imitatorCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    imitatorCore.getSettings().episodeN = episodes;
+    imitatorCore.getSettings().testEpisodeN = nbEpisodes;
+    imitatorCore.runEpisodes();
+
+    cout << "Learned Parameters: " << imitatorPolicy.getParameters().t() << endl;
+    cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
+
+    //Evaluate policy against the real mdp
+    Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
+    evaluationCore.getSettings().loggerStrategy = &emptyStrategy;
+    evaluationCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    evaluationCore.getSettings().episodeN = episodes;
+    evaluationCore.getSettings().testEpisodeN = nbEpisodes;
+    cout << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
 
     return 0;
 }

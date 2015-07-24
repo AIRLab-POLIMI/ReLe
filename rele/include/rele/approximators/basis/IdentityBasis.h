@@ -122,6 +122,18 @@ public:
         //TODO implement
     }
 
+    static BasisFunctions_<InputC> generate(BasisFunctions_<InputC> basis)
+	{
+    	BasisFunctions_<InputC> newBasis;
+
+   	    for(auto bf : basis)
+   	    {
+   	    	newBasis.push_back(new InverseBasis_<InputC>(bf));
+  	    }
+
+   	    return newBasis;
+	}
+
 private:
     BasisFunction_<InputC>* basis;
 };
