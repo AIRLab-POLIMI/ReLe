@@ -55,7 +55,7 @@ class deep_state_identity: public BasisFunction
 
 
 #define SAMPLES_GATHERING(ActionC, StateC, acdim, stdim) \
-	    mdp.setHorizon(maxSteps);\
+	mdp.setHorizon(maxSteps);\
         PolicyEvalAgent<ActionC,StateC> agent(policy);\
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
         CollectorStrategy<ActionC, StateC> collection;\
@@ -117,7 +117,7 @@ class deep_state_identity: public BasisFunction
             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);\
             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);\
             for (int oo = 0; oo < dr; ++oo)\
-                Jptr[i+oo*nbEpisodes] = Jvalue[oo];\
+                Jptr[i+oo*nbEpisodes] = Jvalue[oo] / mdp.getSettings().max_obj[oo];\
         }
 
 #define IN_DOMAIN     prhs[0]
@@ -198,79 +198,6 @@ CollectSamplesInContinuousMDP(
         policy.setParameters(policyParams);
 
         SAMPLES_GATHERING(DenseAction, DenseState, mdp.getSettings().continuosActionDim, mdp.getSettings().continuosStateDim)
-//         //////////////////////////////////////////////// METTERE IN UNA DEFINE
-//
-//         PolicyEvalAgent
-//         <DenseAction,DenseState> agent(policy);
-//
-//         ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
-//         CollectorStrategy<DenseAction, DenseState> collection;
-//         oncore.getSettings().loggerStrategy = &collection;
-//         oncore.getSettings().episodeLenght = maxSteps;
-//         oncore.getSettings().testEpisodeN = nbEpisodes;
-//         oncore.runTestEpisodes();
-//         Dataset<DenseAction,DenseState>& data = collection.data;
-//         int ds = mdp.getSettings().continuosStateDim;
-//         int da = mdp.getSettings().continuosActionDim;
-//         int dr = mdp.getSettings().rewardDim;
-//         MEX_DATA_FIELDS(fieldnames);
-//         SAMPLES = mxCreateStructMatrix(data.size(), 1, 5, fieldnames);
-//         DRETURN = mxCreateDoubleMatrix(dr, data.size(), mxREAL);
-//         double* Jptr = mxGetPr(DRETURN);
-//
-//         for (int i = 0, ie = data.size(); i < ie; ++i)
-//         {
-//             int nsteps = data[i].size();
-//             mxArray* state_vector      = mxCreateDoubleMatrix(ds, nsteps, mxREAL);
-//             mxArray* nextstate_vector  = mxCreateDoubleMatrix(ds, nsteps, mxREAL);
-//             mxArray* action_vector     = mxCreateDoubleMatrix(da, nsteps, mxREAL);
-//             mxArray* reward_vector     = mxCreateDoubleMatrix(dr, nsteps, mxREAL);
-//             mxArray* absorb_vector     = mxCreateDoubleMatrix(1, nsteps, mxREAL);;//mxCreateNumericMatrix(1, nsteps, mxINT32_CLASS, mxREAL);
-//
-//             double* states = mxGetPr(state_vector);
-//             double* nextstates = mxGetPr(nextstate_vector);
-//             double* actions = mxGetPr(action_vector);
-// 	    double* rewards = mxGetPr(reward_vector);
-//             double* absorb = mxGetPr(absorb_vector);
-//             int count = 0;
-//             double df = 1.0;
-//             arma::vec Jvalue(dr, arma::fill::zeros);
-//             for (auto sample : data[i])
-//             {
-//                 absorb[count] = 0;
-//                 for (int i = 0; i < ds; ++i)
-//                 {
-//                     assigneStateWorker(states, count*ds+i, sample.x, i);
-//                     assigneStateWorker(nextstates, count*ds+i, sample.xn, i);
-//                 }
-//                 for (int i = 0; i < da; ++i)
-//                 {
-//                     assigneActionWorker(actions[count*da+i], sample.u, i);
-//                 }
-//                 for (int i = 0; i < dr; ++i)
-//                 {
-//                     rewards[count*dr+i] = sample.r[i];
-//                     Jvalue[i] += df*sample.r[i];
-//                 }
-//                 count++;
-//                 df *= gamma;
-//             }
-//             if (data[i][nsteps-1].xn.isAbsorbing())
-//             {
-//                 absorb[nsteps-1] = 1;
-//             }
-//
-//             mxSetFieldByNumber(SAMPLES, i, 0, state_vector);
-//             mxSetFieldByNumber(SAMPLES, i, 1, action_vector);
-//             mxSetFieldByNumber(SAMPLES, i, 2, reward_vector);
-//             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);
-//             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);
-//
-//             for (int oo = 0; oo < dr; ++oo)
-//                 Jptr[i*dr+oo] = Jvalue[oo];
-//         }
-//         ////////////////////////////////////////////////
-
 
         if (nlhs > 2)
         {

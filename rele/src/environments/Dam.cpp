@@ -64,10 +64,11 @@ void DamSettings::defaultSettings(DamSettings& settings)
     settings.ETA = 1.0;
     settings.G = 9.81;
 
-    settings.normalization_factor.push_back(20);
-    settings.normalization_factor.push_back(20);
-    settings.normalization_factor.push_back(2);
-    settings.normalization_factor.push_back(1);
+    settings.max_obj.set_size(4);
+    settings.max_obj(0) = 20;
+    settings.max_obj(1) = 20;
+    settings.max_obj(2) = 2;
+    settings.max_obj(3) = 1;
 
     settings.penalize = false;
     settings.initial_state_type = initType::RANDOM;
@@ -88,10 +89,10 @@ void DamSettings::WriteToStream(ostream &out) const
     out << this->Q_FLO_D << std::endl;
     out << this->ETA << std::endl;
     out << this->G << std::endl;
-    out << this->normalization_factor.size() << std::endl;
-    for (int i = 0, ie = this->normalization_factor.size(); i < ie; ++i)
+    out << this->max_obj.size() << std::endl;
+    for (int i = 0, ie = this->max_obj.size(); i < ie; ++i)
     {
-        out << this->normalization_factor[i] << "\t";
+        out << this->max_obj[i] << "\t";
     }
     out << std::endl;
 }
@@ -107,10 +108,11 @@ void DamSettings::ReadFromStream(istream &in)
     in >> this->ETA >> this->G;
     int dim, y;
     in >> dim;
+    max_obj.set_size(dim);
     for (int i = 0; i < dim; ++i)
     {
         in >> y;
-        this->normalization_factor.push_back(y);
+        this->max_obj(i) = y;
     }
 }
 
@@ -200,7 +202,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
     for (unsigned int i = 0, ie = damConfig.rewardDim; i < ie; ++i)
     {
-        reward[i] /= damConfig.normalization_factor[i];
+        reward[i] /= damConfig.max_obj[i];
         if (damConfig.isAverageReward)
             reward[i] /= getSettings().horizon;
     }

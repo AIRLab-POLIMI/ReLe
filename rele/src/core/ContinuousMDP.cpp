@@ -58,6 +58,7 @@ void ContinuousMDP::setupEnvirorment(size_t stateSize, size_t actionSize, size_t
     task.continuosStateDim = stateSize;
     task.continuosActionDim = actionSize;
     task.rewardDim = rewardSize;
+    task.max_obj = arma::ones(rewardSize);
 }
 
 }

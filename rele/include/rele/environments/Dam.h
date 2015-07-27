@@ -52,8 +52,6 @@ public:
     double ETA;
     double G;
 
-    std::vector<double> normalization_factor;
-
     bool penalize;
 
     virtual void WriteToStream(std::ostream& out) const;

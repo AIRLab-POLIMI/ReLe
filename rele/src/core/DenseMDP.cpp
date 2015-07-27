@@ -58,6 +58,7 @@ void DenseMDP::setupEnvirorment(size_t stateSize, unsigned int actionN, size_t r
     task.continuosStateDim = stateSize;
     task.continuosActionDim = 0;
     task.rewardDim = rewardSize;
+    task.max_obj = arma::ones(rewardSize);
 }
 
 }

@@ -53,6 +53,8 @@ struct EnvironmentSettings
 
     unsigned int rewardDim;
 
+    arma::vec max_obj; //TODO: possiamo mettere un range? (usato per normalizzazione in matlab, default 1)
+
     inline void WriteToStream(std::ostream& out) const
     {
         out << std::setprecision(OS_PRECISION);
