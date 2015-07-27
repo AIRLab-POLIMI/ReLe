@@ -97,7 +97,7 @@ class deep_state_identity: public BasisFunction
                 }\
                 for (int i = 0; i < da; ++i)\
                 {\
-                    assigneActionWorker(actions[count*da+i], sample.u, i);\
+                    assigneActionWorkerMEX(actions[count*da+i], sample.u, i);\
                 }\
                 for (int i = 0; i < dr; ++i)\
                 {\
@@ -117,7 +117,7 @@ class deep_state_identity: public BasisFunction
             mxSetFieldByNumber(SAMPLES, i, 3, nextstate_vector);\
             mxSetFieldByNumber(SAMPLES, i, 4, absorb_vector);\
             for (int oo = 0; oo < dr; ++oo)\
-                Jptr[i+oo*nbEpisodes] = Jvalue[oo] / mdp.getSettings().max_obj[oo];\
+                Jptr[i+oo*nbEpisodes] = Jvalue[oo] * mdp.getSettings().max_obj[oo];\
         }
 
 #define IN_DOMAIN     prhs[0]
@@ -140,6 +140,16 @@ inline void assigneStateWorker(double* val, int idx, FiniteState& state, int i)
 inline void assigneStateWorker(double* val, int idx, DenseState& state, int i)
 {
     val[idx] = state[i];
+}
+
+inline void assigneActionWorkerMEX(double& val, FiniteAction& action, int i)
+{
+    val = action.getActionN() + 1;
+}
+
+inline void assigneActionWorkerMEX(double& val, DenseAction& action, int i)
+{
+    val = action[i];
 }
 
 void

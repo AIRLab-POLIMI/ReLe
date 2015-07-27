@@ -8,6 +8,7 @@ AGGIORNARE REWARD IRL
 DISCUTERE IMPLEMENTAZIONE ALGORITMI BATCH (vedasi LSPI and batch gradients)
 MLE con LASSO
 CPIRL
+RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP
 
 ### older
 0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
