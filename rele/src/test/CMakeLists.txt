@@ -72,6 +72,9 @@ target_link_libraries(lqr_GIRL rele)
 add_executable(nls_GIRL IRL/GIRL/GIRL_NLS.cpp)
 target_link_libraries(nls_GIRL rele)
 
+add_executable(ship_GIRL IRL/GIRL/GIRL_ShipSteering.cpp)
+target_link_libraries(ship_GIRL rele)
+
 
 #add_executable(lqr_GIRL IRL/LQRGIRL.cpp)
 #target_link_libraries(lqr_GIRL rele)

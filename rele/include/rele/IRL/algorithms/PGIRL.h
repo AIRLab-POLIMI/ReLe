@@ -27,7 +27,7 @@
 #include "IRLAlgorithm.h"
 #include "Policy.h"
 #include "Transition.h"
-#include "GIRL.h"
+#include "algorithms/GIRL.h" //TODO togliere, sola dipendenza gradient type
 #include "ArmadilloExtensions.h"
 
 #include <nlopt.hpp>
@@ -43,11 +43,17 @@ public:
 
     PlaneGIRL(Dataset<ActionC,StateC>& dataset,
               DifferentiablePolicy<ActionC,StateC>& policy,
-              std::vector<IRLParametricReward<ActionC, StateC>*>& rewardsf,
+			  BasisFunctions& rewardBasis,
               double gamma, IRLGradType aType)
-        : policy(policy), data(dataset), rewardsf(rewardsf),
+        : policy(policy), data(dataset), rewardBasis(rewardBasis),
           gamma(gamma), atype(aType)
     {
+    	nbFunEvals = 0;
+    }
+
+    virtual ~PlaneGIRL()
+    {
+
     }
 
     virtual arma::vec getWeights()
@@ -66,7 +72,7 @@ public:
     }
 
 
-    arma::vec ReinforceGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec ReinforceGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         arma::vec sumGradLog(dp), localg;
@@ -95,7 +101,7 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn);
+                Rew += df * rewardf(vectorize(tr.x, tr.u, tr.xn));
                 // ********************** //
 
                 df *= gamma;
@@ -121,7 +127,7 @@ public:
         return gradient_J;
     }
 
-    arma::vec ReinforceBaseGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec ReinforceBaseGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         int nbEpisodes = data.size();
@@ -158,7 +164,7 @@ public:
                 for (int p = 0; p < dp; ++p)
                     assert(!isinf(localg(p)));
                 sumGradLog += localg;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn);
+                Rew += df * rewardf(vectorize(tr.x, tr.u, tr.xn));
                 // ********************** //
 
                 df *= gamma;
@@ -224,7 +230,7 @@ public:
         return gradient_J;
     }
 
-    arma::vec GpomdpGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec GpomdpGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         arma::vec sumGradLog(dp), localg;
@@ -253,7 +259,7 @@ public:
                 // *** GPOMDP CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                double creward = rewardf(tr.x, tr.u, tr.xn);
+                double creward = rewardf(vectorize(tr.x, tr.u, tr.xn));
                 Rew += df * creward;
 
                 // compute the gradients
@@ -280,7 +286,7 @@ public:
         return gradient_J;
     }
 
-    arma::vec GpomdpBaseGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec GpomdpBaseGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         int nbEpisodes = data.size();
@@ -326,7 +332,7 @@ public:
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
-                double creward = rewardf(tr.x, tr.u, tr.xn);
+                double creward = rewardf(vectorize(tr.x, tr.u, tr.xn));
                 Rew += df * creward;
                 reward_J_ObjEpStep(ep,t) = df * creward;
 
@@ -390,7 +396,7 @@ public:
         return gradient_J;
     }
 
-    arma::vec NaturalGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec NaturalGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         arma::vec localg;
@@ -459,7 +465,7 @@ public:
         return nat_grad;
     }
 
-    arma::vec ENACGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec ENACGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         arma::vec localg;
@@ -492,7 +498,7 @@ public:
 
                 // *** eNAC CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
-                double creward = rewardf(tr.x, tr.u, tr.xn);
+                double creward = rewardf(vectorize(tr.x, tr.u, tr.xn));
                 Rew += df * creward;
 
                 //Construct basis functions
@@ -533,7 +539,7 @@ public:
         return nat_grad.rows(0,dp-1);
     }
 
-    arma::vec ENACBaseGradient(IRLParametricReward<ActionC, StateC>& rewardf)
+    arma::vec ENACBaseGradient(BasisFunction& rewardf)
     {
         int dp  = policy.getParametersSize();
         arma::vec localg;
@@ -624,35 +630,35 @@ public:
     virtual void run()
     {
         int dp = policy.getParametersSize();
-        int dr = rewardsf.size();
+        int dr = rewardBasis.size();
         std::vector<arma::vec> gradients(dr, arma::vec());
         arma::mat A(dp,dr);
         for (int r = 0; r < dr; ++r)
         {
             if (atype == IRLGradType::R)
             {
-                gradients[r] = ReinforceGradient(*(rewardsf[r]));
+                gradients[r] = ReinforceGradient(*(rewardBasis[r]));
             }
             else if (atype == IRLGradType::RB)
             {
-                gradients[r] = ReinforceBaseGradient(*(rewardsf[r]));
+                gradients[r] = ReinforceBaseGradient(*(rewardBasis[r]));
             }
             else if (atype == IRLGradType::G)
             {
-                gradients[r] = GpomdpGradient(*(rewardsf[r]));
+                gradients[r] = GpomdpGradient(*(rewardBasis[r]));
             }
             else if (atype == IRLGradType::GB)
             {
-                gradients[r] = GpomdpBaseGradient(*(rewardsf[r]));
+                gradients[r] = GpomdpBaseGradient(*(rewardBasis[r]));
             }
             else if (atype == IRLGradType::ENAC)
             {
-                gradients[r] = ENACGradient(*(rewardsf[r]));
+                gradients[r] = ENACGradient(*(rewardBasis[r]));
             }
             else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB) ||
                      (atype == IRLGradType::NATG) || (atype == IRLGradType::NATGB))
             {
-                gradients[r] = NaturalGradient(*(rewardsf[r]));
+                gradients[r] = NaturalGradient(*(rewardBasis[r]));
             }
             else
             {
@@ -784,6 +790,9 @@ public:
             weights(nonZeroIdx) = Y;
         }
 
+        //Normalize (L1) weights
+        weights /= arma::sum(weights);
+
     }
 
     ////////////////////////////////////////////////////////////////
@@ -837,7 +846,7 @@ public:
 protected:
     Dataset<ActionC,StateC>& data;
     DifferentiablePolicy<ActionC,StateC>& policy;
-    std::vector<IRLParametricReward<ActionC, StateC>*>& rewardsf;
+    BasisFunctions& rewardBasis;
     double gamma;
     arma::vec weights;
     IRLGradType atype;

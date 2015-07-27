@@ -123,16 +123,16 @@ public:
     }
 
     static BasisFunctions_<InputC> generate(BasisFunctions_<InputC> basis)
-	{
-    	BasisFunctions_<InputC> newBasis;
+    {
+        BasisFunctions_<InputC> newBasis;
 
-   	    for(auto bf : basis)
-   	    {
-   	    	newBasis.push_back(new InverseBasis_<InputC>(bf));
-  	    }
+        for(auto bf : basis)
+        {
+            newBasis.push_back(new InverseBasis_<InputC>(bf));
+        }
 
-   	    return newBasis;
-	}
+        return newBasis;
+    }
 
 private:
     BasisFunction_<InputC>* basis;

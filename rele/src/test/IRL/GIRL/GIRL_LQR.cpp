@@ -33,6 +33,7 @@
 #include "LQRsolver.h"
 #include "PolicyEvalAgent.h"
 #include "algorithms/GIRL.h"
+#include "algorithms/PGIRL.h"
 
 #include "FileManager.h"
 
@@ -154,12 +155,22 @@ int main(int argc, char *argv[])
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                         mdp.getSettings().gamma, atype);
 
+    PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, basisReward,
+                    mdp.getSettings().gamma, atype);
+
 
     //Run GIRL
     irlAlg.run();
     arma::vec gnormw = irlAlg.getWeights();
 
+    //Run PGIRL
+    irlAlg2.run();
+    arma::vec planew = irlAlg2.getWeights();
+
+
+    //Print results
     cout << "Weights (gnorm): " << gnormw.t();
+    cout << "Weights (plane): " << planew.t();
 
     return 0;
 }
