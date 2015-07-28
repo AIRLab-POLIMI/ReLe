@@ -29,7 +29,6 @@
 #include "policy_search/gradient/hierarchical/HierarchicalREINFORCE.h"
 
 #include "parametric/differentiable/GibbsPolicy.h"
-#include "parametric/differentiable/NewGibbsPolicy.h"
 #include "features/DenseFeatures.h"
 #include "basis/IdentityBasis.h"
 #include "basis/PolynomialFunction.h"
@@ -101,7 +100,7 @@ int main(int argc, char *argv[])
     cout << phi.rows() << endl;
 
     double temperature = 1;
-    NewGibbsPolicy<DenseState> rootPolicyOption(actions, phi, temperature);
+    ParametricGibbsPolicyAllPref<DenseState> rootPolicyOption(actions, phi, temperature);
     DifferentiableOption<FiniteAction, DenseState> rootOption(rootPolicyOption, options);
     //--
 
