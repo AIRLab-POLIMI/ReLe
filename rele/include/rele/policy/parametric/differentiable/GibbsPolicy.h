@@ -54,92 +54,29 @@ public:
 
 
     double operator() (typename state_type<StateC>::const_type_ref state,
-                       typename action_type<FiniteAction>::const_type_ref action)
+                       const unsigned int& action)
     {
-        int statesize = state.size(), nactions = mActions.size();
+        int statesize = state.size();
+        int nactions = mActions.size();
+
         arma::vec tuple(1+statesize);
-        const std::vector<bool>& mask = this->getMask(state, nactions);
+        tuple(arma::span(0, statesize-1)) = state;
 
-
-        for (unsigned int i = 0; i < statesize; ++i)
-        {
-            tuple[i] = state[i];
-        }
-        double den = 1.0;
-        for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
-        {
-            tuple[statesize] = mActions[k].getActionN();
-            arma::vec preference = approximator(tuple);
-            den += mask[k]*exp(preference[0]/tau);
-        }
-
-        tuple[statesize] = action;
-
-        double num = mask[action]*1.0;
-        if (action != mActions[nactions - 1].getActionN())
-        {
-            arma::vec preference = approximator(tuple);
-            num = mask[action]*exp(preference[0]/tau);
-        }
-
-        return num/den;
+        arma::vec&& distribution = computeDistribution(nactions, tuple,	statesize);
+        unsigned int index = findActionIndex(action);
+        return distribution[index];
     }
 
     unsigned int operator() (typename state_type<StateC>::const_type_ref state)
     {
-        double den = 1.0;
-        int count = 0, nactions = mActions.size();
-        const std::vector<bool>& mask = this->getMask(state, nactions);
-
         int statesize = state.size();
+        int nactions = mActions.size();
+
         arma::vec tuple(1+statesize);
-        for (unsigned int i = 0; i < statesize; ++i)
-        {
-            tuple[i] = state[i];
-        }
-
-        for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
-        {
-            tuple[statesize] = mActions[k].getActionN();
-
-            arma::vec preference = approximator(tuple);
-            double val = mask[k]*exp(preference[0]/tau);
-            den += val;
-            distribution[count++] = val;
-        }
-        distribution[nactions-1] = mActions[nactions-1]*1.0;
+        tuple(arma::span(0, statesize-1)) = state;
 
 
-        double new_den = 0.0;
-        for (unsigned int k = 0, ke = nactions; k < ke; ++k)
-        {
-#ifdef DEBUG_GIBBS
-            double val = den;
-            if (isinf(val))
-            {
-                throw std::runtime_error("Distribution is infinite");
-            }
-            else if(isnan(val))
-            {
-                throw std::runtime_error("Distribution is NaN");
-            }
-#endif
-            distribution[k] /= den;
-            if (isnan(distribution[k]) || isinf(distribution[k]))
-            {
-                distribution[k] = 1;
-            }
-            new_den += distribution[k];
-        }
-
-        if (!(abs(new_den - 1.0) < 1e-5))
-        {
-            for (unsigned int k = 0, ke = nactions; k < ke; ++k)
-            {
-                distribution[k] /= new_den;
-            }
-        }
-
+        arma::vec&& distribution = computeDistribution(nactions, tuple,	statesize);
         unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
         return mActions.at(idx).getActionN();
     }
@@ -171,61 +108,88 @@ public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
                            typename action_type<FiniteAction>::const_type_ref action)
     {
-        return (*this)(state, action)*difflog(state, action);
+        ParametricGibbsPolicy& pi = *this;
+        return pi(state, action)*difflog(state, action);
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
                               typename action_type<FiniteAction>::const_type_ref action)
     {
-        // Compute the sum of all the preferences
-        double sumexp = 0;
-        arma::mat sumpref(this->getParametersSize(),1,arma::fill::zeros); // sum of the preferences
-        unsigned int nactions = mActions.size();
-        const std::vector<bool>& mask = this->getMask(state, nactions);
-
         int statesize = state.size();
-        arma::vec tuple(1+statesize);
-        for (unsigned int i = 0; i < statesize; ++i)
-        {
-            tuple[i] = state[i];
-        }
+        int nactions = mActions.size();
 
-        Features& basis = approximator.getBasis();
-        for (unsigned int k = 0, ke = nactions - 1; k < ke; ++k)
+        arma::vec tuple(1+statesize);
+        tuple(arma::span(0, statesize-1)) = state;
+
+
+        arma::vec&& distribution = computeDistribution(nactions, tuple, statesize);
+        Features& phi = approximator.getBasis();
+        arma::mat features(phi.rows(), nactions);
+
+        for (unsigned int k = 0; k < nactions; k++)
         {
             tuple[statesize] = mActions[k].getActionN();
-            arma::vec pref = approximator(tuple);
-            arma::mat loc_phi = basis(tuple);
-            double val = mask[k]*std::min(exp(pref[0]/tau), 1e200);
-            distribution[k] = val;
-
-#ifdef DEBUG_GIBBS
-            if (isinf(val))
-            {
-                throw std::runtime_error("Distribution is infinite");
-            }
-            else if(isnan(val))
-            {
-                throw std::runtime_error("Distribution is NaN");
-            }
-#endif
-
-            sumexp = sumexp + distribution[k];
-            sumpref = sumpref + loc_phi*distribution[k]/tau;
+            features.col(k) = phi(tuple) / tau;
         }
-        sumexp = sumexp + 1;
-        sumpref = sumpref / sumexp;
 
-        arma::vec gradient;
-        if (action == mActions[mActions.size()-1].getActionN())
-            gradient = -sumpref;
-        else
+        unsigned int index = findActionIndex(action);
+
+        return features.col(index) - features*distribution;
+    }
+
+private:
+    arma::vec computeDistribution(int nactions, arma::vec tuple, int statesize)
+    {
+        int na_red = nactions - 1;
+        arma::vec distribution(nactions);
+        distribution(na_red) = 1.0; //last action is valued 1.0
+        double den = 1.0; //set the value of the last action to the den
+        for (unsigned int k = 0; k < na_red; k++)
         {
-            tuple[statesize] = action;
-            arma::mat loc_phi = basis(tuple);
-            gradient = loc_phi/tau - sumpref;
+            tuple[statesize] = mActions[k].getActionN();
+            arma::vec preference = approximator(tuple);
+            double val = exp(preference[0] / tau);
+            if (isnan(val) || isinf(val))
+            {
+                val = arma::datum::inf;
+                std::cerr << "Gibbs: found inf or nan element in distribution." << std::endl;
+            }
+            den += val;
+            distribution[k] = val;
         }
-        return gradient;
+
+        // check extreme cases (if some action is nan or infinite
+        arma::uvec q_inf = arma::find(distribution == arma::datum::inf);
+        if (q_inf.n_elem > 0)
+        {
+            //get other elements
+            std::cerr << "distribution contains infinite elements: " << distribution.t();
+            arma::uvec q_not_inf = arma::find(distribution != arma::datum::inf);
+            distribution.elem(q_inf).ones();
+            den = q_inf.n_elem;
+            distribution.elem(q_not_inf).zeros();
+        }
+
+        distribution /= den;
+        return distribution;
+    }
+
+    unsigned int findActionIndex(const unsigned int& action)
+    {
+        unsigned int index;
+
+        for (index = 0; index < mActions.size(); index++)
+        {
+            if (action == mActions[index].getActionN())
+                break;
+        }
+
+        if (index == mActions.size())
+        {
+            throw std::runtime_error("Action not found");
+        }
+
+        return index;
     }
 
 protected:

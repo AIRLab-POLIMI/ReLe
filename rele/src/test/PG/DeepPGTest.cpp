@@ -63,7 +63,7 @@ struct gradConfig
 
 void help()
 {
-    cout << "lqr_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
+    cout << "_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
     cout << " - algorithm: r, rb, g, gb" << endl;
     cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
 }
