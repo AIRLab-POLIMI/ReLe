@@ -122,25 +122,26 @@ protected:
     virtual void updateStep(const Reward& reward)
     {
         RewardTransformation& rTr = *rewardTr;
+        double reward_t = rTr(reward);
 
-        int dp = policy.getParametersSize();
+        //int dp = policy.getParametersSize();
 
         arma::vec grad = policy.difflog(currentState, currentAction);
         sumdLogPi += grad;
 
         // store the basic elements used to compute the gradient
-        episodeStepReward(epiCount, stepCount) = df * rTr(reward);
+        episodeStepReward(epiCount, stepCount) = df * reward_t;
         sumGradLog.tube(epiCount,stepCount) = sumdLogPi;
 
         // compute the baseline
         if (useBaseline && bType == BaseLineType::MULTI)
         {
-            baseline_num.col(stepCount) += df * rTr(reward) * sumdLogPi % sumdLogPi;
+            baseline_num.col(stepCount) += df * reward_t * sumdLogPi % sumdLogPi;
             baseline_den.col(stepCount) += sumdLogPi % sumdLogPi;
         }
         else if (useBaseline && bType == BaseLineType::SINGLE)
         {
-            baseline_num1_single += df * rTr(reward) * sumdLogPi;
+            baseline_num1_single += df * reward_t * sumdLogPi;
             baseline_num2_single += sumdLogPi;
         }
 

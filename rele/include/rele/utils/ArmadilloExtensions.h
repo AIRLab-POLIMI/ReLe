@@ -94,6 +94,25 @@ arma::vec wrapToPi(const arma::vec& lambda);
  */
 void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& xx, arma::mat& yy);
 
+/**
+ * @brief Generate a block diagonal matrix from the input arguments
+ * Note that the provided order is used to define the diagonal.
+ * @param diag_blocks a set of matricies
+ * @return a sparse block diagonal matrix
+ */
+arma::sp_mat blockdiagonal(const std::vector<arma::mat>& diag_blocks);
+
+/**
+ * @brief Generate a block diagonal matrix from the input arguments.
+ * This implementation is more efficient when the size of the resulting matrix is known by the caller.
+ * This function avoid the computation of such information from the given matrix vector.
+ * @param diag_blocks
+ * @param rows number of rows of the resulting matrix
+ * @param cols number of cols of the resulting matrix
+ * @return a sparse block diagonal matrix
+ */
+arma::sp_mat blockdiagonal(const std::vector<arma::mat>& diag_blocks, int rows, int cols);
+
 //void meshgrid(const arma::vec& x, const arma::vec& y, const arma::vec& z, arma::mat& xx, arma::mat& yy, arma::mat& zz);
 
 }

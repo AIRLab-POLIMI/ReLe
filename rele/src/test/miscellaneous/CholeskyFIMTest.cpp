@@ -31,6 +31,8 @@
 #include <map>
 #include <random>
 #include <cmath>
+#include <cassert>
+#include "FileManager.h"
 
 using namespace std;
 using namespace ReLe;
@@ -40,37 +42,56 @@ using namespace arma;
 int main(int argc, char *argv[])
 {
 
+    FileManager fm("chol_FIM", "test");
+    fm.createDir();
+    fm.cleanDir();
+    std::cout << std::setprecision(OS_PRECISION);
+
+
+    arma::vec mean0;
+    mean0.load(argv[1], raw_ascii);
+    arma::mat chol0;
+    chol0.load(argv[2], raw_ascii);
+
+    arma::vec mean = mean0;
 
     //--- distribution setup
     //----- ParametricCholeskyNormal
-    int nparams = 3;
-    arma::vec mean(nparams, fill::zeros);
-    arma::mat cov(nparams, nparams, arma::fill::eye);
-    mat cholMtx = chol(cov);
+    mat cholMtx = chol(chol0);
     ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-    //    vec mean(nparams, fill::zeros);
-    //    vec sigmas(nparams, fill::ones);
-    //    ParametricDiagonalNormal dist(mean, sigmas);
+//            ParametricDiagonalNormal dist(mean, chol0);
     //-----
     //---
 
-    int i, nbSamples = 10e6;
-    arma::mat Fs(dist.getParametersSize(), dist.getParametersSize());
+    int i, nbSamples = 100000;
+    arma::mat Fs(dist.getParametersSize(), dist.getParametersSize(), arma::fill::zeros);
     for (i = 0; i < nbSamples; ++i)
     {
         vec theta = dist();
         vec grad = dist.difflog(theta);
         Fs += grad * grad.t();
+//        arma::uvec q = arma::find_nonfinite(grad);
+//        if (q.n_elem > 0)
+//            cout << "ERROR" <<endl;
     }
     Fs /= nbSamples;
-    cout << Fs << endl;
 
     sp_mat tmp = dist.FIM();
     mat Fe(tmp);
 
-    Fs.save("Fs.dat");
-    Fe.save("Fe.dat");
+    tmp = dist.inverseFIM();
+    mat Feinv(tmp);
+
+    Fs.save(fm.addPath("Fs.dat"), arma::raw_ascii);
+    Fe.save(fm.addPath("Fe.dat"), arma::raw_ascii);
+    Feinv.save(fm.addPath("Feinv.dat"), arma::raw_ascii);
+
+
+    mat invt = arma::inv(Fe);
+    cout << "\naccu(abs(Feinv - inv(Fe))): " << arma::accu(abs(Feinv-invt)) << endl << endl;
+    assert(arma::accu(abs(Feinv-invt)) < 1e-5);
+
 
     cout << Fs.diag() << endl;
     cout << Fe.diag() << endl;

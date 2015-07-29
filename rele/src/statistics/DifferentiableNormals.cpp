@@ -23,6 +23,7 @@
 
 #include "DifferentiableNormals.h"
 #include "ArmadilloPDFs.h"
+#include "ArmadilloExtensions.h"
 #include <cassert>
 
 using namespace std;
@@ -274,7 +275,7 @@ void ParametricDiagonalNormal::updateInternalState()
     for (int i = 0, ie = pointSize; i < ie; ++i)
     {
         Cov(i,i) = diagStdDev(i)*diagStdDev(i);
-        invCov(i,i) = 1/Cov(i,i);
+        invCov(i,i) = 1.0/Cov(i,i);
         cholCov(i,i) = diagStdDev(i);
     }
 }
@@ -497,7 +498,7 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
     mat R = solve(cholCov.t(), tmp);
     mat dlogpdt_sigma(pointSize, pointSize, fill::zeros);
     for (int i = 0; i < pointSize; ++i)
-        for (int j = 0; j < pointSize; ++j)
+        for (int j = i; j < pointSize; ++j)
             if (i == j)
                 dlogpdt_sigma(i,j) = R(i,j) - 1.0 / cholCov(i,j);
             else
@@ -521,11 +522,11 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
     for (unsigned i = pointSize; i < paramSize; ++i)
     {
         gradient[i] = dlogpdt_sigma(rowi,coli);
-        rowi++;
-        if (rowi > coli)
+        coli++;
+        if (coli == pointSize)
         {
-            coli++;
-            rowi = 0;
+            rowi++;
+            coli = rowi;
         }
     }
     return gradient;
@@ -543,32 +544,17 @@ sp_mat ParametricCholeskyNormal::FIM()
     int cols = invCov.n_cols;
     vector<mat> diag_blocks;
     diag_blocks.push_back(invCov);
-    for (int k = 0; k < pointSize; ++k)
+    for (int k = 0, end_v = pointSize - 1; k < pointSize; ++k)
     {
-        int index = pointSize - k;
-        int low_index = pointSize - index;
-        mat tmp = invCov( span(low_index, pointSize-1), span(low_index, pointSize-1) );
+        mat tmp = invCov( span(k, end_v), span(k, end_v) );
         tmp(0,0) += 1.0 / (cholCov(k,k)*cholCov(k,k));
         rows += tmp.n_rows;
         cols += tmp.n_cols;
         diag_blocks.push_back(tmp);
     }
-    sp_mat fim(rows, cols);
-    int roffset = 0, coffset = 0;
-    for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
-    {
-        mat& mtx = diag_blocks[i];
-        for (int r = 0, re = mtx.n_rows; r < re; ++r)
-        {
-            for (int c = 0, ce = mtx.n_cols; c < ce; ++c)
-            {
-                fim(roffset+r, coffset+c) = mtx(r,c);
-            }
-        }
-        roffset = roffset + mtx.n_rows;
-        coffset = coffset + mtx.n_cols;
-    }
-    return fim;
+    //==========================
+    return blockdiagonal(diag_blocks, rows, cols);
+    //=========================
 }
 
 sp_mat ParametricCholeskyNormal::inverseFIM()
@@ -578,43 +564,21 @@ sp_mat ParametricCholeskyNormal::inverseFIM()
     int cols = Cov.n_cols;
     vector<mat> diag_blocks;
     diag_blocks.push_back(Cov);
-    for (int k = 0; k < pointSize; ++k)
+    //std::cout << invCov << std::endl << std::endl;
+    //std::cout << cholCov << std::endl << std::endl;
+    for (int k = 0, end_v = pointSize - 1; k < pointSize; ++k)
     {
-        int index = pointSize - k;
-        int low_index = pointSize - index;
-        mat tmp = invCov( span(low_index, pointSize-1), span(low_index, pointSize-1) );
+        mat tmp = invCov( span(k, end_v), span(k, end_v) );
         tmp(0,0) += 1.0 / (cholCov(k,k)*cholCov(k,k));
-        mat nMtx(tmp.n_rows, tmp.n_cols);
-        for (int r = 0; r < tmp.n_rows; ++r)
-        {
-            for (int c = 0; c < tmp.n_cols; ++c)
-            {
-                if (tmp(r,c) != 0.0)
-                    nMtx(r,c) = 1 / tmp(r,c);
-                else
-                    nMtx(r,c) = 0.0;
-            }
-        }
+        mat nMtx = arma::solve(tmp.t(), arma::eye(tmp.n_rows, tmp.n_cols)).t(); //in matlab it is mrdivide operator
+        //std::cout << nMtx << std::endl << std::endl;
         rows += nMtx.n_rows;
         cols += nMtx.n_cols;
         diag_blocks.push_back(nMtx);
     }
-    sp_mat fim(rows, cols);
-    int roffset = 0, coffset = 0;
-    for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
-    {
-        mat& mtx = diag_blocks[i];
-        for (int r = 0, re = mtx.n_rows; r < re; ++r)
-        {
-            for (int c = 0, ce = mtx.n_cols; c < ce; ++c)
-            {
-                fim(roffset+r, coffset+c) = mtx(r,c);
-            }
-        }
-        roffset = roffset + mtx.n_rows;
-        coffset = coffset + mtx.n_cols;
-    }
-    return fim;
+    //==========================
+    return blockdiagonal(diag_blocks, rows, cols);
+    //=========================
 }
 
 void ParametricCholeskyNormal::writeOnStream(ostream &out)
@@ -628,13 +592,10 @@ void ParametricCholeskyNormal::writeOnStream(ostream &out)
         out << mean(i) << "\t";
     }
 
-    //TODO fare meglio
-    mat tmp = trimatu(ones(pointSize, pointSize));
-    vec tmpv = cholCov.elem( find(tmp == 1.0) );
-
-    for (unsigned i = 0, ie = tmp.n_elem; i < ie; ++i)
+    //TODO fare meglio [RISCRIVERE]
+    for (unsigned i = 0, ie = cholCov.n_elem; i < ie; ++i)
     {
-        out << tmpv(i) << "\t";
+        out << cholCov(i) << "\t";
     }
 
     out << std::endl;
@@ -658,20 +619,10 @@ void ParametricCholeskyNormal::readFromStream(istream &in)
         in >> val;
         mean(i) = val;
     }
-    int rowi = 0, coli = 0;
-    int cc = 0;
-    for (unsigned i = 0; i < paramSize-pointSize; ++i)
+    for (unsigned i = 0, ie = pointSize*pointSize; i < ie; ++i)
     {
         in >> val;
-        cholCov(rowi,coli) = val;
-        cc++;
-        rowi++;
-        if (cc > coli)
-        {
-            coli++;
-            rowi = 0;
-            cc=0;
-        }
+        cholCov(i) = val;
     }
     this->updateInternalState();
 }
@@ -690,14 +641,14 @@ arma::vec ParametricCholeskyNormal::getParameters()
 
 
     int rowi = 0, coli = 0;
-    for (unsigned i = 0; i < dim-pointSize; ++i)
+    for (unsigned i = 0, ie = dim-pointSize; i < ie; ++i)
     {
         params(pointSize+i) = cholCov(rowi,coli);
-        rowi++;
-        if (rowi > coli)
+        coli++;
+        if (coli == pointSize)
         {
-            coli++;
-            rowi = 0;
+            rowi++;
+            coli = rowi;
         }
     }
     return params;
@@ -711,14 +662,14 @@ void ParametricCholeskyNormal::setParameters(arma::vec& newval)
 
 
     int rowi = 0, coli = 0;
-    for (unsigned i = 0; i < dim-pointSize; ++i)
+    for (unsigned i = 0, ie = dim-pointSize; i < ie; ++i)
     {
         cholCov(rowi,coli) = newval(pointSize+i);
-        rowi++;
-        if (rowi > coli)
+        coli++;
+        if (coli == pointSize)
         {
-            coli++;
-            rowi = 0;
+            rowi++;
+            coli = rowi;
         }
     }
     updateInternalState();
@@ -732,15 +683,14 @@ void ParametricCholeskyNormal::update(arma::vec &increment)
 
 
     int rowi = 0, coli = 0;
-    for (unsigned i = 0; i < dim-pointSize; ++i)
+    for (unsigned i = 0, ie = dim-pointSize; i < ie; ++i)
     {
         cholCov(rowi,coli) += increment(pointSize+i);
-//        std::cout << "(" << rowi << ", " << coli << ") - " << i << endl;
-        rowi++;
-        if (rowi > coli)
+        coli++;
+        if (coli == pointSize)
         {
-            coli++;
-            rowi = 0;
+            rowi++;
+            coli = rowi;
         }
     }
     updateInternalState();

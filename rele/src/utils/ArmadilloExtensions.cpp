@@ -166,6 +166,57 @@ void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& xx, arma::mat& 
     }
 }
 
+arma::sp_mat blockdiagonal(const std::vector<arma::mat>& diag_blocks)
+{
+    //precompute matrix size
+    int rows = 0, cols = 0;
+    for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
+    {
+        const arma::mat& mtx = diag_blocks[i];
+        rows += mtx.n_rows;
+        cols += mtx.n_cols;
+    }
+
+    //define matrix
+    arma::sp_mat diagonal(rows, cols);
+    int roffset = 0, coffset = 0;
+    for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
+    {
+        const arma::mat& mtx = diag_blocks[i];
+        for (int r = 0, re = mtx.n_rows; r < re; ++r)
+        {
+            for (int c = 0, ce = mtx.n_cols; c < ce; ++c)
+            {
+                diagonal(roffset+r, coffset+c) = mtx(r,c);
+            }
+        }
+        roffset = roffset + mtx.n_rows;
+        coffset = coffset + mtx.n_cols;
+    }
+    return diagonal;
+}
+
+arma::sp_mat blockdiagonal(const std::vector<arma::mat> &diag_blocks, int rows, int cols)
+{
+    //define matrix
+    arma::sp_mat diagonal(rows, cols);
+    int roffset = 0, coffset = 0;
+    for (int i = 0, ie = diag_blocks.size(); i < ie; ++i)
+    {
+        const arma::mat& mtx = diag_blocks[i];
+        for (int r = 0, re = mtx.n_rows; r < re; ++r)
+        {
+            for (int c = 0, ce = mtx.n_cols; c < ce; ++c)
+            {
+                diagonal(roffset+r, coffset+c) = mtx(r,c);
+            }
+        }
+        roffset = roffset + mtx.n_rows;
+        coffset = coffset + mtx.n_cols;
+    }
+    return diagonal;
+}
+
 //void meshgrid(const arma::vec &x, const arma::vec &y, const arma::vec &z, arma::mat &xx, arma::mat &yy, arma::mat &zz)
 //{
 //    if ((x.n_elem == 0) || (y.n_elem == 0) || (z.n_elem == 0))

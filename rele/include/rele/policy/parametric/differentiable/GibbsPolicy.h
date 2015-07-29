@@ -149,28 +149,22 @@ private:
             tuple[statesize] = mActions[k].getActionN();
             arma::vec preference = approximator(tuple);
             double val = exp(preference[0] / tau);
-            if (isnan(val) || isinf(val))
-            {
-                val = arma::datum::inf;
-                std::cerr << "Gibbs: found inf or nan element in distribution." << std::endl;
-            }
             den += val;
             distribution[k] = val;
         }
 
-        // check extreme cases (if some action is nan or infinite
-        arma::uvec q_inf = arma::find(distribution == arma::datum::inf);
-        if (q_inf.n_elem > 0)
+        // check extreme cases (if some action is nan or infinite)
+        arma::uvec q_nf = arma::find_nonfinite(distribution);
+        if (q_nf.n_elem > 0)
         {
-            //get other elements
-            std::cerr << "distribution contains infinite elements: " << distribution.t();
-            arma::uvec q_not_inf = arma::find(distribution != arma::datum::inf);
-            distribution.elem(q_inf).ones();
-            den = q_inf.n_elem;
-            distribution.elem(q_not_inf).zeros();
+            arma::uvec q_f = arma::find_finite(distribution);
+            distribution(q_f).zeros();
+            distribution(q_nf).ones();
+            den = q_nf.n_elem;
         }
 
         distribution /= den;
+//        std::cout << distribution.t();
         return distribution;
     }
 
@@ -206,7 +200,7 @@ class ParametricGibbsPolicyAllPref : public DifferentiablePolicy<FiniteAction, S
 public:
 
     ParametricGibbsPolicyAllPref(std::vector<FiniteAction> actions,
-                   Features& phi, double temperature) :
+                                 Features& phi, double temperature) :
         mActions(actions), distribution(actions.size(),0),
         approximator(phi), tau(temperature)
     {
@@ -335,25 +329,18 @@ private:
             tuple[statesize] = mActions[k].getActionN();
             arma::vec preference = approximator(tuple);
             double val = exp(preference[0] / tau);
-            if (isnan(val) || isinf(val))
-            {
-                val = arma::datum::inf;
-                std::cerr << "Gibbs: found inf or nan element in distribution." << std::endl;
-            }
             den += val;
             distribution[k] = val;
         }
 
-        // check extreme cases (if some action is nan or infinite
-        arma::uvec q_inf = arma::find(distribution == arma::datum::inf);
-        if (q_inf.n_elem > 0)
+        // check extreme cases (if some action is nan or infinite)
+        arma::uvec q_nf = arma::find_nonfinite(distribution);
+        if (q_nf.n_elem > 0)
         {
-            //get other elements
-            std::cerr << "distribution contains infinite elements: " << distribution.t();
-            arma::uvec q_not_inf = arma::find(distribution != arma::datum::inf);
-            distribution.elem(q_inf).ones();
-            den = q_inf.n_elem;
-            distribution.elem(q_not_inf).zeros();
+            arma::uvec q_f = arma::find_finite(distribution);
+            distribution(q_f).zeros();
+            distribution(q_nf).ones();
+            den = q_nf.n_elem;
         }
 
         distribution /= den;

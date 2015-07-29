@@ -44,6 +44,10 @@ public:
         : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
+        if (dist.getDistributionName().compare("ParametricCholeskyNormal") == 0)
+        {
+            std::cout << "=================================\nWE SERIOUSLY SUGGEST TO USE ENES WITH CHOLESKY DISTRIBUTION!!\n=================================" << std::endl;
+        }
     }
 
     NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
@@ -53,6 +57,10 @@ public:
         : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline)
     {
+        if (dist.getDistributionName().compare("ParametricCholeskyNormal") == 0)
+        {
+            std::cout << "=================================\nWE SERIOUSLY SUGGEST TO USE ENES WITH CHOLESKY DISTRIBUTION!!\n=================================" << std::endl;
+        }
     }
 
     virtual ~NES()
