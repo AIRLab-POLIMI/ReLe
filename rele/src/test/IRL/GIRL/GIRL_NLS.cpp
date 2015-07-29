@@ -27,6 +27,8 @@
 #include "basis/IdentityBasis.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/GaussianRbf.h"
+#include "basis/NormBasis.h"
+#include "basis/SubspaceBasis.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
 
@@ -36,6 +38,7 @@
 #include "Core.h"
 #include "ParametricRewardMDP.h"
 #include "algorithms/GIRL.h"
+#include "algorithms/PGIRL.h"
 #include "policy_search/NES/NES.h"
 #include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 
@@ -51,7 +54,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::GB;
-    int nbEpisodes = 200;
+    int nbEpisodes = 6000;
 
     FileManager fm("nls", "GIRL");
     fm.createDir();
@@ -93,24 +96,36 @@ int main(int argc, char *argv[])
 
 
     // Create parametric reward
-    BasisFunctions basisReward = InverseBasis::generate(GaussianRbf::generate({4, 4}, {-10, 10, -10, 10}));
+    //BasisFunctions basisReward = InverseBasis::generate(GaussianRbf::generate({5, 5}, {-10, 10, -10, 10}));
+    //BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-10, 10, -10, 10});
+    //BasisFunctions basisReward = InverseBasis::generate(PolynomialFunction::generate(4, 5));
+    BasisFunctions basisReward;
+    basisReward.push_back(new SubspaceBasis(new NormBasis(), arma::span(0,1)));
+    basisReward.push_back(new IdentityBasis(2));
+    basisReward.push_back(new SubspaceBasis(new NormBasis(), arma::span(3,4)));
     DenseFeatures phiReward(basisReward);
 
-
     LinearApproximator rewardRegressor(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+    PlaneGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, basisReward,
                                         mdp.getSettings().gamma, atype);
-
+    /*GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                        mdp.getSettings().gamma, atype);*/
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
     std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
+    std::cout << "Features Expectation " << data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).t();
 
     //Run GIRL
     irlAlg.run();
-    arma::vec gnormw = irlAlg.getWeights();
+    arma::vec weights = irlAlg.getWeights();
 
-    cout << "Weights (gnorm): " << gnormw.t();
+    cout << "Weights: " << weights.t();
+    /*weights(arma::find(weights < 0)).zeros();
+    weights /= arma::sum(weights);
+    cout << "Weights: " << weights.t();*/
+
+    rewardRegressor.setParameters(weights);
 
 
     //Try to recover the initial policy
@@ -149,11 +164,20 @@ int main(int argc, char *argv[])
 
     //Evaluate policy against the real mdp
     Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
-    evaluationCore.getSettings().loggerStrategy = &emptyStrategy;
+    CollectorStrategy<DenseAction, DenseState> collector2;
+    evaluationCore.getSettings().loggerStrategy = &collector2;
     evaluationCore.getSettings().episodeLenght = mdp.getSettings().horizon;
     evaluationCore.getSettings().episodeN = episodes;
     evaluationCore.getSettings().testEpisodeN = nbEpisodes;
-    cout << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
+
+    evaluationCore.runTestEpisodes();
+
+    Dataset<DenseAction,DenseState>& data2 = collector2.data;
+
+    double gamma = mdp.getSettings().gamma;
+    cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
+    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest());
+
 
     return 0;
 }

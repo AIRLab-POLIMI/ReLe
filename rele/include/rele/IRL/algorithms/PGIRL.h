@@ -43,12 +43,12 @@ public:
 
     PlaneGIRL(Dataset<ActionC,StateC>& dataset,
               DifferentiablePolicy<ActionC,StateC>& policy,
-			  BasisFunctions& rewardBasis,
+              BasisFunctions& rewardBasis,
               double gamma, IRLGradType aType)
         : policy(policy), data(dataset), rewardBasis(rewardBasis),
           gamma(gamma), atype(aType)
     {
-    	nbFunEvals = 0;
+        nbFunEvals = 0;
     }
 
     virtual ~PlaneGIRL()

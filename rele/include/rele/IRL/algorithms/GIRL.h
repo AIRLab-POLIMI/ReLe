@@ -98,7 +98,8 @@ public:
 
         if (starting.n_elem == 0)
         {
-            starting.zeros(dpr);
+            starting.ones(dpr);
+            starting /= arma::sum(starting);
         }
         else
         {
@@ -123,14 +124,6 @@ public:
         //setup optimization algorithm
         nlopt::opt optimizator;
 
-
-        //                optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
-        //                optimizator = nlopt::opt(nlopt::algorithm::AUGLAG, dpr);
-        //                optimizator.set_local_optimizer(localoptimizator);
-        //                optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dpr);
-        //                optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT, dpr);
-        //                optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT_L, dpr);
-
         optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
         optimizator.set_min_objective(GIRL::wrapper, this);
         optimizator.set_xtol_rel(1e-6);
@@ -143,8 +136,13 @@ public:
         optimizator.set_lower_bounds(lowerBounds);
         optimizator.set_upper_bounds(upperBounds);
         optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-6);
-        //        optimizator.add_inequality_constraint(GIRL::f1, NULL, 1e-16);
-        //        optimizator.add_inequality_constraint(GIRL::f2, NULL, 1e-16);
+
+        /*localOptimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
+        localOptimizator.set_xtol_rel(1e-6);
+        localOptimizator.set_ftol_rel(1e-6);
+        localOptimizator.set_ftol_abs(1e-6);
+        localOptimizator.set_maxeval(10);
+        optimizator.set_local_optimizer(localOptimizator);*/
 
 
         //optimize dual function
@@ -783,12 +781,22 @@ public:
 
     static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
     {
-        grad = nullptr;
+    	if(grad != nullptr)
+    	{
+    		for (unsigned int i = 0; i < n; ++i)
+    		{
+    			grad[0] = 1;
+    		}
+    	}
+
         double val = -1.0;
+        //std::cout << "x: ";
         for (unsigned int i = 0; i < n; ++i)
         {
+        	//std::cout << x[i] << " ";
             val += x[i];
         }
+        //std::cout << std::endl << "val: " << val << std::endl;
         return val;
     }
 

@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
                                         mdp.getSettings().gamma, atype);
 
     PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, basisReward,
-                    mdp.getSettings().gamma, atype);
+            mdp.getSettings().gamma, atype);
 
 
     //Run GIRL

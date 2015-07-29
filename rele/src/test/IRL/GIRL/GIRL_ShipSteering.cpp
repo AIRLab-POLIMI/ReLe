@@ -50,13 +50,13 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-	//Learning parameters
-	int episodesPerPolicy = 1;
-	int policyPerUpdate = 100;
-	int updates = 400;
-	int episodes = episodesPerPolicy*policyPerUpdate*updates;
-	int testEpisodes = 100;
-	AdaptiveStep stepRule(0.01);
+    //Learning parameters
+    int episodesPerPolicy = 1;
+    int policyPerUpdate = 100;
+    int updates = 400;
+    int episodes = episodesPerPolicy*policyPerUpdate*updates;
+    int testEpisodes = 100;
+    AdaptiveStep stepRule(0.01);
     IRLGradType atype = IRLGradType::GB;
 
     FileManager fm("ship", "GIRL");
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 
     // Solve the problem with GPOMDP
     GPOMDPAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate,
-                mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+            mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     expertCore.getSettings().loggerStrategy = &empty;
@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     PlaneGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, basisReward,
-                                        mdp.getSettings().gamma, atype);
+            mdp.getSettings().gamma, atype);
 
 
     //Info print
