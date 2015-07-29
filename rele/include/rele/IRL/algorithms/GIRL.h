@@ -76,9 +76,9 @@ public:
     GIRL(Dataset<ActionC,StateC>& dataset,
          DifferentiablePolicy<ActionC,StateC>& policy,
          ParametricRegressor& rewardf,
-         double gamma, IRLGradType aType)
+         double gamma, IRLGradType aType, bool useSimplexConstraints = true)
         : policy(policy), data(dataset), rewardf(rewardf),
-          gamma(gamma), maxSteps(0), atype(aType)
+          gamma(gamma), maxSteps(0), atype(aType), useSimplexConstraints(useSimplexConstraints)
     {
         nbFunEvals = 0;
     }
@@ -124,26 +124,24 @@ public:
         //setup optimization algorithm
         nlopt::opt optimizator;
 
-        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
+        if(useSimplexConstraints)
+        	optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
+        else
+        	optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
         optimizator.set_min_objective(GIRL::wrapper, this);
         optimizator.set_xtol_rel(1e-6);
         optimizator.set_ftol_rel(1e-6);
         optimizator.set_ftol_abs(1e-6);
         optimizator.set_maxeval(maxFunEvals);
 
-        std::vector<double> lowerBounds(dpr, 0.0);
-        std::vector<double> upperBounds(dpr, 1.0);
-        optimizator.set_lower_bounds(lowerBounds);
-        optimizator.set_upper_bounds(upperBounds);
-        optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-6);
-
-        /*localOptimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
-        localOptimizator.set_xtol_rel(1e-6);
-        localOptimizator.set_ftol_rel(1e-6);
-        localOptimizator.set_ftol_abs(1e-6);
-        localOptimizator.set_maxeval(10);
-        optimizator.set_local_optimizer(localOptimizator);*/
-
+        if(useSimplexConstraints)
+        {
+            std::vector<double> lowerBounds(dpr, 0.0);
+            std::vector<double> upperBounds(dpr, 1.0);
+            optimizator.set_lower_bounds(lowerBounds);
+            optimizator.set_upper_bounds(upperBounds);
+            optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-6);
+        }
 
         //optimize dual function
         std::vector<double> parameters(dpr);
@@ -152,7 +150,7 @@ public:
         double minf;
         if (optimizator.optimize(parameters, minf) < 0)
         {
-            printf("nlopt failed!\n");
+            std::cout << "nlopt failed!" << std::endl;
         }
         else
         {
@@ -781,19 +779,19 @@ public:
 
     static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
     {
-    	if(grad != nullptr)
-    	{
-    		for (unsigned int i = 0; i < n; ++i)
-    		{
-    			grad[0] = 1;
-    		}
-    	}
+        if(grad != nullptr)
+        {
+            for (unsigned int i = 0; i < n; ++i)
+            {
+                grad[0] = 1;
+            }
+        }
 
         double val = -1.0;
         //std::cout << "x: ";
         for (unsigned int i = 0; i < n; ++i)
         {
-        	//std::cout << x[i] << " ";
+            //std::cout << x[i] << " ";
             val += x[i];
         }
         //std::cout << std::endl << "val: " << val << std::endl;
@@ -843,6 +841,7 @@ protected:
     unsigned int maxSteps;
     IRLGradType atype;
     unsigned int nbFunEvals;
+    bool useSimplexConstraints;
 };
 
 } //end namespace

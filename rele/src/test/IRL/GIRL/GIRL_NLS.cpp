@@ -23,12 +23,8 @@
 
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/GaussianMixtureModels.h"
 #include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/GaussianRbf.h"
-#include "basis/NormBasis.h"
-#include "basis/SubspaceBasis.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
 
@@ -38,8 +34,6 @@
 #include "Core.h"
 #include "ParametricRewardMDP.h"
 #include "algorithms/GIRL.h"
-#include "algorithms/PGIRL.h"
-#include "policy_search/NES/NES.h"
 #include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 
 #include "FileManager.h"
@@ -96,20 +90,14 @@ int main(int argc, char *argv[])
 
 
     // Create parametric reward
-    //BasisFunctions basisReward = InverseBasis::generate(GaussianRbf::generate({5, 5}, {-10, 10, -10, 10}));
-    //BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-10, 10, -10, 10});
-    //BasisFunctions basisReward = InverseBasis::generate(PolynomialFunction::generate(4, 5));
-    BasisFunctions basisReward;
-    basisReward.push_back(new SubspaceBasis(new NormBasis(), arma::span(0,1)));
-    basisReward.push_back(new IdentityBasis(2));
-    basisReward.push_back(new SubspaceBasis(new NormBasis(), arma::span(3,4)));
+    BasisFunctions basisReward = IdentityBasis::generate(2);
     DenseFeatures phiReward(basisReward);
 
-    LinearApproximator rewardRegressor(phiReward);
-    PlaneGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, basisReward,
-                                        mdp.getSettings().gamma, atype);
-    /*GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype);*/
+    GaussianRegressor rewardRegressor(phiReward);
+    /*PlaneGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, basisReward,
+            mdp.getSettings().gamma, atype);*/
+    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                        mdp.getSettings().gamma, atype, false);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();

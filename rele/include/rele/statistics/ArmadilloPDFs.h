@@ -80,7 +80,7 @@ inline double mvnpdf(const arma::vec& x,
     //compute distance from mean
     arma::vec diff = x - mean;
 
-    arma::vec cinv = arma::inv(cov);
+    arma::mat cinv = arma::inv(cov);
 
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, cinv*diff);
@@ -93,7 +93,7 @@ inline double mvnpdf(const arma::vec& x,
     g_mean = -f * invDiff;
 
     // Calculate the g_cov values; this is a (1 x (dim * (dim + 1) / 2)) vector.
-    g_cov = f * (cinv * diff * diff.t() * cinv - cinv);
+    g_cov = arma::vectorise(f * (cinv * diff * diff.t() * cinv - cinv));
 
     return f;
 }
