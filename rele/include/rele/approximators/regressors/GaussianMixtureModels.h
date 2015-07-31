@@ -36,8 +36,8 @@ class GaussianRegressor_ : public ParametricRegressor_<InputC>
 public:
     GaussianRegressor_(Features_<InputC>& phi) : ParametricRegressor_<InputC>(1), phi(phi)
     {
-    	unsigned int size = phi.rows();
-        sigma = arma::eye(size, size);
+        unsigned int size = phi.rows();
+        sigma = 0.1*arma::eye(size, size);
         mu.set_size(size);
     }
 
@@ -58,10 +58,10 @@ public:
 
     virtual arma::vec operator() (const InputC& input)
     {
-    	const arma::vec& value = phi(input);
+        const arma::vec& value = phi(input);
 
-    	arma::vec result(1);
-    	result(0) = mvnpdf(value, mu, sigma);
+        arma::vec result(1);
+        result(0) = mvnpdf(value, mu, sigma);
 
         return result;
     }

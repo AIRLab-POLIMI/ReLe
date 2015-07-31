@@ -85,7 +85,7 @@ inline double mvnpdf(const arma::vec& x,
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, cinv*diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / 2.0)
+    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
                     * exp(exponent) / sqrt(arma::det(cov));
 
     // Calculate the gradient w.r.t. the input value x; this is a (dim x 1) vector.
@@ -124,7 +124,7 @@ inline double mvnpdfFast(const arma::vec& x,
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, inverse_cov * diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / 2.0)
+    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
                     * exp(exponent) / sqrt(det);
 
     // Calculate the gradient w.r.t. the input value x; this is a (dim x 1) vector.

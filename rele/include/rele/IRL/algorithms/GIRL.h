@@ -33,39 +33,6 @@
 namespace ReLe
 {
 
-//TODO togliere, questo e' solo temporaneo
-/*template<class ActionC, class StateC>
-class IRLParametricReward
-{
-public:
-    virtual double operator()(StateC& s, ActionC& a, StateC& ns) = 0;
-    virtual arma::mat diff(StateC& s, ActionC& a, StateC& ns) = 0;
-
-    virtual inline void setParameters(unsigned int n, const double* x)
-    {
-        assert(weights.n_elem == n);
-        for (unsigned int i = 0; i < n; ++i)
-            weights[i] = x[i];
-    }
-
-    virtual inline void setParameters(arma::vec& params)
-    {
-        weights = params;
-    }
-
-    virtual inline unsigned int getParametersSize()
-    {
-        return weights.n_elem;
-    }
-
-    virtual inline arma::vec getParameters()
-    {
-        return weights;
-    }
-protected:
-    arma::vec weights;
-};*/
-
 enum IRLGradType {R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB};
 
 template<class ActionC, class StateC>
@@ -100,6 +67,7 @@ public:
         {
             starting.ones(dpr);
             starting /= arma::sum(starting);
+            //starting.zeros(dpr);
         }
         else
         {
@@ -125,23 +93,26 @@ public:
         nlopt::opt optimizator;
 
         if(useSimplexConstraints)
-        	optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
-        else
-        	optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
-        optimizator.set_min_objective(GIRL::wrapper, this);
-        optimizator.set_xtol_rel(1e-6);
-        optimizator.set_ftol_rel(1e-6);
-        optimizator.set_ftol_abs(1e-6);
-        optimizator.set_maxeval(maxFunEvals);
-
-        if(useSimplexConstraints)
         {
+            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
+
             std::vector<double> lowerBounds(dpr, 0.0);
             std::vector<double> upperBounds(dpr, 1.0);
             optimizator.set_lower_bounds(lowerBounds);
             optimizator.set_upper_bounds(upperBounds);
             optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-6);
+
         }
+        else
+        {
+            optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dpr);
+        }
+
+        optimizator.set_min_objective(GIRL::wrapper, this);
+        optimizator.set_xtol_rel(1e-8);
+        optimizator.set_ftol_rel(1e-8);
+        optimizator.set_ftol_abs(1e-8);
+        optimizator.set_maxeval(maxFunEvals);
 
         //optimize dual function
         std::vector<double> parameters(dpr);
@@ -154,7 +125,7 @@ public:
         }
         else
         {
-            //            printf("found minimum = %0.10g\n", minf);
+            std::cout << "found minimum = " << minf << std::endl;
 
             arma::vec finalP(dpr);
             for(int i = 0; i < dpr; ++i)
@@ -192,7 +163,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(dpr,1);
+        arma::mat dRew(1, dpr);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -261,7 +232,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(dpr,1);
+        arma::mat dRew(1, dpr);
 
         arma::vec baseline_J_num(dp, arma::fill::zeros);
         arma::vec baseline_den(dp, arma::fill::zeros);
@@ -376,7 +347,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(dpr,1);
+        arma::mat dRew(1, dpr);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -770,8 +741,8 @@ public:
             }
         }
 
-        double norm22 = arma::norm(gradient,2);
-        double f = 0.5 * norm22 * norm22;
+        //double norm22 = arma::norm(gradient,2);
+        double f = 0.5 * arma::as_scalar(gradient.t()*gradient);
         //        std::cerr << f << std::endl;
         return f;
 
@@ -825,7 +796,30 @@ public:
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        return reinterpret_cast<GIRL*>(o)->objFunction(n, x, grad);
+        double value = reinterpret_cast<GIRL*>(o)->objFunction(n, x, grad);
+
+        std::cout << "v= " << value << " ";
+
+        std::cout << "x= ";
+        for(int i = 0; i < n; i++)
+        {
+            std::cout << x[i] << " ";
+        }
+
+        std::cout << std::endl;
+
+        if(grad)
+        {
+            std::cout << "g= ";
+            for(int i = 0; i < n; i++)
+            {
+                std::cout << grad[i] << " ";
+            }
+
+            std::cout << std::endl;
+        }
+
+        return value;
     }
 
     unsigned int getFunEvals()
