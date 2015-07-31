@@ -105,7 +105,7 @@ public:
         }
         else
         {
-            optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dpr);
+            optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
         }
 
         optimizator.set_min_objective(GIRL::wrapper, this);

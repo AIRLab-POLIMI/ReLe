@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::GB;
+    IRLGradType atype = IRLGradType::NATG;
     int dim = 1;
     int nbEpisodes = 2000;
 
@@ -111,33 +111,33 @@ int main(int argc, char *argv[])
 
 
     //Run GIRL
-    //irlAlg.run();
-    //arma::vec gnormw = irlAlg.getWeights();
+    irlAlg.run();
+    arma::vec gnormw = irlAlg.getWeights();
 
-    //calculate full grid function
-    int samplesPositive = 1000;
+    /*//calculate full grid function
+    int samplesPositive = 500;
     arma::vec values(samplesPositive*2+1);
     arma::mat gradients(samplesPositive*2+1, rewardRegressor.getParametersSize());
     for(int i = -samplesPositive; i < samplesPositive+1; i++)
     {
-    	double step = 0.01;
-    	arma::vec wm(1);
-    	wm(0) = i*step;
-    	rewardRegressor.setParameters(wm);
-    	arma::mat gGrad(dim, dim);
-    	arma::vec grad = irlAlg.ReinforceGradient(gGrad);
-    	gradients.row(i+samplesPositive) = gGrad.t()*grad;
-    	values(i+samplesPositive) = as_scalar(0.5*grad.t()*grad);
-    	cout << i << endl;
+        double step = 0.01;
+        arma::vec wm(1);
+        wm(0) = i*step;
+        rewardRegressor.setParameters(wm);
+        arma::mat gGrad(dim, dim);
+        arma::vec grad = irlAlg.ReinforceGradient(gGrad);
+        gradients.row(i+samplesPositive) = gGrad.t()*grad;
+        values(i+samplesPositive) = as_scalar(0.5*grad.t()*grad);
+        cout << i << endl;
     }
 
     values.save("/tmp/ReLe/norm.txt", arma::raw_ascii);
-    gradients.save("/tmp/ReLe/gradient.txt", arma::raw_ascii);
+    gradients.save("/tmp/ReLe/gradient.txt", arma::raw_ascii);*/
 
 
     //Print results
     cout << "Optimal Weights: " << arma::zeros(dim).t() << endl;
-    //cout << "Weights (gnorm): " << gnormw.t();
+    cout << "Weights (gnorm): " << gnormw.t();
 
     return 0;
 }

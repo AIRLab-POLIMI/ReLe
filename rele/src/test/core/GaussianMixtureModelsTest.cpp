@@ -24,6 +24,7 @@
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
 #include "regressors/GaussianMixtureModels.h"
+#include "regressors/LinearApproximator.h"
 
 #include <nlopt.hpp>
 
@@ -43,7 +44,7 @@ double f(unsigned int n, const double* x, double* grad, void* obj)
 
     if(grad != nullptr)
     {
-        arma::vec g = regressor.diff(input);
+        arma::vec g = -regressor.diff(input); // true only by chance... diff is wrt w, not input
 
         for(int i = 0; i < n; i++)
         {
@@ -103,9 +104,9 @@ int main(int argc, char *argv[])
 
     optimizator.optimize(x, J);
 
-    std::cout << "Jopt = " << regressor(w)(0) << std::endl;
+    std::cout << "Jopt = " << as_scalar(regressor(w)) << std::endl;
     std::cout << "J    = " << J << std::endl;
-    std::cout << "xopt = " << x[0] << ", " << x[1] << std::endl;
+    std::cout << "xopt = " << w[0] << ", " << w[1] << std::endl;
     std::cout << "x    = " << x[0] << ", " << x[1] << std::endl;
 
 
