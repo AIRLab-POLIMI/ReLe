@@ -22,12 +22,11 @@ disp('--------------------------');
 
 
 Fe = dlmread('/tmp/ReLe/chol_FIM/test/Fe.dat');
-Fs = dlmread('/tmp/ReLe/chol_FIM/test/Fs.dat')
+Fs = dlmread('/tmp/ReLe/chol_FIM/test/Fs.dat');
 Feinv = dlmread('/tmp/ReLe/chol_FIM/test/Feinv.dat');
 disp('Fe vs Fs (estimated v.s. computed exactly) -- C++');
 [diag(Fe),diag(Fs)]
 assert(max(abs(diag(Fe)-diag(Fs))) < 0.1);
-
 
 
 policy = gaussian_chol_constant(n_params,mu0,chol(sigma0));
@@ -47,10 +46,11 @@ Fme = Fme/nbs;
 
 disp('Fm vs Fme (estimated v.s. computed exactly) -- MATLAB');
 [diag(Fm), diag(Fme)]
-%%
+
 
 %check that the exact versions are equal between matlab and C++
 assert(sum(sum(abs(Fe - Fm)))<1e-4);
+
 
 Fminv = policy.inverseFisher();
 assert(sum(sum(abs(Feinv - inv(Fe)))) < 1e-5);

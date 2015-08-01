@@ -190,6 +190,98 @@ arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point)
     return hessian;
 }
 
+sp_mat ParametricDiagonalNormal::FIM()
+{
+    //TODO: make in a more efficient way
+    int rows = invCov.n_rows;
+    int cols = invCov.n_cols;
+    vector<mat> diag_blocks;
+    diag_blocks.push_back(invCov);
+    for (int k = 0, end_v = pointSize - 1; k < pointSize; ++k)
+    {
+        mat tmp = invCov( span(k, end_v), span(k, end_v) );
+        tmp(0,0) += 1.0 / (cholCov(k,k)*cholCov(k,k));
+        rows += tmp.n_rows;
+        cols += tmp.n_cols;
+        diag_blocks.push_back(tmp);
+    }
+    //==========================
+    sp_mat tmp = blockdiagonal(diag_blocks, rows, cols);
+    //=========================
+
+    //Construct list of indexes that must be kept
+    uvec indexes(2*pointSize);
+    for (int i = 0; i < pointSize; ++i)
+        indexes(i) = i;
+    indexes(pointSize) = pointSize;
+    for (int i = 1; i < pointSize; ++i)
+    {
+        indexes(pointSize+i) = indexes(pointSize+i-1) + pointSize - i + 1;
+    }
+
+    //Select subview of the sparse matrix
+    sp_mat final(2*pointSize,2*pointSize);
+    int r, c;
+    for (int i = 0, dim = 2*pointSize; i < dim; ++i)
+    {
+        r = indexes(i);
+        for (int j = 0; j < dim; ++j)
+        {
+            c = indexes(j);
+            final(i,j) = tmp.at(r,c);
+        }
+    }
+
+    return final;
+}
+
+sp_mat ParametricDiagonalNormal::inverseFIM()
+{
+    //TODO: make in a more efficient way
+    int rows = Cov.n_rows;
+    int cols = Cov.n_cols;
+    vector<mat> diag_blocks;
+    diag_blocks.push_back(Cov);
+    for (int k = 0, end_v = pointSize - 1; k < pointSize; ++k)
+    {
+        mat tmp = invCov( span(k, end_v), span(k, end_v) );
+        tmp(0,0) += 1.0 / (cholCov(k,k)*cholCov(k,k));
+        mat nMtx = arma::solve(tmp.t(), arma::eye(tmp.n_rows, tmp.n_cols)).t(); //in matlab it is mrdivide operator
+        //std::cout << nMtx << std::endl << std::endl;
+        rows += nMtx.n_rows;
+        cols += nMtx.n_cols;
+        diag_blocks.push_back(nMtx);
+    }
+    //==========================
+    sp_mat tmp = blockdiagonal(diag_blocks, rows, cols);
+    //=========================
+
+    //Construct list of indexes that must be kept
+    uvec indexes(2*pointSize);
+    for (int i = 0; i < pointSize; ++i)
+        indexes(i) = i;
+    indexes(pointSize) = pointSize;
+    for (int i = 1; i < pointSize; ++i)
+    {
+        indexes(pointSize+i) = indexes(pointSize+i-1) + pointSize - i + 1;
+    }
+
+    //Select subview of the sparse matrix
+    sp_mat final(2*pointSize,2*pointSize);
+    int r, c;
+    for (int i = 0, dim = 2*pointSize; i < dim; ++i)
+    {
+        r = indexes(i);
+        for (int j = 0; j < dim; ++j)
+        {
+            c = indexes(j);
+            final(i,j) = tmp.at(r,c);
+        }
+    }
+
+    return final;
+}
+
 void ParametricDiagonalNormal::writeOnStream(ostream& out)
 {
     out << "ParametricDiagonalNormal " << std::endl;

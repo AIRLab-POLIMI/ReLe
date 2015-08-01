@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     mat cholMtx = chol(chol0);
     ParametricCholeskyNormal dist(mean, cholMtx);
     //----- ParametricDiagonalNormal
-//            ParametricDiagonalNormal dist(mean, chol0);
+//    ParametricDiagonalNormal dist(mean, chol0);
     //-----
     //---
 
