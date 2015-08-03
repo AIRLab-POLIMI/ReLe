@@ -706,6 +706,19 @@ public:
             std::iota (std::begin(nonZeroIdx), std::end(nonZeroIdx), 0);
         }
 
+        if(nonZeroIdx.n_elem == 0)
+        {
+        	weights.zeros(A.n_cols);
+        	return;
+        }
+
+        if(nonZeroIdx.n_elem == 1)
+        {
+        	weights.zeros(A.n_cols);
+        	weights(nonZeroIdx).ones();
+        	return;
+        }
+
 
         Ared.save("/tmp/ReLe/gradRed.log", arma::raw_ascii);
 

@@ -25,6 +25,7 @@
 #include "features/DenseFeatures.h"
 #include "regressors/GaussianMixtureModels.h"
 #include "basis/IdentityBasis.h"
+#include "basis/GaussianRbf.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
 
@@ -34,6 +35,7 @@
 #include "Core.h"
 #include "ParametricRewardMDP.h"
 #include "algorithms/GIRL.h"
+#include "algorithms/PGIRL.h"
 #include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 
 #include "FileManager.h"
@@ -48,7 +50,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::GB;
-    int nbEpisodes = 6000;
+    int nbEpisodes = 10000;
 
     FileManager fm("nls", "GIRL");
     fm.createDir();
@@ -90,14 +92,30 @@ int main(int argc, char *argv[])
 
 
     // Create parametric reward
-    BasisFunctions basisReward = IdentityBasis::generate(2);
+    //BasisFunctions basisReward = IdentityBasis::generate(2);
+    arma::vec cT = {0, 0};
+    arma::vec cF = {10, 10};
+    BasisFunction* bfT = new GaussianRbf(cT, 1);
+    BasisFunction* bfF = new GaussianRbf(cF, 1);
+    BasisFunctions basisReward;
+    basisReward.push_back(bfT);
+    basisReward.push_back(bfF);
+
+    unsigned int nbasis = 3;
+    for(unsigned int i = 0; i < nbasis; i++)
+    {
+    	double angle = i*2.0/3.0*M_PI;
+    	basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1));
+    }
+
     DenseFeatures phiReward(basisReward);
 
-    GaussianRegressor rewardRegressor(phiReward);
+    //GaussianRegressor rewardRegressor(phiReward);
+    LinearApproximator rewardRegressor(phiReward);
     /*PlaneGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, basisReward,
             mdp.getSettings().gamma, atype);*/
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype, false);
+                                        mdp.getSettings().gamma, atype, true);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -136,7 +154,6 @@ int main(int argc, char *argv[])
     imitatorPolicy.setParameters(mean);
     GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
             mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
-
 
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
     Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
