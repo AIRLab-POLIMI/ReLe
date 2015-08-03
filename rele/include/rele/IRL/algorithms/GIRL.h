@@ -29,6 +29,7 @@
 #include "Transition.h"
 #include <nlopt.hpp>
 #include <cassert>
+#include <math.h>
 
 namespace ReLe
 {
@@ -67,7 +68,6 @@ public:
         {
             starting.ones(dpr);
             starting /= arma::sum(starting);
-            //starting.zeros(dpr);
         }
         else
         {
@@ -741,10 +741,44 @@ public:
             }
         }
 
-        //double norm22 = arma::norm(gradient,2);
-        double f = 0.5 * arma::as_scalar(gradient.t()*gradient);
+        long double J = computeJ();
+
+        long double g2 = 0.5 * arma::as_scalar(gradient.t()*gradient);
+
+        long double fObj = std::log(g2) - std::log(0.5*J*J);
+        //double f = g2/(J*J);
+
+        std::cout << "J: " << J << std::endl;
+        std::cout << "g2: " << g2 << std::endl;
+        std::cout << "f: " << fObj << std::endl;
+        std::cout << "x" << parV.t();
+        std::cout << "-----------------------------------------" << std::endl;
+
         //        std::cerr << f << std::endl;
-        return f;
+        return fObj;
+
+    }
+
+    double computeJ()
+    {
+        double J = 0;
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            //core setup
+            int nbSteps = data[i].size();
+            double df = 1.0;
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                auto tr = data[i][t];
+                J += df*arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                df *= gamma;
+            }
+        }
+
+        return J/static_cast<double>(nbEpisodes);
 
     }
 
@@ -796,9 +830,9 @@ public:
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        double value = reinterpret_cast<GIRL*>(o)->objFunction(n, x, grad);
+        double value = static_cast<GIRL*>(o)->objFunction(n, x, grad);
 
-        std::cout << "v= " << value << " ";
+        /*std::cout << "v= " << value << " ";
 
         std::cout << "x= ";
         for(int i = 0; i < n; i++)
@@ -817,7 +851,7 @@ public:
             }
 
             std::cout << std::endl;
-        }
+        }*/
 
         return value;
     }

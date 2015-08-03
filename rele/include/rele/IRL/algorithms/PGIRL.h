@@ -708,9 +708,9 @@ public:
 
         if(nonZeroIdx.n_elem == 1)
         {
-        	weights.zeros(A.n_cols);
-        	weights(nonZeroIdx).ones();
-        	return;
+            weights.zeros(A.n_cols);
+            weights(nonZeroIdx).ones();
+            return;
         }
 
 

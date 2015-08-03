@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::GB;
+    IRLGradType atype = IRLGradType::R;
     int nbEpisodes = 10000;
 
     FileManager fm("nls", "GIRL");
@@ -101,12 +101,12 @@ int main(int argc, char *argv[])
     basisReward.push_back(bfT);
     basisReward.push_back(bfF);
 
-    unsigned int nbasis = 3;
+    /*unsigned int nbasis = 3;
     for(unsigned int i = 0; i < nbasis; i++)
     {
-    	double angle = i*2.0/3.0*M_PI;
-    	basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1));
-    }
+        double angle = i*2.0/3.0*M_PI;
+        basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1));
+    }*/
 
     DenseFeatures phiReward(basisReward);
 
@@ -126,12 +126,9 @@ int main(int argc, char *argv[])
     irlAlg.run();
     arma::vec weights = irlAlg.getWeights();
 
-    cout << "Weights: " << weights.t();
-    /*weights(arma::find(weights < 0)).zeros();
-    weights /= arma::sum(weights);
-    cout << "Weights: " << weights.t();*/
 
     rewardRegressor.setParameters(weights);
+    cout << "weights: " << weights.t();
 
 
     //Try to recover the initial policy
@@ -146,10 +143,6 @@ int main(int argc, char *argv[])
     arma::vec mean(nparams, fill::zeros);
     mean[0] = -0.42;
     mean[1] =  0.42;
-    /*arma::mat cov(nparams, nparams, arma::fill::eye);
-    mat cholMtx = chol(cov);
-    ParametricCholeskyNormal dist(mean, cholMtx);
-    NES<DenseAction, DenseState> imitator(dist, imitatorPolicy, episodesPerPolicy, policyPerUpdate, stepRule, true);*/
 
     imitatorPolicy.setParameters(mean);
     GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
@@ -183,6 +176,32 @@ int main(int argc, char *argv[])
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
     cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest());
 
+    //calculate full grid function
+    int samplesPositive = 100;
+    arma::vec valuesG(samplesPositive);
+    arma::vec valuesJ(samplesPositive);
+
+#ifdef PRINT_GRADIENT
+    for(int i = 0; i < samplesPositive; i++)
+    {
+        double step = 0.01;
+        arma::vec wm(2);
+        wm(0) = i*step;
+        wm(1) = 1.0 - wm(0);
+        rewardRegressor.setParameters(wm);
+        arma::mat gGrad(2, 2);
+        arma::vec grad = irlAlg.ReinforceBaseGradient(gGrad);
+        //gradients.row(i+samplesPositive) = gGrad.t()*grad;
+        double Je = irlAlg.computeJ();
+        valuesG(i) = as_scalar(0.5*grad.t()*grad);
+        valuesJ(i) = 0.5*std::pow(Je, 2);
+        cout << i << endl;
+    }
+
+    valuesG.save("/tmp/ReLe/normG.txt", arma::raw_ascii);
+    valuesJ.save("/tmp/ReLe/normJ.txt", arma::raw_ascii);
+    //gradients.save("/tmp/ReLe/gradient.txt", arma::raw_ascii);
+#endif
 
     return 0;
 }
