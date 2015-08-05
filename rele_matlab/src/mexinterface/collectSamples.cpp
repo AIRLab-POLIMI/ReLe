@@ -10,7 +10,7 @@
 #include <random>
 #include <cmath>
 
-#include "collectSamplesUtils.h"
+#include "CSDomainSettings.h"
 
 using namespace std;
 using namespace arma;
@@ -79,20 +79,7 @@ void mexFunction(int nlhs, mxArray *plhs[], /* Output variables */
 
     char* domain_settings = mxArrayToString(IN_DOMAIN);
 
-    if ((strcmp(domain_settings, "lqr") == 0) || (strcmp(domain_settings, "nls") == 0)
-            || (strcmp(domain_settings, "dam") == 0)
-       )
-    {
-        CollectSamplesInContinuousMDP(nlhs, plhs, nrhs, prhs);
-    }
-    else if(strcmp(domain_settings, "deep") == 0)
-    {
-        CollectSamplesInDenseMDP(nlhs, plhs, nrhs, prhs);
-    }
-    else
-    {
-        mexErrMsgTxt("collectSamples: Unknown settings!\n");
-    }
+    CollectSamplesGateway(nlhs, plhs, nrhs, prhs);
 
     mxFree(domain_settings);
 }
