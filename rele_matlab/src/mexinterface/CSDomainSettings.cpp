@@ -155,12 +155,15 @@ CollectSamplesGateway(
     }
     else if (strcmp(domain_settings, "nls") == 0)
     {
+        nls_domain_settings(nlhs, plhs, nrhs, prhs);
     }
     else if (strcmp(domain_settings, "dam") == 0)
     {
+        dam_domain_settings(nlhs, plhs, nrhs, prhs);
     }
     else if (strcmp(domain_settings, "deep") == 0)
     {
+        deep_domain_settings(nlhs, plhs, nrhs, prhs);
     }
     else
     {

@@ -1,4 +1,5 @@
 clc;
+addpath ..
 params.policyParameters = ones(6,1);
 params.asVariance = 1;
 params.nbRewards = 2;
