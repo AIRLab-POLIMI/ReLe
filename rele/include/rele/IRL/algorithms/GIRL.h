@@ -29,7 +29,12 @@
 #include "Transition.h"
 #include <nlopt.hpp>
 #include <cassert>
-#include <math.h>
+
+#include "policy_search/step_rules/StepRules.h"
+
+#define DISPARITY
+//#define LOG_OBJ
+//#define SQUARE_OBJ
 
 namespace ReLe
 {
@@ -100,7 +105,7 @@ public:
             std::vector<double> upperBounds(dpr, 1.0);
             optimizator.set_lower_bounds(lowerBounds);
             optimizator.set_upper_bounds(upperBounds);
-            optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-6);
+            optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-3);
 
         }
         else
@@ -683,7 +688,7 @@ public:
         return nat_grad;
     }
 
-    double objFunction(unsigned int n, const double* x, double* grad)
+    double objFunction(const arma::vec& parV, arma::vec df)
     {
 
         ++nbFunEvals;
@@ -691,7 +696,6 @@ public:
 
         arma::vec gradient;
         arma::mat dGradient;
-        arma::vec parV(const_cast<double*>(x), n, true);
         rewardf.setParameters(parV);
         if (atype == IRLGradType::R)
         {
@@ -728,40 +732,56 @@ public:
             abort();
         }
 
-        //        std::cerr << gradient.t();
-        //        std::cerr << dGradient;
 
-        if (grad != nullptr)
-        {
-            arma::vec g = dGradient.t() * gradient;
-            //            std::cerr << g.t();
-            for (int i = 0; i < g.n_elem; ++i)
-            {
-                grad[i] = g[i];
-            }
-        }
+        double g2 = arma::as_scalar(gradient.t()*gradient);
 
-        long double J = computeJ();
+#if defined LOG_OBJ || defined SQUARE_OBJ
+        arma::vec dJ;
+        double J = computeJ(dJ);
+        double J4 = std::pow(J, 4);
+#elif defined DISPARITY
+        double D = computeDisparity();
+        double D2 = D*D;
+#endif
 
-        long double g2 = 0.5 * arma::as_scalar(gradient.t()*gradient);
 
-        long double fObj = std::log(g2) - std::log(0.5*J*J);
-        //double f = g2/(J*J);
+#ifdef LOG_OBJ
+        double f = std::log(g2) - std::log(J4);
+#elif defined SQUARE_OBJ
+        double f = g2/J4;
+#elif defined DISPARITY
+        double f = g2/D2;
+#else
+        double f = g2;
+#endif
 
-        std::cout << "J: " << J << std::endl;
+#if defined LOG_OBJ || defined SQUARE_OBJ
+        arma::vec dg2 = 2.0*dGradient.t() * gradient;
+        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
+
+#ifdef LOG_OBJ
+        df = dg2/g2 - dJ4/J4;
+#elif defined SQUARE_OBJ
+        df = (dg2*J4 - dJ4*g2) / (J4*J4);
+#else
+        df = dg2;
+#endif
+#endif
+
         std::cout << "g2: " << g2 << std::endl;
-        std::cout << "f: " << fObj << std::endl;
+        std::cout << "f: " << f << std::endl;
+        std::cout << "df: " << df.t() << std::endl;
         std::cout << "x" << parV.t();
         std::cout << "-----------------------------------------" << std::endl;
 
-        //        std::cerr << f << std::endl;
-        return fObj;
+        return f;
 
     }
 
-    double computeJ()
+    double computeJ(arma::vec& dR)
     {
         double J = 0;
+        dR.zeros(rewardf.getParametersSize());
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -774,12 +794,48 @@ public:
             {
                 auto tr = data[i][t];
                 J += df*arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dR += df*rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
                 df *= gamma;
             }
         }
 
         return J/static_cast<double>(nbEpisodes);
 
+    }
+
+    double computeDisparity()
+    {
+        double D = 0;
+
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            double R = 0;
+            double R2 = 0;
+            double Gamma = 0;
+
+            //Compute episode J
+            int nbSteps = data[i].size();
+            double df = 1.0;
+
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Gamma += df;
+                auto tr = data[i][t];
+                double r = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                R += df*r;
+                R2 += df*r*r;
+                df *= gamma;
+            }
+
+            R /= Gamma;
+            R2 /= Gamma;
+
+            D += R2 - R*R;
+
+        }
+
+        return D/static_cast<double>(nbEpisodes);
     }
 
     static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
@@ -803,55 +859,24 @@ public:
         return val;
     }
 
-    static double f1(unsigned int n, const double *x, double *grad, void *data)
-    {
-        grad = nullptr;
-        double val = -1.0;
-        for (unsigned int i = 0; i < n; ++i)
-        {
-            val += x[i];
-            if (grad != nullptr)
-                grad[i] = 1;
-        }
-        return val;
-    }
-    static double f2(unsigned int n, const double *x, double *grad, void *data)
-    {
-        double val = 1.0;
-        for (unsigned int i = 0; i < n; ++i)
-        {
-            val += -x[i];
-            if (grad != nullptr)
-                grad[i] = -1;
-        }
-        return val;
-    }
-
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        double value = static_cast<GIRL*>(o)->objFunction(n, x, grad);
+        arma::vec df;
+        arma::vec parV(const_cast<double*>(x), n, true);
+        double value = static_cast<GIRL*>(o)->objFunction(parV, df);
 
-        /*std::cout << "v= " << value << " ";
-
-        std::cout << "x= ";
-        for(int i = 0; i < n; i++)
-        {
-            std::cout << x[i] << " ";
-        }
-
-        std::cout << std::endl;
-
+        //Save gradient
         if(grad)
         {
-            std::cout << "g= ";
-            for(int i = 0; i < n; i++)
+            for (int i = 0; i < df.n_elem; ++i)
             {
-                std::cout << grad[i] << " ";
+                grad[i] = df[i];
             }
+        }
 
-            std::cout << std::endl;
-        }*/
+        //Print gradient and value
+        //printOptimizationInfo(value, n, x, grad);
 
         return value;
     }
@@ -859,6 +884,28 @@ public:
     unsigned int getFunEvals()
     {
         return nbFunEvals;
+    }
+
+protected:
+    void printOptimizationInfo(double value, unsigned int n, const double* x,
+                               double* grad)
+    {
+        std::cout << "v= " << value << " ";
+        std::cout << "x= ";
+        for (int i = 0; i < n; i++)
+        {
+            std::cout << x[i] << " ";
+        }
+        std::cout << std::endl;
+        if (grad)
+        {
+            std::cout << "g= ";
+            for (int i = 0; i < n; i++)
+            {
+                std::cout << grad[i] << " ";
+            }
+            std::cout << std::endl;
+        }
     }
 
 protected:
@@ -871,6 +918,7 @@ protected:
     unsigned int nbFunEvals;
     bool useSimplexConstraints;
 };
+
 
 } //end namespace
 

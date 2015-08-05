@@ -44,13 +44,18 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
+#define PRINT
+//#define RECOVER
+//#define RUN_GIRL
+
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::R;
-    int nbEpisodes = 10000;
+
+    IRLGradType atype = IRLGradType::RB;
+    int nbEpisodes = 1000;
 
     FileManager fm("nls", "GIRL");
     fm.createDir();
@@ -112,8 +117,6 @@ int main(int argc, char *argv[])
 
     //GaussianRegressor rewardRegressor(phiReward);
     LinearApproximator rewardRegressor(phiReward);
-    /*PlaneGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, basisReward,
-            mdp.getSettings().gamma, atype);*/
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                         mdp.getSettings().gamma, atype, true);
 
@@ -122,15 +125,17 @@ int main(int argc, char *argv[])
     std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
     std::cout << "Features Expectation " << data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).t();
 
+
     //Run GIRL
+#ifdef RUN_GIRL
     irlAlg.run();
     arma::vec weights = irlAlg.getWeights();
 
-
     rewardRegressor.setParameters(weights);
     cout << "weights: " << weights.t();
+#endif
 
-
+#ifdef RECOVER
     //Try to recover the initial policy
     int episodesPerPolicy = 1;
     int policyPerUpdate = 100;
@@ -175,32 +180,39 @@ int main(int argc, char *argv[])
     double gamma = mdp.getSettings().gamma;
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
     cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest());
+#endif
 
+#ifdef PRINT
     //calculate full grid function
-    int samplesPositive = 100;
-    arma::vec valuesG(samplesPositive);
-    arma::vec valuesJ(samplesPositive);
+    int samplesParams = 101;
+    arma::vec valuesG(samplesParams);
+    arma::vec valuesJ(samplesParams);
+    arma::vec valuesD(samplesParams);
 
-#ifdef PRINT_GRADIENT
-    for(int i = 0; i < samplesPositive; i++)
+    for(int i = 0; i < samplesParams; i++)
     {
+        cerr << i << endl;
         double step = 0.01;
         arma::vec wm(2);
         wm(0) = i*step;
         wm(1) = 1.0 - wm(0);
         rewardRegressor.setParameters(wm);
         arma::mat gGrad(2, 2);
-        arma::vec grad = irlAlg.ReinforceBaseGradient(gGrad);
-        //gradients.row(i+samplesPositive) = gGrad.t()*grad;
-        double Je = irlAlg.computeJ();
-        valuesG(i) = as_scalar(0.5*grad.t()*grad);
-        valuesJ(i) = 0.5*std::pow(Je, 2);
-        cout << i << endl;
+        arma::vec dJ;
+        arma::vec g = irlAlg.ReinforceBaseGradient(gGrad);
+
+        double Je = irlAlg.computeJ(dJ);
+        double D = irlAlg.computeDisparity();
+        double G2 = as_scalar(g.t()*g);
+        valuesG(i) = std::sqrt(G2);
+        valuesJ(i) = Je;
+        valuesD(i) = D;
     }
 
-    valuesG.save("/tmp/ReLe/normG.txt", arma::raw_ascii);
-    valuesJ.save("/tmp/ReLe/normJ.txt", arma::raw_ascii);
-    //gradients.save("/tmp/ReLe/gradient.txt", arma::raw_ascii);
+    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
+    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
+    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
+
 #endif
 
     return 0;

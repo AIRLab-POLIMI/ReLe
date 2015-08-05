@@ -42,13 +42,15 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
+#define PRINT
+//#define RUN
 
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::NATG;
+    IRLGradType atype = IRLGradType::RB;
     int dim = 1;
     int nbEpisodes = 2000;
 
@@ -58,7 +60,7 @@ int main(int argc, char *argv[])
     std::cout << std::setprecision(OS_PRECISION);
 
     /*** Learn lqr correct policy ***/
-    GaussianRewardMDP mdp(dim, 0, 0.1);
+    GaussianRewardMDP mdp(dim);
 
     BasisFunctions basis = IdentityBasis::generate(dim);
 
@@ -109,35 +111,49 @@ int main(int argc, char *argv[])
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
                                         mdp.getSettings().gamma, atype, false);
 
-
+#ifdef RUN
     //Run GIRL
     irlAlg.run();
     arma::vec gnormw = irlAlg.getWeights();
 
-    /*//calculate full grid function
-    int samplesPositive = 500;
-    arma::vec values(samplesPositive*2+1);
-    arma::mat gradients(samplesPositive*2+1, rewardRegressor.getParametersSize());
-    for(int i = -samplesPositive; i < samplesPositive+1; i++)
-    {
-        double step = 0.01;
-        arma::vec wm(1);
-        wm(0) = i*step;
-        rewardRegressor.setParameters(wm);
-        arma::mat gGrad(dim, dim);
-        arma::vec grad = irlAlg.ReinforceGradient(gGrad);
-        gradients.row(i+samplesPositive) = gGrad.t()*grad;
-        values(i+samplesPositive) = as_scalar(0.5*grad.t()*grad);
-        cout << i << endl;
-    }
-
-    values.save("/tmp/ReLe/norm.txt", arma::raw_ascii);
-    gradients.save("/tmp/ReLe/gradient.txt", arma::raw_ascii);*/
-
-
     //Print results
     cout << "Optimal Weights: " << arma::zeros(dim).t() << endl;
     cout << "Weights (gnorm): " << gnormw.t();
+#endif
+
+#ifdef PRINT
+    //calculate full grid function
+    int samplesParams = 1001;
+    double startValue = -10.0;
+    double step = 0.02;
+
+    arma::vec valuesG(samplesParams);
+    arma::vec valuesJ(samplesParams);
+    arma::vec valuesD(samplesParams);
+
+    for(int i = 0; i < samplesParams; i++)
+    {
+        cout << i << "/"<< samplesParams -1 << endl;
+        arma::vec wm(1);
+        wm(0) = i*step + startValue;
+        rewardRegressor.setParameters(wm);
+        arma::mat gGrad(2, 2);
+        arma::vec dJ;
+        arma::vec g = irlAlg.ReinforceBaseGradient(gGrad);
+
+        double Je = irlAlg.computeJ(dJ);
+        double G2 = as_scalar(g.t()*g);
+        double D = irlAlg.computeDisparity();
+        valuesG(i) = std::sqrt(G2);
+        valuesJ(i) = Je;
+        valuesD(i) = D;
+    }
+
+    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
+    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
+    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
+
+#endif
 
     return 0;
 }

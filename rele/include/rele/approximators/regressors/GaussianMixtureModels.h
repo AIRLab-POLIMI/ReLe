@@ -37,7 +37,7 @@ public:
     GaussianRegressor_(Features_<InputC>& phi) : ParametricRegressor_<InputC>(1), phi(phi)
     {
         unsigned int size = phi.rows();
-        sigma = 0.1*arma::eye(size, size);
+        sigma = arma::eye(size, size);
         mu.set_size(size);
     }
 

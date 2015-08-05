@@ -81,6 +81,9 @@ target_link_libraries(ship_GIRL rele)
 add_executable(gaussian_GIRL IRL/GIRL/GIRL_Gaussian.cpp)
 target_link_libraries(gaussian_GIRL rele)
 
+add_executable(lqr_MGIRL IRL/GIRL/MGIRL_LQR.cpp)
+target_link_libraries(lqr_MGIRL rele)
+
 
 #add_executable(lqr_GIRL IRL/LQRGIRL.cpp)
 #target_link_libraries(lqr_GIRL rele)
