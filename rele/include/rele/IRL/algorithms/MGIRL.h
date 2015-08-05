@@ -43,7 +43,7 @@ public:
 
     virtual void run()
     {
-    	run(arma::vec(), 0);
+        run(arma::vec(), 0);
     }
 
     virtual void run(arma::vec starting,
@@ -73,7 +73,7 @@ public:
         {
             int nbSteps = this->data[i].size();
             if (this->maxSteps < nbSteps)
-            	this->maxSteps = nbSteps;
+                this->maxSteps = nbSteps;
         }
 
 
@@ -100,14 +100,16 @@ public:
         {
             std::cout << "found minimum = " << minf << std::endl;
 
-            arma::vec finalP(dpr);
-            for(int i = 0; i < dpr; ++i)
+            arma::vec finalPreferences(dpr -1);
+            for(int i = 0; i < finalPreferences.size(); ++i)
             {
-                finalP(i) = parameters[i];
+                finalPreferences(i) = parameters[i];
             }
+
+            arma::vec weights = computeParameters(finalPreferences);
             std::cout << std::endl;
 
-            this->rewardf.setParameters(finalP);
+            this->rewardf.setParameters(weights);
         }
     }
 
@@ -116,7 +118,7 @@ public:
     {
         arma::vec df;
         const arma::vec preferences(const_cast<double*>(x), n, true);
-        arma::vec parV = computeparameters(preferences);
+        arma::vec parV = computeParameters(preferences);
         double value = static_cast<GIRL<ActionC, StateC>*>(o)->objFunction(parV, df);
 
         //Save gradient
@@ -135,13 +137,13 @@ public:
     }
 
 private:
-    static arma::vec computeparameters(const arma::vec& preferences)
+    static arma::vec computeParameters(const arma::vec& preferences)
     {
-    	unsigned int nPref = preferences.n_elem;
-    	arma::vec expPref(nPref + 1);
-    	expPref(arma::span(0, nPref - 1)) = arma::exp(preferences);
-    	expPref(nPref) = 1;
-    	return expPref / sum(expPref);
+        unsigned int nPref = preferences.n_elem;
+        arma::vec expPref(nPref + 1);
+        expPref(arma::span(0, nPref - 1)) = arma::exp(preferences);
+        expPref(nPref) = 1;
+        return expPref / sum(expPref);
     }
 
 };

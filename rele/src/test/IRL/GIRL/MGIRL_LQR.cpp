@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     MGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype);
+                                         mdp.getSettings().gamma, atype);
 
     PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, basisReward,
             mdp.getSettings().gamma, atype);
