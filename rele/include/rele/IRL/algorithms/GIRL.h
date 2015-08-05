@@ -32,7 +32,7 @@
 
 #include "policy_search/step_rules/StepRules.h"
 
-#define DISPARITY
+//#define DISPARITY
 //#define LOG_OBJ
 //#define SQUARE_OBJ
 
@@ -688,7 +688,7 @@ public:
         return nat_grad;
     }
 
-    double objFunction(const arma::vec& parV, arma::vec df)
+    double objFunction(const arma::vec& parV, arma::vec& df)
     {
 
         ++nbFunEvals;
@@ -755,17 +755,17 @@ public:
         double f = g2;
 #endif
 
-#if defined LOG_OBJ || defined SQUARE_OBJ
         arma::vec dg2 = 2.0*dGradient.t() * gradient;
+#if defined LOG_OBJ || defined SQUARE_OBJ
         arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
 
 #ifdef LOG_OBJ
         df = dg2/g2 - dJ4/J4;
 #elif defined SQUARE_OBJ
         df = (dg2*J4 - dJ4*g2) / (J4*J4);
+#endif
 #else
         df = dg2;
-#endif
 #endif
 
         std::cout << "g2: " << g2 << std::endl;
