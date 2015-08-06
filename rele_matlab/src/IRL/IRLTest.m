@@ -1,29 +1,83 @@
 %% Plot the gradient
 
 %% Load data
+clc
 clear
 close all
 
-normG = load('/tmp/ReLe/norm.txt', '-ascii')
-dNormG = load('/tmp/ReLe/gradient.txt', '-ascii')
+path = '/tmp/ReLe/Graphs/';
 
-gridPoints = size(normG, 1);
+mkdir(path)
+
+load('/tmp/ReLe/G.txt', '-ascii');
+load('/tmp/ReLe/J.txt', '-ascii');
+load('/tmp/ReLe/D.txt', '-ascii');
+
+gridPoints = size(G, 1);
 stepSize = 0.01;
+startValue = 0;
 
-p = -floor(gridPoints/2):1:floor(gridPoints/2);
-p = p * stepSize;
+p = 0:gridPoints-1;
+p = p * stepSize + startValue;
 
 figure(1)
-hold on
-plot(p, dNormG)
-plot(p, gradient(normG)/stepSize)
-title('gradient')
+plot(p, G)
+title('normG')
 xlabel('p')
-ylabel('d|g|')
-legend('analytical', 'finite differences') 
+ylabel('|G|')
+saveas(1, [path, 'G.jpg'])
 
 figure(2)
-plot(p, normG)
-title('norm')
+plot(p, J)
+title('J')
 xlabel('p')
-ylabel('|g|')
+ylabel('J')
+saveas(2, [path, 'J.jpg']);
+
+
+figure(3)
+plot(p, D*1000)
+title('D')
+xlabel('p')
+ylabel('D')
+saveas(3, [path, 'D.jpg']);
+
+figure(4)
+plot(p, G./J)
+title('G/J')
+xlabel('p')
+ylabel('|G|/J')
+saveas(4, [path, 'G_J.jpg']);
+
+figure(5)
+semilogy(p, G./(J.^2))
+title('G/J2')
+xlabel('p')
+ylabel('|G|/J^2')
+saveas(5, [path, 'G_J2.jpg']);
+ 
+figure(6)
+semilogy(p, G./D)
+title('G/D')
+xlabel('p')
+ylabel('|G|/D')
+saveas(6, [path, 'G_D.jpg']); 
+
+
+%% debug figures
+figure(7)
+plot(p, gradient(G.^2)/stepSize)
+title('dG2')
+xlabel('p')
+ylabel('dG2')
+%saveas(1, [path, 'G.jpg'])
+
+figure(8)
+plot(p, gradient((G./D).^2)/stepSize)
+title('d(G/D)^2')
+xlabel('p')
+ylabel('d(G/D)^2')
+
+
+% figure(5)
+% plot(p, stepSize*gradient(log(normG) - log(normJ2)))

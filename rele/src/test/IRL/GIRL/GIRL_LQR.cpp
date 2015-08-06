@@ -41,6 +41,9 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
+//#define RUN
+#define PRINT
+
 class LQR_RewardBasis : public BasisFunction
 {
 public:
@@ -94,7 +97,8 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::GB;
-    vec eReward = {0.2, 0.7, 0.1};
+    //vec eReward = {0.2, 0.7, 0.1};
+    vec eReward = {0.3, 0.7};
     int nbEpisodes = 5000;
 
     FileManager fm("lqr", "GIRL");
@@ -158,7 +162,7 @@ int main(int argc, char *argv[])
     PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, basisReward,
             mdp.getSettings().gamma, atype);
 
-
+#ifdef RUN
     //Run GIRL
     irlAlg.run();
     arma::vec gnormw = irlAlg.getWeights();
@@ -171,6 +175,43 @@ int main(int argc, char *argv[])
     //Print results
     cout << "Weights (gnorm): " << gnormw.t();
     cout << "Weights (plane): " << planew.t();
+#endif
+
+#ifdef PRINT
+    //calculate full grid function
+    int samplesParams = 101;
+    arma::vec valuesG(samplesParams);
+    arma::vec valuesJ(samplesParams);
+    arma::vec valuesD(samplesParams);
+    arma::mat valuesdG2(dim, samplesParams);
+
+    for(int i = 0; i < samplesParams; i++)
+    {
+        cerr << i << endl;
+        double step = 0.01;
+        arma::vec wm(2);
+        wm(0) = i*step;
+        wm(1) = 1.0 - wm(0);
+        rewardRegressor.setParameters(wm);
+        arma::mat dGradient(dim, dim);
+        arma::vec dJ;
+        arma::vec g = irlAlg.ReinforceBaseGradient(dGradient);
+        arma::vec dg2 = 2.0*dGradient.t() * g;
+
+        double Je = irlAlg.computeJ(dJ);
+        double D = irlAlg.computeDisparity();
+        double G = norm(g);
+        valuesG(i) = G;
+        valuesJ(i) = Je;
+        valuesD(i) = D;
+        valuesdG2.col(i) = dg2;
+    }
+
+    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
+    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
+    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
+    valuesdG2.save("/tmp/ReLe/dG2.txt", arma::raw_ascii);
+#endif
 
     return 0;
 }
