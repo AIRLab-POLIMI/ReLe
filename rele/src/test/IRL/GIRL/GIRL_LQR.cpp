@@ -24,7 +24,6 @@
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
 #include "regressors/LinearApproximator.h"
-#include "basis/QuadraticBasis.h"
 #include "basis/IdentityBasis.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
@@ -37,59 +36,14 @@
 
 #include "FileManager.h"
 
+#include "RewardBasisLQR.h"
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-//#define RUN
-#define PRINT
-
-class LQR_RewardBasis : public BasisFunction
-{
-public:
-    LQR_RewardBasis(unsigned int i, unsigned int dim)
-    {
-        mat Q(dim, dim);
-        mat R(dim, dim);
-
-        double e = 0.1;
-        for (int j = 0; j < dim; j++)
-        {
-            if (i == j)
-            {
-                Q(j,j) = 1.0 - e;
-                R(j,j) = e;
-            }
-            else
-            {
-                Q(j,j) = e;
-                R(j,j) = 1.0 - e;
-            }
-        }
-
-        bf1 = new QuadraticBasis(Q, span(0, dim-1));
-        bf2 = new QuadraticBasis(R, span(dim,2*dim-1));
-    }
-
-    virtual double operator()(const vec& input)
-    {
-        return -(*bf1)(input)-(*bf2)(input);
-    }
-
-    virtual void writeOnStream(std::ostream& out)
-    {
-
-    }
-
-    virtual void readFromStream(std::istream& in)
-    {
-
-    }
-
-private:
-    BasisFunction* bf1;
-    BasisFunction* bf2;
-};
+#define RUN
+//#define PRINT
 
 int main(int argc, char *argv[])
 {
