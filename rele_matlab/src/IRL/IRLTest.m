@@ -14,8 +14,8 @@ load('/tmp/ReLe/J.txt', '-ascii');
 load('/tmp/ReLe/D.txt', '-ascii');
 
 gridPoints = size(G, 1);
-stepSize = 0.01;
-startValue = 0;
+stepSize = 0.02;
+startValue = -5;
 
 p = 0:gridPoints-1;
 p = p * stepSize + startValue;

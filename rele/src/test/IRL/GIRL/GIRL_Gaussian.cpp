@@ -33,6 +33,7 @@
 #include "LQRsolver.h"
 #include "PolicyEvalAgent.h"
 #include "algorithms/GIRL.h"
+#include "algorithms/NoGIRL.h"
 #include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 #include "policy_search/gradient/onpolicy/ENACAlgorithm.h"
 
@@ -43,16 +44,16 @@ using namespace arma;
 using namespace ReLe;
 
 #define PRINT
-//#define RUN
+#define RUN
 
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::RB;
+    IRLGradType atype = IRLGradType::GB;
     int dim = 1;
-    int nbEpisodes = 2000;
+    int nbEpisodes = 10000;
 
     FileManager fm("gaussian", "GIRL");
     fm.createDir();
@@ -108,8 +109,10 @@ int main(int argc, char *argv[])
 
 
     GaussianRegressor rewardRegressor(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype, false);
+    std::vector<double> lowerBounds(rewardRegressor.getParametersSize(), -5.0);
+    std::vector<double> upperBounds(rewardRegressor.getParametersSize(), 5.0);
+    NoGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                        mdp.getSettings().gamma, atype, lowerBounds, upperBounds);
 
 #ifdef RUN
     //Run GIRL
@@ -123,8 +126,8 @@ int main(int argc, char *argv[])
 
 #ifdef PRINT
     //calculate full grid function
-    int samplesParams = 1001;
-    double startValue = -10.0;
+    int samplesParams = 501;
+    double startValue = -5.0;
     double step = 0.02;
 
     arma::vec valuesG(samplesParams);
@@ -137,10 +140,10 @@ int main(int argc, char *argv[])
         arma::vec wm(1);
         wm(0) = i*step + startValue;
         rewardRegressor.setParameters(wm);
-        arma::mat gGrad(2, 2);
+        arma::mat dG2;
         arma::vec dJ;
         arma::vec dD;
-        arma::vec g = irlAlg.ReinforceBaseGradient(gGrad);
+        arma::vec g = irlAlg.GpomdpBaseGradient(dG2);
 
         double Je = irlAlg.computeJ(dJ);
         double G2 = as_scalar(g.t()*g);

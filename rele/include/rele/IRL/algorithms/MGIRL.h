@@ -125,7 +125,7 @@ public:
 
         //normalize to avoid exploding gradients
         if(static_cast<MGIRL*>(o)->normalizeGradient)
-        	dM/=arma::norm(df);
+            dM/=arma::norm(df);
 
         //Save gradient
         if (grad)
@@ -180,7 +180,7 @@ private:
     }
 
 private:
-	bool normalizeGradient;
+    bool normalizeGradient;
 
 };
 
