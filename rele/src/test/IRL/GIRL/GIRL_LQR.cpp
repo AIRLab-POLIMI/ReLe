@@ -51,8 +51,11 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::GB;
-    //vec eReward = {0.2, 0.7, 0.1};
+#ifndef PRINT
+    vec eReward = {0.2, 0.7, 0.1};
+#else
     vec eReward = {0.3, 0.7};
+#endif
     int nbEpisodes = 5000;
 
     FileManager fm("lqr", "GIRL");

@@ -139,11 +139,12 @@ int main(int argc, char *argv[])
         rewardRegressor.setParameters(wm);
         arma::mat gGrad(2, 2);
         arma::vec dJ;
+        arma::vec dD;
         arma::vec g = irlAlg.ReinforceBaseGradient(gGrad);
 
         double Je = irlAlg.computeJ(dJ);
         double G2 = as_scalar(g.t()*g);
-        double D = irlAlg.computeDisparity();
+        double D = irlAlg.computeDisparity(dD);
         valuesG(i) = std::sqrt(G2);
         valuesJ(i) = Je;
         valuesD(i) = D;

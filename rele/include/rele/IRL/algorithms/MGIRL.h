@@ -35,8 +35,8 @@ class MGIRL: public GIRL<ActionC, StateC>
 public:
     MGIRL(Dataset<ActionC, StateC>& dataset,
           DifferentiablePolicy<ActionC, StateC>& policy,
-          ParametricRegressor& rewardf, double gamma, IRLGradType aType) :
-        GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType)
+          ParametricRegressor& rewardf, double gamma, IRLGradType aType, bool normalizeGradient = false) :
+        GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType), normalizeGradient(normalizeGradient)
     {
 
     }
@@ -120,8 +120,12 @@ public:
         double value = static_cast<GIRL<ActionC, StateC>*>(o)->objFunction(parV,
                        df);
 
-        //compute the derivative using normalized df
-        arma::vec dM = dTheta.t()*df/arma::norm(df);
+        //compute the derivative
+        arma::vec dM = dTheta.t()*df;
+
+        //normalize to avoid exploding gradients
+        if(static_cast<MGIRL*>(o)->normalizeGradient)
+        	dM/=arma::norm(df);
 
         //Save gradient
         if (grad)
@@ -174,6 +178,9 @@ private:
 
         return theta;
     }
+
+private:
+	bool normalizeGradient;
 
 };
 

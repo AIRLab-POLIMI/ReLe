@@ -32,7 +32,7 @@
 
 #include "policy_search/step_rules/StepRules.h"
 
-//#define DISPARITY
+#define DISPARITY
 //#define LOG_OBJ
 //#define SQUARE_OBJ
 
@@ -740,7 +740,8 @@ public:
         double J = computeJ(dJ);
         double J4 = std::pow(J, 4);
 #elif defined DISPARITY
-        double D = computeDisparity();
+        arma::vec dD;
+        double D = computeDisparity(dD);
         double D2 = D*D;
 #endif
 
@@ -764,6 +765,9 @@ public:
 #elif defined SQUARE_OBJ
         df = (dg2*J4 - dJ4*g2) / (J4*J4);
 #endif
+#elif defined DISPARITY
+        arma::vec dD2 = 2.0*dD*D;
+        df = (dg2*D2 - dD2*g2) / (D2*D2);
 #else
         df = dg2;
 #endif
@@ -803,15 +807,19 @@ public:
 
     }
 
-    double computeDisparity()
+    double computeDisparity(arma::vec& dD)
     {
         double D = 0;
+        dD.zeros(rewardf.getParametersSize());
 
-        int nbEpisodes = data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
+        int nEpisodes = data.size();
+        for (int i = 0; i < nEpisodes; ++i)
         {
             double R = 0;
             double R2 = 0;
+            arma::vec dR(rewardf.getParametersSize(), arma::fill::zeros);
+            arma::vec dR2(rewardf.getParametersSize(), arma::fill::zeros);
+
             double Gamma = 0;
 
             //Compute episode J
@@ -823,8 +831,12 @@ public:
                 Gamma += df;
                 auto tr = data[i][t];
                 double r = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                arma::vec dr = rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
                 R += df*r;
+                dR += df*dr;
                 R2 += df*r*r;
+                dR2 += df*dr*r;
+
                 df *= gamma;
             }
 
@@ -832,10 +844,15 @@ public:
             R2 /= Gamma;
 
             D += R2 - R*R;
+            dD += 2.0*(dR2 - R*dR)/Gamma;
 
         }
 
-        return D/static_cast<double>(nbEpisodes);
+        double N = nEpisodes;
+
+        dD /= N;
+
+        return D/N;
     }
 
     static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
