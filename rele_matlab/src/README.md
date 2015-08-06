@@ -52,5 +52,7 @@ Finally, a last parameters can be given to the function. This input, named *para
 - hessian
 
 ##### All the admissible calls are reported here:
+~~~~
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma)
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma, params)
+~~~~
