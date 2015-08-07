@@ -43,7 +43,7 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-//#define PRINT
+#define PRINT
 //#define RUN
 #define TRAJECTORIES
 
@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::RB;
-    int dim = 2;
-    int nbEpisodes = 2000;
+    int dim = 1;
+    int nbEpisodes = 10000;
 
     FileManager fm("gaussian", "GIRL");
     fm.createDir();
