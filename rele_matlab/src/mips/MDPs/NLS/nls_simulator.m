@@ -1,22 +1,18 @@
-function [nextState, reward, absorb] = uwv_simulator(state, action)
-% Mulit-Heat system with N-rooms
+function [nextState, reward, absorb] = nls_simulator(state, action)
+% Segway simulater
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % System parameter
 %--------------------------------------
-
-mdp_vars = uwv_mdpvariables();
-vel_lo = mdp_vars.vel_lo;
-vel_hi = mdp_vars.vel_hi;
-dt = mdp_vars.dt;
+mdp_vars = nls_mdpvariables();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Check meaning of the function
 %--------------------------------------
 if nargin == 0
     % draw initial state
-    nextState = vel_lo + rand() * (vel_hi - vel_lo);
+    nextState = normrnd(mdp_vars.pos0_mean, mdp_vars.pos0_std);
     return
     
 elseif nargin == 1
@@ -29,20 +25,22 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Update state
 %--------------------------------------
-ac = mdp_vars.action_values(action);
+model_noise = normrnd(mdp_vars.noise_mean, mdp_vars.noise_std);
 
-[t,y] = ode45(@(t,s) uwv_ode(t,s,ac), [0 dt], state);
-nextState = y(end,:)';
+nexstate = ones(2,1);
+nextState(2) = state(2) + 1.0/(1 + exp(-action)) - 0.5 + model_noise;
+nextState(1) = state(1) - 0.1 * nextState(2) + model_noise;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute reward
 %--------------------------------------
-if abs(mdp_vars.setPoint - nextState) < mdp_vars.mu
-    reward = 0.0;
+norm2state = norm(state,2);
+if norm2state < mdp_vars.reward_reg
+    reward = 1.0;
 else
-    reward = -mdp_vars.C;
+    reward = 0.0;
 end
 absorb = 0;
 
-end % uwv_simulator()
+end % nls_simulator()
 

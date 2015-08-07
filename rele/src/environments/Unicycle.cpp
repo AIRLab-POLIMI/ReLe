@@ -79,8 +79,8 @@ void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_typ
 {
     //Status and actions
     const double rho   = std::max(x[StateLabel::rho], 1e-6); //avoid numerical instability
-    const double gamma = std::max(x[StateLabel::gamma], 1e-6);
-    const double delta = std::max(x[StateLabel::delta], 1e-6);
+    const double gamma = x[StateLabel::gamma];
+    // const double delta = std::max(x[StateLabel::delta], 1e-6);
 
     //dinamics
     const double drho = -v * cos(gamma);
@@ -89,7 +89,7 @@ void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_typ
 
     const double ddelta = sin(gamma) * v / rho;
 
-    dx.resize(3);
+    dx.set_size(3);
     dx[StateLabel::rho]   = drho;
     dx[StateLabel::gamma] = dgamma;
     dx[StateLabel::delta] = ddelta;

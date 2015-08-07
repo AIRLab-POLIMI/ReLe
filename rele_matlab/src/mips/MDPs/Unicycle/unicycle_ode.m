@@ -1,6 +1,6 @@
 function dy = unicycle_ode(t, y, k)
 
-rho = y(1);
+rho   = max(y(1), 1e-6);
 gamma = wrapToPi(y(2));
 delta = wrapToPi(y(3));
 

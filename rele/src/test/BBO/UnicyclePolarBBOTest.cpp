@@ -61,7 +61,7 @@ struct bboConfig
 
 void help()
 {
-    cout << "segway_BBO algorithm [] #Updates #Policies stepLength [updaterule]" << endl;
+    cout << "unicycle_BBO algorithm [] #Updates #Policies stepLength [updaterule]" << endl;
     cout << " - algorithm: pgpe, nes, enes, reps" << endl;
     cout << "   * notes that pgpe and nes requires and additional paramiter" << endl;
     cout << "   * distribution: gauss, log, chol, diag" << endl;

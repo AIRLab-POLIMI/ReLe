@@ -1,14 +1,12 @@
-function [nextState, reward, absorb] = uwv_simulator(state, action)
-% Mulit-Heat system with N-rooms
+function [nextState, reward, absorb] = segway_simulator(state, action)
+% Segway simulater
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % System parameter
 %--------------------------------------
 
-mdp_vars = uwv_mdpvariables();
-vel_lo = mdp_vars.vel_lo;
-vel_hi = mdp_vars.vel_hi;
+mdp_vars = segway_mdpvariables();
 dt = mdp_vars.dt;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,7 +14,7 @@ dt = mdp_vars.dt;
 %--------------------------------------
 if nargin == 0
     % draw initial state
-    nextState = vel_lo + rand() * (vel_hi - vel_lo);
+    nextState = [0.08; 0; 0];
     return
     
 elseif nargin == 1
@@ -29,20 +27,22 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Update state
 %--------------------------------------
-ac = mdp_vars.action_values(action);
+ac = action;
 
-[t,y] = ode45(@(t,s) uwv_ode(t,s,ac), [0 dt], state);
+[t,y] = ode45(@(t,s) segway_ode(t,s,ac), [0 dt], state);
 nextState = y(end,:)';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Compute reward
 %--------------------------------------
-if abs(mdp_vars.setPoint - nextState) < mdp_vars.mu
-    reward = 0.0;
+if abs(nextState[1]) > pi/18
+    reward = -1000;
+    absorb = 1;
 else
-    reward = -mdp_vars.C;
+    lqr_cost = nextState'*nextState;% + action'*action;
+    reward = -lqr_cost;
+    absorb = 0;
 end
-absorb = 0;
 
 end % uwv_simulator()
 
