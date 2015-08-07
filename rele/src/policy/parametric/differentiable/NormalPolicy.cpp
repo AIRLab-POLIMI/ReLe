@@ -102,13 +102,13 @@ NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 
 double MVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
     return mvnpdfFast(action, mMean, mCinv, mDeterminant);
 }
 
 arma::vec MVNPolicy::operator() (const arma::vec& state)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
 //    std::cout << mMean.t();
 //    std::cout << mCholeskyDec << std::endl;
     return mvnrandFast(mMean, mCholeskyDec);
@@ -121,7 +121,7 @@ arma::vec MVNPolicy::diff(const arma::vec &state, const arma::vec &action)
 
 arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
 
     arma::vec smdiff(mCovariance.n_rows);
     //        std::cout << "Action: ";
@@ -145,7 +145,7 @@ arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
 
 arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
 
     Features& basis = approximator.getBasis();
     arma::mat features = basis(state);
@@ -174,7 +174,7 @@ void MVNDiagonalPolicy::setParameters(arma::vec &w)
 
 arma::vec MVNDiagonalPolicy::difflog(const arma::vec &state, const arma::vec &action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
 
     arma::vec smdiff(mCovariance.n_rows);
     arma::vec gradstddev(mCovariance.n_rows);
@@ -205,7 +205,7 @@ arma::vec MVNDiagonalPolicy::difflog(const arma::vec &state, const arma::vec &ac
 
 arma::mat MVNDiagonalPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
 
     int paramSize = this->getParametersSize();
     arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
@@ -275,7 +275,7 @@ void MVNDiagonalPolicy::UpdateCovarianceMatrix()
 
 arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
     arma::vec smdiff(mCovariance.n_rows);
     for (unsigned i = 0; i < mCovariance.n_rows; ++i)
     {
@@ -313,7 +313,7 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
 
 arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
-    UpdateInternalState(state);
+    updateInternalState(state);
 
     //TODO controllare implementazione
     int paramSize = this->getParametersSize();

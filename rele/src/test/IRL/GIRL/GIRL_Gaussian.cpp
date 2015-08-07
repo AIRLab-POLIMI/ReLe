@@ -43,24 +43,25 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define PRINT
-#define RUN
+//#define PRINT
+//#define RUN
+#define TRAJECTORIES
 
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::GB;
-    int dim = 1;
-    int nbEpisodes = 10000;
+    IRLGradType atype = IRLGradType::RB;
+    int dim = 2;
+    int nbEpisodes = 2000;
 
     FileManager fm("gaussian", "GIRL");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    /*** Learn lqr correct policy ***/
+    /*** Learn correct policy ***/
     GaussianRewardMDP mdp(dim);
 
     BasisFunctions basis = IdentityBasis::generate(dim);
@@ -68,7 +69,17 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    MVNPolicy expertPolicy(phi);
+    arma::mat Sigma(dim, dim, fill::eye);
+    Sigma *= 0.1;
+    //MVNPolicy expertPolicy(phi, Sigma);
+
+    BasisFunctions basisStdDev = IdentityBasis::generate(dim);
+    SparseFeatures phiStdDev;
+    phiStdDev.setDiagonal(basisStdDev);
+    arma::mat stdDevW(dim, dim, fill::eye);
+    stdDevW *= 0.1;
+
+    MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
 
     /*** solve the problem ***/
     int episodesPerPolicy = 1;
@@ -109,10 +120,10 @@ int main(int argc, char *argv[])
 
 
     GaussianRegressor rewardRegressor(phiReward);
-    std::vector<double> lowerBounds(rewardRegressor.getParametersSize(), -5.0);
-    std::vector<double> upperBounds(rewardRegressor.getParametersSize(), 5.0);
+    std::vector<double> lowerBounds(rewardRegressor.getParametersSize(), -10.0);
+    std::vector<double> upperBounds(rewardRegressor.getParametersSize(), 10.0);
     NoGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype, lowerBounds, upperBounds);
+                                          mdp.getSettings().gamma, atype, lowerBounds, upperBounds);
 
 #ifdef RUN
     //Run GIRL
@@ -143,7 +154,16 @@ int main(int argc, char *argv[])
         arma::mat dG2;
         arma::vec dJ;
         arma::vec dD;
-        arma::vec g = irlAlg.GpomdpBaseGradient(dG2);
+        arma::vec g;
+        switch(atype)
+        {
+        case GB:
+            g = irlAlg.GpomdpBaseGradient(dG2);
+        case RB:
+            g = irlAlg.ReinforceBaseGradient(dG2);
+        case ENAC:
+            g = irlAlg.ENACGradient(dG2);
+        }
 
         double Je = irlAlg.computeJ(dJ);
         double G2 = as_scalar(g.t()*g);
@@ -157,6 +177,11 @@ int main(int argc, char *argv[])
     valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
     valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
 
+#endif
+
+#ifdef TRAJECTORIES
+    std::ofstream ofs("/tmp/ReLe/Trajectories.txt");
+    data.writeToStream(ofs);
 #endif
 
     return 0;

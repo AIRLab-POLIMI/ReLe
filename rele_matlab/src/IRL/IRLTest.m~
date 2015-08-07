@@ -80,17 +80,5 @@ xlabel('p')
 ylabel('d(G/D)^2')
 
 %% Trajectories
-csv = csvread('/tmp/ReLe/Trajectories.txt');
-traj = readDataset(csv);
-
-figure(9)
-hold on;
-for episode = 1:size(traj,1)
-    
-    if(size(traj(episode).x, 2) == 1)
-        plot(traj(episode).x);
-    else if(size(traj(episode).x, 2) == 2)
-            plot3(1:size(traj(episode).x,1), traj(episode).x(:, 1), traj(episode).x(:,2));
-        end
-    end
-end
+csv = csvread('/tmp/ReLe/Trajectories.txt"');
+data = readDataset(

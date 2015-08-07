@@ -36,7 +36,7 @@ public:
     NoGIRL(Dataset<ActionC, StateC>& dataset,
            DifferentiablePolicy<ActionC, StateC>& policy,
            ParametricRegressor& rewardf, double gamma, IRLGradType aType,
-		   std::vector<double>& lowerBounds, std::vector<double>& upperBounds) :
+           std::vector<double>& lowerBounds, std::vector<double>& upperBounds) :
         GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType),
         upperBounds(upperBounds), lowerBounds(lowerBounds)
     {
@@ -77,7 +77,7 @@ public:
         {
             int nbSteps = this->data[i].size();
             if (this->maxSteps < nbSteps)
-            	this->maxSteps = nbSteps;
+                this->maxSteps = nbSteps;
         }
 
 
