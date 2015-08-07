@@ -35,13 +35,15 @@ Finally, a last parameters can be given to the function. This input, named *para
 - hessian
 
 ### All the admissible calls are reported here:
+~~~~
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma)
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma, params)
+~~~~
 
 
 ### How to define a new settings
 You have to perform these simple steps:
-1. Define a function that represents the new settings *NEWSET_domain_settings* in CSDomainSettings.h with inputs 
+1. Define a function that represents the new settings *NEWSET_domain_settings* in *CSDomainSettings.h* with inputs 
 ~~~~
 void
 NEWSET_domain_settings(
@@ -51,7 +53,7 @@ NEWSET_domain_settings(
 ~~~~
 2. Update the function *CollectSamplesGateway* in CSDomainSettings.h to handle the new settings. We suggest to use the prefix *NEWSET* as the name of the settings.
 
-MDPs can be grouped based on the representation of state and action spaces (continuous or finite). This difference will influence the definition of the function *NEWSET_domain_settings*. We provide a general structure of such function but you can refer to the implementations in CSDomainSettings.cpp for more details.
+MDPs can be grouped based on the representation of state and action spaces (continuous or finite). This difference will influence the definition of the function *NEWSET_domain_settings*. We provide a general structure of such function but you can refer to the implementations in *CSDomainSettings.cpp* for more details.
 
 ~~~~
 void

@@ -29,6 +29,7 @@ You need to move into *mexinterface/* where you can use the script *MEXMakefile*
 Then add such folder to the MATLAB search path.
 
 ### Provided functions
+Here we report a brief descriptions of the functions. A more detailed explaination is provided in *mexinterface/README.md*.
 #### collectSamples
 ~~~~
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma, [params])
@@ -52,5 +53,7 @@ Finally, a last parameters can be given to the function. This input, named *para
 - hessian
 
 ##### All the admissible calls are reported here:
+~~~~
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma)
 [new_samples, ret, G, H] = collectSamples(domain_settings, nbEpisodes, maxSteps, gamma, params)
+~~~~
