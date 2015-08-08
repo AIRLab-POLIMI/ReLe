@@ -159,10 +159,13 @@ int main(int argc, char *argv[])
         {
         case GB:
             g = irlAlg.GpomdpBaseGradient(dG2);
+            break;
         case RB:
             g = irlAlg.ReinforceBaseGradient(dG2);
+            break;
         case ENAC:
             g = irlAlg.ENACGradient(dG2);
+            break;
         }
 
         double Je = irlAlg.computeJ(dJ);
