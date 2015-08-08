@@ -8,9 +8,9 @@
 
 clear all
 
-verboseOut = false; % to print output messages
+verboseOut = true; % to print output messages
 
-domain = 'dam';
+domain = 'Como';
 makeDet = 0; % if we want to consider stochastic or deterministic policies
 [N_obj, init_pol, episodes, steps, gamma] = feval([domain '_settings']);
 

@@ -20,16 +20,22 @@ for i = 1 : n
     LQR.R{i} = eye(n);
 end
 
-for i = 1 : n
-    for j = 1 : n
-        if i == j
-            LQR.Q{i}(j,j) = 1-LQR.e;
-            LQR.R{i}(j,j) = LQR.e;
-        else
-            LQR.Q{i}(j,j) = LQR.e;
-            LQR.R{i}(j,j) = 1-LQR.e;
+if n > 1
+    for i = 1 : n
+        for j = 1 : n
+            if i == j
+                LQR.Q{i}(j,j) = 1-LQR.e;
+                LQR.R{i}(j,j) = LQR.e;
+            else
+                LQR.Q{i}(j,j) = LQR.e;
+                LQR.R{i}(j,j) = 1-LQR.e;
+            end
         end
     end
+else
+    LQR.Q = LQR.Q * 0.5;
+    LQR.R = LQR.R * 0.5;
 end
 
 end
+
