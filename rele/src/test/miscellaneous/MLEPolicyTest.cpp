@@ -32,7 +32,6 @@
 #include "LQR.h"
 #include "LQRsolver.h"
 #include "PolicyEvalAgent.h"
-#include "algorithms/GIRL.h"
 #include "policy_search/PGPE/PGPE.h"
 #include "ParametricRewardMDP.h"
 #include "RandomGenerator.h"

@@ -37,7 +37,7 @@ inline double mvnpdf(const arma::vec& x,
                      const arma::vec& mean,
                      const arma::mat& cov)
 {
-    arma::vec diff = mean - x;
+    arma::vec diff = x - mean;
 
     arma::vec prod = arma::solve(cov, diff);
 
@@ -51,7 +51,7 @@ inline double mvnpdfFast(const arma::vec& x,
                          const arma::mat& inverse_cov,
                          const double& det)
 {
-    arma::vec diff = mean - x;
+    arma::vec diff = x - mean;
 
     double exponent = -0.5 * arma::dot(diff, inverse_cov*diff);
 
@@ -80,20 +80,20 @@ inline double mvnpdf(const arma::vec& x,
     //compute distance from mean
     arma::vec diff = x - mean;
 
-    arma::vec cinv = arma::inv(cov);
+    arma::mat cinv = arma::inv(cov);
 
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, cinv*diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / 2.0)
+    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
                     * exp(exponent) / sqrt(arma::det(cov));
 
     // Calculate the gradient w.r.t. the input value x; this is a (dim x 1) vector.
-    arma::vec invDiff = cinv * diff;
-    g_mean = -f * invDiff;
+    arma::vec invDiff = cinv*diff;
+    g_mean = f * invDiff;
 
     // Calculate the g_cov values; this is a (1 x (dim * (dim + 1) / 2)) vector.
-    g_cov = f * (cinv * diff * diff.t() * cinv - cinv);
+    g_cov = arma::vectorise(f * (cinv * diff * diff.t() * cinv - cinv));
 
     return f;
 }
@@ -124,12 +124,12 @@ inline double mvnpdfFast(const arma::vec& x,
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, inverse_cov * diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / 2.0)
+    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
                     * exp(exponent) / sqrt(det);
 
     // Calculate the gradient w.r.t. the input value x; this is a (dim x 1) vector.
     arma::vec invDiff = inverse_cov * diff;
-    g_mean = -f * invDiff;
+    g_mean = f * invDiff;
 
     // Calculate the g_cov values; this is a (1 x (dim * (dim + 1) / 2)) vector.
     g_cov = f * (inverse_cov * diff * diff.t() * inverse_cov - inverse_cov);

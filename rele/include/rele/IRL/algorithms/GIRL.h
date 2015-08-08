@@ -30,41 +30,14 @@
 #include <nlopt.hpp>
 #include <cassert>
 
+#include "policy_search/step_rules/StepRules.h"
+
+#define DISPARITY
+//#define LOG_OBJ
+//#define SQUARE_OBJ
+
 namespace ReLe
 {
-
-//TODO togliere, questo e' solo temporaneo
-template<class ActionC, class StateC>
-class IRLParametricReward
-{
-public:
-    virtual double operator()(StateC& s, ActionC& a, StateC& ns) = 0;
-    virtual arma::mat diff(StateC& s, ActionC& a, StateC& ns) = 0;
-
-    virtual inline void setParameters(unsigned int n, const double* x)
-    {
-        assert(weights.n_elem == n);
-        for (unsigned int i = 0; i < n; ++i)
-            weights[i] = x[i];
-    }
-
-    virtual inline void setParameters(arma::vec& params)
-    {
-        weights = params;
-    }
-
-    virtual inline unsigned int getParametersSize()
-    {
-        return weights.n_elem;
-    }
-
-    virtual inline arma::vec getParameters()
-    {
-        return weights;
-    }
-protected:
-    arma::vec weights;
-};
 
 enum IRLGradType {R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB};
 
@@ -75,11 +48,12 @@ public:
 
     GIRL(Dataset<ActionC,StateC>& dataset,
          DifferentiablePolicy<ActionC,StateC>& policy,
-         IRLParametricReward<ActionC, StateC>& rewardf,
-         double gamma, IRLGradType aType)
+         ParametricRegressor& rewardf,
+         double gamma, IRLGradType aType, bool useSimplexConstraints = true)
         : policy(policy), data(dataset), rewardf(rewardf),
-          gamma(gamma), maxSteps(0), atype(aType)
+          gamma(gamma), maxSteps(0), atype(aType), useSimplexConstraints(useSimplexConstraints)
     {
+        nbFunEvals = 0;
     }
 
     virtual ~GIRL() { }
@@ -97,7 +71,8 @@ public:
 
         if (starting.n_elem == 0)
         {
-            starting.zeros(dpr);
+            starting.ones(dpr);
+            starting /= arma::sum(starting);
         }
         else
         {
@@ -122,29 +97,27 @@ public:
         //setup optimization algorithm
         nlopt::opt optimizator;
 
+        if(useSimplexConstraints)
+        {
+            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
 
-        //                optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
-        //                optimizator = nlopt::opt(nlopt::algorithm::AUGLAG, dpr);
-        //                optimizator.set_local_optimizer(localoptimizator);
-        //                optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, dpr);
-        //                optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT, dpr);
-        //                optimizator = nlopt::opt(nlopt::algorithm::GN_ORIG_DIRECT_L, dpr);
+            std::vector<double> lowerBounds(dpr, 0.0);
+            std::vector<double> upperBounds(dpr, 1.0);
+            optimizator.set_lower_bounds(lowerBounds);
+            optimizator.set_upper_bounds(upperBounds);
+            optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-3);
 
-        optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
+        }
+        else
+        {
+            optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
+        }
+
         optimizator.set_min_objective(GIRL::wrapper, this);
-        optimizator.set_xtol_rel(1e-6);
-        optimizator.set_ftol_rel(1e-6);
-        optimizator.set_ftol_abs(1e-6);
+        optimizator.set_xtol_rel(1e-8);
+        optimizator.set_ftol_rel(1e-8);
+        optimizator.set_ftol_abs(1e-8);
         optimizator.set_maxeval(maxFunEvals);
-
-        std::vector<double> lowerBounds(dpr, 0.0);
-        std::vector<double> upperBounds(dpr, 1.0);
-        optimizator.set_lower_bounds(lowerBounds);
-        optimizator.set_upper_bounds(upperBounds);
-        optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-6);
-        //        optimizator.add_inequality_constraint(GIRL::f1, NULL, 1e-16);
-        //        optimizator.add_inequality_constraint(GIRL::f2, NULL, 1e-16);
-
 
         //optimize dual function
         std::vector<double> parameters(dpr);
@@ -153,11 +126,11 @@ public:
         double minf;
         if (optimizator.optimize(parameters, minf) < 0)
         {
-            printf("nlopt failed!\n");
+            std::cout << "nlopt failed!" << std::endl;
         }
         else
         {
-            //            printf("found minimum = %0.10g\n", minf);
+            std::cout << "found minimum = " << minf << std::endl;
 
             arma::vec finalP(dpr);
             for(int i = 0; i < dpr; ++i)
@@ -195,7 +168,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(1,dpr);
+        arma::mat dRew(1, dpr);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -221,8 +194,8 @@ public:
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 //                std::cout << tr.r[0] << " " << tr.r[1] << std::endl;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn);
-                dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
+                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 // ********************** //
 
                 df *= gamma;
@@ -264,7 +237,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(1,dpr);
+        arma::mat dRew(1, dpr);
 
         arma::vec baseline_J_num(dp, arma::fill::zeros);
         arma::vec baseline_den(dp, arma::fill::zeros);
@@ -296,8 +269,8 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn);
-                dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
+                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 // ********************** //
 
                 df *= gamma;
@@ -379,7 +352,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(1,dpr);
+        arma::mat dRew(1, dpr);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -404,16 +377,16 @@ public:
                 // *** GPOMDP CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df * rewardf(tr.x, tr.u, tr.xn);
-                dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
+                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
 
                 // compute the gradients
-                Rew += df * rewardf(tr.x, tr.u, tr.xn);
-                dRew += df * rewardf.diff(tr.x, tr.u, tr.xn);
+                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
 
                 for (int p = 0; p < dp; ++p)
                 {
-                    gradient_J[p] += df * rewardf(tr.x, tr.u, tr.xn) * sumGradLog(p);
+                    gradient_J[p] += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn))) * sumGradLog(p);
                     for (int rp = 0; rp < dpr; ++rp)
                     {
                         gGradient(p,rp) += sumGradLog(p) * dRew(0,rp);
@@ -449,7 +422,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
-        arma::mat dRew(1,dpr);
+        arma::mat dRew(1, dpr);
 
 
         arma::mat baseline_J_num(dp, maxSteps, arma::fill::zeros);
@@ -485,8 +458,8 @@ public:
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
-                double creward = rewardf(tr.x, tr.u, tr.xn);
-                arma::mat cdreward = rewardf.diff(tr.x, tr.u, tr.xn);
+                double creward = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                arma::mat cdreward = rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 Rew += df * creward;
                 dRew += df * cdreward;
                 reward_J_ObjEpStep(ep,t) = df * creward;
@@ -601,7 +574,7 @@ public:
 
                 // *** eNAC CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
-                double creward = rewardf(tr.x, tr.u, tr.xn);
+                double creward = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 Rew += df * creward;
 
                 //Construct basis functions
@@ -715,7 +688,7 @@ public:
         return nat_grad;
     }
 
-    double objFunction(unsigned int n, const double* x, double* grad)
+    double objFunction(const arma::vec& parV, arma::vec& df)
     {
 
         ++nbFunEvals;
@@ -723,7 +696,7 @@ public:
 
         arma::vec gradient;
         arma::mat dGradient;
-        rewardf.setParameters(n, x);
+        rewardf.setParameters(parV);
         if (atype == IRLGradType::R)
         {
             //            std::cout << "GIRL REINFORCE" << std::endl;
@@ -759,65 +732,170 @@ public:
             abort();
         }
 
-        //        std::cerr << gradient.t();
-        //        std::cerr << dGradient;
 
-        if (grad != nullptr)
-        {
-            arma::vec g = dGradient.t() * gradient;
-            //            std::cerr << g.t();
-            for (int i = 0; i < g.n_elem; ++i)
-            {
-                grad[i] = g[i];
-            }
-        }
+        double g2 = arma::as_scalar(gradient.t()*gradient);
 
-        double norm22 = arma::norm(gradient,2);
-        double f = 0.5 * norm22 * norm22;
-        //        std::cerr << f << std::endl;
+#if defined LOG_OBJ || defined SQUARE_OBJ
+        arma::vec dJ;
+        double J = computeJ(dJ);
+        double J4 = std::pow(J, 4);
+#elif defined DISPARITY
+        arma::vec dD;
+        double D = computeDisparity(dD);
+        double D2 = D*D;
+#endif
+
+
+#ifdef LOG_OBJ
+        double f = std::log(g2) - std::log(J4);
+#elif defined SQUARE_OBJ
+        double f = g2/J4;
+#elif defined DISPARITY
+        double f = g2/D2;
+#else
+        double f = g2;
+#endif
+
+        arma::vec dg2 = 2.0*dGradient.t() * gradient;
+#if defined LOG_OBJ || defined SQUARE_OBJ
+        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
+
+#ifdef LOG_OBJ
+        df = dg2/g2 - dJ4/J4;
+#elif defined SQUARE_OBJ
+        df = (dg2*J4 - dJ4*g2) / (J4*J4);
+#endif
+#elif defined DISPARITY
+        arma::vec dD2 = 2.0*dD*D;
+        df = (dg2*D2 - dD2*g2) / (D2*D2);
+#else
+        df = dg2;
+#endif
+
+        std::cout << "g2: " << g2 << std::endl;
+        std::cout << "f: " << f << std::endl;
+        std::cout << "df: " << df.t() << std::endl;
+        std::cout << "x" << parV.t();
+        std::cout << "-----------------------------------------" << std::endl;
+
         return f;
 
     }
 
-    static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
+    double computeJ(arma::vec& dR)
     {
-        grad = nullptr;
-        double val = -1.0;
-        for (unsigned int i = 0; i < n; ++i)
+        double J = 0;
+        dR.zeros(rewardf.getParametersSize());
+        int nbEpisodes = data.size();
+        for (int i = 0; i < nbEpisodes; ++i)
         {
-            val += x[i];
+            //core setup
+            int nbSteps = data[i].size();
+            double df = 1.0;
+
+            //iterate the episode
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                auto tr = data[i][t];
+                J += df*arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dR += df*rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
+                df *= gamma;
+            }
         }
-        return val;
+
+        return J/static_cast<double>(nbEpisodes);
+
     }
 
-    static double f1(unsigned int n, const double *x, double *grad, void *data)
+    double computeDisparity(arma::vec& dD)
     {
-        grad = nullptr;
-        double val = -1.0;
-        for (unsigned int i = 0; i < n; ++i)
+        double D = 0;
+        dD.zeros(rewardf.getParametersSize());
+
+        int nEpisodes = data.size();
+        for (int i = 0; i < nEpisodes; ++i)
         {
-            val += x[i];
-            if (grad != nullptr)
-                grad[i] = 1;
+            double R = 0;
+            double R2 = 0;
+            arma::vec dR(rewardf.getParametersSize(), arma::fill::zeros);
+            arma::vec dR2(rewardf.getParametersSize(), arma::fill::zeros);
+
+            double Gamma = 0;
+
+            //Compute episode J
+            int nbSteps = data[i].size();
+            double df = 1.0;
+
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                Gamma += df;
+                auto tr = data[i][t];
+                double r = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                arma::vec dr = rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
+                R += df*r;
+                dR += df*dr;
+                R2 += df*r*r;
+                dR2 += df*dr*r;
+
+                df *= gamma;
+            }
+
+            R /= Gamma;
+            R2 /= Gamma;
+
+            D += R2 - R*R;
+            dD += 2.0*(dR2 - R*dR)/Gamma;
+
         }
-        return val;
+
+        double N = nEpisodes;
+
+        dD /= N;
+
+        return D/N;
     }
-    static double f2(unsigned int n, const double *x, double *grad, void *data)
+
+    static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
     {
-        double val = 1.0;
+        if(grad != nullptr)
+        {
+            for (unsigned int i = 0; i < n; ++i)
+            {
+                grad[0] = 1;
+            }
+        }
+
+        double val = -1.0;
+        //std::cout << "x: ";
         for (unsigned int i = 0; i < n; ++i)
         {
-            val += -x[i];
-            if (grad != nullptr)
-                grad[i] = -1;
+            //std::cout << x[i] << " ";
+            val += x[i];
         }
+        //std::cout << std::endl << "val: " << val << std::endl;
         return val;
     }
 
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        return reinterpret_cast<GIRL*>(o)->objFunction(n, x, grad);
+        arma::vec df;
+        arma::vec parV(const_cast<double*>(x), n, true);
+        double value = static_cast<GIRL*>(o)->objFunction(parV, df);
+
+        //Save gradient
+        if(grad)
+        {
+            for (int i = 0; i < df.n_elem; ++i)
+            {
+                grad[i] = df[i];
+            }
+        }
+
+        //Print gradient and value
+        //printOptimizationInfo(value, n, x, grad);
+
+        return value;
     }
 
     unsigned int getFunEvals()
@@ -826,14 +904,38 @@ public:
     }
 
 protected:
+    void printOptimizationInfo(double value, unsigned int n, const double* x,
+                               double* grad)
+    {
+        std::cout << "v= " << value << " ";
+        std::cout << "x= ";
+        for (int i = 0; i < n; i++)
+        {
+            std::cout << x[i] << " ";
+        }
+        std::cout << std::endl;
+        if (grad)
+        {
+            std::cout << "g= ";
+            for (int i = 0; i < n; i++)
+            {
+                std::cout << grad[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+
+protected:
     Dataset<ActionC,StateC>& data;
     DifferentiablePolicy<ActionC,StateC>& policy;
-    IRLParametricReward<ActionC, StateC>& rewardf;
+    ParametricRegressor& rewardf;
     double gamma;
     unsigned int maxSteps;
     IRLGradType atype;
     unsigned int nbFunEvals;
+    bool useSimplexConstraints;
 };
+
 
 } //end namespace
 

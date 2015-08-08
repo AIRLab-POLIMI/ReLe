@@ -325,7 +325,7 @@ protected:
      * @param cholesky_dec A flag used to require the Cholesky decomposition of the
      * covariance matrix.
      */
-    void UpdateInternalState(const arma::vec& state, bool cholesky_dec = false)
+    inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
     {
         //TODO: si potrebbe togliere il flag cholesky_dec e aggiungere un controllo
         // sul puntatore dello stato. Se è uguale al ultimo non ricomputo tutto
@@ -341,6 +341,55 @@ protected:
     LinearApproximator approximator;
     arma::vec mMean;
 };
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// MVN POLICY with state dependant covariance
+///////////////////////////////////////////////////////////////////////////////////////
+
+class MVNStateDependantStddevPolicy : public MVNPolicy
+{
+public:
+    MVNStateDependantStddevPolicy(Features& phi, Features& phiStdDev, arma::mat& stdDevW)
+		: MVNPolicy(phi), phiStdDev(phiStdDev), stdDevW(stdDevW)
+    {
+    	assert(phiStdDev.cols() == phi.cols());
+    	assert(stdDevW.n_rows == phiStdDev.cols());
+    	assert(stdDevW.n_cols == phiStdDev.rows());
+    }
+
+    virtual inline std::string getPolicyName()
+    {
+        return "MVNStateDependantStddevPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters()
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy()
+    {
+        return "";
+    }
+
+protected:
+    inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
+        {
+            mCovariance=stdDevW*phiStdDev(state);
+            mCovariance = mCovariance*mCovariance.t();
+            mCinv = arma::inv(mCovariance);
+            mCholeskyDec = arma::chol(mCovariance);
+            mDeterminant = arma::det(mCovariance);
+
+            // compute mean vector
+            mMean = approximator(state);
+        }
+
+protected:
+    Features& phiStdDev;
+    arma::mat& stdDevW;
+
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// MVN POLICY with Diagonal covariance (parameters of the diagonal are stddev)

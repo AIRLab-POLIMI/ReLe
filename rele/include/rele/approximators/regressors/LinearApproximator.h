@@ -70,7 +70,7 @@ public:
         return parameters;
     }
 
-    inline void setParameters(arma::vec& params)
+    inline void setParameters(const arma::vec& params)
     {
         assert(params.n_elem == parameters.n_elem);
         parameters = params;

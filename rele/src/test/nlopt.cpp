@@ -68,7 +68,32 @@ double g(unsigned int n, const double* x, double* grad, void*)
 
 }
 
-int main()
+double h(unsigned int n, const double* x, double* grad, void*)
+{
+    if(grad != nullptr)
+    {
+        grad[0] = 1;
+        grad[1] = 1;
+    }
+
+
+    return x[0]+x[1];
+}
+
+double constraint(unsigned int n, const double *x, double *grad, void *)
+{
+    if(grad != nullptr)
+    {
+        grad[0] = 2*x[0];
+        grad[1] = 2*x[1];
+    }
+
+    double val = x[0]*x[0]+x[1]*x[1]-1;
+    std::cout << "val: " << val << std::endl;
+    return val;
+}
+
+/*int main()
 {
     nlopt::opt optimizator;
     int size = 3;
@@ -85,6 +110,42 @@ int main()
     optimizator.optimize(x, J);
 
     std::cout << "x = " << x[0] << ", " << x[1] << ", " << x[2] << std::endl;
+    std::cout << "J = " << J << std::endl;
+
+}*/
+
+int main()
+{
+    nlopt::opt optimizator;
+    nlopt::opt localOptimizator;
+    int size = 2;
+    optimizator = nlopt::opt(nlopt::algorithm::LN_AUGLAG_EQ, size);
+    optimizator.set_min_objective(h, nullptr);
+    optimizator.set_xtol_rel(1e-8);
+    optimizator.set_ftol_rel(1e-12);
+    optimizator.add_equality_constraint(constraint, nullptr, 0.001);
+    optimizator.set_maxeval(600);
+
+    localOptimizator = nlopt::opt(nlopt::algorithm::LD_MMA, size);
+    localOptimizator.set_xtol_rel(1e-8);
+    localOptimizator.set_ftol_rel(1e-12);
+
+    //optimizator.set_local_optimizer(localOptimizator);
+
+    std::vector<double> x(size, 0);
+    x[1] = 1;
+    double J;
+
+    try
+    {
+        optimizator.optimize(x, J);
+    }
+    catch(...)
+    {
+
+    }
+
+    std::cout << "x = " << x[0] << ", " << x[1] << std::endl;
     std::cout << "J = " << J << std::endl;
 
 }

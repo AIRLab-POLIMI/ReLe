@@ -68,7 +68,7 @@ public:
     {
     }
 
-    virtual void setParameters(arma::vec& params) = 0;
+    virtual void setParameters(const arma::vec& params) = 0;
     virtual arma::vec getParameters() const = 0;
     virtual unsigned int getParametersSize() const = 0;
     virtual arma::vec  diff(const InputC& input) = 0;

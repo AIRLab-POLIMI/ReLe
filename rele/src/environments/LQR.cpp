@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/LQR.h"
+#include "LQR.h"
 
 #include "RandomGenerator.h"
 #include <cassert>
