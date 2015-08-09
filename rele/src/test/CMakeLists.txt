@@ -66,7 +66,11 @@ add_executable(mountain_car TD/MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
 
 #IRL tests
-add_executable(lqr_MWAL IRL/LQRMWAL.cpp)
+
+add_executable(simple_chain_MWAL IRL/MWAL/SimpleChainMWAL.cpp)
+target_link_libraries(simple_chain_MWAL rele)
+
+add_executable(lqr_MWAL IRL/MWAL/LQRMWAL.cpp)
 target_link_libraries(lqr_MWAL rele)
 
 add_executable(lqr_GIRL IRL/GIRL/GIRL_LQR.cpp)
@@ -108,9 +112,6 @@ target_link_libraries(lqr_MGIRL rele)
 
 #add_executable(dam_GIRL IRL/DamGIRL.cpp)
 #target_link_libraries(dam_GIRL rele)
-
-#add_executable(simple_chain_MWAL IRL/SimpleChainMWAL.cpp)
-#target_link_libraries(simple_chain_MWAL rele)
 
 #add_executable(mc_GIRL IRL/McGIRLTest.cpp)
 #target_link_libraries(mc_GIRL rele)

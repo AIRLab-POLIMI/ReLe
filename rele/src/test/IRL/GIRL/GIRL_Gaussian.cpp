@@ -35,7 +35,8 @@
 #include "algorithms/GIRL.h"
 #include "algorithms/NoGIRL.h"
 #include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
-#include "policy_search/gradient/onpolicy/ENACAlgorithm.h"
+
+#include "ParametricRewardMDP.h"
 
 #include "FileManager.h"
 
@@ -43,9 +44,10 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define PRINT
-//#define RUN
-#define TRAJECTORIES
+//#define PRINT
+#define RUN
+//#define TRAJECTORIES
+#define RECOVER
 
 int main(int argc, char *argv[])
 {
@@ -71,7 +73,6 @@ int main(int argc, char *argv[])
 
     arma::mat Sigma(dim, dim, fill::eye);
     Sigma *= 0.1;
-    //MVNPolicy expertPolicy(phi, Sigma);
 
     BasisFunctions basisStdDev = IdentityBasis::generate(dim);
     SparseFeatures phiStdDev;
@@ -90,7 +91,6 @@ int main(int argc, char *argv[])
 
     GPOMDPAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate,
             mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
-    /*eNACAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate, stepRule);*/
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     EmptyStrategy<DenseAction, DenseState> emptyS;
@@ -187,5 +187,22 @@ int main(int argc, char *argv[])
     data.writeToStream(ofs);
 #endif
 
+#ifdef RECOVER
+    ParametricRewardMDP<DenseAction, DenseState> prMDP(mdp, rewardRegressor);
+
+    MVNStateDependantStddevPolicy imitatorPolicy(phi, phiStdDev, stdDevW);
+    GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
+                mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+
+    Core<DenseAction, DenseState> imitatorCore(prMDP, imitator);
+    imitatorCore.getSettings().loggerStrategy = &emptyS;
+    imitatorCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    imitatorCore.getSettings().episodeN = episodes;
+    imitatorCore.getSettings().testEpisodeN = 100;
+    imitatorCore.runEpisodes();
+
+    cout << "Parameters learned: " << imitatorPolicy.getParameters().t() << endl;
+
+#endif
     return 0;
 }
