@@ -8,53 +8,67 @@ dlogpi_c = 1;
 dJdtheta = 0;
 drewdJ   = 0;
 
-%%% Compute optimal baseline
-j = 0;
-num_trials = max(size(data));
-bnum2 = 0;
-bnum = 0;
+%% Compute optimal baseline
+bnum_rewder = 0;
+bnum_rewfun = 0;
 bden = 0;
+num_trials = max(size(data));
 for trial = 1 : num_trials
-    sumrew = 0;
-    sumrew2 = 0;
+    sum_rewfun = 0;
+    sum_rewder = 0;
     sumdlogPi = zeros(dlogpi_r,dlogpi_c);
+    
+    df = 1;
     
     for step = 1 : max(size(data(trial).a))
         sumdlogPi = sumdlogPi + ...
             policy.dlogPidtheta(data(trial).s(:,step), data(trial).a(:,step));
-        sumrew = sumrew + gamma^(step-1) * fReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
-        sumrew2 = sumrew2 + gamma^(step-1) * dfReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
-        j = j + 1;
+        % sum discounted reward
+        sum_rewfun = sum_rewfun + df * fReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
+        % sum discounted reward derivative
+        sum_rewder = sum_rewder + df * dfReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
+        % update discount factor according to time step
+        df = df * gamma;
     end
     
     sumdlogPi = sumdlogPi .* sumdlogPi;
-    bnum = bnum + sumdlogPi * sumrew;
-    bnum2 = bnum2 + sumdlogPi * sumrew2;
+    bnum_rewfun = bnum_rewfun + sumdlogPi * sum_rewfun;
+    bnum_rewder = bnum_rewder + sumdlogPi * sum_rewder;
     bden = bden + sumdlogPi;
 end
-b  = bnum  ./ bden;
-b2 = bnum2 ./ repmat(bden,1,size(bnum2,2));
+b  = bnum_rewfun ./ bden;
+b2 = bnum_rewder ./ repmat(bden,1,size(bnum_rewder,2));
 b(isnan(b))  = 0;
 b2(isnan(b)) = 0;
 
-%%% Compute gradient
-j = 0;
+%% Compute gradient
+totstep = 0;
 for trial = 1 : num_trials
-    sumrew = 0;
-    sumrew2 = 0;
+    sum_rewfun = 0;
+    sum_rewder = 0;
     sumdlogPi = zeros(dlogpi_r,dlogpi_c);
+    
+    df = 1.0;
     
     for step = 1 : max(size(data(trial).a))
         sumdlogPi = sumdlogPi + ...
             policy.dlogPidtheta(data(trial).s(:,step), data(trial).a(:,step));
-        sumrew = sumrew + gamma^(step-1) * fReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
-        sumrew2 = sumrew2 + gamma^(step-1) * dfReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
-        
-        j = j + 1; % number of steps
+        sum_rewfun = sum_rewfun + df * fReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
+        sum_rewder = sum_rewder + df * dfReward(data(trial).s(:,step), data(trial).a(:,step), data(trial).nexts(:,step));
+        % update discount factor according to time step
+        df = df * gamma;
+        % count steps
+        totstep = totstep + 1;
     end
-    dJdtheta = dJdtheta + sumdlogPi .* (ones(dlogpi_r, 1) * sumrew - b);
-    drewdJ = drewdJ + repmat(sumdlogPi,1,size(sumrew2,2)) .* (repmat(sumrew2,size(b2,1),1) - b2);
+    dJdtheta = dJdtheta + sumdlogPi .* (ones(dlogpi_r, 1) * sum_rewfun - b);
+    drewdJ = drewdJ + repmat(sumdlogPi,1,size(sum_rewder,2)) .* (repmat(sum_rewder,size(b2,1),1) - b2);
 end
 
-dJdtheta = dJdtheta / num_trials;
-drewdJ = drewdJ / num_trials;
+if gamma == 1
+    dJdtheta = dJdtheta / totstep;
+    drewdJ = drewdJ / totstep;
+else
+    dJdtheta = dJdtheta / num_trials;
+    drewdJ = drewdJ / num_trials;
+end
+

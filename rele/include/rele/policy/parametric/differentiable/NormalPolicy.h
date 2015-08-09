@@ -351,11 +351,11 @@ class MVNStateDependantStddevPolicy : public MVNPolicy
 {
 public:
     MVNStateDependantStddevPolicy(Features& phi, Features& phiStdDev, arma::mat& stdDevW)
-		: MVNPolicy(phi), phiStdDev(phiStdDev), stdDevW(stdDevW)
+        : MVNPolicy(phi), phiStdDev(phiStdDev), stdDevW(stdDevW)
     {
-    	assert(phiStdDev.cols() == phi.cols());
-    	assert(stdDevW.n_rows == phiStdDev.cols());
-    	assert(stdDevW.n_cols == phiStdDev.rows());
+        assert(phiStdDev.cols() == phi.cols());
+        assert(stdDevW.n_rows == phiStdDev.cols());
+        assert(stdDevW.n_cols == phiStdDev.rows());
     }
 
     virtual inline std::string getPolicyName()
@@ -373,16 +373,16 @@ public:
 
 protected:
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
-        {
-            mCovariance=stdDevW*phiStdDev(state);
-            mCovariance = mCovariance*mCovariance.t();
-            mCinv = arma::inv(mCovariance);
-            mCholeskyDec = arma::chol(mCovariance);
-            mDeterminant = arma::det(mCovariance);
+    {
+        mCovariance=stdDevW*phiStdDev(state);
+        mCovariance = mCovariance*mCovariance.t();
+        mCinv = arma::inv(mCovariance);
+        mCholeskyDec = arma::chol(mCovariance);
+        mDeterminant = arma::det(mCovariance);
 
-            // compute mean vector
-            mMean = approximator(state);
-        }
+        // compute mean vector
+        mMean = approximator(state);
+    }
 
 protected:
     Features& phiStdDev;
