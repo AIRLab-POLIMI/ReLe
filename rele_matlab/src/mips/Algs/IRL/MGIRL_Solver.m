@@ -31,7 +31,10 @@ classdef MGIRL_Solver < handle
         end
         
         %% CORE
-        function [x, fval] = solve(obj, gradAlgType)
+        function [x, fval] = solve(obj, gradAlgType, reducedSpace)
+            if nargin < 3
+                reducedSpace = 1;
+            end
             objfun = @(x) IRLgrad_step_objfun(obj, x, gradAlgType);
             
             % 'Algorithm', 'interior-point', ...
@@ -41,7 +44,11 @@ classdef MGIRL_Solver < handle
                 'TolX', 10^-12, ...
                 'TolFun', 10^-12, ...
                 'MaxIter', 300);
-            x0 = ones(size(obj.weights))/length(obj.weights);
+            if reducedSpace
+                x0 = ones(length(obj.weights)-1,1)/length(obj.weights);
+            else
+                x0 = ones(length(obj.weights),1)/length(obj.weights);
+            end
             tic;
             [x,fval,exitflag,output] = fmincon(objfun, x0, ...
                 [], [], [], [], [], [], [], options);
@@ -58,21 +65,32 @@ classdef MGIRL_Solver < handle
             gamma  = obj.gamma;
             
             n = length(x);
-            sumexp = sum(exp(x));
-            dist_x = exp(x) / sumexp;
+            if (n == length(obj.weights) - 1)
+                sumexp = 1 + sum(exp(x));
+                dist_x = [exp(x); 1] / sumexp;
+            else
+                sumexp = sum(exp(x));
+                dist_x = exp(x) / sumexp;
+            end
+            % A NaN can occur if the exp was Inf
+            dist_x(isnan(dist_x)) = 1;
+            % Ensure that the sum is 1
+            dist_x = dist_x / sum(dist_x);
+            
             DGx = zeros(n,n);
             for i = 1:n
                 for j = 1:n
                     if i == j
-                        DGX(i,j) = exp(x(i)) * (sumexp - exp(x(i))) / sumexp^2;
+                        DGx(i,j) = exp(x(i)) * (sumexp - exp(x(i))) / sumexp^2;
                     else
-                        DGX(i,j) = - exp(x(i)) * exp(x(j)) / sumexp^2;
+                        DGx(i,j) = - exp(x(i)) * exp(x(j)) / sumexp^2;
                     end
                 end
-            end            
+            end
             
-            fReward  = @(state,action,nexts) DGx * obj.fReward(state,action,nexts,dist_x);
-            dfReward = @(state,action,nexts) DGx * obj.dfReward(state,action,nexts,dist_x);
+            subview = @(t) t(1:n);
+            fReward  = @(state,action,nexts) obj.fReward (state, action, nexts, dist_x);
+            dfReward = @(state,action,nexts) subview(obj.dfReward(state, action, nexts, dist_x)) * DGx;
             
             if strcmp(gtype,'r')
                 dJdtheta    = eREINFORCE_IRL(policy, data, gamma, fReward);
