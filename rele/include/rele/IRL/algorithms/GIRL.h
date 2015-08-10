@@ -51,9 +51,10 @@ public:
          ParametricRegressor& rewardf,
          double gamma, IRLGradType aType, bool useSimplexConstraints = true)
         : policy(policy), data(dataset), rewardf(rewardf),
-          gamma(gamma), maxSteps(0), atype(aType), useSimplexConstraints(useSimplexConstraints)
+          gamma(gamma), atype(aType), useSimplexConstraints(useSimplexConstraints)
     {
         nbFunEvals = 0;
+        maxSteps = data.getEpisodeMaxLenght();
     }
 
     virtual ~GIRL() { }
@@ -83,16 +84,6 @@ public:
             maxFunEvals = std::min(30*dpr, 600);
 
         nbFunEvals = 0;
-
-        maxSteps = 0;
-        int nbEpisodes = data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            int nbSteps = data[i].size();
-            if (maxSteps < nbSteps)
-                maxSteps = nbSteps;
-        }
-
 
         //setup optimization algorithm
         nlopt::opt optimizator;
@@ -156,6 +147,7 @@ public:
     void setData(Dataset<ActionC,StateC>& dataset)
     {
         data = dataset;
+        maxSteps = data.getEpisodeMaxLenght();
     }
 
     arma::vec ReinforceGradient(arma::mat& gGradient)

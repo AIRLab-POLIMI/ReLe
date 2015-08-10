@@ -153,6 +153,23 @@ public:
         addData(data);
     }
 
+    unsigned int getEpisodesNumber()
+    {
+        return this->size();
+    }
+
+    unsigned int getEpisodeMaxLenght()
+    {
+        unsigned int max = 0;
+        for(auto& episode : *this)
+        {
+            unsigned int steps = episode.size();
+            max = std::max(steps, max);
+        }
+
+        return max;
+    }
+
 
 public:
     void writeToStream(std::ostream& os)
