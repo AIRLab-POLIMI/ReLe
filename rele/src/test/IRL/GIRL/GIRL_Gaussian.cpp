@@ -24,7 +24,7 @@
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
 #include "regressors/GaussianMixtureModels.h"
-#include "basis/QuadraticBasis.h"
+#include "basis/PolynomialFunction.h"
 #include "basis/IdentityBasis.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
@@ -66,19 +66,17 @@ int main(int argc, char *argv[])
     /*** Learn correct policy ***/
     GaussianRewardMDP mdp(dim);
 
-    BasisFunctions basis = IdentityBasis::generate(dim);
+    BasisFunctions basis = PolynomialFunction::generate(1, dim);
 
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
+    SparseFeatures phi(basis, dim);
 
     arma::mat Sigma(dim, dim, fill::eye);
     Sigma *= 0.1;
 
-    BasisFunctions basisStdDev = IdentityBasis::generate(dim);
-    SparseFeatures phiStdDev;
-    phiStdDev.setDiagonal(basisStdDev);
-    arma::mat stdDevW(dim, dim, fill::eye);
-    stdDevW *= 0.1;
+    BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
+    SparseFeatures phiStdDev(basisStdDev, dim);
+    arma::mat stdDevW(dim, phiStdDev.rows(), fill::ones);
+    stdDevW *= 0.01;
 
     MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
 

@@ -33,7 +33,7 @@
 
 #include "policy_search/step_rules/StepRules.h"
 
-//#define DISPARITY
+#define DISPARITY
 //#define LOG_OBJ
 //#define SQUARE_OBJ
 
