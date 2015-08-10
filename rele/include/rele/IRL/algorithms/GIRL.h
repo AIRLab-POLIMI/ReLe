@@ -53,10 +53,11 @@ public:
          double gamma, IRLGradType aType,
          bool useSimplexConstraints = true, bool isRewardLinear = false)
         : policy(policy), data(dataset), rewardf(rewardf),
-          gamma(gamma), maxSteps(0), atype(aType),
+          gamma(gamma), atype(aType),
           useSimplexConstraints(useSimplexConstraints), isRewardLinear(isRewardLinear)
     {
         nbFunEvals = 0;
+        maxSteps = data.getEpisodeMaxLenght();
     }
 
     virtual ~GIRL() { }
@@ -86,15 +87,6 @@ public:
             maxFunEvals = std::min(30*dpr, 600);
 
         nbFunEvals = 0;
-
-        maxSteps = 0;
-        int nbEpisodes = data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            int nbSteps = data[i].size();
-            if (maxSteps < nbSteps)
-                maxSteps = nbSteps;
-        }
 
         //if the reward is linear perform preprocessing
         active_feat = arma::linspace<arma::uvec>(0, dpr-1, 1);
@@ -183,6 +175,7 @@ public:
     void setData(Dataset<ActionC,StateC>& dataset)
     {
         data = dataset;
+        maxSteps = data.getEpisodeMaxLenght();
     }
 
     arma::vec ReinforceGradient(arma::mat& gGradient)
@@ -296,8 +289,6 @@ public:
         arma::mat baseline_Rder_num(dp, dpr, arma::fill::zeros);
         std::vector<arma::mat> return_Rder_ObjEp(nbEpisodes, arma::mat());
 
-        std::ofstream iii("/tmp/da.txt");
-
         int totstep = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -320,7 +311,6 @@ public:
 
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
-                iii << localg.t();
                 sumGradLog += localg;
                 Rew  += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
@@ -370,8 +360,6 @@ public:
             // ********************** //
 
         }
-
-        iii.close();
 
         // *** REINFORCE BASE CORE *** //
 
@@ -887,7 +875,7 @@ public:
         std::cout << "x:  " << parV.t();
         std::cout << "-----------------------------------------" << std::endl;
 
-        abort();
+        //abort();
         return f;
 
     }

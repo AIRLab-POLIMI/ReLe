@@ -5,7 +5,7 @@ External dependencies
 ---------------------
 
 To properly compile the ReLe library you must install
-- [Armadillo](http://arma.sourceforge.net/)
+- [Armadillo](http://arma.sourceforge.net/) (>=4.5)
 - [NLopt](http://ab-initio.mit.edu/wiki/index.php/NLopt)
 - [Boost](http://www.boost.org/) (>= 1.53)
 
@@ -33,7 +33,7 @@ mkdir ReLe
 mkdir ReLe/build
 mkdir ReLe/src
 cd ReLe/src
-git clone https://github.com/AIRLab-POLIMI/ReLe.git
+git clone https://github.com/AIRLab-POLIMI/ReLe.git .
 cd ../build
 cmake ../src/rele
 make

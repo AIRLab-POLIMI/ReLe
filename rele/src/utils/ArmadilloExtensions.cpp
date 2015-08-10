@@ -222,6 +222,38 @@ arma::vec range(arma::mat& X, unsigned int dim)
     return max(X,dim) - min(X,dim);
 }
 
+void vecToTriangular(unsigned int dim, const arma::vec& vector, arma::mat& triangular)
+{
+    int rowi = 0, coli = 0;
+
+    for (unsigned i = 0; i < dim; i++)
+    {
+        triangular(rowi,coli) = vector(i);
+        coli++;
+        if (coli == dim)
+        {
+            rowi++;
+            coli = rowi;
+        }
+    }
+}
+
+void triangularToVec(unsigned int dim, const arma::mat& triangular, arma::vec& vector)
+{
+    int rowi = 0, coli = 0;
+
+    for (unsigned i = 0; i < dim; i++)
+    {
+        vector(i) = triangular(rowi,coli);
+        coli++;
+        if (coli == dim)
+        {
+            rowi++;
+            coli = rowi;
+        }
+    }
+}
+
 //void meshgrid(const arma::vec &x, const arma::vec &y, const arma::vec &z, arma::mat &xx, arma::mat &yy, arma::mat &zz)
 //{
 //    if ((x.n_elem == 0) || (y.n_elem == 0) || (z.n_elem == 0))

@@ -124,6 +124,24 @@ arma::sp_mat blockdiagonal(const std::vector<arma::mat>& diag_blocks, int rows, 
  */
 arma::vec range(arma::mat& X, unsigned int dim = 0);
 
+/**
+ * @brief Generate a lower triangular matrix from the input vector.
+ * This function avoid the computation of matrix size from the given matrix vector.
+ * @param dim number of rows and columns of the matrix
+ * @param vector vector of elements of the triangular matrix, must be of size (dim^2-dim)/2
+ * @param triangular resulting triangular matrix, must be of size (dim, dim)
+ */
+void vecToTriangular(unsigned int dim, const arma::vec& vector, arma::mat& triangular);
+
+/**
+ * @brief Generate a vector from the input lower triangular matrix.
+ * This function avoid the computation of matrix size from the given vector.
+ * @param dim number of rows and columns of the matrix
+ * @param triangular resulting triangular matrix, must be of size (dim, dim)
+ * @param vector vector of nonzero elements of the triangular matrix, must be of size (dim^2-dim)/2
+ */
+void triangularToVec(unsigned int dim, const arma::mat& triangular, arma::vec& vector);
+
 //void meshgrid(const arma::vec& x, const arma::vec& y, const arma::vec& z, arma::mat& xx, arma::mat& yy, arma::mat& zz);
 
 }

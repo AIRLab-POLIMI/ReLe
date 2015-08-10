@@ -44,19 +44,19 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-//#define PRINT
-#define RUN
-//#define TRAJECTORIES
-#define RECOVER
+#define PRINT
+#define TRAJECTORIES
+//#define RUN
+//#define RECOVER
 
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::RB;
+    IRLGradType atype = IRLGradType::GB;
     int dim = 1;
-    int nbEpisodes = 10000;
+    int nbEpisodes = 3000;
 
     FileManager fm("gaussian", "GIRL");
     fm.createDir();
@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 
     MVNStateDependantStddevPolicy imitatorPolicy(phi, phiStdDev, stdDevW);
     GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
-                mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+            mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
 
     Core<DenseAction, DenseState> imitatorCore(prMDP, imitator);
     imitatorCore.getSettings().loggerStrategy = &emptyS;

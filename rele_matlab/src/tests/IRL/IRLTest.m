@@ -1,6 +1,6 @@
 %% Scripts to visualize GIRL data
 
-addpath('../Statistics')
+addpath('../../iodata')
 
 %% Load data
 clc
