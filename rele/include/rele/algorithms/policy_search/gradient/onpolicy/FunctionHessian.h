@@ -71,6 +71,7 @@ public:
         arma::mat hessian_J(dp, dp, arma::fill::zeros);
         double Rew;
 
+        int totstep = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -99,6 +100,7 @@ public:
                 Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -115,7 +117,14 @@ public:
 
         }
         // compute mean values
-        hessian_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            hessian_J /= totstep;
+        }
+        else
+        {
+            hessian_J /= nbEpisodes;
+        }
 
         return hessian_J;
     }
@@ -135,6 +144,7 @@ public:
         arma::vec return_J_ObjEp(nbEpisodes);
         std::vector<arma::mat> sumHessLog_CompEp(nbEpisodes, arma::mat(dp,dp));
 
+        int totstep = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
             //core setup
@@ -162,6 +172,7 @@ public:
                 Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -211,7 +222,14 @@ public:
         // ********************** //
 
         // compute mean values
-        hessian_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            hessian_J /= totstep;
+        }
+        else
+        {
+            hessian_J /= nbEpisodes;
+        }
 
         return hessian_J;
     }
@@ -226,6 +244,7 @@ public:
         arma::mat hessian_J(dp, dp, arma::fill::zeros);
         double Rew;
 
+        int totstep = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
             //core setup
@@ -256,6 +275,7 @@ public:
                 hessian_J += df * creward * (sumGradLog * sumGradLog.t() + sumHessLog);
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -267,7 +287,14 @@ public:
 
         }
         // compute mean values
-        hessian_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            hessian_J /= totstep;
+        }
+        else
+        {
+            hessian_J /= nbEpisodes;
+        }
 
         return hessian_J;
     }

@@ -67,6 +67,7 @@ public:
         arma::vec gradient_J(dp, arma::fill::zeros);
         double Rew;
 
+        int totstep = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -92,6 +93,7 @@ public:
                 Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -110,7 +112,14 @@ public:
 
         }
         // compute mean values
-        gradient_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -129,6 +138,7 @@ public:
         arma::vec return_J_ObjEp(nbEpisodes);
         arma::mat sumGradLog_CompEp(dp,nbEpisodes);
 
+        int totstep = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
             //core setup
@@ -153,6 +163,7 @@ public:
                 Rew += df * rewardf->operator ()(tr.r);
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -205,7 +216,14 @@ public:
         // ********************** //
 
         // compute mean values
-        gradient_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -216,6 +234,7 @@ public:
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
 
+        int totstep = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -246,6 +265,7 @@ public:
                 }
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -257,7 +277,14 @@ public:
 
         }
         // compute mean values
-        gradient_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -285,6 +312,7 @@ public:
         arma::cube sumGradLog_CompEpStep(dp,nbEpisodes, maxSteps);
         arma::vec  maxsteps_Ep(nbEpisodes);
 
+        int totstep = 0;
         for (int ep = 0; ep < nbEpisodes; ++ep)
         {
             //core setup
@@ -330,6 +358,7 @@ public:
                 }
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -367,7 +396,14 @@ public:
         // ************************ //
 
         // compute mean values
-        gradient_J /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -455,6 +491,7 @@ public:
         arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
         double Jpol = 0.0;
 
+        int totstep = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -487,6 +524,7 @@ public:
                     phi[i] += df * localg[i];
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -504,10 +542,20 @@ public:
         }
 
         // compute mean value
-        fisher /= nbEpisodes;
-        g /= nbEpisodes;
-        eligibility /= nbEpisodes;
-        Jpol /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            fisher /= totstep;
+            g /= totstep;
+            eligibility /= totstep;
+            Jpol /= totstep;
+        }
+        else
+        {
+            fisher /= nbEpisodes;
+            g /= nbEpisodes;
+            eligibility /= nbEpisodes;
+            Jpol /= nbEpisodes;
+        }
 
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
