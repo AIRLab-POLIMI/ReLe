@@ -32,7 +32,7 @@
 
 #include "policy_search/step_rules/StepRules.h"
 
-#define DISPARITY
+//#define DISPARITY
 //#define LOG_OBJ
 //#define SQUARE_OBJ
 
@@ -170,6 +170,8 @@ public:
         double Rew;
         arma::mat dRew(1, dpr);
 
+
+        int totstep = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -198,6 +200,8 @@ public:
                 dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 // ********************** //
 
+
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -220,8 +224,16 @@ public:
 
         }
         // compute mean values
-        gradient_J /= nbEpisodes;
-        gGradient  /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+            gGradient  /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+            gGradient  /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -232,21 +244,32 @@ public:
         int dpr = rewardf.getParametersSize();
         int nbEpisodes = data.size();
 
+        // performance (J) gradient
+        arma::vec gradient_J(dp, arma::fill::zeros);
+        // gradient w.r.t. R weights of performance (J) gradient
         gGradient.zeros(dp,dpr);
 
-        arma::vec sumGradLog(dp), localg;
-        arma::vec gradient_J(dp, arma::fill::zeros);
+        // cumulate reward function over episode
         double Rew;
+        // cumulate reward derivative over episode
         arma::mat dRew(1, dpr);
 
-        arma::vec baseline_J_num(dp, arma::fill::zeros);
+        // sum of log-gradientes and gradient of the policy
+        arma::vec sumGradLog(dp), localg;
+        // baseline denominator is shared between Rfun and Rder
         arma::vec baseline_den(dp, arma::fill::zeros);
-        arma::vec return_J_ObjEp(nbEpisodes);
+        // the sum of the log-grad is shared between Rfun and Rder
         arma::mat sumGradLog_CompEp(dp,nbEpisodes);
 
-        arma::mat baseline_R_num(dp, dpr, arma::fill::zeros);
-        std::vector<arma::mat> return_R_ObjEp(nbEpisodes, arma::mat());
+        // variables related to reward function
+        arma::vec baseline_Rfun_num(dp, arma::fill::zeros);
+        arma::vec return_Rfun_ObjEp(nbEpisodes);
 
+        // variables related to reward derivative
+        arma::mat baseline_Rder_num(dp, dpr, arma::fill::zeros);
+        std::vector<arma::mat> return_Rder_ObjEp(nbEpisodes, arma::mat());
+
+        int totstep = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
             //core setup
@@ -269,10 +292,11 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                Rew  += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -286,22 +310,30 @@ public:
 
             // store the basic elements used to compute the gradients
 
-            return_J_ObjEp(i) = Rew;
-            return_R_ObjEp[i] = dRew;
+            return_Rfun_ObjEp(i) = Rew;
+            return_Rder_ObjEp[i] = dRew;
 
-            for (int p = 0; p < dp; ++p)
-            {
-                sumGradLog_CompEp(p,i) = sumGradLog(p);
-            }
+//            for (int p = 0; p < dp; ++p)
+//            {
+//                sumGradLog_CompEp(p,i) = sumGradLog(p);
+//            }
 
             // compute the baselines
             for (int p = 0; p < dp; ++p)
             {
-                baseline_J_num(p) += Rew * sumGradLog(p) * sumGradLog(p);
-                baseline_den(p) += sumGradLog(p) * sumGradLog(p);
+                //store sum of log-gradients
+                sumGradLog_CompEp(p,i) = sumGradLog(p);
+
+                // square sum log-grad
+                double tmp = sumGradLog(p) * sumGradLog(p);
+                // baseline denominator
+                baseline_den(p) += tmp;
+                // compute numerator for reward fun (baseline)
+                baseline_Rfun_num(p) += Rew * tmp;
+                // compute numerator for reward der (baseline)
                 for (int rp = 0; rp < dpr; ++rp)
                 {
-                    baseline_R_num(p,rp) += sumGradLog(p) * sumGradLog(p) * dRew(0,rp);
+                    baseline_Rder_num(p,rp) += tmp * dRew(0,rp);
                 }
             }
 
@@ -318,26 +350,37 @@ public:
             double baseline_J = 0;
             if (baseline_den(p) != 0)
             {
-                baseline_J = baseline_J_num(p) / baseline_den(p);
+                baseline_J = baseline_Rfun_num(p) / baseline_den(p);
             }
 
             for (int ep = 0; ep < nbEpisodes; ++ep)
             {
-                gradient_J[p] += (return_J_ObjEp(ep) - baseline_J) * sumGradLog_CompEp(p,ep);
+                gradient_J[p] += (return_Rfun_ObjEp(ep) - baseline_J) * sumGradLog_CompEp(p,ep);
 
                 for (int rp = 0; rp < dpr; ++rp)
                 {
-                    double basel = baseline_den(p) != 0 ? baseline_R_num(p,rp) / baseline_den(p) : 0.0;
-                    gGradient(p,rp) += (return_R_ObjEp[ep](0,rp) - basel) * sumGradLog_CompEp(p,ep);
+                    double basel = baseline_den(p) != 0 ? baseline_Rder_num(p,rp) / baseline_den(p) : 0.0;
+                    gGradient(p,rp) += (return_Rder_ObjEp[ep](0,rp) - basel) * sumGradLog_CompEp(p,ep);
                 }
             }
         }
+        // in MATLAB the above loops are replaced by
+        // dJdtheta = dJdtheta + sumdlogPi .* (ones(dlogpi_r, 1) * sum_rewfun - b);
+        // drewdJ = drewdJ + repmat(sumdlogPi,1,size(sum_rewder,2)) .* (repmat(sum_rewder,size(b2,1),1) - b2);
 
         // ********************** //
 
         // compute mean values
-        gradient_J /= nbEpisodes;
-        gGradient  /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+            gGradient  /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+            gGradient  /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -354,6 +397,7 @@ public:
         double Rew;
         arma::mat dRew(1, dpr);
 
+        int totstep = 0;
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -377,12 +421,10 @@ public:
                 // *** GPOMDP CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
 
-                // compute the gradients
-                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
+                // compute the reward gradients
+                Rew  = df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                dRew = df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
 
                 for (int p = 0; p < dp; ++p)
                 {
@@ -394,6 +436,7 @@ public:
                 }
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -405,8 +448,16 @@ public:
 
         }
         // compute mean values
-        gradient_J /= nbEpisodes;
-        gGradient  /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+            gGradient  /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+            gGradient  /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -421,19 +472,30 @@ public:
 
         arma::vec sumGradLog(dp), localg;
         arma::vec gradient_J(dp, arma::fill::zeros);
-        double Rew;
-        arma::mat dRew(1, dpr);
 
 
-        arma::mat baseline_J_num(dp, maxSteps, arma::fill::zeros);
-        std::vector<arma::mat> baseline_R_num(maxSteps, arma::mat(dp,dpr, arma::fill::zeros));
+        // baseline denominator is shared between rew fun and rew der
         arma::mat baseline_den(dp, maxSteps, arma::fill::zeros);
+
+        // baseline numerator of reward function is a (dp x maxStep) matrix
+        arma::mat baseline_J_num(dp, maxSteps, arma::fill::zeros);
+        // for each episode it store the discounted immediate reward
         arma::mat reward_J_ObjEpStep(nbEpisodes, maxSteps);
+
+        // variables related to the reward derivative
+        // baseline numerator is a vector of maxSteps elements where each element is a (dp x dpr) matrix
+        std::vector<arma::mat> baseline_R_num(maxSteps, arma::mat(dp,dpr, arma::fill::zeros));
+        //for each episode, for each step, it store the discounted reward derivative (1 x dpr)
         std::vector<std::vector<arma::mat>> reward_R_ObjEpStep(nbEpisodes,
-                                         std::vector<arma::mat>(maxSteps,arma::mat()));
+                                         std::vector<arma::mat>(maxSteps,arma::mat())); //(1 x dpr)
+
+        // store for each episode the sum of log-grad at a given time step
         arma::cube sumGradLog_CompEpStep(dp,nbEpisodes, maxSteps);
+
+        // store the length of each episode
         arma::vec  maxsteps_Ep(nbEpisodes);
 
+        int totstep = 0;
         for (int ep = 0; ep < nbEpisodes; ++ep)
         {
             //core setup
@@ -443,8 +505,6 @@ public:
             // *** GPOMDP CORE *** //
             sumGradLog.zeros();
             double df = 1.0;
-            Rew = 0.0;
-            dRew.zeros();
             // ********************** //
 
             //iterate the episode
@@ -458,12 +518,10 @@ public:
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
-                double creward = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                arma::mat cdreward = rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
-                Rew += df * creward;
-                dRew += df * cdreward;
-                reward_J_ObjEpStep(ep,t) = df * creward;
-                reward_R_ObjEpStep[ep][t] = df * cdreward;
+                double creward = df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                arma::mat cdreward = df *rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t(); //(1 x dpr)
+                reward_J_ObjEpStep(ep,t) =  creward;
+                reward_R_ObjEpStep[ep][t] = cdreward;
 
 
                 for (int p = 0; p < dp; ++p)
@@ -474,20 +532,25 @@ public:
                 // compute the baselines
                 for (int p = 0; p < dp; ++p)
                 {
-                    baseline_J_num(p,t) += df * creward * sumGradLog(p) * sumGradLog(p);
+                    double tmp = sumGradLog(p) * sumGradLog(p);
+
+                    baseline_J_num(p,t) += creward * tmp;
 
                     for (int rp = 0; rp < dpr; ++rp)
                     {
-                        baseline_R_num[t](p,rp) += df * cdreward(0,rp) * sumGradLog(p) * sumGradLog(p);
+                        baseline_R_num[t](p,rp) += cdreward(0,rp) * tmp;
                     }
+
+                    baseline_den(p,t) += tmp;
                 }
 
-                for (int p = 0; p < dp; ++p)
-                {
-                    baseline_den(p,t) += sumGradLog(p) * sumGradLog(p);
-                }
+                //for (int p = 0; p < dp; ++p)
+                //{
+                //    baseline_den(p,t) += sumGradLog(p) * sumGradLog(p);
+                //}
                 // ********************** //
 
+                ++totstep;
                 df *= gamma;
 
                 if (tr.xn.isAbsorbing())
@@ -503,6 +566,11 @@ public:
         }
 
         // *** GPOMDP BASE CORE *** //
+
+        //for (int i = 0; i < baseline_R_num.size(); ++i)
+        //{
+        //    std::cout << baseline_R_num[i] / arma::repmat(baseline_den.col(i),1,baseline_R_num[i].n_cols) << std::endl;
+        //}
 
         // compute the gradients
         for (int p = 0; p < dp; ++p)
@@ -523,7 +591,7 @@ public:
                     arma::mat& tmp = reward_R_ObjEpStep[ep][t];
                     for (int rp = 0; rp < dpr; ++rp)
                     {
-                        double basel = baseline_den(p) != 0 ? baseline_R_num[t](p,rp) / baseline_den(p) : 0.0;
+                        double basel = baseline_den(p) != 0 ? baseline_R_num[t](p,rp) / baseline_den(p,t) : 0.0;
                         gGradient(p,rp) += (tmp(0,rp) - basel) * sumGradLog_CompEpStep(p,ep,t);
                     }
                 }
@@ -532,8 +600,16 @@ public:
         // ************************ //
 
         // compute mean values
-        gradient_J /= nbEpisodes;
-        gGradient  /= nbEpisodes;
+        if (gamma == 1.0)
+        {
+            gradient_J /= totstep;
+            gGradient  /= totstep;
+        }
+        else
+        {
+            gradient_J /= nbEpisodes;
+            gGradient  /= nbEpisodes;
+        }
 
         return gradient_J;
     }
@@ -774,8 +850,9 @@ public:
 
         std::cout << "g2: " << g2 << std::endl;
         std::cout << "f: " << f << std::endl;
-        std::cout << "df: " << df.t() << std::endl;
-        std::cout << "x" << parV.t();
+        std::cout << "dwdj: " << dGradient;
+        std::cout << "df: " << df.t();
+        std::cout << "x:  " << parV.t();
         std::cout << "-----------------------------------------" << std::endl;
 
         return f;

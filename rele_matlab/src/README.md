@@ -24,7 +24,7 @@ MEX interface
 This folder provides the access to ReLe functions via MATLAB.
 
 Remember to check the last supported version of GCC. For example, MATLAB R2015a supports up to GCC 4.7.x
-To compile GCC 4.7 on ubuntu you can use the following instructions
+To compile GCC 4.7 on *UBUNTU* you can use the following instructions
 ~~~~
 #!/bin/sh
 sudo apt-get install libmpfr-dev libgmp3-dev libmpc-dev flex bison libc6-dev-i386
@@ -49,6 +49,12 @@ make -j4
 make install
 rm -rf ~/Downloads/tmp
 ~~~~
+
+In *FEDORA* install the following packages and then use the same instructions above
+~~~~
+sudo yum install mpfr-devel gmp-devel libmpc-devel flex bison 
+~~~~
+
 
 First you need to compile the mex functions through MATLAB.
 You need to move into *mexinterface/* where you can use the script *MEXMakefile* to compile the functions (you have to change the path to the compiler accordingly to your setup)

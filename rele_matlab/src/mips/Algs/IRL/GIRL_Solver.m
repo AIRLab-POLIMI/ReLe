@@ -115,7 +115,8 @@ classdef GIRL_Solver < handle
             elseif strcmp(gtype,'gb')
                 %     dJdtheta    = GPOMDPbase_IRL(policy, data, gamma, fReward);
                 %     dgraddomega = GPOMDP_IRL(policy, data, gamma, dfReward);
-                [dJdtheta, dgraddomega] = GPOMDPbase_IRL_grad(policy, data, gamma, fReward, dfReward);
+                %     [dJdtheta, dgraddomega] = GPOMDPbase_IRL_grad(policy, data, gamma, fReward, dfReward);
+                [dJdtheta, dgraddomega] = GPOMDPbase_NEW_IRL_grad(policy, data, gamma, fReward, dfReward);
             else
                 error('Unknown gradient type');
             end

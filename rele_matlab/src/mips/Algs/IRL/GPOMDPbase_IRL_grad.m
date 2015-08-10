@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Reference: www.scholarpedia.org/article/Policy_gradient_methods
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [dJdtheta, drewdJ] = GPOMDPbase_IRL_grad(policy, data, gamma, fReward, dfReward)
+function [dJdtheta, drewdJ,b,b2] = GPOMDPbase_IRL_grad(policy, data, gamma, fReward, dfReward)
 
 dlogpi_r = policy.dlogPidtheta;
 dlogpi_c = 1;
@@ -9,6 +9,8 @@ dJdtheta = zeros(dlogpi_r, dlogpi_c);
 drewdJ = 0;
 
 %%% Compute baselines
+
+%% FIXME PRECOMPUTE NUMBER OF STEP
 num_trials = max(size(data));
 bnum = zeros(dlogpi_r, max(size(data(1).a)));
 bnum2 = cell(1, max(size(data(1).a)));
@@ -70,4 +72,5 @@ for trial = 1 : num_trials
 end
 
 	dJdtheta = dJdtheta / num_trials;
+    drewdJ = drewdJ / num_trials;
 

@@ -42,6 +42,7 @@ b(isnan(b))  = 0;
 b2(isnan(b)) = 0;
 
 %% Compute gradient
+[nr,nc] = size(b2);
 totstep = 0;
 for trial = 1 : num_trials
     sum_rewfun = 0;
@@ -61,7 +62,7 @@ for trial = 1 : num_trials
         totstep = totstep + 1;
     end
     dJdtheta = dJdtheta + sumdlogPi .* (ones(dlogpi_r, 1) * sum_rewfun - b);
-    drewdJ = drewdJ + repmat(sumdlogPi,1,size(sum_rewder,2)) .* (repmat(sum_rewder,size(b2,1),1) - b2);
+    drewdJ = drewdJ + repmat(sumdlogPi,1,nc) .* (repmat(sum_rewder,nr,1) - b2);
 end
 
 if gamma == 1
