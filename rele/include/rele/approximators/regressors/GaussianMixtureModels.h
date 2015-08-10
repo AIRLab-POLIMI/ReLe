@@ -211,11 +211,11 @@ public:
         unsigned int start = n;
         for(unsigned int i = 0; i < n; i++)
         {
-        	arma::vec g_mean;
-        	arma::vec g_sigma;
+            arma::vec g_mean;
+            arma::vec g_sigma;
 
-        	arma::mat sigma = cholSigma[i]*cholSigma[i].t();
-        	diffV(i) = mvnpdf(value, mu[i], sigma, g_mean, g_sigma);
+            arma::mat sigma = cholSigma[i]*cholSigma[i].t();
+            diffV(i) = mvnpdf(value, mu[i], sigma, g_mean, g_sigma);
 
             diffV(arma::span(start,start + dim - 1)) = h[i]*g_mean;
             start = start + dim;

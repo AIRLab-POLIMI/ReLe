@@ -40,7 +40,7 @@ tar xvzf gcc-4.7.4.tar.gz
 cd gcc-4.7.4
 mkdir build
 cd build
-../configure --disable-checking --enable-languages=c,c++ \
+../configure --disable-checking --enable-languages=c,c++,fortran \
   --enable-multiarch --enable-shared --enable-threads=posix \
   --program-suffix=4.7 --with-gmp=/usr/local/lib --with-mpc=/usr/lib \
   --with-mpfr=/usr/lib --without-included-gettext --with-system-zlib \
@@ -56,10 +56,21 @@ In *FEDORA* install the following packages and then use the same instructions ab
 sudo yum install mpfr-devel gmp-devel libmpc-devel flex bison 
 ~~~~
 
-
-First you need to compile the mex functions through MATLAB.
+1. First you need to compile rele library with the supported GCC version. To do that you can follow the following steps
+~~~~
+mkdir ReLe
+mkdir ReLe/build
+mkdir ReLe/src
+cd ReLe/src
+git clone https://github.com/AIRLab-POLIMI/ReLe.git .
+cd ../build
+cmake ../src/rele -DCMAKE_CXX_COMPILER=/usr/local/bin/g++4.7 -DCMAKE_C_COMPILER=/usr/local/bin/gcc4.7 -DCMAKE_BUILD_TYPE=Debug
+make
+~~~~
+Pay attention to the flags to be given to cmake. You have to set them accordingly to your settings.
+2. You need to compile the mex functions through MATLAB.
 You need to move into *mexinterface/* where you can use the script *MEXMakefile* to compile the functions (you have to change the path to the compiler accordingly to your setup)
-Then add such folder to the MATLAB search path.
+3. Finally add such folder to the MATLAB search path.
 
 ### Provided functions
 Here we report a brief descriptions of the functions. A more detailed explaination is provided in *mexinterface/README.md*.

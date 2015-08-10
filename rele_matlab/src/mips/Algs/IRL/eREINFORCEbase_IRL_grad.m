@@ -13,7 +13,7 @@ bnum_rewder = 0;
 bnum_rewfun = 0;
 bden = 0;
 num_trials = max(size(data));
-for trial = 1 : num_trials
+parfor trial = 1 : num_trials
     sum_rewfun = 0;
     sum_rewder = 0;
     sumdlogPi = zeros(dlogpi_r,dlogpi_c);
@@ -44,7 +44,7 @@ b2(isnan(b)) = 0;
 %% Compute gradient
 [nr,nc] = size(b2);
 totstep = 0;
-for trial = 1 : num_trials
+parfor trial = 1 : num_trials
     sum_rewfun = 0;
     sum_rewder = 0;
     sumdlogPi = zeros(dlogpi_r,dlogpi_c);

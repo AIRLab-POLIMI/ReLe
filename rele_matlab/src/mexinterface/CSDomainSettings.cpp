@@ -257,7 +257,7 @@ lqr_domain_settings(
         {
             IndexRT rewardRegressor(i);
             HessianFromDataWorker<DenseAction,DenseState,MVNPolicy> gdw(data, policy, rewardRegressor, gamma);
-            arma::mat h = gdw.GpomdpHessian();
+            arma::mat h = gdw.ReinforceBaseHessian();
 
             mxArray* hmat = mxCreateDoubleMatrix(dp, dp, mxREAL);
             double* gptr = mxGetPr(hmat);

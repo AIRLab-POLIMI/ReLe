@@ -10,7 +10,7 @@ j = 0;
 num_trials = max(size(data));
 bnum = 0;
 bden = 0;
-for trial = 1 : num_trials
+parfor trial = 1 : num_trials
     sumrew = 0;
     sumdlogPi = 0;
     
@@ -30,7 +30,7 @@ b(isnan(b)) = 0;
 
 %%% Compute gradient
 j = 0;
-for trial = 1 : num_trials
+parfor trial = 1 : num_trials
     sumrew = 0;
     sumdlogPi = 0;
     

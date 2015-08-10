@@ -58,6 +58,9 @@ public:
     {
         nbFunEvals = 0;
         maxSteps = data.getEpisodeMaxLenght();
+        // initially all features are active
+        active_feat.set_size(rewardf.getParametersSize());
+        std::iota (std::begin(active_feat), std::end(active_feat), 0);
     }
 
     virtual ~GIRL() { }
@@ -73,23 +76,15 @@ public:
         int dpr = rewardf.getParametersSize();
         assert(dpr > 0);
 
-        if (starting.n_elem == 0)
-        {
-            starting.ones(dpr);
-            starting /= arma::sum(starting);
-        }
-        else
-        {
-            assert(dpr == starting.n_elem);
-        }
-
         if (maxFunEvals == 0)
             maxFunEvals = std::min(30*dpr, 600);
 
         nbFunEvals = 0;
 
         //if the reward is linear perform preprocessing
-        active_feat = arma::linspace<arma::uvec>(0, dpr-1, 1);
+        active_feat.set_size(dpr);
+        std::iota (std::begin(active_feat), std::end(active_feat), 0);
+        // std::cerr << active_feat.t();
         if (isRewardLinear)
         {
             // performs preprocessing in order to remove the features
@@ -98,8 +93,11 @@ public:
             arma::uvec const_ft;
             arma::vec mu = preproc_linear_reward(const_ft);
 
+            // normalize features
+            mu = arma::normalise(mu);
+
             //find non-zero features
-            arma::uvec q = arma::find( abs(mu) > 1e-5);
+            arma::uvec q = arma::find( abs(mu) > 1e-6);
 
             //sort indexes
             q = arma::sort(q);
@@ -109,8 +107,25 @@ public:
             auto it = std::set_difference(q.begin(), q.end(), const_ft.begin(), const_ft.end(), active_feat.begin());
             active_feat.resize(it-active_feat.begin());
 
+            std::cout << "mu: " << mu.t();
+            std::cout << "const_ft: " << const_ft.t();
+            std::cout << "q: " << q.t();
+            std::cout << "active_feat: " << active_feat.t();
+
             // force simplex constraint with linear reward parametrizations
             useSimplexConstraints = true;
+        }
+
+        //compute effective parameters dimension
+        int effective_dim = active_feat.n_elem;
+
+        // handle the case of only one active reward feature
+        if (effective_dim == 1)
+        {
+            arma::vec x(dpr, arma::fill::zeros);
+            x.elem(active_feat).ones();
+            rewardf.setParameters(x);
+            return;
         }
 
         //setup optimization algorithm
@@ -118,18 +133,28 @@ public:
 
         if(useSimplexConstraints)
         {
-            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, dpr);
+            // simplex constraint reduces the parameter by one element
+            --effective_dim;
 
-            std::vector<double> lowerBounds(dpr, 0.0);
-            std::vector<double> upperBounds(dpr, 1.0);
+            // optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, effective_dim);
+            optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, effective_dim);
+
+            std::vector<double> lowerBounds(effective_dim, 0.0);
+            std::vector<double> upperBounds(effective_dim, 1.0);
             optimizator.set_lower_bounds(lowerBounds);
             optimizator.set_upper_bounds(upperBounds);
-            optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-3);
 
+            // equality constraint
+            // optimizator.add_equality_constraint(GIRL::OneSumConstraint, NULL, 1e-3);
+
+            // inequality constraint
+            // x >= 0 && sum x <= 1
+            std::vector<double> tols(effective_dim + 1, 1e-5);
+            optimizator.add_inequality_mconstraint(GIRL::InequalitySimplexConstraints, NULL, tols);
         }
         else
         {
-            optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
+            optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, effective_dim);
         }
 
         optimizator.set_min_objective(GIRL::wrapper, this);
@@ -138,10 +163,21 @@ public:
         optimizator.set_ftol_abs(1e-8);
         optimizator.set_maxeval(maxFunEvals);
 
-        //optimize dual function
-        std::vector<double> parameters(dpr);
-        for (int i = 0; i < dpr; ++i)
+        // define initial point
+        if (starting.n_elem == 0)
+        {
+            starting.ones(effective_dim);
+            starting /= arma::sum(starting);
+        }
+        else
+        {
+            assert(effective_dim <= starting.n_elem);
+        }
+        std::vector<double> parameters(effective_dim);
+        for (int i = 0; i < effective_dim; ++i)
             parameters[i] = starting[i];
+
+        //optimize dual function
         double minf;
         if (optimizator.optimize(parameters, minf) < 0)
         {
@@ -151,31 +187,34 @@ public:
         {
             std::cout << "found minimum = " << minf << std::endl;
 
-            arma::vec finalP(dpr);
-            for(int i = 0; i < dpr; ++i)
+            // reconstruct parameters
+            int dim = active_feat.n_elem;
+            int n   = parameters.size();
+
+            arma::vec x(dpr, arma::fill::zeros);
+
+            if (n == dim-1)
             {
-                finalP(i) = parameters[i];
+                // simplex scenario
+                double sumx = 0.0;
+                for (int i = 0; i < n; ++i)
+                {
+                    x(active_feat(i)) = parameters[i];
+                    sumx += parameters[i];
+                }
+                x(active_feat(n)) = 1 - sumx;
             }
-            std::cout << std::endl;
+            else
+            {
+                // full features
+                for (int i = 0; i < dim; ++i)
+                {
+                    x(active_feat(i)) = parameters[i];
+                }
+            }
 
-            rewardf.setParameters(finalP);
+            rewardf.setParameters(x);
         }
-    }
-
-    virtual arma::vec getWeights()
-    {
-        return rewardf.getParameters();
-    }
-
-    virtual Policy<ActionC, StateC>* getPolicy()
-    {
-        return &policy;
-    }
-
-    void setData(Dataset<ActionC,StateC>& dataset)
-    {
-        data = dataset;
-        maxSteps = data.getEpisodeMaxLenght();
     }
 
     arma::vec ReinforceGradient(arma::mat& gGradient)
@@ -784,12 +823,39 @@ public:
         return nat_grad;
     }
 
-    double objFunction(const arma::vec& parV, arma::vec& df)
+    double objFunction(const arma::vec& x, arma::vec& df)
     {
 
         ++nbFunEvals;
 
 
+        // reconstruct parameters
+        int dpr = rewardf.getParametersSize();
+        int n = x.n_elem;
+        arma::vec parV(dpr, arma::fill::zeros);
+        int dim = active_feat.n_elem;
+        if (n == dim-1)
+        {
+            // simplex scenario
+            double sumx = 0.0;
+            for (int i = 0; i < n; ++i)
+            {
+                parV(active_feat(i)) = x[i];
+                sumx += x[i];
+            }
+            parV(active_feat(n)) = 1 - sumx;
+        }
+        else
+        {
+            // full features
+            for (int i = 0; i < dim; ++i)
+            {
+                parV(active_feat(i)) = x[i];
+            }
+        }
+
+
+        // dispatch the right call
         arma::vec gradient;
         arma::mat dGradient;
         rewardf.setParameters(parV);
@@ -826,6 +892,17 @@ public:
         {
             std::cerr << "GIRL ERROR" << std::endl;
             abort();
+        }
+
+        // select only active elements in the derivative of the policy
+        // gradient
+        if (n == dim-1)
+        {
+            dGradient = dGradient.cols(active_feat(arma::span(0,dim-2)));
+        }
+        else
+        {
+            dGradient = dGradient.cols(active_feat);
         }
 
 
@@ -872,10 +949,10 @@ public:
         std::cout << "f: " << f << std::endl;
         std::cout << "dwdj: " << dGradient;
         std::cout << "df: " << df.t();
-        std::cout << "x:  " << parV.t();
+        std::cout << "x:  " << x.t();
         std::cout << "-----------------------------------------" << std::endl;
 
-        //abort();
+        // abort();
         return f;
 
     }
@@ -1004,13 +1081,42 @@ public:
 
     }
 
+    static void InequalitySimplexConstraints(unsigned m, double* result, unsigned n, const double* x, double* grad, void* f_data)
+    {
+        result[n] = -1.0;
+        for (int i = 0; i < n; ++i)
+        {
+            result[i] = -x[i];
+            result[n] += x[i];
+        }
+        if (grad != nullptr)
+        {
+            for (int j = 0; j < n; ++j)
+            {
+                for (int i = 0; i < n; ++i)
+                {
+                    if (i == j)
+                    {
+                        grad[i*n+j] = -1.0;
+                    }
+                    else
+                    {
+                        grad[i*n+j] = 0.0;
+                    }
+
+                }
+                grad[n*n+j] = 1.0;
+            }
+        }
+    }
+
     static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
     {
         if(grad != nullptr)
         {
             for (unsigned int i = 0; i < n; ++i)
             {
-                grad[0] = 1;
+                grad[i] = 1;
             }
         }
 
@@ -1050,6 +1156,46 @@ public:
     unsigned int getFunEvals()
     {
         return nbFunEvals;
+    }
+
+
+    //======================================================================
+    // GETTERS and SETTERS
+    //----------------------------------------------------------------------
+    virtual arma::vec getWeights()
+    {
+        return rewardf.getParameters();
+    }
+
+    virtual Policy<ActionC, StateC>* getPolicy()
+    {
+        return &policy;
+    }
+
+    void setData(Dataset<ActionC,StateC>& dataset)
+    {
+        data = dataset;
+        maxSteps = data.getEpisodeMaxLenght();
+    }
+
+    inline void setIsRewardLinear(bool flag)
+    {
+        isRewardLinear = flag;
+    }
+
+    inline bool getIsRewardLinear()
+    {
+        return isRewardLinear;
+    }
+
+    inline void setUseSimplexConstraints(bool flag)
+    {
+        useSimplexConstraints = flag;
+    }
+
+    inline bool getUseSimplexConstraints()
+    {
+        return useSimplexConstraints;
     }
 
 protected:

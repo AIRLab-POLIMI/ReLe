@@ -10,7 +10,7 @@ dg = 0;
 num_trials = max(size(data));
 drew = 0;
 
-for trial = 1 : num_trials
+parfor trial = 1 : num_trials
 	phi = [zeros(dlp,1); 1];
     R = 0;
     dR = 0;
