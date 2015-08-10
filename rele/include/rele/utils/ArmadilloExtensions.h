@@ -113,6 +113,17 @@ arma::sp_mat blockdiagonal(const std::vector<arma::mat>& diag_blocks);
  */
 arma::sp_mat blockdiagonal(const std::vector<arma::mat>& diag_blocks, int rows, int cols);
 
+/**
+ * range(X) returns the difference between the maximum and the minimum of a sample.
+ * For vectors, range(x) is the range of the elements.
+ * For matrices, range(X) is a row vector containing the range of each column of X.
+ * @brief Range of values
+ * @param X the vector of matrix to be analyzed
+ * @param dim the range is computed along dimension dim of X
+ * @return the difference between the maximum and the minimum
+ */
+arma::vec range(arma::mat& X, unsigned int dim = 0);
+
 //void meshgrid(const arma::vec& x, const arma::vec& y, const arma::vec& z, arma::mat& xx, arma::mat& yy, arma::mat& zz);
 
 }

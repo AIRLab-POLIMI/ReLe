@@ -27,6 +27,7 @@
 #include "IRLAlgorithm.h"
 #include "Policy.h"
 #include "Transition.h"
+#include "ArmadilloExtensions.h"
 #include <nlopt.hpp>
 #include <cassert>
 
@@ -49,9 +50,11 @@ public:
     GIRL(Dataset<ActionC,StateC>& dataset,
          DifferentiablePolicy<ActionC,StateC>& policy,
          ParametricRegressor& rewardf,
-         double gamma, IRLGradType aType, bool useSimplexConstraints = true)
+         double gamma, IRLGradType aType,
+         bool useSimplexConstraints = true, bool isRewardLinear = false)
         : policy(policy), data(dataset), rewardf(rewardf),
-          gamma(gamma), maxSteps(0), atype(aType), useSimplexConstraints(useSimplexConstraints)
+          gamma(gamma), maxSteps(0), atype(aType),
+          useSimplexConstraints(useSimplexConstraints), isRewardLinear(isRewardLinear)
     {
         nbFunEvals = 0;
     }
@@ -93,6 +96,30 @@ public:
                 maxSteps = nbSteps;
         }
 
+        //if the reward is linear perform preprocessing
+        active_feat = arma::linspace<arma::uvec>(0, dpr-1, 1);
+        if (isRewardLinear)
+        {
+            // performs preprocessing in order to remove the features
+            // that are constant and the one that are almost never
+            // under the given samples
+            arma::uvec const_ft;
+            arma::vec mu = preproc_linear_reward(const_ft);
+
+            //find non-zero features
+            arma::uvec q = arma::find( abs(mu) > 1e-5);
+
+            //sort indexes
+            q = arma::sort(q);
+            const_ft = arma::sort(const_ft);
+
+            //compute set difference in order to obtain active features
+            auto it = std::set_difference(q.begin(), q.end(), const_ft.begin(), const_ft.end(), active_feat.begin());
+            active_feat.resize(it-active_feat.begin());
+
+            // force simplex constraint with linear reward parametrizations
+            useSimplexConstraints = true;
+        }
 
         //setup optimization algorithm
         nlopt::opt optimizator;
@@ -269,6 +296,8 @@ public:
         arma::mat baseline_Rder_num(dp, dpr, arma::fill::zeros);
         std::vector<arma::mat> return_Rder_ObjEp(nbEpisodes, arma::mat());
 
+        std::ofstream iii("/tmp/da.txt");
+
         int totstep = 0;
         for (int i = 0; i < nbEpisodes; ++i)
         {
@@ -291,6 +320,7 @@ public:
 
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
+                iii << localg.t();
                 sumGradLog += localg;
                 Rew  += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
@@ -313,10 +343,10 @@ public:
             return_Rfun_ObjEp(i) = Rew;
             return_Rder_ObjEp[i] = dRew;
 
-//            for (int p = 0; p < dp; ++p)
-//            {
-//                sumGradLog_CompEp(p,i) = sumGradLog(p);
-//            }
+            //            for (int p = 0; p < dp; ++p)
+            //            {
+            //                sumGradLog_CompEp(p,i) = sumGradLog(p);
+            //            }
 
             // compute the baselines
             for (int p = 0; p < dp; ++p)
@@ -340,6 +370,8 @@ public:
             // ********************** //
 
         }
+
+        iii.close();
 
         // *** REINFORCE BASE CORE *** //
 
@@ -855,6 +887,7 @@ public:
         std::cout << "x:  " << parV.t();
         std::cout << "-----------------------------------------" << std::endl;
 
+        abort();
         return f;
 
     }
@@ -930,6 +963,57 @@ public:
         dD /= N;
 
         return D/N;
+    }
+
+    arma::vec preproc_linear_reward(arma::uvec& const_features)
+    {
+        int nEpisodes = data.size();
+        unsigned int dpr = rewardf.getParametersSize();
+        unsigned int dp  = policy.getParametersSize();
+        arma::vec mu(dpr, arma::fill::zeros);
+
+        arma::mat constant_reward(dpr, nEpisodes, arma::fill::zeros);
+
+        for (int i = 0; i < nEpisodes; ++i)
+        {
+
+            //Compute episode J
+            int nbSteps = data[i].size();
+            double df = 1.0;
+
+
+            // store immediate reward over trajectory
+            arma::mat reward_vec(dp, nbSteps, arma::fill::zeros);
+
+            for (int t = 0; t < nbSteps; ++t)
+            {
+                auto tr = data[i][t];
+
+                reward_vec.col(t) = rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
+
+                mu += df * reward_vec.col(t);
+
+                df *= gamma;
+            }
+
+            // check reward range over trajectories
+            arma::vec R = range(reward_vec, 1);
+            for (int o = 0; o < R.n_elem; ++o)
+            {
+                if (R(o) <= 1e-4)
+                {
+                    constant_reward(o,i) = 1;
+                }
+            }
+
+        }
+
+        const_features = arma::find( arma::sum(constant_reward,1) == nEpisodes );
+
+        mu /= nEpisodes;
+
+        return mu;
+
     }
 
     static double OneSumConstraint(unsigned int n, const double *x, double *grad, void *data)
@@ -1010,7 +1094,8 @@ protected:
     unsigned int maxSteps;
     IRLGradType atype;
     unsigned int nbFunEvals;
-    bool useSimplexConstraints;
+    bool useSimplexConstraints, isRewardLinear;
+    arma::uvec active_feat;
 };
 
 

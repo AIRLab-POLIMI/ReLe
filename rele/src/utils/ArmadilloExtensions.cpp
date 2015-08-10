@@ -217,6 +217,11 @@ arma::sp_mat blockdiagonal(const std::vector<arma::mat> &diag_blocks, int rows, 
     return diagonal;
 }
 
+arma::vec range(arma::mat& X, unsigned int dim)
+{
+    return max(X,dim) - min(X,dim);
+}
+
 //void meshgrid(const arma::vec &x, const arma::vec &y, const arma::vec &z, arma::mat &xx, arma::mat &yy, arma::mat &zz)
 //{
 //    if ((x.n_elem == 0) || (y.n_elem == 0) || (z.n_elem == 0))
