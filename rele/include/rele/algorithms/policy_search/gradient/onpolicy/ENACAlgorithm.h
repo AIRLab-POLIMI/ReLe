@@ -125,10 +125,20 @@ protected:
         int dp = policy.getParametersSize();
 
         // compute mean value
-        fisher /= nbEpisodesToEvalPolicy;
-        g /= nbEpisodesToEvalPolicy;
-        eligibility /= nbEpisodesToEvalPolicy;
-        Jpol /= nbEpisodesToEvalPolicy;
+        if (task.gamma == 1.0)
+        {
+            fisher /= totstep;
+            g /= totstep;
+            eligibility /= totstep;
+            Jpol /= totstep;
+        }
+        else
+        {
+            fisher /= nbEpisodesToEvalPolicy;
+            g /= nbEpisodesToEvalPolicy;
+            eligibility /= nbEpisodesToEvalPolicy;
+            Jpol /= nbEpisodesToEvalPolicy;
+        }
         int nbParams = policy.getParametersSize();
 
         //--- Compute learning step

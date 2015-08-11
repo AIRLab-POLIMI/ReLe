@@ -33,7 +33,7 @@
 
 #include "policy_search/step_rules/StepRules.h"
 
-#define DISPARITY
+//#define DISPARITY
 //#define LOG_OBJ
 //#define SQUARE_OBJ
 
@@ -51,16 +51,25 @@ public:
          DifferentiablePolicy<ActionC,StateC>& policy,
          ParametricRegressor& rewardf,
          double gamma, IRLGradType aType,
-         bool useSimplexConstraints = true, bool isRewardLinear = false)
+         bool useSimplexConstraints = true)
         : policy(policy), data(dataset), rewardf(rewardf),
           gamma(gamma), atype(aType),
-          useSimplexConstraints(useSimplexConstraints), isRewardLinear(isRewardLinear)
+          useSimplexConstraints(useSimplexConstraints), isRewardLinear(false)
     {
         nbFunEvals = 0;
         maxSteps = data.getEpisodeMaxLenght();
         // initially all features are active
         active_feat.set_size(rewardf.getParametersSize());
         std::iota (std::begin(active_feat), std::end(active_feat), 0);
+    }
+
+    GIRL(Dataset<ActionC,StateC>& dataset,
+         DifferentiablePolicy<ActionC,StateC>& policy,
+         LinearApproximator& rewardf,
+         double gamma, IRLGradType aType)
+        : GIRL(dataset, policy, rewardf, gamma, aType, true)
+    {
+        isRewardLinear = true;
     }
 
     virtual ~GIRL() { }
@@ -84,43 +93,8 @@ public:
 
         nbFunEvals = 0;
 
-        //initially all features are active
-        active_feat.set_size(dpr);
-        std::iota (std::begin(active_feat), std::end(active_feat), 0);
-
-        //if the reward is linear perform preprocessing
-        if (isRewardLinear)
-        {
-            // performs preprocessing in order to remove the features
-            // that are constant and the one that are almost never
-            // under the given samples
-            arma::uvec const_ft;
-            arma::vec mu = preproc_linear_reward(const_ft);
-
-            // normalize features
-            mu = arma::normalise(mu);
-
-            //find non-zero features
-            arma::uvec q = arma::find( abs(mu) > 1e-6);
-
-            //sort indexes
-            q = arma::sort(q);
-            const_ft = arma::sort(const_ft);
-
-            //compute set difference in order to obtain active features
-            auto it = std::set_difference(q.begin(), q.end(), const_ft.begin(), const_ft.end(), active_feat.begin());
-            active_feat.resize(it-active_feat.begin());
-
-            std::cout << "--- LINEAR REWARD: PRE-PROCESSING ---" << std::endl;
-            std::cout << "Feature expectation\n mu: " << mu.t();
-            std::cout << "Constant features\n cf: " << const_ft.t();
-            std::cout << "based on mu test, the following features are preserved\n q: " << q.t();
-            std::cout << "Finally the active features are\n q - cf: " << active_feat.t();
-            std::cout << "--------------------------------------------" << std::endl;
-
-            // force simplex constraint with linear reward parametrizations
-            useSimplexConstraints = true;
-        }
+        // initialize active features set
+        preprocessing();
 
         //compute effective parameters dimension
         int effective_dim = active_feat.n_elem;
@@ -344,6 +318,7 @@ public:
         arma::vec dD;
         double D = computeDisparity(dD);
         double D2 = D*D;
+        std::cout << dD << std::endl;
 #endif
 
 
@@ -463,8 +438,53 @@ public:
     }
 
     //======================================================================
-    // ONLY FOR LINEAR REWARD PARAMETRIZATION (PRE-PROCESSING)
+    // PRE-PROCESSING
     //----------------------------------------------------------------------
+
+    void preprocessing()
+    {
+        // get reward parameters dimension
+        int dpr = rewardf.getParametersSize();
+
+        //initially all features are active
+        active_feat.set_size(dpr);
+        std::iota (std::begin(active_feat), std::end(active_feat), 0);
+
+        //if the reward is linear perform preprocessing
+        if (isRewardLinear)
+        {
+            // performs preprocessing in order to remove the features
+            // that are constant and the one that are almost never
+            // under the given samples
+            arma::uvec const_ft;
+            arma::vec mu = preproc_linear_reward(const_ft);
+
+            // normalize features
+            mu = arma::normalise(mu);
+
+            //find non-zero features
+            arma::uvec q = arma::find( abs(mu) > 1e-6);
+
+            //sort indexes
+            q = arma::sort(q);
+            const_ft = arma::sort(const_ft);
+
+            //compute set difference in order to obtain active features
+            auto it = std::set_difference(q.begin(), q.end(), const_ft.begin(), const_ft.end(), active_feat.begin());
+            active_feat.resize(it-active_feat.begin());
+
+            std::cout << "--- LINEAR REWARD: PRE-PROCESSING ---" << std::endl;
+            std::cout << "Feature expectation\n mu: " << mu.t();
+            std::cout << "Constant features\n cf: " << const_ft.t();
+            std::cout << "based on mu test, the following features are preserved\n q: " << q.t();
+            std::cout << "Finally the active features are\n q - cf: " << active_feat.t();
+            std::cout << "--------------------------------------------" << std::endl;
+
+            // force simplex constraint with linear reward parametrizations
+            useSimplexConstraints = true;
+        }
+    }
+
     /**
      * @brief Compute the feature expectation and identifies the constant features
      * The function computes the features expectation over trajecteries that can be

@@ -155,7 +155,10 @@ protected:
 
 
         // compute mean value
-        gradient /= nbEpisodesToEvalPolicy;
+        if (task.gamma == 1.0)
+            gradient /= totstep;
+        else
+            gradient /= nbEpisodesToEvalPolicy;
         fisher /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
@@ -309,7 +312,10 @@ protected:
         }
 
         // compute mean value
-        gradient /= nbEpisodesToEvalPolicy;
+        if (task.gamma == 1.0)
+            gradient /= totstep;
+        else
+            gradient /= nbEpisodesToEvalPolicy;
         fisher /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
