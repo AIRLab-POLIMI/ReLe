@@ -116,10 +116,11 @@ int main(int argc, char *argv[])
     mu.push_back({-1.0, -1.0});
     GaussianMixtureRegressor regressor2(phi, mu);
 
+    std::cout << "Test parameters get" << std::endl;
     std::cout << regressor2.getParametersSize() << std::endl;
     std::cout << regressor2.getParameters().t();
 
-
+    std::cout << "Test regressor value" << std::endl;
     arma::vec in1 = {0, 0};
     arma::vec in2 = {1, 1};
     arma::vec in3 = {-1, -1};
@@ -127,6 +128,13 @@ int main(int argc, char *argv[])
     std::cout << regressor2(in2).t() << "(0.0810)" << std::endl;
     std::cout << regressor2(in3).t() << "(0.0810)" << std::endl;
 
+    std::cout << "Test regressor diff" << std::endl;
+    std::cout << regressor2.diff(in1).t();
+    std::cout << regressor2.diff(in2).t();
+    std::cout << regressor2.diff(in3).t();
+
+
+    std::cout << "Test parameters set" << std::endl;
     arma::vec newPar = regressor2.getParameters();
 
     newPar(0) = 0.6;
@@ -142,5 +150,6 @@ int main(int argc, char *argv[])
     std::cout << regressor2.getParametersSize() << std::endl;
     std::cout << newPar.t();
     std::cout << regressor2.getParameters().t();
+
 
 }

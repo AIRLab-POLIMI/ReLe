@@ -232,7 +232,7 @@ void vecToTriangular(unsigned int dim, const arma::vec& vector, arma::mat& trian
         rowi++;
         if (rowi + 1 == dim)
         {
-        	coli++;
+            coli++;
             rowi = coli;
         }
     }

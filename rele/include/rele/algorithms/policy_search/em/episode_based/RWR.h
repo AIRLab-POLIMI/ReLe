@@ -32,18 +32,18 @@ namespace ReLe
 template<class ActionC, class StateC>
 class RWR: public BlackBoxAlgorithm<ActionC, StateC, ParametricNormal, BlackBoxOutputData>
 {
-	USE_BBA_MEMBERS(BlackBoxOutputData)
+    USE_BBA_MEMBERS(BlackBoxOutputData)
 
 public:
-	RWR()
-	{
+    RWR()
+    {
 
-	}
+    }
 
-	virtual ~RWR()
-	{
+    virtual ~RWR()
+    {
 
-	}
+    }
 
 protected:
     virtual void init()
