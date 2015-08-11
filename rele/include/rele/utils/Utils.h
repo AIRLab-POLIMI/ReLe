@@ -27,6 +27,9 @@
 #include <cmath>
 #include <armadillo>
 
+#include <functional>
+
+
 namespace ReLe
 {
 
@@ -84,6 +87,32 @@ public:
             }
 
         }
+
+    }
+
+    /**
+     * @brief Numerical gradient computation
+     */
+    template<class F>
+    static inline arma::vec computeNumericalGradient(F J, arma::vec theta)
+    {
+
+    	arma::vec numgrad = arma::zeros(theta.n_elem);
+    	arma::vec perturb = arma::zeros(theta.n_elem);
+    	double e = 1e-5;
+
+		for (unsigned int p = 0; p < theta.n_elem; p++)
+		{
+			// Set perturbation vector
+			perturb(p) = e;
+			double loss1 = J(theta - perturb);
+			double loss2 = J(theta + perturb);
+			// Compute Numerical Gradient
+			numgrad(p) = (loss2 - loss1) / (2*e);
+			perturb(p) = 0;
+		}
+
+		return numgrad;
 
     }
 

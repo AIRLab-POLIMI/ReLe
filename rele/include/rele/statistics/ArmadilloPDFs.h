@@ -129,10 +129,7 @@ inline double mvnpdf(const arma::vec& x,
     g_mean = f * invDiff;
 
     // Calculate the gradient w.r.t. the cholesky decomposition of covariance; this is a (dim x dim) matrix.
-    arma::mat D = arma::inv(arma::diagmat(cholCov.diag()));
-    arma::mat L = arma::inv(cholCov.t());
-    arma::mat S = diff*diff.t()*L*L.t()*L;
-    g_cholSigma = f*(D + S);
+    g_cholSigma = f*(diff*diff.t()*cinv*cholCov - arma::inv(arma::diagmat(cholCov.diag())));
 
     return f;
 }
