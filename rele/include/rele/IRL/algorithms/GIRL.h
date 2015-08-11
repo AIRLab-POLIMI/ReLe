@@ -34,6 +34,7 @@
 #include "policy_search/step_rules/StepRules.h"
 
 //#define DISPARITY
+#define LOG_D
 //#define LOG_OBJ
 //#define SQUARE_OBJ
 
@@ -314,7 +315,7 @@ public:
         arma::vec dJ;
         double J = computeJ(dJ);
         double J4 = std::pow(J, 4);
-#elif defined DISPARITY
+#elif defined DISPARITY || defined LOG_D
         arma::vec dD;
         double D = computeDisparity(dD);
         double D2 = D*D;
@@ -328,6 +329,8 @@ public:
         double f = g2/J4;
 #elif defined DISPARITY
         double f = g2/D2;
+#elif defined LOG_D
+        double f = std::log(g2) - std::log(D2);
 #else
         double f = g2;
 #endif
@@ -341,9 +344,13 @@ public:
 #elif defined SQUARE_OBJ
         df = (dg2*J4 - dJ4*g2) / (J4*J4);
 #endif
-#elif defined DISPARITY
+#elif defined DISPARITY || defined LOG_D
         arma::vec dD2 = 2.0*dD*D;
+#if defined DISPARITY
         df = (dg2*D2 - dD2*g2) / (D2*D2);
+#elif defined LOG_D
+        df = dg2/g2 - dD2/D2;
+#endif
 #else
         df = dg2;
 #endif
