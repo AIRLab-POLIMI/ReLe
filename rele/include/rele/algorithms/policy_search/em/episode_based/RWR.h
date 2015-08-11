@@ -24,12 +24,16 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_EM_EPISODE_BASED_RWR_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_EM_EPISODE_BASED_RWR_H_
 
+#include "policy_search/BlackBoxAlgorithm.h"
+
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class RWR: public Agent<ActionC, StateC>
+class RWR: public BlackBoxAlgorithm<ActionC, StateC, ParametricNormal, BlackBoxOutputData>
 {
+	USE_BBA_MEMBERS(BlackBoxOutputData)
+
 public:
 	RWR()
 	{
@@ -41,46 +45,22 @@ public:
 
 	}
 
-    virtual void initTestEpisode()
+protected:
+    virtual void init()
     {
 
     }
 
-    virtual void initEpisode(const StateC& state, ActionC& action)
+    virtual void afterPolicyEstimate()
     {
 
     }
 
-    virtual void sampleAction(const StateC& state, ActionC& action)
+    virtual void afterMetaParamsEstimate()
     {
 
     }
 
-    virtual void step(const Reward& reward, const StateC& nextState,
-                      ActionC& action)
-    {
-
-    }
-
-    virtual void endEpisode(const Reward& reward)
-    {
-
-    }
-
-    virtual void endEpisode()
-    {
-
-    }
-
-    virtual AgentOutputData* getAgentOutputData()
-    {
-        return nullptr;
-    }
-
-    virtual AgentOutputData* getAgentOutputDataEnd()
-    {
-        return nullptr;
-    }
 };
 
 }

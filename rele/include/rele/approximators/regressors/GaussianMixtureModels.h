@@ -145,7 +145,7 @@ public:
             mu[i] = params(arma::span(start,start + dim - 1));
             start = start + dim;
             unsigned int nSigma = dim + (dim*dim-dim)/2;
-            vecToTriangular(dim, params(arma::span(start,start + nSigma -1)), cholSigma[i]);
+            vecToTriangular(nSigma, params(arma::span(start,start + nSigma -1)), cholSigma[i]);
             start += nSigma;
         }
     }
@@ -167,9 +167,10 @@ public:
         {
             params(arma::span(start,start + dim - 1)) = mu[i];
             start = start + dim;
-            unsigned int nSigma = (dim*dim-dim)/2;
-            arma::vec& cholVec = params(arma::span(start,start + nSigma -1));
-            triangularToVec(dim, cholSigma[i], cholVec);
+            unsigned int nSigma = dim + (dim*dim-dim)/2;
+            arma::vec cholVec(nSigma);
+            triangularToVec(nSigma, cholSigma[i], cholVec);
+            params(arma::span(start,start + nSigma -1)) = cholVec;
             start += nSigma;
         }
 

@@ -229,11 +229,11 @@ void vecToTriangular(unsigned int dim, const arma::vec& vector, arma::mat& trian
     for (unsigned i = 0; i < dim; i++)
     {
         triangular(rowi,coli) = vector(i);
-        coli++;
-        if (coli == dim)
+        rowi++;
+        if (rowi + 1 == dim)
         {
-            rowi++;
-            coli = rowi;
+        	coli++;
+            rowi = coli;
         }
     }
 }
@@ -245,11 +245,11 @@ void triangularToVec(unsigned int dim, const arma::mat& triangular, arma::vec& v
     for (unsigned i = 0; i < dim; i++)
     {
         vector(i) = triangular(rowi,coli);
-        coli++;
-        if (coli == dim)
+        rowi++;
+        if (rowi + 1 == dim)
         {
-            rowi++;
-            coli = rowi;
+            coli++;
+            rowi = coli;
         }
     }
 }

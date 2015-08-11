@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
     GaussianRewardMDP mdp(dim);
 
     BasisFunctions basis = PolynomialFunction::generate(1, dim);
+    //BasisFunctions basis = IdentityBasis::generate(dim);
 
     SparseFeatures phi(basis, dim);
 
