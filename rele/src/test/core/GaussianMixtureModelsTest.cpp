@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 {
     int size = 2;
 
-
+    //Test gaussian Regressor
     BasisFunctions basis = IdentityBasis::generate(size);
     DenseFeatures phi(basis);
     GaussianRegressor regressor(phi);
@@ -109,5 +109,38 @@ int main(int argc, char *argv[])
     std::cout << "xopt = " << w[0] << ", " << w[1] << std::endl;
     std::cout << "x    = " << x[0] << ", " << x[1] << std::endl;
 
+
+    //Test GaussianMixture Regressor
+    std::vector<arma::vec> mu;
+    mu.push_back({1.0, 1.0});
+    mu.push_back({-1.0, -1.0});
+    GaussianMixtureRegressor regressor2(phi, mu);
+
+    std::cout << regressor2.getParametersSize() << std::endl;
+    std::cout << regressor2.getParameters().t();
+
+
+    arma::vec in1 = {0, 0};
+    arma::vec in2 = {1, 1};
+    arma::vec in3 = {-1, -1};
+    std::cout << regressor2(in1).t() << "(0.0585)" << std::endl;
+    std::cout << regressor2(in2).t() << "(0.0810)" << std::endl;
+    std::cout << regressor2(in3).t() << "(0.0810)" << std::endl;
+
+    arma::vec newPar = regressor2.getParameters();
+
+    newPar(0) = 0.6;
+    newPar(1) = 0.4;
+    newPar(2) = 1.5;
+    newPar(3) = 1.5;
+    newPar(9) = 2.0;
+    newPar(10) = 1.0;
+    newPar(11) = 0.5;
+
+    regressor2.setParameters(newPar);
+
+    std::cout << regressor2.getParametersSize() << std::endl;
+    std::cout << newPar.t();
+    std::cout << regressor2.getParameters().t();
 
 }
