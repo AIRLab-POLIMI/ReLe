@@ -219,7 +219,10 @@ protected:
         }
 
         // compute mean value
-        gradient /= nbEpisodesToEvalPolicy;
+        if (task.gamma == 1.0)
+            gradient /= totstep;
+        else
+            gradient /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
         arma::vec step_size = stepLength.stepLength(gradient);

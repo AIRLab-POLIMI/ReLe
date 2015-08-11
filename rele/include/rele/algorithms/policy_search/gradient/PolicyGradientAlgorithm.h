@@ -61,7 +61,7 @@ public:
                                     RewardTransformation& reward_tr,
                                     bool baseline = true) :
         policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
-        runCount(0), epiCount(0), df(1.0), Jep(0.0),
+        runCount(0), epiCount(0), totstep(0), df(1.0), Jep(0.0),
         rewardTr(&reward_tr), cleanRT(false),
         useBaseline(baseline), output2LogReady(false), stepLength(stepL),
         currentItStats(nullptr)
@@ -124,6 +124,8 @@ public:
         Jep += df * rTr(reward);
         //update discount factor
         df *= this->task.gamma;
+        //increment number of steps
+        ++totstep;
 
         sampleAction(nextState, action);
 
@@ -162,6 +164,7 @@ public:
 
             //reset counters and gradient
             epiCount = 0; //reset episode counter
+            totstep = 0;  //reset step counter
             runCount++; //update run counter
             output2LogReady = true; //output must be ready for log
         }
@@ -192,7 +195,7 @@ protected:
 protected:
     DifferentiablePolicy<ActionC, StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy;
-    unsigned int runCount, epiCount;
+    unsigned int runCount, epiCount, totstep; //totstep = #episodes * #steps
     double df, Jep;
     StepRule& stepLength;
     RewardTransformation* rewardTr;
@@ -211,12 +214,14 @@ protected:
     using Base::nbEpisodesToEvalPolicy;                            \
     using Base::runCount;                                          \
     using Base::epiCount;                                          \
+    using Base::totstep;                                           \
     using Base::df;                                                \
     using Base::Jep;                                               \
     using Base::stepLength;                                        \
     using Base::rewardTr;                                          \
     using Base::history_J;                                         \
     using Base::useBaseline;                                       \
+    using Base::task;                                              \
     using Base::output2LogReady;                                   \
     using Base::currentItStats;                                    \
     using Base::currentAction;                                     \
