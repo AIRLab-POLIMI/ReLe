@@ -60,6 +60,7 @@ protected:
     virtual void init()
     {
         d.zeros(nbPoliciesToEvalMetap);
+        theta.resize(policy.getParameters(), nbPoliciesToEvalMetap);
     }
 
     virtual void afterPolicyEstimate()

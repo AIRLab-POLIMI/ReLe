@@ -64,7 +64,7 @@ public:
 protected:
     virtual void init()
     {
-    	theta.set_size(policy.getParametersSize(), nbPoliciesToEvalMetap);
+        theta.set_size(policy.getParametersSize(), nbPoliciesToEvalMetap);
         history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
         maxJ = -std::numeric_limits<double>::infinity();
 
@@ -72,7 +72,7 @@ protected:
         etaOpt = 1;
 
         //setup optimization algorithm
-        optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, 1);
+        optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, 1);
         optimizator.set_min_objective(REPS::wrapper, this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-12);

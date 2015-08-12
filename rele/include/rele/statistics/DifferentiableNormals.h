@@ -293,6 +293,52 @@ protected:
 
 };
 
+class ParametricFullNormal : public ParametricNormal
+{
+
+public:
+    ParametricFullNormal(arma::vec& initial_mean,
+                         arma::mat& initial_cov);
+
+    virtual ~ParametricFullNormal()
+    {}
+
+    virtual inline std::string getDistributionName()
+    {
+        return "ParametricFullNormal";
+    }
+
+    // DifferentiableDistribution interface
+public:
+    arma::vec difflog(const arma::vec& point);
+    arma::mat diff2log(const arma::vec& point);
+
+    arma::sp_mat FIM();
+    arma::sp_mat inverseFIM();
+
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
+    // WritableInterface interface
+public:
+    void writeOnStream(std::ostream &out);
+    void readFromStream(std::istream &in);
+
+public:
+    unsigned int getParametersSize();
+    virtual arma::vec getParameters();
+    virtual void setParameters(arma::vec& newval);
+    virtual void update(arma::vec &increment);
+
+
+    // ParametricNormal interface
+protected:
+    void updateInternalState();
+
+};
+
+
+
+
 
 } //end namespace
 
