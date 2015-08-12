@@ -253,51 +253,8 @@ public:
         rewardf.setParameters(parV);
 		computeGradient(gradient, dGradient);
 
-        double g2 = arma::as_scalar(gradient.t()*gradient);
-
-#if defined LOG_OBJ || defined SQUARE_OBJ
-        arma::vec dJ;
-        double J = computeJ(dJ);
-        double J4 = std::pow(J, 4);
-#elif defined DISPARITY || defined LOG_D
-        arma::vec dD;
-        double D = computeDisparity(dD);
-        double D2 = D*D;
-        std::cout << dD << std::endl;
-#endif
-
-
-#ifdef LOG_OBJ
-        double f = std::log(g2) - std::log(J4);
-#elif defined SQUARE_OBJ
-        double f = g2/J4;
-#elif defined DISPARITY
-        double f = g2/D2;
-#elif defined LOG_D
-        double f = std::log(g2) - std::log(D2);
-#else
-        double f = g2;
-#endif
-
-        arma::vec dg2 = 2.0*dGradient.t() * gradient;
-#if defined LOG_OBJ || defined SQUARE_OBJ
-        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
-
-#ifdef LOG_OBJ
-        df = dg2/g2 - dJ4/J4;
-#elif defined SQUARE_OBJ
-        df = (dg2*J4 - dJ4*g2) / (J4*J4);
-#endif
-#elif defined DISPARITY || defined LOG_D
-        arma::vec dD2 = 2.0*dD*D;
-#if defined DISPARITY
-        df = (dg2*D2 - dD2*g2) / (D2*D2);
-#elif defined LOG_D
-        df = dg2/g2 - dD2/D2;
-#endif
-#else
-        df = dg2;
-#endif
+		//nomalize the gradient
+        double f = normalizeGradient(gradient, dGradient, df);
 
 
         //compute the derivative wrt active features
@@ -329,8 +286,7 @@ public:
 
         }
 
-
-        std::cout << "g2: " << g2 << std::endl;
+        std::cout << "g2: " << arma::as_scalar(gradient.t()*gradient) << std::endl;
         std::cout << "f: " << f << std::endl;
         std::cout << "dwdj: " << dGradient;
         std::cout << "df: " << df.t();
@@ -1313,6 +1269,56 @@ private:
 			std::cerr << "GIRL ERROR" << std::endl;
 			abort();
 		}
+	}
+
+	double normalizeGradient(const arma::vec& gradient, const arma::mat& dGradient, arma::vec& df)
+	{
+		double g2 = arma::as_scalar(gradient.t()*gradient);
+
+		#if defined LOG_OBJ || defined SQUARE_OBJ
+		        arma::vec dJ;
+		        double J = computeJ(dJ);
+		        double J4 = std::pow(J, 4);
+		#elif defined DISPARITY || defined LOG_D
+		        arma::vec dD;
+		        double D = computeDisparity(dD);
+		        double D2 = D*D;
+		#endif
+
+
+		#ifdef LOG_OBJ
+		        double f = std::log(g2) - std::log(J4);
+		#elif defined SQUARE_OBJ
+		        double f = g2/J4;
+		#elif defined DISPARITY
+		        double f = g2/D2;
+		#elif defined LOG_D
+		        double f = std::log(g2) - std::log(D2);
+		#else
+		        double f = g2;
+		#endif
+
+		        arma::vec dg2 = 2.0*dGradient.t() * gradient;
+		#if defined LOG_OBJ || defined SQUARE_OBJ
+		        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
+
+		#ifdef LOG_OBJ
+		        df = dg2/g2 - dJ4/J4;
+		#elif defined SQUARE_OBJ
+		        df = (dg2*J4 - dJ4*g2) / (J4*J4);
+		#endif
+		#elif defined DISPARITY || defined LOG_D
+		        arma::vec dD2 = 2.0*dD*D;
+		#if defined DISPARITY
+		        df = (dg2*D2 - dD2*g2) / (D2*D2);
+		#elif defined LOG_D
+		        df = dg2/g2 - dD2/D2;
+		#endif
+		#else
+		        df = dg2;
+		#endif
+
+		        return f;
 	}
 };
 
