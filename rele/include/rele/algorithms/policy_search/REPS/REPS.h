@@ -105,7 +105,7 @@ protected:
         maxJ = -std::numeric_limits<double>::infinity();
     }
 
-    double dualFunction(const double& eta, double& grad)
+    double dualFunction(const double& eta, double& grad, bool computeGradient)
     {
 
         double sum1 = 0;
@@ -116,21 +116,22 @@ protected:
         for (auto& sample : history_J)
         {
             double r = sample - maxJ; //numeric trick
-            sum1 += exp(r / eta);
-            sum2 += exp(r / eta) * r;
+            sum1 += std::exp(r / eta);
+            sum2 += std::exp(r / eta) * r;
         }
 
         sum1 /= N;
         sum2 /= N;
 
-        grad = eps + log(sum1) - sum2 / (eta * sum1);
-        return eta * eps + eta * log(sum1) + maxJ;
+        if(computeGradient)
+        	grad = eps + std::log(sum1) - sum2 / (eta * sum1);
+        return eta * eps + eta * std::log(sum1) + maxJ;
     }
 
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        return reinterpret_cast<REPS*>(o)->dualFunction(*x, *grad);
+        return reinterpret_cast<REPS*>(o)->dualFunction(*x, *grad, grad != nullptr);
     }
 
     void updatePolicy()

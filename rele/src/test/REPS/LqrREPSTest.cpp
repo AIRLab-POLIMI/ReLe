@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     arma::mat cov(1, 1, arma::fill::eye);
     cov *= 0.01;
 
-    ParametricNormal dist(mean, cov);
+    ParametricFullNormal dist(mean, cov);
 
     IdentityBasis* pf = new IdentityBasis(0);
     DenseFeatures phi(pf);

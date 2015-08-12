@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     mean[1] =  0.42;
     arma::mat cov(dim, dim, arma::fill::eye);
     cov *= 0.1;
-    ParametricNormal dist(mean,cov);
+    ParametricFullNormal dist(mean,cov);
     //---
 
 

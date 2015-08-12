@@ -877,7 +877,7 @@ void ParametricFullNormal::wmle(const arma::vec& weights, const arma::mat& sampl
 
     arma::mat delta = samples;
     delta.each_col() -= mean;
-    Cov = delta*delta.t()*weights/Z;
+    Cov = delta*diagmat(weights)*delta.t()/Z;
 
     updateInternalState();
 }
