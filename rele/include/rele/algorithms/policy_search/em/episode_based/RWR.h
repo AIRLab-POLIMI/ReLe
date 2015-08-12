@@ -32,13 +32,24 @@ namespace ReLe
 template<class ActionC, class StateC>
 class RWR: public BlackBoxAlgorithm<ActionC, StateC, ParametricNormal, BlackBoxOutputData>
 {
-    USE_BBA_MEMBERS(BlackBoxOutputData)
+    USE_BBA_MEMBERS(ActionC, StateC, ParametricNormal, BlackBoxOutputData)
 
 public:
-    RWR()
+    RWR(ParametricNormal& dist, ParametricPolicy<ActionC, StateC>& policy,
+        unsigned int nbEpisodes, unsigned int nbPolicies,
+        RewardTransformation& reward_tr, double beta)
+        : Base(dist, policy, nbEpisodes, nbPolicies, reward_tr), beta(beta)
     {
 
     }
+
+    RWR(ParametricNormal& dist, ParametricPolicy<ActionC, StateC>& policy,
+        unsigned int nbEpisodes, unsigned int nbPolicies,
+        double beta, int reward_obj = 0)
+        : Base(dist, policy, nbEpisodes, nbPolicies, true, reward_obj), beta(beta)
+    {
+    }
+
 
     virtual ~RWR()
     {
@@ -48,18 +59,24 @@ public:
 protected:
     virtual void init()
     {
-
+        d.zeros(nbPoliciesToEvalMetap);
     }
 
     virtual void afterPolicyEstimate()
     {
-
+        d(polCount) = std::exp(beta*Jpol/nbEpisodesToEvalPolicy);
+        theta.col(polCount) = policy.getParameters();
     }
 
     virtual void afterMetaParamsEstimate()
     {
-
+        dist.wmle(d, theta);
     }
+
+private:
+    arma::vec d;
+    arma::mat theta;
+    double beta;
 
 };
 

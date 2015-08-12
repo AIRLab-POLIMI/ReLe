@@ -114,7 +114,11 @@ int main(int argc, char *argv[])
     cout << "Parameters" << endl;
     cout << w.t();
     cout << "Numerical gradient" << endl;
-    auto lambda = [&](const arma::vec& par){ regressor.setParameters(par); return arma::as_scalar(regressor(w)); };
+    auto lambda = [&](const arma::vec& par)
+    {
+        regressor.setParameters(par);
+        return arma::as_scalar(regressor(w));
+    };
     arma::vec numGrad = utils::computeNumericalGradient(lambda, w);
     cout << numGrad.t();
     cout << "Actual gradient" << endl;
@@ -152,7 +156,11 @@ int main(int argc, char *argv[])
     arma::vec parGMM = regressor2.getParameters();
     cout << parGMM.t();
     cout << "Numerical gradient" << endl;
-    auto lambda2 = [&](const arma::vec& par){ regressor2.setParameters(par); return arma::as_scalar(regressor2(in1));};
+    auto lambda2 = [&](const arma::vec& par)
+    {
+        regressor2.setParameters(par);
+        return arma::as_scalar(regressor2(in1));
+    };
     arma::vec numGrad2 = utils::computeNumericalGradient(lambda2, parGMM);
     cout << numGrad2.t();
     cout << "Actual gradient" << endl;

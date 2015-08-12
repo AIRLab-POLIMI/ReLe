@@ -45,13 +45,11 @@ class BlackBoxAlgorithm: public Agent<ActionC, StateC>
 public:
     BlackBoxAlgorithm(DistributionC& dist,
                       ParametricPolicy<ActionC, StateC>& policy,
-                      unsigned int nbEpisodes, unsigned int nbPolicies,
-                      bool baseline = true, int reward_obj = 0) :
+                      unsigned int nbEpisodes, unsigned int nbPolicies, int reward_obj = 0) :
         dist(dist), policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
         nbPoliciesToEvalMetap(nbPolicies), runCount(0), epiCount(0),
         polCount(0), df(1.0), Jep(0.0), Jpol(0.0),
-        rewardTr(new IndexRT(reward_obj)), cleanRT(true),
-        useBaseline(baseline), output2LogReady(false),
+        rewardTr(new IndexRT(reward_obj)), cleanRT(true), output2LogReady(false),
         currentItStats(nullptr)
     {
     }
@@ -59,13 +57,11 @@ public:
     BlackBoxAlgorithm(DistributionC& dist,
                       ParametricPolicy<ActionC, StateC>& policy,
                       unsigned int nbEpisodes, unsigned int nbPolicies,
-                      RewardTransformation& reward_tr,
-                      bool baseline = true) :
+                      RewardTransformation& reward_tr) :
         dist(dist), policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
         nbPoliciesToEvalMetap(nbPolicies), runCount(0), epiCount(0),
         polCount(0), df(1.0), Jep(0.0), Jpol(0.0),
-        rewardTr(&reward_tr), cleanRT(false),
-        useBaseline(baseline), output2LogReady(false),
+        rewardTr(&reward_tr), cleanRT(false), output2LogReady(false),
         currentItStats(nullptr)
     {
     }
@@ -211,7 +207,7 @@ protected:
     arma::vec history_J;
     RewardTransformation* rewardTr;
     bool cleanRT;
-    bool useBaseline, output2LogReady; //TODO levare baseline
+    bool output2LogReady; //TODO levare baseline
     AgentOutputC* currentItStats;
 };
 
@@ -225,9 +221,8 @@ public:
                               unsigned int nbEpisodes, unsigned int nbPolicies,
                               StepRule& step_length, bool baseline = true, int reward_obj = 0) :
         BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
-            dist, policy, nbEpisodes, nbPolicies, baseline,
-            reward_obj),
-        stepLengthRule(step_length)
+            dist, policy, nbEpisodes, nbPolicies, reward_obj),
+        stepLengthRule(step_length), useBaseline(baseline)
     {
     }
 
@@ -239,7 +234,7 @@ public:
                               bool baseline = true) :
         BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
             dist, policy, nbEpisodes, nbPolicies, reward_tr, baseline),
-        stepLengthRule(step_length)
+        stepLengthRule(step_length), useBaseline(baseline)
     {
     }
 
@@ -252,9 +247,10 @@ protected:
     StepRule& stepLengthRule;
     arma::vec diffObjFunc;
     std::vector<arma::vec> history_dlogsist;
+    bool useBaseline;
 };
 
-#define USE_BBA_MEMBERS(AgentOutputClass)                                             \
+#define USE_BBA_MEMBERS(ActionC, StateC, DistributionC, AgentOutputClass)                                             \
 	typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputClass> Base; \
     using Base::dist;                                                                 \
     using Base::policy;                                                               \
@@ -268,7 +264,6 @@ protected:
     using Base::Jpol;                                                                 \
     using Base::rewardTr;                                                             \
     using Base::history_J;                                                            \
-    using Base::useBaseline;                                                          \
     using Base::output2LogReady;                                                      \
     using Base::currentItStats;
 

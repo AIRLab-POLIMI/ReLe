@@ -34,6 +34,8 @@ public:
         return "ParametricNormal";
     }
 
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
     // DifferentiableDistribution interface
 public:
 
@@ -119,6 +121,8 @@ public:
         return "ParametricDiagonalNormal";
     }
 
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
@@ -191,6 +195,8 @@ public:
     {
         return "ParametricLogisticNormal";
     }
+
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
 
     // DifferentiableDistribution interface
 public:
@@ -266,6 +272,8 @@ public:
         cholCov = A;
         updateInternalState();
     }
+
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
 
     // WritableInterface interface
 public:

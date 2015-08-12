@@ -38,14 +38,13 @@ template<class ActionC, class StateC, class DistributionC>
 class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
 {
 
-    USE_BBA_MEMBERS(REPSOutputData)
+    USE_BBA_MEMBERS(ActionC, StateC, DistributionC, REPSOutputData)
 
 public:
     REPS(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies,
-         bool baseline = true, int reward_obj = 0)
+         unsigned int nbEpisodes, unsigned int nbPolicies, int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
-        (dist, policy, nbEpisodes, nbPolicies, baseline, reward_obj)
+        (dist, policy, nbEpisodes, nbPolicies, reward_obj)
     {
         etaOpt = 1;
         //default parameters
@@ -65,7 +64,7 @@ public:
 protected:
     virtual void init()
     {
-        history_theta.assign(nbPoliciesToEvalMetap, arma::vec(policy.getParametersSize()));
+    	theta.set_size(policy.getParametersSize(), nbPoliciesToEvalMetap);
         history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
         maxJ = -std::numeric_limits<double>::infinity();
 
@@ -90,7 +89,7 @@ protected:
         history_J[polCount] = Jpol;
         if (maxJ < Jpol)
             maxJ = Jpol;
-        history_theta[polCount] = policy.getParameters();
+        theta.col(polCount) = policy.getParameters();
     }
 
     virtual void afterMetaParamsEstimate()
@@ -142,8 +141,6 @@ protected:
 
         //update parameters
         etaOpt = newParameters.back();
-//        std::cout << etaOpt << std::endl;
-//        std::cout << optimizator.last_optimum_value() << std::endl;
 
         //--- save eta value
         currentItStats->eta = etaOpt;
@@ -157,45 +154,13 @@ protected:
             d[i] = exp(r / etaOpt);
         }
 
-//        char ddd[455];
-//        sprintf(ddd,"/tmp/d%d.dat",runCount);
-//        d.save(ddd, arma::raw_ascii);
 
-        //Compute weights sums
-        double dSum = sum(d);
-        double d2Sum = sum(square(d));
-        double Z = (dSum*dSum - d2Sum) / dSum;
-
-        unsigned int thethaSize = policy.getParametersSize();
-
-        //Compute mean
-        arma::vec mean(thethaSize, arma::fill::zeros);
-        for(unsigned int i = 0; i < d.size(); i++)
-        {
-            const arma::vec& theta = history_theta[i];
-            mean += d[i]*theta;
-        }
-
-        mean /= dSum;
-
-        //Compute covariance
-        arma::mat cov(thethaSize, thethaSize, arma::fill::zeros);
-        for(unsigned int i = 0; i < d.size(); i++)
-        {
-            const arma::vec& theta = history_theta[i];
-            arma::vec delta = theta - mean;
-            cov += d[i]*delta*delta.t();
-        }
-
-        cov /= Z;
-
-        //Update high level policy
-        dist.setMeanAndCovariance(mean, cov);
+        dist.wmle(d, theta);
 
     }
 
 protected:
-    std::vector<arma::vec> history_theta;
+    arma::mat theta;
     double maxJ;
 
     double etaOpt;

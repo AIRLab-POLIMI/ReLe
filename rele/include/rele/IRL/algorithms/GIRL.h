@@ -251,36 +251,36 @@ public:
         arma::vec gradient;
         arma::mat dGradient;
         rewardf.setParameters(parV);
-		computeGradient(gradient, dGradient);
+        computeGradient(gradient, dGradient);
 
-		//nomalize the gradient
+        //nomalize the gradient
         double f = normalizeGradient(gradient, dGradient, df);
 
 
         //compute the derivative wrt active features
         if(dpr != n)
         {
-        	if(n == dim)
-        	{
-        		//full features
-        		df = df(active_feat);
-        	}
-        	else
-        	{
-        		//simplex scenario
-        		arma::mat dtheta_active(n, dim, arma::fill::zeros);
+            if(n == dim)
+            {
+                //full features
+                df = df(active_feat);
+            }
+            else
+            {
+                //simplex scenario
+                arma::mat dtheta_active(n, dim, arma::fill::zeros);
 
-        		int i;
-        		for( i = 0; i+1 < dim; i++)
-        		{
-        			unsigned int index = active_feat(i);
-        			dtheta_active(index, index) = 1.0;
-        		}
+                int i;
+                for( i = 0; i+1 < dim; i++)
+                {
+                    unsigned int index = active_feat(i);
+                    dtheta_active(index, index) = 1.0;
+                }
 
-        		dtheta_active.col(active_feat(i)) = -arma::ones(n);
+                dtheta_active.col(active_feat(i)) = -arma::ones(n);
 
-        		df = dtheta_active*df;
-        	}
+                df = dtheta_active*df;
+            }
 
 
 
@@ -1232,94 +1232,94 @@ protected:
     arma::uvec active_feat;
 
 private:
-	void computeGradient(arma::vec& gradient, arma::mat& dGradient)
-	{
-		if (atype == IRLGradType::R)
-		{
-			//            std::cout << "GIRL REINFORCE" << std::endl;
-			gradient = ReinforceGradient(dGradient);
-		}
-		else if (atype == IRLGradType::RB)
-		{
-			//            std::cout << "GIRL REINFORCE BASE" << std::endl;
-			gradient = ReinforceBaseGradient(dGradient);
-		}
-		else if (atype == IRLGradType::G)
-		{
-			//            std::cout << "GIRL GPOMDP" << std::endl;
-			gradient = GpomdpGradient(dGradient);
-		}
-		else if (atype == IRLGradType::GB)
-		{
-			//            std::cout << "GIRL GPOMDP BASE" << std::endl;
-			gradient = GpomdpBaseGradient(dGradient);
-		}
-		else if (atype == IRLGradType::ENAC)
-		{
-			gradient = ENACGradient(dGradient);
-		}
-		else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB)
-					|| (atype == IRLGradType::NATG)
-					|| (atype == IRLGradType::NATGB))
-		{
-			gradient = NaturalGradient(dGradient);
-		}
-		else
-		{
-			std::cerr << "GIRL ERROR" << std::endl;
-			abort();
-		}
-	}
+    void computeGradient(arma::vec& gradient, arma::mat& dGradient)
+    {
+        if (atype == IRLGradType::R)
+        {
+            //            std::cout << "GIRL REINFORCE" << std::endl;
+            gradient = ReinforceGradient(dGradient);
+        }
+        else if (atype == IRLGradType::RB)
+        {
+            //            std::cout << "GIRL REINFORCE BASE" << std::endl;
+            gradient = ReinforceBaseGradient(dGradient);
+        }
+        else if (atype == IRLGradType::G)
+        {
+            //            std::cout << "GIRL GPOMDP" << std::endl;
+            gradient = GpomdpGradient(dGradient);
+        }
+        else if (atype == IRLGradType::GB)
+        {
+            //            std::cout << "GIRL GPOMDP BASE" << std::endl;
+            gradient = GpomdpBaseGradient(dGradient);
+        }
+        else if (atype == IRLGradType::ENAC)
+        {
+            gradient = ENACGradient(dGradient);
+        }
+        else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB)
+                 || (atype == IRLGradType::NATG)
+                 || (atype == IRLGradType::NATGB))
+        {
+            gradient = NaturalGradient(dGradient);
+        }
+        else
+        {
+            std::cerr << "GIRL ERROR" << std::endl;
+            abort();
+        }
+    }
 
-	double normalizeGradient(const arma::vec& gradient, const arma::mat& dGradient, arma::vec& df)
-	{
-		double g2 = arma::as_scalar(gradient.t()*gradient);
+    double normalizeGradient(const arma::vec& gradient, const arma::mat& dGradient, arma::vec& df)
+    {
+        double g2 = arma::as_scalar(gradient.t()*gradient);
 
-		#if defined LOG_OBJ || defined SQUARE_OBJ
-		        arma::vec dJ;
-		        double J = computeJ(dJ);
-		        double J4 = std::pow(J, 4);
-		#elif defined DISPARITY || defined LOG_D
-		        arma::vec dD;
-		        double D = computeDisparity(dD);
-		        double D2 = D*D;
-		#endif
+#if defined LOG_OBJ || defined SQUARE_OBJ
+        arma::vec dJ;
+        double J = computeJ(dJ);
+        double J4 = std::pow(J, 4);
+#elif defined DISPARITY || defined LOG_D
+        arma::vec dD;
+        double D = computeDisparity(dD);
+        double D2 = D*D;
+#endif
 
 
-		#ifdef LOG_OBJ
-		        double f = std::log(g2) - std::log(J4);
-		#elif defined SQUARE_OBJ
-		        double f = g2/J4;
-		#elif defined DISPARITY
-		        double f = g2/D2;
-		#elif defined LOG_D
-		        double f = std::log(g2) - std::log(D2);
-		#else
-		        double f = g2;
-		#endif
+#ifdef LOG_OBJ
+        double f = std::log(g2) - std::log(J4);
+#elif defined SQUARE_OBJ
+        double f = g2/J4;
+#elif defined DISPARITY
+        double f = g2/D2;
+#elif defined LOG_D
+        double f = std::log(g2) - std::log(D2);
+#else
+        double f = g2;
+#endif
 
-		        arma::vec dg2 = 2.0*dGradient.t() * gradient;
-		#if defined LOG_OBJ || defined SQUARE_OBJ
-		        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
+        arma::vec dg2 = 2.0*dGradient.t() * gradient;
+#if defined LOG_OBJ || defined SQUARE_OBJ
+        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
 
-		#ifdef LOG_OBJ
-		        df = dg2/g2 - dJ4/J4;
-		#elif defined SQUARE_OBJ
-		        df = (dg2*J4 - dJ4*g2) / (J4*J4);
-		#endif
-		#elif defined DISPARITY || defined LOG_D
-		        arma::vec dD2 = 2.0*dD*D;
-		#if defined DISPARITY
-		        df = (dg2*D2 - dD2*g2) / (D2*D2);
-		#elif defined LOG_D
-		        df = dg2/g2 - dD2/D2;
-		#endif
-		#else
-		        df = dg2;
-		#endif
+#ifdef LOG_OBJ
+        df = dg2/g2 - dJ4/J4;
+#elif defined SQUARE_OBJ
+        df = (dg2*J4 - dJ4*g2) / (J4*J4);
+#endif
+#elif defined DISPARITY || defined LOG_D
+        arma::vec dD2 = 2.0*dD*D;
+#if defined DISPARITY
+        df = (dg2*D2 - dD2*g2) / (D2*D2);
+#elif defined LOG_D
+        df = dg2/g2 - dD2/D2;
+#endif
+#else
+        df = dg2;
+#endif
 
-		        return f;
-	}
+        return f;
+    }
 };
 
 

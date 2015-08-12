@@ -41,8 +41,10 @@ ParametricNormal::ParametricNormal(unsigned int support_dim)
       mean(support_dim, fill::zeros),
       Cov(support_dim, support_dim, fill::eye),
       invCov(support_dim, support_dim, fill::eye),
-      cholCov(support_dim, support_dim, fill::eye)
+      cholCov(support_dim, support_dim, fill::eye),
+      detValue(0)
 {
+
 }
 
 ParametricNormal::ParametricNormal(vec& params, mat& covariance)
@@ -67,6 +69,12 @@ vec ParametricNormal::operator() ()
 double ParametricNormal::operator() (vec& point)
 {
     return mvnpdfFast(point, mean, invCov, detValue);
+}
+
+void ParametricNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    mean = samples*weights/sum(weights);
+    updateInternalState();
 }
 
 void ParametricNormal::update(vec &increment)
@@ -140,6 +148,22 @@ ParametricDiagonalNormal::ParametricDiagonalNormal(arma::vec mean, arma::vec sta
     assert(mean.n_elem == standardeviation.n_elem);
     this->mean = mean;
     updateInternalState();
+}
+
+void ParametricDiagonalNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    double sumD = sum(weights);
+    double sumD2 = sum(square(weights));
+    double Z = sumD - sumD2/sumD;
+
+    mean = samples*weights/sumD;
+
+    arma::mat delta = samples;
+    delta.each_col() -= mean;
+    diagStdDev = square(delta)*weights/Z;
+
+    updateInternalState();
+
 }
 
 arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
@@ -410,6 +434,11 @@ ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec log
     updateInternalState();
 }
 
+void ParametricLogisticNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    //TODO implement
+}
+
 vec ParametricLogisticNormal::difflog(const vec& point)
 {
     vec diff = point - mean;
@@ -575,6 +604,11 @@ ParametricCholeskyNormal::ParametricCholeskyNormal(vec& initial_mean, mat& initi
     this->updateInternalState();
 }
 
+void ParametricCholeskyNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    //TODO implement
+}
+
 vec ParametricCholeskyNormal::difflog(const vec& point)
 {
     int paramSize = this->getParametersSize();
@@ -626,7 +660,8 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
 
 mat ParametricCholeskyNormal::diff2log(const vec &point)
 {
-
+    //TODO implement
+    return mat();
 }
 
 sp_mat ParametricCholeskyNormal::FIM()
