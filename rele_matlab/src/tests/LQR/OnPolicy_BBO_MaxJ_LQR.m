@@ -1,6 +1,6 @@
 %% LQR gradient test
-addpath(genpath('../Statistics'));
-addpath(genpath('./GradientTests'));
+addpath(genpath('../../Statistics'));
+addpath(genpath('../../iodata'));
 addpath('../');
 
 %clear old data
@@ -24,7 +24,8 @@ stepLength = 0.01;
 
 domain = 'lqr';
 
-prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_BBO'];
+%prog = ['/home/matteo/Projects/github/ReLe/rele-build/',domain,'_BBO'];
+prog = ['/home/dave/ReLe/devel/lib/rele/',domain,'_BBO'];
 
 args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
     ' ', num2str(stepLength)];
@@ -38,6 +39,9 @@ for i = 1 : 2
     
     for k = 1 : length(distributions)
         cmd = [prog, ' ', algorithms{i}, ' ', distributions{k}, ' ', args];
+        disp('==============================================');
+        disp(['### Running algorithm: ',algorithms{k}, ' ###'])
+        disp('==============================================');
         status = system(cmd);
         
         %% show results
@@ -87,7 +91,7 @@ for i = 3 : 4
     cmd = [prog, ' ', algorithms{i}, ' ', args];
     status = system(cmd);
     
-    if (status==0)
+    if (status==0 && ~strcmp(algorithms{i},'reps'))
         %% show results
         disp('Reading agent data...')
         csv = csvread(['/tmp/ReLe/',domain,'/BBO/',domain,'_',algorithms{i},'_agentData.log']);
@@ -138,6 +142,7 @@ end
 grid on;
 title([domain,', episodes:' num2str(nbEpisodes),', iter:',num2str(nbUpdates)]);
 legend(testname, 'location', 'southeast');
+set(gca,'yscale','log');
 hold off;
 
 %% Plot results

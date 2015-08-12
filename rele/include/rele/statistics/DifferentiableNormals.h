@@ -108,7 +108,7 @@ public:
  * Gaussian with mean and diagonal covariance.
  * Both mean and variance are learned.
  */
-class ParametricDiagonalNormal : public ParametricNormal
+class ParametricDiagonalNormal : public ParametricNormal, public FisherInterface
 {
 public:
     ParametricDiagonalNormal(arma::vec mean, arma::vec covariance);
@@ -239,7 +239,7 @@ protected:
 
 };
 
-class ParametricCholeskyNormal : public ParametricNormal
+class ParametricCholeskyNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
@@ -293,7 +293,7 @@ protected:
 
 };
 
-class ParametricFullNormal : public ParametricNormal
+class ParametricFullNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
