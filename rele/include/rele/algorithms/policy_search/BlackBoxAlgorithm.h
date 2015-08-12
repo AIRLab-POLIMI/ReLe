@@ -38,12 +38,12 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
+template<class ActionC, class StateC, class AgentOutputC>
 class BlackBoxAlgorithm: public Agent<ActionC, StateC>
 {
 
 public:
-    BlackBoxAlgorithm(DistributionC& dist,
+    BlackBoxAlgorithm(DifferentiableDistribution& dist,
                       ParametricPolicy<ActionC, StateC>& policy,
                       unsigned int nbEpisodes, unsigned int nbPolicies, int reward_obj = 0) :
         dist(dist), policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
@@ -54,7 +54,7 @@ public:
     {
     }
 
-    BlackBoxAlgorithm(DistributionC& dist,
+    BlackBoxAlgorithm(DifferentiableDistribution& dist,
                       ParametricPolicy<ActionC, StateC>& policy,
                       unsigned int nbEpisodes, unsigned int nbPolicies,
                       RewardTransformation& reward_tr) :
@@ -198,7 +198,7 @@ protected:
     virtual void afterMetaParamsEstimate() = 0;
 
 protected:
-    DistributionC& dist;
+    DifferentiableDistribution& dist;
     ParametricPolicy<ActionC, StateC>& policy;
     unsigned int nbEpisodesToEvalPolicy, nbPoliciesToEvalMetap;
     unsigned int runCount, epiCount, polCount;
@@ -211,28 +211,26 @@ protected:
     AgentOutputC* currentItStats;
 };
 
-template<class ActionC, class StateC, class DistributionC, class AgentOutputC>
-class GradientBlackBoxAlgorithm: public BlackBoxAlgorithm<ActionC, StateC,
-    DistributionC, AgentOutputC>
+template<class ActionC, class StateC, class AgentOutputC>
+class GradientBlackBoxAlgorithm: public BlackBoxAlgorithm<ActionC, StateC, AgentOutputC>
 {
 public:
-    GradientBlackBoxAlgorithm(DistributionC& dist,
+    GradientBlackBoxAlgorithm(DifferentiableDistribution& dist,
                               ParametricPolicy<ActionC, StateC>& policy,
                               unsigned int nbEpisodes, unsigned int nbPolicies,
                               StepRule& step_length, bool baseline = true, int reward_obj = 0) :
-        BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
-            dist, policy, nbEpisodes, nbPolicies, reward_obj),
+        BlackBoxAlgorithm<ActionC, StateC, AgentOutputC>(dist, policy, nbEpisodes, nbPolicies, reward_obj),
         stepLengthRule(step_length), useBaseline(baseline)
     {
     }
 
-    GradientBlackBoxAlgorithm(DistributionC& dist,
+    GradientBlackBoxAlgorithm(DifferentiableDistribution& dist,
                               ParametricPolicy<ActionC, StateC>& policy,
                               unsigned int nbEpisodes, unsigned int nbPolicies,
                               StepRule& step_length,
                               RewardTransformation& reward_tr,
                               bool baseline = true) :
-        BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputC>(
+        BlackBoxAlgorithm<ActionC, StateC, AgentOutputC>(
             dist, policy, nbEpisodes, nbPolicies, reward_tr, baseline),
         stepLengthRule(step_length), useBaseline(baseline)
     {
@@ -250,8 +248,8 @@ protected:
     bool useBaseline;
 };
 
-#define USE_BBA_MEMBERS(ActionC, StateC, DistributionC, AgentOutputClass)                                             \
-	typedef BlackBoxAlgorithm<ActionC, StateC, DistributionC, AgentOutputClass> Base; \
+#define USE_BBA_MEMBERS(ActionC, StateC, AgentOutputClass)                            \
+	typedef BlackBoxAlgorithm<ActionC, StateC, AgentOutputClass> Base;                \
     using Base::dist;                                                                 \
     using Base::policy;                                                               \
     using Base::nbEpisodesToEvalPolicy;                                               \

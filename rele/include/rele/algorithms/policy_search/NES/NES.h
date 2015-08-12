@@ -33,15 +33,15 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
+class NES: public GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
 {
 
-    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats> Base;
 public:
     NES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
         bool baseline = true, int reward_obj = 0)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
         if (dist.getDistributionName().compare("ParametricCholeskyNormal") == 0)
@@ -54,7 +54,7 @@ public:
         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
         RewardTransformation& reward_tr,
         bool baseline = true)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DifferentiableDistribution, NESIterationStats>
+        : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline)
     {
         if (dist.getDistributionName().compare("ParametricCholeskyNormal") == 0)
@@ -187,26 +187,28 @@ protected:
 /**
  * Exact NES (NES with closed-form FIM)
  */
-template<class ActionC, class StateC, class DistributionC>
-class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
+template<class ActionC, class StateC>
+class eNES: public GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
 {
-    typedef GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats> Base;
+    typedef GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats> Base;
 
 public:
-    eNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
+    eNES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
          bool baseline = true, int reward_obj = 0)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+        : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
+		distFI(dynamic_cast<FisherInterface&>(dist))
     {
     }
 
-    eNES(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
+    eNES(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
          RewardTransformation& reward_tr,
          bool baseline = true)
-        : GradientBlackBoxAlgorithm<ActionC, StateC, DistributionC, NESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline)
+        : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
+        (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
+		distFI(dynamic_cast<FisherInterface&>(dist))
     {
     }
 
@@ -281,10 +283,10 @@ protected:
 
         arma::vec step_size;
         arma::vec nat_grad;
-        arma::sp_mat invFisherMtx = Base::dist.inverseFIM();
+        arma::sp_mat invFisherMtx = distFI.inverseFIM();
         if (invFisherMtx.n_elem == 0)
         {
-            arma::sp_mat spFisherMtx = Base::dist.FIM();
+            arma::sp_mat spFisherMtx = distFI.FIM();
             arma::mat fisherMtx(spFisherMtx);
             int rnk = arma::rank(fisherMtx);
             if (rnk == fisherMtx.n_rows)
@@ -339,6 +341,7 @@ protected:
 
 protected:
     arma::vec b_num, b_den;
+    FisherInterface& distFI;
 };
 
 #if 0

@@ -34,16 +34,16 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC, class DistributionC>
-class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
+template<class ActionC, class StateC>
+class REPS: public BlackBoxAlgorithm<ActionC, StateC, REPSOutputData>
 {
 
-    USE_BBA_MEMBERS(ActionC, StateC, DistributionC, REPSOutputData)
+    USE_BBA_MEMBERS(ActionC, StateC, REPSOutputData)
 
 public:
-    REPS(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
+    REPS(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
+        : BlackBoxAlgorithm<ActionC, StateC, REPSOutputData>
         (dist, policy, nbEpisodes, nbPolicies, reward_obj)
     {
         etaOpt = 1;
@@ -95,7 +95,7 @@ protected:
     virtual void afterMetaParamsEstimate()
     {
         //--- Update current data
-        currentItStats->covariance = dist.getCovariance();
+        //currentItStats->covariance = dist.getCovariance();
         //---
 
         //optimize function
