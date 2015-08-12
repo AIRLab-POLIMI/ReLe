@@ -234,27 +234,16 @@ public:
         int n = x.n_elem;
         arma::vec parV(dpr, arma::fill::zeros);
         int dim = active_feat.n_elem;
-        if (n == dim-1)
+        if (n+1 == dim)
         {
             // simplex scenario
             parV(active_feat(arma::span(0,dim-2))) = x;
             parV(active_feat(dim-1)) = 1.0 - sum(x);
-//            double sumx = 0.0;
-//            for (int i = 0; i < n; ++i)
-//            {
-//                parV(active_feat(i)) = x[i];
-//                sumx += x[i];
-//            }
-//            parV(active_feat(n)) = 1 - sumx;
         }
         else
         {
             // full features
             parV(active_feat) = x;
-//            for (int i = 0; i < dim; ++i)
-//            {
-//                parV(active_feat(i)) = x[i];
-//            }
         }
 
 
@@ -262,52 +251,7 @@ public:
         arma::vec gradient;
         arma::mat dGradient;
         rewardf.setParameters(parV);
-        if (atype == IRLGradType::R)
-        {
-            //            std::cout << "GIRL REINFORCE" << std::endl;
-            gradient = ReinforceGradient(dGradient);
-        }
-        else if (atype == IRLGradType::RB)
-        {
-            //            std::cout << "GIRL REINFORCE BASE" << std::endl;
-            gradient = ReinforceBaseGradient(dGradient);
-        }
-        else if (atype == IRLGradType::G)
-        {
-            //            std::cout << "GIRL GPOMDP" << std::endl;
-            gradient = GpomdpGradient(dGradient);
-        }
-        else if (atype == IRLGradType::GB)
-        {
-            //            std::cout << "GIRL GPOMDP BASE" << std::endl;
-            gradient = GpomdpBaseGradient(dGradient);
-        }
-        else if (atype == IRLGradType::ENAC)
-        {
-            gradient = ENACGradient(dGradient);
-        }
-        else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB) ||
-                 (atype == IRLGradType::NATG) || (atype == IRLGradType::NATGB))
-        {
-            gradient = NaturalGradient(dGradient);
-        }
-        else
-        {
-            std::cerr << "GIRL ERROR" << std::endl;
-            abort();
-        }
-
-        // select only active elements in the derivative of the policy
-        // gradient
-        if (n == dim-1)
-        {
-            dGradient = dGradient.cols(active_feat(arma::span(0,dim-2)));
-        }
-        else if (dpr != dim)
-        {
-            dGradient = dGradient.cols(active_feat);
-        }
-
+		computeGradient(gradient, dGradient);
 
         double g2 = arma::as_scalar(gradient.t()*gradient);
 
@@ -354,6 +298,37 @@ public:
 #else
         df = dg2;
 #endif
+
+
+        //compute the derivative wrt active features
+        if(dpr != n)
+        {
+        	if(n == dim)
+        	{
+        		//full features
+        		df = df(active_feat);
+        	}
+        	else
+        	{
+        		//simplex scenario
+        		arma::mat dtheta_active(n, dim, arma::fill::zeros);
+
+        		int i;
+        		for( i = 0; i+1 < dim; i++)
+        		{
+        			unsigned int index = active_feat(i);
+        			dtheta_active(index, index) = 1.0;
+        		}
+
+        		dtheta_active.col(active_feat(i)) = -arma::ones(n);
+
+        		df = dtheta_active*df;
+        	}
+
+
+
+        }
+
 
         std::cout << "g2: " << g2 << std::endl;
         std::cout << "f: " << f << std::endl;
@@ -1299,6 +1274,46 @@ protected:
     unsigned int nbFunEvals;
     bool useSimplexConstraints, isRewardLinear;
     arma::uvec active_feat;
+
+private:
+	void computeGradient(arma::vec& gradient, arma::mat& dGradient)
+	{
+		if (atype == IRLGradType::R)
+		{
+			//            std::cout << "GIRL REINFORCE" << std::endl;
+			gradient = ReinforceGradient(dGradient);
+		}
+		else if (atype == IRLGradType::RB)
+		{
+			//            std::cout << "GIRL REINFORCE BASE" << std::endl;
+			gradient = ReinforceBaseGradient(dGradient);
+		}
+		else if (atype == IRLGradType::G)
+		{
+			//            std::cout << "GIRL GPOMDP" << std::endl;
+			gradient = GpomdpGradient(dGradient);
+		}
+		else if (atype == IRLGradType::GB)
+		{
+			//            std::cout << "GIRL GPOMDP BASE" << std::endl;
+			gradient = GpomdpBaseGradient(dGradient);
+		}
+		else if (atype == IRLGradType::ENAC)
+		{
+			gradient = ENACGradient(dGradient);
+		}
+		else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB)
+					|| (atype == IRLGradType::NATG)
+					|| (atype == IRLGradType::NATGB))
+		{
+			gradient = NaturalGradient(dGradient);
+		}
+		else
+		{
+			std::cerr << "GIRL ERROR" << std::endl;
+			abort();
+		}
+	}
 };
 
 
