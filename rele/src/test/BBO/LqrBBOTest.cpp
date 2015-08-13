@@ -24,6 +24,7 @@
 #include "policy_search/PGPE/PGPE.h"
 #include "policy_search/NES/NES.h"
 #include "policy_search/REPS/REPS.h"
+#include "policy_search/em/episode_based/RWR.h"
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/LinearPolicy.h"
@@ -61,7 +62,7 @@ struct bboConfig
 void help()
 {
     cout << "lqr_BBO algorithm [] #Updates #Policies stepLength [updaterule]" << endl;
-    cout << " - algorithm: pgpe, nes, enes, reps" << endl;
+    cout << " - algorithm: pgpe, nes, enes, reps, rwr" << endl;
     cout << "   * notes that pgpe and nes requires and additional paramiter" << endl;
     cout << "   * distribution: gauss, log, chol, diag" << endl;
     cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
@@ -137,7 +138,7 @@ int main(int argc, char *argv[])
     {
         strncpy(alg, argv[1], 10);
         int offset = 0;
-        if ((strcmp(alg,"pgpe") == 0) || (strcmp(alg,"nes") == 0))
+        if ((strcmp(alg,"pgpe") == 0) || (strcmp(alg,"nes") == 0) || (strcmp(alg,"rwr") == 0))
         {
             if (argc > 2)
             {
@@ -252,6 +253,14 @@ int main(int argc, char *argv[])
         (*dist, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
         sprintf(outputname, "lqr_nes_%s.log", polType);
+    }
+    else if (strcmp(alg, "rwr") == 0)
+    {
+        bool usebaseline = true;
+        RWR<DenseAction, DenseState>* agent = new RWR<DenseAction, DenseState>
+        (*dist, policy, nbepperpol, nbpolperupd, 1);
+        core = new ReLe::Core<DenseAction, DenseState>(mdp, *agent);
+        sprintf(outputname, "lqr_rwr_%s.log", polType);
     }
     else if (strcmp(alg, "enes") == 0)
     {

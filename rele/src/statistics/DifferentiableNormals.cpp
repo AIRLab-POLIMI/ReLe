@@ -606,7 +606,18 @@ ParametricCholeskyNormal::ParametricCholeskyNormal(vec& initial_mean, mat& initi
 
 void ParametricCholeskyNormal::wmle(const arma::vec& weights, const arma::mat& samples)
 {
-    //TODO implement
+	double sumD = sum(weights);
+	double sumD2 = sum(square(weights));
+	double Z = sumD - sumD2/sumD;
+
+	mean = samples*weights/sumD;
+
+	arma::mat delta = samples;
+	delta.each_col() -= mean;
+
+	cholCov = arma::chol(delta*diagmat(weights)*delta.t())/std::sqrt(Z);
+
+	updateInternalState();
 }
 
 vec ParametricCholeskyNormal::difflog(const vec& point)

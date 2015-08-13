@@ -10,8 +10,10 @@ close all;
 
 algorithms{1} = 'pgpe';
 algorithms{2} = 'nes';
-algorithms{3} = 'enes';
-algorithms{4} = 'reps';
+algorithms{3} = 'rwr';
+algorithms{4} = 'enes';
+algorithms{5} = 'reps';
+
 
 distributions{1} = 'gauss';
 distributions{2} = 'chol';
@@ -35,7 +37,7 @@ args = [num2str(nbUpdates), ' ', num2str(nbEpisodes), ...
 nbtests = length(distributions)*2+2;
 J = zeros(nbUpdates,nbtests);
 count = 1;
-for i = 1 : 2
+for i = 1 : 3
     
     for k = 1 : length(distributions)
         cmd = [prog, ' ', algorithms{i}, ' ', distributions{k}, ' ', args];
@@ -65,6 +67,11 @@ for i = 1 : 2
                 [data(ep), index] = ReadPGPEStatistics(csv, index);
                 ep = ep + 1;
             end
+        elseif strcmp(algorithms{i},'rwr')
+            while(index < size(csv, 1))
+                [data(ep), index] = ReadEMStatistics(csv, index);
+                ep = ep + 1;
+            end
             
         end
         
@@ -87,7 +94,7 @@ for i = 1 : 2
     %         {'LineWidth', 2'}, 1);
     %     legend(algorithms{i});
 end
-for i = 3 : 4
+for i = 4 : 5
     cmd = [prog, ' ', algorithms{i}, ' ', args];
     status = system(cmd);
     

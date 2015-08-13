@@ -25,17 +25,18 @@
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_EM_EPISODE_BASED_RWR_H_
 
 #include "policy_search/BlackBoxAlgorithm.h"
+#include "policy_search/em/episode_based/EMOutputData.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class RWR: public BlackBoxAlgorithm<ActionC, StateC, ParametricNormal, BlackBoxOutputData>
+class RWR: public BlackBoxAlgorithm<ActionC, StateC, EMOutputData>
 {
-    USE_BBA_MEMBERS(ActionC, StateC, ParametricNormal, BlackBoxOutputData)
+    USE_BBA_MEMBERS(ActionC, StateC, EMOutputData)
 
 public:
-    RWR(ParametricNormal& dist, ParametricPolicy<ActionC, StateC>& policy,
+    RWR(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
         unsigned int nbEpisodes, unsigned int nbPolicies,
         RewardTransformation& reward_tr, double beta)
         : Base(dist, policy, nbEpisodes, nbPolicies, reward_tr), beta(beta)
@@ -43,10 +44,10 @@ public:
 
     }
 
-    RWR(ParametricNormal& dist, ParametricPolicy<ActionC, StateC>& policy,
+    RWR(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
         unsigned int nbEpisodes, unsigned int nbPolicies,
         double beta, int reward_obj = 0)
-        : Base(dist, policy, nbEpisodes, nbPolicies, true, reward_obj), beta(beta)
+        : Base(dist, policy, nbEpisodes, nbPolicies, reward_obj), beta(beta)
     {
     }
 
@@ -60,7 +61,7 @@ protected:
     virtual void init()
     {
         d.zeros(nbPoliciesToEvalMetap);
-        theta.resize(policy.getParameters(), nbPoliciesToEvalMetap);
+        theta.resize(policy.getParametersSize(), nbPoliciesToEvalMetap);
     }
 
     virtual void afterPolicyEstimate()
