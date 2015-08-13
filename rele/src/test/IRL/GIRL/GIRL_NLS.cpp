@@ -44,9 +44,9 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define PRINT
-//#define RECOVER
-//#define RUN_GIRL
+//#define PRINT
+#define RUN_GIRL
+#define RECOVER
 
 int main(int argc, char *argv[])
 {
@@ -106,19 +106,20 @@ int main(int argc, char *argv[])
     basisReward.push_back(bfT);
     basisReward.push_back(bfF);
 
-    /*unsigned int nbasis = 3;
+    unsigned int nbasis = 10;
+
     for(unsigned int i = 0; i < nbasis; i++)
     {
-        double angle = i*2.0/3.0*M_PI;
-        basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1));
-    }*/
+    	double anglePart = nbasis;
+        double angle = i*2.0/anglePart*M_PI;
+        basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1.0/anglePart));
+    }
 
     DenseFeatures phiReward(basisReward);
 
-    //GaussianRegressor rewardRegressor(phiReward);
     LinearApproximator rewardRegressor(phiReward);
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype, true);
+                                        mdp.getSettings().gamma, atype);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();

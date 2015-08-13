@@ -453,7 +453,7 @@ public:
 
 
             // store immediate reward over trajectory
-            arma::mat reward_vec(dp, nbSteps, arma::fill::zeros);
+            arma::mat reward_vec(dpr, nbSteps, arma::fill::zeros);
 
             for (int t = 0; t < nbSteps; ++t)
             {
