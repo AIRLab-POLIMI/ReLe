@@ -210,6 +210,7 @@ int main(int argc, char *argv[])
     {
         //----- ParametricNormal
         arma::mat cov(nparams, nparams, arma::fill::eye);
+        cov *= 0.01;
         dist = new ParametricNormal(mean, cov);
     }
     else if (strcmp(polType, "log") == 0)

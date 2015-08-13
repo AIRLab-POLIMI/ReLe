@@ -41,9 +41,10 @@ for i = 1 : 3
     
     for k = 1 : length(distributions)
         cmd = [prog, ' ', algorithms{i}, ' ', distributions{k}, ' ', args];
-        disp('==============================================');
-        disp(['### Running algorithm: ',algorithms{k}, ' ###'])
-        disp('==============================================');
+
+        disp('=======================================================================');
+        disp(['### Running algorithm: ',algorithms{i}, ' (',  distributions{k},') ###'])
+        disp('=======================================================================');
         status = system(cmd);
         
         %% show results
@@ -86,13 +87,7 @@ for i = 1 : 3
         testname{count} = [algorithms{i}, ' ', distributions{k}];
         count = count + 1;
     end
-    
-    %     %     plot(J(:,i));
-    %     shadedErrorBar(1:size(J_history,2), ...
-    %         mean(J_history), ...
-    %         2*sqrt(diag(cov(J_history))), ...
-    %         {'LineWidth', 2'}, 1);
-    %     legend(algorithms{i});
+   
 end
 for i = 4 : 5
     cmd = [prog, ' ', algorithms{i}, ' ', args];
