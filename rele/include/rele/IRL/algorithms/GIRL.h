@@ -72,6 +72,7 @@ public:
         GIRL(dataset, policy, rewardf, gamma, aType, true)
     {
         isRewardLinear = true;
+
     }
 
     virtual ~GIRL()
@@ -120,7 +121,7 @@ public:
             --effective_dim;
 
             // optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, effective_dim);
-            optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, effective_dim);
+            optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, effective_dim);
 
             std::vector<double> lowerBounds(effective_dim, 0.0);
             std::vector<double> upperBounds(effective_dim, 1.0);
@@ -257,6 +258,8 @@ public:
         //nomalize the gradient
         double f = normalizeGradient(gradient, dGradient, df);
 
+
+        arma::vec df_full = df;
         //compute the derivative wrt active features
         if (dpr != n)
         {
@@ -278,6 +281,7 @@ public:
         std::cout << "f: " << f << std::endl;
         std::cout << "dwdj: " << dGradient;
         std::cout << "df: " << df.t();
+        std::cout << "df_full: " << df_full.t();
         std::cout << "x:  " << x.t();
         std::cout << "x_full:  " << parV.t();
         std::cout << "-----------------------------------------" << std::endl;
@@ -1240,18 +1244,6 @@ protected:
         }
     }
 
-protected:
-    Dataset<ActionC, StateC>& data;
-    DifferentiablePolicy<ActionC, StateC>& policy;
-    ParametricRegressor& rewardf;
-    double gamma;
-    unsigned int maxSteps;
-    IRLGradType atype;
-    unsigned int nbFunEvals;
-    bool useSimplexConstraints, isRewardLinear;
-    arma::uvec active_feat;
-    arma::mat dtheta_simplex;
-
 private:
     void computeSimplexDerivative(unsigned int dpr)
     {
@@ -1360,6 +1352,19 @@ private:
 
         return f;
     }
+
+protected:
+    Dataset<ActionC, StateC>& data;
+    DifferentiablePolicy<ActionC, StateC>& policy;
+    ParametricRegressor& rewardf;
+    double gamma;
+    unsigned int maxSteps;
+    IRLGradType atype;
+    unsigned int nbFunEvals;
+    bool useSimplexConstraints, isRewardLinear;
+    arma::uvec active_feat;
+    arma::mat dtheta_simplex;
+
 };
 
 } //end namespace

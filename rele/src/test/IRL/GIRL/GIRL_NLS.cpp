@@ -25,6 +25,7 @@
 #include "features/DenseFeatures.h"
 #include "regressors/GaussianMixtureModels.h"
 #include "basis/IdentityBasis.h"
+#include "basis/PolynomialFunction.h"
 #include "basis/GaussianRbf.h"
 
 #include "parametric/differentiable/NormalPolicy.h"
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 
 
     IRLGradType atype = IRLGradType::RB;
-    int nbEpisodes = 1000;
+    int nbEpisodes = 3000;
 
     FileManager fm("nls", "GIRL");
     fm.createDir();
@@ -71,10 +72,10 @@ int main(int argc, char *argv[])
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
 
-    BasisFunctions stdBasis = IdentityBasis::generate(dim);
+    BasisFunctions stdBasis = PolynomialFunction::generate(1, dim);
     DenseFeatures stdPhi(stdBasis);
     arma::vec stdWeights(stdPhi.rows());
-    stdWeights.fill(0.5);
+    stdWeights.fill(0.1);
 
     NormalStateDependantStddevPolicy expertPolicy(phi, stdPhi, stdWeights);
 
@@ -98,21 +99,22 @@ int main(int argc, char *argv[])
 
     // Create parametric reward
     //BasisFunctions basisReward = IdentityBasis::generate(2);
+    unsigned int nbasis = 3;
+    double anglePart = nbasis;
+    double sigma = 1.0/anglePart;
+
     arma::vec cT = {0, 0};
     arma::vec cF = {10, 10};
-    BasisFunction* bfT = new GaussianRbf(cT, 1);
-    BasisFunction* bfF = new GaussianRbf(cF, 1);
+    BasisFunction* bfT = new GaussianRbf(cT, sigma);
+    BasisFunction* bfF = new GaussianRbf(cF, sigma);
     BasisFunctions basisReward;
     basisReward.push_back(bfT);
     basisReward.push_back(bfF);
 
-    unsigned int nbasis = 10;
-
     for(unsigned int i = 0; i < nbasis; i++)
     {
-        double anglePart = nbasis;
         double angle = i*2.0/anglePart*M_PI;
-        basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1.0/anglePart));
+        basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, sigma));
     }
 
     DenseFeatures phiReward(basisReward);
