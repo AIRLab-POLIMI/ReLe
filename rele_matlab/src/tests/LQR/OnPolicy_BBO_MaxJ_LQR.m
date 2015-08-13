@@ -91,7 +91,7 @@ for i = 3 : 4
     cmd = [prog, ' ', algorithms{i}, ' ', args];
     status = system(cmd);
     
-    if (status==0 && ~strcmp(algorithms{i},'reps'))
+    if (status==0)
         %% show results
         disp('Reading agent data...')
         csv = csvread(['/tmp/ReLe/',domain,'/BBO/',domain,'_',algorithms{i},'_agentData.log']);
