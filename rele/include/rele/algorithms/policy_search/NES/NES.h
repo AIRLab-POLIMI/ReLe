@@ -198,7 +198,7 @@ public:
          bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
-		distFI(dynamic_cast<FisherInterface&>(dist))
+        distFI(dynamic_cast<FisherInterface&>(dist))
     {
     }
 
@@ -208,7 +208,7 @@ public:
          bool baseline = true)
         : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
-		distFI(dynamic_cast<FisherInterface&>(dist))
+        distFI(dynamic_cast<FisherInterface&>(dist))
     {
     }
 

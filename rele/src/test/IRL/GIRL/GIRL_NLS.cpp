@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     for(unsigned int i = 0; i < nbasis; i++)
     {
-    	double anglePart = nbasis;
+        double anglePart = nbasis;
         double angle = i*2.0/anglePart*M_PI;
         basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, 1.0/anglePart));
     }

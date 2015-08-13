@@ -31,7 +31,7 @@ namespace ReLe
 {
 
 EMOutputData::EMOutputData(unsigned int nbIndividual, unsigned int nbParams,
-                   unsigned int nbEvals) :BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
+                           unsigned int nbEvals) :BlackBoxOutputData(nbIndividual, nbParams, nbEvals)
 {
 
 }

@@ -124,7 +124,7 @@ protected:
         sum2 /= N;
 
         if(computeGradient)
-        	grad = eps + std::log(sum1) - sum2 / (eta * sum1);
+            grad = eps + std::log(sum1) - sum2 / (eta * sum1);
         return eta * eps + eta * std::log(sum1) + maxJ;
     }
 

@@ -32,8 +32,8 @@ namespace ReLe
 class EMOutputData:  virtual public BlackBoxOutputData<BlackBoxPolicyIndividual>
 {
 public:
-	EMOutputData(unsigned int nbIndividual, unsigned int nbParams,
-                   unsigned int nbEvals);
+    EMOutputData(unsigned int nbIndividual, unsigned int nbParams,
+                 unsigned int nbEvals);
     virtual void writeData(std::ostream& os);
     virtual void writeDecoratedData(std::ostream& os);
 };
