@@ -1250,18 +1250,16 @@ private:
         unsigned int dim = active_feat.n_elem;
         unsigned int n = dim - 1;
 
-        dtheta_simplex = arma::mat(dpr - 1, dpr, arma::fill::zeros);
+        dtheta_simplex = arma::mat(n, dpr, arma::fill::zeros);
 
         int i;
-        for (i = 0; i + 1 < dim; i++)
+        for (i = 0; i < n; i++)
         {
             unsigned int index = active_feat(i);
-            dtheta_simplex(index, index) = 1.0;
+            dtheta_simplex(i, index) = 1.0;
         }
 
-        arma::vec tmp = arma::zeros(dpr - 1);
-        tmp(active_feat.head(n)).ones();
-        dtheta_simplex.col(active_feat(i)) -= tmp;
+        dtheta_simplex.col(active_feat(i)) -= arma::ones(n);
     }
 
     void computeGradient(arma::vec& gradient, arma::mat& dGradient)

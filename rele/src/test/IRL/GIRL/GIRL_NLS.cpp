@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     double anglePart = nbasis;
     double sigma = 1.0/anglePart;
 
-    arma::vec cT = {0, 0};
+    /*arma::vec cT = {0, 0};
     arma::vec cF = {10, 10};
     BasisFunction* bfT = new GaussianRbf(cT, sigma);
     BasisFunction* bfF = new GaussianRbf(cF, sigma);
@@ -115,7 +115,9 @@ int main(int argc, char *argv[])
     {
         double angle = i*2.0/anglePart*M_PI;
         basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, sigma));
-    }
+    }*/
+
+    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-10, 10, -10, 10});
 
     DenseFeatures phiReward(basisReward);
 
