@@ -34,6 +34,8 @@ public:
         return "ParametricNormal";
     }
 
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
     // DifferentiableDistribution interface
 public:
 
@@ -106,7 +108,7 @@ public:
  * Gaussian with mean and diagonal covariance.
  * Both mean and variance are learned.
  */
-class ParametricDiagonalNormal : public ParametricNormal
+class ParametricDiagonalNormal : public ParametricNormal, public FisherInterface
 {
 public:
     ParametricDiagonalNormal(arma::vec mean, arma::vec covariance);
@@ -118,6 +120,8 @@ public:
     {
         return "ParametricDiagonalNormal";
     }
+
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
 
     // DifferentiableDistribution interface
 public:
@@ -192,6 +196,8 @@ public:
         return "ParametricLogisticNormal";
     }
 
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
     // DifferentiableDistribution interface
 public:
     arma::vec difflog(const arma::vec& point);
@@ -233,7 +239,7 @@ protected:
 
 };
 
-class ParametricCholeskyNormal : public ParametricNormal
+class ParametricCholeskyNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
@@ -267,6 +273,8 @@ public:
         updateInternalState();
     }
 
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
     // WritableInterface interface
 public:
     void writeOnStream(std::ostream &out);
@@ -284,6 +292,52 @@ protected:
     void updateInternalState();
 
 };
+
+class ParametricFullNormal : public ParametricNormal, public FisherInterface
+{
+
+public:
+    ParametricFullNormal(arma::vec& initial_mean,
+                         arma::mat& initial_cov);
+
+    virtual ~ParametricFullNormal()
+    {}
+
+    virtual inline std::string getDistributionName()
+    {
+        return "ParametricFullNormal";
+    }
+
+    // DifferentiableDistribution interface
+public:
+    arma::vec difflog(const arma::vec& point);
+    arma::mat diff2log(const arma::vec& point);
+
+    arma::sp_mat FIM();
+    arma::sp_mat inverseFIM();
+
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+
+    // WritableInterface interface
+public:
+    void writeOnStream(std::ostream &out);
+    void readFromStream(std::istream &in);
+
+public:
+    unsigned int getParametersSize();
+    virtual arma::vec getParameters();
+    virtual void setParameters(arma::vec& newval);
+    virtual void update(arma::vec &increment);
+
+
+    // ParametricNormal interface
+protected:
+    void updateInternalState();
+
+};
+
+
+
 
 
 } //end namespace

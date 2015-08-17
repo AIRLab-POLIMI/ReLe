@@ -41,8 +41,10 @@ ParametricNormal::ParametricNormal(unsigned int support_dim)
       mean(support_dim, fill::zeros),
       Cov(support_dim, support_dim, fill::eye),
       invCov(support_dim, support_dim, fill::eye),
-      cholCov(support_dim, support_dim, fill::eye)
+      cholCov(support_dim, support_dim, fill::eye),
+      detValue(0)
 {
+
 }
 
 ParametricNormal::ParametricNormal(vec& params, mat& covariance)
@@ -67,6 +69,12 @@ vec ParametricNormal::operator() ()
 double ParametricNormal::operator() (vec& point)
 {
     return mvnpdfFast(point, mean, invCov, detValue);
+}
+
+void ParametricNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    mean = samples*weights/sum(weights);
+    updateInternalState();
 }
 
 void ParametricNormal::update(vec &increment)
@@ -140,6 +148,22 @@ ParametricDiagonalNormal::ParametricDiagonalNormal(arma::vec mean, arma::vec sta
     assert(mean.n_elem == standardeviation.n_elem);
     this->mean = mean;
     updateInternalState();
+}
+
+void ParametricDiagonalNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    double sumD = sum(weights);
+    double sumD2 = sum(square(weights));
+    double Z = sumD - sumD2/sumD;
+
+    mean = samples*weights/sumD;
+
+    arma::mat delta = samples;
+    delta.each_col() -= mean;
+    diagStdDev = square(delta)*weights/Z;
+
+    updateInternalState();
+
 }
 
 arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
@@ -410,6 +434,11 @@ ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec log
     updateInternalState();
 }
 
+void ParametricLogisticNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    //TODO implement
+}
+
 vec ParametricLogisticNormal::difflog(const vec& point)
 {
     vec diff = point - mean;
@@ -575,6 +604,22 @@ ParametricCholeskyNormal::ParametricCholeskyNormal(vec& initial_mean, mat& initi
     this->updateInternalState();
 }
 
+void ParametricCholeskyNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    double sumD = sum(weights);
+    double sumD2 = sum(square(weights));
+    double Z = sumD - sumD2/sumD;
+
+    mean = samples*weights/sumD;
+
+    arma::mat delta = samples;
+    delta.each_col() -= mean;
+
+    cholCov = arma::chol(delta*diagmat(weights)*delta.t())/std::sqrt(Z);
+
+    updateInternalState();
+}
+
 vec ParametricCholeskyNormal::difflog(const vec& point)
 {
     int paramSize = this->getParametersSize();
@@ -626,7 +671,8 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
 
 mat ParametricCholeskyNormal::diff2log(const vec &point)
 {
-
+    //TODO implement
+    return mat();
 }
 
 sp_mat ParametricCholeskyNormal::FIM()
@@ -795,5 +841,115 @@ void ParametricCholeskyNormal::updateInternalState()
     invCov = inv(Cov);
     detValue = det(Cov);
 }
+
+///////////////////////////////////////////////////////
+/// Full covariance matrix
+///////////////////////////////////////////////////////
+ParametricFullNormal::ParametricFullNormal(arma::vec& initial_mean,
+        arma::mat& initial_cov) : ParametricNormal(initial_mean.n_elem)
+{
+    mean = initial_mean;
+    Cov = initial_cov;
+
+    updateInternalState();
+}
+
+arma::vec ParametricFullNormal::difflog(const arma::vec& point)
+{
+    //TODO implement
+    return mat();
+}
+
+arma::mat ParametricFullNormal::diff2log(const arma::vec& point)
+{
+    //TODO implement
+    return mat();
+}
+
+arma::sp_mat ParametricFullNormal::FIM()
+{
+    //TODO implement
+    return sp_mat();
+}
+
+arma::sp_mat ParametricFullNormal::inverseFIM()
+{
+    //TODO implement
+    return sp_mat();
+}
+
+void ParametricFullNormal::wmle(const arma::vec& weights, const arma::mat& samples)
+{
+    double sumD = sum(weights);
+    double sumD2 = sum(square(weights));
+    double Z = sumD - sumD2/sumD;
+
+    mean = samples*weights/sumD;
+
+    arma::mat delta = samples;
+    delta.each_col() -= mean;
+    Cov = delta*diagmat(weights)*delta.t()/Z;
+
+    updateInternalState();
+}
+
+void ParametricFullNormal::writeOnStream(std::ostream &out)
+{
+    //TODO implement
+}
+
+void ParametricFullNormal::readFromStream(std::istream &in)
+{
+    //TODO implement
+}
+
+unsigned int ParametricFullNormal::getParametersSize()
+{
+    return mean.n_elem + Cov.n_elem;
+}
+
+arma::vec ParametricFullNormal::getParameters()
+{
+    arma::vec w(getParametersSize());
+    w.rows(0, mean.n_elem - 1) = mean;
+    w.rows(mean.n_elem, w.n_elem - 1) = vectorise(Cov);
+    return w;
+}
+
+void ParametricFullNormal::setParameters(arma::vec& newval)
+{
+    mean = newval.rows(0, mean.n_elem - 1);
+
+    const auto& newCov = newval.rows(mean.n_elem, newval.n_elem -1);
+
+    for(unsigned i = 0; i < newCov.n_elem; i++)
+        Cov[i] = newCov[i];
+
+
+    updateInternalState();
+}
+
+void ParametricFullNormal::update(arma::vec &increment)
+{
+    mean += increment.rows(0, mean.n_elem - 1);
+
+    const auto& covInc = increment.rows(mean.n_elem, increment.n_elem -1);
+
+    for(unsigned i = 0; i < covInc.n_elem; i++)
+        Cov[i] += covInc[i];
+
+    updateInternalState();
+
+}
+
+
+void ParametricFullNormal::updateInternalState()
+{
+    invCov     = inv(Cov);
+    detValue   = det(Cov);
+    cholCov    = chol(Cov);
+}
+
+
 
 } //end namespace

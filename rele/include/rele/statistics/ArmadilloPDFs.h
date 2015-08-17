@@ -60,7 +60,7 @@ inline double mvnpdfFast(const arma::vec& x,
 
 /**
  * Calculates the multivariate Gaussian probability density function and also
- * the gradients of the mean and variance w.r.t. the input value x.
+ * the gradients of the mean w.r.t. the input value x.
  *
  * Example use:
  * @code
@@ -73,8 +73,7 @@ inline double mvnpdfFast(const arma::vec& x,
 inline double mvnpdf(const arma::vec& x,
                      const arma::vec& mean,
                      const arma::mat& cov,
-                     arma::vec& g_mean,
-                     arma::vec& g_cov)
+                     arma::vec& g_mean)
 {
 
     //compute distance from mean
@@ -92,8 +91,45 @@ inline double mvnpdf(const arma::vec& x,
     arma::vec invDiff = cinv*diff;
     g_mean = f * invDiff;
 
-    // Calculate the g_cov values; this is a (1 x (dim * (dim + 1) / 2)) vector.
-    g_cov = arma::vectorise(f * (cinv * diff * diff.t() * cinv - cinv));
+    return f;
+}
+
+/**
+ * Calculates the multivariate Gaussian probability density function and also
+ * the gradients of the mean and  cholesky decomposition of covariance w.r.t. the input value x.
+ *
+ * Example use:
+ * @code
+ * extern arma::vec x, mean, g_mean, g_cov;
+ * std::vector<arma::mat> d_cov; // the dSigma
+ * ....
+ * double f = phi(x, mean, cov, d_cov, &g_mean, &g_cov);
+ * @endcode
+ */
+inline double mvnpdf(const arma::vec& x,
+                     const arma::vec& mean,
+                     const arma::mat& cholCov,
+                     arma::vec& g_mean,
+                     arma::mat& g_cholSigma)
+{
+
+    //compute distance from mean
+    arma::vec diff = x - mean;
+    arma::mat cov = cholCov*cholCov.t();
+    arma::mat cinv = arma::inv(cov);
+
+    // compute exponent
+    double exponent = -0.5 * arma::dot(diff, cinv*diff);
+
+    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
+                    * exp(exponent) / sqrt(arma::det(cov));
+
+    // Calculate the gradient w.r.t. the mean; this is a (dim x 1) vector.
+    arma::vec invDiff = cinv*diff;
+    g_mean = f * invDiff;
+
+    // Calculate the gradient w.r.t. the cholesky decomposition of covariance; this is a (dim x dim) matrix.
+    g_cholSigma = f*(diff*diff.t()*cinv*cholCov - arma::inv(arma::diagmat(cholCov.diag())));
 
     return f;
 }

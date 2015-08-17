@@ -25,41 +25,60 @@
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_EM_EPISODE_BASED_RWR_H_
 
 #include "policy_search/BlackBoxAlgorithm.h"
+#include "policy_search/em/episode_based/EMOutputData.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class RWR: public BlackBoxAlgorithm<ActionC, StateC, ParametricNormal, BlackBoxOutputData>
+class RWR: public BlackBoxAlgorithm<ActionC, StateC, EMOutputData>
 {
-	USE_BBA_MEMBERS(BlackBoxOutputData)
+    USE_BBA_MEMBERS(ActionC, StateC, EMOutputData)
 
 public:
-	RWR()
-	{
+    RWR(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
+        unsigned int nbEpisodes, unsigned int nbPolicies,
+        RewardTransformation& reward_tr, double beta)
+        : Base(dist, policy, nbEpisodes, nbPolicies, reward_tr), beta(beta)
+    {
 
-	}
+    }
 
-	virtual ~RWR()
-	{
+    RWR(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
+        unsigned int nbEpisodes, unsigned int nbPolicies,
+        double beta, int reward_obj = 0)
+        : Base(dist, policy, nbEpisodes, nbPolicies, reward_obj), beta(beta)
+    {
+    }
 
-	}
+
+    virtual ~RWR()
+    {
+
+    }
 
 protected:
     virtual void init()
     {
-
+        d.zeros(nbPoliciesToEvalMetap);
+        theta.resize(policy.getParametersSize(), nbPoliciesToEvalMetap);
     }
 
     virtual void afterPolicyEstimate()
     {
-
+        d(polCount) = std::exp(beta*Jpol/nbEpisodesToEvalPolicy);
+        theta.col(polCount) = policy.getParameters();
     }
 
     virtual void afterMetaParamsEstimate()
     {
-
+        dist.wmle(d, theta);
     }
+
+private:
+    arma::vec d;
+    arma::mat theta;
+    double beta;
 
 };
 

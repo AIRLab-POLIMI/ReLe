@@ -69,6 +69,8 @@ public:
 
     virtual std::string getDistributionName() = 0;
 
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) = 0;
+
 protected:
     unsigned int pointSize;
 

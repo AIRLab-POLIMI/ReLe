@@ -28,6 +28,8 @@
 
 #include <nlopt.hpp>
 
+#include "Utils.h"
+
 using namespace std;
 using namespace ReLe;
 
@@ -109,6 +111,25 @@ int main(int argc, char *argv[])
     std::cout << "xopt = " << w[0] << ", " << w[1] << std::endl;
     std::cout << "x    = " << x[0] << ", " << x[1] << std::endl;
 
+    cout << "Parameters" << endl;
+    cout << w.t();
+    cout << "Numerical gradient" << endl;
+    auto lambda = [&](const arma::vec& par)
+    {
+        regressor.setParameters(par);
+        return arma::as_scalar(regressor(w));
+    };
+    arma::vec numGrad = utils::computeNumericalGradient(lambda, w);
+    cout << numGrad.t();
+    cout << "Actual gradient" << endl;
+    regressor.setParameters(w);
+    arma::vec grad1 = regressor.diff(w);
+    cout << grad1.t();
+    cout << "Error" << endl;
+    cout << numGrad.t() - grad1.t();
+    cout << "Error Norm" << endl;
+    cout << arma::norm(numGrad.t() - grad1.t()) << endl;
+
 
     //Test GaussianMixture Regressor
     std::vector<arma::vec> mu;
@@ -116,10 +137,11 @@ int main(int argc, char *argv[])
     mu.push_back({-1.0, -1.0});
     GaussianMixtureRegressor regressor2(phi, mu);
 
+    std::cout << "Test parameters get" << std::endl;
     std::cout << regressor2.getParametersSize() << std::endl;
     std::cout << regressor2.getParameters().t();
 
-
+    std::cout << "Test regressor value" << std::endl;
     arma::vec in1 = {0, 0};
     arma::vec in2 = {1, 1};
     arma::vec in3 = {-1, -1};
@@ -127,6 +149,32 @@ int main(int argc, char *argv[])
     std::cout << regressor2(in2).t() << "(0.0810)" << std::endl;
     std::cout << regressor2(in3).t() << "(0.0810)" << std::endl;
 
+    std::cout << "Test regressor diff" << std::endl;
+
+
+    cout << "Parameters" << endl;
+    arma::vec parGMM = regressor2.getParameters();
+    cout << parGMM.t();
+    cout << "Numerical gradient" << endl;
+    auto lambda2 = [&](const arma::vec& par)
+    {
+        regressor2.setParameters(par);
+        return arma::as_scalar(regressor2(in1));
+    };
+    arma::vec numGrad2 = utils::computeNumericalGradient(lambda2, parGMM);
+    cout << numGrad2.t();
+    cout << "Actual gradient" << endl;
+    regressor2.setParameters(parGMM);
+    arma::vec grad2 = regressor2.diff(in1);
+    cout << grad2.t();
+    cout << "Error" << endl;
+    cout << (numGrad2 - grad2).t();
+    cout << "Error Norm" << endl;
+    cout << arma::norm(numGrad2 - grad2) << endl;
+
+
+
+    std::cout << "Test parameters set" << std::endl;
     arma::vec newPar = regressor2.getParameters();
 
     newPar(0) = 0.6;
@@ -142,5 +190,6 @@ int main(int argc, char *argv[])
     std::cout << regressor2.getParametersSize() << std::endl;
     std::cout << newPar.t();
     std::cout << regressor2.getParameters().t();
+
 
 }

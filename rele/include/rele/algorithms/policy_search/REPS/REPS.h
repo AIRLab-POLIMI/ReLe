@@ -34,18 +34,17 @@
 namespace ReLe
 {
 
-template<class ActionC, class StateC, class DistributionC>
-class REPS: public BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
+template<class ActionC, class StateC>
+class REPS: public BlackBoxAlgorithm<ActionC, StateC, REPSOutputData>
 {
 
-    USE_BBA_MEMBERS(REPSOutputData)
+    USE_BBA_MEMBERS(ActionC, StateC, REPSOutputData)
 
 public:
-    REPS(DistributionC& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies,
-         bool baseline = true, int reward_obj = 0)
-        : BlackBoxAlgorithm<ActionC, StateC, DistributionC, REPSOutputData>
-        (dist, policy, nbEpisodes, nbPolicies, baseline, reward_obj)
+    REPS(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
+         unsigned int nbEpisodes, unsigned int nbPolicies, int reward_obj = 0)
+        : BlackBoxAlgorithm<ActionC, StateC, REPSOutputData>
+        (dist, policy, nbEpisodes, nbPolicies, reward_obj)
     {
         etaOpt = 1;
         //default parameters
@@ -65,7 +64,7 @@ public:
 protected:
     virtual void init()
     {
-        history_theta.assign(nbPoliciesToEvalMetap, arma::vec(policy.getParametersSize()));
+        theta.set_size(policy.getParametersSize(), nbPoliciesToEvalMetap);
         history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
         maxJ = -std::numeric_limits<double>::infinity();
 
@@ -73,7 +72,7 @@ protected:
         etaOpt = 1;
 
         //setup optimization algorithm
-        optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, 1);
+        optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, 1);
         optimizator.set_min_objective(REPS::wrapper, this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-12);
@@ -90,13 +89,13 @@ protected:
         history_J[polCount] = Jpol;
         if (maxJ < Jpol)
             maxJ = Jpol;
-        history_theta[polCount] = policy.getParameters();
+        theta.col(polCount) = policy.getParameters();
     }
 
     virtual void afterMetaParamsEstimate()
     {
         //--- Update current data
-        currentItStats->covariance = dist.getCovariance();
+        //currentItStats->covariance = dist.getCovariance();
         //---
 
         //optimize function
@@ -106,7 +105,7 @@ protected:
         maxJ = -std::numeric_limits<double>::infinity();
     }
 
-    double dualFunction(const double& eta, double& grad)
+    double dualFunction(const double& eta, double& grad, bool computeGradient)
     {
 
         double sum1 = 0;
@@ -117,21 +116,22 @@ protected:
         for (auto& sample : history_J)
         {
             double r = sample - maxJ; //numeric trick
-            sum1 += exp(r / eta);
-            sum2 += exp(r / eta) * r;
+            sum1 += std::exp(r / eta);
+            sum2 += std::exp(r / eta) * r;
         }
 
         sum1 /= N;
         sum2 /= N;
 
-        grad = eps + log(sum1) - sum2 / (eta * sum1);
-        return eta * eps + eta * log(sum1) + maxJ;
+        if(computeGradient)
+            grad = eps + std::log(sum1) - sum2 / (eta * sum1);
+        return eta * eps + eta * std::log(sum1) + maxJ;
     }
 
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        return reinterpret_cast<REPS*>(o)->dualFunction(*x, *grad);
+        return reinterpret_cast<REPS*>(o)->dualFunction(*x, *grad, grad != nullptr);
     }
 
     void updatePolicy()
@@ -142,8 +142,6 @@ protected:
 
         //update parameters
         etaOpt = newParameters.back();
-//        std::cout << etaOpt << std::endl;
-//        std::cout << optimizator.last_optimum_value() << std::endl;
 
         //--- save eta value
         currentItStats->eta = etaOpt;
@@ -157,45 +155,13 @@ protected:
             d[i] = exp(r / etaOpt);
         }
 
-//        char ddd[455];
-//        sprintf(ddd,"/tmp/d%d.dat",runCount);
-//        d.save(ddd, arma::raw_ascii);
 
-        //Compute weights sums
-        double dSum = sum(d);
-        double d2Sum = sum(square(d));
-        double Z = (dSum*dSum - d2Sum) / dSum;
-
-        unsigned int thethaSize = policy.getParametersSize();
-
-        //Compute mean
-        arma::vec mean(thethaSize, arma::fill::zeros);
-        for(unsigned int i = 0; i < d.size(); i++)
-        {
-            const arma::vec& theta = history_theta[i];
-            mean += d[i]*theta;
-        }
-
-        mean /= dSum;
-
-        //Compute covariance
-        arma::mat cov(thethaSize, thethaSize, arma::fill::zeros);
-        for(unsigned int i = 0; i < d.size(); i++)
-        {
-            const arma::vec& theta = history_theta[i];
-            arma::vec delta = theta - mean;
-            cov += d[i]*delta*delta.t();
-        }
-
-        cov /= Z;
-
-        //Update high level policy
-        dist.setMeanAndCovariance(mean, cov);
+        dist.wmle(d, theta);
 
     }
 
 protected:
-    std::vector<arma::vec> history_theta;
+    arma::mat theta;
     double maxJ;
 
     double etaOpt;

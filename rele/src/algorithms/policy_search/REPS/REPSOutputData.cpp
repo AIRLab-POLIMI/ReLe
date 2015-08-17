@@ -106,7 +106,6 @@ void REPSOutputData::writeData(ostream& os)
     }
 
     os << eta << std::endl;
-    CSVutils::matrixToCSV(covariance, os);
 }
 
 void REPSOutputData::writeDecoratedData(ostream& os)

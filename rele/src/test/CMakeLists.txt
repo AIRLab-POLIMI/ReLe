@@ -140,14 +140,6 @@ add_executable(taxi_hierarchical hierarchical/taxi/TaxiFuelTest.cpp
                                  hierarchical/taxi/TaxiOptions.cpp)
 target_link_libraries(taxi_hierarchical rele)
 
-
-#REPS test
-add_executable(lqr_REPS REPS/LqrREPSTest.cpp)
-target_link_libraries(lqr_REPS rele)
-
-add_executable(nls_REPS REPS/NlsREPSTest.cpp)
-target_link_libraries(nls_REPS rele)
-
 #BBO test
 add_executable(deep_BBO BBO/DeepBBOTest.cpp)
 target_link_libraries(deep_BBO rele)

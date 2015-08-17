@@ -318,7 +318,7 @@ int main(int argc, char *argv[])
         arma::mat cov(nparams, nparams, arma::fill::eye);
         mat cholMtx = chol(cov);
         ParametricCholeskyNormal* distr = new ParametricCholeskyNormal(mean, cholMtx);
-        eNES<FiniteAction, DenseState, ParametricCholeskyNormal>* agent= new eNES<FiniteAction, DenseState, ParametricCholeskyNormal>
+        eNES<FiniteAction, DenseState>* agent= new eNES<FiniteAction, DenseState>
         (*distr, policy, nbepperpol, nbpolperupd, *(config.steprule), usebaseline);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "deep_enes.log");
@@ -327,9 +327,8 @@ int main(int argc, char *argv[])
     {
         arma::vec mean(nparams, fill::zeros);
         arma::mat cov(nparams, nparams, arma::fill::eye);
-        ParametricNormal* distr= new ParametricNormal(mean, cov);
-        REPS<FiniteAction, DenseState, ParametricNormal>* agent = new REPS<FiniteAction, DenseState, ParametricNormal>
-        (*distr,policy,nbepperpol,nbpolperupd);
+        ParametricNormal* distr= new ParametricFullNormal(mean, cov);
+        REPS<FiniteAction, DenseState>* agent = new REPS<FiniteAction, DenseState>(*distr,policy,nbepperpol,nbpolperupd);
         agent->setEps(0.9);
         core = new ReLe::Core<FiniteAction, DenseState>(mdp, *agent);
         sprintf(outputname, "deep_reps.log");

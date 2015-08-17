@@ -1,5 +1,5 @@
-function [ iteration, index ] = ReadREPSStatistics(csv, index)
-%READREPSSTATISTICS Read REPS statistics
+function [ iteration, index ] = ReadEMStatistics(csv, index)
+%READEMSTATISTICS Read EM statistics
 %   Read all the parameters used by the algorithm and their reward
 
 index = index +1; %skip episode info
@@ -19,9 +19,6 @@ for i=1:individualsN
     index = index +1;
     iteration.policies(i).J = csv(index, 1:nbEpisodesPerPolicy);
 end
-
-index = index + 1;
-iteration.eta = csv(index, 1);
 
 index = index + 1; %go to next episode
 

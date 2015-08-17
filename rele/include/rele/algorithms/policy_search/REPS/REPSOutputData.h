@@ -66,29 +66,6 @@ private:
     std::string policyPrinted;
 };
 
-/*
-class EpisodicREPSOutputData: public AgentOutputData
-{
-public:
-    EpisodicREPSOutputData(double eps, const std::string& policyName,
-                           const arma::vec& policyParameters,
-                           const arma::mat& policyVariance,
-                           std::vector<ParameterSample>& samples);
-
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
-
-    virtual ~EpisodicREPSOutputData();
-
-private:
-    double eps;
-    std::string policyName;
-    arma::vec policyParameters;
-    arma::mat policyVariance;
-
-    std::vector<ParameterSample> samples;
-
-};*/
 
 class REPSOutputData : virtual public BlackBoxOutputData<BlackBoxPolicyIndividual>
 {
@@ -100,7 +77,6 @@ public:
 
 public:
     double eta;
-    arma::mat covariance;
 };
 
 

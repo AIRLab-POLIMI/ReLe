@@ -73,7 +73,7 @@ public:
         arma::vec g_sigma;
         const arma::vec& value = phi(input);
 
-        mvnpdf(value, mu, sigma, g_mean, g_sigma);
+        mvnpdf(value, mu, sigma, g_mean);
 
         return g_mean;
     }
@@ -213,14 +213,15 @@ public:
         for(unsigned int i = 0; i < n; i++)
         {
             arma::vec g_mean;
-            arma::vec g_sigma;
+            arma::mat dCholSigma;
 
-            arma::mat sigma = cholSigma[i]*cholSigma[i].t();
-            diffV(i) = mvnpdf(value, mu[i], sigma, g_mean, g_sigma);
+            diffV(i) = mvnpdf(value, mu[i], cholSigma[i], g_mean, dCholSigma);
 
             diffV(arma::span(start,start + dim - 1)) = h[i]*g_mean;
             start = start + dim;
             unsigned int nSigma = dim + (dim*dim-dim)/2;
+            arma::vec g_sigma(nSigma);
+            triangularToVec(nSigma, dCholSigma, g_sigma);
             diffV(arma::span(start,start + nSigma -1)) = h[i]*g_sigma;
             start += nSigma;
         }
