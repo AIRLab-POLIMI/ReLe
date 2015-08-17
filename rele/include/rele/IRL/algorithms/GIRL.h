@@ -137,6 +137,9 @@ public:
             optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, effective_dim);
         }
 
+
+        std::cout << "Optimization dim: " << effective_dim << std::endl << std::endl;
+
         optimizator.set_min_objective(GIRL::wrapper, this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-8);
@@ -238,22 +241,22 @@ public:
             // simplex scenario
             parV(active_feat(arma::span(0,dim-2))) = x;
             parV(active_feat(dim-1)) = 1.0 - sum(x);
-//            double sumx = 0.0;
-//            for (int i = 0; i < n; ++i)
-//            {
-//                parV(active_feat(i)) = x[i];
-//                sumx += x[i];
-//            }
-//            parV(active_feat(n)) = 1 - sumx;
+            //            double sumx = 0.0;
+            //            for (int i = 0; i < n; ++i)
+            //            {
+            //                parV(active_feat(i)) = x[i];
+            //                sumx += x[i];
+            //            }
+            //            parV(active_feat(n)) = 1 - sumx;
         }
         else
         {
             // full features
             parV(active_feat) = x;
-//            for (int i = 0; i < dim; ++i)
-//            {
-//                parV(active_feat(i)) = x[i];
-//            }
+            //            for (int i = 0; i < dim; ++i)
+            //            {
+            //                parV(active_feat(i)) = x[i];
+            //            }
         }
 
 
@@ -473,16 +476,24 @@ public:
             auto it = std::set_difference(q.begin(), q.end(), const_ft.begin(), const_ft.end(), active_feat.begin());
             active_feat.resize(it-active_feat.begin());
 
-            std::cout << "--- LINEAR REWARD: PRE-PROCESSING ---" << std::endl;
+            std::cout << "=== LINEAR REWARD: PRE-PROCESSING ===" << std::endl;
             std::cout << "Feature expectation\n mu: " << mu.t();
             std::cout << "Constant features\n cf: " << const_ft.t();
             std::cout << "based on mu test, the following features are preserved\n q: " << q.t();
             std::cout << "Finally the active features are\n q - cf: " << active_feat.t();
-            std::cout << "--------------------------------------------" << std::endl;
+            std::cout << "=====================================" << std::endl;
 
             // force simplex constraint with linear reward parametrizations
             useSimplexConstraints = true;
         }
+
+        std::cout << std::endl << "Initial dim: " << dpr << std::endl;
+        if (active_feat.n_elem < dpr)
+        {
+            std::cout << std::endl << "Reduced dim: " << active_feat.n_elem << std::endl;
+            std::cout << std::endl << " indicies: " << active_feat.t();
+        } else
+            std::cout << "NO feature reduction!" << std::endl;
     }
 
     /**
@@ -983,7 +994,7 @@ public:
         std::vector<arma::mat> baseline_R_num(maxSteps, arma::mat(dp,dpr, arma::fill::zeros));
         //for each episode, for each step, it store the discounted reward derivative (1 x dpr)
         std::vector<std::vector<arma::mat>> reward_R_ObjEpStep(nbEpisodes,
-                                         std::vector<arma::mat>(maxSteps,arma::mat())); //(1 x dpr)
+                                                               std::vector<arma::mat>(maxSteps,arma::mat())); //(1 x dpr)
 
         // store for each episode the sum of log-grad at a given time step
         arma::cube sumGradLog_CompEpStep(dp,nbEpisodes, maxSteps);
