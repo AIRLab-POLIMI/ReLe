@@ -117,7 +117,7 @@ else()
                                    ${Boost_LIBRARIES})
 endif()
 
-add_subdirectory(src/test)
+add_subdirectory(test)
 
 # ------------------------ INSTALLATION ------------------------
 
