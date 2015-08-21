@@ -272,9 +272,14 @@ private:
 
             //Propagate the gradients w.r.t. the next lower-level hidden layer’s activations
             arma::vec gn(h[layer].n_elem);
+
             for (unsigned int i = 0; i < gn.n_elem; i++)
             {
-                unsigned int start = end2 - g.size();
+                unsigned int start = end2;
+                std::cout << start << std::endl;
+                std::cout << end2 << std::endl;
+                std::cout << "------------" << std::endl;
+
                 arma::vec&& Wki = w(arma::span(start, end2 - 1));
                 gn[i] = as_scalar(Wki.t() * g);
                 end2 = start - 1;

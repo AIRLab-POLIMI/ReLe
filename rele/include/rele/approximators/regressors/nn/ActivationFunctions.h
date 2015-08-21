@@ -49,7 +49,7 @@ public:
     inline virtual double diff(double x)
     {
         Sigmoid& f = *this;
-        return f(1 - f(x));
+        return f(x)*(1 - f(x));
     }
 };
 
