@@ -430,7 +430,8 @@ public:
         {
             std::cout << std::endl << "Reduced dim: " << active_feat.n_elem << std::endl;
             std::cout << std::endl << " indicies: " << active_feat.t();
-        } else
+        }
+        else
             std::cout << "NO feature reduction!" << std::endl;
     }
 

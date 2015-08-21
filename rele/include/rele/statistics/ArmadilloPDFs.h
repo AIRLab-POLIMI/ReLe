@@ -204,14 +204,14 @@ inline void mvnpdf(const arma::mat& x,
                     pow(det(cov), -0.5) * exponents;
 }
 
-inline arma::mat mvnrand(int n, arma::vec& mu, arma::mat& sigma)
+inline arma::mat mvnrand(int n, const arma::vec& mu, const arma::mat& sigma)
 {
     int ncols = sigma.n_cols;
     arma::mat Y = arma::randn(n, ncols);
     return arma::repmat(mu, 1, n).t() + Y * arma::chol(sigma);
 }
 
-inline arma::vec mvnrand(arma::vec& mu, arma::mat& sigma)
+inline arma::vec mvnrand(const arma::vec& mu, const arma::mat& sigma)
 {
     int ncols = sigma.n_cols;
     arma::mat Y = arma::randn(1, ncols);
@@ -219,7 +219,7 @@ inline arma::vec mvnrand(arma::vec& mu, arma::mat& sigma)
     return mu + temp.t();
 }
 
-inline arma::vec mvnrandFast(arma::vec& mu, arma::mat& CholSigma)
+inline arma::vec mvnrandFast(const arma::vec& mu, const arma::mat& CholSigma)
 {
     int ncols = mu.n_rows;
     arma::mat Y = arma::randn(1, ncols);

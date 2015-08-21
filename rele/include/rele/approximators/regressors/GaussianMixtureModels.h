@@ -109,6 +109,9 @@ public:
 
         h = arma::vec(n, arma::fill::ones)/n;
 
+        //default precision of EM algorithm
+        precision = 1e-8;
+
     }
 
     GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu)
@@ -123,6 +126,9 @@ public:
         }
 
         h = arma::vec(n, arma::fill::ones)/n;
+
+        //default precision of EM algorithm
+        precision = 1e-8;
     }
 
     GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu, std::vector<arma::mat>& cholSigma)
@@ -130,6 +136,9 @@ public:
     {
         unsigned int n = mu.size();
         h = arma::vec(n, arma::fill::ones)/n;
+
+        //default precision of EM algorithm
+        precision = 1e-8;
     }
 
     virtual void setParameters(const arma::vec& params)
@@ -190,13 +199,7 @@ public:
     {
         const arma::vec& value = phi(input);
 
-        arma::vec result(1);
-
-        for(unsigned int i = 0; i < mu.size(); i++)
-        {
-            arma::mat sigma = cholSigma[i]*cholSigma[i].t();
-            result(0) += h[i]*mvnpdf(value, mu[i], sigma);
-        }
+        arma::vec result = {arma::sum(computeMemberships(value))};
 
         return result;
     }
@@ -232,9 +235,99 @@ public:
         return arma::vec();
     }
 
+
+    void train(const std::vector<InputC>& samples)
+    {
+        assert(samples.size() > 0);
+
+
+        double N = samples.size();
+
+        //compute features matrix
+        arma::mat features(phi.rows(), samples.size());
+        for(int i = 0; i < samples.size(); i++)
+        {
+            features.col(i) = phi(samples[i]);
+        }
+
+
+        double oldLogL, logL = logLikelihood(features);
+
+        do
+        {
+            //save last log likelihood
+            oldLogL = logL;
+
+            //Expectation
+            arma::mat W(features.n_cols, mu.size());
+            for(unsigned int i = 0; i < features.n_cols; i++)
+            {
+                arma::vec&& memberships = computeMemberships(features.col(i));
+                W.row(i) = memberships.t()/arma::sum(memberships);
+            }
+
+            //Maximization
+            arma::vec Nk = arma::sum(W).t();
+            h = Nk/N;
+
+            std::cout << "h: " << h.t();
+
+            for(unsigned int k = 0; k < mu.size(); k++)
+            {
+                auto Wk = arma::diagmat(W.col(k));
+                mu[k] = arma::sum(features*Wk, 1)/Nk(k);
+
+                arma::mat delta = features;
+                delta.each_col() -= mu[k];
+
+                arma::mat Sigma = delta*Wk*delta.t()/Nk(k);
+                cholSigma[k] = arma::chol(Sigma);
+
+                std::cout << "mu["<< k<< "]: " << mu[k].t();
+            }
+
+            //compute new log likelihood
+            logL = logLikelihood(features);
+
+            std::cout << "logL: " << logL << std::endl;
+            std::cout << "---------------------------" << std::endl;
+
+        }
+        while(logL - oldLogL > precision);
+
+    }
+
     virtual ~GaussianMixtureRegressor_()
     {
 
+    }
+
+
+private:
+    double logLikelihood(const arma::mat& samples)
+    {
+        GaussianMixtureRegressor_& self = *this;
+        double value = 0;
+
+        for(int i = 0; i < samples.n_cols; i++)
+        {
+            auto xi = samples.col(i);
+            double likelihood = arma::as_scalar(self(xi));
+            value += std::log(likelihood);
+        }
+
+        return value;
+    }
+
+    arma::vec computeMemberships(const arma::vec& value)
+    {
+        arma::vec memberships(mu.size());
+        for (unsigned int i = 0; i < mu.size(); i++)
+        {
+            arma::mat sigma = cholSigma[i] * cholSigma[i].t();
+            memberships[i] = h[i] * mvnpdf(value, mu[i], sigma);
+        }
+        return memberships;
     }
 
 private:
@@ -242,6 +335,8 @@ private:
     arma::vec h;
     std::vector<arma::vec> mu;
     std::vector<arma::mat> cholSigma;
+
+    double precision;
 };
 
 typedef GaussianMixtureRegressor_<arma::vec> GaussianMixtureRegressor;

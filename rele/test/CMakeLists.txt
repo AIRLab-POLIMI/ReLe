@@ -29,6 +29,9 @@ target_link_libraries(trees_test rele)
 add_executable(gaussian_test core/GaussianMixtureModelsTest.cpp)
 target_link_libraries(gaussian_test rele)
 
+add_executable(em_test core/ExpectationMaximizationTest.cpp)
+target_link_libraries(em_test rele)
+
 #Matlab tests (miscellaneous)
 add_executable(chol_FIM miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)
