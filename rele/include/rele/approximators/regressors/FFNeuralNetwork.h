@@ -244,22 +244,14 @@ private:
 
             //Compute neuron outputs
             Function& f = *layerFunction[layer];
-            auto fun = [&](double val)
-            {
-                return f(val);
-            };
-            h[layer + 1] = a[layer];
-            h[layer + 1].transform(fun);
+            h[layer + 1] = f(a[layer]);
         }
     }
 
-    arma::vec backPropagation(arma::vec g, double lambda = 0.0)
+    arma::vec backPropagation(arma::vec g)
     {
         arma::vec gradW(paramSize);
         unsigned int end = gradW.n_elem - 1;
-
-        //Compute normalization derivative
-        //arma::vec&& dOmega = lambda * Omega->diff(w);
 
         for (unsigned int k = a.size(); k >= 1; k--)
         {
@@ -267,13 +259,7 @@ private:
 
             //Convert the gradient on the layer’s output into a gradient into the pre-nonlinearity activation
             Function& f = *layerFunction[layer];
-            auto fun = [&](double val)
-            {
-                return f.diff(val);
-            };
-            arma::vec df = a[layer];
-            df.transform(fun);
-            g = g % df;
+            g = g % f.diff(a[layer]);
 
             //Compute gradients on bias
             unsigned int start = end - b(layer).n_elem + 1;
@@ -305,10 +291,12 @@ private:
             forwardComputation(x);
             arma::vec yhat = h.back();
             arma::vec gs = yhat - y;
-            g += backPropagation(gs, lambda);
+            g += backPropagation(gs);
         }
 
         g /= static_cast<double>(dataset.size());
+
+        g += lambda*Omega->diff(*w);
 
     }
 
@@ -318,12 +306,12 @@ private:
 
         for (unsigned int i = 0; i < dataset.size(); i++)
         {
-        	const InputC& x = dataset.getInput(i);
-        	const arma::vec& y = dataset.getOutput(i);
+            const InputC& x = dataset.getInput(i);
+            const arma::vec& y = dataset.getOutput(i);
 
-        	FFNeuralNetwork_& net = *this;
+            FFNeuralNetwork_& net = *this;
 
-        	arma::vec wold = net.getParameters();
+            arma::vec wold = net.getParameters();
 
             auto lambda = [&](const arma::vec& par)
             {
@@ -346,6 +334,18 @@ private:
 
 private:
 
+    void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
+    {
+        arma::vec& w = *this->w;
+        arma::vec g(paramSize, arma::fill::zeros);
+
+        for (unsigned k = 0; k < params.maxIterations; k++)
+        {
+            computeGradient(dataset, params.lambda, g);
+            w -= params.alpha * g;
+        }
+    }
+
     void stochasticGradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
         arma::vec& w = *this->w;
@@ -357,18 +357,6 @@ private:
             computeGradient(*miniBatch, params.lambda, g);
             w -= params.alpha * g;
             delete miniBatch;
-        }
-    }
-
-    void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
-    {
-        arma::vec& w = *this->w;
-        arma::vec g(paramSize, arma::fill::zeros);
-
-        for (unsigned k = 0; k < params.maxIterations; k++)
-        {
-            computeGradient(dataset, params.lambda, g);
-            w -= params.alpha * g;
         }
     }
 
