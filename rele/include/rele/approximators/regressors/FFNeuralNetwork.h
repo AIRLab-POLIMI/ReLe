@@ -34,6 +34,8 @@
 #include "nn/ActivationFunctions.h"
 #include "nn/Regularization.h"
 
+#include "Utils.h"
+
 namespace ReLe
 {
 
@@ -209,9 +211,7 @@ private:
             input = output;
         }
 
-        w->ones();
-        //TODO remove
-        checkParameters();
+        w->randn();
 
         //Default parameters
         params.alg = GradientDescend;
@@ -312,11 +312,43 @@ private:
 
     }
 
+    void computeGradientNumerical(const BatchData<InputC, arma::vec>& dataset, arma::vec& g)
+    {
+        g.zeros();
+
+        for (unsigned int i = 0; i < dataset.size(); i++)
+        {
+        	const InputC& x = dataset.getInput(i);
+        	const arma::vec& y = dataset.getOutput(i);
+
+        	FFNeuralNetwork_& net = *this;
+
+        	arma::vec wold = net.getParameters();
+
+            auto lambda = [&](const arma::vec& par)
+            {
+
+                net.setParameters(par);
+                double value = arma::as_scalar(net(x) - y);
+
+                return 0.5*value*value;
+
+            };
+
+            g += utils::computeNumericalGradient(lambda, wold);
+
+            net.setParameters(wold);
+        }
+
+        g /= static_cast<double>(dataset.size());
+
+    }
+
 private:
 
     void stochasticGradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
-    	arma::vec& w = *this->w;
+        arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
@@ -330,21 +362,19 @@ private:
 
     void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
-    	arma::vec& w = *this->w;
+        arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
+
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
             computeGradient(dataset, params.lambda, g);
             w -= params.alpha * g;
-
-            checkParameters();//TODO levare
-            //std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
         }
     }
 
     void adadelta(const BatchData<InputC, arma::vec>& dataset)
     {
-    	arma::vec& w = *this->w;
+        arma::vec& w = *this->w;
 
         arma::vec g(paramSize, arma::fill::zeros);
         arma::vec r(paramSize, arma::fill::zeros);
@@ -382,10 +412,9 @@ private:
         return *bvec[layer];
     }
 
-    //TODO remove
     void checkParameters()
     {
-    	arma::vec& params = *this->w;
+        arma::vec& params = *this->w;
 
         unsigned int start = 0;
         for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
