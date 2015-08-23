@@ -70,16 +70,23 @@ int main(int argc, char *argv[])
 
 
     //Train atan2
-    FFNeuralNetwork atan2Net(phi, 5, 1);
+    cout << "atan2 test" << endl;
+    FFNeuralNetwork atan2Net(phi, 20, 1);
     BatchDataPlain<arma::vec, arma::vec> dataset;
 
     //Config parameters
     atan2Net.getHyperParameters().alg = FFNeuralNetwork::Adadelta;
-    atan2Net.getHyperParameters().epsilon = 0.01;
+    atan2Net.getHyperParameters().epsilon = 0.1;
     atan2Net.getHyperParameters().rho = 0.1;
-    atan2Net.getHyperParameters().maxIterations = 2500;
+    atan2Net.getHyperParameters().maxIterations = 10000;
     atan2Net.getHyperParameters().lambda = 0;
     atan2Net.getHyperParameters().minibatchSize = dataset.size();
+
+    /*atan2Net.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
+    atan2Net.getHyperParameters().alpha = 0.1;
+    atan2Net.getHyperParameters().maxIterations = 10000;
+    atan2Net.getHyperParameters().lambda = 0;*/
+
 
     for(int i = 0; i < 300; i++)
     {
@@ -113,8 +120,8 @@ int main(int argc, char *argv[])
 
     //Config parameters
     xorNet.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    xorNet.getHyperParameters().alpha = 0.6;
-    xorNet.getHyperParameters().maxIterations = 14000;
+    xorNet.getHyperParameters().alpha = 0.01;
+    xorNet.getHyperParameters().maxIterations = 2500;
     xorNet.getHyperParameters().lambda = 0;
 
     arma::vec i0 = {0.0, 0.0};

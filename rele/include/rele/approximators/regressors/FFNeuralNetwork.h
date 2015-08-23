@@ -73,9 +73,11 @@ public:
         setupNetwork();
     }
 
-    FFNeuralNetwork_(Features_<InputC, denseOutput>& phi, std::vector<unsigned int>& layerNeurons,
+    FFNeuralNetwork_(Features_<InputC, denseOutput>& phi,
+                     std::vector<unsigned int>& layerNeurons,
                      std::vector<Function*>& layerFunction) :
-        ParametricRegressor(layerNeurons.back()), phi(phi), layerFunction(layerFunction), layerNeurons(layerNeurons)
+        ParametricRegressor(layerNeurons.back()), phi(phi),
+        layerFunction(layerFunction), layerNeurons(layerNeurons)
     {
         setupNetwork();
     }
@@ -109,28 +111,14 @@ public:
 
     inline arma::vec getParameters() const
     {
-        return arma::vec(paramSize); //TODO implement
+        return *w;
     }
 
     inline void setParameters(const arma::vec& params)
     {
         assert(params.n_elem == getParametersSize());
 
-        unsigned int start = 0;
-        for(unsigned int layer = 0; layer < layerFunction.size(); layer++)
-        {
-        	unsigned int end = start + W[layer].n_elem -1;
-        	arma::mat Wnew = params(arma::span(start, end));
-        	Wnew.reshape(W[layer].n_rows, W[layer].n_cols);
-        	W[layer] = Wnew;
-
-        	start = end +1;
-
-        	end = start + b[layer].n_elem -1;
-        	b[layer] = params(arma::span(start, end));
-
-        	start = end + 1;
-        }
+        *w = params;
     }
 
     inline unsigned int getParametersSize() const
@@ -162,8 +150,7 @@ public:
 
     }
 
-    double computeJ(const BatchData<InputC, arma::vec>& dataset,
-                    double lambda)
+    double computeJ(const BatchData<InputC, arma::vec>& dataset, double lambda)
     {
         double J = 0;
 
@@ -189,7 +176,7 @@ public:
 private:
     void setupNetwork()
     {
-    	calculateParamSize();
+        calculateParamSize();
 
         h.push_back(arma::vec());
 
@@ -202,14 +189,29 @@ private:
         Omega = new L2_Regularization();
 
         //Create the network
+        aux_mem = new double[paramSize];
         unsigned int input = phi.rows();
+
+        w = new arma::vec(aux_mem, paramSize, false);
+
+        Wvec.resize(layerNeurons.size());
+        bvec.resize(layerNeurons.size());
+
+
+        unsigned int start = 0;
         for (unsigned int i = 0; i < layerNeurons.size(); i++)
         {
-        	unsigned int output = layerNeurons[i];
-        	W.push_back(arma::mat(output, input, arma::fill::zeros));
-        	b.push_back(arma::vec(output, arma::fill::zeros));
-        	input = output;
+            unsigned int output = layerNeurons[i];
+            Wvec[i] = new arma::mat(aux_mem + start, output, input, false);
+            start += Wvec[i]->n_elem;
+            bvec[i] = new arma::vec(aux_mem + start, output, false);
+            start += bvec[i]->n_elem;
+            input = output;
         }
+
+        w->ones();
+        //TODO remove
+        checkParameters();
 
         //Default parameters
         params.alg = GradientDescend;
@@ -237,12 +239,15 @@ private:
         unsigned int start = 0;
         for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
         {
-        	//Compute activation
-            a[layer] = W[layer]*h[layer] + b[layer];
+            //Compute activation
+            a[layer] = W(layer) * h[layer] + b(layer);
 
             //Compute neuron outputs
             Function& f = *layerFunction[layer];
-            auto fun = [&](double val){ return f(val);};
+            auto fun = [&](double val)
+            {
+                return f(val);
+            };
             h[layer + 1] = a[layer];
             h[layer + 1].transform(fun);
         }
@@ -251,7 +256,7 @@ private:
     arma::vec backPropagation(arma::vec g, double lambda = 0.0)
     {
         arma::vec gradW(paramSize);
-        unsigned int end = gradW.n_elem -1;
+        unsigned int end = gradW.n_elem - 1;
 
         //Compute normalization derivative
         //arma::vec&& dOmega = lambda * Omega->diff(w);
@@ -262,25 +267,27 @@ private:
 
             //Convert the gradient on the layer’s output into a gradient into the pre-nonlinearity activation
             Function& f = *layerFunction[layer];
-            auto fun = [&](double val){ return f.diff(val);};
+            auto fun = [&](double val)
+            {
+                return f.diff(val);
+            };
             arma::vec df = a[layer];
             df.transform(fun);
             g = g % df;
 
             //Compute gradients on bias
-            unsigned int start = end - b[layer].n_elem + 1;
-            gradW(arma::span(start, end)) = g;// + dOmega(arma::span(start, end));
+            unsigned int start = end - b(layer).n_elem + 1;
+            gradW(arma::span(start, end)) = g; // + dOmega(arma::span(start, end));
             end = start - 1;
 
-           start = end - W[layer].n_elem  + 1;
-           gradW(arma::span(start, end)) = arma::vectorise(g*h[layer].t());// + dOmega(arma::span(start, end));
-           end = start - 1;
-
+            start = end - W(layer).n_elem + 1;
+            gradW(arma::span(start, end)) = arma::vectorise(g * h[layer].t()); // + dOmega(arma::span(start, end));
+            end = start - 1;
 
             //Propagate the gradients w.r.t. the next lower-level hidden layer’s activations
             arma::vec gn(h[layer].n_elem);
 
-            g = W[layer].t()*g;
+            g = W(layer).t() * g;
         }
 
         return gradW;
@@ -309,31 +316,36 @@ private:
 
     void stochasticGradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
+    	arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
             const BatchData<InputC, arma::vec>* miniBatch =
                 dataset.getMiniBatch(params.minibatchSize);
             computeGradient(*miniBatch, params.lambda, g);
-            arma::vec deltaP = params.alpha * g;
+            w -= params.alpha * g;
             delete miniBatch;
         }
     }
 
     void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
     {
+    	arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
             computeGradient(dataset, params.lambda, g);
-            arma::vec deltaP = params.alpha * g;
+            w -= params.alpha * g;
 
+            checkParameters();//TODO levare
             //std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
         }
     }
 
     void adadelta(const BatchData<InputC, arma::vec>& dataset)
     {
+    	arma::vec& w = *this->w;
+
         arma::vec g(paramSize, arma::fill::zeros);
         arma::vec r(paramSize, arma::fill::zeros);
         arma::vec s(paramSize, arma::fill::zeros);
@@ -344,19 +356,52 @@ private:
                 dataset.getMiniBatch(params.minibatchSize);
             computeGradient(*miniBatch, params.lambda, g);
 
-            r = params.rho*r + (1 - params.rho)*arma::square(g);
+            r = params.rho * r + (1 - params.rho) * arma::square(g);
 
-            arma::vec deltaW = -arma::sqrt(s+params.epsilon)/arma::sqrt(r+params.epsilon)%g;
+            arma::vec deltaW = -arma::sqrt(s + params.epsilon)
+                               / arma::sqrt(r + params.epsilon) % g;
 
-            s = params.rho*s + (1 - params.rho)*arma::square(deltaW);
+            s = params.rho * s + (1 - params.rho) * arma::square(deltaW);
 
-            //w += deltaW;
+            w += deltaW;
 
             //std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
 
             delete miniBatch;
         }
 
+    }
+
+    inline arma::mat& W(unsigned int layer)
+    {
+        return *Wvec[layer];
+    }
+
+    inline arma::vec& b(unsigned int layer)
+    {
+        return *bvec[layer];
+    }
+
+    //TODO remove
+    void checkParameters()
+    {
+    	arma::vec& params = *this->w;
+
+        unsigned int start = 0;
+        for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
+        {
+            unsigned int end = start + W(layer).n_elem - 1;
+            arma::mat Wnew = params(arma::span(start, end));
+            Wnew.reshape(W(layer).n_rows, W(layer).n_cols);
+            assert(arma::sum(arma::sum(W(layer) != Wnew)) == 0);
+
+            start = end + 1;
+
+            end = start + b(layer).n_elem - 1;
+            assert(arma::sum(b(layer) != params(arma::span(start, end))) == 0);
+
+            start = end + 1;
+        }
     }
 
 private:
@@ -369,9 +414,10 @@ private:
     std::vector<Function*> layerFunction;
     unsigned int paramSize;
 
-
-    std::vector<arma::mat> W;
-    std::vector<arma::mat> b;
+    arma::vec* w;
+    std::vector<arma::mat*> Wvec;
+    std::vector<arma::vec*> bvec;
+    double* aux_mem;
 
     Regularization* Omega;
     Features_<InputC, denseOutput>& phi;
