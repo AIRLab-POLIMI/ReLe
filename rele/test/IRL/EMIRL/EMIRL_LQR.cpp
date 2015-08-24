@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     {
         std::cout << eReward(i) << " ";
     }
-    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
+    std::cout << "| Params: " << expertDist.getParameters().t() << std::endl;
 
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     arma::vec omega = irlAlg.getWeights();
 
     //Print results
-    cout << "Weights (gnorm): " << omega;
+    cout << "Weights (EM): " << omega.t();
 
 
     return 0;
