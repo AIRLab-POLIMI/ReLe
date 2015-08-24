@@ -100,9 +100,26 @@ public:
     {
         //obtain new parameters
         arma::vec new_params = dist();
+
+        //Save them in the history
+        params_history.push_back(new_params);
+
         //set to policy
         policy.setParameters(new_params);
     }
+
+    arma::mat getParams()
+    {
+    	arma::mat params(policy.getParametersSize(), params_history.size());
+
+    	for(int i = 0; i < params.n_cols; i++)
+    	{
+    		params.col(i) = params_history[i];
+    	}
+
+    	return params;
+    }
+
 
     virtual ~PolicyEvalDistribution()
     {
@@ -112,6 +129,7 @@ public:
 private:
     ParametricPolicy<ActionC, StateC>& policy;
     Distribution& dist;
+    std::vector<arma::vec> params_history;
 };
 
 } //end namespace

@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
 
-    arma::mat theta;
+    arma::mat theta = expert.getParams();
     EMIRL<DenseAction,DenseState> irlAlg(data, theta, p, arma::eye(p.n_elem, p.n_elem),
                                          phiReward, mdp.getSettings().gamma);
 

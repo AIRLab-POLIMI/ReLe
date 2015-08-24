@@ -39,7 +39,7 @@ class EMIRL: public IRLAlgorithm<ActionC, StateC>
 public:
     EMIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, const arma::vec& wBar, const arma::mat& sigma,
           Features& phi, double gamma) //TODO correct Features with template params
-        : data(data), theta(theta), wBar(wBar), sigmaInv(arma::inv(sigma))
+        : data(data), theta(theta), phiBar(phi.rows(), data.size()), wBar(wBar), sigmaInv(arma::inv(sigma))
     {
         for(unsigned int i = 0; i < data.size(); i++)
         {
@@ -142,8 +142,8 @@ public:
         double KL = arma::as_scalar(delta.t()*sigmaInv*delta);
 
         //Compute derivative
-        arma::vec dwhat = theta*(arma::diagmat(a) - a*a.t())*phiBar;
-        arma::vec dKL = 2*sigmaInv*delta*dwhat;
+        arma::mat dwhat = theta*(arma::diagmat(a) - a*a.t())*phiBar.t();
+        arma::vec dKL = 2*dwhat*sigmaInv*delta;
 
         arma::mat dSimplex = arma::join_horiz(arma::eye(x.n_elem, x.n_elem), -arma::ones(x.n_elem));
 
