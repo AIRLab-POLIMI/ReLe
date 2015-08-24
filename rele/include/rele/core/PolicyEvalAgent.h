@@ -26,6 +26,7 @@
 
 #include "Agent.h"
 #include "Policy.h"
+#include "Distribution.h"
 #include "BasicFunctions.h"
 
 namespace ReLe
@@ -37,19 +38,22 @@ class PolicyEvalAgent: public Agent<ActionC, StateC>
 public:
     PolicyEvalAgent(Policy<ActionC, StateC>& policy): policy(policy)
     {
+
     }
+
     virtual ~PolicyEvalAgent()
     {
     }
 
     // Agent interface
 public:
-    void initTestEpisode()
+    virtual void initTestEpisode()
     {
     }
 
-    void initEpisode(const StateC &state, ActionC &action)
+    virtual void initEpisode(const StateC &state, ActionC &action)
     {
+        sampleAction(state, action);
     }
 
     void sampleAction(const StateC &state, ActionC &action)
@@ -72,6 +76,42 @@ public:
 
 private:
     Policy<ActionC, StateC>& policy;
+
+};
+
+template<class ActionC, class StateC>
+class PolicyEvalDistribution : public PolicyEvalAgent<ActionC, StateC>
+{
+public:
+
+    PolicyEvalDistribution(Distribution& dist, ParametricPolicy<ActionC, StateC>& policy)
+        : PolicyEvalAgent<ActionC, StateC>(policy), policy(policy), dist(dist)
+    {
+
+    }
+
+    virtual void initEpisode(const StateC &state, ActionC &action)
+    {
+        initTestEpisode();
+        this->sampleAction(state, action);
+    }
+
+    virtual void initTestEpisode()
+    {
+        //obtain new parameters
+        arma::vec new_params = dist();
+        //set to policy
+        policy.setParameters(new_params);
+    }
+
+    virtual ~PolicyEvalDistribution()
+    {
+
+    }
+
+private:
+    ParametricPolicy<ActionC, StateC>& policy;
+    Distribution& dist;
 };
 
 } //end namespace

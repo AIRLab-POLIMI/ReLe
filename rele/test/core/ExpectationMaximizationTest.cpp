@@ -42,7 +42,8 @@ int main(int argc, char *argv[])
     //generate data from gaussians
     arma::vec componentProbabilities = { 0.2, 0.3, 0.4, 0.1 };
     arma::mat componentMeans =        {{ 1.0, 1.0, 5.0, 5.0 },
-                                       { 1.0, 5.0, 1.0, 5.0 }};
+        { 1.0, 5.0, 1.0, 5.0 }
+    };
 
     for (unsigned int i = 0; i < nSamples; i++)
     {

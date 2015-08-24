@@ -38,7 +38,7 @@ class LinearApproximator_: public ParametricRegressor_<InputC, denseOutput>
 
 public:
     LinearApproximator_(Features_<InputC, denseOutput>& bfs)
-        : ParametricRegressor(bfs.cols()), basis(bfs),
+        : ParametricRegressor_<InputC>(bfs.cols()), basis(bfs),
           parameters(bfs.rows(), arma::fill::zeros)
     {
     }

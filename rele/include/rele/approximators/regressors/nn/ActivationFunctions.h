@@ -29,108 +29,108 @@
 class Function
 {
 public:
-	inline arma::vec operator()(const arma::vec& x)
-	{
-		arma::vec fx = x;
+    inline arma::vec operator()(const arma::vec& x)
+    {
+        arma::vec fx = x;
 
-		auto fun = [&](double val)
-		{
-			return this->eval(val);
-		};
+        auto fun = [&](double val)
+        {
+            return this->eval(val);
+        };
 
-		fx.transform(fun);
+        fx.transform(fun);
 
-		return fx;
+        return fx;
 
-	}
+    }
 
-	inline arma::vec diff(const arma::vec& x)
-	{
-		arma::vec dfx = x;
+    inline arma::vec diff(const arma::vec& x)
+    {
+        arma::vec dfx = x;
 
-		auto fun = [&](double val)
-		{
-			return this->diff(val);
-		};
+        auto fun = [&](double val)
+        {
+            return this->diff(val);
+        };
 
-		dfx.transform(fun);
+        dfx.transform(fun);
 
-		return dfx;
+        return dfx;
 
-	}
+    }
 
-	virtual double eval(double x) = 0;
-	virtual double diff(double x) = 0;
+    virtual double eval(double x) = 0;
+    virtual double diff(double x) = 0;
 
-	virtual ~Function()
-	{
+    virtual ~Function()
+    {
 
-	}
+    }
 };
 
 class Sigmoid: public Function
 {
 public:
-	inline virtual double eval(double x)
-	{
-		return 1.0 / (1.0 + std::exp(-x));
-	}
+    inline virtual double eval(double x)
+    {
+        return 1.0 / (1.0 + std::exp(-x));
+    }
 
-	inline virtual double diff(double x)
-	{
-		return eval(x) * (1 - eval(x));
-	}
+    inline virtual double diff(double x)
+    {
+        return eval(x) * (1 - eval(x));
+    }
 };
 
 class HyperbolicTangent: public Function
 {
 public:
-	inline virtual double eval(double x)
-	{
-		return std::tanh(x);
-	}
+    inline virtual double eval(double x)
+    {
+        return std::tanh(x);
+    }
 
-	inline virtual double diff(double x)
-	{
-		return 1 - std::pow(std::tanh(x), 2);
-	}
+    inline virtual double diff(double x)
+    {
+        return 1 - std::pow(std::tanh(x), 2);
+    }
 };
 
 class Rectifier: public Function
 {
 public:
-	inline virtual double eval(double x)
-	{
-		return std::log(1 + std::exp(x));
-	}
+    inline virtual double eval(double x)
+    {
+        return std::log(1 + std::exp(x));
+    }
 
-	inline virtual double diff(double x)
-	{
-		return 1.0 / (1.0 + std::exp(-x));
-	}
+    inline virtual double diff(double x)
+    {
+        return 1.0 / (1.0 + std::exp(-x));
+    }
 };
 
 class Linear: public Function
 {
 public:
-	Linear(double alpha = 1) :
-				alpha(alpha)
-	{
+    Linear(double alpha = 1) :
+        alpha(alpha)
+    {
 
-	}
+    }
 
-	inline virtual double eval(double x)
-	{
-		return alpha * x;
-	}
+    inline virtual double eval(double x)
+    {
+        return alpha * x;
+    }
 
-	inline virtual double diff(double x)
-	{
-		return alpha;
-	}
+    inline virtual double diff(double x)
+    {
+        return alpha;
+    }
 
 private:
-	double alpha;
+    double alpha;
 };
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NN_ACTIVATIONFUNCTIONS_H_ */

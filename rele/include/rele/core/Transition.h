@@ -28,6 +28,7 @@
 #include <fstream>
 
 #include "BasicFunctions.h"
+#include "BasicsTraits.h"
 #include "Features.h"
 #include "CSV.h"
 
@@ -89,6 +90,25 @@ class Episode : public std::vector<Transition<ActionC,StateC>>
 {
 
 public:
+    //TODO add template method...
+    arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
+    {
+        arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
+
+        double df = 1;
+
+        Episode& episode = *this;
+
+        for(unsigned int t = 0; t < episode.size(); t++)
+        {
+            Transition<ActionC, StateC>& transition = episode[t];
+            featureExpectation += df * phi(vectorize(transition.x, transition.u, transition.xn));
+            df *= gamma;
+        }
+
+        return featureExpectation;
+    }
+
     void printHeader(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -115,26 +135,15 @@ class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
 
 public:
-    template<class InputC>
-    arma::mat computefeatureExpectation(Features_<InputC>& phi, double gamma = 1)
+
+    arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
     {
         size_t episodes = this->size();
         arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
 
         for(auto& episode : *this)
         {
-            arma::mat episodefeatureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
-
-            double df = 1;
-
-            for(unsigned int t = 0; t < episode.size(); t++)
-            {
-                Transition<ActionC, StateC>& transition = episode[t];
-                episodefeatureExpectation += df * phi(vectorize(transition.x, transition.u, transition.xn));
-                df *= gamma;
-            }
-
-            featureExpectation += episodefeatureExpectation;
+            featureExpectation += episode.computefeatureExpectation(phi, gamma);
         }
 
         featureExpectation /= episodes;

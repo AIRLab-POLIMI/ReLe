@@ -36,7 +36,7 @@
 
 #include "FileManager.h"
 
-#include "RewardBasisLQR.h"
+#include "../RewardBasisLQR.h"
 
 using namespace std;
 using namespace arma;

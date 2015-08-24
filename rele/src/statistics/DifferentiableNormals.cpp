@@ -47,7 +47,7 @@ ParametricNormal::ParametricNormal(unsigned int support_dim)
 
 }
 
-ParametricNormal::ParametricNormal(vec& params, mat& covariance)
+ParametricNormal::ParametricNormal(const vec& params, const mat& covariance)
     : ParametricNormal(params.n_elem)
 {
     //    std::cout << "...." << params << std::endl;
@@ -142,7 +142,7 @@ void ParametricNormal::updateInternalState()
 ///////////////////////////////////////////////////////////////////////////////////////
 /// DIAGONAL COVARIANCE NORMAL DISTRIBUTION
 ///////////////////////////////////////////////////////////////////////////////////////
-ParametricDiagonalNormal::ParametricDiagonalNormal(arma::vec mean, arma::vec standardeviation)
+ParametricDiagonalNormal::ParametricDiagonalNormal(const arma::vec& mean, const arma::vec& standardeviation)
     : ParametricNormal(mean.n_elem), diagStdDev(standardeviation)
 {
     assert(mean.n_elem == standardeviation.n_elem);
@@ -408,7 +408,7 @@ ParametricLogisticNormal::ParametricLogisticNormal(unsigned int point_dim, doubl
     updateInternalState();
 }
 
-ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec logWeights, double variance_asymptote)
+ParametricLogisticNormal::ParametricLogisticNormal(const arma::vec& mean, const arma::vec& logWeights, double variance_asymptote)
     : ParametricNormal(mean.n_elem),
       asVariance(variance_asymptote*ones<vec>(mean.n_elem)), logisticWeights(logWeights)
 {
@@ -417,14 +417,14 @@ ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec log
     updateInternalState();
 }
 
-ParametricLogisticNormal::ParametricLogisticNormal(arma::vec variance_asymptote)
+ParametricLogisticNormal::ParametricLogisticNormal(const arma::vec& variance_asymptote)
     : ParametricNormal(variance_asymptote.n_elem),
       asVariance(variance_asymptote), logisticWeights(variance_asymptote.n_elem, fill::zeros)
 {
     updateInternalState();
 }
 
-ParametricLogisticNormal::ParametricLogisticNormal(arma::vec mean, arma::vec logWeights, arma::vec variance_asymptote)
+ParametricLogisticNormal::ParametricLogisticNormal(const arma::vec& mean, const arma::vec& logWeights, const arma::vec& variance_asymptote)
     : ParametricNormal(mean.n_elem),
       asVariance(variance_asymptote), logisticWeights(logWeights)
 {
@@ -596,7 +596,7 @@ void ParametricLogisticNormal::updateInternalState()
 /// PARAMETRIC CHOLESKY NORMAL DISTRIBUTION
 ///////////////////////////////////////////////////////////////////////////////////////
 
-ParametricCholeskyNormal::ParametricCholeskyNormal(vec& initial_mean, mat& initial_cholA)
+ParametricCholeskyNormal::ParametricCholeskyNormal(const vec& initial_mean, const mat& initial_cholA)
     : ParametricNormal(initial_mean.n_elem)
 {
     mean = initial_mean;
@@ -845,8 +845,8 @@ void ParametricCholeskyNormal::updateInternalState()
 ///////////////////////////////////////////////////////
 /// Full covariance matrix
 ///////////////////////////////////////////////////////
-ParametricFullNormal::ParametricFullNormal(arma::vec& initial_mean,
-        arma::mat& initial_cov) : ParametricNormal(initial_mean.n_elem)
+ParametricFullNormal::ParametricFullNormal(const arma::vec& initial_mean,
+        const arma::mat& initial_cov) : ParametricNormal(initial_mean.n_elem)
 {
     mean = initial_mean;
     Cov = initial_cov;

@@ -18,8 +18,8 @@ public:
 
     ParametricNormal(unsigned int support_dim);
 
-    ParametricNormal(arma::vec& params,
-                     arma::mat& covariance);
+    ParametricNormal(const arma::vec& params,
+                     const arma::mat& covariance);
 
     virtual ~ParametricNormal()
     { }
@@ -111,7 +111,7 @@ public:
 class ParametricDiagonalNormal : public ParametricNormal, public FisherInterface
 {
 public:
-    ParametricDiagonalNormal(arma::vec mean, arma::vec covariance);
+    ParametricDiagonalNormal(const arma::vec& mean, const arma::vec& covariance);
 
     virtual ~ParametricDiagonalNormal()
     {}
@@ -180,13 +180,13 @@ public:
     ParametricLogisticNormal(unsigned int point_dim,
                              double variance_asymptote);
 
-    ParametricLogisticNormal(arma::vec mean, arma::vec logWeights,
+    ParametricLogisticNormal(const arma::vec& mean, const arma::vec& logWeights,
                              double variance_asymptote);
 
-    ParametricLogisticNormal(arma::vec variance_asymptote);
+    ParametricLogisticNormal(const arma::vec& variance_asymptote);
 
-    ParametricLogisticNormal(arma::vec mean, arma::vec logWeights,
-                             arma::vec variance_asymptote);
+    ParametricLogisticNormal(const arma::vec& mean, const arma::vec& logWeights,
+                             const arma::vec& variance_asymptote);
 
     virtual ~ParametricLogisticNormal()
     {}
@@ -243,8 +243,8 @@ class ParametricCholeskyNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
-    ParametricCholeskyNormal(arma::vec& initial_mean,
-                             arma::mat& initial_cholA);
+    ParametricCholeskyNormal(const arma::vec& initial_mean,
+                             const arma::mat& initial_cholA);
 
     virtual ~ParametricCholeskyNormal()
     {}
@@ -297,8 +297,8 @@ class ParametricFullNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
-    ParametricFullNormal(arma::vec& initial_mean,
-                         arma::mat& initial_cov);
+    ParametricFullNormal(const arma::vec& initial_mean,
+                         const arma::mat& initial_cov);
 
     virtual ~ParametricFullNormal()
     {}
