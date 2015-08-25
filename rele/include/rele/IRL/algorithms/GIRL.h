@@ -30,13 +30,9 @@
 #include "ArmadilloExtensions.h"
 #include <nlopt.hpp>
 #include <cassert>
+#include <stdexcept>
 
 #include "policy_search/step_rules/StepRules.h"
-
-//#define DISPARITY
-#define LOG_D
-//#define LOG_OBJ
-//#define SQUARE_OBJ
 
 namespace ReLe
 {
@@ -44,6 +40,11 @@ namespace ReLe
 enum IRLGradType
 {
     R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB
+};
+
+enum NormalizationType
+{
+    None, Disparity, SquareNorm, LogDisparity, LogSquareNorm
 };
 
 template<class ActionC, class StateC>
@@ -54,9 +55,9 @@ public:
     GIRL(Dataset<ActionC, StateC>& dataset,
          DifferentiablePolicy<ActionC, StateC>& policy,
          ParametricRegressor& rewardf, double gamma, IRLGradType aType,
-         bool useSimplexConstraints = true) :
+         NormalizationType nType = None, bool useSimplexConstraints = true) :
         policy(policy), data(dataset), rewardf(rewardf), gamma(gamma),
-        atype(aType), useSimplexConstraints(useSimplexConstraints),
+        aType(aType), nType(nType), useSimplexConstraints(useSimplexConstraints),
         isRewardLinear(false)
     {
         nbFunEvals = 0;
@@ -68,8 +69,8 @@ public:
 
     GIRL(Dataset<ActionC, StateC>& dataset,
          DifferentiablePolicy<ActionC, StateC>& policy,
-         LinearApproximator& rewardf, double gamma, IRLGradType aType) :
-        GIRL(dataset, policy, rewardf, gamma, aType, true)
+         LinearApproximator& rewardf, double gamma, IRLGradType aType, NormalizationType nType = None) :
+        GIRL(dataset, policy, rewardf, gamma, aType, nType, true)
     {
         isRewardLinear = true;
 
@@ -640,9 +641,7 @@ public:
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 //                std::cout << tr.r[0] << " " << tr.r[1] << std::endl;
-                Rew += df
-                       * arma::as_scalar(
-                           rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 // ********************** //
 
@@ -736,9 +735,7 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df
-                       * arma::as_scalar(
-                           rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
                 // ********************** //
 
@@ -874,19 +871,12 @@ public:
                 sumGradLog += localg;
 
                 // compute the reward gradients
-                Rew = df
-                      * arma::as_scalar(
-                          rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                Rew = df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 dRew = df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
 
                 for (int p = 0; p < dp; ++p)
                 {
-                    gradient_J[p] += df
-                                     * arma::as_scalar(
-                                         rewardf(
-                                             vectorize(tr.x, tr.u,
-                                                       tr.xn)))
-                                     * sumGradLog(p);
+                    gradient_J[p] += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn))) * sumGradLog(p);
                     for (int rp = 0; rp < dpr; ++rp)
                     {
                         gGradient(p, rp) += sumGradLog(p) * dRew(0, rp);
@@ -975,11 +965,8 @@ public:
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
-                double creward = df
-                                 * arma::as_scalar(
-                                     rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                arma::mat cdreward = df
-                                     * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t(); //(1 x dpr)
+                double creward = df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                arma::mat cdreward = df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t(); //(1 x dpr)
                 reward_J_ObjEpStep(ep, t) = creward;
                 reward_R_ObjEpStep[ep][t] = cdreward;
 
@@ -1115,8 +1102,7 @@ public:
 
                 // *** eNAC CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
-                double creward = arma::as_scalar(
-                                     rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                double creward = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
                 Rew += df * creward;
 
                 //Construct basis functions
@@ -1192,19 +1178,19 @@ public:
         fisher /= nbEpisodes;
 
         arma::vec gradient;
-        if (atype == IRLGradType::NATR)
+        if (aType == IRLGradType::NATR)
         {
             gradient = ReinforceGradient(gGradient);
         }
-        else if (atype == IRLGradType::NATRB)
+        else if (aType == IRLGradType::NATRB)
         {
             gradient = ReinforceBaseGradient(gGradient);
         }
-        else if (atype == IRLGradType::NATG)
+        else if (aType == IRLGradType::NATG)
         {
             gradient = GpomdpGradient(gGradient);
         }
-        else if (atype == IRLGradType::NATGB)
+        else if (aType == IRLGradType::NATGB)
         {
             gradient = GpomdpBaseGradient(gGradient);
         }
@@ -1272,91 +1258,97 @@ private:
 
     void computeGradient(arma::vec& gradient, arma::mat& dGradient)
     {
-        if (atype == IRLGradType::R)
+        switch(aType)
         {
-            //            std::cout << "GIRL REINFORCE" << std::endl;
+        case R:
             gradient = ReinforceGradient(dGradient);
-        }
-        else if (atype == IRLGradType::RB)
-        {
-            //            std::cout << "GIRL REINFORCE BASE" << std::endl;
+            break;
+
+        case RB:
             gradient = ReinforceBaseGradient(dGradient);
-        }
-        else if (atype == IRLGradType::G)
-        {
-            //            std::cout << "GIRL GPOMDP" << std::endl;
+            break;
+
+        case G:
             gradient = GpomdpGradient(dGradient);
-        }
-        else if (atype == IRLGradType::GB)
-        {
-            //            std::cout << "GIRL GPOMDP BASE" << std::endl;
+            break;
+
+        case GB:
             gradient = GpomdpBaseGradient(dGradient);
-        }
-        else if (atype == IRLGradType::ENAC)
-        {
+            break;
+
+        case ENAC:
             gradient = ENACGradient(dGradient);
-        }
-        else if ((atype == IRLGradType::NATR) || (atype == IRLGradType::NATRB)
-                 || (atype == IRLGradType::NATG)
-                 || (atype == IRLGradType::NATGB))
-        {
+            break;
+
+        case NATR:
+        case NATRB:
+        case NATG:
+        case NATGB:
             gradient = NaturalGradient(dGradient);
+            break;
+
+        default:
+            throw std::runtime_error("Gradient type not implemented");
+            break;
         }
-        else
-        {
-            std::cerr << "GIRL ERROR" << std::endl;
-            abort();
-        }
+
     }
 
     double normalizeGradient(const arma::vec& gradient,
                              const arma::mat& dGradient, arma::vec& df)
     {
         double g2 = arma::as_scalar(gradient.t() * gradient);
-
-#if defined LOG_OBJ || defined SQUARE_OBJ
-        arma::vec dJ;
-        double J = computeJ(dJ);
-        double J4 = std::pow(J, 4);
-#elif defined DISPARITY || defined LOG_D
-        arma::vec dD;
-        double D = computeDisparity(dD);
-        double D2 = D * D;
-#endif
-
-#ifdef LOG_OBJ
-        double f = std::log(g2) - std::log(J4);
-#elif defined SQUARE_OBJ
-        double f = g2/J4;
-#elif defined DISPARITY
-        double f = g2/D2;
-#elif defined LOG_D
-        double f = std::log(g2) - std::log(D2);
-#else
-        double f = g2;
-#endif
-
         arma::vec dg2 = 2.0 * dGradient.t() * gradient;
-#if defined LOG_OBJ || defined SQUARE_OBJ
-        arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
 
-#ifdef LOG_OBJ
-        df = dg2/g2 - dJ4/J4;
-#elif defined SQUARE_OBJ
-        df = (dg2*J4 - dJ4*g2) / (J4*J4);
-#endif
-#elif defined DISPARITY || defined LOG_D
-        arma::vec dD2 = 2.0 * dD * D;
-#if defined DISPARITY
-        df = (dg2*D2 - dD2*g2) / (D2*D2);
-#elif defined LOG_D
-        df = dg2 / g2 - dD2 / D2;
-#endif
-#else
-        df = dg2;
-#endif
+        switch (nType)
+        {
+        case None:
+            df = dg2;
+            return g2;
 
-        return f;
+        case Disparity:
+        case LogDisparity:
+        {
+            arma::vec dD;
+            double D = computeDisparity(dD);
+            double D2 = D * D;
+
+            arma::vec dD2 = 2.0 * dD * D;
+
+            return normalizeGradientLow(g2, dg2, D2, dD2, df);
+        }
+
+        case SquareNorm:
+        case LogSquareNorm:
+        {
+            arma::vec dJ;
+            double J = computeJ(dJ);
+            double J4 = std::pow(J, 4);
+
+            arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
+
+            return normalizeGradientLow(g2, dg2, J4, dJ4, df);
+        }
+
+        default:
+            throw std::runtime_error("Normalization type not implemented");
+        }
+    }
+
+    double normalizeGradientLow(double g2, const arma::vec& dg2,
+                                double J, const arma::vec& dJ,
+                                arma::vec& df)
+    {
+        if(nType == LogDisparity || nType == LogSquareNorm)
+        {
+            df = dg2 / g2 - dJ / J;
+            return std::log(g2) - std::log(J);
+        }
+        else
+        {
+            df = (dg2*J - dJ*g2) / (J*J);
+            return g2/J;
+        }
     }
 
 protected:
@@ -1365,7 +1357,8 @@ protected:
     ParametricRegressor& rewardf;
     double gamma;
     unsigned int maxSteps;
-    IRLGradType atype;
+    IRLGradType aType;
+    NormalizationType nType;
     unsigned int nbFunEvals;
     bool useSimplexConstraints, isRewardLinear;
     arma::uvec active_feat;

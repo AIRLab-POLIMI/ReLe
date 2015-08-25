@@ -52,7 +52,7 @@ public:
 
     virtual void run()
     {
-    	unsigned int effective_dim = omega.n_elem - 1;
+        unsigned int effective_dim = omega.n_elem - 1;
 
         nlopt::opt optimizator;
         optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, effective_dim);
@@ -129,7 +129,7 @@ public:
     double objFunction(const arma::vec& x, arma::vec& df)
     {
         //Compute expectation-maximization update
-    	arma::vec xlast = {1.0 - arma::sum(x)};
+        arma::vec xlast = {1.0 - arma::sum(x)};
         arma::vec omega = arma::join_vert(x, xlast);
         arma::vec Jep = phiBar.t()*omega;
         arma::vec a = arma::exp(Jep);

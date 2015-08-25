@@ -110,14 +110,14 @@ public:
 
     arma::mat getParams()
     {
-    	arma::mat params(policy.getParametersSize(), params_history.size());
+        arma::mat params(policy.getParametersSize(), params_history.size());
 
-    	for(int i = 0; i < params.n_cols; i++)
-    	{
-    		params.col(i) = params_history[i];
-    	}
+        for(int i = 0; i < params.n_cols; i++)
+        {
+            params.col(i) = params_history[i];
+        }
 
-    	return params;
+        return params;
     }
 
 
