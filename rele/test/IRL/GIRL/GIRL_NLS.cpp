@@ -122,70 +122,98 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
     LinearApproximator rewardRegressor(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                        mdp.getSettings().gamma, atype);
+    GIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, rewardRegressor,
+                                         mdp.getSettings().gamma, atype, None);
+    GIRL<DenseAction,DenseState> irlAlg2(data, expertPolicy, rewardRegressor,
+                                         mdp.getSettings().gamma, atype, LogDisparity);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
     std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
     std::cout << "Features Expectation " << data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).t();
 
+    ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
+    data.writeToStream(ofs);
+
 
     //Run GIRL
 #ifdef RUN_GIRL
-    irlAlg.run();
-    arma::vec weights = irlAlg.getWeights();
+    irlAlg1.run();
+    arma::vec weights1 = irlAlg1.getWeights();
 
-    rewardRegressor.setParameters(weights);
-    cout << "weights: " << weights.t();
+    irlAlg2.run();
+    arma::vec weights2 = irlAlg2.getWeights();
+
+
+    cout << "weights         (None): " << weights1.t();
+    cout << "weights (LogDisparity): " << weights2.t();
+
+    arma::mat weights(weights1.n_rows, 2);
+
+    weights.col(0) = weights1;
+    weights.col(1) = weights2;
+
 #endif
 
 #ifdef RECOVER
-    //Try to recover the initial policy
-    int episodesPerPolicy = 1;
-    int policyPerUpdate = 100;
-    int updates = 400;
-    int episodes = episodesPerPolicy*policyPerUpdate*updates;
 
-    NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
-    AdaptiveStep stepRule(0.01);
-    int nparams = phi.rows();
-    arma::vec mean(nparams, fill::zeros);
-    mean[0] = -0.42;
-    mean[1] =  0.42;
+    for(unsigned int i = 0; i < weights.n_cols; i++)
+    {
+        rewardRegressor.setParameters(weights.col(i));
 
-    imitatorPolicy.setParameters(mean);
-    GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
-            mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+        //Try to recover the initial policy
+        int episodesPerPolicy = 1;
+        int policyPerUpdate = 100;
+        int updates = 400;
+        int episodes = episodesPerPolicy*policyPerUpdate*updates;
 
-    ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
-    Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
-    EmptyStrategy<DenseAction, DenseState> emptyStrategy;
-    imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
-    imitatorCore.getSettings().episodeLenght = mdp.getSettings().horizon;
-    imitatorCore.getSettings().episodeN = episodes;
-    imitatorCore.getSettings().testEpisodeN = nbEpisodes;
-    imitatorCore.runEpisodes();
+        NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
+        AdaptiveStep stepRule(0.01);
+        int nparams = phi.rows();
+        arma::vec mean(nparams, fill::zeros);
+        mean[0] = -0.42;
+        mean[1] =  0.42;
 
-    cout << "Learned Parameters: " << imitatorPolicy.getParameters().t() << endl;
-    cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
+        imitatorPolicy.setParameters(mean);
+        GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
+                mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
 
-    //Evaluate policy against the real mdp
-    Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
-    CollectorStrategy<DenseAction, DenseState> collector2;
-    evaluationCore.getSettings().loggerStrategy = &collector2;
-    evaluationCore.getSettings().episodeLenght = mdp.getSettings().horizon;
-    evaluationCore.getSettings().episodeN = episodes;
-    evaluationCore.getSettings().testEpisodeN = nbEpisodes;
+        ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
+        Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
+        EmptyStrategy<DenseAction, DenseState> emptyStrategy;
+        imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
+        imitatorCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+        imitatorCore.getSettings().episodeN = episodes;
+        imitatorCore.getSettings().testEpisodeN = nbEpisodes;
+        imitatorCore.runEpisodes();
 
-    evaluationCore.runTestEpisodes();
+        cout << "Learned Parameters: " << imitatorPolicy.getParameters().t() << endl;
+        cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
 
-    Dataset<DenseAction,DenseState>& data2 = collector2.data;
+        //Evaluate policy against the real mdp
+        Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
+        CollectorStrategy<DenseAction, DenseState> collector2;
+        evaluationCore.getSettings().loggerStrategy = &collector2;
+        evaluationCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+        evaluationCore.getSettings().episodeN = episodes;
+        evaluationCore.getSettings().testEpisodeN = nbEpisodes;
 
-    double gamma = mdp.getSettings().gamma;
-    cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest());
+        evaluationCore.runTestEpisodes();
+
+        Dataset<DenseAction,DenseState>& data2 = collector2.data;
+
+        double gamma = mdp.getSettings().gamma;
+        cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
+        cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
+
+
+        stringstream ss;
+        ss << "TrajectoriesImitator" << i << ".txt";
+        ofstream ofs(fm.addPath(ss.str()));
+        data2.writeToStream(ofs);
+    }
 #endif
+
 
 #ifdef PRINT
     //calculate full grid function
@@ -205,10 +233,10 @@ int main(int argc, char *argv[])
         arma::mat gGrad(2, 2);
         arma::vec dJ;
         arma::vec dD;
-        arma::vec g = irlAlg.ReinforceBaseGradient(gGrad);
+        arma::vec g = irlAlg1.ReinforceBaseGradient(gGrad);
 
-        double Je = irlAlg.computeJ(dJ);
-        double D = irlAlg.computeDisparity(dD);
+        double Je = irlAlg1.computeJ(dJ);
+        double D = irlAlg1.computeDisparity(dD);
         double G2 = as_scalar(g.t()*g);
         valuesG(i) = std::sqrt(G2);
         valuesJ(i) = Je;
