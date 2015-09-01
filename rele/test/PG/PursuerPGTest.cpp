@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     {
         5,
         5,
-        3
+        5
     },
     {
         -10.0, 10.0,
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
      {
         5,
         5,
-        3
+        5
      },
      {
         -10.0, 10.0,
@@ -189,13 +189,13 @@ int main(int argc, char *argv[])
         -M_PI, M_PI
      });
 
+
     BasisFunctions basisChased = SubspaceBasis::generate(basis1, arma::span(Pursuer::x, Pursuer::theta));
     BasisFunctions basisPursuer = SubspaceBasis::generate(basis2, arma::span(Pursuer::xp, Pursuer::thetap));
 
     BasisFunctions basis;
     basis.insert(basis.end(), basisChased.begin(), basisChased.end());
     basis.insert(basis.end(), basisPursuer.begin(), basisPursuer.end());
-
 
     SparseFeatures phi(basis, 2);
 

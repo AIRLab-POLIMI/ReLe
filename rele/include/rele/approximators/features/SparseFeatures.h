@@ -41,7 +41,7 @@ public:
     SparseFeatures_(BasisFunctions_<InputC>& basis,
                     unsigned int nbReplication = 1,
                     bool indipendent = true)
-        : n_rows(basis.size()*(indipendent?nbReplication:1)), n_cols(nbReplication)
+        : n_rows(basis.size()*(indipendent?nbReplication:1)), n_cols(nbReplication), valuesToDelete(basis)
     {
         unsigned int i, k;
         unsigned int offset = 0;
@@ -104,6 +104,7 @@ public:
             {
                 found = true;
                 values[i] = bfs;
+                valuesToDelete[i] = bfs;
             }
         }
         if (!found)
@@ -111,6 +112,7 @@ public:
             rowsIdxs.push_back(row);
             colsIdxs.push_back(col);
             values.push_back(bfs);
+            valuesToDelete.push_back(bfs);
         }
         if (n_rows <= row)
             n_rows = row + 1;
@@ -128,11 +130,13 @@ public:
         int dim = basis.size();
         n_rows = n_cols = dim;
 
+        valuesToDelete = basis;
+        values = basis;
+
         for (int i = 0; i < dim; ++i)
         {
             rowsIdxs.push_back(i);
             colsIdxs.push_back(i);
-            values.push_back(basis[i]);
         }
     }
 
@@ -144,18 +148,20 @@ public:
 private:
     void clearBasis()
     {
-        for(auto basis : values)
+        for(auto basis : valuesToDelete)
         {
             delete basis;
         }
 
         values.clear();
+        valuesToDelete.clear();
     }
 
 private:
     //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
     std::vector<unsigned int> rowsIdxs, colsIdxs;
     BasisFunctions_<InputC> values;
+    BasisFunctions_<InputC> valuesToDelete;
     unsigned int n_rows, n_cols;
 };
 
