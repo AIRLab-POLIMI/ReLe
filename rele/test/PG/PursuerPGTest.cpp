@@ -29,10 +29,11 @@
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "basis/GaussianRbf.h"
-#include "features/DenseFeatures.h"
+#include "basis/SubspaceBasis.h"
+#include "features/SparseFeatures.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
-#include "ShipSteering.h"
+#include "Pursuer.h"
 
 
 #include <iostream>
@@ -61,7 +62,7 @@ struct gradConfig
 
 void help()
 {
-    cout << "ship_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
+    cout << "pursuer_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
     cout << " - algorithm: r, rb, g, gb" << endl;
     cout << " - updaterule: 'constant', 'adaptive' (default)" << endl;
 }
@@ -154,34 +155,53 @@ int main(int argc, char *argv[])
     }
     //---
 
-    FileManager fm("ship", "PG");
+    FileManager fm("pursuer", "PG");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    ShipSteering mdp;
+    Pursuer mdp;
 
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    BasisFunctions basis = GaussianRbf::generate(
+    BasisFunctions basis1 = GaussianRbf::generate(
     {
-        3,
-        3,
-        6,
-        2
+        5,
+        5,
+        3
     },
     {
-        0.0, 150.0,
-        0.0, 150.0,
-        -M_PI, M_PI,
-        -15.0, 15.0
+        -10.0, 10.0,
+        -10.0, 10.0,
+        -M_PI, M_PI
     });
 
-    DenseFeatures phi(basis);
+    BasisFunctions basis2 = GaussianRbf::generate(
+     {
+        5,
+        5,
+        3
+     },
+     {
+        -10.0, 10.0,
+        -10.0, 10.0,
+        -M_PI, M_PI
+     });
 
-    double epsilon = 0.05;
-    NormalPolicy policy(epsilon, phi);
+    BasisFunctions basisChased = SubspaceBasis::generate(basis1, arma::span(Pursuer::x, Pursuer::theta));
+    BasisFunctions basisPursuer = SubspaceBasis::generate(basis2, arma::span(Pursuer::xp, Pursuer::thetap));
+
+    BasisFunctions basis;
+    basis.insert(basis.end(), basisChased.begin(), basisChased.end());
+    basis.insert(basis.end(), basisPursuer.begin(), basisPursuer.end());
+
+
+    SparseFeatures phi(basis, 2);
+
+    arma::mat cov(2, 2, arma::fill::eye);
+    cov *= 0.1;
+    MVNPolicy policy(phi, cov);
     //---
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
@@ -265,7 +285,7 @@ int main(int argc, char *argv[])
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath(outputname), WriteStrategy<DenseAction, DenseState>::AGENT, true);
 
-    core.getSettings().episodeLenght = 5000;
+    core.getSettings().episodeLenght = mdp.getSettings().horizon;
 
     int nbUpdates = config.nbRuns;
     int episodes  = nbUpdates*nbepperpol;

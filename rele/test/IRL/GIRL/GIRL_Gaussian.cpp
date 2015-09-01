@@ -44,10 +44,10 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define PRINT
+//#define PRINT
 #define TRAJECTORIES
-//#define RUN
-//#define RECOVER
+#define RUN
+#define RECOVER
 
 int main(int argc, char *argv[])
 {
@@ -55,7 +55,8 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IRLGradType atype = IRLGradType::GB;
-    int dim = 1;
+    NormalizationType ntype = NormalizationType::LogDisparity;
+    int dim = 2;
     int nbEpisodes = 3000;
 
     FileManager fm("gaussian", "GIRL");
@@ -71,13 +72,19 @@ int main(int argc, char *argv[])
 
     SparseFeatures phi(basis, dim);
 
-    arma::mat Sigma(dim, dim, fill::eye);
-    Sigma *= 0.1;
-
     BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
     SparseFeatures phiStdDev(basisStdDev, dim);
-    arma::mat stdDevW(dim, phiStdDev.rows(), fill::ones);
+    arma::mat stdDevW(dim, phiStdDev.rows(), fill::zeros);
+
+    for(int i = 0; i < stdDevW.n_rows; i++)
+    	for(int j = i*basis.size(); j < (i+1)*basis.size(); j++)
+    	{
+    		stdDevW(i, j) = 1;
+    	}
+
     stdDevW *= 0.01;
+
+    std::cout << stdDevW << std::endl;
 
     MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
 
@@ -122,7 +129,7 @@ int main(int argc, char *argv[])
     std::vector<double> lowerBounds(rewardRegressor.getParametersSize(), -10.0);
     std::vector<double> upperBounds(rewardRegressor.getParametersSize(), 10.0);
     NoGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                          mdp.getSettings().gamma, atype, lowerBounds, upperBounds);
+                                          mdp.getSettings().gamma, atype, ntype, lowerBounds, upperBounds);
 
 #ifdef RUN
     //Run GIRL
@@ -182,7 +189,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef TRAJECTORIES
-    std::ofstream ofs("/tmp/ReLe/Trajectories.txt");
+    std::ofstream ofs(fm.addPath("Trajectories.log"));
     data.writeToStream(ofs);
 #endif
 
@@ -201,6 +208,16 @@ int main(int argc, char *argv[])
     imitatorCore.runEpisodes();
 
     cout << "Parameters learned: " << imitatorPolicy.getParameters().t() << endl;
+
+
+    //Save sample trajectories
+    imitatorCore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
+            fm.addPath("Imitator.log"),  WriteStrategy<DenseAction, DenseState>::TRANS,false);
+    imitatorCore.getSettings().testEpisodeN = 3000;
+    imitatorCore.runTestEpisodes();
+    //---
+
+   delete imitatorCore.getSettings().loggerStrategy;
 
 #endif
     return 0;

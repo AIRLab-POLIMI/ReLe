@@ -1,15 +1,11 @@
-%% Rocky data visualizer
+%% ShipSteering data visualizer
 addpath('../Statistics');
 
 %clear old data
 clear
 
 %clear old figures
-figure(1)
-clf(1)
-
-figure(2)
-clf(2)
+close all
 
 %% Choose file
 basedir = '/tmp/ReLe/ShipSteering/PG/';

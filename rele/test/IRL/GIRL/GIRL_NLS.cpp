@@ -171,8 +171,6 @@ int main(int argc, char *argv[])
         AdaptiveStep stepRule(0.01);
         int nparams = phi.rows();
         arma::vec mean(nparams, fill::zeros);
-        mean[0] = -0.42;
-        mean[1] =  0.42;
 
         imitatorPolicy.setParameters(mean);
         GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
@@ -187,7 +185,8 @@ int main(int argc, char *argv[])
         imitatorCore.getSettings().testEpisodeN = nbEpisodes;
         imitatorCore.runEpisodes();
 
-        cout << "Learned Parameters: " << imitatorPolicy.getParameters().t() << endl;
+        cout << "----------------------------------------------------------" << endl;
+        cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
         cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
 
         //Evaluate policy against the real mdp

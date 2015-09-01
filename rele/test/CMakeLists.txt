@@ -186,6 +186,9 @@ target_link_libraries(dam_PG rele)
 add_executable(ship_PG PG/ShipSteeringPGTest.cpp)
 target_link_libraries(ship_PG rele)
 
+add_executable(pursuer_PG PG/PursuerPGTest.cpp)
+target_link_libraries(pursuer_PG rele)
+
 add_executable(taxi_PG PG/TaxiFuelPGTest.cpp)
 target_link_libraries(taxi_PG rele)
 
