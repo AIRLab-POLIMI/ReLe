@@ -214,14 +214,14 @@ int main(int argc, char *argv[])
         bool usebaseline = false;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "ship_r.log");
+        sprintf(outputname, "pursuer_r.log");
     }
     else if (strcmp(alg, "g"  ) == 0)
     {
         cout << "GPOMDPAlgorithm" << endl;
         agent = new GPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule), rewardId);
-        sprintf(outputname, "ship_g.log");
+        sprintf(outputname, "pursuer_g.log");
     }
     else if (strcmp(alg, "rb" ) == 0)
     {
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new REINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "ship_rb.log");
+        sprintf(outputname, "pursuer_rb.log");
     }
     else if (strcmp(alg, "gb" ) == 0)
     {
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
                 mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI,
                 rewardId);
-        sprintf(outputname, "ship_gb.log");
+        sprintf(outputname, "pursuer_gb.log");
     }
     else if (strcmp(alg, "gsb") == 0)
     {
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
                 mdp.getSettings().horizon, *(config.steprule),
                 GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::SINGLE,
                 rewardId);
-        sprintf(outputname, "ship_gsb.log");
+        sprintf(outputname, "pursuer_gsb.log");
     }
     else if (strcmp(alg, "natg") == 0)
     {
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new NaturalGPOMDPAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 mdp.getSettings().horizon, *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "ship_natg.log");
+        sprintf(outputname, "pursuer_natg.log");
     }
     else if (strcmp(alg, "natr") == 0)
     {
@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new NaturalREINFORCEAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "ship_natr.log");
+        sprintf(outputname, "pursuer_natr.log");
     }
     else if (strcmp(alg, "enac") == 0)
     {
@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
         bool usebaseline = true;
         agent = new eNACAlgorithm<DenseAction, DenseState>(policy, nbepperpol,
                 *(config.steprule), usebaseline, rewardId);
-        sprintf(outputname, "ship_enac.log");
+        sprintf(outputname, "pursuer_enac.log");
     }
     else
     {
