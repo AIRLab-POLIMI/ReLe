@@ -85,8 +85,6 @@ void Pursuer::getInitialState(DenseState& state)
     currentState[y] = RandomGenerator::sampleUniform(limitY.lo(), limitY.hi());
     currentState[theta] = RandomGenerator::sampleUniform(-M_PI, M_PI);
 
-
-
     //pursuer state
     do
     {

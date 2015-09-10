@@ -30,6 +30,8 @@
 #include "parametric/differentiable/NormalPolicy.h"
 #include "basis/GaussianRbf.h"
 #include "basis/SubspaceBasis.h"
+#include "basis/ModularBasis.h"
+#include "basis/NormBasis.h"
 #include "features/SparseFeatures.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
@@ -165,37 +167,17 @@ int main(int argc, char *argv[])
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    BasisFunctions basis1 = GaussianRbf::generate(
-    {
-        5,
-        5,
-        5
-    },
-    {
-        -10.0, 10.0,
-        -10.0, 10.0,
-        -M_PI, M_PI
-    });
+    BasisFunctions spaceBasis = GaussianRbf::generate({5, 5, 5},{-10, 10, -10, 10, -M_PI, M_PI});
 
-    BasisFunctions basis2 = GaussianRbf::generate(
-     {
-        5,
-        5,
-        5
-     },
-     {
-        -10.0, 10.0,
-        -10.0, 10.0,
-        -M_PI, M_PI
-     });
-
-
-    BasisFunctions basisChased = SubspaceBasis::generate(basis1, arma::span(Pursuer::x, Pursuer::theta));
-    BasisFunctions basisPursuer = SubspaceBasis::generate(basis2, arma::span(Pursuer::xp, Pursuer::thetap));
 
     BasisFunctions basis;
-    basis.insert(basis.end(), basisChased.begin(), basisChased.end());
-    basis.insert(basis.end(), basisPursuer.begin(), basisPursuer.end());
+
+    basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::xp, Pursuer::yp)));
+    //basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::x, Pursuer::y)));
+    basis.push_back(new ModularDifference(Pursuer::theta, Pursuer::thetap, RangePi()));
+    basis.insert(basis.end(), spaceBasis.begin(), spaceBasis.end());
+
+
 
     SparseFeatures phi(basis, 2);
 
