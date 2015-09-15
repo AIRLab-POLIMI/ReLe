@@ -77,10 +77,10 @@ int main(int argc, char *argv[])
     arma::mat stdDevW(dim, phiStdDev.rows(), fill::zeros);
 
     for(int i = 0; i < stdDevW.n_rows; i++)
-    	for(int j = i*basis.size(); j < (i+1)*basis.size(); j++)
-    	{
-    		stdDevW(i, j) = 1;
-    	}
+        for(int j = i*basis.size(); j < (i+1)*basis.size(); j++)
+        {
+            stdDevW(i, j) = 1;
+        }
 
     stdDevW *= 0.01;
 
@@ -212,12 +212,12 @@ int main(int argc, char *argv[])
 
     //Save sample trajectories
     imitatorCore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-            fm.addPath("Imitator.log"),  WriteStrategy<DenseAction, DenseState>::TRANS,false);
+        fm.addPath("Imitator.log"),  WriteStrategy<DenseAction, DenseState>::TRANS,false);
     imitatorCore.getSettings().testEpisodeN = 3000;
     imitatorCore.runTestEpisodes();
     //---
 
-   delete imitatorCore.getSettings().loggerStrategy;
+    delete imitatorCore.getSettings().loggerStrategy;
 
 #endif
     return 0;

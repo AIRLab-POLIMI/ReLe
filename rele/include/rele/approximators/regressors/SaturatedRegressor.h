@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LINEARAPPROXIMATOR_H
-#define LINEARAPPROXIMATOR_H
+#ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_SATURATEDREGRESSOR_H_
+#define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_SATURATEDREGRESSOR_H_
 
 #include "Features.h"
 #include <armadillo>
@@ -34,31 +34,33 @@ namespace ReLe
 {
 
 template<class InputC, bool denseOutput = true>
-class LinearApproximator_: public ParametricRegressor_<InputC, denseOutput>
+class SaturatedRegressor_: public ParametricRegressor_<InputC, denseOutput>
 {
-
 public:
-    LinearApproximator_(Features_<InputC, denseOutput>& bfs)
-        : ParametricRegressor_<InputC>(bfs.cols()), basis(bfs),
+    SaturatedRegressor_(Features_<InputC, denseOutput>& bfs, const arma::vec& uMin, const arma::vec& uMax)
+        : ParametricRegressor_<InputC>(bfs.cols()), basis(bfs), uMin(uMin), uMax(uMax),
           parameters(bfs.rows(), arma::fill::zeros)
     {
     }
 
-    ~LinearApproximator_()
+    ~SaturatedRegressor_()
     {
     }
 
     arma::vec operator()(const InputC& input)
     {
-        arma::mat features = basis(input);
-        arma::vec output = features.t()*parameters;
-        return output;
+        arma::vec weights = arma::exp(basis(input).t()*parameters);
+        weights = weights/(weights + 1);
+
+        return (uMax - uMin)%weights + uMin;
     }
 
     arma::vec diff(const InputC& input)
     {
         arma::mat features = basis(input);
-        return vectorise(features);
+        arma::vec weights = arma::exp(features.t()*parameters);
+        arma::mat output = features*(weights/arma::square(weights +1))*arma::diagmat(uMax - uMin);
+        return vectorise(output);
     }
 
     inline Features& getBasis()
@@ -85,10 +87,13 @@ public:
 private:
     arma::vec parameters;
     Features_<InputC, denseOutput>& basis;
+    arma::vec uMin;
+    arma::vec uMax;
+
 };
 
-typedef LinearApproximator_<arma::vec> LinearApproximator;
+typedef SaturatedRegressor_<arma::vec> SaturatedRegressor;
 
-} //end namespace
+}
 
-#endif //LINEARAPPROXIMATOR_H
+#endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_SATURATEDREGRESSOR_H_ */

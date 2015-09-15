@@ -62,6 +62,24 @@ struct gradConfig
     }
 };
 
+class InverseDistanceBasis: public BasisFunction
+{
+    virtual double operator()(const arma::vec& input)
+    {
+        return 1.0/(std::pow(input(Pursuer::xp), 2)+std::pow(input(Pursuer::yp), 2));
+    }
+
+    virtual void writeOnStream(std::ostream& out)
+    {
+
+    }
+
+    virtual void readFromStream(std::istream& in)
+    {
+
+    }
+};
+
 void help()
 {
     cout << "pursuer_PG algorithm #Updates #Episodes stepLength [updaterule]" << endl;
@@ -167,13 +185,14 @@ int main(int argc, char *argv[])
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    BasisFunctions spaceBasis = GaussianRbf::generate({5, 5, 5},{-10, 10, -10, 10, -M_PI, M_PI});
+    BasisFunctions spaceBasis = GaussianRbf::generate({5, 5, 5}, {-10, 10, -10, 10, -M_PI, M_PI});
 
 
     BasisFunctions basis;
 
-    basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::xp, Pursuer::yp)));
+    //basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::xp, Pursuer::yp)));
     //basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::x, Pursuer::y)));
+    basis.push_back(new InverseDistanceBasis());
     basis.push_back(new ModularDifference(Pursuer::theta, Pursuer::thetap, RangePi()));
     basis.insert(basis.end(), spaceBasis.begin(), spaceBasis.end());
 

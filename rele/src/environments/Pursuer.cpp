@@ -42,7 +42,7 @@ Pursuer::Pursuer() :
 }
 
 void Pursuer::step(const DenseAction& action, DenseState& nextState,
-                 Reward& reward)
+                   Reward& reward)
 {
     //action threshold
     double v = maxV.bound(action[0]);
@@ -67,12 +67,12 @@ void Pursuer::step(const DenseAction& action, DenseState& nextState,
 
     if (captured())
     {
-    	reward[0] = -100;
+        reward[0] = -100;
         currentState.setAbsorbing(true);
     }
     else
     {
-    	reward[0] = 1;
+        reward[0] = 1;
     }
 
     nextState = currentState;
@@ -88,9 +88,10 @@ void Pursuer::getInitialState(DenseState& state)
     //pursuer state
     do
     {
-    	currentState[xp] = RandomGenerator::sampleNormal(0.0, 1.0);
-    	currentState[yp] = RandomGenerator::sampleNormal(0.0, 1.0);
-    }while(unfeasibleState());
+        currentState[xp] = RandomGenerator::sampleNormal(0.0, 1.0);
+        currentState[yp] = RandomGenerator::sampleNormal(0.0, 1.0);
+    }
+    while(unfeasibleState());
 
     currentState[thetap] = RandomGenerator::sampleUniform(-M_PI, M_PI);
 
@@ -129,7 +130,7 @@ void Pursuer::computePursuerControl(double& vr, double& omegar)
 }
 
 void Pursuer::updatePursuerPose(double vr, double omegar, double& xrabs,
-                            double& yrabs)
+                                double& yrabs)
 {
     vec2 chickenPosition = currentState.rows(span(x, y));
     vec2 rockyRelPosition = currentState.rows(span(xp, yp));
@@ -164,18 +165,18 @@ void Pursuer::updateChasedPose(double v, double omega)
 
 bool Pursuer::unfeasibleState()
 {
-	bool cond1 = currentState[x] + currentState[xp] > limitX.hi();
-	bool cond2 = cond1 && currentState[x] + currentState[xp] < limitX.lo();
-	bool cond3 = cond2 && currentState[y] + currentState[yp] > limitY.hi();
-	bool cond4 = cond3 && currentState[y] + currentState[yp] < limitY.lo();
+    bool cond1 = currentState[x] + currentState[xp] > limitX.hi();
+    bool cond2 = cond1 && currentState[x] + currentState[xp] < limitX.lo();
+    bool cond3 = cond2 && currentState[y] + currentState[yp] > limitY.hi();
+    bool cond4 = cond3 && currentState[y] + currentState[yp] < limitY.lo();
 
-	return cond4 && !captured();
+    return cond4 && !captured();
 }
 
 bool Pursuer::captured()
 {
-	vec2 pursuerRelPosition = currentState.rows(span(xp, yp));
-	return norm(pursuerRelPosition) < 0.05;
+    vec2 pursuerRelPosition = currentState.rows(span(xp, yp));
+    return norm(pursuerRelPosition) < 0.05;
 }
 
 Pursuer::Predictor::Predictor(double dt, Range limitX, Range limitY) :

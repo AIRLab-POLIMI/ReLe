@@ -35,7 +35,7 @@ namespace ReLe
 class Pursuer : public ContinuousMDP
 {
 public:
-	Pursuer();
+    Pursuer();
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward);
     virtual void getInitialState(DenseState& state);
@@ -94,7 +94,7 @@ private:
 
     void updateChasedPose(double v, double omega);
     void updatePursuerPose(double vr, double omegar, double& xrabs,
-                         double& yrabs);
+                           double& yrabs);
     void computePursuerControl(double& vr, double& omegar);
 };
 
