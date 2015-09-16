@@ -171,7 +171,7 @@ public:
 public:
     arma::vec getParameters() const;
     const unsigned int getParametersSize() const;
-    void setParameters(arma::vec &w);
+    void setParameters(const arma::vec& w);
 
 protected:
     arma::vec params;

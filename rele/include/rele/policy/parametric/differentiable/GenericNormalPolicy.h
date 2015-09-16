@@ -62,23 +62,23 @@ public:
      */
     GenericMVNPolicy(ParametricRegressor& approximator) :
         approximator(approximator),
-        mMean(approximator.getOutputSize(), arma::fill::zeros)
+        mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
-        mCovariance.eye(output_dim, output_dim);
-        mCinv = arma::inv(mCovariance);
-        mCholeskyDec = arma::chol(mCovariance);
-        mDeterminant = arma::det(mCovariance);
+        Sigma.eye(output_dim, output_dim);
+        invSigma = arma::inv(Sigma);
+        choleskySigma = arma::chol(Sigma);
+        determinant = arma::det(Sigma);
     }
 
     GenericMVNPolicy(ParametricRegressor& approximator, arma::mat& covariance) :
         approximator(approximator),
-        mMean(approximator.getOutputSize(), arma::fill::zeros),
-        mCovariance(covariance)
+        mean(approximator.getOutputSize(), arma::fill::zeros),
+        Sigma(covariance)
     {
-        mCinv = arma::inv(mCovariance);
-        mCholeskyDec = arma::chol(mCovariance);
-        mDeterminant = arma::det(mCovariance);
+        invSigma = arma::inv(Sigma);
+        choleskySigma = arma::chol(Sigma);
+        determinant = arma::det(Sigma);
     }
 
     /**
@@ -92,42 +92,42 @@ public:
     GenericMVNPolicy(ParametricRegressor& approximator,
                      std::initializer_list<double> initialCov) :
         approximator(approximator),
-        mMean(approximator.getOutputSize(), arma::fill::zeros)
+        mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
-        mCovariance.zeros(output_dim, output_dim);
+        Sigma.zeros(output_dim, output_dim);
         int row = 0, col = 0;
         for (double x : initialCov)
         {
-            mCovariance(row, col++) = x;
+            Sigma(row, col++) = x;
             if (col == output_dim)
             {
                 col = 0;
                 ++row;
             }
         }
-        mCinv = arma::inv(mCovariance);
-        mCholeskyDec = arma::chol(mCovariance);
-        mDeterminant = arma::det(mCovariance);
+        invSigma = arma::inv(Sigma);
+        choleskySigma = arma::chol(Sigma);
+        determinant = arma::det(Sigma);
     }
 
     GenericMVNPolicy(ParametricRegressor& approximator, double* covariance) :
         approximator(approximator),
-        mMean(approximator.getOutputSize(), arma::fill::zeros)
+        mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
-        mCovariance.zeros(output_dim, output_dim);
+        Sigma.zeros(output_dim, output_dim);
         for (int i = 0; i < output_dim; ++i)
         {
             for (int j = 0; j < output_dim; ++j)
             {
-                mCovariance(i, j) = covariance[i + output_dim * j];
+                Sigma(i, j) = covariance[i + output_dim * j];
             }
         }
 
-        mCinv = arma::inv(mCovariance);
-        mCholeskyDec = arma::chol(mCovariance);
-        mDeterminant = arma::det(mCovariance);
+        invSigma = arma::inv(Sigma);
+        choleskySigma = arma::chol(Sigma);
+        determinant = arma::det(Sigma);
     }
 
     virtual ~GenericMVNPolicy()
@@ -169,7 +169,7 @@ public:
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(arma::vec &w)
+    virtual inline void setParameters(const arma::vec& w)
     {
         approximator.setParameters(w);
     }
@@ -200,14 +200,14 @@ protected:
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
     {
         // compute mean vector
-        mMean = approximator(state);
+        mean = approximator(state);
     }
 
 protected:
-    arma::mat mCovariance, mCinv, mCholeskyDec;
-    double mDeterminant;
+    arma::mat Sigma, invSigma, choleskySigma;
+    double determinant;
     ParametricRegressor& approximator;
-    arma::vec mMean;
+    arma::vec mean;
 };
 
 

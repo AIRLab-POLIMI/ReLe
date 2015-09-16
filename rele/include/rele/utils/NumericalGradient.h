@@ -27,6 +27,7 @@
 
 #include <armadillo>
 #include "Regressors.h"
+#include "Policy.h"
 
 namespace ReLe
 {
@@ -79,6 +80,30 @@ public:
         };
 
         return compute(lambda, theta, regressor.getOutputSize());
+    }
+
+    /**
+     * @brief Numerical gradient computation for policies
+     */
+    template<class StateC>
+    static inline arma::mat compute(DifferentiablePolicy<DenseAction, StateC>& policy,
+                                    arma::vec theta,
+									typename state_type<StateC>::const_type_ref input,
+									const arma::vec& output)
+    {
+        arma::vec p = policy.getParameters();
+
+        auto lambda = [&](const arma::vec& par)
+        {
+        	arma::vec value(1);
+            policy.setParameters(par);
+            value(0) = policy(input, output);
+            policy.setParameters(p);
+
+            return value;
+        };
+
+        return compute(lambda, theta);
     }
 
 };

@@ -48,11 +48,15 @@ target_link_libraries(pol2mat rele)
 add_executable(mle_Policy miscellaneous/MLEPolicyTest.cpp)
 target_link_libraries(mle_Policy rele)
 
-add_executable(rand_Policy miscellaneous/RandomPolicyTest.cpp)
-target_link_libraries(rand_Policy rele)
-
 add_executable(range_test miscellaneous/ModularRangeTest.cpp)
 target_link_libraries(range_test rele)
+
+#Policy tests
+add_executable(rand_Policy policy/RandomPolicyTest.cpp)
+target_link_libraries(rand_Policy rele)
+
+add_executable(mvn_Policy policy/GenericNormalPolicyTest.cpp)
+target_link_libraries(mvn_Policy rele)
 
 #miscellaneous/policy_search tests
 add_executable(datadiff2mat miscellaneous/policy_search/DataDiff2Matlab.cpp)

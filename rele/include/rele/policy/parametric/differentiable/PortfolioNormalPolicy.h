@@ -88,7 +88,7 @@ public:
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(arma::vec &w)
+    virtual inline void setParameters(const arma::vec& w)
     {
         approximator.setParameters(w);
     }

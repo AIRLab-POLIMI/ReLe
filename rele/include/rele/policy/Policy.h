@@ -89,7 +89,7 @@ class ParametricPolicy: public Policy<ActionC, StateC>
 public:
     virtual arma::vec getParameters() const = 0;
     virtual const unsigned int getParametersSize() const = 0;
-    virtual void setParameters(arma::vec& w) = 0;
+    virtual void setParameters(const arma::vec& w) = 0;
 
     virtual ~ParametricPolicy()
     {

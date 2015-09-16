@@ -35,13 +35,13 @@ namespace ReLe
 double GenericMVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 {
     updateInternalState(state);
-    return mvnpdfFast(action, mMean, mCinv, mDeterminant);
+    return mvnpdfFast(action, mean, invSigma, determinant);
 }
 
 arma::vec GenericMVNPolicy::operator() (const arma::vec& state)
 {
     updateInternalState(state);
-    return mvnrandFast(mMean, mCholeskyDec);
+    return mvnrandFast(mean, choleskySigma);
 }
 
 arma::vec GenericMVNPolicy::diff(const arma::vec &state, const arma::vec &action)
@@ -53,12 +53,12 @@ arma::vec GenericMVNPolicy::difflog(const arma::vec &state, const arma::vec &act
 {
     updateInternalState(state);
 
-    arma::vec delta = action - mMean;
+    arma::vec delta = action - mean;
     arma::mat gMu = approximator.diff(state);
-    gMu.reshape(approximator.getParametersSize(), mMean.n_elem);
+    gMu.reshape(approximator.getParametersSize(), mean.n_elem);
 
     // compute gradient
-    return 0.5 * gMu * (mCinv + mCinv.t()) * delta;
+    return 0.5 * gMu * (invSigma + invSigma.t()) * delta;
 }
 
 }

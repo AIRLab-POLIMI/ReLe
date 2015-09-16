@@ -95,7 +95,7 @@ public:
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(arma::vec &w)
+    virtual inline void setParameters(const arma::vec& w)
     {
         approximator.setParameters(w);
     }
@@ -317,7 +317,7 @@ public:
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(arma::vec &w)
+    virtual inline void setParameters(const arma::vec& w)
     {
         approximator.setParameters(w);
     }
@@ -466,7 +466,7 @@ public:
     {
         return approximator.getParametersSize() + stddevParams.n_elem;
     }
-    virtual void setParameters(arma::vec &w);
+    virtual void setParameters(const arma::vec& w);
 
     // DifferentiablePolicy interface
 public:
@@ -596,7 +596,7 @@ public:
     {
         return approximator.getParametersSize() + mLogisticParams.n_elem;
     }
-    virtual inline void setParameters(arma::vec &w)
+    virtual inline void setParameters(const arma::vec& w)
     {
         assert(w.n_elem == this->getParametersSize());
         int dp = approximator.getParametersSize();

@@ -65,7 +65,7 @@ public:
         return PARAM_SIZE;
     }
 
-    virtual void setParameters(arma::vec& w)
+    virtual void setParameters(const arma::vec& w)
     {
         this->w = w;
     }

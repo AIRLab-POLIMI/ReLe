@@ -182,7 +182,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 /// MVN POLICY with Diagonal covariance (parameters of the diagonal are stddev)
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void MVNDiagonalPolicy::setParameters(arma::vec &w)
+void MVNDiagonalPolicy::setParameters(const arma::vec& w)
 {
     assert(w.n_elem == this->getParametersSize());
     int dp = approximator.getParametersSize();

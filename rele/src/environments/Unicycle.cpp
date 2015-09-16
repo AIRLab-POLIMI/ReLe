@@ -225,7 +225,7 @@ const unsigned int UnicycleControlLaw::getParametersSize() const
     return params.n_elem;
 }
 
-void UnicycleControlLaw::setParameters(arma::vec& w)
+void UnicycleControlLaw::setParameters(const arma::vec& w)
 {
     assert(params.n_elem == w.n_elem);
     params = w;
