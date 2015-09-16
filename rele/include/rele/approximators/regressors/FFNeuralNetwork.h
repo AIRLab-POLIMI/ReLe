@@ -34,7 +34,7 @@
 #include "nn/ActivationFunctions.h"
 #include "nn/Regularization.h"
 
-#include "Utils.h"
+#include "NumericalGradient.h"
 
 namespace ReLe
 {
@@ -323,7 +323,7 @@ private:
 
             };
 
-            g += utils::computeNumericalGradient(lambda, wold);
+            g += NumericalGradient::compute(lambda, wold);
 
             net.setParameters(wold);
         }

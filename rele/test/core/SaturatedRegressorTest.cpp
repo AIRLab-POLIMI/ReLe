@@ -25,7 +25,8 @@
 #include "features/SparseFeatures.h"
 #include "regressors/SaturatedRegressor.h"
 
-#include "Utils.h"
+#include "NumericalGradient.h"
+#include "ArmadilloPDFs.h"
 
 using namespace std;
 using namespace ReLe;
@@ -38,6 +39,8 @@ int main(int argc, char *argv[])
     arma::vec input1 = {0.0, 0.0};
     arma::vec input2 = {100.0, 100.0};
     arma::vec input3 = {-100.0, -100.0};
+    arma::vec input4 = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({5.0, 5.0})));
+    arma::vec input5 = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({5.0, 5.0})));
 
     arma::vec w(phi.rows(), arma::fill::ones);
 
@@ -55,10 +58,10 @@ int main(int argc, char *argv[])
     std::cout << input2.t() << "-> " << regressor1(input2).t() << std::endl;
     std::cout << input3.t() << "-> " << regressor1(input3).t() << std::endl;
     std::cout << "diff:" << std::endl;
-    std::cout << input1.t() << "-> " << regressor1.diff(input1).t() << std::endl;
-    std::cout << input2.t() << "-> " << regressor1.diff(input2).t() << std::endl;
-    std::cout << input3.t() << "-> " << regressor1.diff(input3).t() << std::endl;
-
+    std::cout << input4.t() << "-> " << regressor1.diff(input4).t() << std::endl;
+    std::cout << "numerical: " << arma::vectorise(NumericalGradient::compute(regressor1, w, input4)).t();
+    std::cout << input5.t() << "-> " << regressor1.diff(input5).t() << std::endl;
+    std::cout << "numerical: " << arma::vectorise(NumericalGradient::compute(regressor1, w, input5)).t();
 
     uMin = {-1,5};
     uMax = {1, 8};
@@ -73,9 +76,10 @@ int main(int argc, char *argv[])
     std::cout << input2.t() << "-> " << regressor2(input2).t() << std::endl;
     std::cout << input3.t() << "-> " << regressor2(input3).t() << std::endl;
     std::cout << "diff:" << std::endl;
-    std::cout << input1.t() << "-> " << regressor2.diff(input1).t() << std::endl;
-    std::cout << input2.t() << "-> " << regressor2.diff(input2).t() << std::endl;
-    std::cout << input3.t() << "-> " << regressor2.diff(input3).t() << std::endl;
+    std::cout << input4.t() << "-> " << regressor2.diff(input4).t() << std::endl;
+    std::cout << "numerical: " << arma::vectorise(NumericalGradient::compute(regressor2, w, input4)).t();
+    std::cout << input5.t() << "-> " << regressor2.diff(input5).t() << std::endl;
+    std::cout << "numerical: " << arma::vectorise(NumericalGradient::compute(regressor2, w, input5)).t();
 
 
 }

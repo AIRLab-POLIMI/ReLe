@@ -28,7 +28,7 @@
 
 #include <nlopt.hpp>
 
-#include "Utils.h"
+#include "NumericalGradient.h"
 
 using namespace std;
 using namespace ReLe;
@@ -114,12 +114,7 @@ int main(int argc, char *argv[])
     cout << "Parameters" << endl;
     cout << w.t();
     cout << "Numerical gradient" << endl;
-    auto lambda = [&](const arma::vec& par)
-    {
-        regressor.setParameters(par);
-        return arma::as_scalar(regressor(w));
-    };
-    arma::vec numGrad = utils::computeNumericalGradient(lambda, w);
+    arma::vec numGrad = NumericalGradient::compute(regressor, w, w);
     cout << numGrad.t();
     cout << "Actual gradient" << endl;
     regressor.setParameters(w);
@@ -156,12 +151,7 @@ int main(int argc, char *argv[])
     arma::vec parGMM = regressor2.getParameters();
     cout << parGMM.t();
     cout << "Numerical gradient" << endl;
-    auto lambda2 = [&](const arma::vec& par)
-    {
-        regressor2.setParameters(par);
-        return arma::as_scalar(regressor2(in1));
-    };
-    arma::vec numGrad2 = utils::computeNumericalGradient(lambda2, parGMM);
+    arma::vec numGrad2 = NumericalGradient::compute(regressor2, parGMM, in1);
     cout << numGrad2.t();
     cout << "Actual gradient" << endl;
     regressor2.setParameters(parGMM);

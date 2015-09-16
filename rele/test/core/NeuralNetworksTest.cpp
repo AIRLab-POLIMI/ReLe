@@ -53,17 +53,7 @@ int main(int argc, char *argv[])
     arma::vec diff = net.diff(input);
     cout << "f'(1.0, 1.0) =" << diff.t() << endl;
 
-    auto lambda = [&](const arma::vec& par)
-    {
-        net.setParameters(par);
-        double value = arma::as_scalar(net(input));
-        net.setParameters(p);
-
-        return value;
-
-    };
-
-    arma::vec numerical = utils::computeNumericalGradient(lambda, p);
+    arma::vec numerical = NumericalGradient::compute(net, p, input);
     cout << "numerical: " << numerical.t();
     cout << "error norm: " << norm(numerical - net.diff(input)) << endl;
 

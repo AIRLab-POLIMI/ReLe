@@ -38,7 +38,7 @@ class SaturatedRegressor_: public ParametricRegressor_<InputC, denseOutput>
 {
 public:
     SaturatedRegressor_(Features_<InputC, denseOutput>& bfs, const arma::vec& uMin, const arma::vec& uMax)
-        : ParametricRegressor_<InputC>(bfs.cols()), basis(bfs), uMin(uMin), uMax(uMax),
+        : ParametricRegressor_<InputC>(bfs.cols()), basis(bfs), uMin(uMin), uDelta(arma::diagmat(uMax-uMin)),
           parameters(bfs.rows(), arma::fill::zeros)
     {
     }
@@ -52,14 +52,14 @@ public:
         arma::vec weights = arma::exp(basis(input).t()*parameters);
         weights = weights/(weights + 1);
 
-        return (uMax - uMin)%weights + uMin;
+        return uDelta*weights + uMin;
     }
 
     arma::vec diff(const InputC& input)
     {
         arma::mat features = basis(input);
-        arma::vec weights = arma::exp(features.t()*parameters);
-        arma::mat output = features*(weights/arma::square(weights +1))*arma::diagmat(uMax - uMin);
+        arma::mat weights = arma::diagmat(arma::exp(features.t()*parameters));
+        arma::mat output = features*(weights/arma::square(weights +1))*uDelta;
         return vectorise(output);
     }
 
@@ -88,7 +88,7 @@ private:
     arma::vec parameters;
     Features_<InputC, denseOutput>& basis;
     arma::vec uMin;
-    arma::vec uMax;
+    arma::mat uDelta;
 
 };
 
