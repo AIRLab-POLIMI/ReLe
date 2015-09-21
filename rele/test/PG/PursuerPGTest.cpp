@@ -67,33 +67,33 @@ struct gradConfig
 struct WallNearBasis: public BasisFunction
 {
 public:
-	enum dir {N, S, W, E};
+    enum dir {N, S, W, E};
 
 public:
-	WallNearBasis(dir wall, double threshold) : wall(wall), threshold(threshold)
-	{
+    WallNearBasis(dir wall, double threshold) : wall(wall), threshold(threshold)
+    {
 
-	}
+    }
 
     virtual double operator()(const arma::vec& input)
     {
-    	switch(wall)
-    	{
-    		case N:
-    			return abs(input[Pursuer::y] - 10) < threshold;
+        switch(wall)
+        {
+        case N:
+            return abs(input[Pursuer::y] - 10) < threshold;
 
-    		case S:
-    			return abs(input[Pursuer::y] + 10) < threshold;
+        case S:
+            return abs(input[Pursuer::y] + 10) < threshold;
 
-    		case W:
-    			return abs(input[Pursuer::x] + 10) < threshold;
+        case W:
+            return abs(input[Pursuer::x] + 10) < threshold;
 
-    		case E:
-    			return abs(input[Pursuer::x] + 10) < threshold;
+        case E:
+            return abs(input[Pursuer::x] + 10) < threshold;
 
-    		default:
-    			return 0;
-    	}
+        default:
+            return 0;
+        }
 
     }
 
@@ -120,9 +120,9 @@ private:
 class PursuerDirectionBasis: public BasisFunction
 {
 public:
-	virtual double operator()(const arma::vec& input)
-	{
-		return RangePi::wrap(atan2(input[Pursuer::yp], input[Pursuer::xp]));
+    virtual double operator()(const arma::vec& input)
+    {
+        return RangePi::wrap(atan2(input[Pursuer::yp], input[Pursuer::xp]));
     }
 
     virtual void writeOnStream(std::ostream& out)

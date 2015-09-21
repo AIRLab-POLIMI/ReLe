@@ -2,7 +2,7 @@
 close all
 clear all
 
-addpath('../../iodata')
+addpath(genpath('../../..'));
 
 fraction = 0.1;
 step = floor(1/fraction);

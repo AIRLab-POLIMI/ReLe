@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     double epsilon = 0.05;
     NormalPolicy expertPolicy(epsilon, phi);
 
-    // Solve the problem with GPOMDP
+    // Solve the problem with REINFORCE
     REINFORCEAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate, stepRule);
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);

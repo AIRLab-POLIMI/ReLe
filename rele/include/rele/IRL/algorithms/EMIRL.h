@@ -143,7 +143,7 @@ public:
 
         //Compute derivative
         arma::mat dwhat = theta*(arma::diagmat(a) - a*a.t())*phiBar.t();
-        arma::vec dKL = 2*dwhat*sigmaInv*delta;
+        arma::vec dKL = 2*dwhat.t()*sigmaInv*delta;
 
         arma::mat dSimplex = arma::join_horiz(arma::eye(x.n_elem, x.n_elem), -arma::ones(x.n_elem));
 

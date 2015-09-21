@@ -100,6 +100,12 @@ target_link_libraries(lqr_MGIRL rele)
 add_executable(lqr_EMIRL IRL/EMIRL/EMIRL_LQR.cpp)
 target_link_libraries(lqr_EMIRL rele)
 
+add_executable(nls_EMIRL IRL/EMIRL/EMIRL_NLS.cpp)
+target_link_libraries(nls_EMIRL rele)
+
+add_executable(ship_EMIRL IRL/EMIRL/EMIRL_ShipSteering.cpp)
+target_link_libraries(ship_EMIRL rele)
+
 
 #add_executable(lqr_GIRL IRL/LQRGIRL.cpp)
 #target_link_libraries(lqr_GIRL rele)

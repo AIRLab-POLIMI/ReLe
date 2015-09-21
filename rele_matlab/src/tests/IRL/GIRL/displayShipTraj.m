@@ -2,7 +2,7 @@
 close all
 clear all
 
-addpath('../../iodata')
+addpath(genpath('../../..'));
 
 fraction = 1.0;
 step = floor(1/fraction);
@@ -16,14 +16,14 @@ ye = 100;
 
 %% plot trajectories of imitator
 
-%titles{1} = 'Imitator 1 -Normalization: None';
-titles{1} = 'Imitator 2 -Normalization: Log Disparity';
-lastindex = 1;
+titles{1} = 'Imitator 1 -Normalization: None';
+titles{2} = 'Imitator 2 -Normalization: Log Disparity';
+lastindex = 2;
 
 
 for i = 1:lastindex
 
-    csv = csvread(['/tmp/ReLe/gaussian/GIRL/Imitator.log']);
+    csv = csvread(['/tmp/ReLe/ship/GIRL/TrajectoriesImitator', num2str(i-1) '.txt']);
     traj = readDataset(csv);
 
     figure(i)
@@ -39,12 +39,12 @@ for i = 1:lastindex
         maxTime = max(maxTime, size(traj(episode).x, 1));
     end
     
-     %fill3([1 maxTime maxTime 1 1], [xs xs xe xe xs], [ys ys ye ye ys], 'y')
+     fill3([1 maxTime maxTime 1 1], [xs xs xe xe xs], [ys ys ye ye ys], 'y')
 
 end
 
 %% plot trajectories of expert
-csv = csvread('/tmp/ReLe/gaussian/GIRL/Trajectories.log');
+csv = csvread('/tmp/ReLe/ship/GIRL/TrajectoriesExpert.txt');
 traj = readDataset(csv);
 
 figure(lastindex + 1)
@@ -61,4 +61,4 @@ for episode = 1:step:size(traj,1)
        maxTime = max(maxTime, size(traj(episode).x, 1));
 end
 
-%fill3([1 700 700 1 1], [xs xs xe xe xs], [ys ys ye ye ys], 'y')
+fill3([1 700 700 1 1], [xs xs xe xe xs], [ys ys ye ye ys], 'y')
