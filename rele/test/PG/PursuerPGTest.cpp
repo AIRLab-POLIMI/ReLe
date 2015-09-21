@@ -28,6 +28,8 @@
 #include "DifferentiableNormals.h"
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
+#include "parametric/differentiable/GenericNormalPolicy.h"
+#include "regressors/SaturatedRegressor.h"
 #include "basis/GaussianRbf.h"
 #include "basis/SubspaceBasis.h"
 #include "basis/ModularBasis.h"
@@ -62,11 +64,37 @@ struct gradConfig
     }
 };
 
-class InverseDistanceBasis: public BasisFunction
+struct WallNearBasis: public BasisFunction
 {
+public:
+	enum dir {N, S, W, E};
+
+public:
+	WallNearBasis(dir wall, double threshold) : wall(wall), threshold(threshold)
+	{
+
+	}
+
     virtual double operator()(const arma::vec& input)
     {
-        return 1.0/(std::pow(input(Pursuer::xp), 2)+std::pow(input(Pursuer::yp), 2));
+    	switch(wall)
+    	{
+    		case N:
+    			return abs(input[Pursuer::y] - 10) < threshold;
+
+    		case S:
+    			return abs(input[Pursuer::y] + 10) < threshold;
+
+    		case W:
+    			return abs(input[Pursuer::x] + 10) < threshold;
+
+    		case E:
+    			return abs(input[Pursuer::x] + 10) < threshold;
+
+    		default:
+    			return 0;
+    	}
+
     }
 
     virtual void writeOnStream(std::ostream& out)
@@ -75,6 +103,39 @@ class InverseDistanceBasis: public BasisFunction
     }
 
     virtual void readFromStream(std::istream& in)
+    {
+
+    }
+
+    ~WallNearBasis()
+    {
+
+    }
+
+private:
+    dir wall;
+    double threshold;
+};
+
+class PursuerDirectionBasis: public BasisFunction
+{
+public:
+	virtual double operator()(const arma::vec& input)
+	{
+		return RangePi::wrap(atan2(input[Pursuer::yp], input[Pursuer::xp]));
+    }
+
+    virtual void writeOnStream(std::ostream& out)
+    {
+
+    }
+
+    virtual void readFromStream(std::istream& in)
+    {
+
+    }
+
+    virtual ~PursuerDirectionBasis()
     {
 
     }
@@ -185,16 +246,17 @@ int main(int argc, char *argv[])
     int dim = mdp.getSettings().continuosStateDim;
 
     //--- define policy (low level)
-    BasisFunctions spaceBasis = GaussianRbf::generate({5, 5, 5}, {-10, 10, -10, 10, -M_PI, M_PI});
-
-
     BasisFunctions basis;
 
-    //basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::xp, Pursuer::yp)));
-    //basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::x, Pursuer::y)));
-    basis.push_back(new InverseDistanceBasis());
+    basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::xp, Pursuer::yp)));
+    basis.push_back(new SubspaceBasis(new NormBasis(), arma::span(Pursuer::x, Pursuer::y)));
     basis.push_back(new ModularDifference(Pursuer::theta, Pursuer::thetap, RangePi()));
-    basis.insert(basis.end(), spaceBasis.begin(), spaceBasis.end());
+    basis.push_back(new PursuerDirectionBasis());
+    double criticalDistance = 0.5;
+    basis.push_back(new WallNearBasis(WallNearBasis::N, criticalDistance));
+    basis.push_back(new WallNearBasis(WallNearBasis::S, criticalDistance));
+    basis.push_back(new WallNearBasis(WallNearBasis::W, criticalDistance));
+    basis.push_back(new WallNearBasis(WallNearBasis::E, criticalDistance));
 
 
 
@@ -203,6 +265,8 @@ int main(int argc, char *argv[])
     arma::mat cov(2, 2, arma::fill::eye);
     cov *= 0.1;
     MVNPolicy policy(phi, cov);
+    //SaturatedRegressor regressor(phi, {0, -M_PI}, {1, M_PI});
+    //GenericMVNPolicy policy(regressor, cov);
     //---
 
     AbstractPolicyGradientAlgorithm<DenseAction, DenseState>* agent;
@@ -322,6 +386,9 @@ int main(int argc, char *argv[])
     core.getSettings().testEpisodeN = 3000;
     core.runTestEpisodes();
     //---
+
+    cout << "Learned Parameters: " << endl;
+    cout << policy.getParameters().t();
 
     delete core.getSettings().loggerStrategy;
 

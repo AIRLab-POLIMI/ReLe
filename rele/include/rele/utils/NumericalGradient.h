@@ -88,14 +88,14 @@ public:
     template<class StateC>
     static inline arma::mat compute(DifferentiablePolicy<DenseAction, StateC>& policy,
                                     arma::vec theta,
-									typename state_type<StateC>::const_type_ref input,
-									const arma::vec& output)
+                                    typename state_type<StateC>::const_type_ref input,
+                                    const arma::vec& output)
     {
         arma::vec p = policy.getParameters();
 
         auto lambda = [&](const arma::vec& par)
         {
-        	arma::vec value(1);
+            arma::vec value(1);
             policy.setParameters(par);
             value(0) = policy(input, output);
             policy.setParameters(p);

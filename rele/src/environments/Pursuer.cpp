@@ -47,21 +47,20 @@ void Pursuer::step(const DenseAction& action, DenseState& nextState,
     //action threshold
     double v = maxV.bound(action[0]);
     double omega = maxOmega.bound(action[1]);
-    bool eat = (action[2] > 0 && v == 0 && omega == 0) ? true : false;
 
-    //Compute rocky control using chicken pose prediction
+    //Compute pursuer control using chicken pose prediction
     double omegar;
     double vr;
     computePursuerControl(vr, omegar);
 
-    //Update rocky state
+    //Update pursuer state
     double xrabs, yrabs;
     updatePursuerPose(vr, omegar, xrabs, yrabs);
 
-    //update chicken position
+    //update chased position
     updateChasedPose(v, omega);
 
-    //update rocky relative position
+    //update pursuer relative position
     currentState[xp] = xrabs - currentState[x];
     currentState[yp] = yrabs - currentState[y];
 
@@ -91,7 +90,7 @@ void Pursuer::getInitialState(DenseState& state)
         currentState[xp] = RandomGenerator::sampleNormal(0.0, 1.0);
         currentState[yp] = RandomGenerator::sampleNormal(0.0, 1.0);
     }
-    while(unfeasibleState());
+    while(!feasibleState());
 
     currentState[thetap] = RandomGenerator::sampleUniform(-M_PI, M_PI);
 
@@ -163,14 +162,12 @@ void Pursuer::updateChasedPose(double v, double omega)
 }
 
 
-bool Pursuer::unfeasibleState()
+bool Pursuer::feasibleState()
 {
-    bool cond1 = currentState[x] + currentState[xp] > limitX.hi();
-    bool cond2 = cond1 && currentState[x] + currentState[xp] < limitX.lo();
-    bool cond3 = cond2 && currentState[y] + currentState[yp] > limitY.hi();
-    bool cond4 = cond3 && currentState[y] + currentState[yp] < limitY.lo();
+    bool cond1 = limitX.contains(currentState[x] + currentState[xp]);
+    bool cond2 = cond1 && limitY.contains(currentState[y] + currentState[yp]);
 
-    return cond4 && !captured();
+    return cond2 && !captured();
 }
 
 bool Pursuer::captured()

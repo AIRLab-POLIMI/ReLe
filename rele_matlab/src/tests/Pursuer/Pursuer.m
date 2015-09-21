@@ -8,9 +8,12 @@ clear
 close all
 
 %% Choose file
+%gradientType = 'gb';
+gradientType = 'r';
+
 basedir = '/tmp/ReLe/pursuer/PG/';
-trajectoryFile = [basedir 'pursuer_r.log'];
-gradientFile = [basedir 'pursuer_r_agentData.log'];
+trajectoryFile = [basedir 'pursuer_', gradientType, '.log'];
+gradientFile = [basedir 'pursuer_', gradientType, '_agentData.log'];
 
 %% Read data
 

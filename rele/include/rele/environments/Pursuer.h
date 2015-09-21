@@ -56,7 +56,7 @@ public:
 
 private:
 
-    bool unfeasibleState();
+    bool feasibleState();
     bool captured();
 
     class Predictor
