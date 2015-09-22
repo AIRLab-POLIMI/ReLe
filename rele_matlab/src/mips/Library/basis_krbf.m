@@ -3,7 +3,7 @@ function Phi = basis_krbf(n_centers, range, state)
 % bandwidths are automatically computed to guarantee 25% of overlapping and 
 % confidence between 95-99%.
 %
-% Phi = exp( -0.5 * (state - centers)' * B^-1 * (state - centers) ), 
+% Phi = exp( -(state - centers)' * B^-1 * (state - centers) ), 
 % where B is a diagonal matrix denoting the bandwiths of the kernels.
 %
 % Inputs:
@@ -57,7 +57,7 @@ else
     
     Phi = zeros(dim_phi,1);
     
-    B = 0.5 * diag(1./b);
+    B = diag(1./b);
     
     for i = 1 : dim_phi
         x = state - centers(:,i);

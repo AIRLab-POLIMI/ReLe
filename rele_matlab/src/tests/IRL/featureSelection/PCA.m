@@ -13,9 +13,7 @@ Mmean = repmat(sum(M, 2)/size(M, 2), 1, size(M, 2));
 
 Mnormalized = M - Mmean;
 
-Z = Mnormalized'*U(:, 1:q) + Mmean'*U(:, 1:q); %TODO check
-
-Mr = Z';
+Mr = U(:, 1:q)'*Mnormalized;
 
 end
 

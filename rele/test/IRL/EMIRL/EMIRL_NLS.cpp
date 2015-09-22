@@ -111,13 +111,9 @@ int main(int argc, char *argv[])
     data.writeToStream(ofs2);
 
 
-    //Run GIRL
-#ifdef RUN_GIRL
+    //Run
     irlAlg.run();
     arma::vec weights = irlAlg.getWeights();
-#endif
-
-#ifdef RECOVER
 
     rewardRegressor.setParameters(weights);
 
@@ -177,7 +173,8 @@ int main(int argc, char *argv[])
     ofstream ofs3(fm.addPath(ss.str()));
     data2.writeToStream(ofs3);
 
-#endif
+    // Save Reward Function
+    weights.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
 
     return 0;
 }

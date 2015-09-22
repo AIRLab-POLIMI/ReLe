@@ -69,3 +69,27 @@ for episode = 1:step:size(traj,1)
         end
     end
 end
+
+
+%% Plot recovered reward Function
+W = load('/tmp/ReLe/nls/GIRL/Weights.txt' , '-ascii');
+
+for k = 1:lastindex
+    
+w = W(:, k);
+
+[X,Y] = meshgrid(-10:0.1:10);
+
+Z = zeros(size(X));
+
+for i = 1:length(X)
+    for j = 1:length(X)
+        Z(i, j) = w'*basis_krbf(5,[-10, 10; -10, 10], [X(i, j); Y(i, j)]);
+    end
+
+end
+
+figure(lastindex + 1 +k)
+mesh(Z)
+title(titles{k})
+end

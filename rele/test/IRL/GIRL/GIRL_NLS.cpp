@@ -248,5 +248,8 @@ int main(int argc, char *argv[])
 
 #endif
 
+    // Save Reward Function
+    weights.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
+
     return 0;
 }
