@@ -100,16 +100,16 @@ int main(int argc, char *argv[])
 
     BasisFunctions basis = GaussianRbf::generate(
     {
-            3,
-            3,
-            6,
-            2
+        3,
+        3,
+        6,
+        2
     },
     {
-            0.0, 150.0,
-            0.0, 150.0,
-            -M_PI, M_PI,
-            -15.0, 15.0
+        0.0, 150.0,
+        0.0, 150.0,
+        -M_PI, M_PI,
+        -15.0, 15.0
     });
 
     DenseFeatures phi(basis);

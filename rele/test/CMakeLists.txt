@@ -32,6 +32,9 @@ target_link_libraries(gaussian_test rele)
 add_executable(em_test core/ExpectationMaximizationTest.cpp)
 target_link_libraries(em_test rele)
 
+add_executable(nene_test core/NearestNeighbourTest.cpp)
+target_link_libraries(nene_test rele)
+
 add_executable(saturated_test core/SaturatedRegressorTest.cpp)
 target_link_libraries(saturated_test rele)
 
