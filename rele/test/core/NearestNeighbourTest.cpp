@@ -51,5 +51,6 @@ int main(int argc, char *argv[])
 	regressor.train(vectorData);
 
 	std::cout << regressor.getCentroids() << std::endl;
+	std::cout << arma::umat(regressor.getClusters()) << std::endl;
 
 }

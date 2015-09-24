@@ -85,15 +85,16 @@ public:
 
             //check convergence
 			arma::sp_umat delta = oldClusters - clusters;
-            hasConverged = delta.n_nonzero == features.n_cols;
+            hasConverged = delta.n_nonzero == 0;
 
             //save clusters
             oldClusters = clusters;
         }
         while(!hasConverged);
 
-        //save centroids
+        //save centroids and clusters
         this->centroids = centroids;
+        this->clusters = oldClusters;
     }
 
     arma::sp_umat getClusters()
