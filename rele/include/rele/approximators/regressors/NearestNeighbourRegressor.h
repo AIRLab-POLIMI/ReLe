@@ -34,42 +34,30 @@ namespace ReLe
 {
 
 template<class InputC, bool denseOutput = true>
-class NearestNeighbourRegressor_: public NonParametricRegressor_<InputC, denseOutput>
+class NearestNeighbourRegressor_: public NonParametricRegressor_<InputC, denseOutput>,
+    public UnsupervisedBatchRegressor_<InputC, denseOutput>
 {
 
 public:
     NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
-        : NonParametricRegressor_<InputC>(phi.cols()), phi(phi), k(k), iterations(1),
+        : NonParametricRegressor_<InputC>(phi.cols()),
+          UnsupervisedBatchRegressor_<InputC, denseOutput>(phi), k(k), iterations(1),
           centroids(phi.rows(), k, arma::fill::randn), wcss(std::numeric_limits<double>::infinity())
     {
         assert(k >= 2);
     }
 
-    ~NearestNeighbourRegressor_()
-    {
-    }
-
     arma::vec operator()(const InputC& input)
     {
-        arma::vec features = phi(input);
+        arma::vec features = this->phi(input);
 
         unsigned int index = findNearestCluster(features, centroids);
 
         return centroids.col(index);
-
     }
 
-    void train(const std::vector<InputC>& samples)
+    virtual void trainFeatures(const arma::mat& features)
     {
-        unsigned int N = samples.size();
-
-        //compute features matrix
-        arma::mat features(phi.rows(), N);
-        for(int i = 0; i < N; i++)
-        {
-            features.col(i) = phi(samples[i]);
-        }
-
         wcss = std::numeric_limits<double>::infinity();
 
         for(unsigned int it = 0; it < iterations; it++)
@@ -90,7 +78,20 @@ public:
 
     inline double getWCSS()
     {
-       	return wcss;
+        return wcss;
+    }
+
+    inline arma::uvec getClustersIndexes()
+    {
+        arma::uvec indexes(clusters.n_rows);
+
+        for(unsigned int i = 0; i < clusters.n_rows; i++)
+        {
+            arma::sp_uvec feature_i = clusters.row(i).t();
+            indexes(i) = *feature_i.row_indices;
+        }
+
+        return indexes;
     }
 
     inline void setIterations(unsigned int iterations)
@@ -103,6 +104,11 @@ public:
     {
         assert(k >= 2);
         this->k = k;
+    }
+
+    virtual ~NearestNeighbourRegressor_()
+    {
+
     }
 
 private:
@@ -238,7 +244,6 @@ private:
 private:
     unsigned int k;
     unsigned int iterations;
-    Features_<InputC, denseOutput>& phi;
     arma::mat centroids;
     arma::sp_umat clusters;
     double wcss;

@@ -28,6 +28,8 @@
 #include "Policy.h"
 #include "Transition.h"
 
+#include "feature_selection/PrincipalFeatureAnalysis.h"
+
 #include <nlopt.hpp>
 
 namespace ReLe
@@ -46,13 +48,17 @@ public:
             phiBar.col(i) = data[i].computefeatureExpectation(phi, gamma);
         }
 
-        omega = arma::vec(phi.rows(), arma::fill::ones);
-        omega /= phi.rows();
+        active_feat = PrincipalFeatureAnalysis::selectFeatures(phiBar, 0.9);
+        std::cout << "active_feat" << std::endl << active_feat << std::endl;
+        phiBar = phiBar.rows(active_feat);
+
+
+        omega = arma::vec(phi.rows(), arma::fill::zeros);
     }
 
     virtual void run()
     {
-        unsigned int effective_dim = omega.n_elem - 1;
+        unsigned int effective_dim = phiBar.n_rows - 1;
 
         nlopt::opt optimizator;
         optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, effective_dim);
@@ -80,9 +86,9 @@ public:
         //optimize
         std::vector<double> parameters(effective_dim);
         for (int i = 0; i < effective_dim; ++i)
-            parameters[i] = omega[i];
+            parameters[i] = 1.0/phiBar.n_rows;
         double minf;
-        if (optimizator.optimize(parameters, minf) < 0)
+        if (effective_dim != 0 && optimizator.optimize(parameters, minf) < 0)
         {
             std::cout << "nlopt failed!" << std::endl;
         }
@@ -93,10 +99,11 @@ public:
             double sumx = 0.0;
             for (int i = 0; i < effective_dim; ++i)
             {
-                omega(i) = parameters[i];
+                omega(active_feat(i)) = parameters[i];
                 sumx += parameters[i];
             }
-            omega(effective_dim) = 1.0 - sumx;
+
+            omega(active_feat(effective_dim)) = 1.0 - sumx;
         }
 
     }
@@ -221,6 +228,8 @@ private:
     arma::mat sigmaInv;
 
     arma::vec omega;
+
+    arma::uvec active_feat;
 };
 
 }

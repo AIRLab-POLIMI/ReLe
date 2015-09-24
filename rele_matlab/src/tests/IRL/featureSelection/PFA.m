@@ -17,7 +17,7 @@ q = computeDimensions(S, 0.9);
 % Select Features
 Aq = A(1:q, :);
 
-clusterIndexes = kmeans(Aq',q, 'Replicates', 5);
+clusterIndexes = kmeans(Aq',q, 'Replicates', 10);
 idx = 1:size(Aq, 2);
 
 selectedFeatures = zeros(q, 1);

@@ -79,6 +79,9 @@ add_executable(mountain_car TD/MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
 
 #IRL tests
+add_executable(pfa_test IRL/PFA/PFATest.cpp)
+target_link_libraries(pfa_test rele)
+
 add_executable(simple_chain_MWAL IRL/MWAL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
 

@@ -29,7 +29,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	//Easy test
+    //Easy test
     unsigned int featureSize = 3;
     BasisFunctions basis = IdentityBasis::generate(featureSize);
     DenseFeatures phi(basis);

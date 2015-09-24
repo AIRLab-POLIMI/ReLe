@@ -26,6 +26,7 @@
 
 #include "Basics.h"
 #include "BatchData.h"
+#include "Features.h"
 
 namespace ReLe
 {
@@ -105,6 +106,41 @@ public:
     {
 
     }
+};
+
+template<class InputC, bool denseOutput = true>
+class UnsupervisedBatchRegressor_
+{
+
+public:
+    UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi) : phi(phi)
+    {
+
+    }
+
+    virtual void train(const std::vector<InputC>& dataset)
+    {
+        unsigned int N = dataset.size();
+
+        //compute features matrix
+        arma::mat features(phi.rows(), N);
+        for(int i = 0; i < N; i++)
+        {
+            features.col(i) = phi(dataset[i]);
+        }
+
+        trainFeatures(features);
+    }
+
+    virtual void trainFeatures(const arma::mat& features) = 0;
+
+    virtual ~UnsupervisedBatchRegressor_()
+    {
+
+    }
+
+protected:
+    Features_<InputC, denseOutput>& phi;
 };
 
 }
