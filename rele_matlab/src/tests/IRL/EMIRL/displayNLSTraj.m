@@ -79,5 +79,5 @@ end
 
 figure(3)
 title('EM-IRL')
-mesh(Z)
+mesh(X, Y, Z)
 

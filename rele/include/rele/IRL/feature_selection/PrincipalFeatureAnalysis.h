@@ -37,7 +37,7 @@ public:
 
     static arma::uvec selectFeatures(arma::mat& features, double varMin)
     {
-    	std::cout << "meanFeature" << std::endl << arma::sum(features,1)/ features.n_cols << std::endl;
+        std::cout << "meanFeature" << std::endl << arma::sum(features,1)/ features.n_cols << std::endl;
         //compute covariance of features
         arma::mat Sigma = arma::cov(features.t());
         std::cout << "Sigma" << std::endl << Sigma << std::endl;
@@ -59,36 +59,36 @@ public:
 
         if(q > 1)
         {
-			arma::mat means;
-			arma::uvec clustersIndexes;
-			cluster(Aq, means, clustersIndexes, q);
+            arma::mat means;
+            arma::uvec clustersIndexes;
+            cluster(Aq, means, clustersIndexes, q);
 
 
-			arma::uvec idx = arma::linspace<arma::uvec>(0, features.n_rows -1, features.n_rows);
+            arma::uvec idx = arma::linspace<arma::uvec>(0, features.n_rows -1, features.n_rows);
 
-			arma::uvec selectedFeatures(q);
+            arma::uvec selectedFeatures(q);
 
-			for (unsigned int i = 0; i < q; i++)
-			{
-				arma::uvec elements = arma::find(clustersIndexes == i);
-				arma::mat clusterVectors = Aq.cols(elements);
-				arma::uvec vectorIdx = idx(elements);
+            for (unsigned int i = 0; i < q; i++)
+            {
+                arma::uvec elements = arma::find(clustersIndexes == i);
+                arma::mat clusterVectors = Aq.cols(elements);
+                arma::uvec vectorIdx = idx(elements);
 
-				unsigned int k = findNearest(clusterVectors, means.col(i));
-				selectedFeatures(i) = vectorIdx(k);
-			}
+                unsigned int k = findNearest(clusterVectors, means.col(i));
+                selectedFeatures(i) = vectorIdx(k);
+            }
 
-			return arma::sort(selectedFeatures);
+            return arma::sort(selectedFeatures);
         }
         else
         {
-        	arma::vec mean = arma::sum(Aq, 1) / Aq.n_cols;
+            arma::vec mean = arma::sum(Aq, 1) / Aq.n_cols;
 
-        	arma::uvec index(1);
+            arma::uvec index(1);
 
-        	index(0) = findNearest(Aq, mean);
+            index(0) = findNearest(Aq, mean);
 
-        	return index;
+            return index;
         }
 
     }
@@ -96,7 +96,7 @@ public:
 private:
     static unsigned int computeDimensions(arma::vec& s, double varMin)
     {
-    	std::cout << "s: " << s.t() << std::endl;
+        std::cout << "s: " << s.t() << std::endl;
         unsigned int q;
         for (q = 0; q < s.n_elem; q++)
         {
@@ -125,7 +125,7 @@ private:
 
     static unsigned int findNearest(const arma::mat& elements, const arma::vec mean)
     {
-    	unsigned int minIndex = 0;
+        unsigned int minIndex = 0;
         double minDistance = std::numeric_limits<double>::infinity();
 
         for (unsigned int j = 0; j < elements.n_cols; j++)

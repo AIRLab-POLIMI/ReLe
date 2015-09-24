@@ -27,6 +27,7 @@
 #include "IRLAlgorithm.h"
 #include "Policy.h"
 #include "Transition.h"
+#include "ArmadilloExtensions.h"
 
 #include "feature_selection/PrincipalFeatureAnalysis.h"
 
@@ -48,9 +49,11 @@ public:
             phiBar.col(i) = data[i].computefeatureExpectation(phi, gamma);
         }
 
-        active_feat = PrincipalFeatureAnalysis::selectFeatures(phiBar, 0.9);
+
+        preprocess();
+        /*active_feat = PrincipalFeatureAnalysis::selectFeatures(phiBar, 0.9);
         std::cout << "active_feat" << std::endl << active_feat << std::endl;
-        phiBar = phiBar.rows(active_feat);
+        phiBar = phiBar.rows(active_feat);*/
 
 
         omega = arma::vec(phi.rows(), arma::fill::zeros);
@@ -194,6 +197,49 @@ public:
                 grad[n * n + j] = 1.0;
             }
         }
+    }
+
+    //======================================================================
+    // PREPROCESSING
+    //----------------------------------------------------------------------
+
+    void preprocess()
+    {
+        // performs preprocessing in order to remove the features
+        // that are constant and the one that are almost never
+        // under the given samples
+    	active_feat.resize(phiBar.n_cols);
+
+        //check feature range over trajectories
+        double tol = 1e-4;
+        arma::vec R = range(phiBar, 1);
+        arma::uvec const_ft = arma::find(R <= tol);
+
+        // normalize features
+        arma::vec mu = arma::sum(phiBar, 1) / phiBar.n_cols;
+        mu = arma::normalise(mu);
+
+        //find non-zero features
+        arma::uvec q = arma::find(abs(mu) > 1e-6);
+
+        //sort indexes
+        q = arma::sort(q);
+        const_ft = arma::sort(const_ft);
+
+        //compute set difference in order to obtain active features
+        auto it = std::set_difference(q.begin(), q.end(), const_ft.begin(),
+                                      const_ft.end(), active_feat.begin());
+        active_feat.resize(it - active_feat.begin());
+
+        //Compute reduced features set
+        phiBar = phiBar.rows(active_feat);
+
+        std::cout << "=== LINEAR REWARD: PRE-PROCESSING ===" << std::endl;
+        std::cout << "Feature expectation\n mu: " << mu.t();
+        std::cout << "Constant features\n cf: " << const_ft.t();
+        std::cout << "Based on mu test, the following features are preserved\n q: " << q.t();
+        std::cout << "Finally the active features are\n q - cf: " << active_feat.t();
+        std::cout << "=====================================" << std::endl;
     }
 
     //======================================================================
