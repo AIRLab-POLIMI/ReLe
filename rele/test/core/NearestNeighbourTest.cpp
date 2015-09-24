@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include "regressors/NearestNeighbourRegressor.h"
+#include "regressors/NearestNeighbourRegressor.h"
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
 
@@ -29,14 +29,14 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	/*unsigned int featureSize = 3;
+	unsigned int featureSize = 3;
 	BasisFunctions basis = IdentityBasis::generate(featureSize);
 	DenseFeatures phi(basis);
 	NearestNeighbourRegressor regressor(phi, 2);
 
 	arma::mat data1(featureSize, 10, arma::fill::randn);
 	arma::mat data2(featureSize, 10, arma::fill::randn);
-	data2 + 10;
+	data2 += 10;
 
 	arma::mat data = arma::join_horiz(data1, data2);
 
@@ -46,6 +46,10 @@ int main(int argc, char *argv[])
 		vectorData.push_back(data.col(i));
 	}
 
-	regressor.train(vectorData);*/
+	std::cout << "data" << std::endl << data <<std::endl;
+
+	regressor.train(vectorData);
+
+	std::cout << regressor.getCentroids() << std::endl;
 
 }

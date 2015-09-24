@@ -39,7 +39,7 @@ class NearestNeighbourRegressor_: public NonParametricRegressor_<InputC, denseOu
 
 public:
     NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
-        : ParametricRegressor_<InputC>(phi.cols()), phi(phi), k(k)
+        : NonParametricRegressor_<InputC>(phi.cols()), phi(phi), k(k)
     {
     }
 
@@ -73,7 +73,7 @@ public:
         //iteratively find better centroids
         bool hasConverged = false;
 
-        arma::sp_mat oldClusters(N, k);
+        arma::sp_umat oldClusters(N, k);
 
         do
         {
@@ -84,12 +84,13 @@ public:
 			recomputeCentroids(clusters, features, centroids);
 
             //check convergence
-            hasConverged = arma::all(clusters == oldClusters);
+			arma::sp_umat delta = oldClusters - clusters;
+            hasConverged = delta.n_nonzero == features.n_cols;
 
             //save clusters
             oldClusters = clusters;
         }
-        while(hasConverged);
+        while(!hasConverged);
 
         //save centroids
         this->centroids = centroids;
@@ -100,7 +101,7 @@ public:
     	return clusters;
     }
 
-    arma::vec getCentroids()
+    arma::mat getCentroids()
     {
     	return centroids;
     }
@@ -108,7 +109,7 @@ public:
 private:
     arma::mat initRandom(const arma::mat& features)
     {
-        arma::mat centroids;
+        arma::mat centroids(features.n_rows, k);
 
         std::set<unsigned int> centroidsIndx;
 
@@ -117,15 +118,20 @@ private:
             unsigned int indx;
             do
             {
-                indx = RandomGenerator::sampleUniformInt(0, features.n_cols);
+                indx = RandomGenerator::sampleUniformInt(0, features.n_cols - 1);
             }
-            while (centroidsIndx.count(indx) == 0);
+            while (centroidsIndx.count(indx) != 0);
 
             centroidsIndx.insert(indx);
             centroids.col(i) = features.col(indx);
         }
 
         return centroids;
+    }
+
+    const arma::uvec getNonzeroIndices(arma::sp_uvec& sparseVec)
+    {
+    	return arma::uvec(const_cast<arma::uword*>(sparseVec.row_indices), sparseVec.n_nonzero, false);
     }
 
     arma::sp_umat createClusters(const arma::mat& features, const arma::mat& centroids)
@@ -141,14 +147,14 @@ private:
         return clusters;
     }
 
-	void recomputeCentroids(const arma::sp_mat& clusters, const arma::mat& features,
+	void recomputeCentroids(const arma::sp_umat& clusters, const arma::mat& features,
 				arma::mat& centroids)
 	{
 		//for every cluster, re-calculate its centroid.
 		for (int i = 0; i < k; i++)
 		{
-			arma::uvec cluster_i = clusters.col(i);
-			arma::mat clusterElements = features.cols(arma::find(cluster_i));
+			arma::sp_uvec cluster_i = clusters.col(i);
+			arma::mat clusterElements = features.cols(getNonzeroIndices(cluster_i));
 			arma::vec centroid = arma::sum(clusterElements, 1)
 						/ clusterElements.n_cols;
 			centroids.col(i) = centroid;
@@ -178,7 +184,7 @@ private:
 private:
     unsigned int k;
     Features_<InputC, denseOutput>& phi;
-    arma::vec centroids;
+    arma::mat centroids;
     arma::sp_umat clusters;
 };
 
