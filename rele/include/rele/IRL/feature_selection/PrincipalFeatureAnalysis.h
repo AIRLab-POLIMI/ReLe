@@ -54,7 +54,7 @@ public:
         unsigned int q = computeDimensions(s, varMin);
 
         //select features
-        arma::mat Aq = A.rows(0, q-1);
+        arma::mat Aq = A.cols(0, q-1).t();
 
 
         if(q > 1)
