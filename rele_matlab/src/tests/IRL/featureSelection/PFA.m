@@ -15,18 +15,18 @@ q = computeDimensions(S, 0.9);
 
 
 % Select Features
-Aq = A(1:q, :);
+Aq = A(:, 1:q);
 
-clusterIndexes = kmeans(Aq',q, 'Replicates', 10);
-idx = 1:size(Aq, 2);
+clusterIndexes = kmeans(Aq,q, 'Replicates', 10);
+idx = 1:size(Aq, 1);
 
 selectedFeatures = zeros(q, 1);
 
 for i = 1:q
-   clusterVectors = Aq(:, clusterIndexes == i); 
+   clusterVectors = Aq(clusterIndexes == i, :); 
    vectorIdx = idx(clusterIndexes == i);
-   clusterMean = sum(clusterVectors, 2)/size(clusterVectors, 2);
-   k = dsearchn(clusterVectors', clusterMean');
+   clusterMean = sum(clusterVectors, 1)/size(clusterVectors, 1);
+   k = dsearchn(clusterVectors, clusterMean);
    selectedFeatures(i) = vectorIdx(k);
 end
 
