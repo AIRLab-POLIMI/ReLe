@@ -39,8 +39,10 @@ class NearestNeighbourRegressor_: public NonParametricRegressor_<InputC, denseOu
 
 public:
     NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
-        : NonParametricRegressor_<InputC>(phi.cols()), phi(phi), k(k)
+        : NonParametricRegressor_<InputC>(phi.cols()), phi(phi), k(k), iterations(1),
+          centroids(phi.rows(), k, arma::fill::randn), wcss(std::numeric_limits<double>::infinity())
     {
+        assert(k >= 2);
     }
 
     ~NearestNeighbourRegressor_()
@@ -49,11 +51,11 @@ public:
 
     arma::vec operator()(const InputC& input)
     {
-    	arma::vec features = phi(input);
+        arma::vec features = phi(input);
 
-    	unsigned int index = findNearestCluster(features, centroids);
+        unsigned int index = findNearestCluster(features, centroids);
 
-    	return centroids.col(index);
+        return centroids.col(index);
 
     }
 
@@ -68,43 +70,39 @@ public:
             features.col(i) = phi(samples[i]);
         }
 
-        arma::mat&& centroids = initRandom(features);
+        wcss = std::numeric_limits<double>::infinity();
 
-        //iteratively find better centroids
-        bool hasConverged = false;
-
-        arma::sp_umat oldClusters(N, k);
-
-        do
+        for(unsigned int it = 0; it < iterations; it++)
         {
-        	//create clusters
-            arma::sp_umat&& clusters = createClusters(features, centroids);
-
-            //for every cluster, re-calculate its centroid.
-			recomputeCentroids(clusters, features, centroids);
-
-            //check convergence
-			arma::sp_umat delta = oldClusters - clusters;
-            hasConverged = delta.n_nonzero == 0;
-
-            //save clusters
-            oldClusters = clusters;
+            runKMeansIteration(features);
         }
-        while(!hasConverged);
-
-        //save centroids and clusters
-        this->centroids = centroids;
-        this->clusters = oldClusters;
     }
 
-    arma::sp_umat getClusters()
+    inline arma::sp_umat getClusters()
     {
-    	return clusters;
+        return clusters;
     }
 
-    arma::mat getCentroids()
+    inline arma::mat getCentroids()
     {
-    	return centroids;
+        return centroids;
+    }
+
+    inline double getWCSS()
+    {
+       	return wcss;
+    }
+
+    inline void setIterations(unsigned int iterations)
+    {
+        assert(iterations >= 1);
+        this->iterations = iterations;
+    }
+
+    inline void setK(unsigned int k)
+    {
+        assert(k >= 2);
+        this->k = k;
     }
 
 private:
@@ -132,61 +130,118 @@ private:
 
     const arma::uvec getNonzeroIndices(arma::sp_uvec& sparseVec)
     {
-    	return arma::uvec(const_cast<arma::uword*>(sparseVec.row_indices), sparseVec.n_nonzero, false);
+        return arma::uvec(const_cast<arma::uword*>(sparseVec.row_indices), sparseVec.n_nonzero, false);
     }
 
     arma::sp_umat createClusters(const arma::mat& features, const arma::mat& centroids)
     {
-    	arma::sp_umat clusters(features.n_cols, centroids.n_cols);
+        arma::sp_umat clusters(features.n_cols, centroids.n_cols);
 
         for(unsigned int i = 0; i < features.n_cols; i++)
         {
-        	unsigned int minIndex = findNearestCluster(features.col(i), centroids);
+            unsigned int minIndex = findNearestCluster(features.col(i), centroids);
             clusters(i, minIndex) = 1;
         }
 
         return clusters;
     }
 
-	void recomputeCentroids(const arma::sp_umat& clusters, const arma::mat& features,
-				arma::mat& centroids)
-	{
-		//for every cluster, re-calculate its centroid.
-		for (int i = 0; i < k; i++)
-		{
-			arma::sp_uvec cluster_i = clusters.col(i);
-			arma::mat clusterElements = features.cols(getNonzeroIndices(cluster_i));
-			arma::vec centroid = arma::sum(clusterElements, 1)
-						/ clusterElements.n_cols;
-			centroids.col(i) = centroid;
-		}
-	}
+    void recomputeCentroids(const arma::sp_umat& clusters, const arma::mat& features,
+                            arma::mat& centroids)
+    {
+        //for every cluster, re-calculate its centroid.
+        for (int i = 0; i < k; i++)
+        {
+            arma::sp_uvec cluster_i = clusters.col(i);
+            arma::mat clusterElements = features.cols(getNonzeroIndices(cluster_i));
+            arma::vec centroid = arma::sum(clusterElements, 1)
+                                 / clusterElements.n_cols;
+            centroids.col(i) = centroid;
+        }
+    }
 
-	unsigned int findNearestCluster(const arma::vec& currentFeature,
-				const arma::mat& centroids)
-	{
-		unsigned int minIndex = 0;
-		double minDistance = std::numeric_limits<double>::infinity();
+    unsigned int findNearestCluster(const arma::vec& currentFeature,
+                                    const arma::mat& centroids)
+    {
+        unsigned int minIndex = 0;
+        double minDistance = std::numeric_limits<double>::infinity();
 
-		for (unsigned int j = 0; j < centroids.n_cols; j++)
-		{
-			arma::vec delta = currentFeature - centroids.col(j);
-			double distance = arma::as_scalar(delta.t() * delta);
-			if (distance < minDistance)
-			{
-				minDistance = distance;
-				minIndex = j;
-			}
-		}
+        for (unsigned int j = 0; j < centroids.n_cols; j++)
+        {
+            arma::vec delta = currentFeature - centroids.col(j);
+            double distance = arma::as_scalar(delta.t() * delta);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                minIndex = j;
+            }
+        }
 
-		return minIndex;
-	}
+        return minIndex;
+    }
+
+    double computeWCSS(const arma::mat& features, const arma::sp_umat& clusters, const arma::mat centroids)
+    {
+        double wcss = 0;
+
+        for (int i = 0; i < k; i++)
+        {
+            arma::sp_uvec cluster_i = clusters.col(i);
+            arma::mat delta = features.cols(getNonzeroIndices(cluster_i));
+            delta.each_col() -= centroids.col(i);
+
+            wcss += arma::sum(arma::sum(arma::square(delta)));
+        }
+
+
+        return wcss;
+    }
+
+    void runKMeansIteration(const arma::mat& features)
+    {
+        arma::mat&& centroids = initRandom(features);
+
+        //iteratively find better centroids
+        bool hasConverged = false;
+
+        arma::sp_umat oldClusters(features.n_cols, k);
+
+        do
+        {
+            //create clusters
+            arma::sp_umat&& clusters = createClusters(features, centroids);
+
+            //for every cluster, re-calculate its centroid.
+            recomputeCentroids(clusters, features, centroids);
+
+            //check convergence
+            arma::sp_umat delta = oldClusters - clusters;
+            hasConverged = delta.n_nonzero == 0;
+
+            //save clusters
+            oldClusters = clusters;
+        }
+        while(!hasConverged);
+
+        //compute within cluster sum of squared distances
+        double wcss = computeWCSS(features, oldClusters, centroids);
+
+        //save centroids, clusters and wcss if new minimun is found
+        if(wcss < this->wcss)
+        {
+            this->centroids = centroids;
+            this->clusters = oldClusters;
+            this->wcss = wcss;
+        }
+    }
 
 private:
     unsigned int k;
+    unsigned int iterations;
     Features_<InputC, denseOutput>& phi;
     arma::mat centroids;
     arma::sp_umat clusters;
+    double wcss;
 };
 
 typedef NearestNeighbourRegressor_<arma::vec> NearestNeighbourRegressor;

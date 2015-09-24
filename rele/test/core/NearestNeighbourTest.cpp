@@ -29,28 +29,59 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	unsigned int featureSize = 3;
-	BasisFunctions basis = IdentityBasis::generate(featureSize);
-	DenseFeatures phi(basis);
-	NearestNeighbourRegressor regressor(phi, 2);
+	//Easy test
+    unsigned int featureSize = 3;
+    BasisFunctions basis = IdentityBasis::generate(featureSize);
+    DenseFeatures phi(basis);
+    NearestNeighbourRegressor regressor(phi, 2);
 
-	arma::mat data1(featureSize, 10, arma::fill::randn);
-	arma::mat data2(featureSize, 10, arma::fill::randn);
-	data2 += 10;
+    arma::mat data_1(featureSize, 10, arma::fill::randn);
+    arma::mat data_2(featureSize, 10, arma::fill::randn);
+    data_2 += 10;
 
-	arma::mat data = arma::join_horiz(data1, data2);
+    arma::mat data = arma::join_horiz(data_1, data_2);
 
-	std::vector<arma::vec> vectorData;
-	for(unsigned i = 0; i < data.n_cols; i++)
-	{
-		vectorData.push_back(data.col(i));
-	}
+    std::vector<arma::vec> vectorData;
+    for(unsigned i = 0; i < data.n_cols; i++)
+    {
+        vectorData.push_back(data.col(i));
+    }
 
-	std::cout << "data" << std::endl << data <<std::endl;
+    regressor.train(vectorData);
 
-	regressor.train(vectorData);
+    std::cout << "-- Test #1 --" << std::endl;
+    std::cout << "data" << std::endl << data <<std::endl;
+    std::cout << "computed centroids" << std::endl << regressor.getCentroids() << std::endl;
+    std::cout << "computed clusters" << std::endl << arma::umat(regressor.getClusters()) << std::endl;
+    std::cout << "wcss" << std::endl <<  regressor.getWCSS() << std::endl;
 
-	std::cout << regressor.getCentroids() << std::endl;
-	std::cout << arma::umat(regressor.getClusters()) << std::endl;
+
+    //Test with possible local minima
+    arma::mat data2 =
+    {
+        {-0.9994,    0.0113,   -0.0000,    0.0342},
+        {-0.0358,   -0.2098,   -0.0000,   -0.9771}
+    };
+
+    std::vector<arma::vec> vectorData2;
+    for(unsigned i = 0; i < data2.n_cols; i++)
+    {
+        vectorData2.push_back(data2.col(i));
+    }
+
+    BasisFunctions basis2 = IdentityBasis::generate(2);
+    DenseFeatures phi2(basis2);
+    NearestNeighbourRegressor regressor2(phi2, 2);
+
+    regressor2.setIterations(5);
+    regressor2.train(vectorData2);
+
+    std::cout << "-- Test #2 --" << std::endl;
+    std::cout << "data" << std::endl << data2 << std::endl;
+    std::cout << "computed centroids" << std::endl << regressor2.getCentroids() << std::endl;
+    std::cout << "computed clusters" << std::endl << arma::umat(regressor2.getClusters()) << std::endl;
+    std::cout << "wcss" << std::endl <<  regressor2.getWCSS() << std::endl;
+
+
 
 }
