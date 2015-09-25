@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     int nbEpisodes = 5000;
 
-    FileManager fm("lqr", "GIRL");
+    FileManager fm("lqr", "EMIRL");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -121,6 +121,12 @@ int main(int argc, char *argv[])
     //Print results
     cout << "Weights (EM): " << omega.t();
 
+    //save stuff
+    std::ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
+    data.writeToStream(ofs);
+    omega.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
+    theta.save(fm.addPath("Theta.txt"),  arma::raw_ascii);
+    data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).save(fm.addPath("Phi.txt"),  arma::raw_ascii);
 
     return 0;
 }

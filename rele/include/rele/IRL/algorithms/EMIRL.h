@@ -142,6 +142,8 @@ public:
         arma::vec xlast = {1.0 - arma::sum(x)};
         arma::vec omega = arma::join_vert(x, xlast);
         arma::vec Jep = phiBar.t()*omega;
+        double maxJep = arma::max(Jep);
+        Jep = Jep - maxJep; //Numerical trick
         arma::vec a = arma::exp(Jep);
         a /= arma::sum(a);
 
@@ -160,6 +162,15 @@ public:
         df = dSimplex * dKL;
 
         std::cout << "-------------------------------------" << std::endl;
+        std::cout << "Jep Max" << std::endl << maxJep << std::endl;
+        std::cout << "Jep Min" << std::endl << std::endl << arma::min(Jep) << std::endl;
+        std::cout << "a Min" << std::endl << a.min() << std::endl;
+        std::cout << "a Max" << std::endl << a.max() << std::endl;
+        std::cout << "a mean" << std::endl << arma::mean(a) << std::endl;
+        std::cout << "dwhat Min" << std::endl << dwhat.min() << std::endl;
+        std::cout << "dwhat Max" << std::endl << dwhat.max() << std::endl;
+        std::cout << "rank(dwhat) " << std::endl << arma::rank(dwhat) << std::endl;
+        std::cout << "delta" << std::endl << delta.t() << std::endl;
         std::cout << "what" << std::endl << what.t() << std::endl;
         std::cout << "dKL" << std::endl << dKL.t() << std::endl;
         std::cout << "df" << std::endl << df.t() << std::endl;
@@ -244,6 +255,10 @@ public:
         std::cout << "Based on mu test, the following features are preserved\n q: " << q.t();
         std::cout << "Finally the active features are\n q - cf: " << active_feat.t();
         std::cout << "=====================================" << std::endl;
+
+
+        if(arma::rank(theta*phiBar.t()) == 0)
+        	std::cout << "=========== WARNING!!! ZERO RANK PRODUCT ============" << std::endl;
     }
 
     //======================================================================
