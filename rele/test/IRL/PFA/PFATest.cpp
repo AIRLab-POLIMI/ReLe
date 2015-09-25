@@ -34,8 +34,9 @@ int main(int argc, char *argv[])
         {1e-5, 1e-7,   5e-8}
     };
 
-    arma::uvec selectedFeatures = PrincipalFeatureAnalysis::selectFeatures(features, 0.9);
+    arma::uvec selectedFeatures1 = PrincipalFeatureAnalysis::selectFeatures(features, 0.9);
+    std::cout << "selected features indexes" << std::endl << selectedFeatures1;
 
-    std::cout << "selected features indexes" << std::endl << selectedFeatures;
-
+    arma::uvec selectedFeatures2 = PrincipalFeatureAnalysis::selectFeatures(features, 0.9, false);
+    std::cout << "selected features indexes" << std::endl << selectedFeatures2;
 }

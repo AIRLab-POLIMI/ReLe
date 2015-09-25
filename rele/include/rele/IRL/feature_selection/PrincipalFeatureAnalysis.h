@@ -35,11 +35,25 @@ class PrincipalFeatureAnalysis
 {
 public:
 
-    static arma::uvec selectFeatures(arma::mat& features, double varMin)
+    static arma::uvec selectFeatures(arma::mat& features, double varMin, bool useCorrelation = true)
     {
         std::cout << "meanFeature" << std::endl << arma::sum(features,1)/ features.n_cols << std::endl;
-        //compute covariance of features
-        arma::mat Sigma = arma::cov(features.t());
+
+
+        arma::mat Sigma;
+
+        if(useCorrelation)
+        {
+        	//compute correlation of features
+        	Sigma = arma::cor(features.t());
+        	Sigma = (Sigma + Sigma.t())/2;
+        }
+        else
+        {
+        	//compute covariance of features
+        	Sigma = arma::cov(features.t());
+        }
+
         std::cout << "Sigma" << std::endl << Sigma << std::endl;
 
         //compute eigenvalues and eigenvectors

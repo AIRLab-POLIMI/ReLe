@@ -3,12 +3,15 @@ function [ Mr ] = PFA(M)
 %   Given an input dataset, return the features reduced dataset
 
 %Compute covariance
-Sigma = cov(M');
+%Sigma = cov(M');
+Sigma = corrcoef(M')
+Sigma = (Sigma + Sigma')/2
+det(Sigma)
  
 % Principal component analysis
 [A, S] = eig(Sigma);
 A = fliplr(A);
-S = rot90(S,2);
+S = rot90(S,2)
 
 % At least 90% of variability retained
 q = computeDimensions(S, 0.9);

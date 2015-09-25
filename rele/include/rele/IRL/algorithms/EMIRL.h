@@ -90,7 +90,7 @@ public:
         std::vector<double> parameters(effective_dim);
         for (int i = 0; i < effective_dim; ++i)
             parameters[i] = 1.0/phiBar.n_rows;
-        double minf;
+        double minf = 0;
         if (effective_dim != 0 && optimizator.optimize(parameters, minf) < 0)
         {
             std::cout << "nlopt failed!" << std::endl;
@@ -131,7 +131,7 @@ public:
         }
 
         //Print gradient and value
-        //printOptimizationInfo(value, n, x, grad);
+        printOptimizationInfo(value, n, x, grad);
 
         return value;
     }
@@ -158,6 +158,11 @@ public:
         arma::mat dSimplex = arma::join_horiz(arma::eye(x.n_elem, x.n_elem), -arma::ones(x.n_elem));
 
         df = dSimplex * dKL;
+
+        std::cout << "-------------------------------------" << std::endl;
+        std::cout << "what" << std::endl << what.t() << std::endl;
+        std::cout << "dKL" << std::endl << dKL.t() << std::endl;
+        std::cout << "df" << std::endl << df.t() << std::endl;
 
         return KL;
 
@@ -202,7 +207,6 @@ public:
     //======================================================================
     // PREPROCESSING
     //----------------------------------------------------------------------
-
     void preprocess()
     {
         // performs preprocessing in order to remove the features
@@ -259,10 +263,31 @@ public:
     //======================================================================
     // DESTRUCTOR
     //----------------------------------------------------------------------
-
     virtual ~EMIRL()
     {
 
+    }
+
+protected:
+    static void printOptimizationInfo(double value, unsigned int n, const double* x,
+                               double* grad)
+    {
+        std::cout << "v= " << value << " ";
+        std::cout << "x= ";
+        for (int i = 0; i < n; i++)
+        {
+            std::cout << x[i] << " ";
+        }
+        std::cout << std::endl;
+        if (grad)
+        {
+            std::cout << "g= ";
+            for (int i = 0; i < n; i++)
+            {
+                std::cout << grad[i] << " ";
+            }
+            std::cout << std::endl;
+        }
     }
 
 private:
