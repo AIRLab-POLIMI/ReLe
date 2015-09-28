@@ -1,0 +1,21 @@
+function plotPlane(p, n, tgv, sgv)
+%PLOTPLANE plot a plane
+%   TO BE COMPLETED
+
+[T,S] = meshgrid(tgv, sgv);
+
+tmp1 = [n(1); 0; 0];
+
+v1 = cross(tmp1, n);
+v2 = cross(v1, n);
+
+X = p(1) +  
+Y =
+Z =
+
+
+surf(X,Y,Z)
+shading flat
+
+end
+

@@ -30,33 +30,20 @@ zlim([0 20])
 theta = load('/tmp/ReLe/lqr/EMIRL/Theta.txt' , '-ascii');
 figure(3)
 hold on;
-plot3(theta(1, ~any(theta > 0, 1)), theta(2, ~any(theta > 0, 1)), theta(3, ~any(theta > 0, 1)), 'ob');
-plot3(theta(1, any(theta > 0, 1)), theta(2, any(theta > 0, 1)), theta(3, any(theta > 0, 1)), 'xy');
-plot3(theta(1, all(theta > 0, 1)), theta(2, all(theta > 0, 1)), theta(3, all(theta > 0, 1)), 'xr');
+plot3(theta(1, ~any(theta > 0, 1)), theta(2, ~), theta(3, :), 'xr');
+plot3(theta(1, any(theta > 0, 1)), theta(2, any(theta > 0, 1)), theta(3, any(theta > 0, 1)), 'ob');
 
 plotPlane([0, 0, 0], [1, 0, 0], -3:3:3, -3:3:3)
 plotPlane([0, 0, 0], [0, 1, 0], -3:3:3, -3:3:3)
 plotPlane([0, 0, 0], [0, 0, 1],  -3:3:3, -3:3:3)
-plot3(-3, -3, -3, 'dm');
+plot3(-3, -3, -3, 'xm');
 axis equal;
 
 outliers = sum(any(theta > 0, 1));
-acaso = sum(all(theta > 0, 1));
 total = size(theta, 2);
+
 ratio = (total-outliers) / total * 100;
 
-disp('inlier ratio:')
 disp(ratio)
-disp('completely unstable parameters:')
-disp(acaso)
-disp('----------------')
-disp(theta(:, all(theta > 0, 1)))
 
-%% Plot features vectors
-phi = load('/tmp/ReLe/lqr/EMIRL/Phi.txt' , '-ascii');
-figure(4)
-hold on;
-plot3(phi(1, ~any(phi < -1000)), phi(2, ~any(phi < -1000)), phi(3, ~any(phi < -1000)), 'ob');
-figure(5)
-hold on;
-plot3(phi(1, any(phi < -1000)), phi(2, any(phi < -1000)), phi(3, any(phi < -1000)), 'ob');
+
