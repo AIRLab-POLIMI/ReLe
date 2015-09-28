@@ -44,14 +44,14 @@ public:
 
         if(useCorrelation)
         {
-        	//compute correlation of features
-        	Sigma = arma::cor(features.t());
-        	Sigma = (Sigma + Sigma.t())/2;
+            //compute correlation of features
+            Sigma = arma::cor(features.t());
+            Sigma = (Sigma + Sigma.t())/2;
         }
         else
         {
-        	//compute covariance of features
-        	Sigma = arma::cov(features.t());
+            //compute covariance of features
+            Sigma = arma::cov(features.t());
         }
 
         std::cout << "Sigma" << std::endl << Sigma << std::endl;

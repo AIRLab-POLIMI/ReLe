@@ -223,7 +223,7 @@ public:
         // performs preprocessing in order to remove the features
         // that are constant and the one that are almost never
         // under the given samples
-    	active_feat.resize(phiBar.n_cols);
+        active_feat.resize(phiBar.n_cols);
 
         //check feature range over trajectories
         double tol = 1e-4;
@@ -258,7 +258,7 @@ public:
 
 
         if(arma::rank(theta*phiBar.t()) == 0)
-        	std::cout << "=========== WARNING!!! ZERO RANK PRODUCT ============" << std::endl;
+            std::cout << "=========== WARNING!!! ZERO RANK PRODUCT ============" << std::endl;
     }
 
     //======================================================================
@@ -285,7 +285,7 @@ public:
 
 protected:
     static void printOptimizationInfo(double value, unsigned int n, const double* x,
-                               double* grad)
+                                      double* grad)
     {
         std::cout << "v= " << value << " ";
         std::cout << "x= ";

@@ -126,7 +126,13 @@ int main(int argc, char *argv[])
     data.writeToStream(ofs);
     omega.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
     theta.save(fm.addPath("Theta.txt"),  arma::raw_ascii);
-    data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).save(fm.addPath("Phi.txt"),  arma::raw_ascii);
+
+    arma::mat results(rewardRegressor.getParametersSize(), data.size());
+    for(unsigned int i = 0; i < data.size(); i++)
+    {
+    	results.col(i) = data[i].computefeatureExpectation(phiReward, mdp.getSettings().gamma);
+    }
+    results.save(fm.addPath("Phi.txt"),  arma::raw_ascii);
 
     return 0;
 }
