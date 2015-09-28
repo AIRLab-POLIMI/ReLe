@@ -56,7 +56,7 @@ disp(theta(:, all(theta > 0, 1)))
 phi = load('/tmp/ReLe/lqr/EMIRL/Phi.txt' , '-ascii');
 figure(4)
 hold on;
-inliers = any(phi > -1e3);
+inliers = all(phi > -1000);
 plot3(phi(1, inliers), phi(2, inliers), phi(3, inliers), 'ob');
 
 disp('----------------')
@@ -64,4 +64,4 @@ disp('inlier features ratio:')
 disp(sum(inliers)/length(phi));
 
 disp('outliers features:')
-disp(sum(inliers))
+disp(length(phi)-sum(inliers))
