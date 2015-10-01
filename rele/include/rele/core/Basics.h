@@ -237,7 +237,7 @@ public:
         return ss.str();
     }
 
-    inline int serializedSize()
+    inline int serializedSize() override
     {
         return this->n_elem;
     }

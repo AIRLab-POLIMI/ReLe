@@ -35,8 +35,8 @@ class ModularRange : public Range
 public:
     ModularRange(const double lo, const double hi);
 
-    virtual bool contains(const double d) const;
-    virtual double bound(const double& value) const;
+    virtual bool contains(const double d) const override;
+    virtual double bound(const double& value) const override;
 
     virtual ~ModularRange();
 };

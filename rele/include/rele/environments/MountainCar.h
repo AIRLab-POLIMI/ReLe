@@ -46,8 +46,8 @@ public:
 
     MountainCar(ConfigurationsLabel label = Sutton);
     virtual void step(const FiniteAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
     ConfigurationsLabel s0type;
 

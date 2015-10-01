@@ -41,8 +41,8 @@ public:
                    std::string policyHPar,
                    arma::mat Q);
 
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
 
 protected:
     double gamma;
@@ -61,8 +61,8 @@ public:
                    std::string policyHPar,
                    arma::vec Qw);
 
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
 
 protected:
     double gamma;
@@ -78,9 +78,9 @@ class FiniteTD: public Agent<FiniteAction, FiniteState>
 public:
     FiniteTD(ActionValuePolicy<FiniteState>& policy);
 
-    virtual void endEpisode();
+    virtual void endEpisode() override;
 
-    inline virtual AgentOutputData* getAgentOutputDataEnd()
+    inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         return new FiniteTDOutput(task.gamma, alpha, policy.getPolicyName(),
                                   policy.getPolicyHyperparameters(), Q);
@@ -92,7 +92,7 @@ public:
     }
 
 protected:
-    virtual void init();
+    virtual void init() override;
 
 protected:
     //Action-value function
@@ -113,9 +113,9 @@ class LinearTD : public Agent<FiniteAction, DenseState>
 public:
     LinearTD(ActionValuePolicy<DenseState>& policy, Features& phi);
 
-    virtual void endEpisode();
+    virtual void endEpisode() override;
 
-    inline virtual AgentOutputData* getAgentOutputDataEnd()
+    inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         return new LinearTDOutput(task.gamma, alpha, policy.getPolicyName(),
                                   policy.getPolicyHyperparameters(), Q.getParameters());
@@ -127,7 +127,7 @@ public:
     }
 
 protected:
-    virtual void init();
+    virtual void init() override;
 
 protected:
     //Linear action-value function

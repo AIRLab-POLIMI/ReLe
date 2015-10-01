@@ -48,7 +48,7 @@ public:
 
     }
 
-    virtual double operator()(const arma::vec& input)
+    virtual double operator()(const arma::vec& input) override
     {
         size_t currentState = input[2];
 
@@ -58,12 +58,12 @@ public:
             return 0;
     }
 
-    virtual void writeOnStream(std::ostream& out)
+    virtual void writeOnStream(std::ostream& out) override
     {
 
     }
 
-    virtual void readFromStream(std::istream& in)
+    virtual void readFromStream(std::istream& in) override
     {
 
     }

@@ -73,8 +73,8 @@ public:
             delete config;
     }
 
-    void step(const FiniteAction& action, DenseState& nextState, Reward& reward);
-    void getInitialState(DenseState& state);
+    void step(const FiniteAction& action, DenseState& nextState, Reward& reward) override;
+    void getInitialState(DenseState& state) override;
 
     inline const SwingUpSettings& getSettings() const
     {

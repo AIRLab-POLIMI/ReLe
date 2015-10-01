@@ -33,20 +33,20 @@ class DeterministicPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
 {
 
 public:
-    virtual unsigned int operator()(const size_t& state);
-    virtual double operator()(const size_t& state, const unsigned int& action);
+    virtual unsigned int operator()(const size_t& state) override;
+    virtual double operator()(const size_t& state, const unsigned int& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "Deterministic";
     }
 
-    virtual std::string getPolicyHyperparameters()
+    virtual std::string getPolicyHyperparameters() override
     {
         return "";
     }
 
-    virtual std::string printPolicy();
+    virtual std::string printPolicy() override;
 
     inline void update(size_t state, unsigned int action)
     {
@@ -58,7 +58,7 @@ public:
         pi.zeros(nstates);
     }
 
-    virtual DeterministicPolicy* clone()
+    virtual DeterministicPolicy* clone() override
     {
         return new DeterministicPolicy(*this);
     }

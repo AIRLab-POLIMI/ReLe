@@ -57,8 +57,8 @@ class TabularREPSOutputData: public AbstractREPSOutputData
 public:
     TabularREPSOutputData(int N, double eps, const std::string& policyPrinted, bool final);
 
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
 
     virtual ~TabularREPSOutputData();
 

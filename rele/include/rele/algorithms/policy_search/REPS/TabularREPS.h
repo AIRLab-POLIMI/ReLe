@@ -39,15 +39,15 @@ class TabularREPS: public Agent<FiniteAction, FiniteState>
 public:
     TabularREPS(DenseFeatures_<size_t>& phi);
 
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+    virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action);
-    virtual void endEpisode(const Reward& reward);
-    virtual void endEpisode();
+                      FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
+    virtual void endEpisode() override;
 
-    virtual AgentOutputData* getAgentOutputData();
-    virtual AgentOutputData* getAgentOutputDataEnd();
+    virtual AgentOutputData* getAgentOutputData() override;
+    virtual AgentOutputData* getAgentOutputDataEnd() override;
 
     virtual ~TabularREPS();
 
@@ -63,7 +63,7 @@ private:
                           void* o);
 
 protected:
-    virtual void init();
+    virtual void init() override;
 
 private:
     TabularPolicy policy;

@@ -39,9 +39,9 @@ public:
                               std::initializer_list<double> condition_vals);
     AndConditionBasisFunction(BasisFunction* bfs, unsigned int idx, double condition_vals);
 
-    double operator()(const arma::vec& input);
-    void writeOnStream(std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator()(const arma::vec& input) override;
+    void writeOnStream(std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 
     static BasisFunctions generate(BasisFunctions& basis, unsigned int index, unsigned int value);
     static BasisFunctions generate(BasisFunctions& basis, std::vector<unsigned int> indexes,

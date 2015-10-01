@@ -47,11 +47,11 @@ class IdentityBasis : public IdentityBasis_<arma::vec>
 public:
     IdentityBasis(unsigned int index);
     virtual ~IdentityBasis();
-    double operator() (const arma::vec& input);
+    double operator() (const arma::vec& input) override;
 
 
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual void writeOnStream (std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
     static BasisFunctions generate(unsigned int input_size);
 
@@ -63,11 +63,11 @@ class FiniteIdentityBasis : public IdentityBasis_<size_t>
 public:
     FiniteIdentityBasis(unsigned int index);
     virtual ~FiniteIdentityBasis();
-    double operator() (const size_t& input);
+    double operator() (const size_t& input) override;
 
 
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual void writeOnStream (std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
     static BasisFunctions_<size_t> generate(unsigned int stateN);
 };
@@ -77,11 +77,11 @@ class VectorFiniteIdentityBasis : public IdentityBasis_<arma::vec>
 public:
     VectorFiniteIdentityBasis(unsigned int index, double value);
     virtual ~VectorFiniteIdentityBasis();
-    double operator() (const arma::vec& input);
+    double operator() (const arma::vec& input) override;
 
 
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual void writeOnStream (std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
     static BasisFunctions generate(std::vector<unsigned int> values);
     static BasisFunctions generate(unsigned int stateN, unsigned int values);

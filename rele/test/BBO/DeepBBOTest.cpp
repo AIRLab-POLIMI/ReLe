@@ -122,28 +122,28 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
 
 class deep_2state_identity: public BasisFunction
 {
-    double operator()(const arma::vec& input)
+    double operator()(const arma::vec& input) override
     {
         return ((input[0] == 1) && (input[1] == 1))?1:0;
     }
-    void writeOnStream(std::ostream& out)
+    void writeOnStream(std::ostream& out) override
     {
         out << "deep_2state" << endl;
     }
-    void readFromStream(std::istream& in) {}
+    void readFromStream(std::istream& in) override {}
 };
 
 class deep_state_identity: public BasisFunction
 {
-    double operator()(const arma::vec& input)
+    double operator()(const arma::vec& input) override
     {
         return (input[0] == 1)?1:0;
     }
-    void writeOnStream(std::ostream& out)
+    void writeOnStream(std::ostream& out) override
     {
         out << "deep_state" << endl;
     }
-    void readFromStream(std::istream& in) {}
+    void readFromStream(std::istream& in) override {}
 };
 /////////////////////////////////////////////////////////////
 

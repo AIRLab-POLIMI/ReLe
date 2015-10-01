@@ -68,8 +68,8 @@ public:
             delete config;
     }
 
-    virtual void step(const FiniteAction& action, DenseState& nextState, Reward& reward);
-    virtual void getInitialState(DenseState& state);
+    virtual void step(const FiniteAction& action, DenseState& nextState, Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
     void setCurrentState(DenseState& state) //TO REMOVE
     {

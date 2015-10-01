@@ -39,8 +39,8 @@ public:
                      arma::mat Q,
                      double ro);
 
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
 
 private:
     double beta;
@@ -51,13 +51,13 @@ class R_Learning: public FiniteTD
 {
 public:
     R_Learning(ActionValuePolicy<FiniteState>& policy);
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+    virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action);
-    virtual void endEpisode(const Reward& reward);
+                      FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
 
-    inline virtual AgentOutputData* getAgentOutputDataEnd()
+    inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         return new R_LearningOutput(alpha, beta, policy.getPolicyName(),
                                     policy.getPolicyHyperparameters(), Q, ro);

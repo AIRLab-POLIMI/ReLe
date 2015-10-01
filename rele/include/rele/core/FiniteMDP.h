@@ -43,8 +43,8 @@ public:
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings);
 
     virtual void step(const FiniteAction& action, FiniteState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(FiniteState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(FiniteState& state) override;
 
 private:
     void chekMatricesDimensions(const arma::cube& P, const arma::cube& R,

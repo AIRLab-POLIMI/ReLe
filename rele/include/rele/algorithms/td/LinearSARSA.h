@@ -37,11 +37,11 @@ class LinearGradientSARSA: public LinearTD
 {
 public:
     LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, Features& phi);
-    virtual void initEpisode(const DenseState& state, FiniteAction& action);
-    virtual void sampleAction(const DenseState& state, FiniteAction& action);
+    virtual void initEpisode(const DenseState& state, FiniteAction& action) override;
+    virtual void sampleAction(const DenseState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const DenseState& nextState,
-                      FiniteAction& action);
-    virtual void endEpisode(const Reward& reward);
+                      FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
 
     virtual ~LinearGradientSARSA();
 

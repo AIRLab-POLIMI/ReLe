@@ -39,8 +39,8 @@ public:
                       double gamma = 0.9, unsigned int horizon = 50);
 
     virtual void step(const DenseAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
 private:
     void initialize(unsigned int dimensions, double mu_s, double sigma_s);

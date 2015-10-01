@@ -37,9 +37,9 @@ class AffineFunction: public BasisFunction
 public:
     AffineFunction(BasisFunction* bfs, arma::mat A);
 
-    double operator()(const arma::vec& input);
-    void writeOnStream(std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator()(const arma::vec& input) override;
+    void writeOnStream(std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 
     static BasisFunctions generate(BasisFunctions& basis, arma::mat& A);
 

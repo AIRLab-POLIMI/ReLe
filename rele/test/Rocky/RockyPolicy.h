@@ -36,41 +36,41 @@ public:
     RockyPolicy(double dt);
 
     //Policy
-    virtual arma::vec operator() (const arma::vec& state);
-    virtual double operator() (const arma::vec& state, const arma::vec& action);
+    virtual arma::vec operator() (const arma::vec& state) override;
+    virtual double operator() (const arma::vec& state, const arma::vec& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "Rocky Policy";
     }
 
-    inline virtual std::string getPolicyHyperparameters()
+    inline virtual std::string getPolicyHyperparameters() override
     {
         return "";
     }
 
-    inline virtual std::string printPolicy()
+    inline virtual std::string printPolicy() override
     {
         return "";
     }
 
     //ParametricPolicy
-    inline virtual arma::vec getParameters() const
+    inline virtual arma::vec getParameters() const override
     {
         return w;
     }
 
-    inline virtual const unsigned int getParametersSize() const
+    inline virtual const unsigned int getParametersSize() const override
     {
         return PARAM_SIZE;
     }
 
-    virtual void setParameters(const arma::vec& w)
+    virtual void setParameters(const arma::vec& w) override
     {
         this->w = w;
     }
 
-    virtual RockyPolicy* clone()
+    virtual RockyPolicy* clone() override
     {
         return new RockyPolicy(*this);
     }

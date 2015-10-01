@@ -36,9 +36,9 @@ public:
     SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& spanVector);
     ~SubspaceBasis();
 
-    double operator() (const arma::vec& input);
-    void writeOnStream (std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator() (const arma::vec& input) override;
+    void writeOnStream (std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 
     static BasisFunctions generate(BasisFunctions& basisVector, std::vector<arma::span>& spanVector);
     static BasisFunctions generate(BasisFunctions& basisVector, arma::span span);

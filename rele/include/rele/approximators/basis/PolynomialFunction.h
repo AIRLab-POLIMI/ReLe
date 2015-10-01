@@ -37,10 +37,10 @@ public:
                        std::vector<unsigned int> degree);
     PolynomialFunction(unsigned int _dimension, unsigned int _degree);
     virtual ~PolynomialFunction();
-    double operator()(const arma::vec& input);
+    double operator()(const arma::vec& input) override;
 
-    virtual void writeOnStream(std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual void writeOnStream(std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
     static BasisFunctions generate(unsigned int degree, unsigned int input_size);
 

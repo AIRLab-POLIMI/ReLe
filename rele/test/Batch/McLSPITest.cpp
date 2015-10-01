@@ -59,10 +59,10 @@ public:
     {
     }
 
-    virtual void readFromStream(std::istream& in) {}
-    virtual void writeOnStream(std::ostream& out) {}
+    virtual void readFromStream(std::istream& in) override {}
+    virtual void writeOnStream(std::ostream& out) override {}
 
-    virtual double operator()(const arma::vec& s)
+    virtual double operator()(const arma::vec& s) override
     {
         int posIdx = MountainCar::StateLabel::position;
         int velIdx = MountainCar::StateLabel::velocity;

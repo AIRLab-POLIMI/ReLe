@@ -34,11 +34,11 @@ class SARSA: public FiniteTD
 {
 public:
     SARSA(ActionValuePolicy<FiniteState>& policy);
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+    virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action);
-    virtual void endEpisode(const Reward& reward);
+                      FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
 
     virtual ~SARSA();
 
@@ -49,11 +49,11 @@ class SARSA_lambda: public FiniteTD
 {
 public:
     SARSA_lambda(ActionValuePolicy<FiniteState>& policy, bool accumulating);
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+    virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action);
-    virtual void endEpisode(const Reward& reward);
+                      FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
 
     virtual ~SARSA_lambda();
 
@@ -63,7 +63,7 @@ public:
     }
 
 protected:
-    virtual void init();
+    virtual void init() override;
 
 private:
     double lambda;

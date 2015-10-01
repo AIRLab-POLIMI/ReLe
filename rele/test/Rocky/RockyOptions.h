@@ -50,18 +50,18 @@ protected:
 class Eat : public RockyOption
 {
 public:
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, DenseAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, DenseAction& action) override;
 };
 
 class Home : public RockyOption
 {
 public:
     Home();
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, DenseAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, DenseAction& action) override;
 
 private:
     arma::vec home;
@@ -71,9 +71,9 @@ class Feed : public RockyOption
 {
 public:
     Feed();
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, DenseAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, DenseAction& action) override;
 
 private:
     arma::vec spot;
@@ -82,25 +82,25 @@ private:
 class Escape1 : public RockyOption
 {
 public:
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, DenseAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, DenseAction& action) override;
 };
 
 class Escape2 : public RockyOption
 {
 public:
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, DenseAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, DenseAction& action) override;
 };
 
 class Escape3 : public RockyOption
 {
 public:
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, DenseAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, DenseAction& action) override;
 };
 
 }

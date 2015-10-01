@@ -56,17 +56,17 @@ public:
         bf2 = new QuadraticBasis(R, arma::span(dim,2*dim-1));
     }
 
-    virtual double operator()(const arma::vec& input)
+    virtual double operator()(const arma::vec& input) override
     {
         return -(*bf1)(input)-(*bf2)(input);
     }
 
-    virtual void writeOnStream(std::ostream& out)
+    virtual void writeOnStream(std::ostream& out) override
     {
 
     }
 
-    virtual void readFromStream(std::istream& in)
+    virtual void readFromStream(std::istream& in) override
     {
 
     }

@@ -62,49 +62,49 @@ protected:
 
 public:
 
-    virtual double operator()(const arma::vec& state, const arma::vec& action);
+    virtual double operator()(const arma::vec& state, const arma::vec& action) override;
 
-    virtual arma::vec operator()(const arma::vec& state);
+    virtual arma::vec operator()(const arma::vec& state) override;
 
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "NormalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
-    virtual NormalPolicy* clone()
+    virtual NormalPolicy* clone() override
     {
         return new  NormalPolicy(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return approximator.getParameters();
     }
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
 public:
-    virtual arma::vec diff(const arma::vec& state, const arma::vec& action);
+    virtual arma::vec diff(const arma::vec& state, const arma::vec& action) override;
 
-    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
 
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
 
@@ -146,29 +146,29 @@ public:
     }
 
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "NormalStateDependantStddevPolicy";
     }
 
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
 
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
-    virtual NormalStateDependantStddevPolicy* clone()
+    virtual NormalStateDependantStddevPolicy* clone() override
     {
         return new  NormalStateDependantStddevPolicy(*this);
     }
 
 protected:
 
-    virtual void calculateMeanAndStddev(const arma::vec& state);
+    virtual void calculateMeanAndStddev(const arma::vec& state) override;
 
 protected:
     LinearApproximator stdApproximator;
@@ -283,50 +283,50 @@ public:
 
     }
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "MVNPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
 public:
 
-    virtual double operator()(const arma::vec& state, const arma::vec& action);
+    virtual double operator()(const arma::vec& state, const arma::vec& action) override;
 
-    virtual arma::vec operator()(const arma::vec& state);
+    virtual arma::vec operator()(const arma::vec& state) override;
 
-    virtual MVNPolicy* clone()
+    virtual MVNPolicy* clone() override
     {
         return new  MVNPolicy(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return approximator.getParameters();
     }
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
 public:
-    virtual arma::vec diff(const arma::vec& state, const arma::vec& action);
+    virtual arma::vec diff(const arma::vec& state, const arma::vec& action) override;
 
-    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
 
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
 
@@ -381,21 +381,21 @@ public:
         assert(stdDevW.n_cols == phiStdDev.rows());
     }
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "MVNStateDependantStddevPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
 protected:
-    inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
+    inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false) override
     {
         mCovariance=stdDevW*phiStdDev(state);
         mCovariance = mCovariance*mCovariance.t();
@@ -438,42 +438,42 @@ public:
 
     }
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "MVNDiagonalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
-    virtual MVNDiagonalPolicy* clone()
+    virtual MVNDiagonalPolicy* clone() override
     {
         return new  MVNDiagonalPolicy(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return arma::join_vert(approximator.getParameters(), stddevParams);
     }
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize() + stddevParams.n_elem;
     }
-    virtual void setParameters(const arma::vec& w);
+    virtual void setParameters(const arma::vec& w) override;
 
     // DifferentiablePolicy interface
 public:
 
-    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
 
-    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
 
 private:
     /**
@@ -568,35 +568,35 @@ public:
 
     }
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "MVNLogisticPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
-    virtual MVNLogisticPolicy* clone()
+    virtual MVNLogisticPolicy* clone() override
     {
         return new  MVNLogisticPolicy(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return arma::join_vert(approximator.getParameters(), mLogisticParams);
     }
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize() + mLogisticParams.n_elem;
     }
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         assert(w.n_elem == this->getParametersSize());
         int dp = approximator.getParametersSize();
@@ -613,9 +613,9 @@ public:
     // DifferentiablePolicy interface
 public:
 
-    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action);
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
 
-    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action);
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
 
 private:
 

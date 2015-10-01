@@ -136,7 +136,7 @@ public:
             // x >= 0 && sum x <= 1
             std::vector<double> tols(effective_dim + 1, 1e-5);
             optimizator.add_inequality_mconstraint(
-                GIRL::InequalitySimplexConstraints, NULL, tols);
+                GIRL::InequalitySimplexConstraints, nullptr, tols);
         }
         else
         {

@@ -78,7 +78,7 @@ public:
         // x >= 0 && sum x <= 1
         std::vector<double> tols(effective_dim + 1, 1e-5);
         optimizator.add_inequality_mconstraint(
-            EMIRL::InequalitySimplexConstraints, NULL, tols);
+            EMIRL::InequalitySimplexConstraints, nullptr, tols);
 
         optimizator.set_min_objective(EMIRL::wrapper, this);
         optimizator.set_xtol_rel(1e-8);

@@ -45,7 +45,7 @@ public:
     {
     }
 
-    virtual inline double operator()(const Reward& r)
+    virtual inline double operator()(const Reward& r) override
     {
         return r[index];
     }
@@ -62,7 +62,7 @@ public:
     {
     }
 
-    virtual inline double operator()(const Reward& r)
+    virtual inline double operator()(const Reward& r) override
     {
         double val = 0.0;
 //        assert(r.size() == weights.n_elem);

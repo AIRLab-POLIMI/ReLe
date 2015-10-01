@@ -35,15 +35,15 @@ public:
     Boltzmann();
     virtual ~Boltzmann();
 
-    virtual unsigned int operator()(const size_t& state);
-    virtual double operator()(const size_t& state, const unsigned int& action);
+    virtual unsigned int operator()(const size_t& state) override;
+    virtual double operator()(const size_t& state, const unsigned int& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "Boltzmann";
     }
 
-    virtual std::string getPolicyHyperparameters();
+    virtual std::string getPolicyHyperparameters() override;
 
     void setTemperature(double tau)
     {
@@ -55,7 +55,7 @@ public:
         return this->tau;
     }
 
-    virtual Boltzmann* clone()
+    virtual Boltzmann* clone() override
     {
         return new Boltzmann(*this);
     }
@@ -73,14 +73,14 @@ public:
     BoltzmannApproximate();
     virtual ~BoltzmannApproximate();
 
-    virtual unsigned int operator()(const arma::vec& state);
-    virtual double operator()(const arma::vec& state, const unsigned int& action);
+    virtual unsigned int operator()(const arma::vec& state) override;
+    virtual double operator()(const arma::vec& state, const unsigned int& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "Approximate Boltzmann";
     }
-    virtual std::string getPolicyHyperparameters();
+    virtual std::string getPolicyHyperparameters() override;
 
     void setTemperature(double tau)
     {
@@ -92,7 +92,7 @@ public:
         return this->tau;
     }
 
-    virtual BoltzmannApproximate* clone()
+    virtual BoltzmannApproximate* clone() override
     {
         return new BoltzmannApproximate(*this);
     }

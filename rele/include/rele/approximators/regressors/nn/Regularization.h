@@ -41,12 +41,12 @@ public:
 class L2_Regularization : public Regularization
 {
 public:
-    inline virtual double cost(const arma::vec& w)
+    inline virtual double cost(const arma::vec& w) override
     {
         return arma::norm(w);
     }
 
-    inline virtual arma::vec diff(const arma::vec& w)
+    inline virtual arma::vec diff(const arma::vec& w) override
     {
         return 2*w;
     }

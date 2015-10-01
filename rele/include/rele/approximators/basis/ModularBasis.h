@@ -48,36 +48,36 @@ class ModularSum : public ModularBasis
 {
 public:
     ModularSum(unsigned int index1, unsigned int index2, const ModularRange& range);
-    double operator()(const arma::vec& input);
-    void writeOnStream(std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator()(const arma::vec& input) override;
+    void writeOnStream(std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 };
 
 class ModularDifference : public ModularBasis
 {
 public:
     ModularDifference(unsigned int index1, unsigned int index2, const ModularRange& range);
-    double operator()(const arma::vec& input);
-    void writeOnStream(std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator()(const arma::vec& input) override;
+    void writeOnStream(std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 };
 
 class ModularProduct : public ModularBasis
 {
 public:
     ModularProduct(unsigned int index1, unsigned int index2, const ModularRange& range);
-    double operator()(const arma::vec& input);
-    void writeOnStream(std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator()(const arma::vec& input) override;
+    void writeOnStream(std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 };
 
 class ModularDivision : public ModularBasis
 {
 public:
     ModularDivision(unsigned int index1, unsigned int index2, const ModularRange& range);
-    double operator()(const arma::vec& input);
-    void writeOnStream(std::ostream& out);
-    void readFromStream(std::istream& in);
+    double operator()(const arma::vec& input) override;
+    void writeOnStream(std::ostream& out) override;
+    void readFromStream(std::istream& in) override;
 };
 
 }

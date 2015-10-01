@@ -33,9 +33,9 @@ class TaxiLocationOption : public FixedOption<FiniteAction, DenseState>
 {
 public:
     TaxiLocationOption(arma::vec location);
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
-    virtual void operator ()(const DenseState& state, FiniteAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
+    virtual void operator ()(const DenseState& state, FiniteAction& action) override;
 
 protected:
     void goToLocation(const DenseState& state, FiniteAction& action);
@@ -48,28 +48,28 @@ protected:
 class TaxiSimpleOption :  public FixedOption<FiniteAction, DenseState>
 {
 public:
-    virtual bool canStart(const arma::vec& state);
-    virtual double terminationProbability(const DenseState& state);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual double terminationProbability(const DenseState& state) override;
 };
 
 class TaxiPickupOption : public TaxiSimpleOption
 {
 public:
-    virtual void operator ()(const DenseState& state, FiniteAction& action);
+    virtual void operator ()(const DenseState& state, FiniteAction& action) override;
 
 };
 
 class TaxiDropOffOption : public TaxiSimpleOption
 {
 public:
-    virtual void operator ()(const DenseState& state, FiniteAction& action);
+    virtual void operator ()(const DenseState& state, FiniteAction& action) override;
 
 };
 
 class TaxiFillUpOption : public TaxiSimpleOption
 {
 public:
-    virtual void operator ()(const DenseState& state, FiniteAction& action);
+    virtual void operator ()(const DenseState& state, FiniteAction& action) override;
 
 };
 
@@ -83,8 +83,8 @@ protected:
 
 public:
     TaxiComplexOption(std::vector<arma::vec2>& location, ActionType action);
-    virtual bool canStart(const arma::vec& state);
-    virtual void operator ()(const DenseState& state, FiniteAction& action);
+    virtual bool canStart(const arma::vec& state) override;
+    virtual void operator ()(const DenseState& state, FiniteAction& action) override;
 
 
 protected:
@@ -102,7 +102,7 @@ class TaxiComplexPickupOption : public TaxiComplexOption
 {
 public:
     TaxiComplexPickupOption(std::vector<arma::vec2>& locations);
-    virtual double terminationProbability(const DenseState& state);
+    virtual double terminationProbability(const DenseState& state) override;
 
 };
 
@@ -110,7 +110,7 @@ class TaxiComplexDropOffOption : public TaxiComplexOption
 {
 public:
     TaxiComplexDropOffOption(std::vector<arma::vec2>& location);
-    virtual double terminationProbability(const DenseState& state);
+    virtual double terminationProbability(const DenseState& state) override;
 
 };
 
@@ -118,7 +118,7 @@ class TaxiComplexFillupOption : public TaxiComplexOption
 {
 public:
     TaxiComplexFillupOption(std::vector<arma::vec2>& location);
-    virtual double terminationProbability(const DenseState& state);
+    virtual double terminationProbability(const DenseState& state) override;
 
 };
 

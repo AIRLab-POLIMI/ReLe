@@ -15,9 +15,9 @@ public:
     virtual ~GradientIndividual()
     {}
 
-    virtual void writeData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
 
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeDecoratedData(std::ostream& os) override;
 
     std::vector<double> history_J;
     std::vector<arma::vec> history_gradients;

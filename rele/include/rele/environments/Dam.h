@@ -74,8 +74,8 @@ public:
     }
 
     virtual void step(const DenseAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
     void setCurrentState(const DenseState& state);
 

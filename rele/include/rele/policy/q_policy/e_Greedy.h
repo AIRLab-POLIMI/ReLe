@@ -35,14 +35,14 @@ public:
     e_Greedy();
     virtual ~e_Greedy();
 
-    virtual unsigned int operator()(const size_t& state);
-    virtual double operator()(const size_t& state, const unsigned int& action);
+    virtual unsigned int operator()(const size_t& state) override;
+    virtual double operator()(const size_t& state, const unsigned int& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "e-Greedy";
     }
-    virtual std::string getPolicyHyperparameters();
+    virtual std::string getPolicyHyperparameters() override;
 
     inline void setEpsilon(double eps)
     {
@@ -54,7 +54,7 @@ public:
         return this->eps;
     }
 
-    virtual e_Greedy* clone()
+    virtual e_Greedy* clone() override
     {
         return new e_Greedy(*this);
     }
@@ -69,14 +69,14 @@ public:
     e_GreedyApproximate();
     virtual ~e_GreedyApproximate();
 
-    virtual unsigned int operator()(const arma::vec& state);
-    virtual double operator()(const arma::vec& state, const unsigned int& action);
+    virtual unsigned int operator()(const arma::vec& state) override;
+    virtual double operator()(const arma::vec& state, const unsigned int& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "Approximate e-Greedy";
     }
-    virtual std::string getPolicyHyperparameters();
+    virtual std::string getPolicyHyperparameters() override;
 
     inline void setEpsilon(double eps)
     {
@@ -88,7 +88,7 @@ public:
         return this->eps;
     }
 
-    virtual e_GreedyApproximate* clone()
+    virtual e_GreedyApproximate* clone() override
     {
         return new e_GreedyApproximate(*this);
     }

@@ -36,9 +36,9 @@ class NormBasis : public BasisFunction
 public:
     NormBasis(unsigned int p = 2);
 
-    virtual double operator() (const arma::vec& input);
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual double operator() (const arma::vec& input) override;
+    virtual void writeOnStream (std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
 private:
     unsigned int p;
@@ -49,9 +49,9 @@ class InfiniteNorm : public BasisFunction
 public:
     InfiniteNorm(bool max = true);
 
-    virtual double operator() (const arma::vec& input);
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual double operator() (const arma::vec& input) override;
+    virtual void writeOnStream (std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
 private:
     std::string type;

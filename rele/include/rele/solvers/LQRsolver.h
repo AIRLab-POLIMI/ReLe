@@ -37,9 +37,9 @@ public:
     enum Type {MOO, CLASSIC};
 
     LQRsolver(LQR& lqr, Features& phi, Type type = Type::MOO);
-    virtual void solve();
-    virtual Dataset<DenseAction, DenseState> test();
-    virtual Policy<DenseAction, DenseState>& getPolicy();
+    virtual void solve() override;
+    virtual Dataset<DenseAction, DenseState> test() override;
+    virtual Policy<DenseAction, DenseState>& getPolicy() override;
 
     arma::mat computeOptSolution();
     inline void setRewardIndex(unsigned int rewardIndex)

@@ -17,7 +17,7 @@ public:
     GaussianRbf(arma::vec center, arma::vec width, bool useSquareRoot = false);
 
     virtual ~GaussianRbf();
-    double operator() (const arma::vec& input);
+    double operator() (const arma::vec& input) override;
 
     inline arma::vec& getCenter()
     {
@@ -50,8 +50,8 @@ public:
     static BasisFunctions generate(arma::mat& centers, arma::mat& widths);
 
 
-    virtual void writeOnStream (std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual void writeOnStream (std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
 private:
     arma::vec mean, scale;

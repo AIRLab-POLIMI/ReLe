@@ -55,40 +55,40 @@ public:
 public:
 
     virtual double operator()(const arma::vec& state,
-                              typename action_type<FiniteAction>::const_type_ref action);
+                              typename action_type<FiniteAction>::const_type_ref action) override;
 
-    virtual unsigned int operator()(const arma::vec& state);
+    virtual unsigned int operator()(const arma::vec& state) override;
 
 
-    virtual inline std::string getPolicyName()
+    virtual inline std::string getPolicyName() override
     {
         return "PortfolioNormalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters()
+    virtual inline std::string getPolicyHyperparameters() override
     {
         return "";
     }
-    virtual inline std::string printPolicy()
+    virtual inline std::string printPolicy() override
     {
         return "";
     }
 
-    virtual PortfolioNormalPolicy* clone()
+    virtual PortfolioNormalPolicy* clone() override
     {
         return new  PortfolioNormalPolicy(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return approximator.getParameters();
     }
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         approximator.setParameters(w);
     }
@@ -96,10 +96,10 @@ public:
     // DifferentiablePolicy interface
 public:
     virtual arma::vec diff(const arma::vec& state,
-                           typename action_type<FiniteAction>::const_type_ref action);
+                           typename action_type<FiniteAction>::const_type_ref action) override;
 
     virtual arma::vec difflog(const arma::vec& state,
-                              typename action_type<FiniteAction>::const_type_ref action);
+                              typename action_type<FiniteAction>::const_type_ref action) override;
 
     virtual arma::mat diff2log(const arma::vec& state,
                                typename action_type<FiniteAction>::const_type_ref action);

@@ -39,17 +39,17 @@ public:
 
     }
 
-    void solve()
+    void solve() override
     {
         LQRsolver::solve();
     }
 
-    virtual inline Dataset<DenseAction, DenseState> test()
+    virtual inline Dataset<DenseAction, DenseState> test() override
     {
         return LQRsolver::test();
     }
 
-    inline void setWeights(arma::vec& weights)
+    inline void setWeights(arma::vec& weights) override
     {
         LQRsolver::setRewardWeights(weights);
     }
@@ -59,12 +59,12 @@ public:
         return phi.rows();
     }
 
-    inline double getGamma()
+    inline double getGamma() override
     {
         return gamma;
     }
 
-    inline Policy<DenseAction, DenseState>& getPolicy()
+    inline Policy<DenseAction, DenseState>& getPolicy() override
     {
         LQRsolver::getPolicy();
     }
@@ -75,7 +75,7 @@ public:
         LQRsolver::setTestParams(testEpisodes, testEpisodeLength);
     }
 
-    inline arma::mat computeFeaturesExpectations()
+    inline arma::mat computeFeaturesExpectations() override
     {
         Dataset<DenseAction, DenseState>&& dataset = LQRsolver::test();
         return dataset.computefeatureExpectation(phi, gamma);

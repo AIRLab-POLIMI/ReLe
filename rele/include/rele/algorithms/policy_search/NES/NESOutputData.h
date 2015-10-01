@@ -20,7 +20,7 @@ public:
 
     // AgentOutputData interface
 public:
-    virtual void writeData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
 
 public:
     arma::mat fisherMtx;

@@ -35,13 +35,13 @@ class BasicTiles : public Tiles
 public:
     BasicTiles(Range& range, unsigned int tilesN);
     BasicTiles(std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
-    inline virtual unsigned int size()
+    inline virtual unsigned int size() override
     {
         return tilesSize;
     }
-    virtual unsigned int operator()(const arma::vec& input);
-    virtual void writeOnStream(std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual unsigned int operator()(const arma::vec& input) override;
+    virtual void writeOnStream(std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
     //TilesVector generate(unsigned int inputSize, const Range& range);
 
@@ -62,9 +62,9 @@ class SelectiveTiles : public BasicTiles
 public:
     SelectiveTiles(std::vector<unsigned int> stateComponents,
                    std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
-    virtual unsigned int operator()(const arma::vec& input);
-    virtual void writeOnStream(std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual unsigned int operator()(const arma::vec& input) override;
+    virtual void writeOnStream(std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
 private:
     std::vector<unsigned int> stateComponents;

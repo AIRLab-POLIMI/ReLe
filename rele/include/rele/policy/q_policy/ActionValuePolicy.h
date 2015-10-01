@@ -71,7 +71,7 @@ public:
 
     virtual std::string printPolicy()
     {
-        return printPolicyWorker(static_cast<StateC*>(0));
+        return printPolicyWorker(static_cast<StateC*>(nullptr));
     }
 
     virtual ~ActionValuePolicy()

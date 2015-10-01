@@ -42,8 +42,8 @@ public:
     DeepSeaTreasure();
 
     virtual void step(const FiniteAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
 private:
     double deep_reward_treasure(DenseState& state);

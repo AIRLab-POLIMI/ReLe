@@ -42,9 +42,9 @@ public:
 
     // AgentOutputData interface
 public:
-    void writeData(std::ostream& os);
+    void writeData(std::ostream& os) override;
 
-    inline void writeDecoratedData(std::ostream& os)
+    inline void writeDecoratedData(std::ostream& os) override
     {
         writeData(os);
     }

@@ -107,8 +107,8 @@ public:
     }
 
     virtual void step(const DenseAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
     inline const UnicyclePolarSettings& getSettings() const
     {
@@ -147,31 +147,31 @@ public:
 
     // Policy interface
 public:
-    arma::vec operator() (const arma::vec& state);
-    double operator() (const arma::vec& state, const arma::vec& action);
+    arma::vec operator() (const arma::vec& state) override;
+    double operator() (const arma::vec& state, const arma::vec& action) override;
 
-    inline std::string getPolicyName()
+    inline std::string getPolicyName() override
     {
         return "UnicycleControlLaw";
     }
 
-    inline std::string getPolicyHyperparameters()
+    inline std::string getPolicyHyperparameters() override
     {
         return " ";
     }
 
-    inline std::string printPolicy()
+    inline std::string printPolicy() override
     {
         return " ";
     }
 
-    Policy<DenseAction, DenseState>* clone();
+    Policy<DenseAction, DenseState>* clone() override;
 
     // ParametricPolicy interface
 public:
-    arma::vec getParameters() const;
-    const unsigned int getParametersSize() const;
-    void setParameters(const arma::vec& w);
+    arma::vec getParameters() const override;
+    const unsigned int getParametersSize() const override;
+    void setParameters(const arma::vec& w) override;
 
 protected:
     arma::vec params;

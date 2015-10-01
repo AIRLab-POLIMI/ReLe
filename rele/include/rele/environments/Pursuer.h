@@ -37,8 +37,8 @@ class Pursuer : public ContinuousMDP
 public:
     Pursuer();
     virtual void step(const DenseAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
     enum StateComponents
     {

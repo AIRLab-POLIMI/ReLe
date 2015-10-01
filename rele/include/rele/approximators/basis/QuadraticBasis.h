@@ -35,9 +35,9 @@ public:
     QuadraticBasis(arma::mat& Q, arma::span = arma::span::all);
     QuadraticBasis(std::vector<arma::mat>& Q);
     QuadraticBasis(std::vector<arma::mat>& Q, std::vector<arma::span> span);
-    virtual double operator()(const arma::vec& input);
-    virtual void writeOnStream(std::ostream& out);
-    virtual void readFromStream(std::istream& in);
+    virtual double operator()(const arma::vec& input) override;
+    virtual void writeOnStream(std::ostream& out) override;
+    virtual void readFromStream(std::istream& in) override;
 
 private:
     std::vector<arma::mat> Qv;

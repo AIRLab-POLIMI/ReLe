@@ -75,7 +75,7 @@ public:
 
     }
 
-    virtual double operator()(const arma::vec& input)
+    virtual double operator()(const arma::vec& input) override
     {
         switch(wall)
         {
@@ -97,12 +97,12 @@ public:
 
     }
 
-    virtual void writeOnStream(std::ostream& out)
+    virtual void writeOnStream(std::ostream& out) override
     {
 
     }
 
-    virtual void readFromStream(std::istream& in)
+    virtual void readFromStream(std::istream& in) override
     {
 
     }
@@ -120,17 +120,17 @@ private:
 class PursuerDirectionBasis: public BasisFunction
 {
 public:
-    virtual double operator()(const arma::vec& input)
+    virtual double operator()(const arma::vec& input) override
     {
         return RangePi::wrap(atan2(input[Pursuer::yp], input[Pursuer::xp]));
     }
 
-    virtual void writeOnStream(std::ostream& out)
+    virtual void writeOnStream(std::ostream& out) override
     {
 
     }
 
-    virtual void readFromStream(std::istream& in)
+    virtual void readFromStream(std::istream& in) override
     {
 
     }

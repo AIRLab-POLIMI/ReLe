@@ -38,8 +38,8 @@ class DynamicProgrammingAlgorithm : public Solver<FiniteAction, FiniteState>
 {
 public:
     DynamicProgrammingAlgorithm(FiniteMDP& mdp);
-    virtual Policy<FiniteAction, FiniteState>& getPolicy();
-    virtual Dataset<FiniteAction, FiniteState> test();
+    virtual Policy<FiniteAction, FiniteState>& getPolicy() override;
+    virtual Dataset<FiniteAction, FiniteState> test() override;
 
 protected:
     FiniteMDP& mdp;
@@ -59,7 +59,7 @@ class PolicyIteration : public DynamicProgrammingAlgorithm
 public:
     PolicyIteration(FiniteMDP& mdp);
 
-    virtual void solve();
+    virtual void solve() override;
 
     virtual ~PolicyIteration();
 
@@ -76,7 +76,7 @@ class ValueIteration : public DynamicProgrammingAlgorithm
 public:
     ValueIteration(FiniteMDP& mdp, double eps);
 
-    virtual void solve();
+    virtual void solve() override;
 
     virtual ~ValueIteration();
 

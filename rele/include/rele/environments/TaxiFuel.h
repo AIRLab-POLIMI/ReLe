@@ -38,8 +38,8 @@ class TaxiFuel: public DenseMDP
 public:
     TaxiFuel();
     virtual void step(const FiniteAction& action, DenseState& nextState,
-                      Reward& reward);
-    virtual void getInitialState(DenseState& state);
+                      Reward& reward) override;
+    virtual void getInitialState(DenseState& state) override;
 
     enum StateComponents
     {

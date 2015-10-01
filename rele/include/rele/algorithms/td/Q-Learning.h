@@ -36,11 +36,11 @@ class Q_Learning: public FiniteTD
 {
 public:
     Q_Learning(ActionValuePolicy<FiniteState>& policy);
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action);
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action);
+    virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action);
-    virtual void endEpisode(const Reward& reward);
+                      FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
 
 
     virtual ~Q_Learning();

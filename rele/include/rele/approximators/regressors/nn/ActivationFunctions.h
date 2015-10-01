@@ -71,12 +71,12 @@ public:
 class Sigmoid: public Function
 {
 public:
-    inline virtual double eval(double x)
+    inline virtual double eval(double x) override
     {
         return 1.0 / (1.0 + std::exp(-x));
     }
 
-    inline virtual double diff(double x)
+    inline virtual double diff(double x) override
     {
         return eval(x) * (1 - eval(x));
     }
@@ -85,12 +85,12 @@ public:
 class HyperbolicTangent: public Function
 {
 public:
-    inline virtual double eval(double x)
+    inline virtual double eval(double x) override
     {
         return std::tanh(x);
     }
 
-    inline virtual double diff(double x)
+    inline virtual double diff(double x) override
     {
         return 1 - std::pow(std::tanh(x), 2);
     }
@@ -99,12 +99,12 @@ public:
 class Rectifier: public Function
 {
 public:
-    inline virtual double eval(double x)
+    inline virtual double eval(double x) override
     {
         return std::log(1 + std::exp(x));
     }
 
-    inline virtual double diff(double x)
+    inline virtual double diff(double x) override
     {
         return 1.0 / (1.0 + std::exp(-x));
     }
@@ -119,12 +119,12 @@ public:
 
     }
 
-    inline virtual double eval(double x)
+    inline virtual double eval(double x) override
     {
         return alpha * x;
     }
 
-    inline virtual double diff(double x)
+    inline virtual double diff(double x) override
     {
         return alpha;
     }

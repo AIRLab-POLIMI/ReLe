@@ -35,8 +35,8 @@ class HierarchicalOutputData : virtual public AgentOutputData
 public:
     HierarchicalOutputData();
 
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
 
     void addOptionCall(unsigned int option);
     void addLowLevelCommand(); //TODO add

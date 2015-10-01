@@ -71,7 +71,7 @@ public:
     {
     }
 
-    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
+    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false) override
     {
         return stepDirection;
     }
@@ -81,7 +81,7 @@ public:
         return stepDirection;
     }
 
-    void reset()
+    void reset() override
     {
     }
 
@@ -96,7 +96,7 @@ public:
     {
     }
 
-    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false)
+    virtual arma::vec stepLength(arma::vec& gradient, arma::mat& metric, bool inverse = false) override
     {
         double lambda, step_length;
         if (inverse == true)
@@ -136,7 +136,7 @@ public:
         return output;
     }
 
-    virtual arma::vec stepLength(arma::vec& gradient)
+    virtual arma::vec stepLength(arma::vec& gradient) override
     {
         double lambda, step_length;
 
@@ -150,7 +150,7 @@ public:
         return output;
     }
 
-    void reset()
+    void reset() override
     {
     }
 

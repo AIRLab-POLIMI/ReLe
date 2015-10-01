@@ -26,25 +26,25 @@ public:
 
     // Distribution interface
 public:
-    virtual arma::vec operator() ();
-    virtual double operator() (arma::vec& point);
+    virtual arma::vec operator() () override;
+    virtual double operator() (arma::vec& point) override;
 
-    virtual inline std::string getDistributionName()
+    virtual inline std::string getDistributionName() override
     {
         return "ParametricNormal";
     }
 
-    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
     // DifferentiableDistribution interface
 public:
 
-    inline unsigned int getParametersSize()
+    inline unsigned int getParametersSize() override
     {
         return mean.n_elem;
     }
 
-    inline virtual arma::vec getParameters()
+    inline virtual arma::vec getParameters() override
     {
         return mean;
     }
@@ -54,14 +54,14 @@ public:
         mean = newval;
     }
 
-    virtual void update(arma::vec &increment);
-    virtual arma::vec difflog(const arma::vec &point);
-    virtual arma::mat diff2log(const arma::vec &point);
+    virtual void update(arma::vec &increment) override;
+    virtual arma::vec difflog(const arma::vec &point) override;
+    virtual arma::mat diff2log(const arma::vec &point) override;
 
     // WritableInterface interface
 public:
-    virtual void writeOnStream(std::ostream &out);
-    virtual void readFromStream(std::istream &in);
+    virtual void writeOnStream(std::ostream &out) override;
+    virtual void readFromStream(std::istream &in) override;
 
 
     // Specific Normal policy interface //TODO check this!!!
@@ -116,36 +116,36 @@ public:
     virtual ~ParametricDiagonalNormal()
     {}
 
-    virtual inline std::string getDistributionName()
+    virtual inline std::string getDistributionName() override
     {
         return "ParametricDiagonalNormal";
     }
 
-    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
     // DifferentiableDistribution interface
 public:
-    arma::vec difflog(const arma::vec& point);
-    arma::mat diff2log(const arma::vec& point);
+    arma::vec difflog(const arma::vec& point) override;
+    arma::mat diff2log(const arma::vec& point) override;
 
-    arma::sp_mat FIM();
-    arma::sp_mat inverseFIM();
+    arma::sp_mat FIM() override;
+    arma::sp_mat inverseFIM() override;
 
     // WritableInterface interface
 public:
-    void writeOnStream(std::ostream &out);
-    void readFromStream(std::istream &in);
+    void writeOnStream(std::ostream &out) override;
+    void readFromStream(std::istream &in) override;
 
 public:
-    unsigned int getParametersSize();
-    virtual arma::vec getParameters();
-    virtual void setParameters(arma::vec& newval);
-    virtual void update(arma::vec &increment);
+    unsigned int getParametersSize() override;
+    virtual arma::vec getParameters() override;
+    virtual void setParameters(arma::vec& newval) override;
+    virtual void update(arma::vec &increment) override;
 
 
     // ParametricNormal interface
 protected:
-    void updateInternalState();
+    void updateInternalState() override;
 
 private:
     arma::vec diagStdDev;
@@ -191,33 +191,33 @@ public:
     virtual ~ParametricLogisticNormal()
     {}
 
-    virtual inline std::string getDistributionName()
+    virtual inline std::string getDistributionName() override
     {
         return "ParametricLogisticNormal";
     }
 
-    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
     // DifferentiableDistribution interface
 public:
-    arma::vec difflog(const arma::vec& point);
-    arma::mat diff2log(const arma::vec& point);
+    arma::vec difflog(const arma::vec& point) override;
+    arma::mat diff2log(const arma::vec& point) override;
 
     // WritableInterface interface
 public:
-    void writeOnStream(std::ostream &out);
-    void readFromStream(std::istream &in);
+    void writeOnStream(std::ostream &out) override;
+    void readFromStream(std::istream &in) override;
 
 public:
-    unsigned int getParametersSize();
-    virtual arma::vec getParameters();
-    virtual void setParameters(arma::vec& newval);
-    virtual void update(arma::vec &increment);
+    unsigned int getParametersSize() override;
+    virtual arma::vec getParameters() override;
+    virtual void setParameters(arma::vec& newval) override;
+    virtual void update(arma::vec &increment) override;
 
 
     // ParametricNormal interface
 protected:
-    void updateInternalState();
+    void updateInternalState() override;
 
 private:
 
@@ -249,18 +249,18 @@ public:
     virtual ~ParametricCholeskyNormal()
     {}
 
-    virtual inline std::string getDistributionName()
+    virtual inline std::string getDistributionName() override
     {
         return "ParametricCholeskyNormal";
     }
 
     // DifferentiableDistribution interface
 public:
-    arma::vec difflog(const arma::vec& point);
-    arma::mat diff2log(const arma::vec& point);
+    arma::vec difflog(const arma::vec& point) override;
+    arma::mat diff2log(const arma::vec& point) override;
 
-    arma::sp_mat FIM();
-    arma::sp_mat inverseFIM();
+    arma::sp_mat FIM() override;
+    arma::sp_mat inverseFIM() override;
 
     inline arma::mat getCholeskyDec()
     {
@@ -273,23 +273,23 @@ public:
         updateInternalState();
     }
 
-    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
     // WritableInterface interface
 public:
-    void writeOnStream(std::ostream &out);
-    void readFromStream(std::istream &in);
+    void writeOnStream(std::ostream &out) override;
+    void readFromStream(std::istream &in) override;
 
 public:
-    unsigned int getParametersSize();
-    virtual arma::vec getParameters();
-    virtual void setParameters(arma::vec& newval);
-    virtual void update(arma::vec &increment);
+    unsigned int getParametersSize() override;
+    virtual arma::vec getParameters() override;
+    virtual void setParameters(arma::vec& newval) override;
+    virtual void update(arma::vec &increment) override;
 
 
     // ParametricNormal interface
 protected:
-    void updateInternalState();
+    void updateInternalState() override;
 
 };
 
@@ -303,36 +303,36 @@ public:
     virtual ~ParametricFullNormal()
     {}
 
-    virtual inline std::string getDistributionName()
+    virtual inline std::string getDistributionName() override
     {
         return "ParametricFullNormal";
     }
 
     // DifferentiableDistribution interface
 public:
-    arma::vec difflog(const arma::vec& point);
-    arma::mat diff2log(const arma::vec& point);
+    arma::vec difflog(const arma::vec& point) override;
+    arma::mat diff2log(const arma::vec& point) override;
 
-    arma::sp_mat FIM();
-    arma::sp_mat inverseFIM();
+    arma::sp_mat FIM() override;
+    arma::sp_mat inverseFIM() override;
 
-    virtual void wmle(const arma::vec& weights, const arma::mat& samples);
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
     // WritableInterface interface
 public:
-    void writeOnStream(std::ostream &out);
-    void readFromStream(std::istream &in);
+    void writeOnStream(std::ostream &out) override;
+    void readFromStream(std::istream &in) override;
 
 public:
-    unsigned int getParametersSize();
-    virtual arma::vec getParameters();
-    virtual void setParameters(arma::vec& newval);
-    virtual void update(arma::vec &increment);
+    unsigned int getParametersSize() override;
+    virtual arma::vec getParameters() override;
+    virtual void setParameters(arma::vec& newval) override;
+    virtual void update(arma::vec &increment) override;
 
 
     // ParametricNormal interface
 protected:
-    void updateInternalState();
+    void updateInternalState() override;
 
 };
 

@@ -38,13 +38,13 @@ public:
 
     }
 
-    virtual void writeData(std::ostream& os)
+    virtual void writeData(std::ostream& os) override
     {
         GradientIndividual::writeData(os);
         //HierarchicalOutputData::writeData(os);
     }
 
-    virtual void writeDecoratedData(std::ostream& os)
+    virtual void writeDecoratedData(std::ostream& os) override
     {
         this->writeData(os);
     }
