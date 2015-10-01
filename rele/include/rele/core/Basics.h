@@ -165,12 +165,12 @@ public:
         this->actionN = actionN;
     }
 
-    inline virtual std::string to_str() const
+    inline virtual std::string to_str() const override
     {
         return std::to_string(actionN);
     }
 
-    inline int serializedSize()
+    inline int serializedSize() override
     {
         return 1;
     }
@@ -222,7 +222,7 @@ public:
             this->at(i) = other[i];
     }
 
-    inline virtual std::string to_str() const
+    inline virtual std::string to_str() const override
     {
         const arma::vec& self = *this;
         std::stringstream ss;
@@ -352,12 +352,12 @@ public:
         this->stateN = stateN;
     }
 
-    inline virtual std::string to_str() const
+    inline virtual std::string to_str() const override
     {
         return std::to_string(stateN);
     }
 
-    inline int serializedSize()
+    inline int serializedSize() override
     {
         return 1;
     }
@@ -391,7 +391,7 @@ public:
     {
     }
 
-    inline virtual std::string to_str() const
+    inline virtual std::string to_str() const override
     {
         const arma::vec& self = *this;
         std::stringstream ss;
@@ -406,7 +406,7 @@ public:
         return ss.str();
     }
 
-    inline int serializedSize()
+    inline int serializedSize() override
     {
         return this->n_elem;
     }

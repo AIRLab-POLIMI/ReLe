@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     arma::mat results(rewardRegressor.getParametersSize(), data.size());
     for(unsigned int i = 0; i < data.size(); i++)
     {
-    	results.col(i) = data[i].computefeatureExpectation(phiReward, mdp.getSettings().gamma);
+        results.col(i) = data[i].computefeatureExpectation(phiReward, mdp.getSettings().gamma);
     }
     results.save(fm.addPath("Phi.txt"),  arma::raw_ascii);
 

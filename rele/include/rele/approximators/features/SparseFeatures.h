@@ -63,7 +63,7 @@ public:
         }
     }
 
-    arma::mat operator ()(const InputC& input)
+    arma::mat operator ()(const InputC& input) override
     {
         unsigned int c, r, i, nelem = rowsIdxs.size();
         double val;
@@ -82,12 +82,12 @@ public:
         return F;
     }
 
-    inline size_t rows() const
+    inline size_t rows() const override
     {
         return n_rows;
     }
 
-    size_t cols() const
+    size_t cols() const override
     {
         return n_cols;
     }

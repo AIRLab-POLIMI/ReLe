@@ -36,20 +36,20 @@ public:
     class updater;
 
 public:
-    virtual unsigned int operator()(const size_t& state);
-    virtual double operator()(const size_t& state, const unsigned int& action);
+    virtual unsigned int operator()(const size_t& state) override;
+    virtual double operator()(const size_t& state, const unsigned int& action) override;
 
-    inline virtual std::string getPolicyName()
+    inline virtual std::string getPolicyName() override
     {
         return "Tabular";
     }
 
-    virtual std::string getPolicyHyperparameters()
+    virtual std::string getPolicyHyperparameters() override
     {
         return "";
     }
 
-    virtual std::string printPolicy();
+    virtual std::string printPolicy() override;
 
     updater update(size_t state)
     {
@@ -62,7 +62,7 @@ public:
         pi.fill(1.0/nactions);
     }
 
-    virtual TabularPolicy* clone()
+    virtual TabularPolicy* clone() override
     {
         return new TabularPolicy(*this);
     }

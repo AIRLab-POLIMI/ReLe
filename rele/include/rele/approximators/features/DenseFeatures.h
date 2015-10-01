@@ -68,7 +68,7 @@ public:
         }
     }
 
-    virtual arma::mat operator()(const InputC& input)
+    virtual arma::mat operator()(const InputC& input) override
     {
         arma::mat output(basis.n_rows, basis.n_cols);
 
@@ -81,12 +81,12 @@ public:
         return output;
     }
 
-    inline virtual size_t rows() const
+    inline virtual size_t rows() const override
     {
         return basis.n_rows;
     }
 
-    inline virtual size_t cols() const
+    inline virtual size_t cols() const override
     {
         return basis.n_cols;
     }

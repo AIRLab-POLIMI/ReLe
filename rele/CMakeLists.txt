@@ -64,7 +64,7 @@ include_directories(${ARMADILLO_INCLUDE_DIR})
 
 # ----------------------- GCC FLAGS ----------------------------
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wsuggest-override")
 
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)	

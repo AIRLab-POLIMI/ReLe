@@ -42,24 +42,24 @@ public:
         mu.set_size(size);
     }
 
-    virtual void setParameters(const arma::vec& params)
+    virtual void setParameters(const arma::vec& params) override
     {
         mu = params;
     }
 
-    virtual arma::vec getParameters() const
+    virtual arma::vec getParameters() const override
     {
         return mu;
     }
 
-    virtual unsigned int getParametersSize() const
+    virtual unsigned int getParametersSize() const override
     {
         return mu.n_elem;
     }
 
-    virtual arma::vec operator() (const InputC& input)
+    virtual arma::vec operator() (const InputC& input) override
     {
-        const arma::vec& value = phi(input);
+        const arma::vec& value = this->phi(input);
 
         arma::vec result(1);
         result(0) = mvnpdf(value, mu, sigma);
@@ -67,11 +67,11 @@ public:
         return result;
     }
 
-    virtual arma::vec diff(const arma::vec& input)
+    virtual arma::vec diff(const arma::vec& input) override
     {
         arma::vec g_mean;
         arma::vec g_sigma;
-        const arma::vec& value = phi(input);
+        const arma::vec& value = this->phi(input);
 
         mvnpdf(value, mu, sigma, g_mean);
 
@@ -94,10 +94,11 @@ typedef GaussianRegressor_<arma::vec> GaussianRegressor;
 
 
 template<class InputC>
-class GaussianMixtureRegressor_ : public ParametricRegressor_<InputC>
+class GaussianMixtureRegressor_ : public ParametricRegressor_<InputC>, public UnsupervisedBatchRegressor_<InputC>
 {
 public:
-    GaussianMixtureRegressor_(Features_<InputC>& phi, unsigned int n, double muVariance = 1) : ParametricRegressor_<InputC>(1), phi(phi)
+    GaussianMixtureRegressor_(Features_<InputC>& phi, unsigned int n, double muVariance = 1) : ParametricRegressor_<InputC>(1),
+        UnsupervisedBatchRegressor_<InputC>(phi)
     {
         unsigned int size = phi.rows();
 
@@ -115,7 +116,7 @@ public:
     }
 
     GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu)
-        : ParametricRegressor_<InputC>(1), phi(phi), mu(mu)
+        : ParametricRegressor_<InputC>(1), UnsupervisedBatchRegressor_<InputC>(phi), mu(mu)
     {
         unsigned int size = phi.rows();
         unsigned int n = mu.size();
@@ -132,7 +133,7 @@ public:
     }
 
     GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu, std::vector<arma::mat>& cholSigma)
-        : ParametricRegressor_<InputC>(1), phi(phi), mu(mu), cholSigma(cholSigma)
+        : ParametricRegressor_<InputC>(1),  UnsupervisedBatchRegressor_<InputC>(phi), mu(mu), cholSigma(cholSigma)
     {
         unsigned int n = mu.size();
         h = arma::vec(n, arma::fill::ones)/n;
@@ -141,7 +142,7 @@ public:
         precision = 1e-8;
     }
 
-    virtual void setParameters(const arma::vec& params)
+    virtual void setParameters(const arma::vec& params) override
     {
         unsigned int n = mu.size();
         unsigned int dim = mu[0].size();
@@ -159,7 +160,7 @@ public:
         }
     }
 
-    virtual arma::vec getParameters() const
+    virtual arma::vec getParameters() const override
     {
         unsigned int size = getParametersSize();
         unsigned int n = h.size();
@@ -187,30 +188,30 @@ public:
         return params;
     }
 
-    virtual unsigned int getParametersSize() const
+    virtual unsigned int getParametersSize() const override
     {
         unsigned int n = mu.size();
-        unsigned int dim = phi.rows();
+        unsigned int dim = this->phi.rows();
         unsigned int varPar = dim + (dim * dim - dim) / 2;
         return dim*n+varPar*n+n;
     }
 
-    virtual arma::vec operator() (const InputC& input)
+    virtual arma::vec operator() (const InputC& input) override
     {
-        const arma::vec& value = phi(input);
+        const arma::vec& value = this->phi(input);
 
         arma::vec result = {arma::sum(computeMemberships(value))};
 
         return result;
     }
 
-    virtual arma::vec diff(const arma::vec& input)
+    virtual arma::vec diff(const arma::vec& input) override
     {
         arma::vec diffV(getParametersSize());
 
-        const arma::vec& value = phi(input);
+        const arma::vec& value = this->phi(input);
         unsigned int n = mu.size();
-        unsigned int dim = phi.rows();
+        unsigned int dim = this->phi.rows();
 
         unsigned int start = n;
         for(unsigned int i = 0; i < n; i++)
@@ -236,21 +237,9 @@ public:
     }
 
 
-    void train(const std::vector<InputC>& samples)
+
+    virtual void trainFeatures(const arma::mat& features) override
     {
-        assert(samples.size() > 0);
-
-
-        double N = samples.size();
-
-        //compute features matrix
-        arma::mat features(phi.rows(), samples.size());
-        for(int i = 0; i < samples.size(); i++)
-        {
-            features.col(i) = phi(samples[i]);
-        }
-
-
         double oldLogL, logL = logLikelihood(features);
 
         do
@@ -268,7 +257,7 @@ public:
 
             //Maximization
             arma::vec Nk = arma::sum(W).t();
-            h = Nk/N;
+            h = Nk/features.n_cols;
 
             std::cout << "h: " << h.t();
 
@@ -331,7 +320,6 @@ private:
     }
 
 private:
-    Features_<InputC>& phi;
     arma::vec h;
     std::vector<arma::vec> mu;
     std::vector<arma::mat> cholSigma;

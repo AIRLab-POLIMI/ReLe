@@ -49,7 +49,7 @@ public:
                                     unsigned int nbEpisodes, StepRule& stepL,
                                     bool baseline = true, int reward_obj = 0) :
         policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
-        runCount(0), epiCount(0), df(1.0), Jep(0.0),
+        runCount(0), epiCount(0), totstep(0), df(1.0), Jep(0.0),
         rewardTr(new IndexRT(reward_obj)), cleanRT(true),
         useBaseline(baseline), output2LogReady(false), stepLength(stepL),
         currentItStats(nullptr)

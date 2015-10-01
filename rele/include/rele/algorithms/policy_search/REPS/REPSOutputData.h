@@ -36,8 +36,8 @@ class AbstractREPSOutputData: virtual public AgentOutputData
 public:
     AbstractREPSOutputData(int N, double eps, const std::string& policyName, bool final);
 
-    virtual void writeData(std::ostream& os) = 0;
-    virtual void writeDecoratedData(std::ostream& os) = 0;
+    virtual void writeData(std::ostream& os) override = 0;
+    virtual void writeDecoratedData(std::ostream& os) override = 0;
 
     virtual ~AbstractREPSOutputData();
 
@@ -72,8 +72,8 @@ class REPSOutputData : virtual public BlackBoxOutputData<BlackBoxPolicyIndividua
 public:
     REPSOutputData(unsigned int nbIndividual, unsigned int nbParams,
                    unsigned int nbEvals);
-    virtual void writeData(std::ostream& os);
-    virtual void writeDecoratedData(std::ostream& os);
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
 
 public:
     double eta;
