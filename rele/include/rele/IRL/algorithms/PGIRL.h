@@ -44,9 +44,9 @@ public:
     PlaneGIRL(Dataset<ActionC,StateC>& dataset,
               DifferentiablePolicy<ActionC,StateC>& policy,
               BasisFunctions& rewardBasis,
-              double gamma, IRLGradType aType)
+              double gamma, IRLGradType aType, bool sparse = true)
         : policy(policy), data(dataset), rewardBasis(rewardBasis),
-          gamma(gamma), atype(aType), calculator(rewardBasis, dataset, policy, gamma)
+          gamma(gamma), atype(aType), calculator(rewardBasis, dataset, policy, gamma), sparse(sparse)
     {
         nbFunEvals = 0;
     }
@@ -755,8 +755,17 @@ public:
             //setup optimization algorithm
             nlopt::opt optimizator;
             int nbOptParams = Y.n_cols;
-            optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
-            optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+
+            if(sparse)
+            {
+            	optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+            	optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+            }
+            else
+            {
+            	optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, nbOptParams);
+            	optimizator.set_min_objective(PlaneGIRL::wrapperHessian, this);
+            }
 
 
             unsigned int maxFunEvals = 0;
@@ -850,23 +859,41 @@ public:
 
     }
 
-    double objFunctionHessian(unsigned int n, const double* x, double* grad)
+    static double wrapperHessian(unsigned int n, const double* x, double* grad,
+                                  void* o)
+    {
+    	arma::vec dLambda(n);
+    	arma::vec parV(const_cast<double*>(x), n, true);
+        return reinterpret_cast<PlaneGIRL*>(o)->objFunctionHessian(parV, dLambda, grad != nullptr);
+    }
+
+    double objFunctionHessian(const arma::vec& x, arma::vec& dLambda, bool computeGradient)
     {
 
         ++nbFunEvals;
 
-        arma::vec w(x,n);
-        arma::vec p = Y*w;
+        arma::vec w = Y*w;
 
 
-        arma::mat H;
-
-        //TODO implement
+        arma::mat H = calculator.computeHessian(w);
 
 
+        arma::vec lambda;
+        arma::mat v;
 
+        arma::eig_sym(lambda, v, H);
 
-        return 0;
+        if(computeGradient)
+        {
+        	arma::cube Hdiff = calculator.getHessianDiff();
+        	const arma::vec& v0 = v.col(0);
+
+        	for(unsigned int s = 0; s < Hdiff.n_slices; s++)
+        		dLambda(s) = arma::as_scalar(v0.t()*Hdiff.slice(s)*v0);
+
+        }
+
+        return lambda(0);
 
     }
 
@@ -884,8 +911,7 @@ private:
 
     	arma::mat computeHessian(const arma::vec& w)
     	{
-    		unsigned int parametersSize = policy.getParametersSize();
-    		arma::mat H(parametersSize, parametersSize, arma::fill::zeros);
+    		arma::mat H(Hdiff.n_rows, Hdiff.n_cols, arma::fill::zeros);
 
     		for(unsigned int i = 0; i < Hdiff.n_slices; i++)
     		{
@@ -957,7 +983,9 @@ protected:
     unsigned int nbFunEvals;
     arma::mat Y;
 
+    bool sparse;
     HessianCalculator calculator;
+
 
 };
 
