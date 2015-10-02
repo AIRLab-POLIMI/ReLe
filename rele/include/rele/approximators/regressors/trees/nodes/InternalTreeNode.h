@@ -67,7 +67,7 @@ public:
      * Get axis, axis is the index of the split
      * @return the axis
      */
-    virtual int getAxis()
+    virtual int getAxis() override
     {
         return axis;
     }
@@ -76,7 +76,7 @@ public:
      * Get Split
      * @return the split value
      */
-    virtual double getSplit()
+    virtual double getSplit() override
     {
         return split;
     }
@@ -85,7 +85,7 @@ public:
      * Get the value of the subtree
      * @return the value
      */
-    virtual OutputC getValue(const arma::vec& input)
+    virtual OutputC getValue(const arma::vec& input) override
     {
         if (input[axis] < split)
         {
@@ -101,7 +101,7 @@ public:
      * Get Left Child
      * @return a pointer to the left chid node
      */
-    virtual TreeNode<OutputC>* getLeft()
+    virtual TreeNode<OutputC>* getLeft() override
     {
         return left;
     }
@@ -110,7 +110,7 @@ public:
      * Get Right Child
      * @return a pointer to the right child node
      */
-    virtual TreeNode<OutputC>* getRight()
+    virtual TreeNode<OutputC>* getRight() override
     {
         return right;
     }
@@ -168,7 +168,7 @@ public:
     /**
      *
      */
-    virtual void writeOnStream(std::ofstream& out)
+    virtual void writeOnStream(std::ofstream& out) override
     {
         out << "N" << std::endl;
         out << axis << " " << split;
@@ -194,7 +194,7 @@ public:
     /**
      *
      */
-    virtual void readFromStream(std::ifstream& in)
+    virtual void readFromStream(std::ifstream& in) override
     {
         //TODO implement
     }

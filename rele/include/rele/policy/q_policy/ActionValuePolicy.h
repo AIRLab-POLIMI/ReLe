@@ -69,7 +69,7 @@ public:
         this->nactions = nactions;
     }
 
-    virtual std::string printPolicy()
+    virtual std::string printPolicy() override
     {
         return printPolicyWorker(static_cast<StateC*>(nullptr));
     }

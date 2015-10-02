@@ -47,7 +47,7 @@ public:
     {
     }
 
-    arma::vec operator()(const InputC& input)
+    arma::vec operator()(const InputC& input) override
     {
         arma::vec weights = arma::exp(basis(input).t()*parameters);
         weights = weights/(weights + 1);
@@ -55,7 +55,7 @@ public:
         return uDelta*weights + uMin;
     }
 
-    arma::vec diff(const InputC& input)
+    arma::vec diff(const InputC& input) override
     {
         arma::mat features = basis(input);
         arma::mat weights = arma::diagmat(arma::exp(features.t()*parameters));
@@ -68,18 +68,18 @@ public:
         return basis;
     }
 
-    inline arma::vec getParameters() const
+    inline arma::vec getParameters() const override
     {
         return parameters;
     }
 
-    inline void setParameters(const arma::vec& params)
+    inline void setParameters(const arma::vec& params) override
     {
         assert(params.n_elem == parameters.n_elem);
         parameters = params;
     }
 
-    inline unsigned int getParametersSize() const
+    inline unsigned int getParametersSize() const override
     {
         return parameters.n_elem;
     }

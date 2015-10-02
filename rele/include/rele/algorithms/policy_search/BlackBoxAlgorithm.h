@@ -76,7 +76,7 @@ public:
 
     // Agent interface
 public:
-    virtual void initEpisode(const StateC& state, ActionC& action)
+    virtual void initEpisode(const StateC& state, ActionC& action) override
     {
         df = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
@@ -106,7 +106,7 @@ public:
         sampleAction(state, action);
     }
 
-    virtual void initTestEpisode()
+    virtual void initTestEpisode() override
     {
         //obtain new parameters
         arma::vec new_params = dist();
@@ -114,14 +114,14 @@ public:
         policy.setParameters(new_params);
     }
 
-    virtual void sampleAction(const StateC& state, ActionC& action)
+    virtual void sampleAction(const StateC& state, ActionC& action) override
     {
         typename action_type<ActionC>::type_ref u = action;
         u = policy(state);
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      ActionC& action)
+                      ActionC& action) override
     {
         //calculate current J value
         Jep += df * rewardTr->operator ()(reward);
@@ -131,7 +131,7 @@ public:
         sampleAction(nextState, action);
     }
 
-    virtual void endEpisode(const Reward& reward)
+    virtual void endEpisode(const Reward& reward) override
     {
         //add last contribute
         Jep += df * rewardTr->operator ()(reward);
@@ -140,7 +140,7 @@ public:
 
     }
 
-    virtual void endEpisode()
+    virtual void endEpisode() override
     {
 
         Jpol += Jep;
@@ -181,7 +181,7 @@ public:
         }
     }
 
-    virtual AgentOutputData* getAgentOutputDataEnd()
+    virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         if (output2LogReady)
         {
@@ -193,7 +193,7 @@ public:
     }
 
 protected:
-    virtual void init() = 0;
+    virtual void init() override = 0;
     virtual void afterPolicyEstimate() = 0;
     virtual void afterMetaParamsEstimate() = 0;
 

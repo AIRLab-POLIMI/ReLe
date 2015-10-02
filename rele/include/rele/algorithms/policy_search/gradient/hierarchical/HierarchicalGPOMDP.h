@@ -93,7 +93,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = this->getPolicy().getParametersSize();
         HierarchicalPolicyGradient<ActionC, StateC>::init();
@@ -112,7 +112,7 @@ protected:
         maxsteps_Ep.zeros(nbEpisodesToEvalPolicy);
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumdlogpi.zeros();
         stepCount = 0;
@@ -120,7 +120,7 @@ protected:
         baseline_num2_single.zeros();
     }
 
-    virtual void updateStep(const Reward& reward)
+    virtual void updateStep(const Reward& reward) override
     {
         RewardTransformation& rTr = *rewardTr;
 
@@ -160,7 +160,7 @@ protected:
         stepCount++;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         maxsteps_Ep(epiCount) = stepCount;
 
@@ -177,7 +177,7 @@ protected:
             history_J[epiCount] /= stepCount;
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
         int nbParams = this->getPolicy().getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);

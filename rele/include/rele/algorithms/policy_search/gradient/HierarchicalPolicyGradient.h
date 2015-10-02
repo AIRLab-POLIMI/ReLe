@@ -78,7 +78,7 @@ public:
 
     // Agent interface
 public:
-    virtual void initEpisode(const StateC& state, ActionC& action)
+    virtual void initEpisode(const StateC& state, ActionC& action) override
     {
         //Ensure empty option stack
         forceCurrentOptionTermination();
@@ -105,7 +105,7 @@ public:
         currentAction = this->getRootOption().getLastChoice();
     }
 
-    virtual void initTestEpisode()
+    virtual void initTestEpisode() override
     {
         currentItStats = new HierarchicalGradientOutputData();
 
@@ -114,7 +114,7 @@ public:
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      ActionC& action)
+                      ActionC& action) override
     {
 
         auto& currentOption = getCurrentOption();
@@ -142,7 +142,7 @@ public:
         currentAction = this->getRootOption().getLastChoice(); //FIXME
     }
 
-    virtual void endEpisode(const Reward& reward)
+    virtual void endEpisode(const Reward& reward) override
     {
         //FIXME real hierarchical update
         auto& currentOption = getCurrentOption();
@@ -161,7 +161,7 @@ public:
 
     }
 
-    virtual void endEpisode()
+    virtual void endEpisode() override
     {
         //FIXME real hierarchical termination
         forceCurrentOptionTermination();
@@ -185,7 +185,7 @@ public:
         }
     }
 
-    virtual AgentOutputData* getAgentOutputDataEnd()
+    virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         if (output2LogReady)
         {
@@ -197,7 +197,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         history_J.assign(nbEpisodesToEvalPolicy, 0.0);
     }
@@ -209,7 +209,7 @@ protected:
         return static_cast<DifferentiableOption<ActionC, StateC>&>(option).getPolicy();
     }
 
-    virtual HierarchicalOutputData* getCurrentIterationStat()
+    virtual HierarchicalOutputData* getCurrentIterationStat() override
     {
         return currentItStats;
     }

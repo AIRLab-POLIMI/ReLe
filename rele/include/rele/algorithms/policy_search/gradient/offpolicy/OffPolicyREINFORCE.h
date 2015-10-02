@@ -76,7 +76,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = target.getParametersSize();
         history_J.assign(nbEpisodesperUpdate,0.0); // policy performance per episode
@@ -89,7 +89,7 @@ protected:
         b_den.zeros(dp);  // baseline denom (common to J and M)
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumdlogpi.zeros();
         prodImpWeightB = 1.0;
@@ -100,7 +100,7 @@ protected:
         }
     }
 
-    virtual double updateStep(const Reward& reward)
+    virtual double updateStep(const Reward& reward) override
     {
         double currIW = OffPolicyReinforceIWWorker(
                             currentState, currentAction, target, behavioral, prodImpWeightB, prodImpWeightT);
@@ -111,14 +111,14 @@ protected:
         return currIW;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         history_sumdlogpi[epCounter] = sumdlogpi;
         history_impWeights[epCounter] = prodImpWeightT / prodImpWeightB;
         sumIWOverRun += history_impWeights[epCounter];
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
 
         unsigned int dp = target.getParametersSize();

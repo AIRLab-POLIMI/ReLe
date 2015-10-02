@@ -48,14 +48,14 @@ public:
     {
     }
 
-    arma::vec operator()(const InputC& input)
+    arma::vec operator()(const InputC& input) override
     {
         arma::mat features = basis(input);
         arma::vec output = features.t()*parameters;
         return output;
     }
 
-    arma::vec diff(const InputC& input)
+    arma::vec diff(const InputC& input) override
     {
         arma::mat features = basis(input);
         return vectorise(features);
@@ -66,18 +66,18 @@ public:
         return basis;
     }
 
-    inline arma::vec getParameters() const
+    inline arma::vec getParameters() const override
     {
         return parameters;
     }
 
-    inline void setParameters(const arma::vec& params)
+    inline void setParameters(const arma::vec& params) override
     {
         assert(params.n_elem == parameters.n_elem);
         parameters = params;
     }
 
-    inline unsigned int getParametersSize() const
+    inline unsigned int getParametersSize() const override
     {
         return parameters.n_elem;
     }

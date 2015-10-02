@@ -56,12 +56,12 @@ public:
 
     }
 
-    virtual arma::vec getWeights()
+    virtual arma::vec getWeights() override
     {
         return weights;
     }
 
-    virtual Policy<ActionC, StateC>* getPolicy()
+    virtual Policy<ActionC, StateC>* getPolicy() override
     {
         return &policy;
     }
@@ -627,7 +627,7 @@ public:
         return nat_grad.rows(0,dp-1);
     }
 
-    virtual void run()
+    virtual void run() override
     {
         int dp = policy.getParametersSize();
         int dr = rewardBasis.size();

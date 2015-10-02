@@ -121,12 +121,12 @@ class FixedOption : public Option<ActionC, StateC>
 {
 
 public:
-    virtual Option<ActionC, StateC>& operator ()(const StateC& state)
+    virtual Option<ActionC, StateC>& operator ()(const StateC& state) override
     {
         throw std::logic_error("Fixed options cannot generate sub options");
     }
 
-    virtual inline OptionType getOptionType()
+    virtual inline OptionType getOptionType() override
     {
         return Fixed;
     }

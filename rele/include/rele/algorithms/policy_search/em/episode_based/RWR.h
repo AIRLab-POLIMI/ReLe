@@ -58,19 +58,19 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         d.zeros(nbPoliciesToEvalMetap);
         theta.resize(policy.getParametersSize(), nbPoliciesToEvalMetap);
     }
 
-    virtual void afterPolicyEstimate()
+    virtual void afterPolicyEstimate() override
     {
         d(polCount) = std::exp(beta*Jpol/nbEpisodesToEvalPolicy);
         theta.col(polCount) = policy.getParameters();
     }
 
-    virtual void afterMetaParamsEstimate()
+    virtual void afterMetaParamsEstimate() override
     {
         dist.wmle(d, theta);
     }

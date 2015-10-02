@@ -60,7 +60,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
         history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(policy.getParametersSize()));
@@ -71,18 +71,18 @@ protected:
         sumdlogpi.set_size(policy.getParametersSize());
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumdlogpi.zeros();
     }
 
-    virtual void updateStep(const Reward& reward)
+    virtual void updateStep(const Reward& reward) override
     {
         arma::vec grad = policy.difflog(currentState, currentAction);
         sumdlogpi += grad;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         if(useBaseline)
         {
@@ -93,7 +93,7 @@ protected:
         history_sumdlogpi[epiCount] = sumdlogpi;
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);

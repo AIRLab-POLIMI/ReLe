@@ -83,7 +83,7 @@ public:
     //======================================================================
     // RUNNERS
     //----------------------------------------------------------------------
-    virtual void run()
+    virtual void run() override
     {
         run(arma::vec(), 0);
     }
@@ -561,12 +561,12 @@ public:
     //======================================================================
     // GETTERS and SETTERS
     //----------------------------------------------------------------------
-    virtual arma::vec getWeights()
+    virtual arma::vec getWeights() override
     {
         return rewardf.getParameters();
     }
 
-    virtual Policy<ActionC, StateC>* getPolicy()
+    virtual Policy<ActionC, StateC>* getPolicy() override
     {
         return &policy;
     }

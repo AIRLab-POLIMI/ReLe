@@ -47,7 +47,7 @@ public:
         computeRows();
     }
 
-    virtual arma::sp_mat operator()(const InputC& input)
+    virtual arma::sp_mat operator()(const InputC& input) override
     {
         arma::sp_mat output(rowsN, outputs);
 
@@ -65,12 +65,12 @@ public:
         return output;
     }
 
-    virtual size_t rows() const
+    virtual size_t rows() const override
     {
         return rowsN;
     }
 
-    virtual size_t cols() const
+    virtual size_t cols() const override
     {
         return outputs;
     }

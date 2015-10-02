@@ -47,30 +47,30 @@ public:
 
     // Agent interface
 public:
-    virtual void initTestEpisode()
+    virtual void initTestEpisode() override
     {
     }
 
-    virtual void initEpisode(const StateC &state, ActionC &action)
+    virtual void initEpisode(const StateC &state, ActionC &action) override
     {
         sampleAction(state, action);
     }
 
-    void sampleAction(const StateC &state, ActionC &action)
+    void sampleAction(const StateC &state, ActionC &action) override
     {
         typename action_type<ActionC>::type_ref u = action;
         u = policy(state);
     }
 
-    void step(const Reward &reward, const StateC &nextState, ActionC &action)
+    void step(const Reward &reward, const StateC &nextState, ActionC &action) override
     {
     }
 
-    void endEpisode(const Reward& reward)
+    void endEpisode(const Reward& reward) override
     {
     }
 
-    void endEpisode()
+    void endEpisode() override
     {
     }
 
@@ -90,13 +90,13 @@ public:
 
     }
 
-    virtual void initEpisode(const StateC &state, ActionC &action)
+    virtual void initEpisode(const StateC &state, ActionC &action) override
     {
         initTestEpisode();
         this->sampleAction(state, action);
     }
 
-    virtual void initTestEpisode()
+    virtual void initTestEpisode() override
     {
         //obtain new parameters
         arma::vec new_params = dist();

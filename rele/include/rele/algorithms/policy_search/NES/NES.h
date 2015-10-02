@@ -68,7 +68,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         int dp = Base::dist.getParametersSize();
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
@@ -79,7 +79,7 @@ protected:
         Base::history_J = arma::vec(Base::nbPoliciesToEvalMetap, arma::fill::zeros);
     }
 
-    virtual void afterPolicyEstimate()
+    virtual void afterPolicyEstimate() override
     {
         //average over episodes
         Base::Jpol /= Base::nbEpisodesToEvalPolicy;
@@ -99,7 +99,7 @@ protected:
         b_den += dlogdist2;
     }
 
-    virtual void afterMetaParamsEstimate()
+    virtual void afterMetaParamsEstimate() override
     {
 
         //compute baseline
@@ -217,7 +217,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         int dp = Base::dist.getParametersSize();
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
@@ -227,7 +227,7 @@ protected:
         Base::history_J = arma::vec(Base::nbPoliciesToEvalMetap, arma::fill::zeros);
     }
 
-    virtual void afterPolicyEstimate()
+    virtual void afterPolicyEstimate() override
     {
         //average over episodes
         Base::Jpol /= Base::nbEpisodesToEvalPolicy;
@@ -247,7 +247,7 @@ protected:
         b_den += dlogdist2;
     }
 
-    virtual void afterMetaParamsEstimate()
+    virtual void afterMetaParamsEstimate() override
     {
 
         //compute baseline

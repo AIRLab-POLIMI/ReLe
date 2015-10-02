@@ -62,7 +62,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         theta.set_size(policy.getParametersSize(), nbPoliciesToEvalMetap);
         history_J = arma::vec(nbPoliciesToEvalMetap, arma::fill::zeros);
@@ -82,7 +82,7 @@ protected:
         optimizator.set_lower_bounds(lowerBounds);
     }
 
-    virtual void afterPolicyEstimate()
+    virtual void afterPolicyEstimate() override
     {
         //average over episodes
         Jpol /= nbEpisodesToEvalPolicy;
@@ -92,7 +92,7 @@ protected:
         theta.col(polCount) = policy.getParameters();
     }
 
-    virtual void afterMetaParamsEstimate()
+    virtual void afterMetaParamsEstimate() override
     {
         //--- Update current data
         //currentItStats->covariance = dist.getCovariance();

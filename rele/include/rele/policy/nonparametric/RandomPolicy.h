@@ -203,17 +203,17 @@ public:
 //        delete [] distribution;
     }
 
-    std::string getPolicyName()
+    std::string getPolicyName() override
     {
         return std::string("StochasticDiscretePolicy");
     }
 
-    std::string getPolicyHyperparameters()
+    std::string getPolicyHyperparameters() override
     {
         return std::string("");
     }
 
-    std::string printPolicy()
+    std::string printPolicy() override
     {
         return std::string("");
     }
@@ -224,7 +224,7 @@ public:
      */
     virtual double operator() (
         typename state_type<StateC>::const_type_ref state,
-        typename action_type<ActionC>::const_type_ref action)
+        typename action_type<ActionC>::const_type_ref action) override
     {
         int idx = findAction(action);
         return distribution[idx];
@@ -233,7 +233,7 @@ public:
     /**
      * @copydoc DiscreteActionPolicy::sampleAction()
      */
-    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state)
+    virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) override
     {
         std::size_t idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
         return mActions[idx];
@@ -249,7 +249,7 @@ public:
 //        return mActions[ie-1];
     }
 
-    virtual StochasticDiscretePolicy<ActionC, StateC>* clone()
+    virtual StochasticDiscretePolicy<ActionC, StateC>* clone() override
     {
         return new StochasticDiscretePolicy<ActionC, StateC>(*this);
     }

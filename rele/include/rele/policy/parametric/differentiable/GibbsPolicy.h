@@ -37,24 +37,24 @@ public:
 
     // Policy interface
 public:
-    std::string getPolicyName()
+    std::string getPolicyName() override
     {
         return std::string("GibbsPolicy");
     }
 
-    std::string getPolicyHyperparameters()
+    std::string getPolicyHyperparameters() override
     {
         return std::string("");
     }
 
-    std::string printPolicy()
+    std::string printPolicy() override
     {
         return std::string("");
     }
 
 
     double operator() (typename state_type<StateC>::const_type_ref state,
-                       const unsigned int& action)
+                       const unsigned int& action) override
     {
         int statesize = state.size();
         int nactions = mActions.size();
@@ -67,7 +67,7 @@ public:
         return distribution[index];
     }
 
-    unsigned int operator() (typename state_type<StateC>::const_type_ref state)
+    unsigned int operator() (typename state_type<StateC>::const_type_ref state) override
     {
         int statesize = state.size();
         int nactions = mActions.size();
@@ -81,24 +81,24 @@ public:
         return mActions.at(idx).getActionN();
     }
 
-    virtual ParametricGibbsPolicy<StateC>* clone()
+    virtual ParametricGibbsPolicy<StateC>* clone() override
     {
         return new  ParametricGibbsPolicy<StateC>(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return approximator.getParameters();
     }
 
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize();
     }
 
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         approximator.setParameters(w);
     }
@@ -106,14 +106,14 @@ public:
     // DifferentiablePolicy interface
 public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
-                           typename action_type<FiniteAction>::const_type_ref action)
+                           typename action_type<FiniteAction>::const_type_ref action) override
     {
         ParametricGibbsPolicy& pi = *this;
         return pi(state, action)*difflog(state, action);
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
-                              typename action_type<FiniteAction>::const_type_ref action)
+                              typename action_type<FiniteAction>::const_type_ref action) override
     {
         int statesize = state.size();
         int nactions = mActions.size();
@@ -218,24 +218,24 @@ public:
 
     // Policy interface
 public:
-    std::string getPolicyName()
+    std::string getPolicyName() override
     {
         return std::string("ParametricGibbsPolicyAllPref");
     }
 
-    std::string getPolicyHyperparameters()
+    std::string getPolicyHyperparameters() override
     {
         return std::string("");
     }
 
-    std::string printPolicy()
+    std::string printPolicy() override
     {
         return std::string("");
     }
 
 
     double operator() (typename state_type<StateC>::const_type_ref state,
-                       const unsigned int& action)
+                       const unsigned int& action) override
     {
         int statesize = state.size();
         int nactions = mActions.size();
@@ -248,7 +248,7 @@ public:
         return distribution[index];
     }
 
-    unsigned int operator() (typename state_type<StateC>::const_type_ref state)
+    unsigned int operator() (typename state_type<StateC>::const_type_ref state) override
     {
         int statesize = state.size();
         int nactions = mActions.size();
@@ -262,24 +262,24 @@ public:
         return mActions.at(idx).getActionN();
     }
 
-    virtual ParametricGibbsPolicyAllPref<StateC>* clone()
+    virtual ParametricGibbsPolicyAllPref<StateC>* clone() override
     {
         return new  ParametricGibbsPolicyAllPref<StateC>(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return approximator.getParameters();
     }
 
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize();
     }
 
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         approximator.setParameters(w);
     }
@@ -287,14 +287,14 @@ public:
     // DifferentiablePolicy interface
 public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
-                           typename action_type<FiniteAction>::const_type_ref action)
+                           typename action_type<FiniteAction>::const_type_ref action) override
     {
         ParametricGibbsPolicyAllPref& pi = *this;
         return pi(state, action)*difflog(state, action);
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
-                              typename action_type<FiniteAction>::const_type_ref action)
+                              typename action_type<FiniteAction>::const_type_ref action) override
     {
         int statesize = state.size();
         int nactions = mActions.size();

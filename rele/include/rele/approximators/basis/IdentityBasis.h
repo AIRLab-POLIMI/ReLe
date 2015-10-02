@@ -105,19 +105,19 @@ public:
         delete basis;
     }
 
-    double operator() (const InputC& input)
+    double operator() (const InputC& input) override
     {
         BasisFunction_<InputC>& bf = *basis;
         return -bf(input);
     }
 
-    void writeOnStream (std::ostream& out)
+    void writeOnStream (std::ostream& out) override
     {
         out << "Inverse ";
         basis->writeOnStream(out);
     }
 
-    void readFromStream(std::istream& in)
+    void readFromStream(std::istream& in) override
     {
         //TODO implement
     }

@@ -93,7 +93,7 @@ public:
      it can be more efficient to reuse some structures.
      This can be done by setting this parameter to false
      */
-    virtual void train(const BatchData<InputC, OutputC>& ds)
+    virtual void train(const BatchData<InputC, OutputC>& ds) override
     {
         this->cleanTree();
         root = buildExtraTree(ds);

@@ -48,7 +48,7 @@ public:
     }
 
     virtual void step(const ActionC& action, StateC& nextState,
-                      Reward& reward)
+                      Reward& reward) override
     {
         Reward trashReward(envirorment.getSettings().rewardDim);
         envirorment.step(action, nextState, trashReward);
@@ -59,7 +59,7 @@ public:
         state = nextState;
     }
 
-    virtual void getInitialState(StateC& state)
+    virtual void getInitialState(StateC& state) override
     {
         envirorment.getInitialState(state);
         this->state = state;

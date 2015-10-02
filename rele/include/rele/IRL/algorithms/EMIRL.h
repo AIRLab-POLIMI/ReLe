@@ -59,7 +59,7 @@ public:
         omega = arma::vec(phi.rows(), arma::fill::zeros);
     }
 
-    virtual void run()
+    virtual void run() override
     {
         unsigned int effective_dim = phiBar.n_rows - 1;
 
@@ -264,12 +264,12 @@ public:
     //======================================================================
     // GETTERS and SETTERS
     //----------------------------------------------------------------------
-    virtual arma::vec getWeights()
+    virtual arma::vec getWeights() override
     {
         return omega;
     }
 
-    virtual Policy<ActionC, StateC>* getPolicy()
+    virtual Policy<ActionC, StateC>* getPolicy() override
     {
         return nullptr; //TODO implement
     }

@@ -70,7 +70,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = policy.getParametersSize();
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
@@ -89,7 +89,7 @@ protected:
         Jpol = 0.0;
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         phi.zeros();
 #ifdef AUGMENTED
@@ -97,7 +97,7 @@ protected:
 #endif
     }
 
-    virtual void updateStep(const Reward& reward)
+    virtual void updateStep(const Reward& reward) override
     {
         // get number of parameters
         int dp = policy.getParametersSize();
@@ -111,7 +111,7 @@ protected:
             phi[i] += df * grad[i];
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         Jpol += Jep;
         fisher += phi * phi.t();
@@ -119,7 +119,7 @@ protected:
         eligibility += phi;
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
         // get number of parameters
         int dp = policy.getParametersSize();

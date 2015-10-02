@@ -65,30 +65,30 @@ public:
 
     // Policy interface
 public:
-    std::string getPolicyName()
+    std::string getPolicyName() override
     {
         return std::string("DeterministicLinearPolicy");
     }
 
-    std::string getPolicyHyperparameters()
+    std::string getPolicyHyperparameters() override
     {
         return std::string("");
     }
 
-    std::string printPolicy()
+    std::string printPolicy() override
     {
         std::stringstream ss;
         ss << approximator.getParameters().t();
         return ss.str();
     }
 
-    virtual arma::vec operator()(typename state_type<StateC>::const_type_ref state)
+    virtual arma::vec operator()(typename state_type<StateC>::const_type_ref state) override
     {
         return approximator(state);
     }
 
     virtual double operator()(typename state_type<StateC>::const_type_ref state,
-                              const arma::vec& action)
+                              const arma::vec& action) override
     {
         arma::vec output = approximator(state);
 
@@ -102,34 +102,34 @@ public:
         return 0.0;
     }
 
-    virtual DetLinearPolicy<StateC, denseFeatures>* clone()
+    virtual DetLinearPolicy<StateC, denseFeatures>* clone() override
     {
         return new DetLinearPolicy<StateC, denseFeatures>(*this);
     }
 
     // ParametricPolicy interface
 public:
-    virtual inline arma::vec getParameters() const
+    virtual inline arma::vec getParameters() const override
     {
         return approximator.getParameters();
     }
-    virtual inline const unsigned int getParametersSize() const
+    virtual inline const unsigned int getParametersSize() const override
     {
         return approximator.getParametersSize();
     }
-    virtual inline void setParameters(const arma::vec& w)
+    virtual inline void setParameters(const arma::vec& w) override
     {
         approximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
 public:
-    arma::vec diff(typename state_type<StateC>::const_type_ref state, const arma::vec& action)
+    arma::vec diff(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
         return approximator.diff(state);
     }
 
-    arma::vec difflog(typename state_type<StateC>::const_type_ref state, const arma::vec& action)
+    arma::vec difflog(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
         return approximator.diff(state) / approximator(state);
     }

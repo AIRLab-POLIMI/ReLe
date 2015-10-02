@@ -201,7 +201,7 @@ public:
     {
     }
 
-    virtual void computeAandB(const arma::mat& PiPhihat, arma::mat& A, arma::vec& b)
+    virtual void computeAandB(const arma::mat& PiPhihat, arma::mat& A, arma::vec& b) override
     {
         A = Phihat.t() * (Phihat - gamma * PiPhihat);
         b = Phihat.t() * Rhat;
@@ -213,7 +213,7 @@ public:
     }
 
 
-    arma::vec run_slow()
+    arma::vec run_slow() override
     {
         /*** Initialize variables ***/
         int nbEpisodes = data.size();
@@ -360,6 +360,11 @@ public:
         }
 
         return w;
+    }
+
+    virtual ~LSTDQBe()
+    {
+
     }
 
 };

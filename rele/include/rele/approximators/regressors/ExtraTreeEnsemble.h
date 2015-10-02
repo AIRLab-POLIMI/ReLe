@@ -54,7 +54,7 @@ public:
     /**
      *
      */
-    virtual arma::vec operator() (const InputC& input)
+    virtual arma::vec operator() (const InputC& input) override
     {
         arma::vec output(this->outputDimension);
         output = evaluate(input);
@@ -100,7 +100,7 @@ public:
                           it can be more efficient to reuse some structures.
                           This can be done by setting this parameter to false
      */
-    virtual void train(const BatchData<InputC, OutputC>& dataset)
+    virtual void train(const BatchData<InputC, OutputC>& dataset) override
     {
         for(auto tree : ensemble)
         {

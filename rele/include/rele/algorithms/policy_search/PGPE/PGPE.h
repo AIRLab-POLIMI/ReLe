@@ -75,7 +75,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         int dp = Base::dist.getParametersSize();
         Base::diffObjFunc = arma::vec(dp, arma::fill::zeros);
@@ -91,7 +91,7 @@ protected:
 #endif
     }
 
-    virtual void afterPolicyEstimate()
+    virtual void afterPolicyEstimate() override
     {
         //average over episodes
         Base::Jpol /= Base::nbEpisodesToEvalPolicy;
@@ -121,7 +121,7 @@ protected:
         //---------
     }
 
-    virtual void afterMetaParamsEstimate()
+    virtual void afterMetaParamsEstimate() override
     {
 
         //compute baseline

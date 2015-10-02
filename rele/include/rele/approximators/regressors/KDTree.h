@@ -76,7 +76,7 @@ public:
      * Builds an approximation model for the training set
      * @param dataset The training set
      */
-    virtual void train(const BatchData<InputC, OutputC>& dataset)
+    virtual void train(const BatchData<InputC, OutputC>& dataset) override
     {
         this->cleanTree();
         root = buildKDTree(dataset, 0);

@@ -92,7 +92,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = policy.getParametersSize();
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
@@ -111,7 +111,7 @@ protected:
         episodeLenght.zeros(nbEpisodesToEvalPolicy);
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumdLogPi.zeros();
         stepCount = 0;
@@ -119,7 +119,7 @@ protected:
         baseline_num2_single.zeros();
     }
 
-    virtual void updateStep(const Reward& reward)
+    virtual void updateStep(const Reward& reward) override
     {
         RewardTransformation& rTr = *rewardTr;
         double reward_t = rTr(reward);
@@ -148,7 +148,7 @@ protected:
         stepCount++;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         episodeLenght(epiCount) = stepCount;
 
@@ -160,7 +160,7 @@ protected:
         }
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
 
         //std::cerr<< "#############################" << std::endl;

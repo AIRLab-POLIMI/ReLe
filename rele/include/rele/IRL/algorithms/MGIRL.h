@@ -41,12 +41,12 @@ public:
 
     }
 
-    virtual void run()
+    virtual void run() override
     {
         run(arma::vec(), 0);
     }
 
-    virtual void run(arma::vec starting, unsigned int maxFunEvals)
+    virtual void run(arma::vec starting, unsigned int maxFunEvals) override
     {
         int dpr = this->rewardf.getParametersSize();
         assert(dpr > 0);

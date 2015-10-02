@@ -70,7 +70,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = policy.getParametersSize();
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
@@ -87,14 +87,14 @@ protected:
         fisherEp.zeros(dp,dp);
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumdlogpi.zeros();
         stepCount = 0;
         fisherEp.zeros();
     }
 
-    virtual void updateStep(const Reward& reward)
+    virtual void updateStep(const Reward& reward) override
     {
 
         int dp = policy.getParametersSize();
@@ -127,14 +127,14 @@ protected:
         stepCount++;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         maxsteps_Ep(epiCount) = stepCount;
         fisherEp /= stepCount;
         fisher += fisherEp;
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);
@@ -255,7 +255,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = policy.getParametersSize();
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
@@ -269,14 +269,14 @@ protected:
         fisherEp.zeros(dp,dp);
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumdlogpi.zeros();
         fisherEp.zeros();
         stepCount = 0;
     }
 
-    virtual void updateStep(const Reward& reward)
+    virtual void updateStep(const Reward& reward) override
     {
         arma::vec grad = policy.difflog(currentState, currentAction);
         sumdlogpi += grad;
@@ -285,7 +285,7 @@ protected:
         stepCount++;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         for (int p = 0; p < baseline_num.n_elem; ++p)
         {
@@ -297,7 +297,7 @@ protected:
         fisher += fisherEp;
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
         int nbParams = policy.getParametersSize();
         arma::vec gradient(nbParams, arma::fill::zeros);

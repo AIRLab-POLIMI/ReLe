@@ -92,13 +92,13 @@ public:
         }
     }
 
-    arma::vec operator()(const InputC& input)
+    arma::vec operator()(const InputC& input) override
     {
         forwardComputation(input);
         return h.back();
     }
 
-    arma::vec diff(const InputC& input)
+    arma::vec diff(const InputC& input) override
     {
         forwardComputation(input);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
@@ -111,24 +111,24 @@ public:
         return phi;
     }
 
-    inline arma::vec getParameters() const
+    inline arma::vec getParameters() const override
     {
         return *w;
     }
 
-    inline void setParameters(const arma::vec& params)
+    inline void setParameters(const arma::vec& params) override
     {
         assert(params.n_elem == getParametersSize());
 
         *w = params;
     }
 
-    inline unsigned int getParametersSize() const
+    inline unsigned int getParametersSize() const override
     {
         return paramSize;
     }
 
-    void train(const BatchData<InputC, arma::vec>& dataset)
+    void train(const BatchData<InputC, arma::vec>& dataset) override
     {
         assert(dataset.size() > 0);
 

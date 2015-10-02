@@ -91,7 +91,7 @@ public:
      * Get the value
      * @return the value
      */
-    virtual OutputC getValue(const arma::vec& input)
+    virtual OutputC getValue(const arma::vec& input) override
     {
         return value;
     }
@@ -101,7 +101,7 @@ public:
      * internal node
      * @return true if it is a leaf, false otherwise
      */
-    virtual bool isLeaf()
+    virtual bool isLeaf() override
     {
         return true;
     }
@@ -109,7 +109,7 @@ public:
     /**
      *
      */
-    virtual void writeOnStream(std::ofstream& out)
+    virtual void writeOnStream(std::ofstream& out) override
     {
         out << "L" << std::endl;
         out << value << std::endl;
@@ -119,7 +119,7 @@ public:
     /**
      *
      */
-    virtual void readFromStream(std::ifstream& in)
+    virtual void readFromStream(std::ifstream& in) override
     {
         //TODO implement
     }

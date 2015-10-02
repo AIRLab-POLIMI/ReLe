@@ -75,7 +75,7 @@ public:
 
     // Agent interface
 public:
-    virtual void initEpisode(const StateC& state, const ActionC& action)
+    virtual void initEpisode(const StateC& state, const ActionC& action) override
     {
         df  = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
@@ -98,18 +98,18 @@ public:
         //        std::cout << std::endl;
     }
 
-    virtual void initTestEpisode()
+    virtual void initTestEpisode() override
     {
     }
 
-    virtual void sampleAction(const StateC& state, ActionC& action)
+    virtual void sampleAction(const StateC& state, ActionC& action) override
     {
         typename action_type<ActionC>::type_ref u = action;
         u = target(state);
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      const ActionC& nextAction)
+                      const ActionC& nextAction) override
     {
         double currentIW = updateStep(reward);
 
@@ -125,7 +125,7 @@ public:
         currentAction = nextAction;
     }
 
-    virtual void endEpisode(const Reward& reward)
+    virtual void endEpisode(const Reward& reward) override
     {
         double currentIW = updateStep(reward);
 
@@ -137,7 +137,7 @@ public:
 
     }
 
-    virtual void endEpisode()
+    virtual void endEpisode() override
     {
 
         history_J[epCounter] = Jep;
@@ -161,7 +161,7 @@ public:
         }
     }
 
-    virtual AgentOutputData* getAgentOutputDataEnd()
+    virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         if (output2LogReady)
         {
@@ -173,7 +173,7 @@ public:
     }
 
 protected:
-    virtual void init() = 0;
+    virtual void init() override = 0;
     virtual void initializeVariables() = 0;
     virtual double updateStep(const Reward& reward) = 0;
     virtual void updateAtEpisodeEnd() = 0;

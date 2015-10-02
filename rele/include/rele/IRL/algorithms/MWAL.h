@@ -52,7 +52,7 @@ public:
         policyOpt = nullptr;
     }
 
-    virtual void run()
+    virtual void run() override
     {
         for(int i = 0; i <= T; i++)
         {
@@ -97,12 +97,12 @@ public:
         }
     }
 
-    virtual arma::vec getWeights()
+    virtual arma::vec getWeights() override
     {
         return wOpt;
     }
 
-    virtual Policy<ActionC, StateC>* getPolicy()
+    virtual Policy<ActionC, StateC>* getPolicy() override
     {
         return policyOpt;
     }

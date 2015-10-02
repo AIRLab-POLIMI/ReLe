@@ -107,14 +107,14 @@ class BatchAgent : public Agent<ActionC, StateC>
 {
 public:
 
-    void initEpisode(const StateC& state, ActionC& action)
+    void initEpisode(const StateC& state, ActionC& action) override
     {
         const ActionC& constref = action;
         this->initEpisode(state, constref);
     }
 
     void step(const Reward& reward, const StateC& nextState,
-              ActionC& action)
+              ActionC& action) override
     {
         const ActionC& constref = action;
         this->step(reward, nextState, constref);

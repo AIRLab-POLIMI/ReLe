@@ -45,7 +45,7 @@ public:
         return policy;
     }
 
-    virtual Option<ActionC, StateC>& operator ()(const StateC& state)
+    virtual Option<ActionC, StateC>& operator ()(const StateC& state) override
     {
         unsigned int index;
 
@@ -60,7 +60,7 @@ public:
 
     }
 
-    virtual std::vector<bool> getMask(typename state_type<StateC>::const_type_ref state)
+    virtual std::vector<bool> getMask(typename state_type<StateC>::const_type_ref state) override
     {
         std::vector<bool> mask(options.size(), false);
 
@@ -75,12 +75,12 @@ public:
         return mask;
     }
 
-    virtual bool canStart(typename state_type<StateC>::const_type_ref state)
+    virtual bool canStart(typename state_type<StateC>::const_type_ref state) override
     {
         return true;
     }
 
-    virtual double terminationProbability(const StateC& state)
+    virtual double terminationProbability(const StateC& state) override
     {
         return 0;
     }

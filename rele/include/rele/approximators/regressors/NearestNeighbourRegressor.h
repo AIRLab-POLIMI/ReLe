@@ -47,7 +47,7 @@ public:
         assert(k >= 2);
     }
 
-    arma::vec operator()(const InputC& input)
+    arma::vec operator()(const InputC& input) override
     {
         arma::vec features = this->phi(input);
 
@@ -56,7 +56,7 @@ public:
         return centroids.col(index);
     }
 
-    virtual void trainFeatures(const arma::mat& features)
+    virtual void trainFeatures(const arma::mat& features) override
     {
         wcss = std::numeric_limits<double>::infinity();
 

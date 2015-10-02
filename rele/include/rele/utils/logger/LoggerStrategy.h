@@ -55,11 +55,11 @@ template<class ActionC, class StateC>
 class EmptyStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    virtual void processData(Episode<ActionC, StateC>& samples)
+    virtual void processData(Episode<ActionC, StateC>& samples) override
     {
     }
 
-    virtual void processData(std::vector<AgentOutputData*>& outputData)
+    virtual void processData(std::vector<AgentOutputData*>& outputData) override
     {
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
@@ -79,7 +79,7 @@ public:
 
     }
 
-    void processData(Episode<ActionC, StateC>& samples)
+    void processData(Episode<ActionC, StateC>& samples) override
     {
         printTransitions(samples);
 
@@ -93,7 +93,7 @@ public:
         printStateStatistics(samples);
     }
 
-    void processData(std::vector<AgentOutputData*>& outputData)
+    void processData(std::vector<AgentOutputData*>& outputData) override
     {
         if(logAgent)
         {
@@ -197,7 +197,7 @@ public:
     }
 
 
-    void processData(Episode<ActionC, StateC>& samples)
+    void processData(Episode<ActionC, StateC>& samples) override
     {
         if (writeTransitions)
         {
@@ -221,7 +221,7 @@ public:
         }
     }
 
-    void processData(std::vector<AgentOutputData*>& outputData)
+    void processData(std::vector<AgentOutputData*>& outputData) override
     {
         if (writeAgentData)
         {
@@ -267,7 +267,7 @@ public:
     {
     }
 
-    void processData(Episode<ActionC, StateC>& samples)
+    void processData(Episode<ActionC, StateC>& samples) override
     {
         double df = 1.0;
         bool first = true;
@@ -287,7 +287,7 @@ public:
         }
     }
 
-    void processData(std::vector<AgentOutputData*>& outputData)
+    void processData(std::vector<AgentOutputData*>& outputData) override
     {
         //TODO evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
@@ -301,12 +301,12 @@ template<class ActionC, class StateC>
 class CollectorStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-    virtual void processData(Episode<ActionC, StateC>& samples)
+    virtual void processData(Episode<ActionC, StateC>& samples) override
     {
         data.push_back(samples);
     }
 
-    virtual void processData(std::vector<AgentOutputData*>& data)
+    virtual void processData(std::vector<AgentOutputData*>& data) override
     {
         //TODO evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);

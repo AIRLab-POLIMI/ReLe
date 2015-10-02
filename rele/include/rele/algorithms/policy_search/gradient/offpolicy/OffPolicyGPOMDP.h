@@ -82,7 +82,7 @@ public:
 
     // Agent interface
 protected:
-    virtual void init()
+    virtual void init() override
     {
         unsigned int dp = target.getParametersSize();
 //        AbstractOffPolicyGradientAlgorithm<ActionC, StateC>::init();
@@ -102,7 +102,7 @@ protected:
         IW_EpStep.zeros(nbEpisodesperUpdate, maxStepsPerEpisode);
     }
 
-    virtual void initializeVariables()
+    virtual void initializeVariables() override
     {
         sumIWOverRun = 0.0;
         sumdlogpi.zeros();
@@ -113,7 +113,7 @@ protected:
         prodImpWeightB = 1.0;
     }
 
-    virtual double updateStep(const Reward& reward)
+    virtual double updateStep(const Reward& reward) override
     {
 
         int dp = target.getParametersSize();
@@ -162,7 +162,7 @@ protected:
         return currIW;
     }
 
-    virtual void updateAtEpisodeEnd()
+    virtual void updateAtEpisodeEnd() override
     {
         maxsteps_Ep(epCounter) = stepCount;
 
@@ -179,7 +179,7 @@ protected:
         sumAvgIW += sumIWOverRun / stepCount;
     }
 
-    virtual void updatePolicy()
+    virtual void updatePolicy() override
     {
         int dp = target.getParametersSize();
         arma::vec gradient(dp, arma::fill::zeros);

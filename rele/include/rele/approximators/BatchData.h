@@ -227,7 +227,7 @@ public:
 
     }
 
-    virtual const InputC& getInput(unsigned int index) const
+    virtual const InputC& getInput(unsigned int index) const override
     {
         if(indexes.size() == 0)
             return data.getInput(index);
@@ -236,7 +236,7 @@ public:
         return data.getInput(realIndex);
     }
 
-    virtual const OutputC& getOutput(unsigned int index) const
+    virtual const OutputC& getOutput(unsigned int index) const override
     {
         if(indexes.size() == 0)
             return data.getOutput(index);
@@ -245,7 +245,7 @@ public:
         return data.getOutput(realIndex);
     }
 
-    virtual size_t size() const
+    virtual size_t size() const override
     {
         if(indexes.size() == 0)
             return data.size();
@@ -291,17 +291,17 @@ public:
         outputs.push_back(output);
     }
 
-    virtual const InputC& getInput(unsigned int index) const
+    virtual const InputC& getInput(unsigned int index) const override
     {
         return inputs[index];
     }
 
-    virtual const OutputC& getOutput(unsigned int index) const
+    virtual const OutputC& getOutput(unsigned int index) const override
     {
         return outputs[index];
     }
 
-    virtual size_t size() const
+    virtual size_t size() const override
     {
         return inputs.size();
     }

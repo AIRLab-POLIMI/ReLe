@@ -40,19 +40,19 @@ public:
         stack.push_back(&rootOption);
     }
 
-    virtual void sampleAction(const StateC& state, ActionC& action)
+    virtual void sampleAction(const StateC& state, ActionC& action) override
     {
         checkMultipleOptionTermination(state);
         sampleOptionAction(state, action);
     }
 
-    virtual void initEpisode(const StateC& state, ActionC& action) = 0;
+    virtual void initEpisode(const StateC& state, ActionC& action) override = 0;
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      ActionC& action) = 0;
+                      ActionC& action) override = 0;
 
-    virtual void endEpisode(const Reward& reward) = 0;
-    virtual void endEpisode() = 0;
+    virtual void endEpisode(const Reward& reward) override = 0;
+    virtual void endEpisode() override = 0;
 
     virtual ~HierarchicalAlgorithm()
     {

@@ -77,12 +77,12 @@ public:
 
     }
 
-    inline void setWeights(arma::vec& weights)
+    inline void setWeights(arma::vec& weights) override
     {
         rewardRegressor.setParameters(weights);
     }
 
-    inline double getGamma()
+    inline double getGamma() override
     {
         return prMdp.getSettings().gamma;
     }
@@ -109,7 +109,7 @@ public:
         episodeLength = 10000;
     }
 
-    virtual void solve()
+    virtual void solve() override
     {
         EmptyStrategy<ActionC, StateC> strategy;
         Core<ActionC, StateC> core(this->prMdp, agent);
@@ -120,12 +120,12 @@ public:
         core.runEpisodes();
     }
 
-    virtual Dataset<ActionC, StateC> test()
+    virtual Dataset<ActionC, StateC> test() override
     {
         return Solver<ActionC, StateC>::test(this->prMdp, policy);
     }
 
-    virtual Policy<ActionC, StateC>& getPolicy()
+    virtual Policy<ActionC, StateC>& getPolicy() override
     {
         return policy;
     }

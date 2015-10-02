@@ -78,7 +78,7 @@ public:
 
     // Agent interface
 public:
-    virtual void initEpisode(const StateC& state, ActionC& action)
+    virtual void initEpisode(const StateC& state, ActionC& action) override
     {
         df = 1.0;    //reset discount factor
         Jep = 0.0;    //reset J of current episode
@@ -101,20 +101,20 @@ public:
         currentAction = action;
     }
 
-    virtual void initTestEpisode()
+    virtual void initTestEpisode() override
     {
         currentItStats = new GradientIndividual();
         currentItStats->policy_parameters = policy.getParameters();
     }
 
-    virtual void sampleAction(const StateC& state, ActionC& action)
+    virtual void sampleAction(const StateC& state, ActionC& action) override
     {
         typename action_type<ActionC>::type_ref u = action;
         u = policy(state);
     }
 
     virtual void step(const Reward& reward, const StateC& nextState,
-                      ActionC& action)
+                      ActionC& action) override
     {
 
         updateStep(reward);
@@ -134,7 +134,7 @@ public:
         currentAction = action;
     }
 
-    virtual void endEpisode(const Reward& reward)
+    virtual void endEpisode(const Reward& reward) override
     {
         updateStep(reward);
 
@@ -147,7 +147,7 @@ public:
 
     }
 
-    virtual void endEpisode()
+    virtual void endEpisode() override
     {
 
         //save policy value
@@ -170,7 +170,7 @@ public:
         }
     }
 
-    virtual AgentOutputData* getAgentOutputDataEnd()
+    virtual AgentOutputData* getAgentOutputDataEnd() override
     {
         if (output2LogReady)
         {
@@ -182,7 +182,7 @@ public:
     }
 
 protected:
-    virtual void init()
+    virtual void init() override
     {
         history_J.assign(nbEpisodesToEvalPolicy, 0.0);
     }

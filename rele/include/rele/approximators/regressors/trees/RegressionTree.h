@@ -47,7 +47,7 @@ public:
 
     }
 
-    virtual arma::vec operator() (const InputC& input)
+    virtual arma::vec operator() (const InputC& input) override
     {
         arma::vec output(this->outputDimension);
         output = evaluate(input);
@@ -86,7 +86,7 @@ public:
         return nMin;
     }
 
-    virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
+    virtual void train(const BatchData<InputC, OutputC>& dataset) override = 0;
 
     /**
      * Get the root of the tree
