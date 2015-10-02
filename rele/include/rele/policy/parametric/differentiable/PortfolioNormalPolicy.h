@@ -102,7 +102,7 @@ public:
                               typename action_type<FiniteAction>::const_type_ref action) override;
 
     virtual arma::mat diff2log(const arma::vec& state,
-                               typename action_type<FiniteAction>::const_type_ref action);
+                               typename action_type<FiniteAction>::const_type_ref action) override;
 
 protected:
     double epsilon;

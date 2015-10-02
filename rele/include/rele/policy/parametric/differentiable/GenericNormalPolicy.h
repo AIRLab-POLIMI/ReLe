@@ -179,6 +179,8 @@ public:
     virtual arma::vec diff(const arma::vec& state, const arma::vec& action) override;
     virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
 
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
+
 protected:
 
     /**

@@ -137,6 +137,13 @@ public:
         return features.col(index) - features*distribution;
     }
 
+    virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
+                               typename action_type<FiniteAction>::const_type_ref action) override
+    {
+    	//TODO IMPLEMENT
+    	return arma::mat();
+    }
+
 private:
     arma::vec computeDistribution(int nactions, arma::vec tuple, int statesize)
     {
@@ -316,6 +323,13 @@ public:
         unsigned int index = findActionIndex(action);
 
         return features.col(index) - features*distribution;
+    }
+
+    virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
+                                   typename action_type<FiniteAction>::const_type_ref action) override
+    {
+      	//TODO IMPLEMENT
+       	return arma::mat();
     }
 
 

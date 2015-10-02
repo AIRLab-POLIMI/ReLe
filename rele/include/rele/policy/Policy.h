@@ -105,6 +105,10 @@ public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
 
+    //virtual arma::mat diff2(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
+    virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
+
+
     virtual ~DifferentiablePolicy()
     {
 

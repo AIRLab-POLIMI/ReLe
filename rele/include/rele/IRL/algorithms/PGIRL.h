@@ -46,7 +46,7 @@ public:
               BasisFunctions& rewardBasis,
               double gamma, IRLGradType aType)
         : policy(policy), data(dataset), rewardBasis(rewardBasis),
-          gamma(gamma), atype(aType)
+          gamma(gamma), atype(aType), calculator(rewardBasis, dataset, policy, gamma)
     {
         nbFunEvals = 0;
     }
@@ -850,6 +850,103 @@ public:
 
     }
 
+    double objFunctionHessian(unsigned int n, const double* x, double* grad)
+    {
+
+        ++nbFunEvals;
+
+        arma::vec w(x,n);
+        arma::vec p = Y*w;
+
+
+        arma::mat H;
+
+        //TODO implement
+
+
+
+
+        return 0;
+
+    }
+
+private:
+    class HessianCalculator
+	{
+	public:
+    	HessianCalculator(BasisFunctions& basis,
+    				      Dataset<ActionC,StateC>& data,
+    				      DifferentiablePolicy<ActionC,StateC>& policy,
+						  double gamma)
+		{
+    		 computeHessianDiff(basis, data, policy, gamma);
+		}
+
+    	arma::mat computeHessian(const arma::vec& w)
+    	{
+    		unsigned int parametersSize = policy.getParametersSize();
+    		arma::mat H(parametersSize, parametersSize, arma::fill::zeros);
+
+    		for(unsigned int i = 0; i < Hdiff.n_slices; i++)
+    		{
+    			H += Hdiff.slice(i)*w(i);
+    		}
+
+    		return H;
+
+    	}
+
+    	arma::cube getHessianDiff()
+    	{
+    		return Hdiff;
+    	}
+
+	private:
+    	void computeHessianDiff(BasisFunctions& basis,
+    				            Dataset<ActionC,StateC>& data,
+    				            DifferentiablePolicy<ActionC,StateC>& policy,
+								double gamma)
+    	{
+    		unsigned int parameterSize = policy.getParametersSize();
+    		Hdiff.zeros(parameterSize, parameterSize, basis.size());
+
+    		for(unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
+    		{
+    			Episode<ActionC,StateC>& episode = data[ep];
+    			double df = 1.0;
+
+    			for (unsigned int t = 0; t < episode.size(); t++)
+    			{
+    				Transition<ActionC,StateC>& tr = episode[t];
+    				arma::mat K = computeK(policy, tr);
+
+    				for(unsigned int f = 0; f < basis.size(); f++)
+    				{
+    					BasisFunction& bf = *basis[f];
+    					double phi = bf(vectorize(tr.x, tr.u, tr.xn));
+    					Hdiff.slice(f) += df*K*phi;
+    				}
+
+    				df *= gamma;
+
+    			}
+    		}
+
+    	}
+
+    	arma::mat computeK(DifferentiablePolicy<ActionC,StateC>& policy,
+    				       Transition<ActionC,StateC>& tr)
+    	{
+    		arma::vec logDiff = policy.difflog(tr.x, tr.xn);
+    		arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
+    		return logDiff2 + logDiff.t()*logDiff;
+    	}
+
+
+	private:
+		arma::cube Hdiff;
+	};
+
 protected:
     Dataset<ActionC,StateC>& data;
     DifferentiablePolicy<ActionC,StateC>& policy;
@@ -859,6 +956,8 @@ protected:
     IRLGradType atype;
     unsigned int nbFunEvals;
     arma::mat Y;
+
+    HessianCalculator calculator;
 
 };
 

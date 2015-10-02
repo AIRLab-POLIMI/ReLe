@@ -61,4 +61,10 @@ arma::vec GenericMVNPolicy::difflog(const arma::vec &state, const arma::vec &act
     return 0.5 * gMu * (invSigma + invSigma.t()) * delta;
 }
 
+arma::mat GenericMVNPolicy::diff2log(const arma::vec& state, const arma::vec& action)
+{
+	//TODO IMPLEMENT!
+	return arma::mat();
+}
+
 }

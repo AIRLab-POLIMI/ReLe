@@ -90,18 +90,6 @@ protected:
     arma::mat Cov, invCov, cholCov;
     double detValue;
 
-    //FIXME LEVARE! workaround per reps!
-public:
-    inline void setMeanAndCovariance(const arma::vec& mean, const arma::mat& cov)
-    {
-        this->mean = mean;
-        this->Cov = cov;
-
-        this->invCov = inv(this->Cov);
-        this->cholCov = utils::chol(this->Cov);
-        this->detValue = det(this->Cov);
-    }
-
 };
 
 /**
