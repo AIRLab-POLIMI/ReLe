@@ -32,6 +32,11 @@ SimulatedBasketBot::SimulatedBasketBot(double controlFrequency) : SimulatedEnvir
     stateReady = true; //FIXME LEVARE!!!
 }
 
+SimulatedBasketBot::~SimulatedBasketBot()
+{
+
+}
+
 void SimulatedBasketBot::publishAction(const ReLe::FiniteAction& action)
 {
 

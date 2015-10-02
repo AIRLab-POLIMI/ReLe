@@ -34,6 +34,7 @@ class SimulatedBasketBot : public SimulatedEnvironment<ReLe::FiniteAction,
 {
 public:
     SimulatedBasketBot(double controlFrequency);
+    virtual ~SimulatedBasketBot();
 
 protected:
     virtual void publishAction(const ReLe::FiniteAction& action);

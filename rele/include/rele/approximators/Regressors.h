@@ -83,17 +83,6 @@ public:
 
 typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 
-template<class InputC, bool denseOutput = true>
-class NonParametricRegressor_: public Regressor_<InputC, denseOutput>
-{
-public:
-    NonParametricRegressor_(unsigned int output = 1) :
-        Regressor_<InputC, denseOutput>(output)
-    {
-    }
-};
-
-typedef NonParametricRegressor_<arma::vec> NonParametricRegressor;
 
 template<class InputC, class OutputC>
 class BatchRegressor_

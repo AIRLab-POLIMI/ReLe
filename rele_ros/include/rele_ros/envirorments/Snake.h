@@ -33,6 +33,7 @@ class SimulatedSnake : public SimulatedEnvironment<ReLe::DenseAction, ReLe::Dens
 {
 public:
     SimulatedSnake(double controlFrequency, double k = 1e-8);
+    virtual ~SimulatedSnake();
 
 protected:
     virtual void publishAction(const ReLe::DenseAction& action);

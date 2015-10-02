@@ -47,6 +47,11 @@ SimulatedRoomEnvironment::SimulatedRoomEnvironment(double controlFrequency)
     stateReady = true; //FIXME LEVARE!!!
 }
 
+SimulatedRoomEnvironment::~SimulatedRoomEnvironment()
+{
+
+}
+
 void SimulatedRoomEnvironment::publishAction(const ReLe::DenseAction& action)
 {
     vrep_common::JointSetStateData motorSpeeds;

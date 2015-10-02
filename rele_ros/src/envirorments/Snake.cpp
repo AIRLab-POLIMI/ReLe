@@ -43,6 +43,11 @@ SimulatedSnake::SimulatedSnake(double controlFrequency, double k) :
     stateReady = true; //FIXME LEVARE!!!
 }
 
+SimulatedSnake::~SimulatedSnake()
+{
+
+}
+
 void SimulatedSnake::start()
 {
     SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>::start();

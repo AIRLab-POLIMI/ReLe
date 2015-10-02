@@ -34,6 +34,7 @@ class SimulatedRoomEnvironment : public SimulatedEnvironment<ReLe::DenseAction, 
 
 public:
     SimulatedRoomEnvironment(double controlFrequency);
+    virtual ~SimulatedRoomEnvironment();
 
 protected:
     virtual void publishAction(const ReLe::DenseAction& action);
