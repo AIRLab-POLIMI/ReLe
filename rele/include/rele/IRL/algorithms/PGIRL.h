@@ -872,7 +872,7 @@ public:
 
         ++nbFunEvals;
 
-        arma::vec w = Y*w;
+        arma::vec w = Y*x;
 
 
         arma::mat H = calculator.computeHessian(w);
@@ -888,8 +888,12 @@ public:
         	arma::cube Hdiff = calculator.getHessianDiff();
         	const arma::vec& v0 = v.col(0);
 
+        	arma::vec dLambda_dw(Hdiff.n_slices);
+
         	for(unsigned int s = 0; s < Hdiff.n_slices; s++)
-        		dLambda(s) = arma::as_scalar(v0.t()*Hdiff.slice(s)*v0);
+        		dLambda_dw(s) = arma::as_scalar(v0.t()*Hdiff.slice(s)*v0);
+
+        	dLambda = Y.t()*dLambda_dw;
 
         }
 
@@ -965,7 +969,7 @@ private:
     	{
     		arma::vec logDiff = policy.difflog(tr.x, tr.xn);
     		arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
-    		return logDiff2 + logDiff.t()*logDiff;
+    		return logDiff2 + logDiff*logDiff.t();
     	}
 
 
