@@ -222,15 +222,15 @@ arma::vec range(arma::mat& X, unsigned int dim)
     return max(X,dim) - min(X,dim);
 }
 
-void vecToTriangular(unsigned int dim, const arma::vec& vector, arma::mat& triangular)
+void vecToTriangular(const arma::vec& vector, arma::mat& triangular)
 {
     int rowi = 0, coli = 0;
 
-    for (unsigned i = 0; i < dim; i++)
+    for (unsigned i = 0; i < vector.n_elem; i++)
     {
         triangular(rowi,coli) = vector(i);
         rowi++;
-        if (rowi + 1 == dim)
+        if (rowi == triangular.n_rows)
         {
             coli++;
             rowi = coli;
@@ -238,15 +238,15 @@ void vecToTriangular(unsigned int dim, const arma::vec& vector, arma::mat& trian
     }
 }
 
-void triangularToVec(unsigned int dim, const arma::mat& triangular, arma::vec& vector)
+void triangularToVec(const arma::mat& triangular, arma::vec& vector)
 {
     int rowi = 0, coli = 0;
 
-    for (unsigned i = 0; i < dim; i++)
+    for (unsigned i = 0; i < vector.n_elem; i++)
     {
         vector(i) = triangular(rowi,coli);
         rowi++;
-        if (rowi + 1 == dim)
+        if (rowi == triangular.n_rows)
         {
             coli++;
             rowi = coli;

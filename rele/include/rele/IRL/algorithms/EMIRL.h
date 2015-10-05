@@ -44,11 +44,7 @@ public:
           Features& phi, double gamma) //TODO correct Features with template params
         : data(data), theta(theta), phiBar(phi.rows(), data.size()), wBar(wBar), sigmaInv(arma::inv(sigma))
     {
-        for(unsigned int i = 0; i < data.size(); i++)
-        {
-            phiBar.col(i) = data[i].computefeatureExpectation(phi, gamma);
-        }
-
+    	phiBar = data.computeEpisodeFeatureExpectation(phi, gamma);
 
         preprocess();
         /*active_feat = PrincipalFeatureAnalysis::selectFeatures(phiBar, 0.9);

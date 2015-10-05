@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     int nbEpisodes = 3000;
 
-    FileManager fm("nls", "EMIRL");
+    FileManager fm("nls", "GMM");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> expertPolicy(phi);
     ParametricFullNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
 
-    std::cout << "| Params: " << expertDist.getParameters().t() << std::endl;
+    std::cout << "Params: " << expertDist.getParameters().t() << std::endl;
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 
@@ -83,5 +83,13 @@ int main(int argc, char *argv[])
     BasisFunctions basisGMM = IdentityBasis::generate(3);
     DenseFeatures phiGMM(basisGMM);
     GaussianMixtureRegressor featureRegressor(phiGMM, 10, 10);
+
+    arma::mat featuresExp = data.computeEpisodeFeatureExpectation(phiGMM, mdp.getSettings().gamma);
+
+    featuresExp.save(fm.addPath("Phi.txt"),  arma::raw_ascii);
+
+    //featureRegressor.trainFeatures(featuresExp);
+
+    std::cout << featureRegressor.getParameters().t() << std::endl;
 
 }

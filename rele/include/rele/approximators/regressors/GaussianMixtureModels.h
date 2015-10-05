@@ -155,7 +155,7 @@ public:
             mu[i] = params(arma::span(start,start + dim - 1));
             start = start + dim;
             unsigned int nSigma = dim + (dim*dim-dim)/2;
-            vecToTriangular(nSigma, params(arma::span(start,start + nSigma -1)), cholSigma[i]);
+            vecToTriangular(params(arma::span(start,start + nSigma -1)), cholSigma[i]);
             start += nSigma;
         }
     }
@@ -179,7 +179,7 @@ public:
             start = start + dim;
             unsigned int nSigma = dim + (dim*dim-dim)/2;
             arma::vec cholVec(nSigma);
-            triangularToVec(nSigma, cholSigma[i], cholVec);
+            triangularToVec(cholSigma[i], cholVec);
             params(arma::span(start,start + nSigma -1)) = cholVec;
             start += nSigma;
         }
@@ -225,7 +225,7 @@ public:
             start = start + dim;
             unsigned int nSigma = dim + (dim*dim-dim)/2;
             arma::vec g_sigma(nSigma);
-            triangularToVec(nSigma, dCholSigma, g_sigma);
+            triangularToVec(dCholSigma, g_sigma);
             diffV(arma::span(start,start + nSigma -1)) = h[i]*g_sigma;
             start += nSigma;
         }
@@ -317,6 +317,17 @@ private:
             memberships[i] = h[i] * mvnpdf(value, mu[i], sigma);
         }
         return memberships;
+    }
+
+public:
+    inline arma::vec getMu(unsigned int n)
+    {
+    	return mu[n];
+    }
+
+    inline arma::mat getSigma(unsigned int n)
+    {
+      	return cholSigma[n]*cholSigma[n].t();
     }
 
 private:
