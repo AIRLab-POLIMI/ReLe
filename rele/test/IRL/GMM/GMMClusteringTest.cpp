@@ -88,8 +88,9 @@ int main(int argc, char *argv[])
 
     featuresExp.save(fm.addPath("Phi.txt"),  arma::raw_ascii);
 
-    //featureRegressor.trainFeatures(featuresExp);
+    featureRegressor.trainFeatures(featuresExp);
 
-    std::cout << featureRegressor.getParameters().t() << std::endl;
+    for(unsigned int i = 0; i < featureRegressor.getCurrentK(); i++)
+    	std::cout << "mu[" << i << "] = " << featureRegressor.getMu(i) << std::endl;
 
 }

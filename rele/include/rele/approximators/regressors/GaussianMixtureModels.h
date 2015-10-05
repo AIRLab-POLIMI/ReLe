@@ -241,39 +241,88 @@ public:
     virtual void trainFeatures(const arma::mat& features) override
     {
         double oldLogL, logL = logLikelihood(features);
+        arma::uvec deletedIndexes;
 
         do
         {
-            //save last log likelihood
-            oldLogL = logL;
+        	do
+        	{
+        		//clear deleted list
+        		deletedIndexes.clear();
 
-            //Expectation
-            arma::mat W(features.n_cols, mu.size());
-            for(unsigned int i = 0; i < features.n_cols; i++)
-            {
-                arma::vec&& memberships = computeMemberships(features.col(i));
-                W.row(i) = memberships.t()/arma::sum(memberships);
-            }
+				//save last log likelihood
+				oldLogL = logL;
 
-            //Maximization
-            arma::vec Nk = arma::sum(W).t();
-            h = Nk/features.n_cols;
+				//Expectation
+				arma::mat W(features.n_cols, mu.size());
+				for(unsigned int i = 0; i < features.n_cols; i++)
+				{
+					arma::vec&& memberships = computeMemberships(features.col(i));
+					W.row(i) = memberships.t()/arma::sum(memberships);
+				}
 
-            std::cout << "h: " << h.t();
+				//Maximization
+				arma::vec Nk = arma::sum(W).t();
+				h = Nk/features.n_cols;
 
-            for(unsigned int k = 0; k < mu.size(); k++)
-            {
-                auto Wk = arma::diagmat(W.col(k));
-                mu[k] = arma::sum(features*Wk, 1)/Nk(k);
+				std::cout << "h: " << h.t();
 
-                arma::mat delta = features;
-                delta.each_col() -= mu[k];
+				for(unsigned int k = 0; k < mu.size(); k++)
+				{
+					try
+					{
+						auto Wk = arma::diagmat(W.col(k));
+						mu[k] = arma::sum(features*Wk, 1)/Nk(k);
 
-                arma::mat Sigma = delta*Wk*delta.t()/Nk(k);
-                cholSigma[k] = arma::chol(Sigma);
+						arma::mat delta = features;
+						delta.each_col() -= mu[k];
 
-                std::cout << "mu["<< k<< "]: " << mu[k].t();
-            }
+						arma::mat Sigma = delta*Wk*delta.t()/Nk(k);
+						cholSigma[k] = arma::chol(Sigma);
+
+						std::cout << "mu["<< k<< "]: " << mu[k].t();
+					}
+					catch(std::runtime_error& e)
+					{
+						unsigned int size = deletedIndexes.n_elem;
+						deletedIndexes.resize(size + 1);
+						deletedIndexes(size) = k;
+						std::cout << "the " << k << "-component has invalid covariance matrix and will be removed" << std::endl;
+					}
+
+					if(mu[k].has_nan())
+					{
+						unsigned int size = deletedIndexes.n_elem;
+						deletedIndexes.resize(size + 1);
+						deletedIndexes(size) = k;
+						std::cout << "the " << k << "-component has invalid mean and will be removed" << std::endl;
+					}
+				}
+
+				//delete gaussian mixtures without valid covariance matrix
+				h = h(deletedIndexes);
+				for(int i = deletedIndexes.size() -1; i >= 0; i--)
+				{
+					unsigned int indx = deletedIndexes(i);
+					std::cout << "deleting " << indx << std::endl;
+					mu.erase(mu.begin() + indx);
+					cholSigma.erase(cholSigma.begin() + indx);
+				}
+
+				std::cout << "Sigma" << std::endl;
+				for(auto s : cholSigma)
+				{
+					std::cout << s;
+				}
+
+				std::cout << "Mu" << std::endl;
+				for(auto m : mu)
+				{
+					std::cout << m.t();
+				}
+
+
+        	}while(deletedIndexes.size() != 0);
 
             //compute new log likelihood
             logL = logLikelihood(features);
@@ -328,6 +377,11 @@ public:
     inline arma::mat getSigma(unsigned int n)
     {
       	return cholSigma[n]*cholSigma[n].t();
+    }
+
+    inline size_t getCurrentK()
+    {
+    	return mu.size();
     }
 
 private:
