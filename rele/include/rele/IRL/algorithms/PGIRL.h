@@ -782,8 +782,9 @@ public:
             optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
 
             //optimize function
-            std::vector<double> parameters(nbOptParams,0);
+            std::vector<double> parameters(nbOptParams, 1.0/nbOptParams);
             double minf;
+
             if (optimizator.optimize(parameters, minf) < 0)
             {
                 printf("nlopt failed!\n");
@@ -826,6 +827,15 @@ public:
         arma::vec w(x,n);
         arma::vec p = Y*w;
         double val = arma::norm(p,1) - 1.0;
+
+        if(grad != nullptr)
+        {
+        	arma::vec dS(grad, n, false, true);
+        	arma::vec dS_w(Y.n_rows, arma::fill::zeros);
+        	dS = Y.t()*dS_w;
+        	std::cout << "dS = " << dS.t() << std::endl;
+        }
+
         return val;
     }
 
@@ -871,6 +881,7 @@ public:
     {
 
         ++nbFunEvals;
+        std::cout << "x =          " << x.t() << std::endl;
 
         arma::vec w = Y*x;
 
@@ -894,8 +905,11 @@ public:
         		dLambda_dw(s) = arma::as_scalar(v0.t()*Hdiff.slice(s)*v0);
 
         	dLambda = Y.t()*dLambda_dw;
+        	std::cout << "dLambda = " << dLambda.t() << std::endl;
 
         }
+
+        std::cout << "lambda = " << lambda(0) << std::endl;
 
         return lambda(0);
 
