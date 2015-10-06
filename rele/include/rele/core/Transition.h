@@ -153,19 +153,19 @@ public:
 
     arma::mat computeEpisodeFeatureExpectation(Features& phi, double gamma = 1)
     {
-    	auto& dataset = *this;
-    	arma::mat episodeFeatures(phi.rows(), dataset.size());
-    	bool vectorize = phi.cols() > 1;
+        auto& dataset = *this;
+        arma::mat episodeFeatures(phi.rows(), dataset.size());
+        bool vectorize = phi.cols() > 1;
 
-    	for(unsigned int i = 0; i < dataset.size(); i++)
-    	{
-    		if(vectorize)
-    			episodeFeatures.col(i) = arma::vectorise(dataset[i].computefeatureExpectation(phi, gamma));
-    		else
-    			episodeFeatures.col(i) = dataset[i].computefeatureExpectation(phi, gamma);
-    	}
+        for(unsigned int i = 0; i < dataset.size(); i++)
+        {
+            if(vectorize)
+                episodeFeatures.col(i) = arma::vectorise(dataset[i].computefeatureExpectation(phi, gamma));
+            else
+                episodeFeatures.col(i) = dataset[i].computefeatureExpectation(phi, gamma);
+        }
 
-    	return episodeFeatures;
+        return episodeFeatures;
     }
 
     void addData(Dataset<ActionC, StateC>& data)

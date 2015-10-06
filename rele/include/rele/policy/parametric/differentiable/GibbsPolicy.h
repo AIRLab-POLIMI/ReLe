@@ -140,8 +140,8 @@ public:
     virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
                                typename action_type<FiniteAction>::const_type_ref action) override
     {
-    	//TODO IMPLEMENT
-    	return arma::mat();
+        //TODO IMPLEMENT
+        return arma::mat();
     }
 
 private:
@@ -326,10 +326,10 @@ public:
     }
 
     virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
-                                   typename action_type<FiniteAction>::const_type_ref action) override
+                               typename action_type<FiniteAction>::const_type_ref action) override
     {
-      	//TODO IMPLEMENT
-       	return arma::mat();
+        //TODO IMPLEMENT
+        return arma::mat();
     }
 
 

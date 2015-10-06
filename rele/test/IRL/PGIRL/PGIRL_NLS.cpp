@@ -116,15 +116,15 @@ int main(int argc, char *argv[])
         basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, sigma));
     }*/
 
-    BasisFunctions basisReward = GaussianRbf::generate({3, 3}, {-10, 10, -10, 10});
+    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-1, 2, -1, 2});
 
     DenseFeatures phiReward(basisReward);
 
     LinearApproximator rewardRegressor(phiReward);
     PlaneGIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, basisReward,
-                                         mdp.getSettings().gamma, atype, false);
+            mdp.getSettings().gamma, atype, false);
     PlaneGIRL<DenseAction,DenseState> irlAlg2(data, expertPolicy, basisReward,
-                                         mdp.getSettings().gamma, atype, true);
+            mdp.getSettings().gamma, atype, true);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();

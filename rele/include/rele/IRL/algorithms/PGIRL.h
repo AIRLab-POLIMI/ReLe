@@ -758,13 +758,13 @@ public:
 
             if(sparse)
             {
-            	optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
-            	optimizator.set_min_objective(PlaneGIRL::wrapper, this);
+                optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+                optimizator.set_min_objective(PlaneGIRL::wrapper, this);
             }
             else
             {
-            	optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, nbOptParams);
-            	optimizator.set_min_objective(PlaneGIRL::wrapperHessian, this);
+                optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, nbOptParams);
+                optimizator.set_min_objective(PlaneGIRL::wrapperHessian, this);
             }
 
 
@@ -778,11 +778,16 @@ public:
             optimizator.set_ftol_rel(1e-8);
             optimizator.set_ftol_abs(1e-8);
             optimizator.set_maxeval(maxFunEvals);
-
             optimizator.add_equality_constraint(PlaneGIRL::wrapper_constr, this, 1e-6);
 
+
+
             //optimize function
-            std::vector<double> parameters(nbOptParams, 1.0/nbOptParams);
+            arma::vec wStart(dr, arma::fill::ones);
+            wStart /= arma::sum(wStart);
+            arma::vec xStart = arma::pinv(Y)*wStart;
+            std::vector<double> parameters = arma::conv_to<std::vector<double>>::from(xStart);
+
             double minf;
 
             if (optimizator.optimize(parameters, minf) < 0)
@@ -830,11 +835,13 @@ public:
 
         if(grad != nullptr)
         {
-        	arma::vec dS(grad, n, false, true);
-        	arma::vec dS_w(Y.n_rows, arma::fill::zeros);
-        	dS = Y.t()*dS_w;
-        	std::cout << "dS = " << dS.t() << std::endl;
+            arma::vec dS(grad, n, false, true);
+            arma::vec dS_w(Y.n_rows, arma::fill::zeros);
+            dS = Y.t()*dS_w;
+            std::cout << "dS = " << dS.t() << std::endl;
         }
+
+        std::cout << "sum = " << val << std::endl;
 
         return val;
     }
@@ -870,24 +877,34 @@ public:
     }
 
     static double wrapperHessian(unsigned int n, const double* x, double* grad,
-                                  void* o)
+                                 void* o)
     {
-    	arma::vec dLambda(n);
-    	arma::vec parV(const_cast<double*>(x), n, true);
-        return reinterpret_cast<PlaneGIRL*>(o)->objFunctionHessian(parV, dLambda, grad != nullptr);
+        arma::vec dLambda(grad, n, false, true);
+        arma::vec parV(const_cast<double*>(x), n, true);
+        double value = reinterpret_cast<PlaneGIRL*>(o)->objFunctionHessian(parV, dLambda, grad != nullptr);
+
+        if(grad != nullptr && arma::norm(dLambda) != 0)
+            dLambda /= arma::norm(dLambda);
+
+
+        std::cout << "x = " << parV.t();
+        std::cout << "w = " << parV.t()*reinterpret_cast<PlaneGIRL*>(o)->Y.t();
+        if(grad != nullptr)
+            std::cout << "dx= " << dLambda.t();
+        std::cout << "v = " << value << std::endl;
+        return value;
     }
 
     double objFunctionHessian(const arma::vec& x, arma::vec& dLambda, bool computeGradient)
     {
-
         ++nbFunEvals;
-        std::cout << "x =          " << x.t() << std::endl;
 
         arma::vec w = Y*x;
 
 
         arma::mat H = calculator.computeHessian(w);
 
+        std::cout << "det(H) = " << arma::det(H) << std::endl;
 
         arma::vec lambda;
         arma::mat v;
@@ -896,100 +913,101 @@ public:
 
         if(computeGradient)
         {
-        	arma::cube Hdiff = calculator.getHessianDiff();
-        	const arma::vec& v0 = v.col(0);
+            arma::cube Hdiff = calculator.getHessianDiff();
+            const arma::vec& v0 = v.col(0);
 
-        	arma::vec dLambda_dw(Hdiff.n_slices);
+            arma::vec dLambda_dw(Hdiff.n_slices);
 
-        	for(unsigned int s = 0; s < Hdiff.n_slices; s++)
-        		dLambda_dw(s) = arma::as_scalar(v0.t()*Hdiff.slice(s)*v0);
+            for(unsigned int s = 0; s < Hdiff.n_slices; s++)
+                dLambda_dw(s) = arma::as_scalar(v0.t()*Hdiff.slice(s)*v0);
 
-        	dLambda = Y.t()*dLambda_dw;
-        	std::cout << "dLambda = " << dLambda.t() << std::endl;
+            dLambda = Y.t()*dLambda_dw;
+            std::cout << "dLambda = " << dLambda.t() << std::endl;
 
         }
 
-        std::cout << "lambda = " << lambda(0) << std::endl;
-
+        std::cout << "H = " << H;
+        std::cout << "eigval = " << lambda.t();
+        std::cout << "eigvec = " << v;
         return lambda(0);
 
     }
 
 private:
     class HessianCalculator
-	{
-	public:
-    	HessianCalculator(BasisFunctions& basis,
-    				      Dataset<ActionC,StateC>& data,
-    				      DifferentiablePolicy<ActionC,StateC>& policy,
-						  double gamma)
-		{
-    		 computeHessianDiff(basis, data, policy, gamma);
-		}
+    {
+    public:
+        HessianCalculator(BasisFunctions& basis,
+                          Dataset<ActionC,StateC>& data,
+                          DifferentiablePolicy<ActionC,StateC>& policy,
+                          double gamma)
+        {
+            computeHessianDiff(basis, data, policy, gamma);
+        }
 
-    	arma::mat computeHessian(const arma::vec& w)
-    	{
-    		arma::mat H(Hdiff.n_rows, Hdiff.n_cols, arma::fill::zeros);
+        arma::mat computeHessian(const arma::vec& w)
+        {
+            arma::mat H(Hdiff.n_rows, Hdiff.n_cols, arma::fill::zeros);
 
-    		for(unsigned int i = 0; i < Hdiff.n_slices; i++)
-    		{
-    			H += Hdiff.slice(i)*w(i);
-    		}
+            for(unsigned int i = 0; i < Hdiff.n_slices; i++)
+            {
+                H += Hdiff.slice(i)*w(i);
+            }
 
-    		return H;
+            return H;
 
-    	}
+        }
 
-    	arma::cube getHessianDiff()
-    	{
-    		return Hdiff;
-    	}
+        arma::cube getHessianDiff()
+        {
+            return Hdiff;
+        }
 
-	private:
-    	void computeHessianDiff(BasisFunctions& basis,
-    				            Dataset<ActionC,StateC>& data,
-    				            DifferentiablePolicy<ActionC,StateC>& policy,
-								double gamma)
-    	{
-    		unsigned int parameterSize = policy.getParametersSize();
-    		Hdiff.zeros(parameterSize, parameterSize, basis.size());
+    private:
+        void computeHessianDiff(BasisFunctions& basis,
+                                Dataset<ActionC,StateC>& data,
+                                DifferentiablePolicy<ActionC,StateC>& policy,
+                                double gamma)
+        {
+            unsigned int parameterSize = policy.getParametersSize();
+            Hdiff.zeros(parameterSize, parameterSize, basis.size());
 
-    		for(unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
-    		{
-    			Episode<ActionC,StateC>& episode = data[ep];
-    			double df = 1.0;
+            for(unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
+            {
+                Episode<ActionC,StateC>& episode = data[ep];
+                double df = 1.0;
 
-    			for (unsigned int t = 0; t < episode.size(); t++)
-    			{
-    				Transition<ActionC,StateC>& tr = episode[t];
-    				arma::mat K = computeK(policy, tr);
+                for (unsigned int t = 0; t < episode.size(); t++)
+                {
+                    Transition<ActionC,StateC>& tr = episode[t];
+                    arma::mat K = computeK(policy, tr);
 
-    				for(unsigned int f = 0; f < basis.size(); f++)
-    				{
-    					BasisFunction& bf = *basis[f];
-    					double phi = bf(vectorize(tr.x, tr.u, tr.xn));
-    					Hdiff.slice(f) += df*K*phi;
-    				}
+                    for(unsigned int f = 0; f < basis.size(); f++)
+                    {
+                        BasisFunction& bf = *basis[f];
+                        double phi = bf(vectorize(tr.x, tr.u, tr.xn));
+                        Hdiff.slice(f) += df*K*phi;
+                    }
 
-    				df *= gamma;
+                    df *= gamma;
 
-    			}
-    		}
+                }
+            }
 
-    	}
+        }
 
-    	arma::mat computeK(DifferentiablePolicy<ActionC,StateC>& policy,
-    				       Transition<ActionC,StateC>& tr)
-    	{
-    		arma::vec logDiff = policy.difflog(tr.x, tr.xn);
-    		arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
-    		return logDiff2 + logDiff*logDiff.t();
-    	}
+        arma::mat computeK(DifferentiablePolicy<ActionC,StateC>& policy,
+                           Transition<ActionC,StateC>& tr)
+        {
+            arma::vec logDiff = policy.difflog(tr.x, tr.xn);
+            arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
+            return logDiff2 + logDiff*logDiff.t();
+        }
 
 
-	private:
-		arma::cube Hdiff;
-	};
+    private:
+        arma::cube Hdiff;
+    };
 
 protected:
     Dataset<ActionC,StateC>& data;

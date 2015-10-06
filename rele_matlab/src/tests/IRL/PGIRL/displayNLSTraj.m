@@ -78,13 +78,13 @@ for k = 1:lastindex
     
 w = W(:, k);
 
-[X,Y] = meshgrid(-10:0.1:10);
+[X,Y] = meshgrid(-1:0.1:2);
 
 Z = zeros(size(X));
 
 for i = 1:length(X)
     for j = 1:length(X)
-        Z(i, j) = w'*basis_krbf(5,[-10, 10; -10, 10], [X(i, j); Y(i, j)]);
+        Z(i, j) = w'*basis_krbf(5,[-1, 2; -1, 2], [X(i, j); Y(i, j)]);
     end
 
 end

@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
         basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, sigma));
     }*/
 
-    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-10, 10, -10, 10});
+    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-2, 2, -2, 2});
 
     DenseFeatures phiReward(basisReward);
 

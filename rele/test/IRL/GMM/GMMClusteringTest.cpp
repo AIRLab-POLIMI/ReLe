@@ -91,6 +91,6 @@ int main(int argc, char *argv[])
     featureRegressor.trainFeatures(featuresExp);
 
     for(unsigned int i = 0; i < featureRegressor.getCurrentK(); i++)
-    	std::cout << "mu[" << i << "] = " << featureRegressor.getMu(i) << std::endl;
+        std::cout << "mu[" << i << "] = " << featureRegressor.getMu(i) << std::endl;
 
 }
