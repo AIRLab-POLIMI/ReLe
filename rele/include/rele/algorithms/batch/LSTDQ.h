@@ -88,7 +88,8 @@ public:
                 {
                     //compute basis in current state-action pair
                     a(0) = tr.u;
-                    arma::vec input = arma::join_vert(tr.x, a);
+                    arma::vec& tmp = tr.x;
+                    arma::vec input = arma::join_vert(tmp, a);
                     phi = basis(input);
 
                     //update matricies
@@ -118,7 +119,8 @@ public:
                     typename action_type<ActionC>::type nextAction = policy(tr.xn);
                     //evaluate basis in input = [x; u]
                     a(0) = nextAction;
-                    input = arma::join_vert(tr.xn, a);
+                    arma::vec& tmp = tr.xn;
+                    input = arma::join_vert(tmp, a);
                     nextPhi = basis(input);
                     PiPhihat.row(idx) = nextPhi.t();
 #ifdef REMOVE_LAST
@@ -235,7 +237,8 @@ public:
             {
                 //compute basis in current state-action pair
                 a(0) = tr.u;
-                input = arma::join_vert(tr.x, a);
+                arma::vec& tmp = tr.x;
+                input = arma::join_vert(tmp, a);
                 phi = basis(input);
 
                 //compute basis in next state with action selected by the greedy policy
@@ -245,7 +248,8 @@ public:
 #endif
                     typename action_type<ActionC>::type nextAction = policy(tr.xn);
                     a(0) = nextAction;
-                    input = arma::join_vert(tr.xn, a);
+                    arma::vec& tmp2 = tr.xn;
+                    input = arma::join_vert(tmp2, a);
                     nextPhi = basis(input);
 #ifdef REMOVE_LAST
                 }

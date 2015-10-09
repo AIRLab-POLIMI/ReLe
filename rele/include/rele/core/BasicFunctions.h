@@ -35,7 +35,9 @@ namespace ReLe
 template<class StateC, class ActionC>
 arma::vec vectorize(const StateC& state, const ActionC& action)
 {
-    return arma::join_vert(state, action);
+	const arma::vec& tmp1 = state;
+	const arma::vec& tmp2 = action;
+    return arma::join_vert(tmp1, tmp2);
 }
 
 template<class ActionC>
@@ -43,7 +45,8 @@ arma::vec vectorize(const FiniteState& state, const ActionC& action)
 {
     arma::vec aux(1);
     aux[0] = state.getStateN();
-    return arma::join_vert(aux, action);
+    const arma::vec tmp = action;
+    return arma::join_vert(aux, tmp);
 }
 
 template<class StateC>
@@ -51,7 +54,8 @@ arma::vec vectorize(const StateC& state, const FiniteAction& action)
 {
     arma::vec aux(1);
     aux[0] = action.getActionN();
-    return arma::join_vert(state, aux);
+    const arma::vec& tmp = state;
+    return arma::join_vert(tmp, aux);
 }
 
 inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
@@ -66,7 +70,10 @@ inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
 template<class StateC, class ActionC>
 arma::vec vectorize(const StateC& state, const ActionC& action, const StateC& nextState)
 {
-    return arma::join_vert(arma::join_vert(state, action), nextState);
+	const arma::vec& tmp1 = state;
+	const arma::vec& tmp2 = action;
+	const arma::vec& tmp3 = nextState;
+    return arma::join_vert(arma::join_vert(tmp1, tmp2), tmp3);
 }
 
 template<class ActionC>
@@ -76,7 +83,8 @@ arma::vec vectorize(const FiniteState& state, const ActionC& action, const Finit
     aux1[0] = state.getStateN();
     arma::vec aux2(1);
     aux2[0] = state.getStateN();
-    return arma::join_vert(arma::join_vert(aux1, action), aux2);
+    const arma::vec& tmp = action;
+    return arma::join_vert(arma::join_vert(aux1, tmp), aux2);
 }
 
 template<class StateC>
@@ -84,7 +92,9 @@ arma::vec vectorize(const StateC& state, const FiniteAction& action, const State
 {
     arma::vec aux(1);
     aux[0] = action.getActionN();
-    return arma::join_vert(arma::join_vert(state, aux), nextState);
+    const arma::vec& tmp1 = state;
+    const arma::vec& tmp2 = nextState;
+    return arma::join_vert(arma::join_vert(tmp1, aux), tmp2);
 }
 
 inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action, const FiniteState& nextState)
