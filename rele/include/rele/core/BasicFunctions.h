@@ -35,8 +35,8 @@ namespace ReLe
 template<class StateC, class ActionC>
 arma::vec vectorize(const StateC& state, const ActionC& action)
 {
-	const arma::vec& tmp1 = state;
-	const arma::vec& tmp2 = action;
+    const arma::vec& tmp1 = state;
+    const arma::vec& tmp2 = action;
     return arma::join_vert(tmp1, tmp2);
 }
 
@@ -70,9 +70,9 @@ inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
 template<class StateC, class ActionC>
 arma::vec vectorize(const StateC& state, const ActionC& action, const StateC& nextState)
 {
-	const arma::vec& tmp1 = state;
-	const arma::vec& tmp2 = action;
-	const arma::vec& tmp3 = nextState;
+    const arma::vec& tmp1 = state;
+    const arma::vec& tmp2 = action;
+    const arma::vec& tmp3 = nextState;
     return arma::join_vert(arma::join_vert(tmp1, tmp2), tmp3);
 }
 

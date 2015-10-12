@@ -103,6 +103,9 @@ target_link_libraries(gaussian_GIRL rele)
 add_executable(nls_PGIRL IRL/PGIRL/PGIRL_NLS.cpp)
 target_link_libraries(nls_PGIRL rele)
 
+add_executable(simple_PGIRL IRL/PGIRL/SimpleTest.cpp)
+target_link_libraries(simple_PGIRL rele)
+
 add_executable(lqr_MGIRL IRL/GIRL/MGIRL_LQR.cpp)
 target_link_libraries(lqr_MGIRL rele)
 
