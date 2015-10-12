@@ -31,9 +31,12 @@ using namespace ReLe;
 
 int main()
 {
-    arma::mat A = { {-0.6000,    0.6000,         0},
-    		        {0.4000,    0.4000,         0},
-    		        {0,         0,    0.1000 }};
+    arma::mat A =
+    {
+        {-0.6000, 0.6000,       0},
+        { 0.4000, 0.4000,       0},
+        {      0,      0,  0.1000}
+    };
     arma::vec weights;
     int dr = 3;
     int dp = 3;
