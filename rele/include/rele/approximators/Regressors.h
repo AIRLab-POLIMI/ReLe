@@ -44,6 +44,20 @@ public:
 
     virtual arma::vec operator() (const InputC& input) = 0;
 
+    template<class Input1, class Input2>
+    arma::vec operator()(const Input1& input1, const Input2& input2)
+    {
+        auto& self = *this;
+        return self(vectorize(input1, input2));
+    }
+
+    template<class Input1, class Input2, class Input3>
+    arma::vec operator()(const Input1& input1, const Input2& input2, const Input3& input3)
+    {
+        auto& self = *this;
+        return self(vectorize(input1, input2, input3));
+    }
+
     virtual ~Regressor_()
     {
     }
@@ -73,6 +87,18 @@ public:
     virtual arma::vec getParameters() const = 0;
     virtual unsigned int getParametersSize() const = 0;
     virtual arma::vec  diff(const InputC& input) = 0;
+
+    template<class Input1, class Input2>
+    arma::vec diff(const Input1& input1, const Input2& input2)
+    {
+        return this->diff(vectorize(input1, input2));
+    }
+
+    template<class Input1, class Input2, class Input3>
+    arma::vec diff(const Input1& input1, const Input2& input2, const Input3& input3)
+    {
+        return this->diff(vectorize(input1, input2, input3));
+    }
 
     virtual ~ParametricRegressor_()
     {

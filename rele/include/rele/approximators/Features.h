@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_APPROXIMATORS_FEATURES_H_
 
 #include "BasisFunctions.h"
+#include "BasicFunctions.h"
 
 namespace ReLe
 {
@@ -59,6 +60,21 @@ public:
     }
 
     virtual return_type operator()(const InputC& input) = 0;
+
+    template<class Input1, class Input2>
+    return_type operator()(const Input1& input1, const Input2& input2)
+    {
+        auto& self = *this;
+        return self(vectorize(input1, input2));
+    }
+
+    template<class Input1, class Input2, class Input3>
+    return_type operator()(const Input1& input1, const Input2& input2, const Input3& input3)
+    {
+        auto& self = *this;
+        return self(vectorize(input1, input2, input3));
+    }
+
     virtual size_t rows() const = 0;
     virtual size_t cols() const = 0;
 

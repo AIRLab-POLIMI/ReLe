@@ -314,9 +314,8 @@ public:
             {
                 auto tr = data[i][t];
                 J += df
-                     * arma::as_scalar(
-                         rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                dR += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
+                     * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
+                dR += df * rewardf.diff(tr.x, tr.u, tr.xn);
                 df *= gamma;
             }
         }
@@ -349,8 +348,8 @@ public:
                 Gamma += df;
                 auto tr = data[i][t];
                 double r = arma::as_scalar(
-                               rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                arma::vec dr = rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
+                               rewardf(tr.x, tr.u, tr.xn));
+                arma::vec dr = rewardf.diff(tr.x, tr.u, tr.xn);
                 R += df * r;
                 dR += df * dr;
                 R2 += df * r * r;
@@ -472,7 +471,7 @@ public:
             {
                 auto tr = data[ep][t];
 
-                reward_vec.col(t) = rewardf.diff(vectorize(tr.x, tr.u, tr.xn));
+                reward_vec.col(t) = rewardf.diff(tr.x, tr.u, tr.xn);
 
                 mu += df * reward_vec.col(t);
 
@@ -641,8 +640,8 @@ public:
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
                 //                std::cout << tr.r[0] << " " << tr.r[1] << std::endl;
-                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
+                Rew += df * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
+                dRew += df * rewardf.diff(tr.x, tr.u, tr.xn).t();
                 // ********************** //
 
                 ++totstep;
@@ -735,8 +734,8 @@ public:
                 // *** REINFORCE CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
                 sumGradLog += localg;
-                Rew += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                dRew += df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
+                Rew += df * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
+                dRew += df * rewardf.diff(tr.x, tr.u, tr.xn).t();
                 // ********************** //
 
                 ++totstep;
@@ -871,12 +870,12 @@ public:
                 sumGradLog += localg;
 
                 // compute the reward gradients
-                Rew = df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                dRew = df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t();
+                Rew = df * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
+                dRew = df * rewardf.diff(tr.x, tr.u, tr.xn).t();
 
                 for (int p = 0; p < dp; ++p)
                 {
-                    gradient_J[p] += df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn))) * sumGradLog(p);
+                    gradient_J[p] += df * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn)) * sumGradLog(p);
                     for (int rp = 0; rp < dpr; ++rp)
                     {
                         gGradient(p, rp) += sumGradLog(p) * dRew(0, rp);
@@ -965,8 +964,8 @@ public:
                 sumGradLog += localg;
 
                 // store the basic elements used to compute the gradients
-                double creward = df * arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
-                arma::mat cdreward = df * rewardf.diff(vectorize(tr.x, tr.u, tr.xn)).t(); //(1 x dpr)
+                double creward = df * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
+                arma::mat cdreward = df * rewardf.diff(tr.x, tr.u, tr.xn).t(); //(1 x dpr)
                 reward_J_ObjEpStep(ep, t) = creward;
                 reward_R_ObjEpStep[ep][t] = cdreward;
 
@@ -1102,7 +1101,7 @@ public:
 
                 // *** eNAC CORE *** //
                 localg = policy.difflog(tr.x, tr.u);
-                double creward = arma::as_scalar(rewardf(vectorize(tr.x, tr.u, tr.xn)));
+                double creward = arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
                 Rew += df * creward;
 
                 //Construct basis functions
