@@ -121,6 +121,9 @@ target_link_libraries(ship_EMIRL rele)
 add_executable(gmm_features_test IRL/GMM/GMMClusteringTest.cpp)
 target_link_libraries(gmm_features_test rele)
 
+add_executable(mleH2O_test IRL/SmartH2O/mleH2OTest.cpp)
+target_link_libraries(mleH2O_test rele)
+
 #add_executable(lqr_GIRL IRL/LQRGIRL.cpp)
 #target_link_libraries(lqr_GIRL rele)
 

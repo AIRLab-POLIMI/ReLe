@@ -84,7 +84,7 @@ public:
         }
         else
         {
-            printf("found minimum = %0.10g\n", minf);
+            printf("found maximum of log-likelihood = %0.10g (iterations: %d/%d)\n", minf, nbFunEvals, maxFunEvals);
 
             arma::vec finalP(dp);
             for(int i = 0; i < dp; ++i)
@@ -224,7 +224,7 @@ public:
         }
         else
         {
-            printf("found minimum = %0.10g\n", minf);
+            printf("found maximum of log-likelihood = %0.10g (iterations: %d/%d)\n", minf, nbFunEvals, maxFunEvals);
 
             arma::vec finalP(dp);
             for(int i = 0; i < dp; ++i)
@@ -293,7 +293,7 @@ public:
     static double wrapper(unsigned int n, const double* x, double* grad,
                           void* o)
     {
-        return reinterpret_cast<MLE<ActionC,StateC>*>(o)->objFunction(n, x, grad);
+        return reinterpret_cast<RidgeRegularizedMLE<ActionC,StateC>*>(o)->objFunction(n, x, grad);
     }
 
 protected:
