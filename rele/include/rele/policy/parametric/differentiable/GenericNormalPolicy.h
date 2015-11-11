@@ -28,6 +28,7 @@
 #include "Regressors.h"
 #include "ArmadilloPDFs.h"
 
+#include <cassert>
 
 namespace ReLe
 {
@@ -61,7 +62,7 @@ public:
      * @param approximator The regressor used for mean approximation
      */
     GenericMVNPolicy(ParametricRegressor& approximator) :
-        approximator(approximator),
+        meanApproximator(approximator),
         mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
@@ -72,7 +73,7 @@ public:
     }
 
     GenericMVNPolicy(ParametricRegressor& approximator, arma::mat& covariance) :
-        approximator(approximator),
+        meanApproximator(approximator),
         mean(approximator.getOutputSize(), arma::fill::zeros),
         Sigma(covariance)
     {
@@ -91,7 +92,7 @@ public:
      */
     GenericMVNPolicy(ParametricRegressor& approximator,
                      std::initializer_list<double> initialCov) :
-        approximator(approximator),
+        meanApproximator(approximator),
         mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
@@ -112,7 +113,7 @@ public:
     }
 
     GenericMVNPolicy(ParametricRegressor& approximator, double* covariance) :
-        approximator(approximator),
+        meanApproximator(approximator),
         mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
@@ -163,15 +164,15 @@ public:
 public:
     virtual inline arma::vec getParameters() const override
     {
-        return approximator.getParameters();
+        return meanApproximator.getParameters();
     }
     virtual inline const unsigned int getParametersSize() const override
     {
-        return approximator.getParametersSize();
+        return meanApproximator.getParametersSize();
     }
     virtual inline void setParameters(const arma::vec& w) override
     {
-        approximator.setParameters(w);
+        meanApproximator.setParameters(w);
     }
 
     // DifferentiablePolicy interface
@@ -202,17 +203,161 @@ protected:
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
     {
         // compute mean vector
-        mean = approximator(state);
+        mean = meanApproximator(state);
     }
 
 protected:
     arma::mat Sigma, invSigma, choleskySigma;
     double determinant;
-    ParametricRegressor& approximator;
+    ParametricRegressor& meanApproximator;
     arma::vec mean;
 };
 
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// Generic MVN POLICY with Diagonal covariance (parameters: mean, diagonal standard deviations)
+///////////////////////////////////////////////////////////////////////////////////////
+class GenericMVNDiagonalPolicy : public GenericMVNPolicy
+{
+public:
+    GenericMVNDiagonalPolicy(ParametricRegressor& approximator)
+        : GenericMVNPolicy(approximator), stddevParams(approximator.getOutputSize(), arma::fill::ones)
+    {
+        UpdateCovarianceMatrix();
+    }
+
+    GenericMVNDiagonalPolicy(ParametricRegressor& approximator,
+                             arma::vec stddevVector)
+        : GenericMVNPolicy(approximator), stddevParams(stddevVector)
+    {
+        UpdateCovarianceMatrix();
+    }
+
+    virtual ~GenericMVNDiagonalPolicy()
+    {
+
+    }
+
+    virtual inline std::string getPolicyName() override
+    {
+        return "GenericMVNDiagonalPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters() override
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy() override
+    {
+        return "";
+    }
+
+    virtual GenericMVNDiagonalPolicy* clone() override
+    {
+        return new  GenericMVNDiagonalPolicy(*this);
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline arma::vec getParameters() const override
+    {
+        return vectorize(meanApproximator.getParameters(), stddevParams);
+    }
+    virtual inline const unsigned int getParametersSize() const override
+    {
+        return meanApproximator.getParametersSize() + stddevParams.n_elem;
+    }
+    virtual void setParameters(const arma::vec& w) override;
+
+    // DifferentiablePolicy interface
+public:
+
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
+
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
+
+private:
+    /**
+     * Compute the covariance matrix from the logistic parameters and
+     * compute the Cholesky decomposition of it.
+     *
+     * @brief Update the covariance matrix
+     */
+    void UpdateCovarianceMatrix();
+
+protected:
+    arma::vec stddevParams;
+};
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// Generic MVN POLICY with state dependant diagonal standard deviation (parameters: mean, std dev weights)
+///////////////////////////////////////////////////////////////////////////////////////
+class GenericMVNStateDependantStddevPolicy : public GenericMVNPolicy
+{
+public:
+    GenericMVNStateDependantStddevPolicy(ParametricRegressor& meanApproximator, ParametricRegressor& stdApproximator)
+        : GenericMVNPolicy(meanApproximator), stdApproximator(stdApproximator)
+    {
+        assert(meanApproximator.getOutputSize() == stdApproximator.getOutputSize());
+
+        // initialize covariance matrix and inverse
+        int n = stdApproximator.getOutputSize();
+        Sigma.zeros(n, n);
+        invSigma.zeros(n, n);
+        choleskySigma.zeros(n, n);
+    }
+
+    virtual inline std::string getPolicyName() override
+    {
+        return "GenericMVNStateDependantStddevPolicy";
+    }
+    virtual inline std::string getPolicyHyperparameters() override
+    {
+        return "";
+    }
+    virtual inline std::string printPolicy() override
+    {
+        return "";
+    }
+
+    virtual GenericMVNStateDependantStddevPolicy* clone() override
+    {
+        return new  GenericMVNStateDependantStddevPolicy(*this);
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline arma::vec getParameters() const override
+    {
+        return vectorize(meanApproximator.getParameters(), stdApproximator.getParameters());
+    }
+
+    virtual inline const unsigned int getParametersSize() const override
+    {
+        return meanApproximator.getParametersSize() + stdApproximator.getParametersSize();
+    }
+
+    virtual inline void setParameters(const arma::vec& w) override
+    {
+        assert(w.n_elem == this->getParametersSize());
+        meanApproximator.setParameters( w.rows(0,meanApproximator.getParametersSize() - 1) );
+        stdApproximator.setParameters( w.rows(meanApproximator.getParametersSize(), w.n_elem-1) );
+    }
+
+    // DifferentiablePolicy interface
+public:
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
+
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
+
+protected:
+    virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false) override;
+
+
+protected:
+    ParametricRegressor& stdApproximator;
+
+};
 
 
 

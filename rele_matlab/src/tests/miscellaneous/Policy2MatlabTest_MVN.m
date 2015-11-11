@@ -3,7 +3,7 @@
 %locate program
 clear all;
 reset(symengine);
-excmd = '../../../rele-build/pol2mat';
+excmd = '../../../../build/test/pol2mat';
 
 %% Multivariate Normal policy with constant covariance
 polname = 'mvn';

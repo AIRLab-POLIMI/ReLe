@@ -26,6 +26,7 @@
 #include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/PortfolioNormalPolicy.h"
 #include "parametric/differentiable/GibbsPolicy.h"
+#include "parametric/differentiable/GenericNormalPolicy.h"
 #include "nonparametric/RandomPolicy.h"
 #include "RandomGenerator.h"
 #include "FileManager.h"
@@ -159,6 +160,97 @@ int main(int argc, char *argv[])
         //----- NormalStateDependantStddevPolicy
         NormalStateDependantStddevPolicy policy(phi, phis, initws);
         policy.setParameters(params);
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action);
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action);
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+        //compute hessian
+        mat hess = policy.diff2log(state,action);
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
+    }
+    else if (strcmp(argv[1], "mvnstdstate") == 0)
+    {
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
+
+        //load state
+        vec state;
+        state.load(argv[3], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[4], raw_ascii);
+
+        //load degree mean
+        arma::vec deg;
+        deg.load(argv[5], raw_ascii);
+
+        //define basis for mean
+        BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
+        Features* phi = nullptr;
+
+        if (action.n_elem == 1)
+        {
+            phi = new DenseFeatures(basis);
+        }
+        else
+        {
+            phi = new SparseFeatures(basis, action.n_elem);
+        }
+
+
+        //load degree stddev
+        arma::vec degs;
+        degs.load(argv[6], raw_ascii);
+
+        //load weights stddev
+        arma::vec initws;
+        initws.load(argv[7], raw_ascii);
+
+        //define basis for stddev
+        BasisFunctions basiss = PolynomialFunction::generate(degs(0), state.n_elem);
+        Features* phis = nullptr;
+
+        if (action.n_elem == 1)
+        {
+            phis = new DenseFeatures(basiss);
+        }
+        else
+        {
+            phis = new SparseFeatures(basiss, action.n_elem);
+        }
+
+        cerr << phis->operator ()(state) << endl;
+
+        assert(initws.n_elem == phis->rows());
+        LinearApproximator regm(*phi);
+        LinearApproximator regs(*phis);
+
+        //----- NormalStateDependantStddevPolicy
+        GenericMVNStateDependantStddevPolicy policy(regm, regs);
+        cerr << vectorize(params,initws) << endl;
+        cerr << policy.getParametersSize() << endl;
+        policy.setParameters(vectorize(params,initws));
 
         cout << policy.getPolicyName() << endl;
         int dim = action.n_elem, nbs = 50000;
@@ -323,6 +415,79 @@ int main(int argc, char *argv[])
         if (phi != nullptr)
             delete phi;
     }
+    else if (strcmp(argv[1], "genericmvn") == 0)
+    {
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
+
+        //load state
+        vec state;
+        state.load(argv[3], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[4], raw_ascii);
+
+        //load degree
+        arma::vec deg;
+        deg.load(argv[5], raw_ascii);
+
+        //as variance
+        arma::mat variance;
+        variance.load(argv[6], raw_ascii);
+
+        //define approximation
+        BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
+        Features* phi = nullptr;
+
+        if (action.n_elem == 1)
+        {
+            phi = new DenseFeatures(basis);
+        }
+        else
+        {
+            phi = new SparseFeatures(basis, action.n_elem);
+        }
+
+        //define policy
+        cerr << params.t();
+        LinearApproximator reg(*phi);
+        GenericMVNPolicy policy(reg, variance);
+        policy.setParameters(params);
+
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action);
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action);
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+        //compute hessian
+        mat hess = policy.diff2log(state,action);
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
+
+        if (phi != nullptr)
+            delete phi;
+    }
     else if (strcmp(argv[1], "mvnlog") == 0)
     {
         //load policy parameters
@@ -430,6 +595,76 @@ int main(int argc, char *argv[])
         //define policy
         cerr << params.t();
         MVNDiagonalPolicy policy(*phi);
+        policy.setParameters(params);
+
+
+        cout << policy.getPolicyName() << endl;
+        int dim = action.n_elem, nbs = 50000;
+
+
+        //draw random points
+        mat P(nbs,dim);
+        for (int i = 0; i < nbs; ++i)
+        {
+            arma::vec sample = policy(state);
+            for (int k = 0; k < dim; ++k)
+                P(i,k) = sample[k];
+        }
+        P.save(fm.addPath("samples.dat"), raw_ascii);
+
+
+        //evaluate density
+        vec density(1);
+        density(0) = policy(state,action);
+        density.save(fm.addPath("density.dat"), raw_ascii);
+
+        //compute gradient
+        vec grad = policy.difflog(state,action);
+        grad.save(fm.addPath("grad.dat"), raw_ascii);
+
+        //compute hessian
+        mat hess = policy.diff2log(state,action);
+        hess.save(fm.addPath("hessian.dat"), raw_ascii);
+
+        if (phi != nullptr)
+            delete phi;
+
+    }
+    else if (strcmp(argv[1], "genericmvndiag") == 0)
+    {
+        //load policy parameters
+        vec params;
+        params.load(argv[2], raw_ascii);
+
+        //load state
+        vec state;
+        state.load(argv[3], raw_ascii);
+
+        //load action
+        vec action;
+        action.load(argv[4], raw_ascii);
+
+        //load degree
+        arma::vec deg;
+        deg.load(argv[5], raw_ascii);
+
+        //define approximation
+        BasisFunctions basis = PolynomialFunction::generate(deg(0), state.n_elem);
+        Features* phi = nullptr;
+
+        if (action.n_elem == 1)
+        {
+            phi = new DenseFeatures(basis);
+        }
+        else
+        {
+            phi = new SparseFeatures(basis, action.n_elem);
+        }
+
+        //define policy
+        cerr << params.t();
+        LinearApproximator reg(*phi);
+        GenericMVNDiagonalPolicy policy(reg);
         policy.setParameters(params);
 
 

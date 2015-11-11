@@ -6,7 +6,7 @@ reset(symengine);
 excmd = '../../../../build/test/pol2mat';
 
 %% Multivariate Normal policy with diagonal covariance (sigma parameters)
-polname = 'mvndiag';
+polname = 'genericmvndiag';
 stateDim = 2;
 actionDim = 2;
 s = sym('s', [stateDim, 1]);
@@ -36,8 +36,8 @@ h = jacobian(g, [w;sigma]);
 polDeg = 1;
 state = [1.21321;0.956];
 action = [0.865;1.123];
-wVal = [0.5; 0.245; 0.99;0.3; 0.3245; 0.599];
-sigmaVal = [1.3; 0.9];
+wVal = rand(6,1).*[0.5; 0.245; 0.99;0.3; 0.3245; 0.599];
+sigmaVal = [1.3; 0.9] .* rand(2,1);
 
 % write parameters
 mkdir('/tmp/ReLe/pol2mat/test/')
@@ -56,7 +56,7 @@ disp('------------------------');
 %% read values
 redD = dlmread('/tmp/ReLe/pol2mat/test/density.dat');
 redG = dlmread('/tmp/ReLe/pol2mat/test/grad.dat');
-redH = dlmread('/tmp/ReLe/pol2mat/test/hessian.dat');
+% redH = dlmread('/tmp/ReLe/pol2mat/test/hessian.dat');
 
 % compute using sym engine
 evalD = double(subs(pols, [s;a;w;sigma], [state;action;wVal;sigmaVal]));
@@ -74,8 +74,8 @@ assert(abs(redD-evalD) <= 1e-6);
 [redG, evalG]
 assert(max(abs(redG-evalG)) <= 1e-6);
 
-redH, evalH
-assert(max(max(abs(redH-evalH))) <= 1e-6);
+% redH, evalH
+% assert(max(max(abs(redH-evalH))) <= 1e-6);
 
 
 samples = dlmread('/tmp/ReLe/pol2mat/test/samples.dat');
