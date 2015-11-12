@@ -102,7 +102,11 @@ template<class ActionC, class StateC>
 class DifferentiablePolicy: public ParametricPolicy<ActionC, StateC>
 {
 public:
-    virtual arma::vec diff(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
+    virtual arma::vec diff(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action)
+    {
+        return (*this)(state,action) * difflog(state,action);
+    }
+
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
 
     //virtual arma::mat diff2(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) = 0;
