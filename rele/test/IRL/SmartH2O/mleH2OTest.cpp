@@ -25,6 +25,7 @@
 #include "parametric/differentiable/LinearPolicy.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "parametric/differentiable/GenericNormalPolicy.h"
+#include "parametric/differentiable/ParametricMixturePolicy.h"
 #include "features/DenseFeatures.h"
 #include "DifferentiableNormals.h"
 #include "basis/IdentityBasis.h"
@@ -152,6 +153,8 @@ int main(int argc, char *argv[])
     startVal.ones();
     startVal(24) = 8000;
 #else
+
+#if 0
     LinearApproximator meanReg(phi);
     LinearApproximator stdReg(phi);
     GenericMVNStateDependantStddevPolicy policy(meanReg, stdReg);
@@ -160,6 +163,25 @@ int main(int argc, char *argv[])
     arma::vec startStdWeights(phi.rows(), arma::fill::ones);
     startStdWeights *= 400;
     arma::vec startVal = vectorize(startMeanWeights, startStdWeights);
+#else
+    LinearApproximator meanReg_b1(phi);
+    LinearApproximator meanReg_b2(phi);
+
+    LinearApproximator stdReg_b1(phi);
+    LinearApproximator stdReg_b2(phi);
+
+    std::vector<DifferentiablePolicy<DenseAction,DenseState>*> mixture;
+    mixture.push_back(new GenericMVNStateDependantStddevPolicy(meanReg_b1, stdReg_b1));
+    mixture.push_back(new GenericMVNStateDependantStddevPolicy(meanReg_b2, stdReg_b2));
+
+    GenericParametricLogisticMixturePolicy<DenseAction,DenseState> policy(mixture);
+    arma::vec startMeanWeights(2*phi.rows(), arma::fill::ones);
+    arma::vec startStdWeights(2*phi.rows(), arma::fill::ones);
+    startStdWeights *= 400;
+    arma::vec startAlphaWeights(1, arma::fill::ones);
+    startAlphaWeights /= 2;
+    arma::vec startVal = vectorize(startMeanWeights, startStdWeights, startAlphaWeights);
+#endif
 #endif
 
     cout << endl << "Policy: " << policy.getPolicyName() << endl << endl;
