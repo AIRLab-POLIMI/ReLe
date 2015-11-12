@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
     MLE<DenseAction,DenseState> mle(policy, data);
     arma::vec pp = mle.solve(startVal, 1000);
 
-    std::cerr << endl << "MLE Params: " << endl << pp.t();
+    std::cerr << endl << "MLE Params (" << pp.n_elem << " weights): " << endl << pp.t();
     policy.setParameters(pp);
 
     ofstream outdata(fm.addPath("mlepol.dat"));
