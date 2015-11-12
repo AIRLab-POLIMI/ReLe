@@ -197,6 +197,17 @@ class GenericParametricLogisticMixturePolicy : public GenericParametricMixturePo
     using Base::mixture;
     using Base::mixtureWeights;
 
+public:
+    GenericParametricLogisticMixturePolicy(std::vector<DifferentiablePolicy<ActionC, StateC>*>& mixture)
+        : GenericParametricMixturePolicy<ActionC, StateC>(mixture)
+    {
+    }
+
+    GenericParametricLogisticMixturePolicy(std::vector<DifferentiablePolicy<ActionC, StateC>*>& mixture, arma::vec coeff)
+        : GenericParametricMixturePolicy<ActionC, StateC>(mixture, coeff)
+    {
+    }
+
     // Policy interface
 public:
 
@@ -214,13 +225,40 @@ public:
 public:
     arma::vec difflog(typename state_type<StateC>::const_type_ref state, typename action_type<ActionC>::const_type_ref action) override
     {
-        arma::vec mixGrad = GenericParametricMixturePolicy<ActionC,StateC>::difflog(state, action);
+        // int nbParams = mixtureWeights.n_elem;
+        unsigned int nbElem = mixture.size();
         arma::mat dTheta;
-        computeParameters(mixtureWeights, dTheta);
+        arma::vec preferences = computeParameters(mixtureWeights, dTheta);
+        arma::vec lgMix, lgCoeff(nbElem);
 
-        //compute the derivative
-        arma::vec dM = dTheta.t() * mixGrad;
-        return dM;
+        for (int i = 0; i < nbElem; ++i)
+        {
+            arma::vec gP = preferences(i) * mixture[i]->diff(state,action);
+            lgMix = arma::join_vert(lgMix, gP);
+        }
+
+        for (int i = 0; i < nbElem; ++i)
+        {
+            lgCoeff(i) = mixture[i]->operator()(state,action);
+        }
+        arma::vec dM = dTheta.t() * lgCoeff;
+        double mixValue = this->operator ()(state,action);
+        arma::vec grad = vectorize(lgMix, dM) / mixValue;
+        return grad;
+
+
+
+//        arma::vec mixGrad = GenericParametricMixturePolicy<ActionC,StateC>::difflog(state, action);
+//        arma::mat dTheta;
+//        computeParameters(mixtureWeights, dTheta);
+
+//        std::cerr << dTheta << std::endl;
+//        unsigned int nel = mixGrad.n_elem;
+//        std::cerr << mixGrad.rows(nel-mixtureWeights.n_elem,nel-1) << std::endl;
+
+//        //compute the derivative
+//        arma::vec dM = dTheta.t() * mixGrad.rows(nel-mixtureWeights.n_elem,nel-1);
+//        return dM;
 
     }
 
