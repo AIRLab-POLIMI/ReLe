@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     startVal(24) = 8000;
 #else
 
-#if 0
+#if 1
     LinearApproximator meanReg(phi);
     LinearApproximator stdReg(phi);
     GenericMVNStateDependantStddevPolicy policy(meanReg, stdReg);
@@ -175,19 +175,22 @@ int main(int argc, char *argv[])
     mixture.push_back(new GenericMVNStateDependantStddevPolicy(meanReg_b2, stdReg_b2));
 
     GenericParametricLogisticMixturePolicy<DenseAction,DenseState> policy(mixture);
-    arma::vec startMeanWeights(2*phi.rows(), arma::fill::ones);
-    arma::vec startStdWeights(2*phi.rows(), arma::fill::ones);
-    startStdWeights *= 400;
+//    arma::vec startMeanWeights(phi.rows(), arma::fill::randu);
+    arma::vec startStdWeights(phi.rows(), arma::fill::randu);
+    startStdWeights *= 200;
+
     arma::vec startAlphaWeights(1, arma::fill::ones);
     startAlphaWeights /= 2;
-    arma::vec startVal = vectorize(startMeanWeights, startStdWeights, startAlphaWeights);
+    arma::vec startVal = vectorize(arma::randu(phi.rows(),1), startStdWeights);
+    startVal = vectorize(startVal, arma::randu(phi.rows(),1), startStdWeights);
+    startVal = vectorize(startVal, startAlphaWeights);
 #endif
 #endif
 
     cout << endl << "Policy: " << policy.getPolicyName() << endl << endl;
 
     MLE<DenseAction,DenseState> mle(policy, data);
-    arma::vec pp = mle.solve(startVal, 1000);
+    arma::vec pp = mle.solve(startVal, 400);
 
     std::cerr << endl << "MLE Params (" << pp.n_elem << " weights): " << endl << pp.t();
     policy.setParameters(pp);
