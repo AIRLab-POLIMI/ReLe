@@ -119,6 +119,37 @@ NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
     mInitialStddev = evalstd[0];
 }
 
+///////////////////////////////////////////////////////////////////////////////////////
+/// NORMAL POLICY WITH LEARNED STATE DEPENDANT STDDEV (parameters: mean and standard deviations)
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+arma::vec NormalLearnableStateDependantStddevPolicy::difflog(const arma::vec &state, const arma::vec &action)
+{
+    // get scalar action
+    double a = action[0];
+
+    // compute mean value
+    //probabilmente va reimplementata, come?
+    calculateMeanAndStddev(state);
+
+    // get features
+    Features& meanBasis = approximator.getBasis();
+    Features& stddevBasis = stdApproximator.getBasis();
+
+    // compute gradient
+    arma::vec gMean = meanBasis(state) * (a - mMean) / (mInitialStddev * mInitialStddev);
+    arma::vec gStd = stddevBasis(state) * ((a-mMean)*(a-mMean) / (mInitialStddev*mInitialStddev*mInitialStddev) - 1.0 / mInitialStddev);
+
+    return vectorize(gMean, gStd);
+}
+
+
+arma::mat NormalLearnableStateDependantStddevPolicy::diff2log(const arma::vec& state, const arma::vec& action)
+{
+    //TODO Implement
+    return arma::mat();
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// MVN POLICY

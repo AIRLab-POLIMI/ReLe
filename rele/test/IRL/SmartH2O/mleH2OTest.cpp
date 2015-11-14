@@ -53,6 +53,10 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
+//#define NORMALDIAG
+#define NORMALSTDSTATE_LEARN
+//#define GENERICNORMALSTDSTATE
+
 
 class HourFeat : public DenseFeatures_<arma::vec>
 {
@@ -118,7 +122,7 @@ int main(int argc, char *argv[])
 
     HourFeat phi;
 
-#if 0
+#ifdef NORMALDIAG
     MVNDiagonalPolicy policy(phi);
 
     double vv[] =
@@ -153,8 +157,15 @@ int main(int argc, char *argv[])
     startVal.ones();
     startVal(24) = 8000;
 #else
+#ifdef NORMALSTDSTATE_LEARN
+    NormalLearnableStateDependantStddevPolicy policy(phi,phi);
 
-#if 1
+    arma::vec startMeanWeights(phi.rows(), arma::fill::ones);
+    arma::vec startStdWeights(phi.rows(), arma::fill::ones);
+    startStdWeights *= 400;
+    arma::vec startVal = vectorize(startMeanWeights, startStdWeights);
+#else
+#ifdef GENERICNORMALSTDSTATE
     LinearApproximator meanReg(phi);
     LinearApproximator stdReg(phi);
     GenericMVNStateDependantStddevPolicy policy(meanReg, stdReg);
@@ -184,6 +195,7 @@ int main(int argc, char *argv[])
     arma::vec startVal = vectorize(arma::randu(phi.rows(),1), startStdWeights);
     startVal = vectorize(startVal, arma::randu(phi.rows(),1), startStdWeights);
     startVal = vectorize(startVal, startAlphaWeights);
+#endif
 #endif
 #endif
 

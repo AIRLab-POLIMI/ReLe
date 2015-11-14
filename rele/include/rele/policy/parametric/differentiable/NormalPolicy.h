@@ -170,12 +170,89 @@ public:
 
 protected:
 
+    NormalStateDependantStddevPolicy(Features& phi,
+                                     Features& stdPhi)
+        : NormalPolicy(1, phi), stdApproximator(stdPhi)
+    {
+    }
+
     virtual void calculateMeanAndStddev(const arma::vec& state) override;
 
 protected:
     LinearApproximator stdApproximator;
 
 };
+
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// NORMAL POLICY WITH LEARNED STATE DEPENDANT STDDEV (parameters: mean and standard deviations)
+///////////////////////////////////////////////////////////////////////////////////////
+
+// Normal Policy with learnable stddev
+//derivata da StateDependantStddev: la dev.standard dipende dallo stato, in piu' e' imparabile
+//questione da chiarire: considerando quanto le classi antenate vincolano la specifca dei parametri del costruttore,
+//ed eventualmente le variabili di istanza, dov'e' opportuno inserirla nella gerarchia?
+//nel nostro contesto si suppone una di queste per ogni ora? se no si dovrebbero avere media e varianza come vettori...
+class NormalLearnableStateDependantStddevPolicy : public NormalStateDependantStddevPolicy
+{
+public:
+    NormalLearnableStateDependantStddevPolicy(Features& phi, Features& stdPhi) :
+        NormalStateDependantStddevPolicy(phi,stdPhi)
+    {
+        arma::vec w(getParametersSize(), arma::fill::ones);
+        setParameters(w);
+    }
+
+    NormalLearnableStateDependantStddevPolicy(Features& phi, Features& stdPhi,
+            arma::vec& w) :
+        NormalStateDependantStddevPolicy(phi,stdPhi)
+    {
+        setParameters(w);
+    }
+
+    virtual ~NormalLearnableStateDependantStddevPolicy()
+    {
+    }
+
+    virtual inline std::string getPolicyName() override
+    {
+        return "NormalLearnableStddevPolicy";
+    }
+
+    virtual NormalLearnableStateDependantStddevPolicy* clone() override
+    {
+        return new  NormalLearnableStateDependantStddevPolicy(*this);
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline arma::vec getParameters() const override
+    {
+        return vectorize(approximator.getParameters(),stdApproximator.getParameters());
+    }
+    virtual inline const unsigned int getParametersSize() const override
+    {
+        return approximator.getParametersSize() + stdApproximator.getParametersSize();
+    }
+    virtual inline void setParameters(const arma::vec& w) override
+    {
+        int n = getParametersSize();
+        assert(w.size() == n);
+
+        int nbMeanP = approximator.getParametersSize();
+        approximator.setParameters(w.rows(0,nbMeanP-1));
+        stdApproximator.setParameters(w.rows(nbMeanP, n-1));
+    }
+
+
+    // DifferentiablePolicy interface
+public:
+    virtual arma::vec difflog(const arma::vec& state, const arma::vec& action) override;
+
+    virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
+
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /// MVN POLICY
