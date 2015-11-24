@@ -64,7 +64,7 @@ include_directories(${ARMADILLO_INCLUDE_DIR})
 
 # ----------------------- GCC FLAGS ----------------------------
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wsuggest-override")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)	
@@ -82,6 +82,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
                 add_definitions(-DARMA_DONT_USE_CXX11)
                 add_definitions(-DARMA_BLAS_LONG) #required for matlab compatibility
                 message(STATUS "Added defs: -DARMA_DONT_USE_CXX11 -DARMA_BLAS_LONG")
+        endif()
+        
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "5.0")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wsuggest-override")
         endif()
 endif()
 add_definitions( -DARMA_DONT_PRINT_ERRORS )
