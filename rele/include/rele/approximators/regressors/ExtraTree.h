@@ -99,6 +99,11 @@ public:
         root = buildExtraTree(ds);
     }
 
+    void trainFeatures(const InputC& input, const OutputC& output) override
+    {
+        // TODO
+    }
+
     /**
      *
      */

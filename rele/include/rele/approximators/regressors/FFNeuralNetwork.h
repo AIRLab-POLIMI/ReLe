@@ -41,8 +41,9 @@ namespace ReLe
 
 template<class InputC, bool denseOutput = true>
 class FFNeuralNetwork_: public ParametricRegressor_<InputC, denseOutput>,
-    public BatchRegressor_<InputC, arma::vec>
+    public BatchRegressor_<InputC, arma::vec, denseOutput>
 {
+    USE_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
 
 public:
     enum algorithm
@@ -64,7 +65,7 @@ public:
 public:
     FFNeuralNetwork_(Features_<InputC, denseOutput>& phi, unsigned int neurons,
                      unsigned int outputs) :
-        ParametricRegressor(outputs), phi(phi)
+        ParametricRegressor(outputs), BatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
     {
         layerFunction.push_back(new Sigmoid());
         layerFunction.push_back(new Linear());
@@ -78,7 +79,7 @@ public:
     FFNeuralNetwork_(Features_<InputC, denseOutput>& phi,
                      std::vector<unsigned int>& layerNeurons,
                      std::vector<Function*>& layerFunction) :
-        ParametricRegressor(layerNeurons.back()), phi(phi),
+        ParametricRegressor(layerNeurons.back()), BatchRegressor_<InputC, arma::vec, denseOutput>(phi),
         layerFunction(layerFunction), layerNeurons(layerNeurons)
     {
         setupNetwork();
@@ -94,21 +95,16 @@ public:
 
     arma::vec operator()(const InputC& input) override
     {
-        forwardComputation(input);
+        forwardComputation(phi(input));
         return h.back();
     }
 
     arma::vec diff(const InputC& input) override
     {
-        forwardComputation(input);
+        forwardComputation(phi(input));
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
         return backPropagation(g);
-    }
-
-    inline Features& getBasis()
-    {
-        return phi;
     }
 
     inline arma::vec getParameters() const override
@@ -128,6 +124,7 @@ public:
         return paramSize;
     }
 
+    /*
     void train(const BatchData<InputC, arma::vec>& dataset) override
     {
         assert(dataset.size() > 0);
@@ -149,7 +146,30 @@ public:
         default:
             break;
         }
+    }
+    */
 
+    void trainFeatures(const InputC& input, const arma::vec& output) override
+    {
+        switch (params.alg)
+        {
+        case GradientDescend:
+            gradientDescend(input, output);
+            break;
+
+        case StochasticGradientDescend:
+            // FIXME
+            // stochasticGradientDescend(input, output);
+            break;
+
+        case Adadelta:
+            // FIXME
+            // adadelta(input, output);
+            break;
+
+        default:
+            break;
+        }
     }
 
     double computeJ(const BatchData<InputC, arma::vec>& dataset, double lambda)
@@ -233,9 +253,9 @@ private:
         paramSize = paramN;
     }
 
-    void forwardComputation(const InputC& input)
+    void forwardComputation(const arma::vec& input)
     {
-        h[0] = phi(input);
+        h[0] = input;
         unsigned int start = 0;
         for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
         {
@@ -279,11 +299,12 @@ private:
         return gradW;
     }
 
-    void computeGradient(const BatchData<InputC, arma::vec>& dataset,
+    void computeGradient(const arma::mat& input, const arma::mat& output,
                          double lambda, arma::vec& g)
     {
         g.zeros();
 
+        /*
         for (unsigned int i = 0; i < dataset.size(); i++)
         {
             const InputC& x = dataset.getInput(i);
@@ -297,7 +318,20 @@ private:
         g /= static_cast<double>(dataset.size());
 
         g += lambda*Omega->diff(*w);
+        */
 
+        for(unsigned int i = 0; i < output.size(); i++)
+        {
+            const arma::vec& x = input.col(i);
+            const arma::vec& y = output.col(i);
+
+            forwardComputation(x);
+            arma::vec yhat = h.back();
+            arma::vec gs = yhat - y;
+            g += backPropagation(gs);
+        }
+        g /= static_cast<double>(output.size());
+        g += lambda*Omega->diff(*w);
     }
 
     void computeGradientNumerical(const BatchData<InputC, arma::vec>& dataset, arma::vec& g)
@@ -334,14 +368,16 @@ private:
 
 private:
 
-    void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
+    // void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
+    void gradientDescend(const InputC& input, const arma::vec& output)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
 
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
-            computeGradient(dataset, params.lambda, g);
+            // computeGradient(dataset, params.lambda, g);
+            computeGradient(input, output, params.lambda, g);
             w -= params.alpha * g;
         }
     }
@@ -437,7 +473,6 @@ private:
     double* aux_mem;
 
     Regularization* Omega;
-    Features_<InputC, denseOutput>& phi;
 
     //Optimizaion data
     OptimizationParameters params;

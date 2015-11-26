@@ -30,7 +30,7 @@ namespace ReLe
 {
 
 template<class InputC, class OutputC>
-class ExtraTreeEnsemble : public Regressor_<InputC>, public BatchRegressor_<InputC, OutputC>
+class ExtraTreeEnsemble : public BatchRegressor_<InputC, OutputC>
 {
 public:
     /**
@@ -43,7 +43,7 @@ public:
                       unsigned int outputSize = 1, unsigned int m = 50,
                       unsigned int k = 5, unsigned int nMin = 2,
                       double scoreThreshold = 0.0, LeafType leafType = Constant)
-        : Regressor_<InputC>(outputSize),
+        : BatchRegressor_<InputC, OutputC>(phi, outputSize),
           phi(phi), emptyNode(emptyNode),
           m(m), k(k), nMin(nMin),
           scoreThreshold(scoreThreshold), leafType(leafType)
@@ -106,6 +106,11 @@ public:
         {
             tree->train(dataset);
         }
+    }
+
+    void trainFeatures(const InputC& input, const OutputC& output) override
+    {
+        // TODO
     }
 
     /**

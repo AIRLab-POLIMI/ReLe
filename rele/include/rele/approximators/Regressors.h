@@ -70,8 +70,6 @@ public:
 protected:
     unsigned int outputDimension;
 };
-
-
 typedef Regressor_<arma::vec> Regressor;
 
 template<class InputC, bool denseOutput = true>
@@ -106,22 +104,53 @@ public:
     }
 
 };
-
 typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 
 
-template<class InputC, class OutputC>
-class BatchRegressor_
+template<class InputC, class OutputC, bool denseOutput=true>
+class BatchRegressor_ : public Regressor_<InputC, denseOutput>
 {
 
 public:
-    virtual void train(const BatchData<InputC, OutputC>& dataset) = 0;
+    BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
+        Regressor_<InputC, denseOutput>(output),
+        phi(phi)
+    {
+
+    }
+
+    virtual void train(const BatchData<InputC, OutputC>& dataset)
+    {
+        unsigned int N = dataset.size();
+
+        //compute features matrix
+        arma::mat features(phi.rows(), N);
+        arma::mat outputs(this->outputDimension, N);
+        for(int i = 0; i < N; i++)
+        {
+            features.col(i) = phi(dataset.getInput(i));
+            outputs.col(i) = dataset.getOutput(i);
+        }
+
+        trainFeatures(features, outputs);
+    }
+
+    virtual void trainFeatures(const InputC& input, const arma::vec& output) = 0;
 
     virtual ~BatchRegressor_()
     {
 
     }
+
+    inline Features& getBasis()
+    {
+        return phi;
+    }
+
+protected:
+    Features_<InputC, denseOutput>& phi;
 };
+typedef BatchRegressor_<arma::vec, arma::vec> BatchRegressor;
 
 template<class InputC, bool denseOutput = true>
 class UnsupervisedBatchRegressor_
@@ -159,5 +188,9 @@ protected:
 };
 
 }
+
+#define USE_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
+    typedef BatchRegressor_<InputC, OutputC, denseOutput> Base; \
+    using Base::phi;
 
 #endif /* REGRESSORS_H_ */

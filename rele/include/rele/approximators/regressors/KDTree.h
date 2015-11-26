@@ -82,6 +82,11 @@ public:
         root = buildKDTree(dataset, 0);
     }
 
+    void trainFeatures(const InputC& input, const OutputC& output) override
+    {
+        // TODO
+    }
+
     /**
      *
      */

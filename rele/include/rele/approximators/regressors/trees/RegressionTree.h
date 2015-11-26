@@ -35,14 +35,16 @@ namespace ReLe
 {
 
 template<class InputC, class OutputC>
-class RegressionTree: public Regressor_<InputC>, public BatchRegressor_<InputC, OutputC>
+class RegressionTree: public BatchRegressor_<InputC, OutputC>
 {
+
 public:
     RegressionTree(Features_<InputC>& phi,
                    const EmptyTreeNode<OutputC>& emptyNode,
                    unsigned int outputDimensions = 1,
-                   unsigned int mNMin = 2)
-        :  Regressor_<InputC>(outputDimensions), phi(phi), root(nullptr), emptyNode(emptyNode), nMin(mNMin)
+                   unsigned int mNMin = 2) :
+            BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
+            root(nullptr), emptyNode(emptyNode), nMin(mNMin), phi(phi) //FIXME regressors interface
     {
 
     }
@@ -87,6 +89,7 @@ public:
     }
 
     virtual void train(const BatchData<InputC, OutputC>& dataset) override = 0;
+    virtual void trainFeatures(const InputC& input, const OutputC& output) override = 0;
 
     /**
      * Get the root of the tree
@@ -149,9 +152,9 @@ protected:
 
 
 protected:
-    Features_<InputC>& phi;
     TreeNode<OutputC>* root;
     EmptyTreeNode<OutputC> emptyNode;
+    Features_<InputC>& phi;
 
     unsigned int nMin;  // minimum number of tuples for splitting
 };
