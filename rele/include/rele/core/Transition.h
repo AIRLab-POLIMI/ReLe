@@ -168,6 +168,68 @@ public:
         return episodeFeatures;
     }
 
+    unsigned int getTransitionsNumber()
+    {
+        unsigned int nSamples = 0;
+
+        auto& dataset = *this;
+        for(auto& episode : dataset)
+            nSamples += episode.size();
+
+        return nSamples;
+    }
+
+    unsigned int getRewardSize()
+    {
+        auto& dataset = *this;
+        return dataset[0][0].r.size();
+    }
+
+    arma::mat rewardAsMAtrix()
+    {
+        auto& dataset = *this;
+
+        unsigned int rewardSize = getRewardSize();
+        unsigned int nTransitions = getTransitionsNumber();
+        arma::mat rewards(nTransitions, rewardSize);
+
+        unsigned int idx = 0;
+
+        for(auto& episode : dataset)
+        {
+            for(auto& tr : episode)
+            {
+                rewards(idx) = tr.r[0];
+                idx++;
+            }
+        }
+
+        return rewards;
+    }
+
+    template<class InputC>
+    arma::mat featuresAsMatrix(Features_<InputC>& phi)
+    {
+        auto& dataset = *this;
+
+        unsigned int featuresSize = phi.rows();
+        unsigned int nTransitions = getTransitionsNumber();
+        arma::mat features(nTransitions, featuresSize);
+
+        unsigned int idx = 0;
+
+        for(auto& episode : dataset)
+        {
+            for(auto& tr : episode)
+            {
+                features.col(idx) = phi(tr.x, tr.u);
+                idx++;
+            }
+        }
+
+        return features;
+    }
+
     void addData(Dataset<ActionC, StateC>& data)
     {
         this->insert(this->data.end(), data.begin(), data.end());
