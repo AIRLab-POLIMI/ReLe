@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         GridWorldGenerator generator;
         generator.load(argv[1]);
 
-        FiniteMDP&& mdp = generator.getMPD(1.0);
+        FiniteMDP&& mdp = generator.getMDP(1.0);
 
         e_Greedy policy;
         SARSA_lambda agent(policy, false);

@@ -34,7 +34,7 @@ namespace ReLe
 class FiniteGenerator
 {
 public:
-    inline FiniteMDP getMPD(double gamma)
+    inline FiniteMDP getMDP(double gamma)
     {
         return FiniteMDP(P, R, Rsigma, false, gamma);
     }

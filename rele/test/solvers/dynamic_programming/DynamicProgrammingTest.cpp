@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     SimpleChainGenerator generator;
     generator.generate(5, 2);
 
-    FiniteMDP mdp = generator.getMPD(0.9);
+    FiniteMDP mdp = generator.getMDP(0.9);
 
     ValueIteration solver1(mdp, 0.01);
     PolicyIteration solver2(mdp);

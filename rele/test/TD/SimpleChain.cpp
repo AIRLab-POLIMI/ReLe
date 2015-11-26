@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     SimpleChainGenerator generator;
     generator.generate(5, 2);
 
-    FiniteMDP mdp = generator.getMPD(0.9);
+    FiniteMDP mdp = generator.getMDP(0.9);
     //e_Greedy policy;
     //Boltzmann policy;
 
