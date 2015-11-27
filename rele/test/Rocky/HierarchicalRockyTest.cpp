@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
 
     int episodes = 10000;
-    core.getSettings().episodeLenght = 10000;
+    core.getSettings().episodeLength = 10000;
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(fm.addPath("Rocky.log"),
             WriteStrategy<DenseAction, DenseState>::AGENT);
 

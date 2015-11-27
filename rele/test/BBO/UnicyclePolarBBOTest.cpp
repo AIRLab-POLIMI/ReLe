@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
     core->getSettings().loggerStrategy = &wStrategy;
 
     int horiz = mdp.getSettings().horizon;
-    core->getSettings().episodeLenght = horiz;
+    core->getSettings().episodeLength = horiz;
 
     int nbUpdates = config.nbRuns;
     int episodes  = nbUpdates*nbepperpol*nbpolperupd;
@@ -328,7 +328,7 @@ int main(int argc, char *argv[])
             WriteStrategy<DenseAction, DenseState>::TRANS,
             true /*delete file*/);
     core->getSettings().loggerStrategy = &collection;
-    core->getSettings().episodeLenght = mdp.getSettings().horizon;
+    core->getSettings().episodeLength = mdp.getSettings().horizon;
     core->getSettings().testEpisodeN = 1;
     core->runTestEpisodes();
     std::cout << policy.getParameters().t();

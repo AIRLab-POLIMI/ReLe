@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
     PolicyEvalAgent<DenseAction, DenseState> agent(policy);
     ReLe::Core<DenseAction, DenseState> core(mdp, agent);
-    core.getSettings().episodeLenght = mdp.getSettings().horizon;
+    core.getSettings().episodeLength = mdp.getSettings().horizon;
 
     ofstream out("NLS_OptParamSpace.dat", ios_base::out);
 

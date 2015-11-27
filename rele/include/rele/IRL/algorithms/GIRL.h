@@ -61,7 +61,7 @@ public:
         isRewardLinear(false)
     {
         nbFunEvals = 0;
-        maxSteps = data.getEpisodeMaxLenght();
+        maxSteps = data.getEpisodeMaxLength();
         // initially all features are active
         active_feat.set_size(rewardf.getParametersSize());
         std::iota(std::begin(active_feat), std::end(active_feat), 0);
@@ -573,7 +573,7 @@ public:
     void setData(Dataset<ActionC, StateC>& dataset)
     {
         data = dataset;
-        maxSteps = data.getEpisodeMaxLenght();
+        maxSteps = data.getEpisodeMaxLength();
     }
 
     inline void setIsRewardLinear(bool flag)

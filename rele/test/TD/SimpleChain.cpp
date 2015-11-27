@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     TabularREPS agent(phi);
     Core<FiniteAction, FiniteState> core(mdp, agent);
 
-    core.getSettings().episodeLenght = 10000;
+    core.getSettings().episodeLength = 10000;
     core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false, true);
     cout << "starting episode" << endl;
     core.runEpisode();

@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     FakeAgent agent;
     Core<DenseAction, DenseState> core(room, agent);
 
-    core.getSettings().episodeLenght = 600;
+    core.getSettings().episodeLength = 600;
 
     try
     {

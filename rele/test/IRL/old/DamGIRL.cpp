@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     );
 
     int horiz = mdp.getSettings().horizon;
-    core.getSettings().episodeLenght = horiz;
+    core.getSettings().episodeLength = horiz;
 
     int nbUpdates = 750;
     int episodes  = nbUpdates*nbepperpol;
@@ -246,7 +246,7 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().testEpisodeN = 200;
     expertCore.runTestEpisodes();
 

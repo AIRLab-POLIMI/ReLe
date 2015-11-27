@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
     core.getSettings().loggerStrategy = &wStrategy;
 
     int horiz = mdp.getSettings().horizon;
-    core.getSettings().episodeLenght = horiz;
+    core.getSettings().episodeLength = horiz;
 
     int nbUpdates = config.nbRuns;
     int episodes  = nbUpdates*nbepperpol;

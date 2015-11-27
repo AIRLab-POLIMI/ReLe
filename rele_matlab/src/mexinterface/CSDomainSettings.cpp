@@ -33,7 +33,7 @@ using namespace arma;
         ReLe::Core<ActionC, StateC> oncore(mdp, agent);\
         CollectorStrategy<ActionC, StateC> collection;\
         oncore.getSettings().loggerStrategy = &collection;\
-        oncore.getSettings().episodeLenght = mdp.getSettings().horizon;\
+        oncore.getSettings().episodeLength = mdp.getSettings().horizon;\
         oncore.getSettings().testEpisodeN = nbEpisodes;\
         oncore.runTestEpisodes();\
         Dataset<ActionC,StateC>& data = collection.data;\

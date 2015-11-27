@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
     Core<FiniteAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<FiniteAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().testEpisodeN = nbEpisodes;
     expertCore.runTestEpisodes();
 
@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
     Core<FiniteAction, DenseState> mleCore(mdp, mleEval);
     CollectorStrategy<FiniteAction, DenseState> collectionMle;
     mleCore.getSettings().loggerStrategy = &collectionMle;
-    mleCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    mleCore.getSettings().episodeLength = mdp.getSettings().horizon;
     mleCore.getSettings().testEpisodeN = nbEpisodes;
     mleCore.runTestEpisodes();
 
@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
     Core<FiniteAction, DenseState> lspiCore(mdp, lspiEval);
     CollectorStrategy<FiniteAction, DenseState> collectionlspi;
     lspiCore.getSettings().loggerStrategy = &collectionlspi;
-    lspiCore.getSettings().episodeLenght = 10;
+    lspiCore.getSettings().episodeLength = 10;
     lspiCore.getSettings().testEpisodeN = 1000;
     lspiCore.runTestEpisodes();
 
@@ -544,7 +544,7 @@ int main(int argc, char *argv[])
     Core<FiniteAction, DenseState> finalCore(mdp, finalEval);
     CollectorStrategy<FiniteAction, DenseState> collectionFinal;
     finalCore.getSettings().loggerStrategy = &collectionFinal;
-    finalCore.getSettings().episodeLenght = 150;
+    finalCore.getSettings().episodeLength = 150;
     finalCore.getSettings().testEpisodeN = 1000;
     finalCore.runTestEpisodes();
 

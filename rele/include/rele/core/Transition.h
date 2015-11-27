@@ -246,7 +246,7 @@ public:
         return this->size();
     }
 
-    unsigned int getEpisodeMaxLenght()
+    unsigned int getEpisodeMaxLength()
     {
         unsigned int max = 0;
         for(auto& episode : *this)

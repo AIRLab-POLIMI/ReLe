@@ -43,13 +43,13 @@ public:
         CoreSettings()
         {
             loggerStrategy = nullptr;
-            episodeLenght = 0;
+            episodeLength = 0;
             episodeN = 0;
             testEpisodeN = 0;
         }
 
         LoggerStrategy<ActionC, StateC>* loggerStrategy;
-        unsigned int episodeLenght;
+        unsigned int episodeLength;
         unsigned int episodeN;
         unsigned int testEpisodeN;
 
@@ -85,7 +85,7 @@ public:
         Reward r(environment.getSettings().rewardDim);
 
         for (unsigned int i = 0;
-                i < settings.episodeLenght
+                i < settings.episodeLength
                 && !agent.isTerminalConditionReached(); i++)
         {
 
@@ -105,7 +105,7 @@ public:
         if (!xn.isAbsorbing())
             agent.endEpisode();
 
-        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLenght);
+        logger.log(agent.getAgentOutputDataEnd(), settings.episodeLength);
         logger.printStatistics();
     }
 
@@ -134,7 +134,7 @@ public:
         Reward r(environment.getSettings().rewardDim);
 
         for (unsigned int i = 0;
-                i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+                i < settings.episodeLength && !xn.isAbsorbing(); i++)
         {
             agent.sampleAction(xn, u);
             environment.step(u, xn, r);
@@ -175,7 +175,7 @@ public:
             logger.log(xn);
 
             for (unsigned int i = 0;
-                    i < settings.episodeLenght && !xn.isAbsorbing(); i++)
+                    i < settings.episodeLength && !xn.isAbsorbing(); i++)
             {
                 agent.sampleAction(xn, u);
                 environment.step(u, xn, r);

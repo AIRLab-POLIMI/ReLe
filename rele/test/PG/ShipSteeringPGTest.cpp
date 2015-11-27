@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
     core.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
         fm.addPath(outputname), WriteStrategy<DenseAction, DenseState>::AGENT, true);
 
-    core.getSettings().episodeLenght = 5000;
+    core.getSettings().episodeLength = 5000;
 
     int nbUpdates = config.nbRuns;
     int episodes  = nbUpdates*nbepperpol;

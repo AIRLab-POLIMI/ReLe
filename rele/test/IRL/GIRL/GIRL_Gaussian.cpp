@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     EmptyStrategy<DenseAction, DenseState> emptyS;
     expertCore.getSettings().loggerStrategy = &emptyS;
-    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().episodeN = episodes;
     expertCore.getSettings().testEpisodeN = 100;
     expertCore.runEpisodes();
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 
     Core<DenseAction, DenseState> imitatorCore(prMDP, imitator);
     imitatorCore.getSettings().loggerStrategy = &emptyS;
-    imitatorCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
     imitatorCore.getSettings().episodeN = episodes;
     imitatorCore.getSettings().testEpisodeN = 100;
     imitatorCore.runEpisodes();

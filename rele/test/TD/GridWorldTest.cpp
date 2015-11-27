@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
         Core<FiniteAction, FiniteState> core(mdp, agent);
 
-        core.getSettings().episodeLenght = 100000;
+        core.getSettings().episodeLength = 100000;
         //core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, FiniteState>("/home/dave/prova.txt");
         //core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
 

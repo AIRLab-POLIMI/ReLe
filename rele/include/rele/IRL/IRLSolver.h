@@ -113,7 +113,7 @@ public:
     {
         EmptyStrategy<ActionC, StateC> strategy;
         Core<ActionC, StateC> core(this->prMdp, agent);
-        core.getSettings().episodeLenght = episodeLength;
+        core.getSettings().episodeLength = episodeLength;
         core.getSettings().episodeN = episodes;
         core.getSettings().loggerStrategy = &strategy;
 

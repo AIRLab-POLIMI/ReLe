@@ -108,7 +108,7 @@ protected:
         baseline_num2_single.zeros(dp);
         episodeStepReward.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode);
         sumGradLog.zeros(nbEpisodesToEvalPolicy,maxStepsPerEpisode, dp);
-        episodeLenght.zeros(nbEpisodesToEvalPolicy);
+        episodeLength.zeros(nbEpisodesToEvalPolicy);
     }
 
     virtual void initializeVariables() override
@@ -150,7 +150,7 @@ protected:
 
     virtual void updateAtEpisodeEnd() override
     {
-        episodeLenght(epiCount) = stepCount;
+        episodeLength(epiCount) = stepCount;
 
         // compute the baseline
         if (useBaseline && bType == BaseLineType::SINGLE)
@@ -178,7 +178,7 @@ protected:
             {
                 for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
                 {
-                    for (int t = 0; t < episodeLenght(ep); t++)
+                    for (int t = 0; t < episodeLength(ep); t++)
                     {
                         arma::vec baseline = baseline_num.col(t) / baseline_den.col(t);
                         baseline(arma::find_nonfinite(baseline)).zeros();
@@ -198,7 +198,7 @@ protected:
 
                 for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
                 {
-                    for (int t = 0; t < episodeLenght(ep); t++)
+                    for (int t = 0; t < episodeLength(ep); t++)
                     {
                         const arma::vec& sumGradLog_ep_t = sumGradLog.tube(ep,t);
                         gradient += (episodeStepReward(ep,t) - baseline) % sumGradLog_ep_t;
@@ -210,7 +210,7 @@ protected:
         {
             for (int ep = 0; ep < nbEpisodesToEvalPolicy; ep++)
             {
-                for (int t = 0; t < episodeLenght(ep); t++)
+                for (int t = 0; t < episodeLength(ep); t++)
                 {
                     const arma::vec& sumGradLog_ep_t = sumGradLog.tube(ep,t);
                     gradient += episodeStepReward(ep,t) * sumGradLog_ep_t;
@@ -254,7 +254,7 @@ protected:
     arma::vec sumdLogPi;
     arma::mat episodeStepReward;
     arma::cube sumGradLog;
-    arma::ivec episodeLenght;
+    arma::ivec episodeLength;
 
     unsigned int maxStepsPerEpisode, stepCount;
 

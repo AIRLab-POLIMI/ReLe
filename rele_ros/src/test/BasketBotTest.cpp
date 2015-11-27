@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     FakeAgent agent;
     ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(basketBot, agent);
 
-    core.getSettings().episodeLenght = 30;
+    core.getSettings().episodeLength = 30;
 
     try
     {

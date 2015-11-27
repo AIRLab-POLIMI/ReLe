@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     ConsoleManager console(episodes, 1);
     for (int i = 0; i < episodes; i++)
     {
-        core.getSettings().episodeLenght = mdp.getSettings().horizon;
+        core.getSettings().episodeLength = mdp.getSettings().horizon;
         console.printProgress(i);
         core.runEpisode();
     }

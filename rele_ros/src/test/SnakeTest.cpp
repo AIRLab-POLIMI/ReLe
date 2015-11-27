@@ -77,7 +77,7 @@ int main(int argc, char* argv[])
 
 
     PrintStrategy<DenseAction, DenseState> strategy(true, false);
-    core.getSettings().episodeLenght = 100;
+    core.getSettings().episodeLength = 100;
     core.getSettings().loggerStrategy = &strategy;
 
     try

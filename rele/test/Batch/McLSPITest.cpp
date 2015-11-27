@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     Core<FiniteAction, DenseState> finalCore(mdp, finalEval);
     CollectorStrategy<FiniteAction, DenseState> collectionFinal;
     finalCore.getSettings().loggerStrategy = &collectionFinal;
-    finalCore.getSettings().episodeLenght = 250;
+    finalCore.getSettings().episodeLength = 250;
     finalCore.getSettings().testEpisodeN = 1000;
     finalCore.runTestEpisodes();
 

@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 
 
     int episodes = nbepperpol*nbupdates;
-    core.getSettings().episodeLenght = 100;
+    core.getSettings().episodeLength = 100;
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("TaxiFuel.log"),
             WriteStrategy<FiniteAction, DenseState>::AGENT);
 

@@ -34,10 +34,17 @@ namespace ReLe
 * Journal of Machine Learning Research, 6, 2006, pp. 503-556.
 */
 
+// A template is used for states in order to manage both dense and finite states.
 template<class StateC>
 class FQI
 {
 public:
+
+    /*
+    This class implements the FQI algorithm. As a batch algorithm, it takes
+    a dataset of (s, a, r, s') transitions, together with a regressor that
+    it is used to approximate the target distribution of Q values.
+    */
     FQI(Dataset<FiniteAction, StateC>& data, BatchRegressor& QRegressor,
         unsigned int nActions, double gamma) :
         data(data),
@@ -50,78 +57,95 @@ public:
 
     void run(Features& phi, unsigned int maxiterations, double epsilon = 0.1)
     {
-        /*** Initialize variables ***/
+        /*
+        This is the function to be called to run the FQI algorithm. It takes
+        the features phi that are used to compute the input of the regressor.
+        */
+
+        // Compute the overall number of samples
         unsigned int nEpisodes = data.size();
-        // compute the overall number of samples
         unsigned int nSamples = 0;
         for(unsigned int k = 0; k < nEpisodes; k++)
             nSamples += data[k].size();
 
-        arma::vec&& rewards = data.rewardAsMAtrix();
-        arma::vec nextStates(nSamples, arma::fill::zeros);
+        // Rewards are extracted from the dataset
+        arma::vec&& rewards = data.rewardAsMatrix();
+        // Input of the regressor are computed using provided features
         arma::mat input = data.featuresAsMatrix(phi);
-        arma::vec output(nSamples, arma::fill::zeros);
-        Q.zeros(nSamples, nActions);
+        /* Output vector is initialized. It will contain the Q values, found
+        *  with the optimal Bellman equation, that are used in regression as
+        *  target values */
+        arma::vec output(input.n_rows, arma::fill::zeros);
+        // This vector is used for the terminal condition evaluation
+        Q.zeros(input.n_rows);
 
         double J;
 
-        // compute Q_(i+1)
         unsigned int iteration = 0;
-        /*** Main FQI loop ***/
+        // Main FQI loop
         do
         {
-            arma::vec output;
             // Update and print the number of iterations
             ++iteration;
             std::cout << "*********************************************************" << std::endl;
             std::cout << "FQI iteration: " << iteration << std::endl;
 
-            // Evaluate the current policy using the current approximation
-            // of Q functions
+            // Loop on each dataset sample (i.e. on each transition)
             unsigned int i = 0;
             for(auto& episode : data)
             {
                 for(auto& tr : episode)
                 {
-                    arma::vec Q_xn;
+                    /* In order to be able to fill the output vector (i.e. regressor
+                    *  target values), we need to compute the Q values for each
+                    *  s' sample in the dataset and for each action in the
+                    *  set of actions of the problem. */
+                    arma::vec Q_xn(nActions, arma::fill::zeros);
                     for(unsigned int u = 0; u < nActions; u++)
-                    {
                         Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
-                    }
+
+                    /* For the current s', Q values for each action are stored in
+                    *  Q_xn. The optimal Bellman equation can be computed
+                    *  finding the maximum value inside Q_xn. */
                     output(i) = rewards(i) + gamma * arma::max(Q_xn);
                     i++;
                 }
             }
 
-            // Use Regressor
+            // The regressor is trained
             QRegressor.trainFeatures(input, output);
-            arma::mat Qprev = Q;
+            // Previous Q approximated values are stored
+            arma::vec prevQ = Q;
+            /* New Q values are computed using the regressor trained with the
+            *  new output values. */
             computeQ(data);
-            J = arma::norm(Q - Qprev);
+            // Error function is computed
+            J = arma::norm(Q - prevQ);
 
         } while((iteration < maxiterations) && (J > epsilon));
 
-        /*** Display some info ***/
+        // Print info
         std::cout << "*********************************************************" << std::endl;
         if(J > epsilon)
+            /* The algorithm has not converged and terminated for exceeding
+            *  the maximum number of transitions. */
             std::cout << "FQI finished in " << iteration <<
                       " iterations WITHOUT CONVERGENCE to a fixed point" << std::endl;
         else
+            // Error below the maximum desired error: the algorithm has converged
             std::cout << "FQI converged in " << iteration << " iterations" << std::endl <<
                       "********************************************************* " << std::endl;
     }
 
     void computeQ(Dataset<FiniteAction, StateC>& data)
     {
+        // Computation of Q values approximation with the updated regressor
         unsigned int i = 0;
         for(auto& episode : data)
         {
             for(auto& tr : episode)
             {
-                for(unsigned int u = 0; u < nActions; u++)
-                {
-                    Q(i, u) = arma::as_scalar(QRegressor(tr.x, FiniteAction(u)));
-                }
+                Q(i) = arma::as_scalar(QRegressor(tr.x, tr.u));
                 i++;
             }
         }
@@ -129,7 +153,7 @@ public:
 
 protected:
     Dataset<FiniteAction, StateC>& data;
-    arma::mat Q;
+    arma::vec Q;
     BatchRegressor& QRegressor;
     unsigned int nActions;
     double gamma;

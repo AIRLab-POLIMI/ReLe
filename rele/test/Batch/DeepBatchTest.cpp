@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     oncore.getSettings().loggerStrategy = strat;
 
     int horiz = mdp.getSettings().horizon;
-    oncore.getSettings().episodeLenght = horiz;
+    oncore.getSettings().episodeLength = horiz;
 
     int nbTrajectories = 1e4;
     for (int n = 0; n < nbTrajectories; ++n)
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
         WriteStrategy<FiniteAction, DenseState>::AGENT,
         true /*delete file*/
     );
-    offcore.getSettings().episodeLenght = horiz;
+    offcore.getSettings().episodeLength = horiz;
 
     int nbUpdates = 10;
     double every, bevery;

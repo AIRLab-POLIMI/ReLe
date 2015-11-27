@@ -72,7 +72,7 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     expertCore.getSettings().loggerStrategy = &empty;
-    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().episodeN = episodes;
     expertCore.getSettings().testEpisodeN = testEpisodes;
     expertCore.runEpisodes();
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().testEpisodeN = nbEpisodes;
     expertCore.runTestEpisodes();
     Dataset<DenseAction,DenseState>& data = collection.data;
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
     CollectorStrategy<DenseAction, DenseState> collector2;
     evaluationCore.getSettings().loggerStrategy = &collector2;
-    evaluationCore.getSettings().episodeLenght = mdp.getSettings().horizon;
+    evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
     evaluationCore.getSettings().episodeN = episodes;
     evaluationCore.getSettings().testEpisodeN = nbEpisodes;
 
