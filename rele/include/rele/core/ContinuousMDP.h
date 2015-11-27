@@ -42,7 +42,7 @@ public:
                   bool isEpisodic, double gamma = 1.0, unsigned int horizon = 0);
 
 protected:
-    void setupEnvirorment(std::size_t stateSize, std::size_t actionSize, std::size_t rewardSize,
+    void setupEnvironment(std::size_t stateSize, std::size_t actionSize, std::size_t rewardSize,
                           bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                           double gamma);
 

@@ -41,7 +41,7 @@ public:
     {}
 
 protected:
-    void setupEnvirorment(std::size_t stateSize, unsigned int actionN, size_t rewardSize,
+    void setupenvironment(std::size_t stateSize, unsigned int actionN, size_t rewardSize,
                           bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                           double gamma);
 

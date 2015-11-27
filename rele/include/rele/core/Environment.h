@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ENVIRORMENT_H_
-#define ENVIRORMENT_H_
+#ifndef environment_H_
+#define environment_H_
 
 #include <vector>
 
@@ -82,4 +82,4 @@ private:
 
 }
 
-#endif /* ENVIRORMENT_H_ */
+#endif /* environment_H_ */

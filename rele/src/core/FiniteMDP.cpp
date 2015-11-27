@@ -36,7 +36,7 @@ FiniteMDP::FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
     Environment(), P(P), R(R), Rsigma(Rsigma)
 {
     chekMatricesDimensions(P, R, Rsigma);
-    setupEnvirorment(isFiniteHorizon, horizon, gamma, P);
+    setupenvironment(isFiniteHorizon, horizon, gamma, P);
     findAbsorbingStates();
 }
 
@@ -99,7 +99,7 @@ void FiniteMDP::chekMatricesDimensions(const arma::cube& P, const arma::cube& R,
                                "\t\tRsigma must be [actions x states x states]");
 }
 
-void FiniteMDP::setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
+void FiniteMDP::setupenvironment(bool isFiniteHorizon, unsigned int horizon,
                                  double gamma, const arma::cube& P)
 {
     EnvironmentSettings& task = getWritableSettings();

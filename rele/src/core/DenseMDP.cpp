@@ -39,11 +39,11 @@ DenseMDP::DenseMDP(size_t stateSize, unsigned int actionN, size_t rewardSize, bo
                    bool isEpisodic, double gamma, unsigned int horizon) :
     currentState(stateSize)
 {
-    setupEnvirorment(stateSize, actionN, rewardSize, isFiniteHorizon, isEpisodic, horizon,
+    setupenvironment(stateSize, actionN, rewardSize, isFiniteHorizon, isEpisodic, horizon,
                      gamma);
 }
 
-void DenseMDP::setupEnvirorment(size_t stateSize, unsigned int actionN, size_t rewardSize,
+void DenseMDP::setupenvironment(size_t stateSize, unsigned int actionN, size_t rewardSize,
                                 bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                                 double gamma)
 {

@@ -56,11 +56,11 @@ public:
     };
 
 public:
-    Core(Environment<ActionC, StateC>& envirorment,
+    Core(Environment<ActionC, StateC>& environment,
          Agent<ActionC, StateC>& agent) :
-        envirorment(envirorment), agent(agent)
+        environment(environment), agent(agent)
     {
-        agent.setTask(envirorment.getSettings());
+        agent.setTask(environment.getSettings());
     }
 
     CoreSettings& getSettings()
@@ -78,18 +78,18 @@ public:
         logger.setStrategy(settings.loggerStrategy);
 
         //Start episode
-        envirorment.getInitialState(xn);
+        environment.getInitialState(xn);
         agent.initEpisode(xn, u);
         logger.log(xn);
 
-        Reward r(envirorment.getSettings().rewardDim);
+        Reward r(environment.getSettings().rewardDim);
 
         for (unsigned int i = 0;
                 i < settings.episodeLenght
                 && !agent.isTerminalConditionReached(); i++)
         {
 
-            envirorment.step(u, xn, r);
+            environment.step(u, xn, r);
             logger.log(u, xn, r);
 
             if (xn.isAbsorbing())
@@ -128,16 +128,16 @@ public:
 
         //Start episode
         agent.initTestEpisode();
-        envirorment.getInitialState(xn);
+        environment.getInitialState(xn);
         logger.log(xn);
 
-        Reward r(envirorment.getSettings().rewardDim);
+        Reward r(environment.getSettings().rewardDim);
 
         for (unsigned int i = 0;
                 i < settings.episodeLenght && !xn.isAbsorbing(); i++)
         {
             agent.sampleAction(xn, u);
-            envirorment.step(u, xn, r);
+            environment.step(u, xn, r);
             logger.log(u, xn, r);
         }
 
@@ -160,25 +160,25 @@ public:
 
 
 
-        Reward r(envirorment.getSettings().rewardDim);
+        Reward r(environment.getSettings().rewardDim);
         arma::vec J_mean(r.size(), arma::fill::zeros);
 
         for (unsigned int e = 0; e < settings.testEpisodeN; ++e)
         {
             Logger<ActionC, StateC> logger;
-            EvaluateStrategy<ActionC, StateC> stat_e(envirorment.getSettings().gamma);
+            EvaluateStrategy<ActionC, StateC> stat_e(environment.getSettings().gamma);
             logger.setStrategy(&stat_e);
 
             //Start episode
             agent.initTestEpisode();
-            envirorment.getInitialState(xn);
+            environment.getInitialState(xn);
             logger.log(xn);
 
             for (unsigned int i = 0;
                     i < settings.episodeLenght && !xn.isAbsorbing(); i++)
             {
                 agent.sampleAction(xn, u);
-                envirorment.step(u, xn, r);
+                environment.step(u, xn, r);
                 logger.log(u, xn, r);
             }
 
@@ -195,7 +195,7 @@ public:
     }
 
 protected:
-    Environment<ActionC, StateC>& envirorment;
+    Environment<ActionC, StateC>& environment;
     Agent<ActionC, StateC>& agent;
     CoreSettings settings;
 
@@ -208,17 +208,17 @@ class BatchCore : protected Core<ActionC, StateC>
     typedef Core<ActionC, StateC> Base;
     using typename Base::CoreSettings;
     using Base::settings;
-    using Base::envirorment;
+    using Base::environment;
     using Base::agent;
 
 public:
 
-    BatchCore(Environment<ActionC, StateC>& envirorment,
+    BatchCore(Environment<ActionC, StateC>& environment,
               Agent<ActionC, StateC>& agent,
               Dataset<ActionC, StateC>& data) :
-        Core<ActionC, StateC>(envirorment, agent), data(data)
+        Core<ActionC, StateC>(environment, agent), data(data)
     {
-        agent.setTask(envirorment.getSettings());
+        agent.setTask(environment.getSettings());
         nbCurrentEpisode = 0;
     }
 

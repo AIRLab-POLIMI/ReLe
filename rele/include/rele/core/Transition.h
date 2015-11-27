@@ -185,7 +185,7 @@ public:
         return dataset[0][0].r.size();
     }
 
-    arma::mat rewardAsMAtrix()
+    arma::mat rewardAsMatrix()
     {
         auto& dataset = *this;
 

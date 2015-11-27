@@ -39,11 +39,11 @@ ContinuousMDP::ContinuousMDP(size_t stateSize, size_t actionSize, size_t rewardS
                              bool isEpisodic, double gamma, unsigned int horizon) :
     currentState(stateSize)
 {
-    setupEnvirorment(stateSize, actionSize, rewardSize, isFiniteHorizon, isEpisodic, horizon,
+    setupEnvironment(stateSize, actionSize, rewardSize, isFiniteHorizon, isEpisodic, horizon,
                      gamma);
 }
 
-void ContinuousMDP::setupEnvirorment(size_t stateSize, size_t actionSize, size_t rewardSize,
+void ContinuousMDP::setupEnvironment(size_t stateSize, size_t actionSize, size_t rewardSize,
                                      bool isFiniteHorizon, bool isEpisodic, unsigned int horizon,
                                      double gamma)
 {

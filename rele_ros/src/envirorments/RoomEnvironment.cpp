@@ -29,7 +29,7 @@ namespace ReLe_ROS
 {
 
 SimulatedRoomEnvironment::SimulatedRoomEnvironment(double controlFrequency)
-    : SimulatedEnvironment("RoomEnvirorment", controlFrequency)
+    : SimulatedEnvironment("Roomenvironment", controlFrequency)
 {
 
     writeSettings();
@@ -42,7 +42,7 @@ SimulatedRoomEnvironment::SimulatedRoomEnvironment(double controlFrequency)
     objective.resize(7);
     getObjectPose(objective, objectiveHandle);
 
-    motorSpeedPub = n.advertise<vrep_common::JointSetStateData>("/RoomEnvirorment/wheels",1);
+    motorSpeedPub = n.advertise<vrep_common::JointSetStateData>("/Roomenvironment/wheels",1);
 
     stateReady = true; //FIXME LEVARE!!!
 }

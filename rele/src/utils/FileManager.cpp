@@ -28,10 +28,10 @@ using namespace std;
 namespace ReLe
 {
 
-FileManager::FileManager(const string& envirorment,
+FileManager::FileManager(const string& environment,
                          const string& algorithm)
 {
-    outputDir = "/tmp/ReLe/" + envirorment + "/" + algorithm + "/";
+    outputDir = "/tmp/ReLe/" + environment + "/" + algorithm + "/";
 }
 
 void FileManager::createDir()

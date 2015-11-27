@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 
 
-find_package(catkin REQUIRED COMPONENTS rele 
-                                        roscpp 
+find_package(catkin REQUIRED COMPONENTS rele
+                                        roscpp
                                         vrep_common)
 project(rele_ros)
 
@@ -13,22 +13,22 @@ catkin_package(INCLUDE_DIRS include/rele_ros
 # ----------------------- INCLUDES ----------------------------
 
 include_directories(include/rele_ros/core
-                    include/rele_ros/envirorments
+                    include/rele_ros/environments
                     ${catkin_INCLUDE_DIRS})
 
 # ----------------------- LIBRARIES ---------------------------
 
-  
+
 
 # ----------------------- GCC FLAGS ----------------------------
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)	
-	set(BUILD_TYPE_MSG "Debug") 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+	set(BUILD_TYPE_MSG "Debug")
 
-else()	
+else()
 	set(BUILD_TYPE_MSG "Release")
 endif()
 
@@ -40,9 +40,9 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 # ------------------------ BUILD -------------------------------
 
 #releROS library
-file(GLOB_RECURSE ReLeROS_SOURCE 
-                  src/envirorments/*.cpp)
-                  
+file(GLOB_RECURSE ReLeROS_SOURCE
+                  src/environments/*.cpp)
+
 add_library(releROS ${ReLeROS_SOURCE})
 target_link_libraries(releROS ${catkin_LIBRARIES})
 add_dependencies(releROS ${catkin_EXPORTED_TARGETS})
@@ -77,5 +77,3 @@ add_dependencies(snake ${catkin_EXPORTED_TARGETS})
 #)
 
 # --------------------------------------------------------------
-
-

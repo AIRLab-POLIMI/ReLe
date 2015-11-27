@@ -21,8 +21,8 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_ENVIRORMENTS_ROOMENVIRONMENT_H_
-#define INCLUDE_RELE_ROS_ENVIRORMENTS_ROOMENVIRONMENT_H_
+#ifndef INCLUDE_RELE_ROS_environmentS_ROOMENVIRONMENT_H_
+#define INCLUDE_RELE_ROS_environmentS_ROOMENVIRONMENT_H_
 
 #include "../core/SimulatedEnvironment.h"
 
@@ -62,4 +62,4 @@ private:
 
 }
 
-#endif /* INCLUDE_RELE_ROS_ENVIRORMENTS_ROOMENVIRONMENT_H_ */
+#endif /* INCLUDE_RELE_ROS_environmentS_ROOMENVIRONMENT_H_ */

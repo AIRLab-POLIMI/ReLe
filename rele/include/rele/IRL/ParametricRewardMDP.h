@@ -39,19 +39,19 @@ class ParametricRewardMDP : public Environment<ActionC, StateC>
 {
 
 public:
-    ParametricRewardMDP(Environment<ActionC, StateC>& envirorment,
+    ParametricRewardMDP(Environment<ActionC, StateC>& environment,
                         ParametricRegressor& regressor) :
-        envirorment(envirorment), regressor(regressor)
+        environment(environment), regressor(regressor)
     {
-        this->getWritableSettings() = envirorment.getSettings();
+        this->getWritableSettings() = environment.getSettings();
         this->getWritableSettings().rewardDim = regressor.getOutputSize();
     }
 
     virtual void step(const ActionC& action, StateC& nextState,
                       Reward& reward) override
     {
-        Reward trashReward(envirorment.getSettings().rewardDim);
-        envirorment.step(action, nextState, trashReward);
+        Reward trashReward(environment.getSettings().rewardDim);
+        environment.step(action, nextState, trashReward);
 
         arma::vec&& r = computeReward(state, action, nextState);
         reward = arma::conv_to<Reward>::from(r);
@@ -61,7 +61,7 @@ public:
 
     virtual void getInitialState(StateC& state) override
     {
-        envirorment.getInitialState(state);
+        environment.getInitialState(state);
         this->state = state;
     }
 
@@ -78,7 +78,7 @@ private:
     }
 
 private:
-    Environment<ActionC, StateC>& envirorment;
+    Environment<ActionC, StateC>& environment;
     ParametricRegressor& regressor;
     StateC state;
 };

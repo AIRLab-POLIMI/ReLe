@@ -49,7 +49,7 @@ public:
 private:
     void chekMatricesDimensions(const arma::cube& P, const arma::cube& R,
                                 const arma::cube& Rsigma);
-    void setupEnvirorment(bool isFiniteHorizon, unsigned int horizon,
+    void setupenvironment(bool isFiniteHorizon, unsigned int horizon,
                           double gamma, const arma::cube& P);
     void findAbsorbingStates();
 

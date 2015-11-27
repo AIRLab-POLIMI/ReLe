@@ -21,8 +21,8 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_ROSENVIRORMENT_H_
-#define INCLUDE_ROSENVIRORMENT_H_
+#ifndef INCLUDE_ROSenvironment_H_
+#define INCLUDE_ROSenvironment_H_
 
 #include <rele/core/Environment.h>
 #include <ros/ros.h>
@@ -39,10 +39,10 @@ namespace ReLe_ROS
 {
 
 template<class ActionC, class StateC>
-class RosEnvirorment: public ReLe::Environment<ActionC, StateC>
+class Rosenvironment: public ReLe::Environment<ActionC, StateC>
 {
 public:
-    RosEnvirorment(double controlFrequency) :
+    Rosenvironment(double controlFrequency) :
         r(controlFrequency)
     {
         stateReady = false;
@@ -88,7 +88,7 @@ public:
         r.reset();
     }
 
-    virtual ~RosEnvirorment()
+    virtual ~Rosenvironment()
     {
 
     }
@@ -117,4 +117,4 @@ protected:
 
 }
 
-#endif /* INCLUDE_ROSENVIRORMENT_H_ */
+#endif /* INCLUDE_ROSenvironment_H_ */

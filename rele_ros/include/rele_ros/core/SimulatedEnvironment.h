@@ -21,8 +21,8 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_SIMULATEDENVIRORMENT_H_
-#define INCLUDE_RELE_ROS_SIMULATEDENVIRORMENT_H_
+#ifndef INCLUDE_RELE_ROS_SIMULATEDenvironment_H_
+#define INCLUDE_RELE_ROS_SIMULATEDenvironment_H_
 
 #include <stdexcept>
 
@@ -49,14 +49,14 @@ enum JointMode
 };
 
 template<class ActionC, class StateC>
-class SimulatedEnvironment: public RosEnvirorment<ActionC, StateC>
+class SimulatedEnvironment: public Rosenvironment<ActionC, StateC>
 {
 protected:
-    using RosEnvirorment<ActionC, StateC>::n;
+    using Rosenvironment<ActionC, StateC>::n;
 
 public:
     SimulatedEnvironment(const std::string& name, double controlFrequency) :
-        RosEnvirorment<ActionC, StateC>(controlFrequency), name(name)
+        Rosenvironment<ActionC, StateC>(controlFrequency), name(name)
     {
         infoSubscriber = n.subscribe("/vrep/info", 1,
                                      &SimulatedEnvironment::infoCallback, this);
@@ -255,4 +255,4 @@ private:
 };
 
 }
-#endif /* INCLUDE_RELE_ROS_SIMULATEDENVIRORMENT_H_ */
+#endif /* INCLUDE_RELE_ROS_SIMULATEDenvironment_H_ */

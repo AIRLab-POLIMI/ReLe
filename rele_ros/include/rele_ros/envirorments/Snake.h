@@ -21,8 +21,8 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_ENVIRORMENTS_SNAKE_H_
-#define INCLUDE_RELE_ROS_ENVIRORMENTS_SNAKE_H_
+#ifndef INCLUDE_RELE_ROS_environmentS_SNAKE_H_
+#define INCLUDE_RELE_ROS_environmentS_SNAKE_H_
 
 #include "../core/SimulatedEnvironment.h"
 
@@ -65,4 +65,4 @@ private:
 }
 
 
-#endif /* INCLUDE_RELE_ROS_ENVIRORMENTS_SNAKE_H_ */
+#endif /* INCLUDE_RELE_ROS_environmentS_SNAKE_H_ */
