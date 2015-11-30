@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
         data.writeToStream(out);
     out.close();
 
-    cout << "# Ended data collection and save" << endl;
+    cout << endl << "# Ended data collection and save" << endl;
 
     /* The basis functions for the features of the regressor are created here.
      * IdentityBasis functions are features that simply replicate the input. These
@@ -122,8 +122,10 @@ int main(int argc, char *argv[])
     arma::rowvec output(input.n_cols, arma::fill::zeros);
     output = rewards.t();
     Q.zeros(input.n_cols);
+    nn.getHyperParameters().maxIterations = 10;
     nn.trainFeatures(input, output);
     cout << "The training error is: " << nn.computeJFeatures(input, output, 0) << endl;
+
 
     /*
     // A FQI object is instantiated using the dataset and the regressor
