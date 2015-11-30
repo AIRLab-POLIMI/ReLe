@@ -257,9 +257,8 @@ private:
         params.alg = GradientDescend;
         params.alpha = 0.1;
         params.lambda = 0.0;
+        params.maxIterations = 10000;
         params.minibatchSize = 100;
-        //params.maxIterations = 10000;
-        params.maxIterations = 50;
     }
 
     void calculateParamSize()
