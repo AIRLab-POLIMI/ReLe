@@ -26,13 +26,13 @@
 
 namespace ReLe
 {
-/**
-* Fitted Q-Iteration (FQI)
-*
-* "Tree-Based Batch Mode Reinforcement Learning"
-* Damien Ernst, Pierre Geurts, Louis Wehenkel
-* Journal of Machine Learning Research, 6, 2006, pp. 503-556.
-*/
+/*
+ * Fitted Q-Iteration (FQI)
+ *
+ * "Tree-Based Batch Mode Reinforcement Learning"
+ * Damien Ernst, Pierre Geurts, Louis Wehenkel
+ * Journal of Machine Learning Research, 6, 2006, pp. 503-556.
+ */
 
 // A template is used for states in order to manage both dense and finite states.
 template<class StateC>
@@ -41,9 +41,9 @@ class FQI
 public:
 
     /*
-    This class implements the FQI algorithm. As a batch algorithm, it takes
-    a dataset of (s, a, r, s') transitions, together with a regressor that
-    it is used to approximate the target distribution of Q values.
+     * This class implements the FQI algorithm. As a batch algorithm, it takes
+     * a dataset of (s, a, r, s') transitions, together with a regressor that
+     * it is used to approximate the target distribution of Q values.
     */
     FQI(Dataset<FiniteAction, StateC>& data, BatchRegressor& QRegressor,
         unsigned int nActions, double gamma) :
@@ -58,8 +58,8 @@ public:
     void run(Features& phi, unsigned int maxiterations, double epsilon = 0.1)
     {
         /*
-        This is the function to be called to run the FQI algorithm. It takes
-        the features phi that are used to compute the input of the regressor.
+         * This is the function to be called to run the FQI algorithm. It takes
+         * the features phi that are used to compute the input of the regressor.
         */
 
         // Compute the overall number of samples
@@ -73,11 +73,12 @@ public:
         // Input of the regressor are computed using provided features
         arma::mat input = data.featuresAsMatrix(phi);
         /* Output vector is initialized. It will contain the Q values, found
-        *  with the optimal Bellman equation, that are used in regression as
-        *  target values */
-        arma::vec output(input.n_rows, arma::fill::zeros);
+         *  with the optimal Bellman equation, that are used in regression as
+         *  target values.
+         */
+        arma::rowvec output(input.n_cols, arma::fill::zeros);
         // This vector is used for the terminal condition evaluation
-        Q.zeros(input.n_rows);
+        Q.zeros(input.n_cols);
 
         double J;
 
@@ -97,16 +98,18 @@ public:
                 for(auto& tr : episode)
                 {
                     /* In order to be able to fill the output vector (i.e. regressor
-                    *  target values), we need to compute the Q values for each
-                    *  s' sample in the dataset and for each action in the
-                    *  set of actions of the problem. */
+                     *  target values), we need to compute the Q values for each
+                     *  s' sample in the dataset and for each action in the
+                     *  set of actions of the problem.
+                     */
                     arma::vec Q_xn(nActions, arma::fill::zeros);
                     for(unsigned int u = 0; u < nActions; u++)
                         Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
 
                     /* For the current s', Q values for each action are stored in
-                    *  Q_xn. The optimal Bellman equation can be computed
-                    *  finding the maximum value inside Q_xn. */
+                     *  Q_xn. The optimal Bellman equation can be computed
+                     *  finding the maximum value inside Q_xn.
+                     */
                     output(i) = rewards(i) + gamma * arma::max(Q_xn);
                     i++;
                 }
@@ -117,7 +120,8 @@ public:
             // Previous Q approximated values are stored
             arma::vec prevQ = Q;
             /* New Q values are computed using the regressor trained with the
-            *  new output values. */
+             *  new output values.
+             */
             computeQ(data);
             // Error function is computed
             J = arma::norm(Q - prevQ);
@@ -128,7 +132,8 @@ public:
         std::cout << "*********************************************************" << std::endl;
         if(J > epsilon)
             /* The algorithm has not converged and terminated for exceeding
-            *  the maximum number of transitions. */
+             *  the maximum number of transitions.
+             */
             std::cout << "FQI finished in " << iteration <<
                       " iterations WITHOUT CONVERGENCE to a fixed point" << std::endl;
         else
