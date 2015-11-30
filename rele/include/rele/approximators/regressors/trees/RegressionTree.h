@@ -89,7 +89,7 @@ public:
     }
 
     virtual void train(const BatchData<InputC, OutputC>& dataset) override = 0;
-    virtual void trainFeatures(const InputC& input, const OutputC& output) override = 0;
+    virtual void trainFeatures(const arma::mat& input, const arma::rowvec& output) override = 0;
 
     /**
      * Get the root of the tree

@@ -82,7 +82,7 @@ public:
         root = buildKDTree(dataset, 0);
     }
 
-    void trainFeatures(const InputC& input, const OutputC& output) override
+    void trainFeatures(const arma::mat& input, const arma::rowvec& output) override
     {
         // TODO
     }
