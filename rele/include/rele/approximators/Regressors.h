@@ -135,7 +135,7 @@ public:
         trainFeatures(features, outputs);
     }
 
-    virtual void trainFeatures(const InputC& input, const arma::vec& output) = 0;
+    virtual void trainFeatures(const arma::mat& input, const arma::rowvec& output) = 0;
 
     virtual ~BatchRegressor_()
     {
