@@ -149,7 +149,7 @@ public:
     }
     */
 
-    void trainFeatures(const InputC& input, const arma::vec& output) override
+    void trainFeatures(const arma::mat& input, const arma::rowvec& output) override
     {
         switch (params.alg)
         {
@@ -170,6 +170,26 @@ public:
         default:
             break;
         }
+    }
+
+    double computeJFeatures(const arma::mat& input, const arma::rowvec& output, double lambda)
+    {
+    	double J = 0;
+    	unsigned int nSamples = input.n_cols;
+
+    	for(unsigned int i = 0; i < nSamples; i++)
+    	{
+            const arma::vec& x = input.col(i);
+            const arma::vec& y = output.col(i);
+
+            forwardComputation(x);
+            arma::vec yhat = h.back();
+            J += arma::norm(y - yhat);
+    	}
+
+    	J /= (2 * nSamples);
+
+    	return J;
     }
 
     double computeJ(const BatchData<InputC, arma::vec>& dataset, double lambda)
@@ -238,7 +258,8 @@ private:
         params.alpha = 0.1;
         params.lambda = 0.0;
         params.minibatchSize = 100;
-        params.maxIterations = 10000;
+        //params.maxIterations = 10000;
+        params.maxIterations = 50;
     }
 
     void calculateParamSize()
@@ -299,7 +320,7 @@ private:
         return gradW;
     }
 
-    void computeGradient(const arma::mat& input, const arma::mat& output,
+    void computeGradient(const arma::mat& input, const arma::rowvec& output,
                          double lambda, arma::vec& g)
     {
         g.zeros();
@@ -369,7 +390,7 @@ private:
 private:
 
     // void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
-    void gradientDescend(const InputC& input, const arma::vec& output)
+    void gradientDescend(const arma::mat& input, const arma::rowvec& output)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
@@ -474,7 +495,7 @@ private:
 
     Regularization* Omega;
 
-    //Optimizaion data
+    //Optimization data
     OptimizationParameters params;
 };
 
