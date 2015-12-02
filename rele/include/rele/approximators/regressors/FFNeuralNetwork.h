@@ -172,7 +172,7 @@ public:
         }
     }
 
-    double computeJFeatures(const arma::mat& input, const arma::rowvec& output, double lambda)
+    double computeJFeatures(typename input_collection<InputC>::const_ref_type input, const arma::mat& output, double lambda)
     {
     	double J = 0;
     	unsigned int nSamples = input.n_cols;
@@ -319,7 +319,7 @@ private:
         return gradW;
     }
 
-    void computeGradient(const arma::mat& input, const arma::rowvec& output,
+    void computeGradient(typename input_collection<InputC>::const_ref_type input, const arma::mat& output,
                          double lambda, arma::vec& g)
     {
         g.zeros();
@@ -389,7 +389,7 @@ private:
 private:
 
     // void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
-    void gradientDescend(const arma::mat& input, const arma::rowvec& output)
+    void gradientDescend(typename input_collection<InputC>::const_ref_type input, const arma::mat& output)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);

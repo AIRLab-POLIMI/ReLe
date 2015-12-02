@@ -76,7 +76,7 @@ public:
          *  with the optimal Bellman equation, that are used in regression as
          *  target values.
          */
-        arma::rowvec output(input.n_cols, arma::fill::zeros);
+        arma::mat output(1, input.n_cols, arma::fill::zeros);
         // This vector is used for the terminal condition evaluation
         Q.zeros(input.n_cols);
 
@@ -126,6 +126,9 @@ public:
             // Error function is computed
             J = arma::norm(Q - prevQ);
 
+            std::cout << "Bellman Q-values: " << std::endl << output << std::endl;
+            std::cout << "Approximated Q-values: " << std::endl << Q.t() << std::endl;
+            std::cout << "Error at iteration " << iteration << " is: " << J << std::endl;
         }
         while((iteration < maxiterations) && (J > epsilon));
 

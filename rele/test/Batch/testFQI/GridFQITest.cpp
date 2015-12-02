@@ -25,18 +25,34 @@
 #include "PolicyEvalAgent.h"
 #include "q_policy/e_Greedy.h"
 #include "batch/FQI.h"
+#include "td/Q-Learning.h"
 #include "features/DenseFeatures.h"
 #include "FileManager.h"
 #include "FiniteMDP.h"
 #include "GridWorldGenerator.h"
 #include "regressors/FFNeuralNetwork.h"
 #include "basis/IdentityBasis.h"
+#include "IdToGridBasis.h"
 
 #include <iostream>
 
 using namespace std;
 using namespace ReLe;
 using namespace arma;
+
+
+void computeApprQ(Dataset<FiniteAction, FiniteState>& data, BatchRegressor& nn, arma::mat& appr)
+{
+    unsigned int i = 0;
+    for(auto& episode : data)
+    {
+        for(auto& tr : episode)
+        {
+            appr(0, i) = arma::as_scalar(nn(tr.x, tr.u));
+            i++;
+        }
+    }
+}
 
 
 // This simple test is used to verify the correctness of the FQI implementation
@@ -59,14 +75,15 @@ int main(int argc, char *argv[])
     /* This policy is used by an evaluation agent that has the purpose to
      *  build a dataset from its exploration of the environment. The policy is
      *  a random policy, thus allowing pure exploration. */
-    e_Greedy randomPolicy;
-    randomPolicy.setEpsilon(1.0);
-    randomPolicy.setNactions(nActions);
-    arma::mat Q(nStates, nActions);
-    randomPolicy.setQ(&Q);
+    e_Greedy policy;
+    policy.setEpsilon(0.5);
+    policy.setNactions(nActions);
+    // arma::mat Q(nStates, nActions);
+    // policy.setQ(&Q);
 
     // The agent is instantiated. It takes the policy as parameter.
-    PolicyEvalAgent<FiniteAction, FiniteState> expert(randomPolicy);
+    Q_Learning expert(policy);
+    // PolicyEvalAgent<FiniteAction, FiniteState> expert(policy);
 
     /* The Core class is what ReLe uses to move the agent in the MDP. It is
      *  instantiated using the MDP and the agent itself. */
@@ -79,15 +96,15 @@ int main(int argc, char *argv[])
     expertCore.getSettings().loggerStrategy = &collection;
 
     // Number of transitions in an episode
-    unsigned int nTransitions = 250;
+    unsigned int nTransitions = 50;
     expertCore.getSettings().episodeLength = nTransitions;
     // Number of episodes
     unsigned int nEpisodes = 100;
-    expertCore.getSettings().testEpisodeN = nEpisodes;
+    expertCore.getSettings().episodeN = nEpisodes;
 
     /* The agent start the exploration that will last for the provided number of
      *  episodes. */
-    expertCore.runTestEpisodes();
+    expertCore.runEpisodes();
 
     // The dataset is build from the data collected by the CollectorStrategy.
     Dataset<FiniteAction, FiniteState>& data = collection.data;
@@ -102,29 +119,57 @@ int main(int argc, char *argv[])
     cout << endl << "# Ended data collection and save" << endl;
 
     /* The basis functions for the features of the regressor are created here.
-     * IdentityBasis functions are features that simply replicate the input. These
-     * are useful for the purpose of this test, but very likely we'll need to consider
-     * more useful basis functions.
+     * IdentityBasis functions are features that simply replicate the input. We can use
+     * Manhattan distance from s' to goal as feature of the input vector (state, action).
      */
-    BasisFunctions bfs = IdentityBasis::generate(2);
-    // BasisFunctions qBfs = AndConditionBasisFunction::generate(bfs, 1, nActions);
+    // BasisFunctions bfs = IdentityBasis::generate(2);
+    BasisFunctions bfs;
+	bfs.push_back(new IdToGridBasis(8, 8, 7, 7));
 
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    FFNeuralNetwork nn(phi, 10, 1);
+    FFNeuralNetwork nn(phi, 100, 1);
 
 
-    // ***** NEURAL NETWORK TEST *****
-    arma::vec&& rewards = data.rewardAsMatrix();
+    // NEURAL NETWORK TEST - REGRESSION ON Q-LEARNING VALUES
     arma::mat input = data.featuresAsMatrix(phi);
-    arma::rowvec output(input.n_cols, arma::fill::zeros);
-    output = rewards.t();
-    Q.zeros(input.n_cols);
+    unsigned int nSamples = input.n_cols;
+    arma::mat output(1, nSamples, arma::fill::zeros);
+    arma::mat Q = *policy.getQ();
+    unsigned int sample = 0;
+    for(auto& episode : data)
+    {
+        for(auto& tr : episode)
+        {
+        	bool found = false;
+        	for(unsigned int j = 0; j < Q.n_rows; j++)
+        	{
+        		for(unsigned int k = 0; k < Q.n_cols; k++)
+        		{
+        			if(tr.x == j && tr.u == k)
+        			{
+        				output(0, sample) = Q(j, k);
+        				found = true;
+        				sample++;
+        				break;
+        			}
+        		}
+        		if(found)
+        			break;
+        	}
+        }
+    }
+    nn.getHyperParameters().alpha = 0.5;
     nn.getHyperParameters().maxIterations = 10;
     nn.trainFeatures(input, output);
-    cout << "The training error is: " << nn.computeJFeatures(input, output, 0) << endl;
+    arma::mat appr(1, nSamples, arma::fill::zeros);
+	computeApprQ(data, nn, appr);
+	cout << "Q-values found with Q-Learning: " << endl << output << endl;
+	cout << "Approximated Q-values: " << endl << appr << endl;
+    cout << "Error is: " << arma::norm(output - appr);
+    // *****************************************************
 
 
     /*
@@ -132,9 +177,8 @@ int main(int argc, char *argv[])
     FQI<FiniteState> fqi(data, nn, nActions, 0.9);
 
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 100, 0.01);
+    fqi.run(phi, 3, 0.01);
     */
 
-    cout << "END!!!";
     return 0;
 }
