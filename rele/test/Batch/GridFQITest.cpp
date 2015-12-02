@@ -53,64 +53,88 @@ int main(int argc, char *argv[])
     // The MDP w.r.t. the generated grid world is extracted
     FiniteMDP&& mdp = generator.getMDP(1.0);
 
-    // The actions vector is generated considering the number of actions of the MDP
-    vector<FiniteAction> actions;
-    for (unsigned int i = 0; i < mdp.getSettings().finiteActionDim; i++)
-        actions.push_back(FiniteAction(i));
+    unsigned int nActions = mdp.getSettings().finiteActionDim;
+    unsigned int nStates = mdp.getSettings().finiteStateDim;
 
     /* This policy is used by an evaluation agent that has the purpose to
-    *  build a dataset from its exploration of the environment. The policy is
-    *  a random policy, thus allowing pure exploration. */
+     *  build a dataset from its exploration of the environment. The policy is
+     *  a random policy, thus allowing pure exploration. */
     e_Greedy randomPolicy;
-    randomPolicy.setEpsilon(1.);
-    // The agent is instatiated. It takes the policy as parameter.
+    randomPolicy.setEpsilon(1.0);
+    randomPolicy.setNactions(nActions);
+    arma::mat Q(nStates, nActions);
+    randomPolicy.setQ(&Q);
+
+    // The agent is instantiated. It takes the policy as parameter.
     PolicyEvalAgent<FiniteAction, FiniteState> expert(randomPolicy);
 
     /* The Core class is what ReLe uses to move the agent in the MDP. It is
-    *  instatiated using the MDP and the agent itself. */
+     *  instantiated using the MDP and the agent itself. */
     Core<FiniteAction, FiniteState> expertCore(mdp, expert);
+
     /* The CollectorStrategy is used to collect data from the agent that is
-    *  moving in the MDP. Here, it is used to store the transition that are used
-    *  as the inputs of the dataset provided to FQI. */
+     *  moving in the MDP. Here, it is used to store the transition that are used
+     *  as the inputs of the dataset provided to FQI. */
     CollectorStrategy<FiniteAction, FiniteState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    // Number of transitions for each episode is retrieved from the MDP settings.
-    unsigned int nTransitions = mdp.getSettings().horizon;
-    // Number of transitions to be performed is set in the agent settings.
+
+    // Number of transitions in an episode
+    unsigned int nTransitions = 250;
     expertCore.getSettings().episodeLength = nTransitions;
-    // Same as before, for episodes
-    unsigned int nEpisodes = 5000;
+    // Number of episodes
+    unsigned int nEpisodes = 100;
     expertCore.getSettings().testEpisodeN = nEpisodes;
+
     /* The agent start the exploration that will last for the provided number of
-    *  episodes. */
+     *  episodes. */
     expertCore.runTestEpisodes();
+
     // The dataset is build from the data collected by the CollectorStrategy.
     Dataset<FiniteAction, FiniteState>& data = collection.data;
 
     // Dataset is written into a file
-    ofstream out(fm.addPath("Dataset.csv"), ios_base::out);
+    ofstream out(fm.addPath("dataset.csv"), ios_base::out);
+    out << std::setprecision(OS_PRECISION);
     if(out.is_open())
         data.writeToStream(out);
     out.close();
 
-    cout << "# Ended data collection and save" << endl;
+    cout << endl << "# Ended data collection and save" << endl;
 
     /* The basis functions for the features of the regressor are created here.
-    *  Using IdentityBasis function, we simply say that the input of the regressor,
-    *  are the states and actions values themselves. */
-    BasisFunctions bfs = IdentityBasis::generate(2); // FIXME
+     * IdentityBasis functions are features that simply replicate the input. These
+     * are useful for the purpose of this test, but very likely we'll need to consider
+     * more useful basis functions.
+     */
+    BasisFunctions bfs = IdentityBasis::generate(2);
+    // BasisFunctions qBfs = AndConditionBasisFunction::generate(bfs, 1, nActions);
+
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
 
-    // The regressor is instatiated using the feature vector
+    // The regressor is instantiated using the feature vector
     FFNeuralNetwork nn(phi, 10, 1);
-    // FQI needs to know the cardinality of the actions set
-    unsigned int nActions = actions.size();
-    // A fqi object is instatiated using the dataset and the regressor
-    FQI<FiniteState> fqi(data, nn, nActions, 0.9);
-    /* The fqi procedure starts. It takes the feature vector to be passed to the
-    *  regressor. */
-    fqi.run(phi, 100, 0.01);
 
+
+    // ***** NEURAL NETWORK TEST *****
+    arma::vec&& rewards = data.rewardAsMatrix();
+    arma::mat input = data.featuresAsMatrix(phi);
+    arma::rowvec output(input.n_cols, arma::fill::zeros);
+    output = rewards.t();
+    Q.zeros(input.n_cols);
+    nn.getHyperParameters().maxIterations = 10;
+    nn.trainFeatures(input, output);
+    cout << "The training error is: " << nn.computeJFeatures(input, output, 0) << endl;
+
+
+    /*
+    // A FQI object is instantiated using the dataset and the regressor
+    FQI<FiniteState> fqi(data, nn, nActions, 0.9);
+
+    // The FQI procedure starts. It takes the feature vector to be passed to the regressor
+    fqi.run(phi, 100, 0.01);
+    */
+
+    cout << "END!!!";
     return 0;
 }

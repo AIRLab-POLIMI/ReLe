@@ -214,7 +214,7 @@ public:
 
         unsigned int featuresSize = phi.rows();
         unsigned int nTransitions = getTransitionsNumber();
-        arma::mat features(nTransitions, featuresSize);
+        arma::mat features(featuresSize, nTransitions);
 
         unsigned int idx = 0;
 
