@@ -102,7 +102,7 @@ inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action,
     arma::vec vec(3);
     vec[0] = state.getStateN();
     vec[1] = action.getActionN();
-    vec[2] = state.getStateN();
+    vec[2] = nextState.getStateN();
     return vec;
 }
 
