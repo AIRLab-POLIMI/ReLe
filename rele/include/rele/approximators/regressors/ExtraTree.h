@@ -99,7 +99,8 @@ public:
         root = buildExtraTree(ds);
     }
 
-    void trainFeatures(const InputC& input, const OutputC& output) override
+    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
+                               typename output_collection<OutputC>::const_ref_type output) override
     {
         // TODO
     }

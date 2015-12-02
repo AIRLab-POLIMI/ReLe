@@ -149,7 +149,7 @@ public:
     }
     */
 
-    void trainFeatures(const InputC& input, const arma::vec& output) override
+    void trainFeatures(typename input_collection<InputC>::const_ref_type input, const arma::mat& output) override
     {
         switch (params.alg)
         {

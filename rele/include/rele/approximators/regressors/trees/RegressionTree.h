@@ -43,8 +43,8 @@ public:
                    const EmptyTreeNode<OutputC>& emptyNode,
                    unsigned int outputDimensions = 1,
                    unsigned int mNMin = 2) :
-            BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
-            root(nullptr), emptyNode(emptyNode), nMin(mNMin), phi(phi) //FIXME regressors interface
+        BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
+        root(nullptr), emptyNode(emptyNode), nMin(mNMin), phi(phi) //FIXME regressors interface
     {
 
     }
@@ -89,7 +89,8 @@ public:
     }
 
     virtual void train(const BatchData<InputC, OutputC>& dataset) override = 0;
-    virtual void trainFeatures(const InputC& input, const OutputC& output) override = 0;
+    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
+                               typename output_collection<OutputC>::const_ref_type output) override = 0;
 
     /**
      * Get the root of the tree

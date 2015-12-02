@@ -122,7 +122,8 @@ public:
             // Error function is computed
             J = arma::norm(Q - prevQ);
 
-        } while((iteration < maxiterations) && (J > epsilon));
+        }
+        while((iteration < maxiterations) && (J > epsilon));
 
         // Print info
         std::cout << "*********************************************************" << std::endl;

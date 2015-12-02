@@ -27,6 +27,7 @@
 #include "Basics.h"
 #include "BatchData.h"
 #include "Features.h"
+#include "BatchRegressorTraits.h"
 
 namespace ReLe
 {
@@ -106,7 +107,6 @@ public:
 };
 typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 
-
 template<class InputC, class OutputC, bool denseOutput=true>
 class BatchRegressor_ : public Regressor_<InputC, denseOutput>
 {
@@ -135,7 +135,8 @@ public:
         trainFeatures(features, outputs);
     }
 
-    virtual void trainFeatures(const InputC& input, const arma::vec& output) = 0;
+    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
+                               typename output_collection<OutputC>::const_ref_type output) = 0;
 
     virtual ~BatchRegressor_()
     {
