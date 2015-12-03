@@ -57,6 +57,35 @@ int main(int argc, char *argv[])
     cout << "numerical: " << numerical.t();
     cout << "error norm: " << norm(numerical - net.diff(input)) << endl;
 
+    //Train xor
+    BasisFunctions basisPlane = IdentityBasis::generate(1);
+    DenseFeatures phiPlane(basisPlane);
+
+    FFNeuralNetwork planeNet(phiPlane, 10, 1);
+    BatchDataPlain<arma::vec, arma::vec> datasetPlane;
+
+    //Config parameters
+    for(int i = -100; i < 100; i++)
+    {
+    	double f = i;
+    	arma::vec input = { f/100.0 };
+    	arma::vec output = { f/100.0 };
+    	datasetPlane.addSample(input, output);
+    }
+
+    planeNet.train(datasetPlane);
+
+    cout << "plane(1) = " << planeNet({1.0}) <<  endl;
+    cout << "plane(0.5) = " << planeNet({0.5}) << endl;
+    cout << "plane(0.3) = " << planeNet({0.3}) <<  endl;
+    cout << "plane(0) = " << planeNet({0.0}) << endl;
+    cout << "plane(-0.3) = " << planeNet({-0.3}) <<  endl;
+    cout << "plane(-0.5) = " << planeNet({-0.5}) << endl;
+    cout << "plane(-1.0) = " << planeNet({-1.0}) <<  endl;
+
+    cout << "J = " << planeNet.computeJ(datasetPlane, 0) << endl;
+
+
 
 
     //Train atan2

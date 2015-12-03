@@ -174,22 +174,22 @@ public:
 
     double computeJFeatures(typename input_collection<InputC>::const_ref_type input, const arma::mat& output, double lambda)
     {
-    	double J = 0;
-    	unsigned int nSamples = input.n_cols;
+        double J = 0;
+        unsigned int nSamples = input.n_cols;
 
-    	for(unsigned int i = 0; i < nSamples; i++)
-    	{
+        for(unsigned int i = 0; i < nSamples; i++)
+        {
             const arma::vec& x = input.col(i);
             const arma::vec& y = output.col(i);
 
             forwardComputation(x);
             arma::vec yhat = h.back();
             J += arma::norm(y - yhat);
-    	}
+        }
 
-    	J /= (2 * nSamples);
+        J /= (2 * nSamples);
 
-    	return J;
+        return J;
     }
 
     double computeJ(const BatchData<InputC, arma::vec>& dataset, double lambda)

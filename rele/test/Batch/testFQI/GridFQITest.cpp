@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
      */
     // BasisFunctions bfs = IdentityBasis::generate(2);
     BasisFunctions bfs;
-	bfs.push_back(new IdToGridBasis(8, 8, 7, 7));
+    bfs.push_back(new IdToGridBasis(8, 8, 7, 7));
 
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
@@ -143,31 +143,31 @@ int main(int argc, char *argv[])
     {
         for(auto& tr : episode)
         {
-        	bool found = false;
-        	for(unsigned int j = 0; j < Q.n_rows; j++)
-        	{
-        		for(unsigned int k = 0; k < Q.n_cols; k++)
-        		{
-        			if(tr.x == j && tr.u == k)
-        			{
-        				output(0, sample) = Q(j, k);
-        				found = true;
-        				sample++;
-        				break;
-        			}
-        		}
-        		if(found)
-        			break;
-        	}
+            bool found = false;
+            for(unsigned int j = 0; j < Q.n_rows; j++)
+            {
+                for(unsigned int k = 0; k < Q.n_cols; k++)
+                {
+                    if(tr.x == j && tr.u == k)
+                    {
+                        output(0, sample) = Q(j, k);
+                        found = true;
+                        sample++;
+                        break;
+                    }
+                }
+                if(found)
+                    break;
+            }
         }
     }
     nn.getHyperParameters().alpha = 0.5;
     nn.getHyperParameters().maxIterations = 10;
     nn.trainFeatures(input, output);
     arma::mat appr(1, nSamples, arma::fill::zeros);
-	computeApprQ(data, nn, appr);
-	cout << "Q-values found with Q-Learning: " << endl << output << endl;
-	cout << "Approximated Q-values: " << endl << appr << endl;
+    computeApprQ(data, nn, appr);
+    cout << "Q-values found with Q-Learning: " << endl << output << endl;
+    cout << "Approximated Q-values: " << endl << appr << endl;
     cout << "Error is: " << arma::norm(output - appr);
     // *****************************************************
 

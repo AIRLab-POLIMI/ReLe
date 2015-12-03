@@ -35,8 +35,8 @@ template<class InputC>
 class IdToGridBasis_ : public BasisFunction_<InputC>
 {
 public:
-	IdToGridBasis_(unsigned int gridRows, unsigned int gridCols, unsigned int goalRow, unsigned int goalCol) :
-		gridRows(gridRows), gridCols(gridCols), goalRow(goalRow), goalCol(goalCol)
+    IdToGridBasis_(unsigned int gridRows, unsigned int gridCols, unsigned int goalRow, unsigned int goalCol) :
+        gridRows(gridRows), gridCols(gridCols), goalRow(goalRow), goalCol(goalCol)
     {
     }
 
@@ -46,13 +46,13 @@ public:
 
     virtual double operator()(const InputC& input) override
     {
-    	double manDistance;
-    	unsigned int inputRow = floor(input(2) / gridCols);
-		unsigned int inputCol = fmod(input(2), gridCols);
+        double manDistance;
+        unsigned int inputRow = floor(input(2) / gridCols);
+        unsigned int inputCol = fmod(input(2), gridCols);
 
-		manDistance = abs(inputRow - goalRow) + abs(inputCol - goalCol);
+        manDistance = abs(inputRow - goalRow) + abs(inputCol - goalCol);
 
-    	return manDistance;
+        return manDistance;
     }
 
     virtual void writeOnStream(std::ostream& out) override
