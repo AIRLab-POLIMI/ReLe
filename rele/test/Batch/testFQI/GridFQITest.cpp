@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
      *  build a dataset from its exploration of the environment. The policy is
      *  a random policy, thus allowing pure exploration. */
     e_Greedy policy;
-    policy.setEpsilon(0.5);
+    policy.setEpsilon(0.3);
     policy.setNactions(nActions);
     // arma::mat Q(nStates, nActions);
     // policy.setQ(&Q);
@@ -116,69 +116,32 @@ int main(int argc, char *argv[])
         data.writeToStream(out);
     out.close();
 
-    cout << endl << "# Ended data collection and save" << endl;
+    cout << endl << "# Ended data collection and save" << endl << endl;
 
     /* The basis functions for the features of the regressor are created here.
      * IdentityBasis functions are features that simply replicate the input. We can use
      * Manhattan distance from s' to goal as feature of the input vector (state, action).
      */
-    // BasisFunctions bfs = IdentityBasis::generate(2);
     BasisFunctions bfs;
-    bfs.push_back(new IdToGridBasis(8, 8, 7, 7));
+    bfs = IdentityBasis::generate(2);
+    // bfs.push_back(new IdToGridBasis(8, 8, 7, 7));
 
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    FFNeuralNetwork nn(phi, 100, 1);
+    FFNeuralNetwork approximator(phi, 20, 1);
+    approximator.getHyperParameters().lambda = 0.5;
+    approximator.getHyperParameters().maxIterations = 20;
 
-
-    // NEURAL NETWORK TEST - REGRESSION ON Q-LEARNING VALUES
-    arma::mat input = data.featuresAsMatrix(phi);
-    unsigned int nSamples = input.n_cols;
-    arma::mat output(1, nSamples, arma::fill::zeros);
-    arma::mat Q = *policy.getQ();
-    unsigned int sample = 0;
-    for(auto& episode : data)
-    {
-        for(auto& tr : episode)
-        {
-            bool found = false;
-            for(unsigned int j = 0; j < Q.n_rows; j++)
-            {
-                for(unsigned int k = 0; k < Q.n_cols; k++)
-                {
-                    if(tr.x == j && tr.u == k)
-                    {
-                        output(0, sample) = Q(j, k);
-                        found = true;
-                        sample++;
-                        break;
-                    }
-                }
-                if(found)
-                    break;
-            }
-        }
-    }
-    nn.getHyperParameters().alpha = 0.5;
-    nn.getHyperParameters().maxIterations = 10;
-    nn.trainFeatures(input, output);
-    arma::mat appr(1, nSamples, arma::fill::zeros);
-    computeApprQ(data, nn, appr);
-    cout << "Q-values found with Q-Learning: " << endl << output << endl;
-    cout << "Approximated Q-values: " << endl << appr << endl;
-    cout << "Error is: " << arma::norm(output - appr);
-    // *****************************************************
-
-
-    /*
     // A FQI object is instantiated using the dataset and the regressor
-    FQI<FiniteState> fqi(data, nn, nActions, 0.9);
+    FQI<FiniteState> fqi(data, approximator, nActions, 0.9);
+
+    cout << "Starting FQI..." << endl;
 
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 3, 0.01);
-    */
+    fqi.run(phi, 100, 0.0001);
+
 
     return 0;
 }

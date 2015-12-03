@@ -55,7 +55,7 @@ public:
 
     }
 
-    void run(Features& phi, unsigned int maxiterations, double epsilon = 0.1)
+    void run(Features& phi, unsigned int maxiterations, double epsilon)
     {
         /*
          * This is the function to be called to run the FQI algorithm. It takes
@@ -88,8 +88,9 @@ public:
         {
             // Update and print the number of iterations
             ++iteration;
-            std::cout << "*********************************************************" << std::endl;
+            std::cout << std::endl << "*********************************************************" << std::endl;
             std::cout << "FQI iteration: " << iteration << std::endl;
+            std::cout << "*********************************************************" << std::endl;
 
             // Loop on each dataset sample (i.e. on each transition)
             unsigned int i = 0;
