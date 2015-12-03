@@ -58,6 +58,8 @@ void computeApprQ(Dataset<FiniteAction, FiniteState>& data, BatchRegressor& nn, 
 // This simple test is used to verify the correctness of the FQI implementation
 int main(int argc, char *argv[])
 {
+	bool acquireData = true;
+
     FileManager fm("gw", "FQI");
     fm.createDir();
     fm.cleanDir();
@@ -75,48 +77,58 @@ int main(int argc, char *argv[])
     /* This policy is used by an evaluation agent that has the purpose to
      *  build a dataset from its exploration of the environment. The policy is
      *  a random policy, thus allowing pure exploration. */
-    e_Greedy policy;
-    policy.setEpsilon(0.3);
-    policy.setNactions(nActions);
-    // arma::mat Q(nStates, nActions);
-    // policy.setQ(&Q);
+    Dataset<FiniteAction, FiniteState> data;
+    if(acquireData)
+    {
+		e_Greedy policy;
+		policy.setEpsilon(0);
+		policy.setNactions(nActions);
 
-    // The agent is instantiated. It takes the policy as parameter.
-    Q_Learning expert(policy);
-    // PolicyEvalAgent<FiniteAction, FiniteState> expert(policy);
+		// The agent is instantiated. It takes the policy as parameter.
+		Q_Learning expert(policy);
 
-    /* The Core class is what ReLe uses to move the agent in the MDP. It is
-     *  instantiated using the MDP and the agent itself. */
-    Core<FiniteAction, FiniteState> expertCore(mdp, expert);
+		/* The Core class is what ReLe uses to move the agent in the MDP. It is
+		 *  instantiated using the MDP and the agent itself. */
+		Core<FiniteAction, FiniteState> expertCore(mdp, expert);
 
-    /* The CollectorStrategy is used to collect data from the agent that is
-     *  moving in the MDP. Here, it is used to store the transition that are used
-     *  as the inputs of the dataset provided to FQI. */
-    CollectorStrategy<FiniteAction, FiniteState> collection;
-    expertCore.getSettings().loggerStrategy = &collection;
+		/* The CollectorStrategy is used to collect data from the agent that is
+		 *  moving in the MDP. Here, it is used to store the transition that are used
+		 *  as the inputs of the dataset provided to FQI. */
+		CollectorStrategy<FiniteAction, FiniteState> collection;
+		expertCore.getSettings().loggerStrategy = &collection;
 
-    // Number of transitions in an episode
-    unsigned int nTransitions = 50;
-    expertCore.getSettings().episodeLength = nTransitions;
-    // Number of episodes
-    unsigned int nEpisodes = 100;
-    expertCore.getSettings().episodeN = nEpisodes;
+		// Number of transitions in an episode
+		unsigned int nTransitions = 50;
+		expertCore.getSettings().episodeLength = nTransitions;
+		// Number of episodes
+		unsigned int nEpisodes = 100;
+		expertCore.getSettings().episodeN = nEpisodes;
 
-    /* The agent start the exploration that will last for the provided number of
-     *  episodes. */
-    expertCore.runEpisodes();
+		/* The agent start the exploration that will last for the provided number of
+		 *  episodes. */
+		expertCore.runEpisodes();
 
-    // The dataset is build from the data collected by the CollectorStrategy.
-    Dataset<FiniteAction, FiniteState>& data = collection.data;
+		// The dataset is build from the data collected by the CollectorStrategy.
+		data = collection.data;
 
-    // Dataset is written into a file
-    ofstream out(fm.addPath("dataset.csv"), ios_base::out);
-    out << std::setprecision(OS_PRECISION);
-    if(out.is_open())
-        data.writeToStream(out);
-    out.close();
+		// Dataset is written into a file
+		ofstream out(fm.addPath("dataset.csv"), ios_base::out);
+		out << std::setprecision(OS_PRECISION);
+		if(out.is_open())
+			data.writeToStream(out);
+		out.close();
 
-    cout << endl << "# Ended data collection and save" << endl << endl;
+		cout << endl << "# Ended data collection and save" << endl << endl;
+    }
+    else
+    {
+		// Dataset is loaded
+		ifstream in(fm.addPath("dataset.csv"), ios_base::in);
+		in >> std::setprecision(OS_PRECISION);
+		if(in.is_open())
+			data.readFromStream(in);
+		in.close();
+    }
 
     /* The basis functions for the features of the regressor are created here.
      * IdentityBasis functions are features that simply replicate the input. We can use
@@ -130,9 +142,9 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    FFNeuralNetwork approximator(phi, 20, 1);
+    FFNeuralNetwork approximator(phi, 10, 1);
     approximator.getHyperParameters().lambda = 0.5;
-    approximator.getHyperParameters().maxIterations = 20;
+    approximator.getHyperParameters().maxIterations = 10;
 
     // A FQI object is instantiated using the dataset and the regressor
     FQI<FiniteState> fqi(data, approximator, nActions, 0.9);
@@ -140,7 +152,7 @@ int main(int argc, char *argv[])
     cout << "Starting FQI..." << endl;
 
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 100, 0.0001);
+    fqi.run(phi, 1000, 0.00000001);
 
 
     return 0;
