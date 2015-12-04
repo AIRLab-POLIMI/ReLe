@@ -78,20 +78,27 @@ public:
         // This vector is used for the terminal condition evaluation
         Q.zeros(input.n_cols);
 
-        double J1;
-        double J2;
-
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
         arma::vec prevQ = Q;
         computeQ(data);
-        J1 = arma::norm(Q - prevQ);
-        unsigned int iteration = 1;
+        double J1 = arma::norm(Q - prevQ);
+        double J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
+
+        unsigned int iteration = 0;
+        std::cout << std::endl << "*********************************************************" << std::endl;
+        std::cout << "FQI iteration: " << iteration << std::endl;
+        std::cout << "*********************************************************" << std::endl;
+        std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
+        std::cout << "Approximated Q-values: " << std::endl << Q.rows(1, 40).t() << std::endl;
+        std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
+        std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
+
         // Main FQI loop
         while(iteration < maxiterations && J1 > epsilon)
         {
             // Update and print the number of iterations
-            ++iteration;
+            iteration++;
             std::cout << std::endl << "*********************************************************" << std::endl;
             std::cout << "FQI iteration: " << iteration << std::endl;
             std::cout << "*********************************************************" << std::endl;

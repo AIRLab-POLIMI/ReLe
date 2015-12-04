@@ -148,13 +148,12 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    //FFNeuralNetwork approximator(phi, 50, 1);
-    //approximator.getHyperParameters().lambda = 0.5;
-    //approximator.getHyperParameters().maxIterations = 20;
-
-    arma::vec defaultValue = {0};
-    EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    ExtraTree<arma::vec, arma::vec> approximator(phi, defaultNode);
+    FFNeuralNetwork approximator(phi, 50, 1);
+    approximator.getHyperParameters().lambda = 0.3;
+    approximator.getHyperParameters().maxIterations = 50;
+    // arma::vec defaultValue = {0};
+    // EmptyTreeNode<arma::vec> defaultNode(defaultValue);
+    // ExtraTree<arma::vec, arma::vec> approximator(phi, defaultNode);
 
     // A FQI object is instantiated using the dataset and the regressor
     FQI<FiniteState> fqi(data, approximator, nActions, 0.9);
