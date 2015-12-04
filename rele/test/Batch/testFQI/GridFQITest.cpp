@@ -138,36 +138,6 @@ int main(int argc, char *argv[])
         in.close();
     }
 
-    /* For each (state, action) in the dataset, load the Q-Value
-     * found with Q-Learning. The Q-Values vector is used as
-     * a comparison measure for the Q-Values found by FQI.
-     */
-    arma::vec Q_vec(data.getTransitionsNumber(), arma::fill::zeros);
-    bool found;
-    unsigned int sample = 0;
-    for(auto& episode : data)
-    {
-        for(auto& tr: episode)
-        {
-            found = false;
-            for(unsigned int i = 0; i < nStates; i++)
-            {
-                for(unsigned int j = 0; j < nActions; j++)
-                {
-                    if(i == tr.x.getStateN() && j == tr.u.getActionN())
-                    {
-                        Q_vec(sample) = Q(i, j);
-                        sample++;
-                        found = true;
-                        break;
-                    }
-                }
-                if(found)
-                    break;
-            }
-        }
-    }
-
     /* The basis functions for the features of the regressor are created here.
      * IdentityBasis functions are features that simply replicate the input. We can use
      * Manhattan distance from s' to goal as feature of the input vector (state, action).
@@ -193,7 +163,6 @@ int main(int argc, char *argv[])
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 1000, 1e-5, Q_vec);
-
+    fqi.run(phi, 1000, 1e-5);
     return 0;
 }

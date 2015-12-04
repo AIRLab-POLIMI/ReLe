@@ -54,7 +54,7 @@ public:
 
     }
 
-    void run(Features& phi, unsigned int maxiterations, double epsilon, arma::vec QLearningQ)
+    void run(Features& phi, unsigned int maxiterations, double epsilon)
     {
         /* This is the function to be called to run the FQI algorithm. It takes
          * the features phi that are used to compute the input of the regressor.
@@ -80,7 +80,6 @@ public:
 
         double J1;
         double J2;
-        double J3;
 
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
@@ -133,16 +132,11 @@ public:
             // Error function is computed
             J1 = arma::norm(Q - prevQ);
             J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
-            J3 = arma::norm(Q - QLearningQ);
 
             std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
             std::cout << "Approximated Q-values: " << std::endl << Q.rows(1, 40).t() << std::endl;
-            std::cout << "Q-values of Q-Learning: " << std::endl << QLearningQ.rows(1, 40).t() << std:: endl;
             std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
             std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
-            std::cout << "Q_hat - QLearningQ: " << J3 << std::endl;
-            std::cout << "norm Q: " << arma::norm(Q) << std::endl;
-            std::cout << "norm Q: " << arma::norm(output) << std::endl;
         }
 
         // Print info
