@@ -76,7 +76,7 @@ public:
          */
         arma::mat output(1, input.n_cols, arma::fill::zeros);
         // This vector is used for the terminal condition evaluation
-        Q.zeros(input.n_cols);
+        QHat.zeros(input.n_cols);
 
         /* First iteration of FQI is performed here training
          * the regressor with a dataset that has the rewards as
@@ -86,7 +86,7 @@ public:
         QRegressor.trainFeatures(featureDatasetStart);
 
         // Initial Q is stored before update
-        arma::vec prevQ = Q;
+        arma::vec prevQHat = QHat;
 
         // Update Q
         computeQ(data);
@@ -94,11 +94,11 @@ public:
         /* Evaluate the distance between the previous approximation of Q
          * and the current one.
          */
-        double J1 = arma::norm(Q - prevQ);
+        double J1 = arma::norm(QHat - prevQHat);
         /* Evaluate the error mean squared error between the current approximation
          * of Q and the target output in the dataset.
          */
-        double J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
+        double J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
 
         unsigned int iteration = 0;
         // Print info
@@ -106,7 +106,7 @@ public:
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
         std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
-        std::cout << "Approximated Q-values: " << std::endl << Q.rows(1, 40).t() << std::endl;
+        std::cout << "Approximated Q-values: " << std::endl << QHat.rows(1, 40).t() << std::endl;
         std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
         std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
 
@@ -151,7 +151,7 @@ public:
             BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
             QRegressor.trainFeatures(featureDataset);
             // Previous Q approximated values are stored
-            prevQ = Q;
+            prevQHat = QHat;
             /* New Q values are computed using the regressor trained with the
              * new output values.
              */
@@ -159,15 +159,15 @@ public:
             /* Evaluate the distance between the previous approximation of Q
              * and the current one.
              */
-            J1 = arma::norm(Q - prevQ);
+            J1 = arma::norm(QHat - prevQHat);
             /* Evaluate the error mean squared error between the current approximation
              * of Q and the target output in the dataset.
              */
-            J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
+            J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
 
             // Print info
             std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
-            std::cout << "Approximated Q-values: " << std::endl << Q.rows(1, 40).t() << std::endl;
+            std::cout << "Approximated Q-values: " << std::endl << QHat.rows(1, 40).t() << std::endl;
             std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
             std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
         }
@@ -194,7 +194,7 @@ public:
         {
             for(auto& tr : episode)
             {
-                Q(i) = arma::as_scalar(QRegressor(tr.x, tr.u));
+                QHat(i) = arma::as_scalar(QRegressor(tr.x, tr.u));
                 i++;
             }
         }
@@ -202,7 +202,7 @@ public:
 
 protected:
     Dataset<FiniteAction, StateC>& data;
-    arma::vec Q;
+    arma::vec QHat;
     BatchRegressor& QRegressor;
     unsigned int nActions;
     double gamma;
