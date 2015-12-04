@@ -271,6 +271,9 @@ private:
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
         if (bestScore < scoreThreshold)
         {
+        	delete leftDs;
+        	delete rightDs;
+
             return this->buildLeaf(ds, leafType);
         }
         else
@@ -306,6 +309,10 @@ private:
                 }
             }
 #endif
+
+            delete leftDs;
+        	delete rightDs;
+
             //return the current node
             return new InternalTreeNode<OutputC>(bestAttribute, bestSplit, left, right);
         }
