@@ -34,6 +34,7 @@
 #include "basis/IdentityBasis.h"
 #include "IdToGridBasis.h"
 #include "regressors/KDTree.h"
+#include "regressors/ExtraTree.h"
 
 #include <iostream>
 
@@ -80,7 +81,6 @@ int main(int argc, char *argv[])
      *  a random policy, thus allowing pure exploration.
      */
     Dataset<FiniteAction, FiniteState> data;
-    arma::mat Q;
     if(acquireData)
     {
         e_Greedy policy;
@@ -125,8 +125,6 @@ int main(int argc, char *argv[])
         out.close();
 
         cout << endl << "# Ended data collection and save" << endl << endl;
-
-        Q = *policy.getQ();
     }
     else
     {
@@ -156,7 +154,7 @@ int main(int argc, char *argv[])
 
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    KDTree<arma::vec, arma::vec> approximator(phi, defaultNode, 1, 1);
+    ExtraTree<arma::vec, arma::vec> approximator(phi, defaultNode);
 
     // A FQI object is instantiated using the dataset and the regressor
     FQI<FiniteState> fqi(data, approximator, nActions, 0.9);

@@ -233,16 +233,16 @@ private:
         int bestAttribute = candidates[0]; //best attribute (indicated by number) found
         double bestSplit = pickRandomSplit(ds, candidates[0]); //best split value
 
-        // split inputs in two subsets
         arma::uvec indexesLeftBest;
         arma::uvec indexesRightBest;
 
+        // split inputs in two subsets
         this->splitDataset(ds, bestAttribute, bestSplit, indexesLeftBest, indexesRightBest);
 
-        MiniBatchData<InputC, OutputC> leftDs(ds, indexesLeftBest);
-        MiniBatchData<InputC, OutputC> rightDs(ds, indexesRightBest);
+        BatchData<InputC, OutputC>* leftDs = ds.cloneSubset(indexesLeftBest);
+        BatchData<InputC, OutputC>* rightDs = ds.cloneSubset(indexesRightBest);
 
-        double bestScore = score(ds, leftDs, rightDs);
+        double bestScore = score(ds, *leftDs, *rightDs);
 
         //generates remaining splits and overwrites the actual best if better one is found
         for (unsigned int c = 1; c < candidates_size; c++)
@@ -253,9 +253,7 @@ private:
             arma::uvec indexesRight;
             this->splitDataset(ds, candidates[c], split, indexesLeft, indexesRight);
 
-            leftDs.setIndexes(indexesLeft);
-            rightDs.setIndexes(indexesRight);
-            double s = score(ds, leftDs, rightDs);
+            double s = score(ds, *leftDs, *rightDs);
 
             //check if a better split was found
             if (s > bestScore)
@@ -269,8 +267,6 @@ private:
         }
 
         //get the best split of two datasets
-        leftDs.setIndexes(indexesLeftBest);
-        rightDs.setIndexes(indexesRightBest);
 
         //    cout << "Best: " << bestattribute << " " << bestscore << " " << mScoreThreshold << endl;
         if (bestScore < scoreThreshold)
@@ -281,7 +277,7 @@ private:
         {
             if (computeFeaturerelevance)
             {
-                double variance_reduction = varianceReduction(ds, leftDs, rightDs);
+                double variance_reduction = varianceReduction(ds, *leftDs, *rightDs);
                 variance_reduction *= ds.size() * arma::det(ds.getVariance()); //TODO check
 #ifdef FEATURE_PROPAGATION
                 mSplittedAttributes.insert(bestAttribute);
@@ -297,8 +293,8 @@ private:
             }
 
             //build the left and the right children
-            TreeNode<OutputC>* left = buildExtraTree(leftDs);
-            TreeNode<OutputC>* right = buildExtraTree(rightDs);
+            TreeNode<OutputC>* left = buildExtraTree(*leftDs);
+            TreeNode<OutputC>* right = buildExtraTree(*rightDs);
 
 #ifdef FEATURE_PROPAGATION
             if (featureRelevance != NULL)
