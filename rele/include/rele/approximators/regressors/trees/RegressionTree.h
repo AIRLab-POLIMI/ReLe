@@ -42,9 +42,9 @@ public:
     RegressionTree(Features_<InputC>& phi,
                    const EmptyTreeNode<OutputC>& emptyNode,
                    unsigned int outputDimensions = 1,
-                   unsigned int mNMin = 2) :
+                   unsigned int nMin = 2) :
         BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
-        root(nullptr), emptyNode(emptyNode), nMin(mNMin), phi(phi) //FIXME regressors interface
+        root(nullptr), emptyNode(emptyNode), nMin(nMin), phi(phi) //FIXME regressors interface
     {
 
     }

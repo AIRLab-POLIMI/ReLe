@@ -191,7 +191,7 @@ public:
 
         unsigned int rewardSize = getRewardSize();
         unsigned int nTransitions = getTransitionsNumber();
-        arma::mat rewards(nTransitions, rewardSize);
+        arma::mat rewards(rewardSize, nTransitions);
 
         unsigned int idx = 0;
 
@@ -199,7 +199,8 @@ public:
         {
             for(auto& tr : episode)
             {
-                rewards(idx) = tr.r[0];
+            	for(unsigned int i = 0; i < rewardSize; i++)
+            		rewards(i, idx) = tr.r[i];
                 idx++;
             }
         }

@@ -57,12 +57,14 @@ public:
     virtual BatchData* clone() const = 0;
     virtual BatchData* cloneSubset(const arma::uvec& indexes) const = 0;
 
+    // FIXME: to reimplement
     const BatchData* getMiniBatch(unsigned int mSize) const
     {
-        if(mSize >= size())
+
+        /*if(mSize >= size())
         {
             return new MiniBatchData<InputC, OutputC>(this);
-        }
+        }*/
 
         std::set<unsigned int> indexesSet;
         arma::uvec indexes(mSize);
@@ -158,21 +160,6 @@ public:
 
     }
 
-    MiniBatchData(const BatchData<InputC, OutputC>* data) :
-        data(*data)
-
-    {
-
-    }
-
-    MiniBatchData(const BatchData<InputC, OutputC>& data) :
-        data(data)
-
-    {
-
-    }
-
-
     virtual BatchData<InputC, OutputC>* clone() const override
     {
         return new MiniBatchData<InputC, OutputC>(data, indexes);
@@ -186,27 +173,18 @@ public:
 
     virtual InputC getInput(unsigned int index) const override
     {
-        if(indexes.size() == 0)
-            return data.getInput(index);
-
         unsigned int realIndex = indexes(index);
         return data.getInput(realIndex);
     }
 
     virtual OutputC getOutput(unsigned int index) const override
     {
-        if(indexes.n_elem == 0)
-            return data.getOutput(index);
-
         unsigned int realIndex = indexes(index);
         return data.getOutput(realIndex);
     }
 
     virtual size_t size() const override
     {
-        if(indexes.n_elem == 0)
-            return data.size();
-
         return indexes.n_elem;
     }
 
@@ -256,14 +234,7 @@ public:
 
     virtual BatchData<InputC, OutputC>* cloneSubset(const arma::uvec& indexes) const override
     {
-        BatchDataPlain<InputC, OutputC>* subsetDataset = new BatchDataPlain<InputC, OutputC>();
-
-        for(auto i : indexes)
-        {
-            subsetDataset->addSample(getInput(i), getOutput(i));
-        }
-
-        return subsetDataset;
+        return new MiniBatchData<InputC, OutputC>(this, indexes);
     }
 
     void addSample(const InputC& input, const OutputC& output)
@@ -324,7 +295,7 @@ public:
 
     virtual BatchData<InputC, OutputC>* cloneSubset(const arma::uvec& indexes) const override
     {
-        return new BatchDataFeatures<InputC, OutputC>(features.cols(indexes), outputs.cols(indexes));
+        return new MiniBatchData<InputC, OutputC>(this, indexes);
     }
 
     virtual InputC getInput(unsigned int index) const override
@@ -334,7 +305,7 @@ public:
 
     virtual OutputC getOutput(unsigned int index) const override
     {
-        return outputs.col(index);
+    	return outputs.col(index);
     }
 
     FeaturesCollection getOutputs()

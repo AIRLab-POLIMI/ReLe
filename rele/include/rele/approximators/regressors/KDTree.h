@@ -58,8 +58,8 @@ public:
      * @param nm nmin, the minimum number of tuples for splitting
      */
     KDTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
-           unsigned int output_size = 1, unsigned int nm = 2)
-        : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nm)
+           unsigned int output_size = 1, unsigned int nMin = 2)
+        : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nMin)
     {
 
     }
@@ -195,12 +195,15 @@ private:
         // split inputs in two subsets
         this->splitDataset(ds, cutDir, cutPoint, indexesLow, indexesHigh);
 
-        MiniBatchData<InputC, OutputC> lowEx(ds, indexesLow);
-        MiniBatchData<InputC, OutputC> highEx(ds, indexesHigh);
+        BatchData<InputC, OutputC>* lowEx = ds.cloneSubset(indexesLow);
+        BatchData<InputC, OutputC>* highEx = ds.cloneSubset(indexesHigh);
 
         // recall the method for left and right child
-        TreeNode<OutputC>* left = buildKDTree(lowEx, (cutDir + 1) % phi.rows(), store_sample);
-        TreeNode<OutputC>* right = buildKDTree(highEx, (cutDir + 1) % phi.rows(), store_sample);
+        TreeNode<OutputC>* left = buildKDTree(*lowEx, (cutDir + 1) % phi.rows(), store_sample);
+        TreeNode<OutputC>* right = buildKDTree(*highEx, (cutDir + 1) % phi.rows(), store_sample);
+
+        delete lowEx;
+        delete highEx;
 
         // return the current node
         return new InternalTreeNode<OutputC>(cutDir, cutPoint, left, right);

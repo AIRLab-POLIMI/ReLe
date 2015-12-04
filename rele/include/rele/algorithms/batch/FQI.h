@@ -67,7 +67,7 @@ public:
             nSamples += data[k].size();
 
         // Rewards are extracted from the dataset
-        arma::vec&& rewards = data.rewardAsMatrix();
+        arma::mat rewards = data.rewardAsMatrix();
         // Input of the regressor are computed using provided features
         arma::mat input = data.featuresAsMatrix(phi);
         /* Output vector is initialized. It will contain the Q values, found
@@ -82,9 +82,14 @@ public:
         double J2;
         double J3;
 
-        unsigned int iteration = 0;
+        BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
+        QRegressor.trainFeatures(featureDatasetStart);
+        arma::vec prevQ = Q;
+        computeQ(data);
+        J1 = arma::norm(Q - prevQ);
+        unsigned int iteration = 1;
         // Main FQI loop
-        do
+        while(iteration < maxiterations && J1 > epsilon)
         {
             // Update and print the number of iterations
             ++iteration;
@@ -111,7 +116,7 @@ public:
                      * Q_xn. The optimal Bellman equation can be computed
                      * finding the maximum value inside Q_xn.
                      */
-                    output(i) = rewards(i) + gamma * arma::max(Q_xn);
+                    output(i) = rewards(0, i) + gamma * arma::max(Q_xn);
                     i++;
                 }
             }
@@ -120,24 +125,25 @@ public:
             BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
             QRegressor.trainFeatures(featureDataset);
             // Previous Q approximated values are stored
-            arma::vec prevQ = Q;
+            prevQ = Q;
             /* New Q values are computed using the regressor trained with the
              * new output values.
              */
             computeQ(data);
             // Error function is computed
             J1 = arma::norm(Q - prevQ);
-            J2 = arma::norm(Q - output.t());
+            J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
             J3 = arma::norm(Q - QLearningQ);
 
-            std::cout << "Bellman Q-values: " << std::endl << output << std::endl;
-            std::cout << "Approximated Q-values: " << std::endl << Q.t() << std::endl;
-            std::cout << "Q-values of Q-Learning: " << std::endl << QLearningQ.t() << std:: endl;
+            std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
+            std::cout << "Approximated Q-values: " << std::endl << Q.rows(1, 40).t() << std::endl;
+            std::cout << "Q-values of Q-Learning: " << std::endl << QLearningQ.rows(1, 40).t() << std:: endl;
             std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
             std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
             std::cout << "Q_hat - QLearningQ: " << J3 << std::endl;
+            std::cout << "norm Q: " << arma::norm(Q) << std::endl;
+            std::cout << "norm Q: " << arma::norm(output) << std::endl;
         }
-        while((iteration < maxiterations) && (J1 > epsilon));
 
         // Print info
         std::cout << "*********************************************************" << std::endl;
