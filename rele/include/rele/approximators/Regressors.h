@@ -27,7 +27,6 @@
 #include "Basics.h"
 #include "BatchData.h"
 #include "Features.h"
-#include "BatchRegressorTraits.h"
 
 namespace ReLe
 {
@@ -123,6 +122,8 @@ public:
     {
         unsigned int N = dataset.size();
 
+        // FIXME: use trait
+
         //compute features matrix
         arma::mat features(phi.rows(), N);
         arma::mat outputs(this->outputDimension, N);
@@ -132,11 +133,11 @@ public:
             outputs.col(i) = dataset.getOutput(i);
         }
 
-        trainFeatures(features, outputs);
+        BatchDataFeatures<InputC, OutputC> featureDataset(features, outputs);
+        trainFeatures(featureDataset);
     }
 
-    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
-                               typename output_collection<OutputC>::const_ref_type output) = 0;
+    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) = 0;
 
     virtual ~BatchRegressor_()
     {

@@ -93,25 +93,12 @@ public:
         nMin = nm;
     }
 
-    /**
-     * Builds an approximation model for the training set with parallel threads
-     * @param  data The training set
-     * @param   overwrite When several training steps are run on the same inputs,
-                          it can be more efficient to reuse some structures.
-                          This can be done by setting this parameter to false
-     */
-    virtual void train(const BatchData<InputC, OutputC>& dataset) override
+    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override
     {
         for(auto tree : ensemble)
         {
-            tree->train(dataset);
+            tree->trainFeatures(featureDataset);
         }
-    }
-
-    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
-                               typename output_collection<OutputC>::const_ref_type output) override
-    {
-        // TODO
     }
 
     /**

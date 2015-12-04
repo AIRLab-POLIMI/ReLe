@@ -124,47 +124,22 @@ public:
         return paramSize;
     }
 
-    /*
-    void train(const BatchData<InputC, arma::vec>& dataset) override
-    {
-        assert(dataset.size() > 0);
-
-        switch (params.alg)
-        {
-        case GradientDescend:
-            gradientDescend(dataset);
-            break;
-
-        case StochasticGradientDescend:
-            stochasticGradientDescend(dataset);
-            break;
-
-        case Adadelta:
-            adadelta(dataset);
-            break;
-
-        default:
-            break;
-        }
-    }
-    */
-
-    void trainFeatures(typename input_collection<InputC>::const_ref_type input, const arma::mat& output) override
+    void trainFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset) override
     {
         switch (params.alg)
         {
         case GradientDescend:
-            gradientDescend(input, output);
+            gradientDescend(featureDataset);
             break;
 
         case StochasticGradientDescend:
             // FIXME
-            // stochasticGradientDescend(input, output);
+            // stochasticGradientDescend(featureDataset);
             break;
 
         case Adadelta:
             // FIXME
-            // adadelta(input, output);
+            // adadelta(featureDataset);
             break;
 
         default:
@@ -172,15 +147,15 @@ public:
         }
     }
 
-    double computeJFeatures(typename input_collection<InputC>::const_ref_type input, const arma::mat& output, double lambda)
+    double computeJFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset, double lambda)
     {
         double J = 0;
-        unsigned int nSamples = input.n_cols;
+        unsigned int nSamples = featureDataset.size();
 
         for(unsigned int i = 0; i < nSamples; i++)
         {
-            const arma::vec& x = input.col(i);
-            const arma::vec& y = output.col(i);
+            const arma::vec& x = featureDataset.getInput(i);
+            const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
             arma::vec yhat = h.back();
@@ -319,38 +294,22 @@ private:
         return gradW;
     }
 
-    void computeGradient(typename input_collection<InputC>::const_ref_type input, const arma::mat& output,
+    void computeGradient(BatchDataFeatures<InputC, arma::vec>& featureDataset,
                          double lambda, arma::vec& g)
     {
         g.zeros();
 
-        /*
-        for (unsigned int i = 0; i < dataset.size(); i++)
+        for(unsigned int i = 0; i < featureDataset.size(); i++)
         {
-            const InputC& x = dataset.getInput(i);
-            const arma::vec& y = dataset.getOutput(i);
-            forwardComputation(x);
-            arma::vec yhat = h.back();
-            arma::vec gs = yhat - y;
-            g += backPropagation(gs);
-        }
-
-        g /= static_cast<double>(dataset.size());
-
-        g += lambda*Omega->diff(*w);
-        */
-
-        for(unsigned int i = 0; i < output.size(); i++)
-        {
-            const arma::vec& x = input.col(i);
-            const arma::vec& y = output.col(i);
+            const arma::vec& x = featureDataset.getInput(i);
+            const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
             arma::vec yhat = h.back();
             arma::vec gs = yhat - y;
             g += backPropagation(gs);
         }
-        g /= static_cast<double>(output.size());
+        g /= static_cast<double>(featureDataset.size());
         g += lambda*Omega->diff(*w);
     }
 
@@ -388,21 +347,20 @@ private:
 
 private:
 
-    // void gradientDescend(const BatchData<InputC, arma::vec>& dataset)
-    void gradientDescend(typename input_collection<InputC>::const_ref_type input, const arma::mat& output)
+    void gradientDescend(BatchDataFeatures<InputC, arma::vec>& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
 
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
-            // computeGradient(dataset, params.lambda, g);
-            computeGradient(input, output, params.lambda, g);
+            computeGradient(featureDataset, params.lambda, g);
             w -= params.alpha * g;
         }
     }
 
-    void stochasticGradientDescend(const BatchData<InputC, arma::vec>& dataset)
+    /* FIXME: Implement
+    void stochasticGradientDescend(BatchDataFeatures<InputC, arma::vec>& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
@@ -445,6 +403,7 @@ private:
         }
 
     }
+    */
 
     inline arma::mat& W(unsigned int layer)
     {

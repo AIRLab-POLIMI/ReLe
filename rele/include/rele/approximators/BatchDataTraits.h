@@ -21,13 +21,15 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_APPROXIMATORS_BATCHREGRESSORTRAITS_H_
-#define INCLUDE_RELE_APPROXIMATORS_BATCHREGRESSORTRAITS_H_
+#ifndef INCLUDE_RELE_APPROXIMATORS_BATCHDATATRAITS_H_
+#define INCLUDE_RELE_APPROXIMATORS_BATCHDATATRAITS_H_
 
 #include "Basics.h"
 
 namespace ReLe
 {
+
+/* Traits to handle collections */
 template<class InputC>
 struct input_collection
 {
@@ -76,7 +78,55 @@ struct output_collection<arma::vec>
     typedef typename std::add_lvalue_reference<const arma::mat>::type const_ref_type;
 };
 
+/* Traits to handle output */
+template<class OutputC>
+struct output_traits
+{
+    static arma::mat square(const OutputC& o)
+    {
+        return arma::mat();
+    }
+
+    static bool isAlmostEqual(const OutputC& o1, const OutputC& o2)
+    {
+        return o1 == o2;
+    }
+
+};
+
+template<>
+struct output_traits<arma::vec>
+{
+    static arma::mat square(const arma::vec& o)
+    {
+        return o*o.t();
+    }
+
+    static bool isAlmostEqual(const arma::vec& o1, const arma::vec& o2)
+    {
+        return arma::norm(o1 - o2) < 1e-7;
+    }
+
+};
+
+template<>
+struct output_traits<unsigned int>
+{
+    static arma::mat square(const unsigned int& o)
+    {
+        arma::mat m;
+        m = o*o;
+        return m;
+    }
+
+    static bool isAlmostEqual(const unsigned int& o1, const unsigned int& o2)
+    {
+        return std::abs(o1 - o2) < 1e-7;
+    }
+};
+
+
 
 }
 
-#endif /* INCLUDE_RELE_APPROXIMATORS_BATCHREGRESSORTRAITS_H_ */
+#endif /* INCLUDE_RELE_APPROXIMATORS_BATCHDATATRAITS_H_ */

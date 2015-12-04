@@ -88,9 +88,7 @@ public:
         return nMin;
     }
 
-    virtual void train(const BatchData<InputC, OutputC>& dataset) override = 0;
-    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
-                               typename output_collection<OutputC>::const_ref_type output) override = 0;
+    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override = 0;
 
     /**
      * Get the root of the tree
@@ -115,9 +113,14 @@ protected:
 
     void splitDataset(const BatchData<InputC, OutputC>& ds,
                       int cutDir, double cutPoint,
-                      std::vector<unsigned int>& indexesLow,
-                      std::vector<unsigned int>& indexesHigh)
+                      arma::uvec& indexesLow,
+                      arma::uvec& indexesHigh)
     {
+        indexesLow.set_size(ds.size());
+        indexesHigh.set_size(ds.size());
+        unsigned int lowNumber = 0;
+        unsigned int highNumber = 0;
+
         // split inputs in two subsets
         for (unsigned int i = 0; i < ds.size(); i++)
         {
@@ -126,13 +129,18 @@ protected:
 
             if (tmp < cutPoint)
             {
-                indexesLow.push_back(i);
+                indexesLow(lowNumber) = i;
+                lowNumber++;
             }
             else
             {
-                indexesHigh.push_back(i);
+                indexesHigh(highNumber) = i;
+                highNumber++;
             }
         }
+
+        indexesLow.resize(lowNumber);
+        indexesHigh.resize(highNumber);
     }
 
     TreeNode<OutputC>* buildLeaf(const BatchData<InputC, OutputC>& ds, LeafType type)

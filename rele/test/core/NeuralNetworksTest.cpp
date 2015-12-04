@@ -67,10 +67,10 @@ int main(int argc, char *argv[])
     //Config parameters
     for(int i = -100; i < 100; i++)
     {
-    	double f = i;
-    	arma::vec input = { f/100.0 };
-    	arma::vec output = { f/100.0 };
-    	datasetPlane.addSample(input, output);
+        double f = i;
+        arma::vec input = { f/100.0 };
+        arma::vec output = { f/100.0 };
+        datasetPlane.addSample(input, output);
     }
 
     planeNet.train(datasetPlane);

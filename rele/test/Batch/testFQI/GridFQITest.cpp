@@ -58,7 +58,7 @@ void computeApprQ(Dataset<FiniteAction, FiniteState>& data, BatchRegressor& nn, 
 // This simple test is used to verify the correctness of the FQI implementation
 int main(int argc, char *argv[])
 {
-	bool acquireData = true;
+    bool acquireData = true;
 
     FileManager fm("gw", "FQI");
     fm.createDir();
@@ -80,54 +80,54 @@ int main(int argc, char *argv[])
     Dataset<FiniteAction, FiniteState> data;
     if(acquireData)
     {
-		e_Greedy policy;
-		policy.setEpsilon(0);
-		policy.setNactions(nActions);
+        e_Greedy policy;
+        policy.setEpsilon(0);
+        policy.setNactions(nActions);
 
-		// The agent is instantiated. It takes the policy as parameter.
-		Q_Learning expert(policy);
+        // The agent is instantiated. It takes the policy as parameter.
+        Q_Learning expert(policy);
 
-		/* The Core class is what ReLe uses to move the agent in the MDP. It is
-		 *  instantiated using the MDP and the agent itself. */
-		Core<FiniteAction, FiniteState> expertCore(mdp, expert);
+        /* The Core class is what ReLe uses to move the agent in the MDP. It is
+         *  instantiated using the MDP and the agent itself. */
+        Core<FiniteAction, FiniteState> expertCore(mdp, expert);
 
-		/* The CollectorStrategy is used to collect data from the agent that is
-		 *  moving in the MDP. Here, it is used to store the transition that are used
-		 *  as the inputs of the dataset provided to FQI. */
-		CollectorStrategy<FiniteAction, FiniteState> collection;
-		expertCore.getSettings().loggerStrategy = &collection;
+        /* The CollectorStrategy is used to collect data from the agent that is
+         *  moving in the MDP. Here, it is used to store the transition that are used
+         *  as the inputs of the dataset provided to FQI. */
+        CollectorStrategy<FiniteAction, FiniteState> collection;
+        expertCore.getSettings().loggerStrategy = &collection;
 
-		// Number of transitions in an episode
-		unsigned int nTransitions = 50;
-		expertCore.getSettings().episodeLength = nTransitions;
-		// Number of episodes
-		unsigned int nEpisodes = 100;
-		expertCore.getSettings().episodeN = nEpisodes;
+        // Number of transitions in an episode
+        unsigned int nTransitions = 50;
+        expertCore.getSettings().episodeLength = nTransitions;
+        // Number of episodes
+        unsigned int nEpisodes = 100;
+        expertCore.getSettings().episodeN = nEpisodes;
 
-		/* The agent start the exploration that will last for the provided number of
-		 *  episodes. */
-		expertCore.runEpisodes();
+        /* The agent start the exploration that will last for the provided number of
+         *  episodes. */
+        expertCore.runEpisodes();
 
-		// The dataset is build from the data collected by the CollectorStrategy.
-		data = collection.data;
+        // The dataset is build from the data collected by the CollectorStrategy.
+        data = collection.data;
 
-		// Dataset is written into a file
-		ofstream out(fm.addPath("dataset.csv"), ios_base::out);
-		out << std::setprecision(OS_PRECISION);
-		if(out.is_open())
-			data.writeToStream(out);
-		out.close();
+        // Dataset is written into a file
+        ofstream out(fm.addPath("dataset.csv"), ios_base::out);
+        out << std::setprecision(OS_PRECISION);
+        if(out.is_open())
+            data.writeToStream(out);
+        out.close();
 
-		cout << endl << "# Ended data collection and save" << endl << endl;
+        cout << endl << "# Ended data collection and save" << endl << endl;
     }
     else
     {
-		// Dataset is loaded
-		ifstream in(fm.addPath("dataset.csv"), ios_base::in);
-		in >> std::setprecision(OS_PRECISION);
-		if(in.is_open())
-			data.readFromStream(in);
-		in.close();
+        // Dataset is loaded
+        ifstream in(fm.addPath("dataset.csv"), ios_base::in);
+        in >> std::setprecision(OS_PRECISION);
+        if(in.is_open())
+            data.readFromStream(in);
+        in.close();
     }
 
     /* The basis functions for the features of the regressor are created here.

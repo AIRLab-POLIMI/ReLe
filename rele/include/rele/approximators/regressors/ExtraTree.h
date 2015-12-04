@@ -86,23 +86,10 @@ public:
         featureRelevance.resize(phi.rows(), 0.0);
     }
 
-    /**
-     * Builds an approximation model for the training set
-     * @param  data The training set
-     * @param   overwrite When several training steps are run on the same inputs,
-     it can be more efficient to reuse some structures.
-     This can be done by setting this parameter to false
-     */
-    virtual void train(const BatchData<InputC, OutputC>& ds) override
+    virtual void trainFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset) override
     {
         this->cleanTree();
-        root = buildExtraTree(ds);
-    }
-
-    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
-                               typename output_collection<OutputC>::const_ref_type output) override
-    {
-        // TODO
+        root = buildExtraTree(featureDataset);
     }
 
     /**
@@ -247,13 +234,13 @@ private:
         double bestSplit = pickRandomSplit(ds, candidates[0]); //best split value
 
         // split inputs in two subsets
-        std::vector<unsigned int> indexesLeftBest;
-        std::vector<unsigned int> indexesRightBest;
+        arma::uvec indexesLeftBest;
+        arma::uvec indexesRightBest;
 
         this->splitDataset(ds, bestAttribute, bestSplit, indexesLeftBest, indexesRightBest);
 
-        MiniBatchData<InputC, OutputC> leftDs(ds,indexesLeftBest);
-        MiniBatchData<InputC, OutputC> rightDs(ds,indexesRightBest);
+        MiniBatchData<InputC, OutputC> leftDs(ds, indexesLeftBest);
+        MiniBatchData<InputC, OutputC> rightDs(ds, indexesRightBest);
 
         double bestScore = score(ds, leftDs, rightDs);
 
@@ -262,8 +249,8 @@ private:
         {
             double split = pickRandomSplit(ds, candidates[c]);
 
-            std::vector<unsigned int> indexesLeft;
-            std::vector<unsigned int> indexesRight;
+            arma::uvec indexesLeft;
+            arma::uvec indexesRight;
             this->splitDataset(ds, candidates[c], split, indexesLeft, indexesRight);
 
             leftDs.setIndexes(indexesLeft);

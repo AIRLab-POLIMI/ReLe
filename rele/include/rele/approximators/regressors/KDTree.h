@@ -72,20 +72,10 @@ public:
 
     }
 
-    /**
-     * Builds an approximation model for the training set
-     * @param dataset The training set
-     */
-    virtual void train(const BatchData<InputC, OutputC>& dataset) override
+    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override
     {
         this->cleanTree();
-        root = buildKDTree(dataset, 0);
-    }
-
-    virtual void trainFeatures(typename input_collection<InputC>::const_ref_type input,
-                               typename output_collection<OutputC>::const_ref_type output) override
-    {
-        // TODO
+        root = buildKDTree(featureDataset, 0);
     }
 
     /**
@@ -199,14 +189,14 @@ private:
         //  begin operations to split the training set
         double cutPoint = computeMedian(ds, cutDir);
 
-        std::vector<unsigned int> indexesLow;
-        std::vector<unsigned int> indexesHigh;
+        arma::uvec indexesLow;
+        arma::uvec indexesHigh;
 
         // split inputs in two subsets
         this->splitDataset(ds, cutDir, cutPoint, indexesLow, indexesHigh);
 
-        MiniBatchData<InputC, OutputC> lowEx(ds,indexesLow);
-        MiniBatchData<InputC, OutputC> highEx(ds,indexesHigh);
+        MiniBatchData<InputC, OutputC> lowEx(ds, indexesLow);
+        MiniBatchData<InputC, OutputC> highEx(ds, indexesHigh);
 
         // recall the method for left and right child
         TreeNode<OutputC>* left = buildKDTree(lowEx, (cutDir + 1) % phi.rows(), store_sample);

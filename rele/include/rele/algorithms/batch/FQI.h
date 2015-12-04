@@ -117,7 +117,8 @@ public:
             }
 
             // The regressor is trained
-            QRegressor.trainFeatures(input, output);
+            BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
+            QRegressor.trainFeatures(featureDataset);
             // Previous Q approximated values are stored
             arma::vec prevQ = Q;
             /* New Q values are computed using the regressor trained with the

@@ -24,8 +24,8 @@
 #ifndef SRC_TEST_BATCH_FQI_IDTOGRIDBASIS_H_
 #define SRC_TEST_BATCH_FQI_IDTOGRIDBASIS_H_
 
-#include "BatchRegressorTraits.h"
 #include <cmath>
+#include "../../../include/rele/approximators/BatchDataTraits.h"
 
 
 namespace ReLe
