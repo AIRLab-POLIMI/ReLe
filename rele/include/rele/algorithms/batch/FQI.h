@@ -80,7 +80,8 @@ public:
         // This vector is used for the terminal condition evaluation
         Q.zeros(input.n_cols);
 
-        double J;
+        double J1;
+        double J2;
 
         unsigned int iteration = 0;
         // Main FQI loop
@@ -125,17 +126,19 @@ public:
              */
             computeQ(data);
             // Error function is computed
-            J = arma::norm(Q - prevQ);
+            J1 = arma::norm(Q - prevQ);
+            J2 = arma::norm(Q - output.t());
 
             std::cout << "Bellman Q-values: " << std::endl << output << std::endl;
             std::cout << "Approximated Q-values: " << std::endl << Q.t() << std::endl;
-            std::cout << "Error at iteration " << iteration << " is: " << J << std::endl;
+            std::cout << "Q_hat - previous_Q_hat: " << J1 << " *** ";
+            std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
         }
-        while((iteration < maxiterations) && (J > epsilon));
+        while((iteration < maxiterations) && (J1 > epsilon));
 
         // Print info
         std::cout << "*********************************************************" << std::endl;
-        if(J > epsilon)
+        if(J1 > epsilon)
             /* The algorithm has not converged and terminated for exceeding
              *  the maximum number of transitions.
              */

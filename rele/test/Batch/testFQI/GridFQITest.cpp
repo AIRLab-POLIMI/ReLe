@@ -142,9 +142,9 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    FFNeuralNetwork approximator(phi, 10, 1);
+    FFNeuralNetwork approximator(phi, 100, 1);
     approximator.getHyperParameters().lambda = 0.5;
-    approximator.getHyperParameters().maxIterations = 10;
+    approximator.getHyperParameters().maxIterations = 100;
 
     // A FQI object is instantiated using the dataset and the regressor
     FQI<FiniteState> fqi(data, approximator, nActions, 0.9);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     cout << "Starting FQI..." << endl;
 
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 1000, 0.00000001);
+    fqi.run(phi, 1000, 0.001);
 
 
     return 0;
