@@ -78,14 +78,30 @@ public:
         // This vector is used for the terminal condition evaluation
         Q.zeros(input.n_cols);
 
+        /* First iteration of FQI is performed here training
+         * the regressor with a dataset that has the rewards as
+         * output.
+         */
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
+
+        // Initial Q is stored before update
         arma::vec prevQ = Q;
+
+        // Update Q
         computeQ(data);
+
+        /* Evaluate the distance between the previous approximation of Q
+         * and the current one.
+         */
         double J1 = arma::norm(Q - prevQ);
+        /* Evaluate the error mean squared error between the current approximation
+         * of Q and the target output in the dataset.
+         */
         double J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
 
         unsigned int iteration = 0;
+        // Print info
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
@@ -97,7 +113,7 @@ public:
         // Main FQI loop
         while(iteration < maxiterations && J1 > epsilon)
         {
-            // Update and print the number of iterations
+            // Update and print the iteration number
             iteration++;
             std::cout << std::endl << "*********************************************************" << std::endl;
             std::cout << "FQI iteration: " << iteration << std::endl;
@@ -112,15 +128,19 @@ public:
                     /* In order to be able to fill the output vector (i.e. regressor
                      * target values), we need to compute the Q values for each
                      * s' sample in the dataset and for each action in the
-                     * set of actions of the problem.
+                     * set of actions of the problem. Recalling the fact that the values
+                     * are zero for each action in an absorbing state, we check if s' is
+                     * absorbing and, if it is, we leave the Q-values fixed to zero.
                      */
                     arma::vec Q_xn(nActions, arma::fill::zeros);
-                    for(unsigned int u = 0; u < nActions; u++)
-                        Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
+                    if(!tr.xn.isAbsorbing())
+                    	for(unsigned int u = 0; u < nActions; u++)
+                    		Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
 
                     /* For the current s', Q values for each action are stored in
                      * Q_xn. The optimal Bellman equation can be computed
-                     * finding the maximum value inside Q_xn.
+                     * finding the maximum value inside Q_xn. They are zero if
+                     * xn is an absorbing state.
                      */
                     output(i) = rewards(0, i) + gamma * arma::max(Q_xn);
                     i++;
@@ -136,17 +156,23 @@ public:
              * new output values.
              */
             computeQ(data);
-            // Error function is computed
+            /* Evaluate the distance between the previous approximation of Q
+             * and the current one.
+             */
             J1 = arma::norm(Q - prevQ);
+            /* Evaluate the error mean squared error between the current approximation
+             * of Q and the target output in the dataset.
+             */
             J2 = arma::sum(arma::square(Q - output.t()))  / (output.n_cols);
 
+            // Print info
             std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
             std::cout << "Approximated Q-values: " << std::endl << Q.rows(1, 40).t() << std::endl;
             std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
             std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
         }
 
-        // Print info
+        // Print final info
         std::cout << "*********************************************************" << std::endl;
         if(J1 > epsilon)
             /* The algorithm has not converged and terminated for exceeding

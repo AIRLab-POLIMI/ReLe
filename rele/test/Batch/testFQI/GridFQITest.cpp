@@ -43,20 +43,6 @@ using namespace ReLe;
 using namespace arma;
 
 
-void computeApprQ(Dataset<FiniteAction, FiniteState>& data, BatchRegressor& nn, arma::mat& appr)
-{
-    unsigned int i = 0;
-    for(auto& episode : data)
-    {
-        for(auto& tr : episode)
-        {
-            appr(0, i) = arma::as_scalar(nn(tr.x, tr.u));
-            i++;
-        }
-    }
-}
-
-
 // This simple test is used to verify the correctness of the FQI implementation
 int main(int argc, char *argv[])
 {
@@ -76,13 +62,13 @@ int main(int argc, char *argv[])
     unsigned int nActions = mdp.getSettings().finiteActionDim;
     unsigned int nStates = mdp.getSettings().finiteStateDim;
 
-    /* This policy is used by an evaluation agent that has the purpose to
-     *  build a dataset from its exploration of the environment. The policy is
-     *  a random policy, thus allowing pure exploration.
+    /* Decide whether to acquire data with a policy, or to use already
+     * collected ones.
      */
     Dataset<FiniteAction, FiniteState> data;
     if(acquireData)
     {
+    	// Policy is totally random (epsilon = 0) to allow full exploration
         e_Greedy policy;
         policy.setEpsilon(0);
         policy.setNactions(nActions);
@@ -128,7 +114,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        // Dataset is loaded
+        // Dataset is loaded from a file
         ifstream in(fm.addPath("dataset.csv"), ios_base::in);
         in >> std::setprecision(OS_PRECISION);
         if(in.is_open())
@@ -148,9 +134,12 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    FFNeuralNetwork approximator(phi, 50, 1);
+
+    // Neural Network
+    FFNeuralNetwork approximator(phi, 10, 1);
     approximator.getHyperParameters().lambda = 0.3;
-    approximator.getHyperParameters().maxIterations = 50;
+    approximator.getHyperParameters().maxIterations = 10;
+    // Tree
     // arma::vec defaultValue = {0};
     // EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     // ExtraTree<arma::vec, arma::vec> approximator(phi, defaultNode);
