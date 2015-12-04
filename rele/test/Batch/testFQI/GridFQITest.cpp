@@ -76,8 +76,10 @@ int main(int argc, char *argv[])
 
     /* This policy is used by an evaluation agent that has the purpose to
      *  build a dataset from its exploration of the environment. The policy is
-     *  a random policy, thus allowing pure exploration. */
+     *  a random policy, thus allowing pure exploration.
+     */
     Dataset<FiniteAction, FiniteState> data;
+    arma::mat Q;
     if(acquireData)
     {
 		e_Greedy policy;
@@ -88,24 +90,27 @@ int main(int argc, char *argv[])
 		Q_Learning expert(policy);
 
 		/* The Core class is what ReLe uses to move the agent in the MDP. It is
-		 *  instantiated using the MDP and the agent itself. */
+		 *  instantiated using the MDP and the agent itself.
+		 */
 		Core<FiniteAction, FiniteState> expertCore(mdp, expert);
 
 		/* The CollectorStrategy is used to collect data from the agent that is
-		 *  moving in the MDP. Here, it is used to store the transition that are used
-		 *  as the inputs of the dataset provided to FQI. */
+		 * moving in the MDP. Here, it is used to store the transition that are used
+		 * as the inputs of the dataset provided to FQI.
+		 */
 		CollectorStrategy<FiniteAction, FiniteState> collection;
 		expertCore.getSettings().loggerStrategy = &collection;
 
 		// Number of transitions in an episode
-		unsigned int nTransitions = 50;
+		unsigned int nTransitions = 250;
 		expertCore.getSettings().episodeLength = nTransitions;
 		// Number of episodes
 		unsigned int nEpisodes = 100;
 		expertCore.getSettings().episodeN = nEpisodes;
 
 		/* The agent start the exploration that will last for the provided number of
-		 *  episodes. */
+		 *  episodes.
+		 */
 		expertCore.runEpisodes();
 
 		// The dataset is build from the data collected by the CollectorStrategy.
@@ -119,6 +124,8 @@ int main(int argc, char *argv[])
 		out.close();
 
 		cout << endl << "# Ended data collection and save" << endl << endl;
+
+		Q = *policy.getQ();
     }
     else
     {
@@ -128,6 +135,36 @@ int main(int argc, char *argv[])
 		if(in.is_open())
 			data.readFromStream(in);
 		in.close();
+    }
+
+    /* For each (state, action) in the dataset, load the Q-Value
+     * found with Q-Learning. The Q-Values vector is used as
+     * a comparison measure for the Q-Values found by FQI.
+     */
+    arma::vec Q_vec(data.getTransitionsNumber(), arma::fill::zeros);
+    bool found;
+    unsigned int sample = 0;
+    for(auto& episode : data)
+    {
+    	for(auto& tr: episode)
+    	{
+    		found = false;
+			for(unsigned int i = 0; i < nStates; i++)
+			{
+				for(unsigned int j = 0; j < nActions; j++)
+				{
+					if(i == tr.x.getStateN() && j == tr.u.getActionN())
+					{
+						Q_vec(sample) = Q(i, j);
+						sample++;
+						found = true;
+						break;
+					}
+				}
+				if(found)
+					break;
+			}
+    	}
     }
 
     /* The basis functions for the features of the regressor are created here.
@@ -142,18 +179,16 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     // The regressor is instantiated using the feature vector
-    FFNeuralNetwork approximator(phi, 100, 1);
+    FFNeuralNetwork approximator(phi, 50, 1);
     approximator.getHyperParameters().lambda = 0.5;
-    approximator.getHyperParameters().maxIterations = 100;
+    approximator.getHyperParameters().maxIterations = 20;
 
     // A FQI object is instantiated using the dataset and the regressor
     FQI<FiniteState> fqi(data, approximator, nActions, 0.9);
 
     cout << "Starting FQI..." << endl;
-
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 1000, 0.001);
-
+    fqi.run(phi, 1000, 0.001, Q_vec);
 
     return 0;
 }

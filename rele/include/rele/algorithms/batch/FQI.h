@@ -40,11 +40,10 @@ class FQI
 {
 public:
 
-    /*
-     * This class implements the FQI algorithm. As a batch algorithm, it takes
+    /* This class implements the FQI algorithm. As a batch algorithm, it takes
      * a dataset of (s, a, r, s') transitions, together with a regressor that
      * it is used to approximate the target distribution of Q values.
-    */
+     */
     FQI(Dataset<FiniteAction, StateC>& data, BatchRegressor& QRegressor,
         unsigned int nActions, double gamma) :
         data(data),
@@ -55,12 +54,11 @@ public:
 
     }
 
-    void run(Features& phi, unsigned int maxiterations, double epsilon)
+    void run(Features& phi, unsigned int maxiterations, double epsilon, arma::vec QLearningQ)
     {
-        /*
-         * This is the function to be called to run the FQI algorithm. It takes
+        /* This is the function to be called to run the FQI algorithm. It takes
          * the features phi that are used to compute the input of the regressor.
-        */
+         */
 
         // Compute the overall number of samples
         unsigned int nEpisodes = data.size();
@@ -73,8 +71,8 @@ public:
         // Input of the regressor are computed using provided features
         arma::mat input = data.featuresAsMatrix(phi);
         /* Output vector is initialized. It will contain the Q values, found
-         *  with the optimal Bellman equation, that are used in regression as
-         *  target values.
+         * with the optimal Bellman equation, that are used in regression as
+         * target values.
          */
         arma::mat output(1, input.n_cols, arma::fill::zeros);
         // This vector is used for the terminal condition evaluation
@@ -82,6 +80,7 @@ public:
 
         double J1;
         double J2;
+        double J3;
 
         unsigned int iteration = 0;
         // Main FQI loop
@@ -100,17 +99,17 @@ public:
                 for(auto& tr : episode)
                 {
                     /* In order to be able to fill the output vector (i.e. regressor
-                     *  target values), we need to compute the Q values for each
-                     *  s' sample in the dataset and for each action in the
-                     *  set of actions of the problem.
+                     * target values), we need to compute the Q values for each
+                     * s' sample in the dataset and for each action in the
+                     * set of actions of the problem.
                      */
                     arma::vec Q_xn(nActions, arma::fill::zeros);
                     for(unsigned int u = 0; u < nActions; u++)
                         Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
 
                     /* For the current s', Q values for each action are stored in
-                     *  Q_xn. The optimal Bellman equation can be computed
-                     *  finding the maximum value inside Q_xn.
+                     * Q_xn. The optimal Bellman equation can be computed
+                     * finding the maximum value inside Q_xn.
                      */
                     output(i) = rewards(i) + gamma * arma::max(Q_xn);
                     i++;
@@ -122,17 +121,20 @@ public:
             // Previous Q approximated values are stored
             arma::vec prevQ = Q;
             /* New Q values are computed using the regressor trained with the
-             *  new output values.
+             * new output values.
              */
             computeQ(data);
             // Error function is computed
             J1 = arma::norm(Q - prevQ);
             J2 = arma::norm(Q - output.t());
+            J3 = arma::norm(Q - QLearningQ);
 
             std::cout << "Bellman Q-values: " << std::endl << output << std::endl;
             std::cout << "Approximated Q-values: " << std::endl << Q.t() << std::endl;
-            std::cout << "Q_hat - previous_Q_hat: " << J1 << " *** ";
+            std::cout << "Q-values of Q-Learning: " << std::endl << QLearningQ.t() << std:: endl;
+            std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
             std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
+            std::cout << "Q_hat - QLearningQ: " << J3 << std::endl;
         }
         while((iteration < maxiterations) && (J1 > epsilon));
 
@@ -140,7 +142,7 @@ public:
         std::cout << "*********************************************************" << std::endl;
         if(J1 > epsilon)
             /* The algorithm has not converged and terminated for exceeding
-             *  the maximum number of transitions.
+             * the maximum number of transitions.
              */
             std::cout << "FQI finished in " << iteration <<
                       " iterations WITHOUT CONVERGENCE to a fixed point" << std::endl;
