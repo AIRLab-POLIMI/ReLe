@@ -54,7 +54,7 @@ public:
 
     }
 
-    void run(Features& phi, unsigned int maxiterations, double epsilon)
+    void run(Features& phi, unsigned int maxiterations, double epsilon, arma::mat QLearningQ)
     {
         /* This is the function to be called to run the FQI algorithm. It takes
          * the features phi that are used to compute the input of the regressor.
@@ -78,6 +78,33 @@ public:
         // This vector is used for the terminal condition evaluation
         QHat.zeros(input.n_cols);
 
+        // Vector of Q values found with Q-Learning
+        bool found;
+        arma::vec QLearningQData(nSamples, arma::fill::zeros);
+        unsigned int sample = 0;
+        for(auto& episode: data)
+        {
+        	for(auto& tr : episode)
+        	{
+        		found = false;
+        		for(unsigned int i = 0; i < QLearningQ.n_rows; i++)
+        		{
+        			for(unsigned int j = 0; j < QLearningQ.n_cols; j++)
+        			{
+        				if(i == tr.x && j == tr.u)
+        				{
+        					QLearningQData(sample) = QLearningQ(i, j);
+        					found = true;
+        					sample++;
+        					break;
+        				}
+        			}
+        			if(found)
+        				break;
+        		}
+        	}
+        }
+
         /* First iteration of FQI is performed here training
          * the regressor with a dataset that has the rewards as
          * output.
@@ -100,15 +127,22 @@ public:
          */
         double J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
 
+        /* Evaluate the error mean squared error between the current approximation
+         * of Q and the Q values found by Q-Learning.
+         */
+        double J3 = arma::sum(arma::square(QHat - QLearningQData))  / (output.n_cols);
+
         unsigned int iteration = 0;
         // Print info
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
         std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
+        std::cout << "Q-Learning values: " << std::endl << QLearningQData.rows(1, 40).t() << std::endl;
         std::cout << "Approximated Q-values: " << std::endl << QHat.rows(1, 40).t() << std::endl;
         std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
         std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
+        std::cout << "Q_hat - Q-Learning: " << J3 << std::endl;
 
         // Main FQI loop
         while(iteration < maxiterations && J1 > epsilon)
@@ -165,11 +199,18 @@ public:
              */
             J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
 
+            /* Evaluate the error mean squared error between the current approximation
+             * of Q and the Q values found by Q-Learning.
+             */
+            J3 = arma::sum(arma::square(QHat - QLearningQData))  / (output.n_cols);
+
             // Print info
             std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
+            std::cout << "Q-Learning values: " << std::endl << QLearningQData.rows(1, 40).t() << std::endl;
             std::cout << "Approximated Q-values: " << std::endl << QHat.rows(1, 40).t() << std::endl;
             std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
             std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
+            std::cout << "Q_hat - Q-Learning: " << J3 << std::endl;
         }
 
         // Print final info
