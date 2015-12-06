@@ -118,34 +118,16 @@ public:
         // Update Q
         computeQ(data);
 
-        /* Evaluate the distance between the previous approximation of Q
-         * and the current one.
-         */
-        double J1 = arma::norm(QHat - prevQHat);
-        /* Evaluate the error mean squared error between the current approximation
-         * of Q and the target output in the dataset.
-         */
-        double J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
-
-        /* Evaluate the error mean squared error between the current approximation
-         * of Q and the Q values found by Q-Learning.
-         */
-        double J3 = arma::sum(arma::square(QHat - QLearningQData))  / (output.n_cols);
-
         unsigned int iteration = 0;
+        double J;
         // Print info
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
-        std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
-        std::cout << "Q-Learning values: " << std::endl << QLearningQData.rows(1, 40).t() << std::endl;
-        std::cout << "Approximated Q-values: " << std::endl << QHat.rows(1, 40).t() << std::endl;
-        std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
-        std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
-        std::cout << "Q_hat - Q-Learning: " << J3 << std::endl;
+        printInfo(output, QLearningQData, prevQHat, J);
 
         // Main FQI loop
-        while(iteration < maxiterations && J1 > epsilon)
+        while(iteration < maxiterations && J > epsilon)
         {
             // Update and print the iteration number
             iteration++;
@@ -190,32 +172,14 @@ public:
              * new output values.
              */
             computeQ(data);
-            /* Evaluate the distance between the previous approximation of Q
-             * and the current one.
-             */
-            J1 = arma::norm(QHat - prevQHat);
-            /* Evaluate the error mean squared error between the current approximation
-             * of Q and the target output in the dataset.
-             */
-            J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
-
-            /* Evaluate the error mean squared error between the current approximation
-             * of Q and the Q values found by Q-Learning.
-             */
-            J3 = arma::sum(arma::square(QHat - QLearningQData))  / (output.n_cols);
 
             // Print info
-            std::cout << "Bellman Q-values: " << std::endl << output.cols(1, 40) << std::endl;
-            std::cout << "Q-Learning values: " << std::endl << QLearningQData.rows(1, 40).t() << std::endl;
-            std::cout << "Approximated Q-values: " << std::endl << QHat.rows(1, 40).t() << std::endl;
-            std::cout << "Q_hat - previous_Q_hat: " << J1 << std::endl;
-            std::cout << "Q_hat - Q_Bellman: " << J2 << std::endl;
-            std::cout << "Q_hat - Q-Learning: " << J3 << std::endl;
+            printInfo(output, QLearningQData, prevQHat, J);
         }
 
         // Print final info
         std::cout << "*********************************************************" << std::endl;
-        if(J1 > epsilon)
+        if(J > epsilon)
             /* The algorithm has not converged and terminated for exceeding
              * the maximum number of transitions.
              */
@@ -239,6 +203,33 @@ public:
                 i++;
             }
         }
+    }
+
+    void printInfo(arma::mat output, arma::mat QLearningQData, arma::vec prevQHat, double& J1)
+    {
+    	double J2;
+    	double J3;
+
+        /* Evaluate the distance between the previous approximation of Q
+         * and the current one.
+         */
+        J1 = arma::norm(QHat - prevQHat);
+        /* Evaluate the error mean squared error between the current approximation
+         * of Q and the target output in the dataset.
+         */
+        J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
+
+        /* Evaluate the error mean squared error between the current approximation
+         * of Q and the Q values found by Q-Learning.
+         */
+        J3 = arma::sum(arma::square(QHat - QLearningQData))  / (output.n_cols);
+
+        std::cout << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
+        std::cout << "Q-Learning values: " << std::endl << QLearningQData.rows(0, 40).t() << std::endl;
+        std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
+        std::cout << "QHat - Previous QHat: " << J1 << std::endl;
+        std::cout << "QHat - Q Bellman: " << J2 << std::endl;
+        std::cout << "QHat - Q-Learning: " << J3 << std::endl;
     }
 
 protected:
