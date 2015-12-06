@@ -66,9 +66,10 @@ int main(int argc, char *argv[])
      * collected ones.
      */
     Dataset<FiniteAction, FiniteState> data;
+    arma::mat QLearningQ;
     if(acquireData)
     {
-    	// Policy is totally random (epsilon = 0) to allow full exploration
+    	// Policy declaration
         e_Greedy policy;
         policy.setEpsilon(0);
         policy.setNactions(nActions);
@@ -99,6 +100,9 @@ int main(int argc, char *argv[])
          *  episodes.
          */
         expertCore.runEpisodes();
+
+
+        QLearningQ = *policy.getQ();
 
         // The dataset is build from the data collected by the CollectorStrategy.
         data = collection.data;
@@ -149,6 +153,6 @@ int main(int argc, char *argv[])
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 1000, 1e-5);
+    fqi.run(phi, 1000, 1e-5, QLearningQ);
     return 0;
 }
