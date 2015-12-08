@@ -28,6 +28,12 @@
 
 namespace ReLe
 {
+/*
+ * Double Q-Learning
+ *
+ * "Double Q-Learning"
+ * Hado Van Hasselt
+ */
 
 class DoubleQ_Learning: public Q_Learning
 {
