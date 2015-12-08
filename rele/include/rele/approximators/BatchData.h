@@ -305,7 +305,7 @@ public:
 
     virtual OutputC getOutput(unsigned int index) const override
     {
-    	return outputs.col(index);
+        return outputs.col(index);
     }
 
     FeaturesCollection getOutputs()

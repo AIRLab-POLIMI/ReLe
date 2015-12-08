@@ -199,8 +199,8 @@ public:
         {
             for(auto& tr : episode)
             {
-            	for(unsigned int i = 0; i < rewardSize; i++)
-            		rewards(i, idx) = tr.r[i];
+                for(unsigned int i = 0; i < rewardSize; i++)
+                    rewards(i, idx) = tr.r[i];
                 idx++;
             }
         }
