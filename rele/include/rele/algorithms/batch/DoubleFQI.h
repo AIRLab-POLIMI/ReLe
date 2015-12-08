@@ -177,6 +177,30 @@ public:
         trainingRegressor.trainFeatures(featureDataset);
     }
 
+    // Vedere se si riesce ad usare il regressore in FQI come "regressore medio di QA e QB"
+    // In tal caso si toglierebbero queste due funzioni
+    void computeQHat(Dataset<FiniteAction, StateC>& data) override
+    {
+        // Computation of Q values approximation with the updated regressor
+        unsigned int i = 0;
+        for(auto& episode : data)
+        {
+            for(auto& tr : episode)
+            {
+                this->QHat(i) = arma::as_scalar(QRegressorA(tr.x, tr.u) + QRegressorB(tr.x, tr.u) / 2);
+                i++;
+            }
+        }
+    }
+
+    void computeQTable() override
+    {
+    	for(unsigned int i = 0; i < this->nStates; i++)
+    		for(unsigned int j = 0; j < this->nActions; j++)
+    			this->QTable(i, j) = arma::as_scalar(
+    					QRegressorA(FiniteState(i), FiniteAction(j)) + QRegressorB(FiniteState(i), FiniteAction(j)) / 2);
+    }
+
 protected:
     BatchRegressor& QRegressorA;
     BatchRegressor& QRegressorB;

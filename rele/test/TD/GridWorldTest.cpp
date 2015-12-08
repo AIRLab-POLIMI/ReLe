@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         e_Greedy policy;
         // SARSA_lambda agent(policy, false);
         // SARSA agent(policy);
-        // Q_Learning agent(policy);
+        //Q_Learning agent(policy);
         DoubleQ_Learning agent(policy);
 
         Core<FiniteAction, FiniteState> core(mdp, agent);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         //core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, FiniteState>("/home/dave/prova.txt");
         //core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
 
-        for (int i = 0; i < 2000; i++)
+        for(unsigned int i = 0; i < 2000; i++)
         {
             cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();
