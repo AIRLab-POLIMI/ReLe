@@ -24,7 +24,7 @@
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 #include "q_policy/e_Greedy.h"
-#include "batch/FQI.h"
+#include "batch/DoubleFQI.h"
 #include "td/Q-Learning.h"
 #include "features/DenseFeatures.h"
 #include "FileManager.h"
@@ -69,9 +69,9 @@ int main(int argc, char *argv[])
     arma::mat QLearningQ;
     if(acquireData)
     {
-    	// Policy declaration
+        // Policy declaration
         e_Greedy policy;
-        policy.setEpsilon(0);
+        policy.setEpsilon(0.2);
         policy.setNactions(nActions);
 
         // The agent is instantiated. It takes the policy as parameter.
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         expertCore.getSettings().loggerStrategy = &collection;
 
         // Number of transitions in an episode
-        unsigned int nTransitions = 250;
+        unsigned int nTransitions = 1000;
         expertCore.getSettings().episodeLength = nTransitions;
         // Number of episodes
         unsigned int nEpisodes = 100;
@@ -100,9 +100,6 @@ int main(int argc, char *argv[])
          *  episodes.
          */
         expertCore.runEpisodes();
-
-
-        QLearningQ = *policy.getQ();
 
         // The dataset is build from the data collected by the CollectorStrategy.
         data = collection.data;
@@ -140,19 +137,25 @@ int main(int argc, char *argv[])
     // The regressor is instantiated using the feature vector
 
     // Neural Network
-    FFNeuralNetwork approximator(phi, 10, 1);
-    approximator.getHyperParameters().lambda = 0.3;
-    approximator.getHyperParameters().maxIterations = 10;
+    //FFNeuralNetwork QRegressorA(phi, 10, 1);
+    //FFNeuralNetwork QRegressorB(phi, 10, 1);
+    //QRegressorA.getHyperParameters().lambda = 0.3;
+    //QRegressorA.getHyperParameters().maxIterations = 10;
+    //QRegressorB.getHyperParameters().lambda = 0.3;
+    //QRegressorB.getHyperParameters().maxIterations = 10;
     // Tree
-    // arma::vec defaultValue = {0};
-    // EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    // ExtraTree<arma::vec, arma::vec> approximator(phi, defaultNode);
+    arma::vec defaultValue = {0};
+    EmptyTreeNode<arma::vec> defaultNode(defaultValue);
+    KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
+    KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
     // A FQI object is instantiated using the dataset and the regressor
-    FQI<FiniteState> fqi(data, approximator, nActions, 0.9);
+    // FQI<FiniteState> fqi(data, QRegressorA, nStates, nActions, 0.9);
+    DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, nActions, 0.9);
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 1000, 1e-5, QLearningQ);
+    fqi.run(phi, 2, 1e-15);
+
     return 0;
 }

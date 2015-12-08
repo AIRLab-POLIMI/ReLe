@@ -45,16 +45,17 @@ public:
      * it is used to approximate the target distribution of Q values.
      */
     FQI(Dataset<FiniteAction, StateC>& data, BatchRegressor& QRegressor,
-        unsigned int nActions, double gamma) :
+        unsigned int nStates, unsigned int nActions, double gamma) :
         data(data),
         QRegressor(QRegressor),
+		nStates(nStates),
         nActions(nActions),
         gamma(gamma)
     {
-
+    	QTable.zeros(nStates, nActions);
     }
 
-    void run(Features& phi, unsigned int maxiterations, double epsilon, arma::mat QLearningQ)
+    virtual void run(Features& phi, unsigned int maxiterations, double epsilon)
     {
         /* This is the function to be called to run the FQI algorithm. It takes
          * the features phi that are used to compute the input of the regressor.
@@ -75,35 +76,11 @@ public:
          * target values.
          */
         arma::mat output(1, input.n_cols, arma::fill::zeros);
-        // This vector is used for the terminal condition evaluation
+        /*
+         * This vector is used for the terminal condition evaluation. It will
+         * contain the approximated Q values of each sample in the dataset.
+         */
         QHat.zeros(input.n_cols);
-
-        // Vector of Q values found with Q-Learning
-        bool found;
-        arma::vec QLearningQData(nSamples, arma::fill::zeros);
-        unsigned int sample = 0;
-        for(auto& episode: data)
-        {
-        	for(auto& tr : episode)
-        	{
-        		found = false;
-        		for(unsigned int i = 0; i < QLearningQ.n_rows; i++)
-        		{
-        			for(unsigned int j = 0; j < QLearningQ.n_cols; j++)
-        			{
-        				if(i == tr.x && j == tr.u)
-        				{
-        					QLearningQData(sample) = QLearningQ(i, j);
-        					found = true;
-        					sample++;
-        					break;
-        				}
-        			}
-        			if(found)
-        				break;
-        		}
-        	}
-        }
 
         /* First iteration of FQI is performed here training
          * the regressor with a dataset that has the rewards as
@@ -112,11 +89,11 @@ public:
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
 
-        // Initial Q is stored before update
+        // Initial QHat is stored before update
         arma::vec prevQHat = QHat;
 
-        // Update Q
-        computeQ(data);
+        // Update QHat
+        computeQHat(data);
 
         unsigned int iteration = 0;
         double J;
@@ -124,7 +101,7 @@ public:
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
-        printInfo(output, QLearningQData, prevQHat, J);
+        printInfo(output, prevQHat, J);
 
         // Main FQI loop
         while(iteration < maxiterations && J > epsilon)
@@ -150,8 +127,8 @@ public:
                      */
                     arma::vec Q_xn(nActions, arma::fill::zeros);
                     if(!tr.xn.isAbsorbing())
-                    	for(unsigned int u = 0; u < nActions; u++)
-                    		Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
+                        for(unsigned int u = 0; u < nActions; u++)
+                            Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
 
                     /* For the current s', Q values for each action are stored in
                      * Q_xn. The optimal Bellman equation can be computed
@@ -168,13 +145,13 @@ public:
             QRegressor.trainFeatures(featureDataset);
             // Previous Q approximated values are stored
             prevQHat = QHat;
-            /* New Q values are computed using the regressor trained with the
+            /* New QHat values are computed using the regressor trained with the
              * new output values.
              */
-            computeQ(data);
+            computeQHat(data);
 
             // Print info
-            printInfo(output, QLearningQData, prevQHat, J);
+            printInfo(output, prevQHat, J);
         }
 
         // Print final info
@@ -189,9 +166,12 @@ public:
             // Error below the maximum desired error: the algorithm has converged
             std::cout << "FQI converged in " << iteration << " iterations" << std::endl <<
                       "********************************************************* " << std::endl;
+
+        // Print the policy found according to QHat values in the Q-Table
+        printPolicy();
     }
 
-    void computeQ(Dataset<FiniteAction, StateC>& data)
+    virtual void computeQHat(Dataset<FiniteAction, StateC>& data)
     {
         // Computation of Q values approximation with the updated regressor
         unsigned int i = 0;
@@ -205,10 +185,16 @@ public:
         }
     }
 
-    void printInfo(arma::mat output, arma::mat QLearningQData, arma::vec prevQHat, double& J1)
+    virtual void computeQTable()
     {
-    	double J2;
-    	double J3;
+    	for(unsigned int i = 0; i < nStates; i++)
+    		for(unsigned int j = 0; j < nActions; j++)
+    			QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
+    }
+
+    virtual void printInfo(arma::mat output, arma::vec prevQHat, double& J1)
+    {
+        double J2;
 
         /* Evaluate the distance between the previous approximation of Q
          * and the current one.
@@ -219,26 +205,38 @@ public:
          */
         J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
 
-        /* Evaluate the error mean squared error between the current approximation
-         * of Q and the Q values found by Q-Learning.
-         */
-        J3 = arma::sum(arma::square(QHat - QLearningQData))  / (output.n_cols);
-
         std::cout << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
-        std::cout << "Q-Learning values: " << std::endl << QLearningQData.rows(0, 40).t() << std::endl;
         std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
         std::cout << "QHat - Previous QHat: " << J1 << std::endl;
         std::cout << "QHat - Q Bellman: " << J2 << std::endl;
-        std::cout << "QHat - Q-Learning: " << J3 << std::endl;
+    }
+
+    virtual void printPolicy()
+    {
+        computeQTable();
+        std::cout << std::endl << "Policy:" << std::endl;
+		for(unsigned int i = 0; i < nStates; i++)
+		{
+			arma::uword policy;
+			QTable.row(i).max(policy);
+			std::cout << "policy(" << i << ") = " << policy << std::endl;
+		}
+    }
+
+    virtual ~FQI()
+    {
     }
 
 protected:
     Dataset<FiniteAction, StateC>& data;
     arma::vec QHat;
+    arma::mat QTable;
     BatchRegressor& QRegressor;
+    unsigned int nStates;
     unsigned int nActions;
     double gamma;
 };
+
 }
 
 #endif //FQI_H
