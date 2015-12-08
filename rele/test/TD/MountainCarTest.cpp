@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     e_GreedyApproximate policy;
     LinearGradientSARSA agent(policy, phi);
 
-    Core<FiniteAction, DenseState> core(mdp, agent);
+    auto&& core = buildCore(mdp, agent);
 
     for (int i = 0; i < episodes; i++)
     {

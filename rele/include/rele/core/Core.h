@@ -293,6 +293,13 @@ private:
     unsigned int nbCurrentEpisode;
 };
 
+template<class ActionC, class StateC>
+Core<ActionC, StateC> buildCore(Environment<ActionC, StateC>& environment,
+	         Agent<ActionC, StateC>& agent)
+{
+	return Core<ActionC, StateC>(environment, agent);
+}
+
 }
 
 #endif /* CORE_H_ */
