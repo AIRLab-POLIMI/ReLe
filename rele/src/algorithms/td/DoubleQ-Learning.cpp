@@ -38,15 +38,15 @@ DoubleQ_Learning::DoubleQ_Learning(ActionValuePolicy<FiniteState>& policy) :
 
 void DoubleQ_Learning::initEpisode(const FiniteState& state, FiniteAction& action)
 {
-	x = state.getStateN();
-	Q = (QA + QB) / 2;
-	u = policy(x);
+    x = state.getStateN();
+    Q = (QA + QB) / 2;
+    u = policy(x);
 
-	action.setActionN(u);
+    action.setActionN(u);
 }
 
 void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
-                      	  	FiniteAction& action)
+                            FiniteAction& action)
 {
     size_t xn = nextState.getStateN();
     double r = reward[0];
@@ -77,11 +77,11 @@ void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
     }
 
     //update action and state
-	x = xn;
-	Q = (QA + QB) / 2;
-	u = policy(x);
+    x = xn;
+    Q = (QA + QB) / 2;
+    u = policy(x);
 
-	action.setActionN(u);
+    action.setActionN(u);
 }
 
 void DoubleQ_Learning::init()
