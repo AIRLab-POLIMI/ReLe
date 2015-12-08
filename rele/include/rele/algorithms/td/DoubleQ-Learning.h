@@ -34,13 +34,16 @@ class DoubleQ_Learning: public Q_Learning
 public:
     DoubleQ_Learning(ActionValuePolicy<FiniteState>& policy);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
+    virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
                       FiniteAction& action) override;
+    virtual void endEpisode(const Reward& reward) override;
 
     virtual ~DoubleQ_Learning();
 
 protected:
     virtual void init() override;
+    virtual void updateQ();
 
 protected:
     arma::mat QA;
