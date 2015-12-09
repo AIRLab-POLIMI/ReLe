@@ -37,8 +37,7 @@ class Ensemble_ : public BatchRegressor_<InputC, OutputC>
 public:
     Ensemble_(Features_<InputC>& phi,
               unsigned int outputSize = 1)
-        : BatchRegressor_<InputC, OutputC>(phi, outputSize),
-          phi(phi)
+        : BatchRegressor_<InputC, OutputC>(phi, outputSize)
     {
     }
 
@@ -82,7 +81,6 @@ protected:
     }
 
 protected:
-    Features_<InputC>& phi;
     std::vector<BatchRegressor_<InputC, OutputC>*> regressors; // The regressors ensemble
 };
 
