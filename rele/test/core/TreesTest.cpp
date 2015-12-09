@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     cout << "### ExtraTreeTest ###" << endl;
 
     //ExtraTree test
-    ExtraTreeEnsemble<arma::vec, arma::vec> extraTree(phi, defaultNode);
+    ExtraTreeEnsemble_<arma::vec, arma::vec> extraTree(phi, defaultNode);
 
     extraTree.train(datasetAtan2);
 

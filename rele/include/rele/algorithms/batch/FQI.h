@@ -24,6 +24,7 @@
 #ifndef FQI_H_
 #define FQI_H_
 
+
 namespace ReLe
 {
 /*
@@ -48,11 +49,11 @@ public:
         unsigned int nStates, unsigned int nActions, double gamma) :
         data(data),
         QRegressor(QRegressor),
-		nStates(nStates),
+        nStates(nStates),
         nActions(nActions),
         gamma(gamma)
     {
-    	QTable.zeros(nStates, nActions);
+        QTable.zeros(nStates, nActions);
     }
 
     virtual void run(Features& phi, unsigned int maxiterations, double epsilon)
@@ -112,37 +113,9 @@ public:
             std::cout << "FQI iteration: " << iteration << std::endl;
             std::cout << "*********************************************************" << std::endl;
 
-            // Loop on each dataset sample (i.e. on each transition)
-            unsigned int i = 0;
-            for(auto& episode : data)
-            {
-                for(auto& tr : episode)
-                {
-                    /* In order to be able to fill the output vector (i.e. regressor
-                     * target values), we need to compute the Q values for each
-                     * s' sample in the dataset and for each action in the
-                     * set of actions of the problem. Recalling the fact that the values
-                     * are zero for each action in an absorbing state, we check if s' is
-                     * absorbing and, if it is, we leave the Q-values fixed to zero.
-                     */
-                    arma::vec Q_xn(nActions, arma::fill::zeros);
-                    if(!tr.xn.isAbsorbing())
-                        for(unsigned int u = 0; u < nActions; u++)
-                            Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
+            // Iteration of FQI
+            step(input, output, rewards);
 
-                    /* For the current s', Q values for each action are stored in
-                     * Q_xn. The optimal Bellman equation can be computed
-                     * finding the maximum value inside Q_xn. They are zero if
-                     * xn is an absorbing state.
-                     */
-                    output(i) = rewards(0, i) + gamma * arma::max(Q_xn);
-                    i++;
-                }
-            }
-
-            // The regressor is trained
-            BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
-            QRegressor.trainFeatures(featureDataset);
             // Previous Q approximated values are stored
             prevQHat = QHat;
             /* New QHat values are computed using the regressor trained with the
@@ -171,6 +144,41 @@ public:
         printPolicy();
     }
 
+    virtual void step(arma::mat input, arma::mat& output, const arma::mat rewards)
+    {
+        // Loop on each dataset sample (i.e. on each transition)
+        unsigned int i = 0;
+        for(auto& episode : data)
+        {
+            for(auto& tr : episode)
+            {
+                /* In order to be able to fill the output vector (i.e. regressor
+                 * target values), we need to compute the Q values for each
+                 * s' sample in the dataset and for each action in the
+                 * set of actions of the problem. Recalling the fact that the values
+                 * are zero for each action in an absorbing state, we check if s' is
+                 * absorbing and, if it is, we leave the Q-values fixed to zero.
+                 */
+                arma::vec Q_xn(nActions, arma::fill::zeros);
+                if(!tr.xn.isAbsorbing())
+                    for(unsigned int u = 0; u < nActions; u++)
+                        Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
+
+                /* For the current s', Q values for each action are stored in
+                 * Q_xn. The optimal Bellman equation can be computed
+                 * finding the maximum value inside Q_xn. They are zero if
+                 * xn is an absorbing state.
+                 */
+                output(i) = rewards(0, i) + gamma * arma::max(Q_xn);
+                i++;
+            }
+        }
+
+        // The regressor is trained
+        BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
+        QRegressor.trainFeatures(featureDataset);
+    }
+
     virtual void computeQHat(Dataset<FiniteAction, StateC>& data)
     {
         // Computation of Q values approximation with the updated regressor
@@ -187,9 +195,9 @@ public:
 
     virtual void computeQTable()
     {
-    	for(unsigned int i = 0; i < nStates; i++)
-    		for(unsigned int j = 0; j < nActions; j++)
-    			QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
+        for(unsigned int i = 0; i < nStates; i++)
+            for(unsigned int j = 0; j < nActions; j++)
+                QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
     }
 
     virtual void printInfo(arma::mat output, arma::vec prevQHat, double& J1)
@@ -215,12 +223,12 @@ public:
     {
         computeQTable();
         std::cout << std::endl << "Policy:" << std::endl;
-		for(unsigned int i = 0; i < nStates; i++)
-		{
-			arma::uword policy;
-			QTable.row(i).max(policy);
-			std::cout << "policy(" << i << ") = " << policy << std::endl;
-		}
+        for(unsigned int i = 0; i < nStates; i++)
+        {
+            arma::uword policy;
+            QTable.row(i).max(policy);
+            std::cout << "policy(" << i << ") = " << policy << std::endl;
+        }
     }
 
     virtual ~FQI()

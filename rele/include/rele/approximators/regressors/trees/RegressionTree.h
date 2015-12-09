@@ -44,31 +44,19 @@ public:
                    unsigned int outputDimensions = 1,
                    unsigned int nMin = 2) :
         BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
-        root(nullptr), emptyNode(emptyNode), nMin(nMin), phi(phi) //FIXME regressors interface
+        root(nullptr), emptyNode(emptyNode), nMin(nMin), phi(phi)
     {
 
     }
 
-    virtual arma::vec operator() (const InputC& input) override
-    {
-        arma::vec output(this->outputDimension);
-        output = evaluate(input);
-        return output;
-    }
-
-    /**
-     * Evaluate the tree
-     * @return OutputC
-     * @param  input The input data on which the model is evaluated
-     */
-    virtual OutputC evaluate(const InputC& input)
+    virtual OutputC operator() (const InputC& input) override
     {
         if (!root)
-        {
             throw std::runtime_error("Empty tree evaluated");
-        }
 
-        return root->getValue(phi(input));
+        arma::vec output(this->outputDimension);
+        output = root->getValue(phi(input));
+        return output;
     }
 
     /**

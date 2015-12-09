@@ -25,153 +25,69 @@
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_EXTRATREEENSEMBLE_H_
 
 #include "ExtraTree.h"
+#include "Ensemble.h"
+
 
 namespace ReLe
 {
 
 template<class InputC, class OutputC>
-class ExtraTreeEnsemble : public BatchRegressor_<InputC, OutputC>
+class ExtraTreeEnsemble_: public Ensemble_<InputC, OutputC>
 {
 public:
-    /**
-     * The basic constructor
-     * @param m number of trees in the ensemble
-     * @param k number of selectable attributes to be randomly picked
-     * @param nMin minimum number of tuples in a leaf
-     */
-    ExtraTreeEnsemble(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
-                      unsigned int outputSize = 1, unsigned int m = 50,
-                      unsigned int k = 5, unsigned int nMin = 2,
-                      double scoreThreshold = 0.0, LeafType leafType = Constant)
-        : BatchRegressor_<InputC, OutputC>(phi, outputSize),
-          phi(phi), emptyNode(emptyNode),
-          m(m), k(k), nMin(nMin),
-          scoreThreshold(scoreThreshold), leafType(leafType)
+    ExtraTreeEnsemble_(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
+                       unsigned int outputSize = 1, unsigned int nRegressors = 50,
+                       unsigned int k = 5, unsigned int nMin = 2,
+                       double scoreThreshold = 0.0, LeafType leafType = Constant)
+        : Ensemble_<InputC, OutputC>(phi, outputSize), emptyNode(emptyNode),
+          k(k), nMin(nMin), scoreThreshold(scoreThreshold),
+          leafType(leafType)
     {
-        initialize();
+        initialize(nRegressors);
     }
 
-    /**
-     *
-     */
-    virtual arma::vec operator() (const InputC& input) override
+    void initialize(unsigned int nRegressors)
     {
-        arma::vec output(this->outputDimension);
-        output = evaluate(input);
-        return output;
-    }
-
-    /**
-     * Empty destructor
-     */
-    virtual ~ExtraTreeEnsemble()
-    {
-        cleanEnsemble();
-    }
-
-    /**
-     * Initialize the ExtraTreeEnsemble by clearing the internal structures
-     */
-    virtual void initialize()
-    {
-        cleanEnsemble();
-        ensemble.clear();
-        for (unsigned int i = 0; i < m; i++)
+        this->cleanEnsemble();
+        this->regressors.clear();
+        for (unsigned int i = 0; i < nRegressors; i++)
         {
-            auto tree = new ExtraTree<InputC, OutputC>(phi, emptyNode, leafType, this->outputDimension,
+            auto tree = new ExtraTree<InputC, OutputC>(this->phi, emptyNode, leafType, this->outputDimension,
                     k, nMin, scoreThreshold);
-            ensemble.push_back(tree);
+            this->regressors.push_back(tree);
         }
     }
 
-    /**
-     * Set nmin
-     * @param nmin the minimum number of inputs for splitting
-     */
-    void setNMin(int nm)
-    {
-        nMin = nm;
-    }
-
-    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override
-    {
-        for(auto tree : ensemble)
-        {
-            tree->trainFeatures(featureDataset);
-        }
-    }
-
-    /**
-     * @return Value
-     * @param  input The input data on which the model is evaluated
-     */
-    virtual OutputC evaluate(const InputC& input)
-    {
-        if (ensemble.size() == 0)
-        {
-            throw std::runtime_error("Empty ensemble evaluated");
-        }
-
-        OutputC out = ensemble[0]->evaluate(input);
-
-        for(unsigned int i = 1; i < ensemble.size(); i++)
-        {
-            out += ensemble[i]->evaluate(input);
-        }
-
-        return out / static_cast<double>(ensemble.size());
-    }
-
-    /**
-     *
-     */
-    virtual void writeOnStream(std::ofstream& out)
-    {
-        //TODO implement
-    }
-
-    /**
-     *
-     */
-    virtual void ReadFromStream(std::ifstream& in)
-    {
-        //TODO implement
-    }
-
-    /**
-     * Initialize data structures for feature ranking
-     */
     void initFeatureRanks()
     {
-        for(auto tree : ensemble)
-        {
+        for(auto tree : this->regressors)
             tree->initFeatureRanks();
-        }
     }
 
-private:
-    void cleanEnsemble()
+    virtual void writeOnStream(std::ofstream& out)
     {
-        for (auto tree : ensemble)
-        {
-            if (tree)
-            {
-                delete tree;
-            }
-        }
+        // TODO: Implement
+    }
+
+    virtual void readFromStream(std::ifstream& in)
+    {
+        // TODO: Implement
+    }
+
+    virtual ~ExtraTreeEnsemble_()
+    {
+
     }
 
 private:
-    Features_<InputC>& phi;
     const EmptyTreeNode<OutputC>& emptyNode;
-    unsigned int m; //number of trees in the ensemble
-    unsigned int k; //number of selectable attributes to be randomly picked
-    unsigned int nMin; //minimum number of tuples for splitting
+    unsigned int k; // Number of selectable attributes to be randomly picked
+    unsigned int nMin; // Minimum number of tuples for splitting
     double scoreThreshold;
     LeafType leafType;
-
-    std::vector<ExtraTree<InputC, OutputC>*> ensemble; //the extra-trees ensemble
 };
+
+typedef ExtraTreeEnsemble_<arma::vec, arma::vec> ExtraTreeEnsemble;
 
 }
 

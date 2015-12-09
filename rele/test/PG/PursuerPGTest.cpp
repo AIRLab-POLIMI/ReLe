@@ -29,7 +29,6 @@
 #include "Core.h"
 #include "parametric/differentiable/NormalPolicy.h"
 #include "parametric/differentiable/GenericNormalPolicy.h"
-#include "regressors/SaturatedRegressor.h"
 #include "basis/GaussianRbf.h"
 #include "basis/SubspaceBasis.h"
 #include "basis/ModularBasis.h"

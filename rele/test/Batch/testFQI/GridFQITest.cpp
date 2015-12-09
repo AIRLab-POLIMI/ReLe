@@ -31,10 +31,12 @@
 #include "FiniteMDP.h"
 #include "GridWorldGenerator.h"
 #include "regressors/FFNeuralNetwork.h"
+#include "regressors/FFNeuralNetworkEnsemble.h"
 #include "basis/IdentityBasis.h"
 #include "IdToGridBasis.h"
 #include "regressors/KDTree.h"
 #include "regressors/ExtraTree.h"
+#include "regressors/ExtraTreeEnsemble.h"
 
 #include <iostream>
 
@@ -66,12 +68,11 @@ int main(int argc, char *argv[])
      * collected ones.
      */
     Dataset<FiniteAction, FiniteState> data;
-    arma::mat QLearningQ;
     if(acquireData)
     {
         // Policy declaration
         e_Greedy policy;
-        policy.setEpsilon(0.2);
+        policy.setEpsilon(0.25);
         policy.setNactions(nActions);
 
         // The agent is instantiated. It takes the policy as parameter.
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
         /* The Core class is what ReLe uses to move the agent in the MDP. It is
          *  instantiated using the MDP and the agent itself.
          */
-        Core<FiniteAction, FiniteState> expertCore(mdp, expert);
+        auto&& expertCore = buildCore(mdp, expert);
 
         /* The CollectorStrategy is used to collect data from the agent that is
          * moving in the MDP. Here, it is used to store the transition that are used
@@ -134,28 +135,26 @@ int main(int argc, char *argv[])
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
 
-    // The regressor is instantiated using the feature vector
+    // ******* FQI *******
 
     // Neural Network
-    //FFNeuralNetwork QRegressorA(phi, 10, 1);
-    //FFNeuralNetwork QRegressorB(phi, 10, 1);
-    //QRegressorA.getHyperParameters().lambda = 0.3;
-    //QRegressorA.getHyperParameters().maxIterations = 10;
-    //QRegressorB.getHyperParameters().lambda = 0.3;
-    //QRegressorB.getHyperParameters().maxIterations = 10;
+    //FFNeuralNetwork QRegressorA(phi, 50, 1);
+    //FFNeuralNetwork QRegressorB(phi, 50, 1);
+    //QRegressor.getHyperParameters().lambda = 0.3;
+    //QRegressor.getHyperParameters().maxIterations = 10;
+
     // Tree
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    // A FQI object is instantiated using the dataset and the regressor
-    // FQI<FiniteState> fqi(data, QRegressorA, nStates, nActions, 0.9);
-    DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, nActions, 0.9);
+    FQI<FiniteState> fqi(data, QRegressorA, nStates, nActions, 0.9);
+    //DoubleFQI<FiniteState> fqi(data, phi, QRegressorA, QRegressorB, nStates, nActions, 0.9);
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 2, 1e-15);
+    fqi.run(phi, 100, 1e-15);
 
     return 0;
 }

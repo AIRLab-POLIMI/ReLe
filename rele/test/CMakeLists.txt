@@ -35,9 +35,6 @@ target_link_libraries(em_test rele)
 add_executable(nene_test core/NearestNeighbourTest.cpp)
 target_link_libraries(nene_test rele)
 
-add_executable(saturated_test core/SaturatedRegressorTest.cpp)
-target_link_libraries(saturated_test rele)
-
 #Matlab tests (miscellaneous)
 add_executable(chol_FIM miscellaneous/CholeskyFIMTest.cpp)
 target_link_libraries(chol_FIM rele)

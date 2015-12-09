@@ -31,7 +31,7 @@
 namespace ReLe
 {
 
-template<class InputC, bool denseOutput = true>
+template<class InputC, class OutputC, bool denseOutput = true>
 class Regressor_
 {
 
@@ -42,17 +42,17 @@ public:
     {
     }
 
-    virtual arma::vec operator() (const InputC& input) = 0;
+    virtual OutputC operator() (const InputC& input) = 0;
 
     template<class Input1, class Input2>
-    arma::vec operator()(const Input1& input1, const Input2& input2)
+    OutputC operator()(const Input1& input1, const Input2& input2)
     {
         auto& self = *this;
         return self(vectorize(input1, input2));
     }
 
     template<class Input1, class Input2, class Input3>
-    arma::vec operator()(const Input1& input1, const Input2& input2, const Input3& input3)
+    OutputC operator()(const Input1& input1, const Input2& input2, const Input3& input3)
     {
         auto& self = *this;
         return self(vectorize(input1, input2, input3));
@@ -70,21 +70,21 @@ public:
 protected:
     unsigned int outputDimension;
 };
-typedef Regressor_<arma::vec> Regressor;
+typedef Regressor_<arma::vec, arma::vec> Regressor;
 
 template<class InputC, bool denseOutput = true>
-class ParametricRegressor_: public Regressor_<InputC, denseOutput>
+class ParametricRegressor_: public Regressor_<InputC, arma::vec, denseOutput>
 {
 public:
     ParametricRegressor_(unsigned int output = 1) :
-        Regressor_<InputC, denseOutput>(output)
+        Regressor_<InputC, arma::vec, denseOutput>(output)
     {
     }
 
     virtual void setParameters(const arma::vec& params) = 0;
     virtual arma::vec getParameters() const = 0;
     virtual unsigned int getParametersSize() const = 0;
-    virtual arma::vec  diff(const InputC& input) = 0;
+    virtual arma::vec diff(const InputC& input) = 0;
 
     template<class Input1, class Input2>
     arma::vec diff(const Input1& input1, const Input2& input2)
@@ -107,12 +107,12 @@ public:
 typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 
 template<class InputC, class OutputC, bool denseOutput=true>
-class BatchRegressor_ : public Regressor_<InputC, denseOutput>
+class BatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 {
 
 public:
     BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
-        Regressor_<InputC, denseOutput>(output),
+        Regressor_<InputC, OutputC, denseOutput>(output),
         phi(phi)
     {
 

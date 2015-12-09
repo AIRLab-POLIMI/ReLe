@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         //Q_Learning agent(policy);
         DoubleQ_Learning agent(policy);
 
-        Core<FiniteAction, FiniteState> core(mdp, agent);
+        auto&& core = buildCore(mdp, agent);
 
         core.getSettings().episodeLength = 100000;
         //core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, FiniteState>("/home/dave/prova.txt");

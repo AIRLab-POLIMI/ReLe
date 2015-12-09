@@ -24,7 +24,7 @@
 #include "parametric/differentiable/GenericNormalPolicy.h"
 #include "basis/IdentityBasis.h"
 #include "features/SparseFeatures.h"
-#include "regressors/SaturatedRegressor.h"
+#include "regressors/LinearApproximator.h"
 
 #include "NumericalGradient.h"
 
@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     arma::vec uMax = {5.0,  1.0};
 
     arma::vec w = {1.0, 1.0};
-    SaturatedRegressor regressor(phi, uMin, uMax);
+    LinearApproximator regressor(phi);
     regressor.setParameters(w);
 
     GenericMVNPolicy policy(regressor);
