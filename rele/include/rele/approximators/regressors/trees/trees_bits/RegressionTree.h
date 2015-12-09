@@ -24,11 +24,11 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 
+#include "../trees_bits/nodes/EmptyTreeNode.h"
+#include "../trees_bits/nodes/InternalTreeNode.h"
+#include "../trees_bits/nodes/LeafTreeNode.h"
+#include "../trees_bits/nodes/TreeNode.h"
 #include "Regressors.h"
-#include "nodes/TreeNode.h"
-#include "nodes/LeafTreeNode.h"
-#include "nodes/InternalTreeNode.h"
-#include "nodes/EmptyTreeNode.h"
 #include "Features.h"
 
 namespace ReLe
@@ -44,19 +44,31 @@ public:
                    unsigned int outputDimensions = 1,
                    unsigned int nMin = 2) :
         BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
-        root(nullptr), emptyNode(emptyNode), nMin(nMin), phi(phi)
+        root(nullptr), emptyNode(emptyNode), nMin(nMin), phi(phi) //FIXME regressors interface
     {
 
     }
 
-    virtual OutputC operator() (const InputC& input) override
+    virtual arma::vec operator() (const InputC& input) override
+    {
+        arma::vec output(this->outputDimension);
+        output = evaluate(input);
+        return output;
+    }
+
+    /**
+     * Evaluate the tree
+     * @return OutputC
+     * @param  input The input data on which the model is evaluated
+     */
+    virtual OutputC evaluate(const InputC& input)
     {
         if (!root)
+        {
             throw std::runtime_error("Empty tree evaluated");
+        }
 
-        arma::vec output(this->outputDimension);
-        output = root->getValue(phi(input));
-        return output;
+        return root->getValue(phi(input));
     }
 
     /**
