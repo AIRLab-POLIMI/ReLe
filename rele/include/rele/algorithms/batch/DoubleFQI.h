@@ -59,12 +59,12 @@ public:
         return QRegressorB;
     }
 
-    virtual void writeOnStream(std::ofstream& out)
+    virtual void writeOnStream(std::ofstream& out) override
     {
         // TODO: Implement
     }
 
-    virtual void readFromStream(std::ifstream& in)
+    virtual void readFromStream(std::ifstream& in) override
     {
         // TODO: Implement
     }

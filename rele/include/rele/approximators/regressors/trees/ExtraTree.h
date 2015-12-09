@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_EXTRATREE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_EXTRATREE_H_
 
-#include "trees/RegressionTree.h"
+#include "trees_bits/RegressionTree.h"
 #include "RandomGenerator.h"
 
 #include <stdexcept>

@@ -25,7 +25,7 @@
 #include "BasisFunctions.h"
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include "ParametricRewardMDP.h"
 
 #include "FileManager.h"

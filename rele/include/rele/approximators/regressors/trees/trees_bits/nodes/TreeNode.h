@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_TREENODE_H_
 
 #include <iostream>
+#include <armadillo>
 
 namespace ReLe
 {

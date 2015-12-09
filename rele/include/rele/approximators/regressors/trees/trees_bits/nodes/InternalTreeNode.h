@@ -24,7 +24,9 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_INTERNALTREENODE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_TREES_INTERNALTREENODE_H_
 
-#include "../../trees_bits/nodes/TreeNode.h"
+#include "TreeNode.h"
+
+#include "BatchData.h"
 
 namespace ReLe
 {

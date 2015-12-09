@@ -25,7 +25,7 @@
 #include "basis/PolynomialFunction.h"
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 
 using namespace std;
 using namespace ReLe;

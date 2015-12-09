@@ -25,7 +25,7 @@
 #define NORMALPOLICY_H
 
 #include "Policy.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include "ArmadilloPDFs.h"
 
 #define NORMALP_NAME "NormalPolicy"

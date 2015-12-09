@@ -2,7 +2,7 @@
 #define GIBBSPOLICY_H_
 
 #include "Policy.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include "RandomGenerator.h"
 
 #include <stdexcept>

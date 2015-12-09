@@ -25,7 +25,7 @@
 #define INCLUDE_RELE_IRL_ALGORITHMS_MWAL_H_
 
 #include "BasisFunctions.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include "IRLAlgorithm.h"
 #include "IRLSolver.h"
 

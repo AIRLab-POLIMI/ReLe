@@ -22,7 +22,7 @@
  */
 
 #include "features/DenseFeatures.h"
-#include "regressors/GaussianMixtureModels.h"
+#include "regressors/others/GaussianMixtureModels.h"
 #include "parametric/differentiable/LinearPolicy.h"
 #include "basis/IdentityBasis.h"
 

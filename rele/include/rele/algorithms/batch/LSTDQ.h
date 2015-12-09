@@ -27,7 +27,7 @@
 #include "Features.h"
 #include "Transition.h"
 #include "q_policy/e_Greedy.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include <armadillo>
 #include <cassert>
 

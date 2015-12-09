@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "regressors/NearestNeighbourRegressor.h"
+#include "regressors/others/NearestNeighbourRegressor.h"
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
 

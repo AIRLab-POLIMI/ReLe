@@ -23,7 +23,7 @@
 
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
-#include "regressors/GaussianMixtureModels.h"
+#include "regressors/others/GaussianMixtureModels.h"
 #include "basis/IdentityBasis.h"
 #include "basis/PolynomialFunction.h"
 #include "basis/GaussianRbf.h"

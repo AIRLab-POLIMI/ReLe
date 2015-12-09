@@ -31,8 +31,8 @@
 #include <algorithm>
 #include "Regressors.h"
 
-#include "nn/ActivationFunctions.h"
-#include "nn/Regularization.h"
+#include "nn_bits/ActivationFunctions.h"
+#include "nn_bits/Regularization.h"
 
 #include "NumericalGradient.h"
 

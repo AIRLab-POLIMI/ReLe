@@ -23,7 +23,7 @@
 
 #include "features/SparseFeatures.h"
 #include "features/DenseFeatures.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include "basis/IdentityBasis.h"
 
 #include "parametric/differentiable/LinearPolicy.h"

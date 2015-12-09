@@ -24,7 +24,7 @@
 #include "parametric/differentiable/GenericNormalPolicy.h"
 #include "basis/IdentityBasis.h"
 #include "features/SparseFeatures.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 
 #include "NumericalGradient.h"
 

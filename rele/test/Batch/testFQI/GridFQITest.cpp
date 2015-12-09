@@ -30,13 +30,13 @@
 #include "FileManager.h"
 #include "FiniteMDP.h"
 #include "GridWorldGenerator.h"
-#include "regressors/FFNeuralNetwork.h"
-#include "regressors/FFNeuralNetworkEnsemble.h"
+#include "regressors/nn/FFNeuralNetwork.h"
+#include "regressors/nn/FFNeuralNetworkEnsemble.h"
 #include "basis/IdentityBasis.h"
 #include "IdToGridBasis.h"
-#include "regressors/KDTree.h"
-#include "regressors/ExtraTree.h"
-#include "regressors/ExtraTreeEnsemble.h"
+#include "regressors/trees/KDTree.h"
+#include "regressors/trees/ExtraTree.h"
+#include "regressors/trees/ExtraTreeEnsemble.h"
 
 #include <iostream>
 

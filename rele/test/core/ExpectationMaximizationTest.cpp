@@ -23,8 +23,8 @@
 
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
-#include "regressors/GaussianMixtureModels.h"
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/GaussianMixtureModels.h"
+#include "regressors/others/LinearApproximator.h"
 
 #include "Utils.h"
 

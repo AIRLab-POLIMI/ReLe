@@ -26,7 +26,7 @@
 
 #include "Agent.h"
 #include <armadillo>
-#include "regressors/LinearApproximator.h"
+#include "regressors/others/LinearApproximator.h"
 #include "q_policy/e_Greedy.h"
 
 namespace ReLe

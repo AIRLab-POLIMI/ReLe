@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
 #define INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
 
-#include "regressors/NearestNeighbourRegressor.h"
+#include "regressors/others/NearestNeighbourRegressor.h"
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
 

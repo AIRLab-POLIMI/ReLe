@@ -23,7 +23,7 @@
 
 #include "basis/IdentityBasis.h"
 #include "features/DenseFeatures.h"
-#include "regressors/FFNeuralNetwork.h"
+#include "regressors/nn/FFNeuralNetwork.h"
 
 #include "Utils.h"
 
