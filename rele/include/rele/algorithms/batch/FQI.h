@@ -102,10 +102,10 @@ public:
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
-        printInfo(output, prevQHat, J);
+        printInfo(input, output, prevQHat, J);
 
         // Main FQI loop
-        while(iteration < maxiterations)// && J > epsilon)
+        while(iteration < maxiterations && J > epsilon)
         {
             // Update and print the iteration number
             iteration++;
@@ -124,7 +124,7 @@ public:
             computeQHat(data);
 
             // Print info
-            printInfo(output, prevQHat, J);
+            printInfo(input, output, prevQHat, J);
         }
 
         // Print final info
@@ -200,7 +200,7 @@ public:
                 QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
     }
 
-    virtual void printInfo(arma::mat output, arma::vec prevQHat, double& J1)
+    virtual void printInfo(arma::mat input, arma::mat output, arma::vec prevQHat, double& J1)
     {
         double J2;
 
@@ -213,10 +213,13 @@ public:
          */
         J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
 
-        std::cout << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
-        std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
-        std::cout << "QHat - Previous QHat: " << J1 << std::endl;
-        std::cout << "QHat - Q Bellman: " << J2 << std::endl;
+        std::cout << "Input: ";
+        for(unsigned int i = 0; i < 40; i++)
+			std::cout << "(" << input(0, i) << ", " << input(1, i) << ")     ";
+		std::cout << std::endl << std::endl << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
+		std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
+		std::cout << "QHat - Previous QHat: " << J1 << std::endl;
+		std::cout << "QHat - Q Bellman: " << J2 << std::endl;
     }
 
     virtual void printPolicy()
