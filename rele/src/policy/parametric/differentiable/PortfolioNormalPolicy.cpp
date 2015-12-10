@@ -65,7 +65,7 @@ arma::vec PortfolioNormalPolicy::diff(const arma::vec& state,
 arma::vec PortfolioNormalPolicy::difflog(const arma::vec& state,
         typename action_type<FiniteAction>::const_type_ref action)
 {
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
 
     arma::vec output = approximator(state);
@@ -95,7 +95,7 @@ arma::mat PortfolioNormalPolicy::diff2log(const arma::vec& state,
     int dm = approximator.getParametersSize();
 
 
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
     arma::vec output = approximator(state);
     double Exp = exp(0.01 * (output(0) - 10.0) * (output(0) - 10.0));

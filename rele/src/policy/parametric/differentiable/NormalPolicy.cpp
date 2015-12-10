@@ -82,7 +82,7 @@ arma::vec NormalPolicy::difflog(const arma::vec& state, const arma::vec& action)
     calculateMeanAndStddev(state);
 
     // get features
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -96,7 +96,7 @@ arma::mat NormalPolicy::diff2log(const arma::vec& state, const arma::vec& action
     calculateMeanAndStddev(state);
 
     // get features
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
 
     return -features * features.t() / (mInitialStddev * mInitialStddev);
@@ -134,8 +134,8 @@ arma::vec NormalLearnableStateDependantStddevPolicy::difflog(const arma::vec &st
     calculateMeanAndStddev(state);
 
     // get features
-    Features& meanBasis = approximator.getBasis();
-    Features& stddevBasis = stdApproximator.getBasis();
+    Features& meanBasis = approximator.getFeatures();
+    Features& stddevBasis = stdApproximator.getFeatures();
 
     // compute gradient
     arma::vec gMean = meanBasis(state) * (a - mMean) / (mInitialStddev * mInitialStddev);
@@ -187,7 +187,7 @@ arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
     }
     //        std::cout << "\n";
 
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
 
     //        MY_PRINT(features);
@@ -202,7 +202,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
     updateInternalState(state);
 
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -242,7 +242,7 @@ arma::vec MVNDiagonalPolicy::difflog(const arma::vec &state, const arma::vec &ac
     }
     //        std::cout << "\n";
 
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
     //    std::cerr << "action: " << action;
     //    std::cerr << "features: " << features;
@@ -268,7 +268,7 @@ arma::mat MVNDiagonalPolicy::diff2log(const arma::vec &state, const arma::vec &a
     int ds = stddevParams.n_elem;
 
 
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
     arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 
@@ -336,7 +336,7 @@ arma::vec MVNLogisticPolicy::difflog(const arma::vec& state, const arma::vec& ac
     {
         smdiff(i) = action[i] - mMean(i);
     }
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
 
     // compute gradient
@@ -377,7 +377,7 @@ arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& a
     int ds = mLogisticParams.n_elem;
 
 
-    Features& basis = approximator.getBasis();
+    Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
     arma::mat Hm = - 0.5 * features * (mCinv + mCinv.t()) * features.t();
 

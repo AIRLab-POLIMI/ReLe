@@ -45,7 +45,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
 
 
     //Compute gradient dQ(x,u)
-    Features& basis = Q.getBasis();
+    Features& basis = Q.getFeatures();
     mat dQxu = basis(regInput);
 
 
@@ -106,7 +106,7 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
 
 
     //Compute gradient dQ(x,u)
-    Features& basis = Q.getBasis();
+    Features& basis = Q.getFeatures();
     vec dQxu = arma::vectorise(basis(regInput));
 
 

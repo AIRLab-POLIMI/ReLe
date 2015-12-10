@@ -34,14 +34,12 @@ namespace ReLe
 {
 
 template<class InputC, bool denseOutput = true>
-class NearestNeighbourRegressor_: public Regressor_<InputC, arma::vec, denseOutput>,
-    public UnsupervisedBatchRegressor_<InputC, denseOutput>
+class NearestNeighbourRegressor_: public UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>
 {
 
 public:
     NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
-        : Regressor_<InputC, arma::vec>(phi.cols()),
-          UnsupervisedBatchRegressor_<InputC, denseOutput>(phi), k(k), iterations(1),
+        : UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, phi.cols()), k(k), iterations(1),
           centroids(phi.rows(), k, arma::fill::randn), wcss(std::numeric_limits<double>::infinity())
     {
         assert(k >= 2);

@@ -66,7 +66,7 @@ public:
         for (int k = 0; k < nbEpisodes; ++k)
             nbSamples += data[k].size();
 
-        Features_<arma::vec>& basis = Q.getBasis();
+        Features_<arma::vec>& basis = Q.getFeatures();
         int df = basis.rows(); //number of features
         arma::mat PiPhihat(nbSamples, df, arma::fill::zeros);
         arma::mat A(df, df, arma::fill::zeros);
@@ -224,7 +224,7 @@ public:
         for (int k = 0; k < nbEpisodes; ++k)
             nbSamples += data[k].size();
 
-        Features_<arma::vec>& basis = Q.getBasis();
+        Features_<arma::vec>& basis = Q.getFeatures();
         int df = basis.rows(); //number of features
         arma::mat A(df, df, arma::fill::zeros);
         arma::vec b(df, arma::fill::zeros);

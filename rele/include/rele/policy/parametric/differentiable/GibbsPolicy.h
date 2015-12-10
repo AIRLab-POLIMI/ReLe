@@ -123,7 +123,7 @@ public:
 
 
         arma::vec&& distribution = computeDistribution(nactions, tuple, statesize);
-        Features& phi = approximator.getBasis();
+        Features& phi = approximator.getFeatures();
         arma::mat features(phi.rows(), nactions);
 
         for (unsigned int k = 0; k < nactions; k++)
@@ -311,7 +311,7 @@ public:
 
 
         arma::vec&& distribution = computeDistribution(nactions, tuple, statesize);
-        Features& phi = approximator.getBasis();
+        Features& phi = approximator.getFeatures();
         arma::mat features(phi.rows(), nactions);
 
         for (unsigned int k = 0; k < nactions; k++)

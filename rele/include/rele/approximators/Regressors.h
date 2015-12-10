@@ -37,8 +37,8 @@ class Regressor_
 
 public:
 
-    Regressor_(unsigned int output = 1) :
-        outputDimension(output)
+    Regressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
+        phi(phi), outputDimension(output)
     {
     }
 
@@ -67,17 +67,24 @@ public:
         return outputDimension;
     }
 
+    inline Features_<InputC, denseOutput>& getFeatures()
+    {
+        return phi;
+    }
+
 protected:
+    Features_<InputC, denseOutput>& phi;
     unsigned int outputDimension;
 };
+
 typedef Regressor_<arma::vec, arma::vec> Regressor;
 
 template<class InputC, bool denseOutput = true>
 class ParametricRegressor_: public Regressor_<InputC, arma::vec, denseOutput>
 {
 public:
-    ParametricRegressor_(unsigned int output = 1) :
-        Regressor_<InputC, arma::vec, denseOutput>(output)
+    ParametricRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
+        Regressor_<InputC, arma::vec, denseOutput>(phi, output)
     {
     }
 
@@ -104,6 +111,7 @@ public:
     }
 
 };
+
 typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 
 template<class InputC, class OutputC, bool denseOutput=true>
@@ -112,8 +120,7 @@ class BatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 
 public:
     BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
-        Regressor_<InputC, OutputC, denseOutput>(output),
-        phi(phi)
+        Regressor_<InputC, OutputC, denseOutput>(phi, output)
     {
 
     }
@@ -125,11 +132,11 @@ public:
         // FIXME: use trait
 
         //compute features matrix
-        arma::mat features(phi.rows(), N);
+        arma::mat features(this->phi.rows(), N);
         arma::mat outputs(this->outputDimension, N);
         for(int i = 0; i < N; i++)
         {
-            features.col(i) = phi(dataset.getInput(i));
+            features.col(i) = this->phi(dataset.getInput(i));
             outputs.col(i) = dataset.getOutput(i);
         }
 
@@ -144,22 +151,17 @@ public:
 
     }
 
-    inline Features& getBasis()
-    {
-        return phi;
-    }
-
-protected:
-    Features_<InputC, denseOutput>& phi;
 };
+
 typedef BatchRegressor_<arma::vec, arma::vec> BatchRegressor;
 
-template<class InputC, bool denseOutput = true>
-class UnsupervisedBatchRegressor_
+template<class InputC, class OutputC, bool denseOutput = true>
+class UnsupervisedBatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 {
 
 public:
-    UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi) : phi(phi)
+    UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1)
+        : Regressor_<InputC, OutputC, denseOutput>(phi, output)
     {
 
     }
@@ -169,10 +171,10 @@ public:
         unsigned int N = dataset.size();
 
         //compute features matrix
-        arma::mat features(phi.rows(), N);
+        arma::mat features(this->phi.rows(), N);
         for(int i = 0; i < N; i++)
         {
-            features.col(i) = phi(dataset[i]);
+            features.col(i) = this->phi(dataset[i]);
         }
 
         trainFeatures(features);
@@ -185,14 +187,15 @@ public:
 
     }
 
-protected:
-    Features_<InputC, denseOutput>& phi;
 };
 
 }
 
 #define USE_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
-    typedef BatchRegressor_<InputC, OutputC, denseOutput> Base; \
+    typedef Regressor_<InputC, OutputC, denseOutput> Base; \
     using Base::phi;
+
+#define USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
+    typedef ParametricRegressor_<InputC, denseOutput> Base;
 
 #endif /* REGRESSORS_H_ */

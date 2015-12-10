@@ -37,7 +37,7 @@ class DoubleFQIEnsemble : public Ensemble
 public:
     DoubleFQIEnsemble(BatchRegressor& QRegressorA,
                       BatchRegressor& QRegressorB) :
-        Ensemble(QRegressorA.getBasis(), 1)
+        Ensemble(QRegressorA.getFeatures(), 1)
     {
         regressors.push_back(&QRegressorA);
         regressors.push_back(&QRegressorB);
@@ -55,7 +55,7 @@ public:
 
     virtual ~DoubleFQIEnsemble()
     {
-    	regressors.clear();
+        regressors.clear();
     }
 };
 
@@ -75,7 +75,7 @@ public:
               unsigned int nActions,
               double gamma) :
         FQI<StateC>(data, QRegressorEnsemble, nStates, nActions, gamma),
-		QRegressorEnsemble(QRegressorA, QRegressorB)
+        QRegressorEnsemble(QRegressorA, QRegressorB)
     {
     }
 
@@ -84,7 +84,7 @@ public:
         unsigned int selectedQ = RandomGenerator::sampleUniformInt(0, 1);
 
         if(selectedQ == 0)
-        	doubleFQIStep(QRegressorEnsemble.getRegressor(0), QRegressorEnsemble.getRegressor(1), input, output, rewards);
+            doubleFQIStep(QRegressorEnsemble.getRegressor(0), QRegressorEnsemble.getRegressor(1), input, output, rewards);
         else
             doubleFQIStep(QRegressorEnsemble.getRegressor(1), QRegressorEnsemble.getRegressor(0), input, output, rewards);
     }

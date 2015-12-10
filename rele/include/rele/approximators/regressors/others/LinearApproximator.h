@@ -36,11 +36,12 @@ namespace ReLe
 template<class InputC, bool denseOutput = true>
 class LinearApproximator_: public ParametricRegressor_<InputC, denseOutput>
 {
+    USE_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
 
 public:
-    LinearApproximator_(Features_<InputC, denseOutput>& bfs)
-        : ParametricRegressor_<InputC>(bfs.cols()), basis(bfs),
-          parameters(bfs.rows(), arma::fill::zeros)
+    LinearApproximator_(Features_<InputC, denseOutput>& phi)
+        : ParametricRegressor_<InputC>(phi, phi.cols()),
+          parameters(phi.rows(), arma::fill::zeros)
     {
     }
 
@@ -50,20 +51,15 @@ public:
 
     arma::vec operator()(const InputC& input) override
     {
-        arma::mat features = basis(input);
+        arma::mat features = phi(input);
         arma::vec output = features.t()*parameters;
         return output;
     }
 
     arma::vec diff(const InputC& input) override
     {
-        arma::mat features = basis(input);
+        arma::mat features = phi(input);
         return vectorise(features);
-    }
-
-    inline Features& getBasis()
-    {
-        return basis;
     }
 
     inline arma::vec getParameters() const override
@@ -84,7 +80,7 @@ public:
 
 private:
     arma::vec parameters;
-    Features_<InputC, denseOutput>& basis;
+
 };
 
 typedef LinearApproximator_<arma::vec> LinearApproximator;

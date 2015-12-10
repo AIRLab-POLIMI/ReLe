@@ -35,7 +35,7 @@ template<class InputC>
 class GaussianRegressor_ : public ParametricRegressor_<InputC>
 {
 public:
-    GaussianRegressor_(Features_<InputC>& phi) : ParametricRegressor_<InputC>(1), phi(phi)
+    GaussianRegressor_(Features_<InputC>& phi) : ParametricRegressor_<InputC>(phi)
     {
         unsigned int size = phi.rows();
         sigma = arma::eye(size, size);
@@ -84,7 +84,6 @@ public:
     }
 
 private:
-    Features_<InputC>& phi;
     arma::vec mu;
     arma::mat sigma;
 
@@ -94,11 +93,13 @@ typedef GaussianRegressor_<arma::vec> GaussianRegressor;
 
 
 template<class InputC>
-class GaussianMixtureRegressor_ : public ParametricRegressor_<InputC>, public UnsupervisedBatchRegressor_<InputC>
+class GaussianMixtureRegressor_ : public ParametricRegressor_<InputC>, public UnsupervisedBatchRegressor_<InputC, arma::vec>
 {
+    USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, arma::vec, true)
+
 public:
-    GaussianMixtureRegressor_(Features_<InputC>& phi, unsigned int n, double muVariance = 1) : ParametricRegressor_<InputC>(1),
-        UnsupervisedBatchRegressor_<InputC>(phi)
+    GaussianMixtureRegressor_(Features_<InputC>& phi, unsigned int n, double muVariance = 1) : ParametricRegressor_<InputC>(phi, 1),
+        UnsupervisedBatchRegressor_<InputC, arma::vec>(phi)
     {
         unsigned int size = phi.rows();
 
@@ -116,7 +117,7 @@ public:
     }
 
     GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu)
-        : ParametricRegressor_<InputC>(1), UnsupervisedBatchRegressor_<InputC>(phi), mu(mu)
+        : ParametricRegressor_<InputC>(phi), UnsupervisedBatchRegressor_<InputC, arma::vec>(phi), mu(mu)
     {
         unsigned int size = phi.rows();
         unsigned int n = mu.size();
@@ -133,7 +134,7 @@ public:
     }
 
     GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu, std::vector<arma::mat>& cholSigma)
-        : ParametricRegressor_<InputC>(1),  UnsupervisedBatchRegressor_<InputC>(phi), mu(mu), cholSigma(cholSigma)
+        : ParametricRegressor_<InputC>(phi),  UnsupervisedBatchRegressor_<InputC, arma::vec>(phi), mu(mu), cholSigma(cholSigma)
     {
         unsigned int n = mu.size();
         h = arma::vec(n, arma::fill::ones)/n;
@@ -191,14 +192,14 @@ public:
     virtual unsigned int getParametersSize() const override
     {
         unsigned int n = mu.size();
-        unsigned int dim = this->phi.rows();
+        unsigned int dim = Base::phi.rows();
         unsigned int varPar = dim + (dim * dim - dim) / 2;
         return dim*n+varPar*n+n;
     }
 
     virtual arma::vec operator() (const InputC& input) override
     {
-        const arma::vec& value = this->phi(input);
+        const arma::vec& value = Base::phi(input);
 
         arma::vec result = {arma::sum(computeMemberships(value))};
 
@@ -209,9 +210,9 @@ public:
     {
         arma::vec diffV(getParametersSize());
 
-        const arma::vec& value = this->phi(input);
+        const arma::vec& value = Base::phi(input);
         unsigned int n = mu.size();
-        unsigned int dim = this->phi.rows();
+        unsigned int dim = Base::phi.rows();
 
         unsigned int start = n;
         for(unsigned int i = 0; i < n; i++)

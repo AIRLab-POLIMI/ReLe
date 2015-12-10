@@ -215,11 +215,11 @@ public:
 
         std::cout << "Input: ";
         for(unsigned int i = 0; i < 40; i++)
-			std::cout << "(" << input(0, i) << ", " << input(1, i) << ")     ";
-		std::cout << std::endl << std::endl << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
-		std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
-		std::cout << "QHat - Previous QHat: " << J1 << std::endl;
-		std::cout << "QHat - Q Bellman: " << J2 << std::endl;
+            std::cout << "(" << input(0, i) << ", " << input(1, i) << ")     ";
+        std::cout << std::endl << std::endl << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
+        std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
+        std::cout << "QHat - Previous QHat: " << J1 << std::endl;
+        std::cout << "QHat - Q Bellman: " << J2 << std::endl;
     }
 
     virtual void printPolicy()

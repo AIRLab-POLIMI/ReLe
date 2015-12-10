@@ -43,7 +43,7 @@ template<class InputC, bool denseOutput = true>
 class FFNeuralNetwork_: public ParametricRegressor_<InputC, denseOutput>,
     public BatchRegressor_<InputC, arma::vec, denseOutput>
 {
-    USE_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
+    USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
 
 public:
     enum algorithm
@@ -65,7 +65,7 @@ public:
 public:
     FFNeuralNetwork_(Features_<InputC, denseOutput>& phi, unsigned int neurons,
                      unsigned int outputs) :
-        ParametricRegressor(outputs), BatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
+        ParametricRegressor(phi, outputs), BatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
     {
         layerFunction.push_back(new Sigmoid());
         layerFunction.push_back(new Linear());
@@ -95,13 +95,13 @@ public:
 
     arma::vec operator()(const InputC& input) override
     {
-        forwardComputation(phi(input));
+        forwardComputation(Base::phi(input));
         return h.back();
     }
 
     arma::vec diff(const InputC& input) override
     {
-        forwardComputation(phi(input));
+        forwardComputation(Base::phi(input));
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
         return backPropagation(g);
@@ -207,7 +207,7 @@ private:
 
         //Create the network
         aux_mem = new double[paramSize];
-        unsigned int input = phi.rows();
+        unsigned int input = Base::phi.rows();
 
         w = new arma::vec(aux_mem, paramSize, false);
 
@@ -238,7 +238,7 @@ private:
 
     void calculateParamSize()
     {
-        unsigned int paramN = (phi.rows() + 1) * layerNeurons[0];
+        unsigned int paramN = (Base::phi.rows() + 1) * layerNeurons[0];
 
         for (unsigned int layer = 1; layer < layerNeurons.size(); layer++)
         {
