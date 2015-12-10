@@ -64,9 +64,9 @@ public:
     }
 
     BatchRegressor_<InputC, OutputC>& getRegressor(unsigned int index)
-	{
-    	return *regressors[index];
-	}
+    {
+        return *regressors[index];
+    }
 
     virtual void writeOnStream(std::ofstream& out) = 0;
 
