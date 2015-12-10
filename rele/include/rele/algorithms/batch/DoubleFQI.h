@@ -32,31 +32,15 @@
 namespace ReLe
 {
 
-class DoubleFQIEnsemble: public Ensemble
+class DoubleFQIEnsemble : public Ensemble
 {
 public:
-    DoubleFQIEnsemble(Features& phi,
-                      BatchRegressor& QRegressorA,
+    DoubleFQIEnsemble(BatchRegressor& QRegressorA,
                       BatchRegressor& QRegressorB) :
-        Ensemble(phi, 1),
-        QRegressorA(QRegressorA),
-        QRegressorB(QRegressorB)
+        Ensemble(QRegressorA.getBasis(), 1)
     {
-    }
-
-    arma::vec operator()(const arma::vec& input, const arma::vec& output)
-    {
-        return (QRegressorA(input, output) + QRegressorB(input, output)) / 2;
-    }
-
-    virtual BatchRegressor& getQRegressorA()
-    {
-        return QRegressorA;
-    }
-
-    virtual BatchRegressor& getQRegressorB()
-    {
-        return QRegressorB;
+        regressors.push_back(&QRegressorA);
+        regressors.push_back(&QRegressorB);
     }
 
     virtual void writeOnStream(std::ofstream& out) override
@@ -69,11 +53,11 @@ public:
         // TODO: Implement
     }
 
-protected:
-    BatchRegressor& QRegressorA;
-    BatchRegressor& QRegressorB;
+    virtual ~DoubleFQIEnsemble()
+    {
+    	regressors.clear();
+    }
 };
-
 
 template<class StateC>
 class DoubleFQI: public FQI<StateC>
@@ -85,14 +69,13 @@ public:
      * it is used to approximate the target distribution of Q values.
      */
     DoubleFQI(Dataset<FiniteAction, StateC>& data,
-              Features& phi,
               BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
               unsigned int nStates,
               unsigned int nActions,
               double gamma) :
-        QRegressorEnsemble(phi, QRegressorA, QRegressorB),
-        FQI<StateC>(data, QRegressorEnsemble, nStates, nActions, gamma)
+        FQI<StateC>(data, QRegressorEnsemble, nStates, nActions, gamma),
+		QRegressorEnsemble(QRegressorA, QRegressorB)
     {
     }
 
@@ -101,9 +84,9 @@ public:
         unsigned int selectedQ = RandomGenerator::sampleUniformInt(0, 1);
 
         if(selectedQ == 0)
-            doubleFQIStep(QRegressorEnsemble.getQRegressorA(), QRegressorEnsemble.getQRegressorB(), input, output, rewards);
+        	doubleFQIStep(QRegressorEnsemble.getRegressor(0), QRegressorEnsemble.getRegressor(1), input, output, rewards);
         else
-            doubleFQIStep(QRegressorEnsemble.getQRegressorB(), QRegressorEnsemble.getQRegressorA(), input, output, rewards);
+            doubleFQIStep(QRegressorEnsemble.getRegressor(1), QRegressorEnsemble.getRegressor(0), input, output, rewards);
     }
 
     void doubleFQIStep(BatchRegressor& trainingRegressor,

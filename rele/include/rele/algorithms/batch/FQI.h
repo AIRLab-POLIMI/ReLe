@@ -105,7 +105,7 @@ public:
         printInfo(output, prevQHat, J);
 
         // Main FQI loop
-        while(iteration < maxiterations && J > epsilon)
+        while(iteration < maxiterations)// && J > epsilon)
         {
             // Update and print the iteration number
             iteration++;
@@ -128,7 +128,7 @@ public:
         }
 
         // Print final info
-        std::cout << "*********************************************************" << std::endl;
+        std::cout << std::endl << "*********************************************************" << std::endl;
         if(J > epsilon)
             /* The algorithm has not converged and terminated for exceeding
              * the maximum number of transitions.

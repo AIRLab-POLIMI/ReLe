@@ -63,6 +63,11 @@ public:
             regressor->trainFeatures(featureDataset);
     }
 
+    BatchRegressor_<InputC, OutputC>& getRegressor(unsigned int index)
+	{
+    	return *regressors[index];
+	}
+
     virtual void writeOnStream(std::ofstream& out) = 0;
 
     virtual void readFromStream(std::ifstream& in) = 0;
