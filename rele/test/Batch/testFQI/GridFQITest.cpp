@@ -140,8 +140,10 @@ int main(int argc, char *argv[])
     // Neural Network
     //FFNeuralNetwork QRegressorA(phi, 50, 1);
     //FFNeuralNetwork QRegressorB(phi, 50, 1);
-    //QRegressor.getHyperParameters().lambda = 0.3;
-    //QRegressor.getHyperParameters().maxIterations = 10;
+    //QRegressorA.getHyperParameters().lambda = 0.3;
+    //QRegressorA.getHyperParameters().maxIterations = 10;
+    //QRegressorB.getHyperParameters().maxIterations = 10;
+    //QRegressorB.getHyperParameters().maxIterations = 10;
 
     // Tree
     arma::vec defaultValue = {0};
