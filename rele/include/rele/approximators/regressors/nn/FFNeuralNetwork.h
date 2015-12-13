@@ -85,7 +85,7 @@ public:
         setupNetwork();
     }
 
-    ~FFNeuralNetwork_()
+    virtual ~FFNeuralNetwork_()
     {
         for (auto f : layerFunction)
         {
@@ -93,13 +93,13 @@ public:
         }
     }
 
-    arma::vec operator()(const InputC& input) override
+    virtual arma::vec operator()(const InputC& input) override
     {
         forwardComputation(Base::phi(input));
         return h.back();
     }
 
-    arma::vec diff(const InputC& input) override
+    virtual arma::vec diff(const InputC& input) override
     {
         forwardComputation(Base::phi(input));
         arma::vec g(layerNeurons.back(), arma::fill::ones);
@@ -248,6 +248,8 @@ private:
         paramSize = paramN;
     }
 
+
+protected:
     void forwardComputation(const arma::vec& input)
     {
         h[0] = input;
@@ -436,7 +438,7 @@ private:
         }
     }
 
-private:
+protected:
     //Computation results
     std::vector<arma::vec> a;
     std::vector<arma::vec> h;

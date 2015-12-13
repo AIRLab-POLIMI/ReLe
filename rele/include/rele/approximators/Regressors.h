@@ -198,4 +198,10 @@ public:
 #define USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
     typedef ParametricRegressor_<InputC, denseOutput> Base;
 
+#define USE_BATCH_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
+    typedef BatchRegressor_<InputC, OutputC, denseOutput> Base;
+
+#define USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
+    typedef UnsupervisedBatchRegressor_<InputC, OutputC, denseOutput> Base;
+
 #endif /* REGRESSORS_H_ */

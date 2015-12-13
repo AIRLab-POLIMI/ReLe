@@ -23,6 +23,9 @@ target_link_libraries(dataset_test rele)
 add_executable(nn_test core/NeuralNetworksTest.cpp)
 target_link_libraries(nn_test rele)
 
+add_executable(ae_test core/AutoencoderTest.cpp)
+target_link_libraries(ae_test rele)
+
 add_executable(trees_test core/TreesTest.cpp)
 target_link_libraries(trees_test rele)
 
