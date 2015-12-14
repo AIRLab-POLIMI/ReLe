@@ -57,37 +57,40 @@ public:
     virtual BatchData* clone() const = 0;
     virtual BatchData* cloneSubset(const arma::uvec& indexes) const = 0;
 
-    // FIXME: to reimplement
-    const BatchData* getMiniBatch(unsigned int mSize) const
+    virtual const BatchData* shuffle() const
     {
-
-        /*if(mSize >= size())
-        {
-            return new MiniBatchData<InputC, OutputC>(this);
-        }*/
-
-        std::set<unsigned int> indexesSet;
-        arma::uvec indexes(mSize);
-
-        for(int i = 0; i < mSize; i++)
-        {
-            unsigned int r;
-            do
-            {
-                r = RandomGenerator::sampleUniformInt(0, size() - 1);
-            }
-            while(indexesSet.count(r) != 0);
-
-            indexes(i) = r;
-            indexesSet.insert(r);
-        }
+        arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
+        indexes = arma::shuffle(indexes);
 
         return new MiniBatchData<InputC, OutputC>(this, indexes);
     }
 
+    virtual std::vector<const BatchData*> getMiniBatches(unsigned int mSize) const
+    {
+        std::vector<const BatchData*> minibatches;
+
+        arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
+        indexes = arma::shuffle(indexes);
+
+        const unsigned int mNumber = indexes.n_elem / mSize + (indexes.n_elem % mSize == 0) ? 0 : 1;
+
+        for (unsigned int i = 0; i < mNumber; i++)
+        {
+            unsigned int start = i * mSize;
+            unsigned int last = indexes.n_elem;
+            unsigned int end = std::min(start + mSize, last) -1;
+
+            auto* miniBatch = new MiniBatchData<InputC, OutputC>(this, indexes.rows(start, end));
+
+            minibatches.push_back(miniBatch);
+        }
+
+        return minibatches;
+    }
+
     OutputC getMean() const
     {
-        if(!computed)
+        if (!computed)
         {
             computeMeanVariance();
             computed = true;
@@ -98,7 +101,7 @@ public:
 
     arma::mat getVariance() const
     {
-        if(!computed)
+        if (!computed)
         {
             computeMeanVariance();
             computed = true;
@@ -145,16 +148,18 @@ private:
 };
 
 template<class InputC, class OutputC>
-class MiniBatchData : public BatchData<InputC, OutputC>
+class MiniBatchData: public BatchData<InputC, OutputC>
 {
 public:
-    MiniBatchData(const BatchData<InputC, OutputC>* data, const arma::uvec& indexes) :
+    MiniBatchData(const BatchData<InputC, OutputC>* data,
+                  const arma::uvec& indexes) :
         data(*data), indexes(indexes)
     {
 
     }
 
-    MiniBatchData(const BatchData<InputC, OutputC>& data, const arma::uvec& indexes) :
+    MiniBatchData(const BatchData<InputC, OutputC>& data,
+                  const arma::uvec& indexes) :
         data(data), indexes(indexes)
     {
 
@@ -165,10 +170,27 @@ public:
         return new MiniBatchData<InputC, OutputC>(data, indexes);
     }
 
-    virtual BatchData<InputC, OutputC>* cloneSubset(const arma::uvec& indexes) const override
+    virtual BatchData<InputC, OutputC>* cloneSubset(
+        const arma::uvec& indexes) const override
     {
         arma::uvec newIndexes = this->indexes(indexes);
         return new MiniBatchData<InputC, OutputC>(data, newIndexes);
+    }
+
+    virtual const BatchData<InputC, OutputC>* shuffle() const override
+    {
+        if (data.size() == indexes.n_elem)
+            return data.shuffle();
+        else
+            return BatchData<InputC, OutputC>::shuffle();
+    }
+
+    virtual std::vector<const BatchData<InputC, OutputC>*> getMiniBatches(unsigned int mSize) const override
+    {
+        if (data.size() == indexes.n_elem)
+            return data.getMiniBatches(mSize);
+        else
+            return BatchData<InputC, OutputC>::getMiniBatches(mSize);
     }
 
     virtual InputC getInput(unsigned int index) const override
@@ -204,9 +226,8 @@ private:
     arma::uvec indexes;
 };
 
-
 template<class InputC, class OutputC>
-class BatchDataPlain : public BatchData<InputC, OutputC>
+class BatchDataPlain: public BatchData<InputC, OutputC>
 {
 public:
     BatchDataPlain()
@@ -214,17 +235,18 @@ public:
 
     }
 
-    BatchDataPlain(std::vector<InputC> inputs,
-                   std::vector<OutputC> outputs) : inputs(inputs), outputs(outputs)
+    BatchDataPlain(std::vector<InputC> inputs, std::vector<OutputC> outputs) :
+        inputs(inputs), outputs(outputs)
     {
         assert(inputs.size() == outputs.size());
     }
 
     virtual BatchData<InputC, OutputC>* clone() const override
     {
-        BatchDataPlain<InputC, OutputC>* newDataset = new BatchDataPlain<InputC, OutputC>();
+        BatchDataPlain<InputC, OutputC>* newDataset = new BatchDataPlain<InputC,
+        OutputC>();
 
-        for(int i = 0; i < size(); i++)
+        for (int i = 0; i < size(); i++)
         {
             newDataset->addSample(getInput(i), getOutput(i));
         }
@@ -232,7 +254,8 @@ public:
         return newDataset;
     }
 
-    virtual BatchData<InputC, OutputC>* cloneSubset(const arma::uvec& indexes) const override
+    virtual BatchData<InputC, OutputC>* cloneSubset(
+        const arma::uvec& indexes) const override
     {
         return new MiniBatchData<InputC, OutputC>(this, indexes);
     }
@@ -270,15 +293,15 @@ private:
 };
 
 template<class InputC, class OutputC>
-class BatchDataFeatures : public BatchData<InputC, OutputC>
+class BatchDataFeatures: public BatchData<InputC, OutputC>
 {
 public:
     typedef typename input_collection<InputC>::const_ref_type FeaturesCollection;
     typedef typename output_collection<OutputC>::const_ref_type OutputCollection;
 
 public:
-    BatchDataFeatures(FeaturesCollection features,
-                      OutputCollection outputs) : features(features), outputs(outputs)
+    BatchDataFeatures(FeaturesCollection features, OutputCollection outputs) :
+        features(features), outputs(outputs)
     {
         assert(features.n_cols == outputs.n_cols);
     }
@@ -305,12 +328,12 @@ public:
 
     arma::vec getMeanFeatures() const
     {
-    	return arma::mean(features, 1);
+        return arma::mean(features, 1);
     }
 
     arma::vec getStdDevFeatures() const
     {
-    	return arma::stddev(features, 0, 1);
+        return arma::stddev(features, 0, 1);
     }
 
     virtual BatchData<InputC, OutputC>* clone() const override
@@ -318,7 +341,8 @@ public:
         return new BatchDataFeatures<InputC, OutputC>(features, outputs);
     }
 
-    virtual BatchData<InputC, OutputC>* cloneSubset(const arma::uvec& indexes) const override
+    virtual BatchData<InputC, OutputC>* cloneSubset(
+        const arma::uvec& indexes) const override
     {
         return new MiniBatchData<InputC, OutputC>(this, indexes);
     }
@@ -354,13 +378,6 @@ private:
 
 };
 
-
-
-
-
-
 }
-
-
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_BATCHDATA_H_ */

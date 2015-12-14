@@ -29,51 +29,51 @@ namespace ReLe
 
 InternetAds::InternetAds(ExperimentLabel experimentType, double gamma) :
     SimpleMAB(3, gamma),
-	experimentType(experimentType)
+    experimentType(experimentType)
 {
     if(experimentType == First)
-    	visitors = 100000;
+        visitors = 100000;
     else
-    	visitors = 300000;
+        visitors = 300000;
 
     cost = 1;
 }
 
 void InternetAds::step(const FiniteAction& action, FiniteState& nextState,
-                               Reward& reward)
+                       Reward& reward)
 {
     nextState.setStateN(0);
     reward[0] = -cost;
 
     for(unsigned int i = 0; i < nAds(action); i++)
-    	for(unsigned int j = 0; j < visitors; j++)
-    		reward[0] += RandomGenerator::sampleUniformInt(0, 1);
+        for(unsigned int j = 0; j < visitors; j++)
+            reward[0] += RandomGenerator::sampleUniformInt(0, 1);
 }
 
 unsigned int InternetAds::nAds(const FiniteAction& action)
 {
-	unsigned int actionN = action.getActionN();
+    unsigned int actionN = action.getActionN();
 
-	if(experimentType == First)
-	{
-		if(actionN == 0)
-			return 10;
-		else if(actionN == 1)
-			return 100;
-		else if(actionN == 2)
-			return 1000;
-	}
-	else
-	{
-		if(actionN == 0)
-			return 30;
-		else if(actionN == 1)
-			return 300;
-		else if(actionN == 2)
-			return 3000;
-	}
+    if(experimentType == First)
+    {
+        if(actionN == 0)
+            return 10;
+        else if(actionN == 1)
+            return 100;
+        else if(actionN == 2)
+            return 1000;
+    }
+    else
+    {
+        if(actionN == 0)
+            return 30;
+        else if(actionN == 1)
+            return 300;
+        else if(actionN == 2)
+            return 3000;
+    }
 
-	return 0;
+    return 0;
 }
 
 }

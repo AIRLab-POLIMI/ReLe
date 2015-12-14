@@ -32,13 +32,13 @@ namespace ReLe
 class Roulette: public LinearMAB<FiniteAction>
 {
 public:
-	enum ExperimentLabel
-	{
-		American, French
-	};
+    enum ExperimentLabel
+    {
+        American, French
+    };
 
 public:
-	Roulette(ExperimentLabel rouletteType = American, double gamma = 1);
+    Roulette(ExperimentLabel rouletteType = American, double gamma = 1);
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
     virtual double computeReward(const FiniteAction& action) override;

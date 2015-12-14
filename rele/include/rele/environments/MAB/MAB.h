@@ -33,24 +33,24 @@ template<class ActionC>
 class MAB: public Environment<ActionC, FiniteState>
 {
 public:
-	MAB(double gamma, unsigned int horizon = 1) : Environment<ActionC, FiniteState>()
-	{
-		EnvironmentSettings& task = this->getWritableSettings();
-	    task.isFiniteHorizon = true;
-	    task.horizon = horizon;
-	    task.gamma = gamma;
-	    task.isAverageReward = false;
-	    task.isEpisodic = true;
-	    task.finiteStateDim = 1;
-	    task.continuosStateDim = 0;
-	    task.rewardDim = 1;
-	}
+    MAB(double gamma, unsigned int horizon = 1) : Environment<ActionC, FiniteState>()
+    {
+        EnvironmentSettings& task = this->getWritableSettings();
+        task.isFiniteHorizon = true;
+        task.horizon = horizon;
+        task.gamma = gamma;
+        task.isAverageReward = false;
+        task.isEpisodic = true;
+        task.finiteStateDim = 1;
+        task.continuosStateDim = 0;
+        task.rewardDim = 1;
+    }
 
-	void getInitialState(FiniteState& state) override
-	{
-		state.setStateN(0);
-		state.setAbsorbing(false);
-	}
+    void getInitialState(FiniteState& state) override
+    {
+        state.setStateN(0);
+        state.setAbsorbing(false);
+    }
 };
 
 }

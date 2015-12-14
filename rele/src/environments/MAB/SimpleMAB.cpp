@@ -28,8 +28,8 @@ namespace ReLe
 
 SimpleMAB::SimpleMAB(unsigned int nActions, double gamma) : MAB(gamma)
 {
-	EnvironmentSettings& task = getWritableSettings();
-	task.finiteActionDim = nActions;
+    EnvironmentSettings& task = getWritableSettings();
+    task.finiteActionDim = nActions;
     task.continuosActionDim = 0;
 }
 

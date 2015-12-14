@@ -34,8 +34,8 @@ class LinearMAB: public MAB<ActionC>
 {
 public:
     LinearMAB(double gamma) : MAB<ActionC>(gamma)
-	{
-	}
+    {
+    }
 
     virtual double computeReward(const ActionC& action) = 0;
 

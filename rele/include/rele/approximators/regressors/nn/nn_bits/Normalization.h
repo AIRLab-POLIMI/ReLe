@@ -46,7 +46,7 @@ class NoNormalization : public Normalization
 public:
     virtual arma::vec normalizeInput(const arma::vec& features) override
     {
-    	return features;
+        return features;
     }
 
     virtual ~NoNormalization()
@@ -96,13 +96,13 @@ class ZscoreNormalization : public Normalization
 public:
     ZscoreNormalization(const BatchDataFeatures<arma::vec, arma::vec>& data)
     {
-    	mean = data.getMeanFeatures();
-    	stddev = data.getStdDevFeatures();
+        mean = data.getMeanFeatures();
+        stddev = data.getStdDevFeatures();
     }
 
     virtual arma::vec normalizeInput(const arma::vec& features) override
     {
-    	return (features - mean)/stddev;
+        return (features - mean)/stddev;
     }
 
     virtual ~ZscoreNormalization()

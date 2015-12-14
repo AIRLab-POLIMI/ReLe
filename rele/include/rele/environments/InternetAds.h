@@ -32,10 +32,10 @@ namespace ReLe
 class InternetAds: public SimpleMAB
 {
 public:
-	enum ExperimentLabel
-	{
-		First, Second
-	};
+    enum ExperimentLabel
+    {
+        First, Second
+    };
 
 public:
     InternetAds(ExperimentLabel = First, double gamma = 1);

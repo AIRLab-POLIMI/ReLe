@@ -101,14 +101,14 @@ public:
 
     virtual arma::vec operator()(const InputC& input) override
     {
-    	const arma::vec& x = normalization->normalizeInput(Base::phi(input));
+        const arma::vec& x = normalization->normalizeInput(Base::phi(input));
         forwardComputation(x);
         return h.back();
     }
 
     virtual arma::vec diff(const InputC& input) override
     {
-    	const arma::vec& x = normalization->normalizeInput(Base::phi(input));
+        const arma::vec& x = normalization->normalizeInput(Base::phi(input));
         forwardComputation(x);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
@@ -134,12 +134,12 @@ public:
 
     void trainFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset) override
     {
-    	//Clean old normalization
-    	if(normalization)
-    		delete normalization;
+        //Clean old normalization
+        if(normalization)
+            delete normalization;
 
-    	//Compute dataset normalization
-    	normalization = new MinMaxNormalization(featureDataset);
+        //Compute dataset normalization
+        normalization = new MinMaxNormalization(featureDataset);
 
         switch (params.alg)
         {
