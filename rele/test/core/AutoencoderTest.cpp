@@ -39,14 +39,14 @@ int main(int argc, char *argv[])
 
     Autoencoder encoder(phi, 1);
 
-    arma::rowvec angles = arma::linspace<arma::rowvec>(0, 2*M_PI, 1000);
+    arma::rowvec angles = arma::linspace<arma::rowvec>(-M_PI, M_PI, 1000);
 
     arma::mat features = arma::join_vert(arma::sin(angles), arma::cos(angles));
     std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl;
 
     encoder.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    encoder.getHyperParameters().alpha = 0.2;
-    encoder.getHyperParameters().maxIterations = 10000;
+    encoder.getHyperParameters().alpha = 0.02;
+    encoder.getHyperParameters().maxIterations = 20000;
     encoder.getHyperParameters().lambda = 0;
 
     encoder.trainFeatures(features);
@@ -57,12 +57,14 @@ int main(int argc, char *argv[])
     arma::rowvec testAngles(5, arma::fill::randn);
     arma::mat inputs = arma::join_vert(arma::sin(angles), arma::cos(angles));
 
+    std::cout << inputs << std::endl;
+
     for(unsigned int i = 0; i < testAngles.n_elem; i++)
     {
-    	std::cout << "angle          = " << testAngles(i) << std::endl;
-    	std::cout << "input          = " << inputs.col(i).t();
-    	std::cout << "features       = " << encoder(inputs.col(i)).t();
-    	std::cout << "reconstructed  = " << encoder.FFNeuralNetwork::operator()(inputs.col(i)).t();
+        std::cout << "angle          = " << testAngles(i) << std::endl;
+        std::cout << "input          = " << inputs.col(i).t();
+        std::cout << "features       = " << encoder(inputs.col(i)).t();
+        std::cout << "reconstructed  = " << encoder.FFNeuralNetwork::operator()(inputs.col(i)).t();
     }
 
 }

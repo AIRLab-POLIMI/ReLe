@@ -288,6 +288,31 @@ public:
         return features.n_cols;
     }
 
+    virtual size_t featuresSize() const
+    {
+        return features.n_rows;
+    }
+
+    arma::vec getMinFeatures() const
+    {
+        return arma::min(features, 1);
+    }
+
+    arma::vec getMaxFeatures() const
+    {
+        return arma::max(features, 1);
+    }
+
+    arma::vec getMeanFeatures() const
+    {
+    	return arma::mean(features, 1);
+    }
+
+    arma::vec getStdDevFeatures() const
+    {
+    	return arma::stddev(features, 0, 1);
+    }
+
     virtual BatchData<InputC, OutputC>* clone() const override
     {
         return new BatchDataFeatures<InputC, OutputC>(features, outputs);

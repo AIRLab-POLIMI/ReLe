@@ -62,8 +62,8 @@ public	:
 
     virtual double computeJFeatures(const arma::mat& features)
     {
-    	BatchDataFeatures<arma::vec, arma::vec> data(features, features);
-    	return this->computeJ(data, 0);
+        BatchDataFeatures<arma::vec, arma::vec> data(features, features);
+        return this->computeJ(data, 0);
     }
 
     virtual ~Autoencoder_()

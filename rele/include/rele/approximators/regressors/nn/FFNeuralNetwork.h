@@ -33,12 +33,14 @@
 
 #include "nn_bits/ActivationFunctions.h"
 #include "nn_bits/Regularization.h"
+#include "nn_bits/Normalization.h"
 
 #include "NumericalGradient.h"
 
 namespace ReLe
 {
 
+//FIXME fix NN with sparse features
 template<class InputC, bool denseOutput = true>
 class FFNeuralNetwork_: public ParametricRegressor_<InputC, denseOutput>,
     public BatchRegressor_<InputC, arma::vec, denseOutput>
@@ -91,17 +93,23 @@ public:
         {
             delete f;
         }
+
+        delete Omega;
+        delete normalization;
+
     }
 
     virtual arma::vec operator()(const InputC& input) override
     {
-        forwardComputation(Base::phi(input));
+    	const arma::vec& x = normalization->normalizeInput(Base::phi(input));
+        forwardComputation(x);
         return h.back();
     }
 
     virtual arma::vec diff(const InputC& input) override
     {
-        forwardComputation(Base::phi(input));
+    	const arma::vec& x = normalization->normalizeInput(Base::phi(input));
+        forwardComputation(x);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
         return backPropagation(g);
@@ -126,6 +134,13 @@ public:
 
     void trainFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset) override
     {
+    	//Clean old normalization
+    	if(normalization)
+    		delete normalization;
+
+    	//Compute dataset normalization
+    	normalization = new MinMaxNormalization(featureDataset);
+
         switch (params.alg)
         {
         case GradientDescend:
@@ -145,6 +160,7 @@ public:
         default:
             break;
         }
+
     }
 
     double computeJFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset, double lambda)
@@ -154,7 +170,7 @@ public:
 
         for(unsigned int i = 0; i < nSamples; i++)
         {
-            const arma::vec& x = featureDataset.getInput(i);
+            const arma::vec& x = normalization->normalizeInput(featureDataset.getInput(i));
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
@@ -167,13 +183,14 @@ public:
         return J;
     }
 
+    //TODO rewrite using computeJfeatures
     double computeJ(const BatchData<InputC, arma::vec>& dataset, double lambda)
     {
         double J = 0;
 
         for (unsigned int i = 0; i < dataset.size(); i++)
         {
-            const InputC& x = dataset.getInput(i);
+            const InputC& x = normalization->normalizeInput(Base::phi(dataset.getInput(i)));
             const arma::vec& y = dataset.getOutput(i);
             forwardComputation(x);
             arma::vec yhat = h.back();
@@ -204,6 +221,7 @@ private:
         }
 
         Omega = new L2_Regularization();
+        normalization = new NoNormalization();
 
         //Create the network
         aux_mem = new double[paramSize];
@@ -303,7 +321,7 @@ protected:
 
         for(unsigned int i = 0; i < featureDataset.size(); i++)
         {
-            const arma::vec& x = featureDataset.getInput(i);
+            const arma::vec& x = normalization->normalizeInput(featureDataset.getInput(i));
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
@@ -453,7 +471,9 @@ protected:
     std::vector<arma::vec*> bvec;
     double* aux_mem;
 
+    //Regularization class
     Regularization* Omega;
+    Normalization* normalization;
 
     //Optimization data
     OptimizationParameters params;
