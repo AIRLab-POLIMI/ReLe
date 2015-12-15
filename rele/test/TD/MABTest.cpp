@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "InternetAds.h"
-#include "Roulette.h"
+#include "MAB/InternetAds.h"
+#include "MAB/Roulette.h"
 #include "td/DoubleQ-Learning.h"
 #include "Core.h"
 

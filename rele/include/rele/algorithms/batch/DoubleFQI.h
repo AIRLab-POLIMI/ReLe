@@ -36,11 +36,43 @@ class DoubleFQIEnsemble : public Ensemble
 {
 public:
     DoubleFQIEnsemble(BatchRegressor& QRegressorA,
-                      BatchRegressor& QRegressorB) :
-        Ensemble(QRegressorA.getFeatures(), 1)
+                      BatchRegressor& QRegressorB,
+                      double k = 0.5) :
+        Ensemble(QRegressorA.getFeatures()),
+        k(k)
     {
+        assert(k > 0 && k < 1);
+
         regressors.push_back(&QRegressorA);
         regressors.push_back(&QRegressorB);
+    }
+
+    void trainFeatures(BatchDataFeatures<arma::vec, arma::vec>& featureDataset) override
+    {
+        /* This function extract the respective dataset for each
+         * regressor in the ensemble and train them.
+         */
+        arma::mat input = featureDataset.getFeatures();
+        arma::mat output = featureDataset.getOutputs();
+
+        unsigned int nSamples = input.n_cols;
+
+        unsigned int splitIndex = nSamples * k;
+        arma::mat inputA = input.cols(arma::span(0, splitIndex - 1));
+        arma::mat inputB = input.cols(arma::span(splitIndex, nSamples - 1));
+        arma::mat outputA = output.cols(arma::span(0, splitIndex - 1));
+        arma::mat outputB = output.cols(arma::span(splitIndex, nSamples - 1));
+
+        BatchDataFeatures<arma::vec, arma::vec> featureDatasetA(inputA, outputA);
+        BatchDataFeatures<arma::vec, arma::vec> featureDatasetB(inputB, outputB);
+
+        regressors[0]->trainFeatures(featureDatasetA);
+        regressors[1]->trainFeatures(featureDatasetB);
+    }
+
+    double getK() const
+    {
+        return k;
     }
 
     virtual void writeOnStream(std::ofstream& out) override
@@ -57,6 +89,9 @@ public:
     {
         regressors.clear();
     }
+
+protected:
+    double k;
 };
 
 template<class StateC>
@@ -73,63 +108,104 @@ public:
               BatchRegressor& QRegressorB,
               unsigned int nStates,
               unsigned int nActions,
-              double gamma) :
+              double gamma,
+              bool shuffle = false) :
         FQI<StateC>(data, QRegressorEnsemble, nStates, nActions, gamma),
-        QRegressorEnsemble(QRegressorA, QRegressorB)
+        QRegressorEnsemble(QRegressorA, QRegressorB),
+        shuffle(shuffle)
     {
     }
 
-    void step(arma::mat input, arma::mat& output, const arma::mat rewards) override
+    void step(arma::mat input, arma::mat& output, arma::mat rewards) override
     {
-        unsigned int selectedQ = RandomGenerator::sampleUniformInt(0, 1);
+        double k = QRegressorEnsemble.getK();
 
-        if(selectedQ == 0)
-            doubleFQIStep(QRegressorEnsemble.getRegressor(0), QRegressorEnsemble.getRegressor(1), input, output, rewards);
-        else
-            doubleFQIStep(QRegressorEnsemble.getRegressor(1), QRegressorEnsemble.getRegressor(0), input, output, rewards);
-    }
-
-    void doubleFQIStep(BatchRegressor& trainingRegressor,
-                       BatchRegressor& evaluationRegressor,
-                       arma::mat input,
-                       arma::mat& output,
-                       const arma::mat rewards)
-    {
-        // Loop on each dataset sample (i.e. on each transition)
-        unsigned int i = 0;
-
-        for(auto& episode : this->data)
+        /* Dataset is shuffled if flag true.
+         *
+         * TODO: this way of shuffling is temporary. It will be
+         * adapted to the changes that will be made in BatchData classes.
+         */
+        if(shuffle)
         {
-            for(auto& tr : episode)
-            {
-                /* For the current s', Q values for each action are stored in
-                 * Q_xn. The optimal Bellman equation can be computed
-                 * finding the maximum value inside Q_xn. They are zero if
-                 * xn is an absorbing state. Note that here we exchange the
-                 * regressor according to Double Q-Learning algorithm.
-                 */
-                arma::vec Q_xn(this->nActions, arma::fill::zeros);
-                if(!tr.xn.isAbsorbing())
-                    for(unsigned int u = 0; u < this->nActions; u++)
-                        Q_xn(u) = arma::as_scalar(trainingRegressor(tr.xn, FiniteAction(u)));
-
-                double qmax = Q_xn.max();
-                arma::uvec maxIndex = arma::find(Q_xn == qmax);
-                unsigned int index = RandomGenerator::sampleUniformInt(0,
-                                     maxIndex.n_elem - 1);
-                output(i) = arma::as_scalar(rewards(0, i) + this->gamma * evaluationRegressor(tr.xn, FiniteAction(index)));
-
-                i++;
-            }
+            this->indexes = arma::shuffle(this->indexes);
+            input = input.cols(this->indexes);
+            rewards = rewards.cols(this->indexes);
+            this->nextStates = this->nextStates(this->indexes);
         }
 
-        // The regressor is trained
+        // First regressor output creation
+        for(unsigned int i = 0; i < this->nSamples * k; i++)
+        {
+            /* In order to be able to fill the output vector (i.e. regressor
+             * target values), we need to compute the Q-values for each
+             * s' sample in the dataset and for each action in the
+             * set of actions of the problem. Recalling the fact that the values
+             * are zero for each action in an absorbing state, we check if s' is
+             * absorbing and, if it is, we leave the Q-values fixed to zero.
+             */
+            arma::vec Q_xn(this->nActions, arma::fill::zeros);
+            if(!FiniteState(this->nextStates(i)).isAbsorbing())
+                for(unsigned int u = 0; u < this->nActions; u++)
+                    Q_xn(u) = arma::as_scalar(
+                                  QRegressorEnsemble.getRegressor(0)(FiniteState(this->nextStates(i)),
+                                          FiniteAction(u)));
+
+            // Compute index of action with max Q-value in the next state
+            double qmax = Q_xn.max();
+            arma::uvec maxIndex = find(Q_xn == qmax);
+            unsigned int index = RandomGenerator::sampleUniformInt(0,
+                                 maxIndex.n_elem - 1);
+
+            /* For the current s', Q values for each action are stored in
+             * Q_xn. The optimal Bellman equation can be computed
+             * finding the maximum value inside Q_xn. They are zero if
+             * xn is an absorbing state.
+             */
+            output(i) = rewards(0, i) + this->gamma * arma::as_scalar(
+                            QRegressorEnsemble.getRegressor(1)(FiniteState(this->nextStates(i)),
+                                    FiniteAction(index)));
+        }
+
+        // Second regressor output creation
+        for(unsigned int i = this->nSamples * k; i < this->nSamples; i++)
+        {
+            /* In order to be able to fill the output vector (i.e. regressor
+             * target values), we need to compute the Q values for each
+             * s' sample in the dataset and for each action in the
+             * set of actions of the problem. Recalling the fact that the values
+             * are zero for each action in an absorbing state, we check if s' is
+             * absorbing and, if it is, we leave the Q-values fixed to zero.
+             */
+            arma::vec Q_xn(this->nActions, arma::fill::zeros);
+            if(!FiniteState(this->nextStates(i)).isAbsorbing())
+                for(unsigned int u = 0; u < this->nActions; u++)
+                    Q_xn(u) = arma::as_scalar(
+                                  QRegressorEnsemble.getRegressor(1)(FiniteState(this->nextStates(i)),
+                                          FiniteAction(u)));
+
+            double qmax = Q_xn.max();
+            arma::uvec maxIndex = find(Q_xn == qmax);
+            unsigned int index = RandomGenerator::sampleUniformInt(0,
+                                 maxIndex.n_elem - 1);
+
+            /* For the current s', Q values for each action are stored in
+             * Q_xn. The optimal Bellman equation can be computed
+             * finding the maximum value inside Q_xn. They are zero if
+             * xn is an absorbing state.
+             */
+            output(i) = rewards(0, i) + this->gamma * arma::as_scalar(
+                            QRegressorEnsemble.getRegressor(0)(FiniteState(this->nextStates(i)),
+                                    FiniteAction(index)));
+        }
+
+        // The regressors are trained
         BatchDataFeatures featureDataset(input, output);
-        trainingRegressor.trainFeatures(featureDataset);
+        QRegressorEnsemble.trainFeatures(featureDataset);
     }
 
 protected:
     DoubleFQIEnsemble QRegressorEnsemble;
+    bool shuffle;
 };
 
 }

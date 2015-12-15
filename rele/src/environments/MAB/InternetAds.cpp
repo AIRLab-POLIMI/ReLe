@@ -21,16 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "InternetAds.h"
+#include "MAB/InternetAds.h"
 #include "RandomGenerator.h"
 
 namespace ReLe
 {
 
 InternetAds::InternetAds(ExperimentLabel experimentType, double gamma) :
-    SimpleMAB(3, gamma),
+    MAB(gamma),
     experimentType(experimentType)
 {
+    EnvironmentSettings& task = getWritableSettings();
+    task.continuosActionDim = 0;
+    task.finiteActionDim = 3;
+
     if(experimentType == First)
         visitors = 100000;
     else
