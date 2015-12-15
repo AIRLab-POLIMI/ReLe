@@ -47,7 +47,7 @@ public:
         regressors.push_back(&QRegressorB);
     }
 
-    void trainFeatures(BatchDataFeatures<arma::vec, arma::vec>& featureDataset) override
+    void trainFeatures(BatchDataFeatures& featureDataset) override
     {
         /* This function extract the respective dataset for each
          * regressor in the ensemble and train them.
@@ -63,8 +63,8 @@ public:
         arma::mat outputA = output.cols(arma::span(0, splitIndex - 1));
         arma::mat outputB = output.cols(arma::span(splitIndex, nSamples - 1));
 
-        BatchDataFeatures<arma::vec, arma::vec> featureDatasetA(inputA, outputA);
-        BatchDataFeatures<arma::vec, arma::vec> featureDatasetB(inputB, outputB);
+        BatchDataFeatures featureDatasetA(inputA, outputA);
+        BatchDataFeatures featureDatasetB(inputB, outputB);
 
         regressors[0]->trainFeatures(featureDatasetA);
         regressors[1]->trainFeatures(featureDatasetB);
