@@ -42,13 +42,15 @@ public:
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
     virtual double computeReward(const FiniteAction& action);
-    virtual double rouletteReward(unsigned int nSquares);
 
 protected:
     ExperimentLabel rouletteType;
     unsigned int nOutcomes;
-    unsigned int nBets;
+    arma::uvec actions;
     double bet;
+
+protected:
+    double rouletteReward(unsigned int nSquares);
 };
 
 }

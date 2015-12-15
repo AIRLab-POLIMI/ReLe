@@ -33,37 +33,36 @@ Roulette::Roulette(ExperimentLabel rouletteType, double gamma) :
 {
     EnvironmentSettings& task = getWritableSettings();
     task.continuosActionDim = 0;
+    task.finiteStateDim = 2;
 
-    if(rouletteType == American)
-    {
-        nOutcomes = 38;
-        nBets = 171;
-    }
-    else
-    {
-        nOutcomes = 37;
-        nBets = 150;
-    }
-    task.finiteActionDim = nBets;
+    actions = {1, 2, 3, 4, 5, 6, 12, 18, 0};
 
+    task.finiteActionDim = actions.n_elem;
+
+
+    nOutcomes = 38 ? rouletteType == American : 37;
     bet = 1;
 }
 
 void Roulette::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)
 {
-    nextState.setStateN(0);
-
-    if(action.getActionN() == nBets - 1)
+    if(action.getActionN() != actions.n_elem - 1)
+        nextState.setStateN(0);
+    else
+    {
+        nextState.setStateN(1);
         nextState.setAbsorbing();
+    }
     reward[0] = computeReward(action);
 }
 
 double Roulette::computeReward(const FiniteAction& action)
 {
-    unsigned int nSquares;
-
     unsigned int actionN = action.getActionN();
-    if(rouletteType == American)
+
+    unsigned int nSquares = actions(actionN);
+
+    /*if(rouletteType == American)
     {
         if(actionN >= 0 && actionN <= 39)
             nSquares = 1;
@@ -94,7 +93,7 @@ double Roulette::computeReward(const FiniteAction& action)
         }
         else if(actionN == 169)
             return 0;
-    }
+    }*/
 
     return rouletteReward(nSquares);
 }

@@ -21,15 +21,16 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ENVIRONMENTS_INTERNETADS_H_
-#define INCLUDE_RELE_ENVIRONMENTS_INTERNETADS_H_
+#ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_
+#define INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_
 
-#include "MAB/MAB.h"
+#include "MAB/SimpleMAB.h"
+
 
 namespace ReLe
 {
 
-class InternetAds: public MAB<FiniteAction>
+class InternetAds: public SimpleMAB
 {
 public:
     enum ExperimentLabel
@@ -38,17 +39,9 @@ public:
     };
 
 public:
-    InternetAds(ExperimentLabel = First, double gamma = 1);
-    virtual void step(const FiniteAction& action, FiniteState& nextState,
-                      Reward& reward) override;
-    unsigned int nAds(const FiniteAction& action);
-
-protected:
-    ExperimentLabel experimentType;
-    unsigned int visitors;
-    double cost;
+    InternetAds(unsigned int nAds, double gamma = 1, ExperimentLabel experimentType = First);
 };
 
 }
 
-#endif /* INCLUDE_RELE_ENVIRONMENTS_INTERNETADS_H_ */
+#endif /* INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_ */

@@ -106,7 +106,7 @@ public:
         input = input.cols(indexes);
         rewards = rewards.cols(indexes);
         nextStates = nextStates(indexes);
-	BatchDataFeatures featureDatasetStart(input, rewards);
+        BatchDataFeatures featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
 
         // Initial QHat is stored before update

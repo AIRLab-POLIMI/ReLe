@@ -26,13 +26,22 @@
 
 #include "MAB/MAB.h"
 
+
 namespace ReLe
 {
 
 class SimpleMAB: public MAB<FiniteAction>
 {
 public:
-    SimpleMAB(unsigned int nActions, double gamma, unsigned int horizon = 1);
+    SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon = 1);
+    SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon = 1);
+    SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon = 1);
+    SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon = 1);
+    virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
+
+protected:
+    arma::vec P;
+    arma::vec R;
 };
 
 }

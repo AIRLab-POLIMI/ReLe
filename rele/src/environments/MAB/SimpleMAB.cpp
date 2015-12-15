@@ -23,14 +23,62 @@
 
 #include "MAB/SimpleMAB.h"
 
+
 namespace ReLe
 {
 
-SimpleMAB::SimpleMAB(unsigned int nActions, double gamma, unsigned int horizon) : MAB(gamma, horizon)
+SimpleMAB::SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon) :
+    P(P),
+    R(R),
+    MAB(gamma, horizon)
 {
     EnvironmentSettings& task = getWritableSettings();
-    task.finiteActionDim = nActions;
+    task.finiteActionDim = P.n_elem;
     task.continuosActionDim = 0;
+}
+
+SimpleMAB::SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon) :
+    P(P),
+    MAB(gamma, horizon)
+{
+    R = R.ones(P.n_elem) * r;
+
+    EnvironmentSettings& task = getWritableSettings();
+    task.finiteActionDim = P.n_elem;
+    task.continuosActionDim = 0;
+}
+
+SimpleMAB::SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon) :
+    MAB(gamma, horizon)
+{
+    P = arma::randu(nArms);
+    R = R.ones(P.n_elem) * r;
+
+    EnvironmentSettings& task = getWritableSettings();
+    task.finiteActionDim = nArms;
+    task.continuosActionDim = 0;
+}
+
+SimpleMAB::SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon) :
+    MAB(gamma, horizon)
+{
+    P = arma::randu(nArms);
+    R = arma::randn(nArms);
+
+    EnvironmentSettings& task = getWritableSettings();
+    task.finiteActionDim = nArms;
+    task.continuosActionDim = 0;
+}
+
+void SimpleMAB::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)
+{
+    nextState.setStateN(0);
+    reward[0] = 0;
+
+    if(RandomGenerator::sampleEvent(P(action)))
+        reward[0] += R(action);
+    else
+        reward[0] += 0;
 }
 
 }

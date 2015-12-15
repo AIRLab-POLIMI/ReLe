@@ -31,9 +31,11 @@
 using namespace std;
 using namespace ReLe;
 
+
 int main(int argc, char *argv[])
 {
-    Roulette mab;
+    InternetAds::ExperimentLabel experimentType = InternetAds::Second;
+    InternetAds mab(10, 1, experimentType);
 
     e_Greedy policy;
     // SARSA_lambda agent(policy, false);
