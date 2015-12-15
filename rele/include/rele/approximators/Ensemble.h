@@ -30,8 +30,8 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC>
-class Ensemble_ : public BatchRegressor_<InputC, OutputC>
+template<class InputC, class OutputC, bool denseOutput = true>
+class Ensemble_ : public BatchRegressor_<InputC, OutputC, denseOutput>
 {
 
 public:
@@ -57,13 +57,13 @@ public:
         return out / static_cast<double>(this->regressors.size());
     }
 
-    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override
+    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) override
     {
         for(auto regressor : regressors)
             regressor->trainFeatures(featureDataset);
     }
 
-    BatchRegressor_<InputC, OutputC>& getRegressor(unsigned int index)
+    BatchRegressor_<InputC, OutputC, denseOutput>& getRegressor(unsigned int index)
     {
         return *regressors[index];
     }
@@ -86,7 +86,7 @@ protected:
     }
 
 protected:
-    std::vector<BatchRegressor_<InputC, OutputC>*> regressors; // The regressors ensemble
+    std::vector<BatchRegressor_<InputC, OutputC, denseOutput>*> regressors; // The regressors ensemble
 };
 
 typedef Ensemble_<arma::vec, arma::vec> Ensemble;

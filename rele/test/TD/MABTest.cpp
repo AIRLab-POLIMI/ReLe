@@ -33,22 +33,22 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	Roulette mab;
+    Roulette mab;
 
-	e_Greedy policy;
-	// SARSA_lambda agent(policy, false);
-	// SARSA agent(policy);
-	//Q_Learning agent(policy);
-	DoubleQ_Learning agent(policy);
+    e_Greedy policy;
+    // SARSA_lambda agent(policy, false);
+    // SARSA agent(policy);
+    //Q_Learning agent(policy);
+    DoubleQ_Learning agent(policy);
 
-	auto&& core = buildCore(mab, agent);
+    auto&& core = buildCore(mab, agent);
 
-	core.getSettings().episodeLength = 100;
+    core.getSettings().episodeLength = 100;
 
-	for(unsigned int i = 0; i < 2000; i++)
-	{
-		cout << endl << "### Starting episode " << i << " ###" << endl;
-		core.runEpisode();
-	}
+    for(unsigned int i = 0; i < 2000; i++)
+    {
+        cout << endl << "### Starting episode " << i << " ###" << endl;
+        core.runEpisode();
+    }
 }
 

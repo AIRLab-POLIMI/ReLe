@@ -40,12 +40,14 @@ template<>
 struct feature_traits<true>
 {
     typedef arma::mat type;
+    typedef arma::vec column_type;
 };
 
 template<>
 struct feature_traits<false>
 {
     typedef arma::sp_mat type;
+    typedef arma::sp_vec column_type;
 };
 
 template<class InputC, bool denseOutput = true>

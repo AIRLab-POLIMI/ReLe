@@ -46,7 +46,7 @@ enum LeafType
  * This class extends TreeNode and contains methods to set/get the value
  * saved in the node, this value is of type OutputC.
  */
-template<class InputC, class OutputC>
+template<class OutputC, bool denseOutput>
 class LeafTreeNode : public TreeNode<OutputC>
 {
 
@@ -64,7 +64,7 @@ public:
      * Basic constructor
      * @param val the value to store in the node
      */
-    LeafTreeNode(const BatchData<InputC, OutputC>& data)
+    LeafTreeNode(const BatchData_<OutputC, denseOutput>& data)
     {
         fit(data);
     }
@@ -81,7 +81,7 @@ public:
      * Set the value
      * @param val the value
      */
-    virtual void fit(const BatchData<InputC, OutputC>& data)
+    virtual void fit(const BatchData_<OutputC, denseOutput>& data)
     {
         value = data.getMean();
         variance = data.getVariance();
@@ -130,12 +130,12 @@ protected:
 
 };
 
-template<class InputC, class OutputC>
-class SampleLeafTreeNode : public LeafTreeNode<InputC, OutputC>
+template<class OutputC, bool denseOutput>
+class SampleLeafTreeNode : public LeafTreeNode<OutputC, denseOutput>
 {
 public:
-    SampleLeafTreeNode(BatchData<InputC, OutputC>* dataSet)
-        : LeafTreeNode<InputC, OutputC>(*dataSet), dataSet(dataSet)
+    SampleLeafTreeNode(BatchData_<OutputC, denseOutput>* dataSet)
+        : LeafTreeNode<OutputC, denseOutput>(*dataSet), dataSet(dataSet)
     {
 
     }
@@ -146,11 +146,11 @@ public:
     }
 
 private:
-    BatchData<InputC, OutputC>* dataSet;
+    BatchData_<OutputC, denseOutput>* dataSet;
 };
 
-template<class InputC, class OutputC>
-class LinearLeafTreeNode : public LeafTreeNode<InputC, OutputC>
+template<class OutputC, bool denseOutput>
+class LinearLeafTreeNode : public LeafTreeNode<OutputC, denseOutput>
 {
 
 };

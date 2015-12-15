@@ -132,7 +132,7 @@ public:
         return paramSize;
     }
 
-    void trainFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset) override
+    void trainFeatures(BatchDataFeatures& featureDataset) override
     {
         //Clean old normalization
         if(normalization)
@@ -163,7 +163,7 @@ public:
 
     }
 
-    double computeJFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset, double lambda)
+    double computeJFeatures(BatchDataFeatures& featureDataset, double lambda)
     {
         double J = 0;
         unsigned int nSamples = featureDataset.size();
@@ -184,7 +184,7 @@ public:
     }
 
     //TODO rewrite using computeJfeatures
-    double computeJ(const BatchData<InputC, arma::vec>& dataset, double lambda)
+    double computeJ(const BatchDataRaw_<InputC, arma::vec>& dataset, double lambda)
     {
         double J = 0;
 
@@ -314,7 +314,7 @@ protected:
         return gradW;
     }
 
-    void computeGradient(BatchDataFeatures<InputC, arma::vec>& featureDataset,
+    void computeGradient(BatchDataFeatures& featureDataset,
                          double lambda, arma::vec& g)
     {
         g.zeros();
@@ -333,7 +333,7 @@ protected:
         g += lambda*Omega->diff(*w);
     }
 
-    void computeGradientNumerical(const BatchData<InputC, arma::vec>& dataset, arma::vec& g)
+    void computeGradientNumerical(const BatchDataRaw_<InputC, arma::vec>& dataset, arma::vec& g)
     {
         g.zeros();
 
@@ -367,7 +367,7 @@ protected:
 
 private:
 
-    void gradientDescend(BatchDataFeatures<InputC, arma::vec>& featureDataset)
+    void gradientDescend(BatchDataFeatures& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);

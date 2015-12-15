@@ -34,37 +34,62 @@ int main(int argc, char *argv[])
 {
     cout << "## Autoencoder Test ##" << endl;
 
-    BasisFunctions basis = IdentityBasis::generate(2);
+    BasisFunctions basis = IdentityBasis::generate(4);
     DenseFeatures phi(basis);
 
-    Autoencoder encoder(phi, 1);
+    Autoencoder encoder(phi, 3);
 
-    arma::rowvec angles = arma::linspace<arma::rowvec>(-M_PI, M_PI, 1000);
+    arma::mat numbers(3, 1000, arma::fill::randn);
 
-    arma::mat features = arma::join_vert(arma::sin(angles), arma::cos(angles));
-    std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl;
+    arma::mat features1 = numbers.row(0) + numbers.row(1);
+    arma::mat features2 = numbers.row(2) % numbers.row(1);
+    arma::mat features3 = numbers.row(2) - numbers.row(0);
+    arma::mat features4 = numbers.row(0) + numbers.row(1) + numbers.row(2);
+    //arma::mat features5 = arma::square(numbers.row(0));
+
+    arma::mat features(4, 1000);
+
+    features.row(0) = features1;
+    features.row(1) = features2;
+    features.row(2) = features3;
+    features.row(3) = features4;
+    //features.row(4) = features5;
 
     encoder.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    encoder.getHyperParameters().alpha = 0.02;
-    encoder.getHyperParameters().maxIterations = 20000;
+    encoder.getHyperParameters().alpha = 0.2;
+    encoder.getHyperParameters().maxIterations = 10000;
     encoder.getHyperParameters().lambda = 0;
 
+
+    std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl;
     encoder.trainFeatures(features);
+    std::cout << "J  = " << encoder.computeJFeatures(features) << std::endl;
 
+    arma::mat testNumbers(3, 5, arma::fill::randn);
 
-    std::cout << "J = " << encoder.computeJFeatures(features) << std::endl;
+    arma::mat testFeatures1 = testNumbers.row(0) + testNumbers.row(1);
+    arma::mat testFeatures2 = testNumbers.row(2) % testNumbers.row(1);
+    arma::mat testFeatures3 = testNumbers.row(2) - testNumbers.row(0);
+    arma::mat testFeatures4 = testNumbers.row(0) + testNumbers.row(1) + testNumbers.row(2);
+    //arma::mat testFeatures5 = arma::square(testNumbers.row(0));
 
-    arma::rowvec testAngles(5, arma::fill::randn);
-    arma::mat inputs = arma::join_vert(arma::sin(angles), arma::cos(angles));
+    arma::mat testFeatures(4, 5);
 
-    std::cout << inputs << std::endl;
+    testFeatures.row(0) = testFeatures1;
+    testFeatures.row(1) = testFeatures2;
+    testFeatures.row(2) = testFeatures3;
+    testFeatures.row(3) = testFeatures4;
+    //testFeatures.row(4) = testFeatures5;
 
-    for(unsigned int i = 0; i < testAngles.n_elem; i++)
+    std::cout << testFeatures << std::endl;
+
+    for(unsigned int i = 0; i < testNumbers.n_cols; i++)
     {
-        std::cout << "angle          = " << testAngles(i) << std::endl;
-        std::cout << "input          = " << inputs.col(i).t();
-        std::cout << "features       = " << encoder(inputs.col(i)).t();
-        std::cout << "reconstructed  = " << encoder.FFNeuralNetwork::operator()(inputs.col(i)).t();
+        std::cout << "base           = " << testNumbers.col(i).t();
+        std::cout << "input          = " << testFeatures.col(i).t();
+        std::cout << "features       = " << encoder(testFeatures.col(i)).t();
+        std::cout << "reconstructed  = " << encoder.FFNeuralNetwork::operator()(testFeatures.col(i)).t();
+        std::cout << std::endl;
     }
 
 }

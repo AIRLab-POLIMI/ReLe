@@ -40,8 +40,8 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC>
-class ExtraTree: public RegressionTree<InputC, OutputC>
+template<class InputC, class OutputC, bool denseOutput = true>
+class ExtraTree: public RegressionTree<InputC, OutputC, denseOutput>
 {
     USE_REGRESSION_TREE_MEMBERS
 
@@ -61,7 +61,7 @@ public:
      */
     ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
               unsigned int output_size = 1, int k = 5, unsigned int nmin = 2, double score_th = 0.0)
-        : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nmin), leafType(leafType)
+        : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nmin), leafType(leafType)
     {
         numSplits = k;
         scoreThreshold = score_th;
@@ -79,14 +79,14 @@ public:
     /**
      * Initialize data structures for feature ranking
      */
-    void initFeatureRanks()
+    void initFeatureRanks(unsigned int featureSize)
     {
         computeFeaturerelevance = true;
         featureRelevance.clear();
-        featureRelevance.resize(phi.rows(), 0.0);
+        featureRelevance.resize(featureSize, 0.0);
     }
 
-    virtual void trainFeatures(BatchDataFeatures<InputC, arma::vec>& featureDataset) override
+    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) override
     {
         this->cleanTree();
         root = buildExtraTree(featureDataset);
@@ -121,7 +121,7 @@ private:
      * This method build the Extra Tree
      * @param ex the vector containing the training set
      */
-    TreeNode<InputC>* buildExtraTree(const BatchData<InputC, OutputC>& ds)
+    TreeNode<InputC>* buildExtraTree(const BatchData_<OutputC, denseOutput>& ds)
     {
         /*************** part 1 - END CONDITIONS ********************/
         int size = ds.size(); //size of dataset
@@ -154,16 +154,16 @@ private:
             return this->buildLeaf(ds, leafType);
         }
 
-        unsigned int attnum = phi.rows(); //number of attributes
+        unsigned int attnum = ds.featuresSize(); //number of attributes
         std::vector<bool> constant(attnum, true); //indicates if and attribute is costant (true) or not (false)
         int end = attnum; //number of true values in constant
-        arma::vec&& input = phi(ds.getInput(0));
+        arma::vec&& input = ds.getInput(0);
 
         //check if the attributes are constant and build constant vector
         eq = true;
         for (int i = 1; i < size && end > 0; i++)
         {
-            arma::vec&& otherInput = phi(ds.getInput(i));
+            arma::vec&& otherInput = ds.getInput(i);
             for (int c = 0; c < attnum; c++)
             {
                 if (constant[c] && input[c] != otherInput[c])
@@ -239,8 +239,8 @@ private:
         // split inputs in two subsets
         this->splitDataset(ds, bestAttribute, bestSplit, indexesLeftBest, indexesRightBest);
 
-        BatchData<InputC, OutputC>* leftDs = ds.cloneSubset(indexesLeftBest);
-        BatchData<InputC, OutputC>* rightDs = ds.cloneSubset(indexesRightBest);
+        BatchData_<OutputC, denseOutput>* leftDs = ds.cloneSubset(indexesLeftBest);
+        BatchData_<OutputC, denseOutput>* rightDs = ds.cloneSubset(indexesRightBest);
 
         double bestScore = score(ds, *leftDs, *rightDs);
 
@@ -326,19 +326,19 @@ private:
      * @param attsplit number of attribute to split
      * @return the split value
      */
-    double pickRandomSplit(const BatchData<InputC, OutputC>& ds, int attsplit)
+    double pickRandomSplit(const BatchData_<OutputC, denseOutput>& ds, int attsplit)
     {
 #ifdef SPLIT_UNIFORM
         double min, max, tmp;
 
         //initialize min and max with the attribute value of the first observation
-        min = phi(ds.getInput(0))[attsplit];
+        min = ds.getInput(0)[attsplit];
         max = min;
 
         //looking for min and max value of the dataset
         for (unsigned int c = 1; c < ds.size(); c++)
         {
-            tmp = phi(ds.getInput(c))[attsplit];
+            tmp = ds.getInput(c)[attsplit];
             if (tmp < min)
             {
                 min = tmp;
@@ -353,11 +353,11 @@ private:
         return RandomGenerator::sampleUniformHigh(min, max);
 #else
         unsigned int r = RandomGenerator::sampleUniform(0, ds.size());
-        double value = phi(ds.getInput(r))[attsplit];
+        double value = ds.getInput(r)[attsplit];
         double previous = value, next = value;
         for (unsigned int c = 0; c < ds.size(); c++)
         {
-            double tmp = phi(ds.getInput(c))[attsplit];
+            double tmp = ds.getInput(c)[attsplit];
             if (tmp < value && tmp > previous)
             {
                 previous = tmp;
@@ -388,9 +388,9 @@ private:
      * @param dsr the other one
      * @return the percentage of variance
      */
-    double varianceReduction(const BatchData<InputC, OutputC>& ds,
-                             const BatchData<InputC, OutputC>& dsl,
-                             const BatchData<InputC, OutputC>& dsr)
+    double varianceReduction(const BatchData_<OutputC, denseOutput>& ds,
+                             const BatchData_<OutputC, denseOutput>& dsl,
+                             const BatchData_<OutputC, denseOutput>& dsr)
     {
         // VARIANCE REDUCTION
         double corr_fact_dsl = 1.0, corr_fact_dsr = 1.0, corr_fact_ds = 1.0;
@@ -429,9 +429,9 @@ private:
      * @param dsr the other one
      * @return the probability value
      */
-    double probabilityDifferentMeans(const BatchData<InputC, OutputC>& ds,
-                                     const BatchData<InputC, OutputC>& dsl,
-                                     const BatchData<InputC, OutputC>& dsr)
+    double probabilityDifferentMeans(const BatchData_<OutputC, denseOutput>& ds,
+                                     const BatchData_<OutputC, denseOutput>& dsl,
+                                     const BatchData_<OutputC, denseOutput>& dsr)
     {
         if (ds.size() == 0)
             return 0.0;
@@ -506,9 +506,9 @@ private:
      * @param sr the right partition of the observations set
      * @return the score
      */
-    double score(const BatchData<InputC, OutputC>& ds,
-                 const BatchData<InputC, OutputC>& dsl,
-                 const BatchData<InputC, OutputC>& dsr)
+    double score(const BatchData_<OutputC, denseOutput>& ds,
+                 const BatchData_<OutputC, denseOutput>& dsl,
+                 const BatchData_<OutputC, denseOutput>& dsr)
     {
 #ifdef SPLIT_VARIANCE
         return varianceReduction(ds, dsl, dsr);

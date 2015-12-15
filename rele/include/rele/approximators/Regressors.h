@@ -117,7 +117,8 @@ typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 template<class InputC, class OutputC, bool denseOutput=true>
 class BatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 {
-
+	typedef typename input_traits<denseOutput>::type FeaturesCollection;
+	typedef typename output_traits<OutputC>::type OutputCollection;
 public:
     BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
         Regressor_<InputC, OutputC, denseOutput>(phi, output)
@@ -125,26 +126,27 @@ public:
 
     }
 
-    virtual void train(const BatchData<InputC, OutputC>& dataset)
+    virtual void train(const BatchDataRaw_<InputC, OutputC>& dataset)
     {
         unsigned int N = dataset.size();
 
         // FIXME: use trait
 
         //compute features matrix
-        arma::mat features(this->phi.rows(), N);
-        arma::mat outputs(this->outputDimension, N);
+        FeaturesCollection features(this->phi.rows(), N);
+        OutputCollection outputs(this->outputDimension, N);
+
         for(int i = 0; i < N; i++)
         {
             features.col(i) = this->phi(dataset.getInput(i));
             outputs.col(i) = dataset.getOutput(i);
         }
 
-        BatchDataFeatures<InputC, OutputC> featureDataset(features, outputs);
+        BatchDataFeatures_<OutputC, denseOutput> featureDataset(features, outputs);
         trainFeatures(featureDataset);
     }
 
-    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) = 0;
+    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) = 0;
 
     virtual ~BatchRegressor_()
     {

@@ -56,14 +56,14 @@ public	:
 
     virtual void trainFeatures(const arma::mat& features) override
     {
-        BatchDataFeatures<arma::vec, arma::vec> dataset(features, features);
-        FFNeuralNetwork_<InputC>::trainFeatures(dataset);
+        BatchDataFeatures dataset(features, features);
+        FFNeuralNetwork_<InputC, denseOutput>::trainFeatures(dataset);
     }
 
-    virtual double computeJFeatures(const arma::mat& features)
+    double computeJFeatures(const arma::mat& features)
     {
-        BatchDataFeatures<arma::vec, arma::vec> data(features, features);
-        return this->computeJ(data, 0);
+        BatchDataFeatures data(features, features);
+        return FFNeuralNetwork_<InputC, denseOutput>::computeJFeatures(data, 0);
     }
 
     virtual ~Autoencoder_()

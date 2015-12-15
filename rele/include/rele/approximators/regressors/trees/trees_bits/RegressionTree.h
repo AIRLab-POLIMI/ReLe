@@ -34,17 +34,17 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC>
-class RegressionTree: public BatchRegressor_<InputC, OutputC>
+template<class InputC, class OutputC, bool denseOutput>
+class RegressionTree: public BatchRegressor_<InputC, OutputC, denseOutput>
 {
-
+	using BatchRegressor_<InputC, OutputC, denseOutput>::phi;
 public:
-    RegressionTree(Features_<InputC>& phi,
+    RegressionTree(Features_<InputC, denseOutput>& phi,
                    const EmptyTreeNode<OutputC>& emptyNode,
                    unsigned int outputDimensions = 1,
                    unsigned int nMin = 2) :
-        BatchRegressor_<InputC, OutputC>(phi, outputDimensions),
-        root(nullptr), emptyNode(emptyNode), nMin(nMin), phi(phi) //FIXME regressors interface
+        BatchRegressor_<InputC, OutputC, denseOutput>(phi, outputDimensions),
+        root(nullptr), emptyNode(emptyNode), nMin(nMin)
     {
 
     }
@@ -88,7 +88,7 @@ public:
         return nMin;
     }
 
-    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override = 0;
+    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) override = 0;
 
     /**
      * Get the root of the tree
@@ -111,7 +111,7 @@ protected:
             delete root;
     }
 
-    void splitDataset(const BatchData<InputC, OutputC>& ds,
+    void splitDataset(const BatchData_<OutputC, denseOutput>& ds,
                       int cutDir, double cutPoint,
                       arma::uvec& indexesLow,
                       arma::uvec& indexesHigh)
@@ -124,7 +124,7 @@ protected:
         // split inputs in two subsets
         for (unsigned int i = 0; i < ds.size(); i++)
         {
-            auto&& element = phi(ds.getInput(i));
+            auto&& element = ds.getInput(i);
             double tmp = element[cutDir];
 
             if (tmp < cutPoint)
@@ -143,16 +143,16 @@ protected:
         indexesHigh.resize(highNumber);
     }
 
-    TreeNode<OutputC>* buildLeaf(const BatchData<InputC, OutputC>& ds, LeafType type)
+    TreeNode<OutputC>* buildLeaf(const BatchData_<OutputC, denseOutput>& ds, LeafType type)
     {
         switch(type)
         {
         case Constant:
-            return new LeafTreeNode<InputC, OutputC>(ds);
+            return new LeafTreeNode<OutputC, denseOutput>(ds);
         case Linear:
             return nullptr; //TODO implement
         case Samples:
-            return new SampleLeafTreeNode<InputC, OutputC>(ds.clone());
+            return new SampleLeafTreeNode<OutputC, denseOutput>(ds.clone());
         default:
             return nullptr;
         }
@@ -163,14 +163,12 @@ protected:
 protected:
     TreeNode<OutputC>* root;
     EmptyTreeNode<OutputC> emptyNode;
-    Features_<InputC>& phi;
 
     unsigned int nMin;  // minimum number of tuples for splitting
 };
 
 #define USE_REGRESSION_TREE_MEMBERS               \
-	typedef RegressionTree<InputC, OutputC> Base; \
-	using Base::phi;                              \
+	typedef RegressionTree<InputC, OutputC, denseOutput> Base; \
     using Base::root;                             \
     using Base::emptyNode;                        \
     using Base::nMin;

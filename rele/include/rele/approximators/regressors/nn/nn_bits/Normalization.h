@@ -58,7 +58,7 @@ public:
 class MinMaxNormalization : public Normalization
 {
 public:
-    MinMaxNormalization(const BatchDataFeatures<arma::vec, arma::vec>& data, double minValue = 0.0, double maxValue = 1.0)
+    MinMaxNormalization(const BatchDataFeatures& data, double minValue = 0.0, double maxValue = 1.0)
     {
         min = data.getMinFeatures();
         arma::vec delta = data.getMaxFeatures() - min;
@@ -94,7 +94,7 @@ private:
 class ZscoreNormalization : public Normalization
 {
 public:
-    ZscoreNormalization(const BatchDataFeatures<arma::vec, arma::vec>& data)
+    ZscoreNormalization(const BatchDataFeatures& data)
     {
         mean = data.getMeanFeatures();
         stddev = data.getStdDevFeatures();

@@ -36,38 +36,105 @@ namespace ReLe
 {
 
 template<class InputC, class OutputC>
-class MiniBatchData;
+class BatchDataRaw_
+{
+public:
+    BatchDataRaw_()
+    {
 
-template<class InputC, class OutputC>
-class BatchDataPlain;
+    }
 
-template<class InputC, class OutputC>
-class BatchData
+    BatchDataRaw_(std::vector<InputC> inputs, std::vector<OutputC> outputs) :
+        inputs(inputs), outputs(outputs)
+    {
+        assert(inputs.size() == outputs.size());
+    }
+
+    virtual BatchDataRaw_<InputC, OutputC>* clone() const
+    {
+        BatchDataRaw_<InputC, OutputC>* newDataset = new BatchDataRaw_<InputC,
+        OutputC>();
+
+        for (int i = 0; i < size(); i++)
+        {
+            newDataset->addSample(getInput(i), getOutput(i));
+        }
+
+        return newDataset;
+    }
+
+    void addSample(const InputC& input, const OutputC& output)
+    {
+        inputs.push_back(input);
+        outputs.push_back(output);
+    }
+
+    virtual InputC getInput(unsigned int index) const
+    {
+        return inputs[index];
+    }
+
+    virtual OutputC getOutput(unsigned int index) const
+    {
+        return outputs[index];
+    }
+
+    virtual size_t size() const
+    {
+        return inputs.size();
+    }
+
+    virtual ~BatchDataRaw_()
+    {
+
+    }
+
+private:
+    std::vector<InputC> inputs;
+    std::vector<OutputC> outputs;
+
+};
+
+template<class OutputC, bool denseOutput>
+class MiniBatchData_;
+
+template<class OutputC, bool denseOutput = true>
+class BatchData_
 {
 
 public:
-    BatchData()
+    using features_type = typename input_traits<denseOutput>::column_type;
+
+public:
+    BatchData_()
     {
         computed = false;
     }
 
-    virtual InputC getInput(unsigned int index) const = 0;
+    virtual features_type getInput(unsigned int index) const = 0;
     virtual OutputC getOutput(unsigned int index) const = 0;
     virtual size_t size() const = 0;
-    virtual BatchData* clone() const = 0;
-    virtual BatchData* cloneSubset(const arma::uvec& indexes) const = 0;
 
-    virtual const BatchData* shuffle() const
+    virtual size_t featuresSize() const = 0;
+    virtual arma::vec getMinFeatures() const = 0;
+    virtual arma::vec getMaxFeatures() const = 0;
+    virtual arma::vec getMeanFeatures() const = 0;
+    virtual arma::vec getStdDevFeatures() const = 0;
+
+    virtual BatchData_* clone() const = 0;
+    virtual BatchData_* cloneSubset(const arma::uvec& indexes) const = 0;
+
+    virtual const BatchData_* shuffle() const
     {
         arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
         indexes = arma::shuffle(indexes);
 
-        return new MiniBatchData<InputC, OutputC>(this, indexes);
+        return new MiniBatchData_<OutputC, denseOutput>(this, indexes);
     }
 
-    virtual std::vector<const BatchData*> getMiniBatches(unsigned int mSize) const
+    virtual std::vector<const BatchData_*> getMiniBatches(unsigned int mSize) const
     {
-        std::vector<const BatchData*> minibatches;
+        std::vector<const BatchData_*> minibatches;
 
         arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
         indexes = arma::shuffle(indexes);
@@ -80,7 +147,7 @@ public:
             unsigned int last = indexes.n_elem;
             unsigned int end = std::min(start + mSize, last) -1;
 
-            auto* miniBatch = new MiniBatchData<InputC, OutputC>(this, indexes.rows(start, end));
+            auto* miniBatch = new MiniBatchData_<OutputC, denseOutput>(this, indexes.rows(start, end));
 
             minibatches.push_back(miniBatch);
         }
@@ -110,7 +177,7 @@ public:
         return variance;
     }
 
-    virtual ~BatchData()
+    virtual ~BatchData_()
     {
 
     }
@@ -147,53 +214,57 @@ private:
     mutable OutputC mean;
 };
 
-template<class InputC, class OutputC>
-class MiniBatchData: public BatchData<InputC, OutputC>
+typedef BatchData_<arma::vec> BatchData;
+
+template<class OutputC, bool denseOutput = true>
+class MiniBatchData_: public BatchData_<OutputC, denseOutput>
 {
+	using typename BatchData_<OutputC, denseOutput>::features_type;
+
 public:
-    MiniBatchData(const BatchData<InputC, OutputC>* data,
+    MiniBatchData_(const BatchData_<OutputC, denseOutput>* data,
                   const arma::uvec& indexes) :
         data(*data), indexes(indexes)
     {
 
     }
 
-    MiniBatchData(const BatchData<InputC, OutputC>& data,
+    MiniBatchData_(const BatchData_<OutputC, denseOutput>& data,
                   const arma::uvec& indexes) :
         data(data), indexes(indexes)
     {
 
     }
 
-    virtual BatchData<InputC, OutputC>* clone() const override
+    virtual BatchData_<OutputC, denseOutput>* clone() const override
     {
-        return new MiniBatchData<InputC, OutputC>(data, indexes);
+        return new MiniBatchData_<OutputC, denseOutput>(data, indexes);
     }
 
-    virtual BatchData<InputC, OutputC>* cloneSubset(
+    virtual BatchData_<OutputC, denseOutput>* cloneSubset(
         const arma::uvec& indexes) const override
     {
         arma::uvec newIndexes = this->indexes(indexes);
-        return new MiniBatchData<InputC, OutputC>(data, newIndexes);
+        return new MiniBatchData_<OutputC, denseOutput>(data, newIndexes);
     }
 
-    virtual const BatchData<InputC, OutputC>* shuffle() const override
+    virtual const BatchData_<OutputC, denseOutput>* shuffle() const override
     {
         if (data.size() == indexes.n_elem)
             return data.shuffle();
         else
-            return BatchData<InputC, OutputC>::shuffle();
+            return BatchData_<OutputC, denseOutput>::shuffle();
     }
 
-    virtual std::vector<const BatchData<InputC, OutputC>*> getMiniBatches(unsigned int mSize) const override
+    virtual std::vector<const BatchData_<OutputC, denseOutput>*> getMiniBatches(unsigned int mSize) const override
     {
         if (data.size() == indexes.n_elem)
             return data.getMiniBatches(mSize);
         else
-            return BatchData<InputC, OutputC>::getMiniBatches(mSize);
+            return BatchData_<OutputC, denseOutput>::getMiniBatches(mSize);
     }
 
-    virtual InputC getInput(unsigned int index) const override
+    virtual features_type getInput(unsigned int index) const override
     {
         unsigned int realIndex = indexes(index);
         return data.getInput(realIndex);
@@ -210,97 +281,65 @@ public:
         return indexes.n_elem;
     }
 
+    virtual size_t featuresSize() const override
+    {
+        return data.featuresSize();
+    }
+
+    virtual arma::vec getMinFeatures() const override
+    {
+        //TODO fixme
+        return data.getMinFeatures();
+    }
+
+    virtual arma::vec getMaxFeatures() const override
+    {
+        //TODO fixme
+        return data.getMaxFeatures();
+    }
+
+    virtual arma::vec getMeanFeatures() const override
+    {
+        //TODO fixme
+        return data.getMeanFeatures();
+    }
+
+    virtual arma::vec getStdDevFeatures() const override
+    {
+        //TODO fixme
+        return data.getStdDevFeatures();
+    }
+
+
     void setIndexes(const arma::uvec& indexes)
     {
         this->computed = false;
         this->indexes = indexes;
     }
 
-    virtual ~MiniBatchData()
+    virtual ~MiniBatchData_()
     {
 
     }
 
 private:
-    const BatchData<InputC, OutputC>& data;
+    const BatchData_<OutputC, denseOutput>& data;
     arma::uvec indexes;
 };
 
-template<class InputC, class OutputC>
-class BatchDataPlain: public BatchData<InputC, OutputC>
+typedef MiniBatchData_<arma::vec> MiniBatchData;
+
+template<class OutputC, bool denseOutput = true>
+class BatchDataFeatures_: public BatchData_<OutputC, denseOutput>
 {
-public:
-    BatchDataPlain()
-    {
-
-    }
-
-    BatchDataPlain(std::vector<InputC> inputs, std::vector<OutputC> outputs) :
-        inputs(inputs), outputs(outputs)
-    {
-        assert(inputs.size() == outputs.size());
-    }
-
-    virtual BatchData<InputC, OutputC>* clone() const override
-    {
-        BatchDataPlain<InputC, OutputC>* newDataset = new BatchDataPlain<InputC,
-        OutputC>();
-
-        for (int i = 0; i < size(); i++)
-        {
-            newDataset->addSample(getInput(i), getOutput(i));
-        }
-
-        return newDataset;
-    }
-
-    virtual BatchData<InputC, OutputC>* cloneSubset(
-        const arma::uvec& indexes) const override
-    {
-        return new MiniBatchData<InputC, OutputC>(this, indexes);
-    }
-
-    void addSample(const InputC& input, const OutputC& output)
-    {
-        inputs.push_back(input);
-        outputs.push_back(output);
-    }
-
-    virtual InputC getInput(unsigned int index) const override
-    {
-        return inputs[index];
-    }
-
-    virtual OutputC getOutput(unsigned int index) const override
-    {
-        return outputs[index];
-    }
-
-    virtual size_t size() const override
-    {
-        return inputs.size();
-    }
-
-    virtual ~BatchDataPlain()
-    {
-
-    }
-
-private:
-    std::vector<InputC> inputs;
-    std::vector<OutputC> outputs;
-
-};
-
-template<class InputC, class OutputC>
-class BatchDataFeatures: public BatchData<InputC, OutputC>
-{
-public:
-    typedef typename input_collection<InputC>::const_ref_type FeaturesCollection;
-    typedef typename output_collection<OutputC>::const_ref_type OutputCollection;
+	using typename BatchData_<OutputC, denseOutput>::features_type;
 
 public:
-    BatchDataFeatures(FeaturesCollection features, OutputCollection outputs) :
+    typedef typename input_traits<denseOutput>::const_ref_type FeaturesCollection;
+    typedef typename output_traits<OutputC>::const_ref_type OutputCollection;
+
+public:
+    BatchDataFeatures_(FeaturesCollection features, OutputCollection outputs) :
         features(features), outputs(outputs)
     {
         assert(features.n_cols == outputs.n_cols);
@@ -311,43 +350,43 @@ public:
         return features.n_cols;
     }
 
-    virtual size_t featuresSize() const
+    virtual size_t featuresSize() const override
     {
         return features.n_rows;
     }
 
-    arma::vec getMinFeatures() const
+    virtual arma::vec getMinFeatures() const override
     {
         return arma::min(features, 1);
     }
 
-    arma::vec getMaxFeatures() const
+    virtual arma::vec getMaxFeatures() const override
     {
         return arma::max(features, 1);
     }
 
-    arma::vec getMeanFeatures() const
+    virtual arma::vec getMeanFeatures() const override
     {
         return arma::mean(features, 1);
     }
 
-    arma::vec getStdDevFeatures() const
+    virtual arma::vec getStdDevFeatures() const override
     {
         return arma::stddev(features, 0, 1);
     }
 
-    virtual BatchData<InputC, OutputC>* clone() const override
+    virtual BatchData_<OutputC, denseOutput>* clone() const override
     {
-        return new BatchDataFeatures<InputC, OutputC>(features, outputs);
+        return new BatchDataFeatures_<OutputC, denseOutput>(features, outputs);
     }
 
-    virtual BatchData<InputC, OutputC>* cloneSubset(
+    virtual BatchData_<OutputC, denseOutput>* cloneSubset(
         const arma::uvec& indexes) const override
     {
-        return new MiniBatchData<InputC, OutputC>(this, indexes);
+        return new MiniBatchData_<OutputC, denseOutput>(this, indexes);
     }
 
-    virtual InputC getInput(unsigned int index) const override
+    virtual features_type getInput(unsigned int index) const override
     {
         return features.col(index);
     }
@@ -367,7 +406,7 @@ public:
         return features;
     }
 
-    virtual ~BatchDataFeatures()
+    virtual ~BatchDataFeatures_()
     {
 
     }
@@ -377,6 +416,8 @@ private:
     OutputCollection outputs;
 
 };
+
+typedef BatchDataFeatures_<arma::vec> BatchDataFeatures;
 
 }
 

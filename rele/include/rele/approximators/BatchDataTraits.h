@@ -29,59 +29,39 @@
 namespace ReLe
 {
 
-/* Traits to handle collections */
-template<class InputC>
-struct input_collection
+/* Traits to handle input */
+template<bool denseOutput>
+struct input_traits
 {
-    typedef arma::field<InputC> type;
-    typedef typename std::add_lvalue_reference<arma::field<InputC>>::type ref_type;
-    typedef typename std::add_lvalue_reference<const arma::field<InputC>>::type const_ref_type;
+
 };
 
 template<>
-struct input_collection<size_t>
-{
-    typedef arma::uvec type;
-    typedef typename std::add_lvalue_reference<arma::uvec>::type ref_type;
-    typedef typename std::add_lvalue_reference<const arma::uvec>::type const_ref_type;
-};
-
-template<>
-struct input_collection<arma::vec>
+struct input_traits<true>
 {
     typedef arma::mat type;
-    typedef typename std::add_lvalue_reference<arma::mat>::type ref_type;
-    typedef typename std::add_lvalue_reference<const arma::mat>::type const_ref_type;
-};
-
-template<class OutputC>
-struct output_collection
-{
-    typedef arma::field<OutputC> type;
-    typedef typename std::add_lvalue_reference<arma::field<OutputC>>::type ref_type;
-    typedef typename std::add_lvalue_reference<const arma::field<OutputC>>::type const_ref_type;
+    typedef arma::mat& ref_type;
+    typedef const arma::mat& const_ref_type;
+    typedef arma::vec column_type;
 };
 
 template<>
-struct output_collection<unsigned int>
+struct input_traits<false>
 {
-    typedef arma::uvec type;
-    typedef typename std::add_lvalue_reference<arma::uvec>::type ref_type;
-    typedef typename std::add_lvalue_reference<const arma::uvec>::type const_ref_type;
-};
-
-template<>
-struct output_collection<arma::vec>
-{
-    typedef arma::mat type;
-    typedef typename std::add_lvalue_reference<arma::mat>::type ref_type;
-    typedef typename std::add_lvalue_reference<const arma::mat>::type const_ref_type;
+    typedef arma::sp_mat type;
+    typedef arma::sp_mat& ref_type;
+    typedef const arma::sp_mat& const_ref_type;
+    typedef arma::sp_vec column_type;
 };
 
 /* Traits to handle output */
 template<class OutputC>
 struct output_traits
 {
+    typedef arma::field<OutputC> type;
+    typedef typename std::add_lvalue_reference<arma::field<OutputC>>::type ref_type;
+    typedef typename std::add_lvalue_reference<const arma::field<OutputC>>::type const_ref_type;
+
     static arma::mat square(const OutputC& o)
     {
         return arma::mat();
@@ -97,6 +77,10 @@ struct output_traits
 template<>
 struct output_traits<arma::vec>
 {
+    typedef arma::mat type;
+    typedef typename std::add_lvalue_reference<arma::mat>::type ref_type;
+    typedef typename std::add_lvalue_reference<const arma::mat>::type const_ref_type;
+
     static arma::mat square(const arma::vec& o)
     {
         return o*o.t();
@@ -112,6 +96,10 @@ struct output_traits<arma::vec>
 template<>
 struct output_traits<unsigned int>
 {
+    typedef arma::uvec type;
+    typedef typename std::add_lvalue_reference<arma::uvec>::type ref_type;
+    typedef typename std::add_lvalue_reference<const arma::uvec>::type const_ref_type;
+
     static arma::mat square(const unsigned int& o)
     {
         arma::mat m;

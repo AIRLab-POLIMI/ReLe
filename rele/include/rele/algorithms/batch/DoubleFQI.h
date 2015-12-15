@@ -124,7 +124,7 @@ public:
         }
 
         // The regressor is trained
-        BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
+        BatchDataFeatures featureDataset(input, output);
         trainingRegressor.trainFeatures(featureDataset);
     }
 

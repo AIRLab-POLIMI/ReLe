@@ -87,7 +87,7 @@ public:
          * the regressor with a dataset that has the rewards as
          * output.
          */
-        BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
+        BatchDataFeatures featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
 
         // Initial QHat is stored before update
@@ -175,7 +175,7 @@ public:
         }
 
         // The regressor is trained
-        BatchDataFeatures<arma::vec, arma::vec> featureDataset(input, output);
+        BatchDataFeatures featureDataset(input, output);
         QRegressor.trainFeatures(featureDataset);
     }
 

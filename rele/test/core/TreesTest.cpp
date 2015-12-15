@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
     cout << "tree outputSize: " << tree.getOutputSize() << endl;
 
-    BatchDataPlain<arma::vec, arma::vec> dataset;
+    BatchDataRaw_<arma::vec, arma::vec> dataset;
     tree.train(dataset);
 
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 
 
     //Train with atan2
-    BatchDataPlain<arma::vec, arma::vec> datasetAtan2;
+    BatchDataRaw_<arma::vec, arma::vec> datasetAtan2;
     for(int i = 0; i < 1200; i++)
     {
         double step = 0.005;

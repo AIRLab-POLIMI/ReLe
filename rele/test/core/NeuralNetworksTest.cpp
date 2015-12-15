@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     DenseFeatures phiPlane(basisPlane);
 
     FFNeuralNetwork planeNet(phiPlane, 10, 1);
-    BatchDataPlain<arma::vec, arma::vec> datasetPlane;
+    BatchDataRaw_<arma::vec, arma::vec> datasetPlane;
 
     //Config parameters
     for(int i = -100; i < 100; i++)
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     //Train atan2
     cout << "atan2 test" << endl;
     FFNeuralNetwork atan2Net(phi, 20, 1);
-    BatchDataPlain<arma::vec, arma::vec> dataset;
+    BatchDataRaw_<arma::vec, arma::vec> dataset;
 
     //Config parameters
     /*atan2Net.getHyperParameters().alg = FFNeuralNetwork::Adadelta;
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
     //Train xor
     FFNeuralNetwork xorNet(phi, 3, 1);
-    BatchDataPlain<arma::vec, arma::vec> datasetXor;
+    BatchDataRaw_<arma::vec, arma::vec> datasetXor;
 
     //Config parameters
     xorNet.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;

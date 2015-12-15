@@ -46,8 +46,8 @@ namespace ReLe
  * contains less than nmin tuples. In this method the tree structure is
  * independent of the output values of the training sample.
  */
-template<class InputC, class OutputC>
-class KDTree: public RegressionTree<InputC, OutputC>
+template<class InputC, class OutputC, bool denseOutput = true>
+class KDTree: public RegressionTree<InputC, OutputC, denseOutput>
 {
     USE_REGRESSION_TREE_MEMBERS
 
@@ -57,9 +57,9 @@ public:
      * Basic constructor
      * @param nm nmin, the minimum number of tuples for splitting
      */
-    KDTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
+    KDTree(Features_<InputC, denseOutput>& phi, const EmptyTreeNode<OutputC>& emptyNode,
            unsigned int output_size = 1, unsigned int nMin = 2)
-        : RegressionTree<InputC, OutputC>(phi, emptyNode, output_size, nMin)
+        : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nMin)
     {
 
     }
@@ -72,7 +72,7 @@ public:
 
     }
 
-    virtual void trainFeatures(BatchDataFeatures<InputC, OutputC>& featureDataset) override
+    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) override
     {
         this->cleanTree();
         root = buildKDTree(featureDataset, 0);
@@ -102,13 +102,13 @@ private:
      * @param cutDir the cut direction
      * @return true if all the inputs are constant, false otherwise
      */
-    double computeMedian(const BatchData<InputC, OutputC>& ds, int cutDir)
+    double computeMedian(const BatchData_<OutputC, denseOutput>& ds, int cutDir)
     {
         std::vector<double> tmp;
 
         for (unsigned int i = 0; i < ds.size(); i++)
         {
-            auto&& element = phi(ds.getInput(i));
+            auto&& element = ds.getInput(i);
             tmp.push_back(element[cutDir]);
         }
 
@@ -119,18 +119,18 @@ private:
 
     }
 
-    bool fixedInput(const BatchData<InputC, OutputC>& ds, int cutDir)
+    bool fixedInput(const BatchData_<OutputC, denseOutput>& ds, int cutDir)
     {
         if (ds.size() == 0)
         {
             return true;
         }
 
-        auto&& element = phi(ds.getInput(0));
+        auto&& element = ds.getInput(0);
         double val = element[cutDir];
         for (unsigned int i = 1; i < ds.size(); i++)
         {
-            auto&& newElement = phi(ds.getInput(i));
+            auto&& newElement = ds.getInput(i);
             double newVal = newElement[cutDir];
             if (std::abs(val - newVal) > THRESHOLD)
             {
@@ -148,7 +148,7 @@ private:
      * @param store_sample allow to store samples into leaves
      * @return a pointer to the root
      */
-    TreeNode<OutputC>* buildKDTree(const BatchData<InputC, OutputC>& ds,
+    TreeNode<OutputC>* buildKDTree(const BatchData_<OutputC, denseOutput>& ds,
                                    int cutDir, bool store_sample = false)
     {
         unsigned int size = ds.size();
@@ -172,7 +172,7 @@ private:
         bool equal = false;
         while (fixedInput(ds, cutTmp) && !equal)
         {
-            cutTmp = (cutTmp + 1) % phi.rows();
+            cutTmp = (cutTmp + 1) % ds.featuresSize();
             if (cutTmp == cutDir)
             {
                 equal = true;
@@ -195,12 +195,12 @@ private:
         // split inputs in two subsets
         this->splitDataset(ds, cutDir, cutPoint, indexesLow, indexesHigh);
 
-        BatchData<InputC, OutputC>* lowEx = ds.cloneSubset(indexesLow);
-        BatchData<InputC, OutputC>* highEx = ds.cloneSubset(indexesHigh);
+        BatchData_<OutputC, denseOutput>* lowEx = ds.cloneSubset(indexesLow);
+        BatchData_<OutputC, denseOutput>* highEx = ds.cloneSubset(indexesHigh);
 
         // recall the method for left and right child
-        TreeNode<OutputC>* left = buildKDTree(*lowEx, (cutDir + 1) % phi.rows(), store_sample);
-        TreeNode<OutputC>* right = buildKDTree(*highEx, (cutDir + 1) % phi.rows(), store_sample);
+        TreeNode<OutputC>* left = buildKDTree(*lowEx, (cutDir + 1) % ds.featuresSize(), store_sample);
+        TreeNode<OutputC>* right = buildKDTree(*highEx, (cutDir + 1) % ds.featuresSize(), store_sample);
 
         delete lowEx;
         delete highEx;
