@@ -38,24 +38,30 @@ public:
     DoubleFQIEnsemble(BatchRegressor& QRegressorA,
                       BatchRegressor& QRegressorB,
                       double k = 0.5) :
-        Ensemble(QRegressorA.getFeatures(), 1),
+        Ensemble(QRegressorA.getFeatures()),
         k(k)
     {
+        assert(k > 0 && k < 1);
+
         regressors.push_back(&QRegressorA);
         regressors.push_back(&QRegressorB);
     }
 
     void trainFeatures(BatchDataFeatures<arma::vec, arma::vec>& featureDataset) override
     {
+        /* This function extract the respective dataset for each
+         * regressor in the ensemble and train them.
+         */
         arma::mat input = featureDataset.getFeatures();
         arma::mat output = featureDataset.getOutputs();
 
         unsigned int nSamples = input.n_cols;
 
-        arma::mat inputA = input.cols(arma::span(0, nSamples * k - 1));
-        arma::mat inputB = input.cols(arma::span(nSamples * k, nSamples - 1));
-        arma::mat outputA = output.cols(arma::span(0, nSamples * k - 1));
-        arma::mat outputB = output.cols(arma::span(nSamples * k, nSamples - 1));
+        unsigned int splitIndex = nSamples * k;
+        arma::mat inputA = input.cols(arma::span(0, splitIndex - 1));
+        arma::mat inputB = input.cols(arma::span(splitIndex, nSamples - 1));
+        arma::mat outputA = output.cols(arma::span(0, splitIndex - 1));
+        arma::mat outputB = output.cols(arma::span(splitIndex, nSamples - 1));
 
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetA(inputA, outputA);
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetB(inputB, outputB);
@@ -114,18 +120,24 @@ public:
     {
         double k = QRegressorEnsemble.getK();
 
+        /* Dataset is shuffled if flag true.
+         *
+         * TODO: this way of shuffling is temporary. It will be
+         * adapted to the changes that will be made in BatchData classes.
+         */
         if(shuffle)
         {
             this->indexes = arma::shuffle(this->indexes);
             input = input.cols(this->indexes);
             rewards = rewards.cols(this->indexes);
-            this->nextStates = this->nextStates.cols(this->indexes);
+            this->nextStates = this->nextStates(this->indexes);
         }
 
+        // First regressor output creation
         for(unsigned int i = 0; i < this->nSamples * k; i++)
         {
             /* In order to be able to fill the output vector (i.e. regressor
-             * target values), we need to compute the Q values for each
+             * target values), we need to compute the Q-values for each
              * s' sample in the dataset and for each action in the
              * set of actions of the problem. Recalling the fact that the values
              * are zero for each action in an absorbing state, we check if s' is
@@ -138,6 +150,7 @@ public:
                                   QRegressorEnsemble.getRegressor(0)(FiniteState(this->nextStates(i)),
                                           FiniteAction(u)));
 
+            // Compute index of action with max Q-value in the next state
             double qmax = Q_xn.max();
             arma::uvec maxIndex = find(Q_xn == qmax);
             unsigned int index = RandomGenerator::sampleUniformInt(0,
@@ -152,6 +165,8 @@ public:
                             QRegressorEnsemble.getRegressor(1)(FiniteState(this->nextStates(i)),
                                     FiniteAction(index)));
         }
+
+        // Second regressor output creation
         for(unsigned int i = this->nSamples * k; i < this->nSamples; i++)
         {
             /* In order to be able to fill the output vector (i.e. regressor

@@ -151,12 +151,12 @@ int main(int argc, char *argv[])
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    FQI<FiniteState> fqi(data, QRegressorA, nStates, nActions, 0.9);
-    //DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, nActions, 0.9);
+    //FQI<FiniteState> fqi(data, QRegressorA, nStates, nActions, 0.9);
+    DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, nActions, 0.9);
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 100, 1e-15);
+    fqi.run(phi, 1000, 1e-15);
 
     return 0;
 }

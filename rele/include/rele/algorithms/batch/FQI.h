@@ -49,18 +49,23 @@ public:
         unsigned int nStates, unsigned int nActions, double gamma) :
         data(data),
         QRegressor(QRegressor),
-        nSamples(),
+        nSamples(0),
         nStates(nStates),
         nActions(nActions),
         gamma(gamma)
     {
-        QTable.zeros(nStates, nActions);
-
         // Compute the overall number of samples
         unsigned int nEpisodes = data.size();
-        unsigned int nSamples = 0;
         for(unsigned int k = 0; k < nEpisodes; k++)
             nSamples += data[k].size();
+
+        QTable.zeros(nStates, nActions);
+
+        /*
+         * This vector is used for the terminal condition evaluation. It will
+         * contain the approximated Q values of each sample in the dataset.
+         */
+        QHat.zeros(nSamples);
 
         nextStates.zeros(nSamples);
         indexes.zeros(nSamples);
@@ -90,12 +95,6 @@ public:
          */
         arma::mat output(1, nSamples, arma::fill::zeros);
 
-        /*
-         * This vector is used for the terminal condition evaluation. It will
-         * contain the approximated Q values of each sample in the dataset.
-         */
-        QHat.zeros(nSamples);
-
         /* First iteration of FQI is performed here training
          * the regressor with a dataset that has the rewards as
          * output. The dataset is shuffled.
@@ -106,7 +105,7 @@ public:
         indexes = arma::shuffle(indexes);
         input = input.cols(indexes);
         rewards = rewards.cols(indexes);
-        nextStates = nextStates.rows(indexes);
+        nextStates = nextStates(indexes);
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
 
@@ -125,7 +124,7 @@ public:
         printInfo(input, rewards, prevQHat, J);
 
         // Main FQI loop
-        while(iteration < maxiterations && J > epsilon)
+        while(iteration < maxiterations)// && J > epsilon)
         {
             // Update and print the iteration number
             iteration++;
@@ -199,13 +198,13 @@ public:
         // Computation of Q values approximation with the updated regressor
         unsigned int i = 0;
         for(auto& episode : data)
-        {
             for(auto& tr : episode)
             {
                 QHat(i) = arma::as_scalar(QRegressor(tr.x, tr.u));
                 i++;
             }
-        }
+
+        QHat = QHat(indexes);
     }
 
     virtual void computeQTable()
@@ -226,7 +225,7 @@ public:
         /* Evaluate the error mean squared error between the current approximation
          * of Q and the target output in the dataset.
          */
-        J2 = arma::sum(arma::square(QHat - output.t()))  / (output.n_cols);
+        J2 = arma::sum(arma::square(QHat - output.t()))  / nSamples;
 
         std::cout << "Input: ";
         for(unsigned int i = 0; i < 40; i++)
