@@ -26,7 +26,7 @@
 namespace ReLe
 {
 
-SimpleMAB::SimpleMAB(unsigned int nActions, double gamma) : MAB(gamma)
+SimpleMAB::SimpleMAB(unsigned int nActions, double gamma, unsigned int horizon) : MAB(gamma, horizon)
 {
     EnvironmentSettings& task = getWritableSettings();
     task.finiteActionDim = nActions;

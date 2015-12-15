@@ -32,7 +32,7 @@ namespace ReLe
 class SimpleMAB: public MAB<FiniteAction>
 {
 public:
-    SimpleMAB(unsigned int nActions, double gamma);
+    SimpleMAB(unsigned int nActions, double gamma, unsigned int horizon = 1);
 };
 
 }

@@ -24,12 +24,12 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_ROULETTE_H_
 #define INCLUDE_RELE_ENVIRONMENTS_ROULETTE_H_
 
-#include "MAB/LinearMAB.h"
+#include "MAB/MAB.h"
 
 namespace ReLe
 {
 
-class Roulette: public LinearMAB<FiniteAction>
+class Roulette: public MAB<FiniteAction>
 {
 public:
     enum ExperimentLabel
@@ -41,12 +41,12 @@ public:
     Roulette(ExperimentLabel rouletteType = American, double gamma = 1);
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
-    virtual double computeReward(const FiniteAction& action) override;
-    double rouletteReward(unsigned int nSquares);
+    virtual double computeReward(const FiniteAction& action);
+    virtual double rouletteReward(unsigned int nSquares);
 
 protected:
     ExperimentLabel rouletteType;
-    unsigned int nNumbers;
+    unsigned int nOutcomes;
     unsigned int nBets;
     double bet;
 };

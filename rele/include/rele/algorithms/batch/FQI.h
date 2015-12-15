@@ -49,11 +49,29 @@ public:
         unsigned int nStates, unsigned int nActions, double gamma) :
         data(data),
         QRegressor(QRegressor),
+        nSamples(),
         nStates(nStates),
         nActions(nActions),
         gamma(gamma)
     {
         QTable.zeros(nStates, nActions);
+
+        // Compute the overall number of samples
+        unsigned int nEpisodes = data.size();
+        unsigned int nSamples = 0;
+        for(unsigned int k = 0; k < nEpisodes; k++)
+            nSamples += data[k].size();
+
+        nextStates.zeros(nSamples);
+        indexes.zeros(nSamples);
+        unsigned int i = 0;
+        for(auto& episode : data)
+            for(auto& tr : episode)
+            {
+                nextStates(i) = tr.xn.getStateN();
+                indexes(i) = i;
+                i++;
+            }
     }
 
     virtual void run(Features& phi, unsigned int maxiterations, double epsilon)
@@ -61,12 +79,6 @@ public:
         /* This is the function to be called to run the FQI algorithm. It takes
          * the features phi that are used to compute the input of the regressor.
          */
-
-        // Compute the overall number of samples
-        unsigned int nEpisodes = data.size();
-        unsigned int nSamples = 0;
-        for(unsigned int k = 0; k < nEpisodes; k++)
-            nSamples += data[k].size();
 
         // Rewards are extracted from the dataset
         arma::mat rewards = data.rewardAsMatrix();
@@ -76,17 +88,25 @@ public:
          * with the optimal Bellman equation, that are used in regression as
          * target values.
          */
-        arma::mat output(1, input.n_cols, arma::fill::zeros);
+        arma::mat output(1, nSamples, arma::fill::zeros);
+
         /*
          * This vector is used for the terminal condition evaluation. It will
          * contain the approximated Q values of each sample in the dataset.
          */
-        QHat.zeros(input.n_cols);
+        QHat.zeros(nSamples);
 
         /* First iteration of FQI is performed here training
          * the regressor with a dataset that has the rewards as
-         * output.
+         * output. The dataset is shuffled.
+         *
+         * TODO: this way of shuffling is temporary. It will be
+         * adapted to the changes that will be made in BatchData classes.
          */
+        indexes = arma::shuffle(indexes);
+        input = input.cols(indexes);
+        rewards = rewards.cols(indexes);
+        nextStates = nextStates.rows(indexes);
         BatchDataFeatures<arma::vec, arma::vec> featureDatasetStart(input, rewards);
         QRegressor.trainFeatures(featureDatasetStart);
 
@@ -102,7 +122,7 @@ public:
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
-        printInfo(input, output, prevQHat, J);
+        printInfo(input, rewards, prevQHat, J);
 
         // Main FQI loop
         while(iteration < maxiterations && J > epsilon)
@@ -144,34 +164,29 @@ public:
         printPolicy();
     }
 
-    virtual void step(arma::mat input, arma::mat& output, const arma::mat rewards)
+    virtual void step(arma::mat input, arma::mat& output, arma::mat rewards)
     {
-        // Loop on each dataset sample (i.e. on each transition)
-        unsigned int i = 0;
-        for(auto& episode : data)
+        for(unsigned int i = 0; i < nSamples; i++)
         {
-            for(auto& tr : episode)
-            {
-                /* In order to be able to fill the output vector (i.e. regressor
-                 * target values), we need to compute the Q values for each
-                 * s' sample in the dataset and for each action in the
-                 * set of actions of the problem. Recalling the fact that the values
-                 * are zero for each action in an absorbing state, we check if s' is
-                 * absorbing and, if it is, we leave the Q-values fixed to zero.
-                 */
-                arma::vec Q_xn(nActions, arma::fill::zeros);
-                if(!tr.xn.isAbsorbing())
-                    for(unsigned int u = 0; u < nActions; u++)
-                        Q_xn(u) = arma::as_scalar(QRegressor(tr.xn, FiniteAction(u)));
+            /* In order to be able to fill the output vector (i.e. regressor
+             * target values), we need to compute the Q values for each
+             * s' sample in the dataset and for each action in the
+             * set of actions of the problem. Recalling the fact that the values
+             * are zero for each action in an absorbing state, we check if s' is
+             * absorbing and, if it is, we leave the Q-values fixed to zero.
+             */
+            arma::vec Q_xn(nActions, arma::fill::zeros);
+            if(!FiniteState(nextStates(i)).isAbsorbing())
+                for(unsigned int u = 0; u < nActions; u++)
+                    Q_xn(u) = arma::as_scalar(QRegressor(FiniteState(nextStates(i)),
+                                                         FiniteAction(u)));
 
-                /* For the current s', Q values for each action are stored in
-                 * Q_xn. The optimal Bellman equation can be computed
-                 * finding the maximum value inside Q_xn. They are zero if
-                 * xn is an absorbing state.
-                 */
-                output(i) = rewards(0, i) + gamma * arma::max(Q_xn);
-                i++;
-            }
+            /* For the current s', Q values for each action are stored in
+             * Q_xn. The optimal Bellman equation can be computed
+             * finding the maximum value inside Q_xn. They are zero if
+             * xn is an absorbing state.
+             */
+            output(i) = rewards(0, i) + this->gamma * arma::max(Q_xn);
         }
 
         // The regressor is trained
@@ -243,6 +258,9 @@ protected:
     arma::vec QHat;
     arma::mat QTable;
     BatchRegressor& QRegressor;
+    arma::vec nextStates;
+    arma::uvec indexes;
+    unsigned int nSamples;
     unsigned int nStates;
     unsigned int nActions;
     double gamma;

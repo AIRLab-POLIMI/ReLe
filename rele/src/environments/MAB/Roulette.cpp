@@ -21,26 +21,27 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Roulette.h"
+#include "MAB/Roulette.h"
 #include "RandomGenerator.h"
 
 namespace ReLe
 {
 
 Roulette::Roulette(ExperimentLabel rouletteType, double gamma) :
-    LinearMAB<FiniteAction>(gamma),
+    MAB<FiniteAction>(gamma),
     rouletteType(rouletteType)
 {
     EnvironmentSettings& task = getWritableSettings();
     task.continuosActionDim = 0;
+
     if(rouletteType == American)
     {
-        nNumbers = 38;
+        nOutcomes = 38;
         nBets = 171;
     }
     else
     {
-        nNumbers = 37;
+        nOutcomes = 37;
         nBets = 150;
     }
     task.finiteActionDim = nBets;
@@ -60,8 +61,6 @@ void Roulette::step(const FiniteAction& action, FiniteState& nextState, Reward& 
 double Roulette::computeReward(const FiniteAction& action)
 {
     unsigned int nSquares;
-    double payout;
-    double p;
 
     unsigned int actionN = action.getActionN();
     if(rouletteType == American)
@@ -102,8 +101,8 @@ double Roulette::computeReward(const FiniteAction& action)
 
 double Roulette::rouletteReward(unsigned int nSquares)
 {
-    double payout = 36 / nSquares - 1; // Payout formula
-    double p = nSquares / nNumbers; // Probability to win
+    unsigned int payout = floor(36 / nSquares) - 1; // Payout formula
+    double p = nSquares / nOutcomes; // Probability to win
 
     if(RandomGenerator::sampleEvent(p))
         return bet + bet * payout;

@@ -24,12 +24,12 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_INTERNETADS_H_
 #define INCLUDE_RELE_ENVIRONMENTS_INTERNETADS_H_
 
-#include "MAB/SimpleMAB.h"
+#include "MAB/MAB.h"
 
 namespace ReLe
 {
 
-class InternetAds: public SimpleMAB
+class InternetAds: public MAB<FiniteAction>
 {
 public:
     enum ExperimentLabel

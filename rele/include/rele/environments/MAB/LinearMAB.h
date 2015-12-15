@@ -33,7 +33,7 @@ template<class ActionC>
 class LinearMAB: public MAB<ActionC>
 {
 public:
-    LinearMAB(double gamma) : MAB<ActionC>(gamma)
+    LinearMAB(double gamma, unsigned int horizon = 1) : MAB<ActionC>(gamma, horizon)
     {
     }
 
