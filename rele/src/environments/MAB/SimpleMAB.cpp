@@ -41,7 +41,7 @@ SimpleMAB::SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon) 
     P(P),
     MAB(gamma, horizon)
 {
-    R = R.ones(P.n_elem) * r;
+    R = arma::vec(P.n_elem, arma::fill::ones) * r;
 
     EnvironmentSettings& task = getWritableSettings();
     task.finiteActionDim = P.n_elem;
@@ -52,7 +52,7 @@ SimpleMAB::SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int ho
     MAB(gamma, horizon)
 {
     P = arma::randu(nArms);
-    R = R.ones(P.n_elem) * r;
+    R = arma::vec(P.n_elem, arma::fill::ones) * r;
 
     EnvironmentSettings& task = getWritableSettings();
     task.finiteActionDim = nArms;

@@ -33,79 +33,56 @@ Roulette::Roulette(ExperimentLabel rouletteType, double gamma) :
 {
     EnvironmentSettings& task = getWritableSettings();
     task.continuosActionDim = 0;
-    task.finiteStateDim = 2;
 
-    actions = {1, 2, 3, 4, 5, 6, 12, 18, 0};
+    if(rouletteType == American)
+    {
+    	nOutcomes = 38;
+    	actionsId = {38, 96, 111, 133, 134, 145, 151, 157, 158};
+    	nSquares = {1, 2, 3, 4, 5, 6, 12, 18, 0};
+    }
+    else
+    {
+        nOutcomes = 37;
+        actionsId = {37, 58, 15, 22, 11, 6, 6, 1};
+        nSquares = {1, 2, 3, 4, 6, 12, 18, 0};
+    }
+    task.finiteActionDim = actionsId(actionsId.n_elem - 1);
 
-    task.finiteActionDim = actions.n_elem;
-
-
-    nOutcomes = 38 ? rouletteType == American : 37;
     bet = 1;
 }
 
 void Roulette::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)
 {
-    if(action.getActionN() != actions.n_elem - 1)
-        nextState.setStateN(0);
-    else
-    {
-        nextState.setStateN(1);
-        nextState.setAbsorbing();
-    }
-    reward[0] = computeReward(action);
+    nextState.setStateN(0);
+    reward[0] = -bet + computeReward(action);
+
+    const EnvironmentSettings task = getSettings();
+    if(action.getActionN() == task.finiteActionDim - 1)
+    	nextState.setAbsorbing();
 }
 
 double Roulette::computeReward(const FiniteAction& action)
 {
-    unsigned int actionN = action.getActionN();
+	unsigned int actionN = action.getActionN();
 
-    unsigned int nSquares = actions(actionN);
-
-    /*if(rouletteType == American)
-    {
-        if(actionN >= 0 && actionN <= 39)
-            nSquares = 1;
-        else if(actionN >= 40 && actionN <= 97)
-            nSquares = 2;
-        else if(actionN >= 98 && actionN <= 109)
-            nSquares = 3;
-        else if(actionN >= 110 && actionN <= 121)
-            nSquares = 4;
-        else if(actionN == 122)
-            nSquares = 5;
-        else if(actionN >= 123 && actionN <= 133)
-            nSquares = 6;
-        else if(actionN >= 134 && actionN <= 139)
-            nSquares = 12;
-        else if(actionN >= 140 && actionN <= 145)
-            nSquares = 18;
-        else if(actionN == 170)
-            return 0;
-    }
-    else
-    {
-        if(actionN >= 0 && actionN <= 37)
-            nSquares = 2;
-        else if(actionN >= 40 && actionN <= 95)
-        {
-
-        }
-        else if(actionN == 169)
-            return 0;
-    }*/
-
-    return rouletteReward(nSquares);
+	if(actionN < actionsId(0))
+		return rouletteReward(nSquares(0));
+	for(unsigned int i = 1; i < nSquares.n_elem - 1; i++)
+		if(actionN >= actionsId(i) && actionN < actionsId(i + 1))
+			return rouletteReward(nSquares(i));
+	return bet;
 }
 
-double Roulette::rouletteReward(unsigned int nSquares)
+double Roulette::rouletteReward(double nSquares)
 {
-    unsigned int payout = floor(36 / nSquares) - 1; // Payout formula
     double p = nSquares / nOutcomes; // Probability to win
 
     if(RandomGenerator::sampleEvent(p))
+    {
+        unsigned int payout = floor(36 / nSquares) - 1; // Payout formula
         return bet + bet * payout;
-    return -bet;
+    }
+    return 0;
 }
 
 }

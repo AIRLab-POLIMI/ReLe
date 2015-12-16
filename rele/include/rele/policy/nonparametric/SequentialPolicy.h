@@ -21,27 +21,30 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MAB/InternetAds.h"
+#ifndef INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_
+#define INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_
+
+#include "q_policy/ActionValuePolicy.h"
 
 
 namespace ReLe
 {
 
-InternetAds::InternetAds(unsigned int nAds, double gamma, ExperimentLabel experimentType) :
-    SimpleMAB(arma::ones(nAds), 1, gamma)
+class SequentialPolicy: public ActionValuePolicy<FiniteState>
 {
-    EnvironmentSettings& task = getWritableSettings();
-    if(experimentType == First)
-    {
-        P = P.ones(nAds) * 0.5;
-        task.horizon = 100000;
-    }
-    else
-    {
-        P = arma::randu(nAds);
-        P = 0.02 + (0.05 - 0.02) * P;
-        task.horizon = 300000;
-    }
-}
+
+public:
+    SequentialPolicy(unsigned int nActions);
+    unsigned int operator()(const size_t& state) override;
+    double operator()(const size_t& state, const unsigned int& action) override;
+    inline std::string getPolicyName() override;
+    std::string getPolicyHyperparameters() override;
+    SequentialPolicy* clone() override;
+
+protected:
+    unsigned int currentAction;
+};
 
 }
+
+#endif /* INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_ */

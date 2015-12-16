@@ -21,27 +21,46 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MAB/InternetAds.h"
+#include "nonparametric/SequentialPolicy.h"
 
 
 namespace ReLe
 {
 
-InternetAds::InternetAds(unsigned int nAds, double gamma, ExperimentLabel experimentType) :
-    SimpleMAB(arma::ones(nAds), 1, gamma)
+SequentialPolicy::SequentialPolicy(unsigned int nActions) :
+    currentAction(0)
 {
-    EnvironmentSettings& task = getWritableSettings();
-    if(experimentType == First)
-    {
-        P = P.ones(nAds) * 0.5;
-        task.horizon = 100000;
-    }
-    else
-    {
-        P = arma::randu(nAds);
-        P = 0.02 + (0.05 - 0.02) * P;
-        task.horizon = 300000;
-    }
+    nactions = nActions;
+}
+
+unsigned int SequentialPolicy::operator()(const size_t& state)
+{
+    unsigned int returnValue = currentAction++;
+    if(returnValue == nactions - 1)
+        currentAction = 0;
+
+    return returnValue;
+}
+
+double SequentialPolicy::operator()(const size_t& state, const unsigned int& action)
+{
+    // TODO
+    return 0;
+}
+
+inline std::string SequentialPolicy::getPolicyName()
+{
+    return "Sequential";
+}
+
+std::string SequentialPolicy::getPolicyHyperparameters()
+{
+    return "";
+}
+
+SequentialPolicy* SequentialPolicy::clone()
+{
+    return new SequentialPolicy(*this);
 }
 
 }
