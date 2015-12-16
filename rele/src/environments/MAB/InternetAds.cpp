@@ -22,62 +22,26 @@
  */
 
 #include "MAB/InternetAds.h"
-#include "RandomGenerator.h"
+
 
 namespace ReLe
 {
 
-InternetAds::InternetAds(ExperimentLabel experimentType, double gamma) :
-    MAB(gamma),
-    experimentType(experimentType)
+InternetAds::InternetAds(unsigned int nAds, double gamma, ExperimentLabel experimentType) :
+    SimpleMAB(arma::ones(nAds), 1, gamma)
 {
     EnvironmentSettings& task = getWritableSettings();
-    task.continuosActionDim = 0;
-    task.finiteActionDim = 3;
-
-    if(experimentType == First)
-        visitors = 100000;
-    else
-        visitors = 300000;
-
-    cost = 1;
-}
-
-void InternetAds::step(const FiniteAction& action, FiniteState& nextState,
-                       Reward& reward)
-{
-    nextState.setStateN(0);
-    reward[0] = -cost;
-
-    for(unsigned int i = 0; i < nAds(action); i++)
-        for(unsigned int j = 0; j < visitors; j++)
-            reward[0] += RandomGenerator::sampleUniformInt(0, 1);
-}
-
-unsigned int InternetAds::nAds(const FiniteAction& action)
-{
-    unsigned int actionN = action.getActionN();
-
     if(experimentType == First)
     {
-        if(actionN == 0)
-            return 10;
-        else if(actionN == 1)
-            return 100;
-        else if(actionN == 2)
-            return 1000;
+        P = P.ones(nAds) * 0.5;
+        task.horizon = 100000;
     }
     else
     {
-        if(actionN == 0)
-            return 30;
-        else if(actionN == 1)
-            return 300;
-        else if(actionN == 2)
-            return 3000;
+        P = arma::randu(nAds);
+        P = 0.02 + (0.05 - 0.02) * P;
+        task.horizon = 300000;
     }
-
-    return 0;
 }
 
 }

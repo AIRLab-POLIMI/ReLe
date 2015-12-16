@@ -219,18 +219,18 @@ typedef BatchData_<arma::vec> BatchData;
 template<class OutputC, bool denseOutput = true>
 class MiniBatchData_: public BatchData_<OutputC, denseOutput>
 {
-	using typename BatchData_<OutputC, denseOutput>::features_type;
+    using typename BatchData_<OutputC, denseOutput>::features_type;
 
 public:
     MiniBatchData_(const BatchData_<OutputC, denseOutput>* data,
-                  const arma::uvec& indexes) :
+                   const arma::uvec& indexes) :
         data(*data), indexes(indexes)
     {
 
     }
 
     MiniBatchData_(const BatchData_<OutputC, denseOutput>& data,
-                  const arma::uvec& indexes) :
+                   const arma::uvec& indexes) :
         data(data), indexes(indexes)
     {
 
@@ -332,7 +332,7 @@ typedef MiniBatchData_<arma::vec> MiniBatchData;
 template<class OutputC, bool denseOutput = true>
 class BatchDataFeatures_: public BatchData_<OutputC, denseOutput>
 {
-	using typename BatchData_<OutputC, denseOutput>::features_type;
+    using typename BatchData_<OutputC, denseOutput>::features_type;
 
 public:
     typedef typename input_traits<denseOutput>::const_ref_type FeaturesCollection;

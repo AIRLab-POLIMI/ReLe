@@ -21,29 +21,30 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_
-#define INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_
+#ifndef INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_
+#define INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_
 
-#include "MAB/MAB.h"
+#include "q_policy/ActionValuePolicy.h"
 
 
 namespace ReLe
 {
 
-class SimpleMAB: public MAB<FiniteAction>
+class SequentialPolicy: public ActionValuePolicy<FiniteState>
 {
+
 public:
-    SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon = 1);
-    SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon = 1);
-    virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
+    SequentialPolicy(unsigned int nActions);
+    unsigned int operator()(const size_t& state) override;
+    double operator()(const size_t& state, const unsigned int& action) override;
+    inline std::string getPolicyName() override;
+    std::string getPolicyHyperparameters() override;
+    SequentialPolicy* clone() override;
 
 protected:
-    arma::vec P;
-    arma::vec R;
+    unsigned int currentAction;
 };
 
 }
 
-#endif /* INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_ */
+#endif /* INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_ */

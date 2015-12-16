@@ -21,29 +21,46 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_
-#define INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_
-
-#include "MAB/MAB.h"
+#include "nonparametric/SequentialPolicy.h"
 
 
 namespace ReLe
 {
 
-class SimpleMAB: public MAB<FiniteAction>
+SequentialPolicy::SequentialPolicy(unsigned int nActions) :
+    currentAction(0)
 {
-public:
-    SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon = 1);
-    SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon = 1);
-    virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
-
-protected:
-    arma::vec P;
-    arma::vec R;
-};
-
+    nactions = nActions;
 }
 
-#endif /* INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_ */
+unsigned int SequentialPolicy::operator()(const size_t& state)
+{
+    unsigned int returnValue = currentAction++;
+    if(returnValue == nactions - 1)
+        currentAction = 0;
+
+    return returnValue;
+}
+
+double SequentialPolicy::operator()(const size_t& state, const unsigned int& action)
+{
+    // TODO
+    return 0;
+}
+
+inline std::string SequentialPolicy::getPolicyName()
+{
+    return "Sequential";
+}
+
+std::string SequentialPolicy::getPolicyHyperparameters()
+{
+    return "";
+}
+
+SequentialPolicy* SequentialPolicy::clone()
+{
+    return new SequentialPolicy(*this);
+}
+
+}

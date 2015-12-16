@@ -37,7 +37,7 @@ namespace ReLe
 template<class InputC, class OutputC, bool denseOutput>
 class RegressionTree: public BatchRegressor_<InputC, OutputC, denseOutput>
 {
-	using BatchRegressor_<InputC, OutputC, denseOutput>::phi;
+    using BatchRegressor_<InputC, OutputC, denseOutput>::phi;
 public:
     RegressionTree(Features_<InputC, denseOutput>& phi,
                    const EmptyTreeNode<OutputC>& emptyNode,

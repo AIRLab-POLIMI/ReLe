@@ -25,6 +25,8 @@
 #define INCLUDE_RELE_ENVIRONMENTS_MAB_MAB_H_
 
 #include "Environment.h"
+#include "RandomGenerator.h"
+
 
 namespace ReLe
 {

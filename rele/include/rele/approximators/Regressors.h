@@ -117,8 +117,8 @@ typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 template<class InputC, class OutputC, bool denseOutput=true>
 class BatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 {
-	typedef typename input_traits<denseOutput>::type FeaturesCollection;
-	typedef typename output_traits<OutputC>::type OutputCollection;
+    typedef typename input_traits<denseOutput>::type FeaturesCollection;
+    typedef typename output_traits<OutputC>::type OutputCollection;
 public:
     BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
         Regressor_<InputC, OutputC, denseOutput>(phi, output)
