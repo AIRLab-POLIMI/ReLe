@@ -21,6 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Written by: Carlo D'Eramo
+ */
+
 #ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_LINEARMAB_H_
 #define INCLUDE_RELE_ENVIRONMENTS_MAB_LINEARMAB_H_
 

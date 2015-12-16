@@ -21,6 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Written by: Alessandro Nuara, Carlo D'Eramo
+ */
+
 #ifndef INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
 #define INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
 

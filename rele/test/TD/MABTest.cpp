@@ -21,8 +21,11 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Written by: Carlo D'Eramo
+ */
+
 #include "MAB/InternetAds.h"
-#include "MAB/Roulette.h"
 #include "td/DoubleQ-Learning.h"
 #include "nonparametric/SequentialPolicy.h"
 #include "Core.h"
@@ -33,45 +36,20 @@ using namespace std;
 using namespace ReLe;
 
 
-enum EnvironmentLabel
-{
-    iAds, R
-};
-
 int main(int argc, char *argv[])
 {
-    EnvironmentLabel e = EnvironmentLabel::R;
+	InternetAds mab(10, 0.95, InternetAds::Second);
+	unsigned int nActions = mab.getSettings().finiteActionDim;
+	SequentialPolicy policy(nActions);
+	//Q_Learning agent(policy);
+	DoubleQ_Learning agent(policy);
 
-    if(e == iAds)
-    {
-        InternetAds mab(10, 0.95, InternetAds::Second);
-        SequentialPolicy policy(mab.getSettings().finiteActionDim);
-        Q_Learning agent(policy);
-        //DoubleQ_Learning agent(policy);
-
-        auto&& core = buildCore(mab, agent);
-        core.getSettings().episodeLength = 100;
-        for(unsigned int i = 0; i < 20000; i++)
-        {
-            cout << endl << "### Starting episode " << i << " ###" << endl;
-            core.runEpisode();
-        }
-    }
-    else
-    {
-        Roulette mab(Roulette::American, 0.95);
-        SequentialPolicy policy(mab.getSettings().finiteActionDim);
-        Q_Learning agent(policy);
-        //DoubleQ_Learning agent(policy);
-
-        auto&& core = buildCore(mab, agent);
-        core.getSettings().episodeLength = 1000;
-        for(unsigned int i = 1; i <= 2000; i++)
-        {
-            agent.setAlpha(1.0 / i);
-            cout << endl << "### Starting episode " << i << " ###" << endl;
-            core.runEpisode();
-        }
-    }
+	auto&& core = buildCore(mab, agent);
+	core.getSettings().episodeLength = nActions;
+	for(unsigned int i = 0; i < 20000; i++)
+	{
+		cout << endl << "### Starting episode " << i << " ###" << endl;
+		core.runEpisode();
+	}
 }
 

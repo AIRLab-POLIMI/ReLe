@@ -10,6 +10,7 @@
 
   <author email="matteo.pirotta@polimi.it">Matteo Pirotta</author>
   <author email="davide.tateo@polimi.it">Davide Tateo</author>
+  <author email="carlo.deramo@polimi.it">Carlo D'Eramo</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 

@@ -21,6 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/*
+ * Written by: Carlo D'Eramo
+ */
+
 #include "Core.h"
 #include "PolicyEvalAgent.h"
 #include "q_policy/e_Greedy.h"
