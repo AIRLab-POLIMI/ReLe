@@ -47,10 +47,10 @@ class FFNeuralNetwork_: public ParametricRegressor_<InputC, denseOutput>,
 {
     USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
 
-public:
+public	:
     enum algorithm
     {
-        GradientDescend, StochasticGradientDescend, Adadelta
+        GradientDescend, StochasticGradientDescend, Adadelta, ScaledConjugateGradient
     };
 
     struct OptimizationParameters
@@ -136,10 +136,10 @@ public:
     {
         //Clean old normalization
         /*if(normalization)
-            delete normalization;
+         delete normalization;
 
-        //Compute dataset normalization
-        normalization = new MinMaxNormalization(featureDataset);*/
+         //Compute dataset normalization
+         normalization = new MinMaxNormalization(featureDataset);*/
 
         switch (params.alg)
         {
@@ -155,13 +155,17 @@ public:
             adadelta(featureDataset);
             break;
 
+        case ScaledConjugateGradient:
+            scaledConjugateGradient(featureDataset);
+            break;
+
         default:
             break;
         }
 
     }
 
-    double computeJFeatures(BatchDataFeatures& featureDataset, double lambda)
+    double computeJFeatures(const BatchDataFeatures& featureDataset, double lambda)
     {
         double J = 0;
         unsigned int nSamples = featureDataset.size();
@@ -232,7 +236,6 @@ private:
         Wvec.resize(layerNeurons.size());
         bvec.resize(layerNeurons.size());
 
-
         unsigned int start = 0;
         for (unsigned int i = 0; i < layerNeurons.size(); i++)
         {
@@ -273,7 +276,6 @@ private:
         paramSize = paramN;
     }
 
-
 protected:
     void forwardComputation(const arma::vec& input)
     {
@@ -299,20 +301,20 @@ protected:
         {
             unsigned int layer = k - 1;
 
-            //Convert the gradient on the layer’s output into a gradient into the pre-nonlinearity activation
+            //Convert the gradient on the layers output into a gradient into the pre-nonlinearity activation
             Function& f = *layerFunction[layer];
             g = g % f.diff(a[layer]);
 
             //Compute gradients on bias
             unsigned int start = end - b(layer).n_elem + 1;
-            gradW(arma::span(start, end)) = g; // + dOmega(arma::span(start, end));
+            gradW(arma::span(start, end)) = g;// + dOmega(arma::span(start, end));
             end = start - 1;
 
             start = end - W(layer).n_elem + 1;
-            gradW(arma::span(start, end)) = arma::vectorise(g * h[layer].t()); // + dOmega(arma::span(start, end));
+            gradW(arma::span(start, end)) = arma::vectorise(g * h[layer].t());// + dOmega(arma::span(start, end));
             end = start - 1;
 
-            //Propagate the gradients w.r.t. the next lower-level hidden layer’s activations
+            //Propagate the gradients w.r.t. the next lower-level hidden layers activations
             arma::vec gn(h[layer].n_elem);
 
             g = W(layer).t() * g;
@@ -336,6 +338,7 @@ protected:
             arma::vec gs = yhat - y;
             g += backPropagation(gs);
         }
+
         g /= static_cast<double>(featureDataset.size());
         g += lambda*Omega->diff(*w);
     }
@@ -388,7 +391,6 @@ private:
         }
     }
 
-
     void stochasticGradientDescend(const BatchDataFeatures& featureDataset)
     {
         arma::vec& w = *this->w;
@@ -433,6 +435,119 @@ private:
                 delete miniBatch;
 
             }
+
+        }
+
+    }
+
+    void scaledConjugateGradient(const BatchDataFeatures& featureDataset)
+    {
+        arma::vec& w = *this->w;
+        arma::vec wOld;
+
+        //compute initial error
+        double errorOld = computeJFeatures(featureDataset, params.lambda);
+
+        //Compute first gradient
+        arma::vec g(paramSize, arma::fill::zeros);
+        computeGradient(featureDataset, params.lambda, g);
+
+        //first order info
+        arma::vec r = -g;
+        arma::vec p = r;
+        double pNorm2 = arma::as_scalar(p.t()*p);
+
+        //second order info
+        arma::vec s;
+        double delta;
+
+        //init parameters;
+        double l = 1e-4;
+        double lBar = 0;
+        double sigmaPar = 1e-2;
+
+        bool success = true;
+
+        for (unsigned k = 1; k < params.maxIterations +1; k++)
+        {
+            // save current parameters
+            wOld = w;
+
+            // calculate second order information
+            if(success)
+            {
+                double sigma = sigmaPar/arma::norm(p);
+
+                w += sigma*p;
+
+                arma::vec gn(paramSize, arma::fill::zeros);
+                computeGradient(featureDataset, params.lambda, gn);
+
+                s = (gn -g)/sigma;
+                delta = arma::as_scalar(p.t()*s);
+            }
+
+            // scale delta
+            delta += (l - lBar)*pNorm2;
+
+            // if delta <= 0 make the hessian positive definite
+            if(delta <= 0)
+            {
+                lBar = 2*(l - delta/pNorm2);
+                delta = -delta+l*pNorm2;
+                l = lBar;
+            }
+
+            // calculate step size
+            double mu = arma::as_scalar(p.t()*r);
+            double alfa = mu/delta;
+
+            // calculate comparison parameter
+            w = wOld + alfa*p;
+            double error = computeJFeatures(featureDataset, params.lambda);
+            double Delta = 2*delta*(errorOld - error)/std::pow(mu, 2);
+
+            // if Delta >= 0 a reduction in error can be made
+            if(Delta >= 0)
+            {
+                arma::vec g;
+                computeGradient(featureDataset, params.lambda, g);
+                arma::vec rn = -g;
+
+                lBar = 0;
+                success = true;
+
+                // restart algorithm if needed else update p
+                if(k % w.n_elem == 0)
+                {
+                    p = rn;
+                    pNorm2 = arma::as_scalar(p.t()*p);
+
+                    r = rn;
+                }
+                else
+                {
+                    double beta = arma::as_scalar(rn.t()*rn - rn.t()*r);
+                    p = rn + beta*p;
+                    pNorm2 = arma::as_scalar(p.t()*p);
+
+                    r = rn;
+                }
+
+
+                // if Delta >= 0.75 reduce scale parameter
+                if(Delta >= 0.75)
+                    l = l/4;
+            }
+            else
+            {
+                w = wOld; //restore previous parameters
+                lBar = l;
+                success = false;
+            }
+
+            if(Delta < 0.25)
+                l += (delta*(1 - Delta)/pNorm2);
 
         }
 
