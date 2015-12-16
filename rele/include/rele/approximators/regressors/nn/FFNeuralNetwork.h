@@ -135,11 +135,11 @@ public:
     void trainFeatures(BatchDataFeatures& featureDataset) override
     {
         //Clean old normalization
-        if(normalization)
+        /*if(normalization)
             delete normalization;
 
         //Compute dataset normalization
-        normalization = new MinMaxNormalization(featureDataset);
+        normalization = new MinMaxNormalization(featureDataset);*/
 
         switch (params.alg)
         {
@@ -148,13 +148,11 @@ public:
             break;
 
         case StochasticGradientDescend:
-            // FIXME
-            // stochasticGradientDescend(featureDataset);
+            stochasticGradientDescend(featureDataset);
             break;
 
         case Adadelta:
-            // FIXME
-            // adadelta(featureDataset);
+            adadelta(featureDataset);
             break;
 
         default:
@@ -227,7 +225,9 @@ private:
         aux_mem = new double[paramSize];
         unsigned int input = Base::phi.rows();
 
+        // create weights and initialize randomly
         w = new arma::vec(aux_mem, paramSize, false);
+        w->randn();
 
         Wvec.resize(layerNeurons.size());
         bvec.resize(layerNeurons.size());
@@ -237,14 +237,21 @@ private:
         for (unsigned int i = 0; i < layerNeurons.size(); i++)
         {
             unsigned int output = layerNeurons[i];
+
+            // Create Weight view
             Wvec[i] = new arma::mat(aux_mem + start, output, input, false);
             start += Wvec[i]->n_elem;
+
+            // Create Bias view
             bvec[i] = new arma::vec(aux_mem + start, output, false);
             start += bvec[i]->n_elem;
+
+            // Normalize Weight view
+            arma::mat& Wmat = *Wvec[i];
+            Wmat /= std::sqrt(input);
+
             input = output;
         }
-
-        w->randn();
 
         //Default parameters
         params.alg = GradientDescend;
@@ -314,7 +321,7 @@ protected:
         return gradW;
     }
 
-    void computeGradient(BatchDataFeatures& featureDataset,
+    void computeGradient(const BatchData& featureDataset,
                          double lambda, arma::vec& g)
     {
         g.zeros();
@@ -367,7 +374,7 @@ protected:
 
 private:
 
-    void gradientDescend(BatchDataFeatures& featureDataset)
+    void gradientDescend(const BatchDataFeatures& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
@@ -376,25 +383,30 @@ private:
         {
             computeGradient(featureDataset, params.lambda, g);
             w -= params.alpha * g;
+
+            //std::cout << computeJFeatures(featureDataset, 0) << std::endl;
         }
     }
 
-    /* FIXME: Implement
-    void stochasticGradientDescend(BatchDataFeatures<InputC, arma::vec>& featureDataset)
+
+    void stochasticGradientDescend(const BatchDataFeatures& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
-            const BatchData<InputC, arma::vec>* miniBatch =
-                dataset.getMiniBatch(params.minibatchSize);
-            computeGradient(*miniBatch, params.lambda, g);
-            w -= params.alpha * g;
-            delete miniBatch;
+            for(auto* miniBatch : featureDataset.getMiniBatches(params.minibatchSize))
+            {
+                computeGradient(*miniBatch, params.lambda, g);
+                w -= params.alpha * g;
+                delete miniBatch;
+            }
+
+            //std::cout << computeJFeatures(featureDataset, 0) << std::endl;
         }
     }
 
-    void adadelta(const BatchData<InputC, arma::vec>& dataset)
+    void adadelta(const BatchDataFeatures& featureDataset)
     {
         arma::vec& w = *this->w;
 
@@ -404,26 +416,27 @@ private:
 
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
-            const BatchData<InputC, arma::vec>* miniBatch =
-                dataset.getMiniBatch(params.minibatchSize);
-            computeGradient(*miniBatch, params.lambda, g);
 
-            r = params.rho * r + (1 - params.rho) * arma::square(g);
+            for(auto* miniBatch : featureDataset.getMiniBatches(params.minibatchSize))
+            {
+                computeGradient(*miniBatch, params.lambda, g);
 
-            arma::vec deltaW = -arma::sqrt(s + params.epsilon)
-                               / arma::sqrt(r + params.epsilon) % g;
+                r = params.rho * r + (1 - params.rho) * arma::square(g);
 
-            s = params.rho * s + (1 - params.rho) * arma::square(deltaW);
+                arma::vec deltaW = -arma::sqrt(s + params.epsilon)
+                                   / arma::sqrt(r + params.epsilon) % g;
 
-            w += deltaW;
+                s = params.rho * s + (1 - params.rho) * arma::square(deltaW);
 
-            //std::cerr << "J = " << computeJ(dataset, params.lambda) << std::endl;
+                w += deltaW;
 
-            delete miniBatch;
+                delete miniBatch;
+
+            }
+
         }
 
     }
-    */
 
     inline arma::mat& W(unsigned int layer)
     {
