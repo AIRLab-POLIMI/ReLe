@@ -38,6 +38,12 @@ namespace ReLe
 template<class ActionC>
 class MAB: public Environment<ActionC, FiniteState>
 {
+
+    /*
+     * This is the interface for MAB environments. It can have Finite or Continuous actions,
+     * one state and no absorbing states.
+     */
+
 public:
     MAB(double gamma, unsigned int horizon = 1) : Environment<ActionC, FiniteState>()
     {

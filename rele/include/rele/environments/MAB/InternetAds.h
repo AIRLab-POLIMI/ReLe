@@ -36,6 +36,15 @@ namespace ReLe
 
 class InternetAds: public SimpleMAB
 {
+
+    /*
+     * This class is very related to the experiments presented in
+     * "Estimating the Maximum Expected Value: An Analysis of (Nested) Cross
+     * Validation and the Maximum Sample Average" (Hado Van Hasselt). Thus, it has not to be
+     * used as a general interface for internet ads experiments. Nevertheless,
+     * it can be easily changed for other type of experiments.
+     */
+
 public:
     enum ExperimentLabel
     {

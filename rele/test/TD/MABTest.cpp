@@ -37,46 +37,57 @@ using namespace std;
 using namespace ReLe;
 
 
+/*
+ * MAB test with InternetAds or Roulette. Sequential policy is used
+ * with the purpose to execute each possible action sequentially until
+ * the end of the episode.
+ */
+
 enum EnvironmentLabel
 {
     iAds, R
 };
 
-
 int main(int argc, char *argv[])
 {
-	EnvironmentLabel e = EnvironmentLabel::R;
+    EnvironmentLabel e = EnvironmentLabel::R;
 
-	if(e == iAds)
-	{
-		InternetAds mab(10, 0.95, InternetAds::Second);
-		SequentialPolicy policy(mab.getSettings().finiteActionDim);
-		Q_Learning agent(policy);
-		//DoubleQ_Learning agent(policy);
+    if(e == iAds)
+    {
+        InternetAds mab(10, 0.95, InternetAds::Second);
 
-		auto&& core = buildCore(mab, agent);
-		core.getSettings().episodeLength = 100;
-		for(unsigned int i = 0; i < 20000; i++)
-		{
-			cout << endl << "### Starting episode " << i << " ###" << endl;
-			core.runEpisode();
-		}
-	}
-	else
-	{
-		Roulette mab(Roulette::American, 0.95);
-		SequentialPolicy policy(mab.getSettings().finiteActionDim);
-		Q_Learning agent(policy);
-		//DoubleQ_Learning agent(policy);
+        unsigned int episodeLength = 10;
 
-		auto&& core = buildCore(mab, agent);
-		core.getSettings().episodeLength = 1000;
-		for(unsigned int i = 1; i <= 2; i++)
-		{
-			agent.setAlpha(1.0 / i);
-			cout << endl << "### Starting episode " << i << " ###" << endl;
-			core.runEpisode();
-		}
-	}
+        SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
+        //Q_Learning agent(policy);
+        DoubleQ_Learning agent(policy);
+
+        auto&& core = buildCore(mab, agent);
+        core.getSettings().episodeLength = episodeLength;
+        for(unsigned int i = 0; i < 20000; i++)
+        {
+            cout << endl << "### Starting episode " << i << " ###" << endl;
+            core.runEpisode();
+        }
+    }
+    else
+    {
+        Roulette mab(0.95);
+
+        unsigned int episodeLength = mab.getSettings().finiteActionDim;
+
+        SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
+        Q_Learning agent(policy);
+        //DoubleQ_Learning agent(policy);
+
+        auto&& core = buildCore(mab, agent);
+        core.getSettings().episodeLength = episodeLength;
+        for(unsigned int i = 1; i <= 2000; i++)
+        {
+            agent.setAlpha(1.0 / i);
+            cout << endl << "### Starting episode " << i << " ###" << endl;
+            core.runEpisode();
+        }
+    }
 }
 

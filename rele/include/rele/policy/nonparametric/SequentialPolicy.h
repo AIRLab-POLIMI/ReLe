@@ -33,8 +33,13 @@ namespace ReLe
 class SequentialPolicy: public ActionValuePolicy<FiniteState>
 {
 
+    /*
+     * This policy applies each action sequentially till the end
+     * of the episode. Then, it restarts from the first action.
+     */
+
 public:
-    SequentialPolicy(unsigned int nActions);
+    SequentialPolicy(unsigned int nActions, unsigned int episodeLength);
     unsigned int operator()(const size_t& state) override;
     double operator()(const size_t& state, const unsigned int& action) override;
     inline std::string getPolicyName() override;
@@ -43,6 +48,8 @@ public:
 
 protected:
     unsigned int currentAction;
+    unsigned int nActions;
+    unsigned int episodeLength;
 };
 
 }

@@ -85,7 +85,7 @@ void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
         QB(x, u) = QB(x, u) + alpha * delta;
     }
 
-    //update action and state
+    // Update action and state
     x = xn;
     updateQ();
     u = policy(x);
@@ -95,12 +95,13 @@ void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
 
 void DoubleQ_Learning::endEpisode(const Reward& reward)
 {
-    //Last update
+    // Last update
     double r = reward[0];
 
     unsigned int selectedQ = RandomGenerator::sampleUniformInt(0, 1);
     if(selectedQ == 0)
     {
+        // In the last update, the Q of the absorbing state is forced to be 0
         double delta = r - QA(x, u);
         QA(x, u) = QA(x, u) + alpha * delta;
     }

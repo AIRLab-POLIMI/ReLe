@@ -31,17 +31,20 @@
 namespace ReLe
 {
 
-SequentialPolicy::SequentialPolicy(unsigned int nActions) :
-    currentAction(0)
+SequentialPolicy::SequentialPolicy(unsigned int nActions, unsigned int episodeLength) :
+    currentAction(0),
+    nActions(nActions),
+    episodeLength(episodeLength)
 {
-    nactions = nActions;
 }
 
 unsigned int SequentialPolicy::operator()(const size_t& state)
 {
-    unsigned int returnValue = currentAction++;
-    if(returnValue == nactions - 1)
-        currentAction = 0;
+    unsigned int returnValue = currentAction % nActions;
+    currentAction++;
+
+    if(currentAction == episodeLength)
+        currentAction = -1;
 
     return returnValue;
 }

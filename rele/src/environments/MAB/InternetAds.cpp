@@ -37,13 +37,12 @@ InternetAds::InternetAds(unsigned int nAds, double gamma, ExperimentLabel experi
     EnvironmentSettings& task = getWritableSettings();
     if(experimentType == First)
     {
-        P = P.ones(nAds) * 0.5;
+        P = arma::vec(nAds, arma::fill::ones) * 0.5;
         task.horizon = 100000;
     }
     else
     {
-        P = arma::randu(nAds);
-        P = 0.02 + (0.05 - 0.02) * P;
+        P = 0.02 + (0.05 - 0.02) * arma::vec(nAds, arma::fill::randu);
         task.horizon = 300000;
     }
 }

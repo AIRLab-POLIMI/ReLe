@@ -55,7 +55,7 @@ SimpleMAB::SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon) 
 SimpleMAB::SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon) :
     MAB(gamma, horizon)
 {
-    P = arma::randu(nArms);
+    P = arma::vec(nArms, arma::fill::randu);
     R = arma::vec(P.n_elem, arma::fill::ones) * r;
 
     EnvironmentSettings& task = getWritableSettings();
@@ -66,8 +66,8 @@ SimpleMAB::SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int ho
 SimpleMAB::SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon) :
     MAB(gamma, horizon)
 {
-    P = arma::randu(nArms);
-    R = arma::randn(nArms);
+    P = arma::vec(nArms, arma::fill::randu);
+    R = arma::vec(nArms, arma::fill::randn);
 
     EnvironmentSettings& task = getWritableSettings();
     task.finiteActionDim = nArms;
@@ -77,12 +77,11 @@ SimpleMAB::SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon) :
 void SimpleMAB::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)
 {
     nextState.setStateN(0);
-    reward[0] = 0;
 
     if(RandomGenerator::sampleEvent(P(action)))
-        reward[0] += R(action);
+        reward[0] = R(action);
     else
-        reward[0] += 0;
+        reward[0] = 0;
 }
 
 }

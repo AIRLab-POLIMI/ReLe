@@ -36,6 +36,14 @@ namespace ReLe
 
 class SimpleMAB: public MAB<FiniteAction>
 {
+
+    /*
+     * This class represents the simple MAB environment in which
+     * each action has Pi probability to give a reward. Probabilities
+     * of each action are stored in P and respective rewards in R.
+     * Different kinds of constructors are available.
+     */
+
 public:
     SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon = 1);
     SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon = 1);

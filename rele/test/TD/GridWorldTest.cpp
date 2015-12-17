@@ -21,9 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Written by: Alessandro Nuara, Carlo D'Eramo
- */
 
 #include "FiniteMDP.h"
 #include "td/SARSA.h"

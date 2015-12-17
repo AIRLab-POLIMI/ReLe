@@ -36,26 +36,19 @@ namespace ReLe
 class Roulette: public MAB<FiniteAction>
 {
     /*
-     * This class is very related to the experiments presented in the
-     * Double Q-Learning paper. Thus, it has not to be used as a general
+     * This class is very related to the experiments presented in
+     * "Double Q-Learning" (Hado Van Hasselt). Thus, it has not to be used as a general
      * interface for roulette experiments. Nevertheless, it can be easily
      * changed for other type of experiments.
      */
 
 public:
-    enum ExperimentLabel
-    {
-        American, French
-    };
-
-public:
-    Roulette(ExperimentLabel rouletteType = American, double gamma = 1);
+    Roulette(double gamma = 1);
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
     virtual double computeReward(const FiniteAction& action);
 
 protected:
-    ExperimentLabel rouletteType;
     unsigned int nOutcomes;
     arma::uvec actionsId;
     arma::uvec nSquares;
