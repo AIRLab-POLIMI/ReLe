@@ -53,10 +53,11 @@ int main(int argc, char *argv[])
     features.row(2) = features3;
     features.row(3) = features4;
 
-    encoder.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
+    //encoder.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
     //encoder.getHyperParameters().alg = FFNeuralNetwork::Adadelta;
+    encoder.getHyperParameters().alg = FFNeuralNetwork::ScaledConjugateGradient;
     encoder.getHyperParameters().alpha = 0.2;
-    encoder.getHyperParameters().maxIterations = 10000;
+    encoder.getHyperParameters().maxIterations = 5000;
     encoder.getHyperParameters().lambda = 0;
     encoder.getHyperParameters().minibatchSize = 1000;
     encoder.getHyperParameters().rho = 0.95;

@@ -442,8 +442,14 @@ private:
 
     void scaledConjugateGradient(const BatchDataFeatures& featureDataset)
     {
+        //init weights
         arma::vec& w = *this->w;
         arma::vec wOld;
+
+        //init parameters;
+        double l = 5e-7;
+        double lBar = 0;
+        double sigmaPar = 5e-5;
 
         //compute initial error
         double errorOld = computeJFeatures(featureDataset, params.lambda);
@@ -461,11 +467,6 @@ private:
         arma::vec s;
         double delta;
 
-        //init parameters;
-        double l = 1e-4;
-        double lBar = 0;
-        double sigmaPar = 1e-2;
-
         bool success = true;
 
         for (unsigned k = 1; k < params.maxIterations +1; k++)
@@ -476,14 +477,14 @@ private:
             // calculate second order information
             if(success)
             {
-                double sigma = sigmaPar/arma::norm(p);
+                double sigma = sigmaPar/std::sqrt(pNorm2);
 
                 w += sigma*p;
 
                 arma::vec gn(paramSize, arma::fill::zeros);
                 computeGradient(featureDataset, params.lambda, gn);
 
-                s = (gn -g)/sigma;
+                s = (gn - g)/sigma;
                 delta = arma::as_scalar(p.t()*s);
             }
 
@@ -510,7 +511,6 @@ private:
             // if Delta >= 0 a reduction in error can be made
             if(Delta >= 0)
             {
-                arma::vec g;
                 computeGradient(featureDataset, params.lambda, g);
                 arma::vec rn = -g;
 
@@ -522,18 +522,15 @@ private:
                 {
                     p = rn;
                     pNorm2 = arma::as_scalar(p.t()*p);
-
-                    r = rn;
                 }
                 else
                 {
                     double beta = arma::as_scalar(rn.t()*rn - rn.t()*r);
                     p = rn + beta*p;
                     pNorm2 = arma::as_scalar(p.t()*p);
-
-                    r = rn;
                 }
 
+                r = rn;
 
                 // if Delta >= 0.75 reduce scale parameter
                 if(Delta >= 0.75)
