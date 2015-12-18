@@ -330,7 +330,7 @@ private:
 typedef MiniBatchData_<arma::vec> MiniBatchData;
 
 template<class OutputC, bool denseOutput = true>
-class BatchDataFeatures_: public BatchData_<OutputC, denseOutput>
+class BatchDataSimple_: public BatchData_<OutputC, denseOutput>
 {
     using typename BatchData_<OutputC, denseOutput>::features_type;
 
@@ -339,7 +339,7 @@ public:
     typedef typename output_traits<OutputC>::const_ref_type OutputCollection;
 
 public:
-    BatchDataFeatures_(FeaturesCollection features, OutputCollection outputs) :
+    BatchDataSimple_(FeaturesCollection features, OutputCollection outputs) :
         features(features), outputs(outputs)
     {
         assert(features.n_cols == outputs.n_cols);
@@ -377,7 +377,7 @@ public:
 
     virtual BatchData_<OutputC, denseOutput>* clone() const override
     {
-        return new BatchDataFeatures_<OutputC, denseOutput>(features, outputs);
+        return new BatchDataSimple_<OutputC, denseOutput>(features, outputs);
     }
 
     virtual BatchData_<OutputC, denseOutput>* cloneSubset(
@@ -406,7 +406,7 @@ public:
         return features;
     }
 
-    virtual ~BatchDataFeatures_()
+    virtual ~BatchDataSimple_()
     {
 
     }
@@ -417,7 +417,7 @@ private:
 
 };
 
-typedef BatchDataFeatures_<arma::vec> BatchDataFeatures;
+typedef BatchDataSimple_<arma::vec> BatchDataSimple;
 
 }
 

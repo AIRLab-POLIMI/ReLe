@@ -88,7 +88,7 @@ public:
         return nMin;
     }
 
-    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) override = 0;
+    virtual void trainFeatures(BatchDataSimple_<OutputC, denseOutput>& featureDataset) override = 0;
 
     /**
      * Get the root of the tree

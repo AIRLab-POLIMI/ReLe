@@ -36,7 +36,8 @@ namespace ReLe
 template<class InputC, bool denseOutput = true>
 class NearestNeighbourRegressor_: public UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>
 {
-
+	USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
+	DEFINE_FEATURES_TYPES(denseOutput)
 public:
     NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
         : UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, phi.cols()), k(k), iterations(1),
@@ -54,7 +55,7 @@ public:
         return centroids.col(index);
     }
 
-    virtual void trainFeatures(const arma::mat& features) override
+    virtual void trainFeatures(const FeaturesCollection& features) override
     {
         wcss = std::numeric_limits<double>::infinity();
 
@@ -201,7 +202,8 @@ private:
         return wcss;
     }
 
-    void runKMeansIteration(const arma::mat& features)
+    //TODO support sparse vectors properly
+    void runKMeansIteration(const FeaturesCollection& features)
     {
         arma::mat&& centroids = initRandom(features);
 

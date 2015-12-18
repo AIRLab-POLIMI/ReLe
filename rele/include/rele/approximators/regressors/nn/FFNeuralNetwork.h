@@ -132,7 +132,7 @@ public:
         return paramSize;
     }
 
-    void trainFeatures(BatchDataFeatures& featureDataset) override
+    void trainFeatures(BatchDataSimple& featureDataset) override
     {
         //Clean old normalization
         /*if(normalization)
@@ -165,7 +165,7 @@ public:
 
     }
 
-    double computeJFeatures(const BatchDataFeatures& featureDataset, double lambda)
+    double computeJFeatures(const BatchDataSimple& featureDataset, double lambda)
     {
         double J = 0;
         unsigned int nSamples = featureDataset.size();
@@ -377,7 +377,7 @@ protected:
 
 private:
 
-    void gradientDescend(const BatchDataFeatures& featureDataset)
+    void gradientDescend(const BatchDataSimple& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
@@ -391,7 +391,7 @@ private:
         }
     }
 
-    void stochasticGradientDescend(const BatchDataFeatures& featureDataset)
+    void stochasticGradientDescend(const BatchDataSimple& featureDataset)
     {
         arma::vec& w = *this->w;
         arma::vec g(paramSize, arma::fill::zeros);
@@ -408,7 +408,7 @@ private:
         }
     }
 
-    void adadelta(const BatchDataFeatures& featureDataset)
+    void adadelta(const BatchDataSimple& featureDataset)
     {
         arma::vec& w = *this->w;
 
@@ -440,7 +440,7 @@ private:
 
     }
 
-    void scaledConjugateGradient(const BatchDataFeatures& featureDataset)
+    void scaledConjugateGradient(const BatchDataSimple& featureDataset)
     {
         //init weights
         arma::vec& w = *this->w;

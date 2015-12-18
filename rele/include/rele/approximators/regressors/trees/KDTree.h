@@ -72,7 +72,7 @@ public:
 
     }
 
-    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) override
+    virtual void trainFeatures(BatchDataSimple_<OutputC, denseOutput>& featureDataset) override
     {
         this->cleanTree();
         root = buildKDTree(featureDataset, 0);

@@ -130,8 +130,6 @@ public:
     {
         unsigned int N = dataset.size();
 
-        // FIXME: use trait
-
         //compute features matrix
         FeaturesCollection features(this->phi.rows(), N);
         OutputCollection outputs(this->outputDimension, N);
@@ -142,11 +140,11 @@ public:
             outputs.col(i) = dataset.getOutput(i);
         }
 
-        BatchDataFeatures_<OutputC, denseOutput> featureDataset(features, outputs);
+        BatchDataSimple_<OutputC, denseOutput> featureDataset(features, outputs);
         trainFeatures(featureDataset);
     }
 
-    virtual void trainFeatures(BatchDataFeatures_<OutputC, denseOutput>& featureDataset) = 0;
+    virtual void trainFeatures(BatchDataSimple_<OutputC, denseOutput>& featureDataset) = 0;
 
     virtual ~BatchRegressor_()
     {
@@ -160,7 +158,7 @@ typedef BatchRegressor_<arma::vec, arma::vec> BatchRegressor;
 template<class InputC, class OutputC, bool denseOutput = true>
 class UnsupervisedBatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 {
-
+	typedef typename input_traits<denseOutput>::type FeaturesCollection;
 public:
     UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1)
         : Regressor_<InputC, OutputC, denseOutput>(phi, output)
@@ -182,7 +180,7 @@ public:
         trainFeatures(features);
     }
 
-    virtual void trainFeatures(const arma::mat& features) = 0;
+    virtual void trainFeatures(const FeaturesCollection& features) = 0;
 
     virtual ~UnsupervisedBatchRegressor_()
     {
@@ -204,6 +202,10 @@ public:
     typedef BatchRegressor_<InputC, OutputC, denseOutput> Base;
 
 #define USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
-    typedef UnsupervisedBatchRegressor_<InputC, OutputC, denseOutput> Base;
+    typedef UnsupervisedBatchRegressor_<InputC, OutputC, denseOutput> Base; \
+
+#define DEFINE_FEATURES_TYPES(denseOutput) \
+	typedef typename input_traits<denseOutput>::type FeaturesCollection; \
+	typedef typename input_traits<denseOutput>::column_type FeaturesVector;
 
 #endif /* REGRESSORS_H_ */

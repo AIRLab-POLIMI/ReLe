@@ -34,6 +34,7 @@ class Autoencoder_: public UnsupervisedBatchRegressor_<InputC, arma::vec, denseO
     public FFNeuralNetwork_<InputC, denseOutput>
 {
     USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, arma::vec, true)
+    DEFINE_FEATURES_TYPES(denseOutput)
 
 public	:
     Autoencoder_(Features_<InputC, denseOutput>& phi, unsigned int outputs)
@@ -54,15 +55,15 @@ public	:
         return arma::vec();
     }
 
-    virtual void trainFeatures(const arma::mat& features) override
+    virtual void trainFeatures(const FeaturesCollection& features) override
     {
-        BatchDataFeatures dataset(features, features);
+        BatchDataSimple dataset(features, features);
         FFNeuralNetwork_<InputC, denseOutput>::trainFeatures(dataset);
     }
 
     double computeJFeatures(const arma::mat& features)
     {
-        BatchDataFeatures data(features, features);
+        BatchDataSimple data(features, features);
         return FFNeuralNetwork_<InputC, denseOutput>::computeJFeatures(data, 0);
     }
 
