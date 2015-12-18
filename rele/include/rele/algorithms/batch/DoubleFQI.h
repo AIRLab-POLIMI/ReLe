@@ -50,13 +50,15 @@ public:
         regressors.push_back(&QRegressorB);
     }
 
-    void trainFeatures(BatchDataSimple& featureDataset) override
+    void trainFeatures(const BatchData& featureDataset) override
     {
         /* This function extract the respective dataset for each
          * regressor in the ensemble and train them.
          */
-        arma::mat input = featureDataset.getFeatures();
-        arma::mat output = featureDataset.getOutputs();
+
+    	//FIXME doubleFQI
+        arma::mat input; //= featureDataset.getFeatures();
+        arma::mat output; // = featureDataset.getOutputs();
 
         unsigned int nSamples = input.n_cols;
 

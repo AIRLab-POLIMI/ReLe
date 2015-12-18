@@ -57,7 +57,7 @@ public:
         return out / static_cast<double>(this->regressors.size());
     }
 
-    virtual void trainFeatures(BatchDataSimple_<OutputC, denseOutput>& featureDataset) override
+    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
     {
         for(auto regressor : regressors)
             regressor->trainFeatures(featureDataset);

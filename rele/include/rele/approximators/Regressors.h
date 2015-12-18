@@ -144,7 +144,7 @@ public:
         trainFeatures(featureDataset);
     }
 
-    virtual void trainFeatures(BatchDataSimple_<OutputC, denseOutput>& featureDataset) = 0;
+    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) = 0;
 
     virtual ~BatchRegressor_()
     {
