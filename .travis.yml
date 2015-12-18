@@ -1,9 +1,0 @@
-sudo: required
-dist: trusty
-before_install:
-  - sudo rm -rf /var/lib/apt/lists/*
-  - sudo apt-get clean
-  - sudo add-apt-repository "deb http://it.archive.ubuntu.com/ubuntu/ xenial main universe restricted multiverse" -y
-  - sudo cat /etc/apt/sources.list
-  - sudo apt-get update -q
-  - sudo apt-get install libarmadillo libarmadillo-dev
