@@ -36,8 +36,8 @@ namespace ReLe
 template<class InputC, bool denseOutput = true>
 class NearestNeighbourRegressor_: public UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>
 {
-	USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
-	DEFINE_FEATURES_TYPES(denseOutput)
+    USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
+    DEFINE_FEATURES_TYPES(denseOutput)
 public:
     NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
         : UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, phi.cols()), k(k), iterations(1),

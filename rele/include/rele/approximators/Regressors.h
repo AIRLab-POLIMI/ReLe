@@ -25,7 +25,7 @@
 #define REGRESSORS_H_
 
 #include "Basics.h"
-#include "BatchData.h"
+#include "data/BatchData.h"
 #include "Features.h"
 
 namespace ReLe
@@ -158,7 +158,7 @@ typedef BatchRegressor_<arma::vec, arma::vec> BatchRegressor;
 template<class InputC, class OutputC, bool denseOutput = true>
 class UnsupervisedBatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
 {
-	typedef typename input_traits<denseOutput>::type FeaturesCollection;
+    typedef typename input_traits<denseOutput>::type FeaturesCollection;
 public:
     UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1)
         : Regressor_<InputC, OutputC, denseOutput>(phi, output)
@@ -203,7 +203,7 @@ public:
 
 #define USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
     typedef UnsupervisedBatchRegressor_<InputC, OutputC, denseOutput> Base; \
-
+ 
 #define DEFINE_FEATURES_TYPES(denseOutput) \
 	typedef typename input_traits<denseOutput>::type FeaturesCollection; \
 	typedef typename input_traits<denseOutput>::column_type FeaturesVector;

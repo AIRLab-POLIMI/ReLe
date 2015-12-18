@@ -56,7 +56,7 @@ public:
          * regressor in the ensemble and train them.
          */
 
-    	//FIXME doubleFQI
+        //FIXME doubleFQI
         arma::mat input; //= featureDataset.getFeatures();
         arma::mat output; // = featureDataset.getOutputs();
 

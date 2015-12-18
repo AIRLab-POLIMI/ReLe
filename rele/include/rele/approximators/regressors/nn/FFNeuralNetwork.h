@@ -29,13 +29,14 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
+
 #include "Regressors.h"
 
 #include "nn_bits/ActivationFunctions.h"
 #include "nn_bits/Regularization.h"
-#include "nn_bits/Normalization.h"
-
 #include "NumericalGradient.h"
+
+#include "data/BatchDataNormalization.h"
 
 namespace ReLe
 {
@@ -95,20 +96,19 @@ public:
         }
 
         delete Omega;
-        delete normalization;
 
     }
 
     virtual arma::vec operator()(const InputC& input) override
     {
-        const arma::vec& x = normalization->normalizeInput(Base::phi(input));
+        const arma::vec& x = Base::phi(input);
         forwardComputation(x);
         return h.back();
     }
 
     virtual arma::vec diff(const InputC& input) override
     {
-        const arma::vec& x = normalization->normalizeInput(Base::phi(input));
+        const arma::vec& x = Base::phi(input);
         forwardComputation(x);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
@@ -134,12 +134,9 @@ public:
 
     void trainFeatures(const BatchData& featureDataset) override
     {
-        //Clean old normalization
-        /*if(normalization)
-         delete normalization;
-
-         //Compute dataset normalization
-         normalization = new MinMaxNormalization(featureDataset);*/
+    	NoNormalization<true> norm1;
+    	NoNormalization<true> norm2;
+    	normalizeDatasetFull(featureDataset, norm1, norm2);
 
         switch (params.alg)
         {
@@ -172,7 +169,7 @@ public:
 
         for(unsigned int i = 0; i < nSamples; i++)
         {
-            const arma::vec& x = normalization->normalizeInput(featureDataset.getInput(i));
+            const arma::vec& x = featureDataset.getInput(i);
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
@@ -192,7 +189,7 @@ public:
 
         for (unsigned int i = 0; i < dataset.size(); i++)
         {
-            const InputC& x = normalization->normalizeInput(Base::phi(dataset.getInput(i)));
+            const InputC& x = Base::phi(dataset.getInput(i));
             const arma::vec& y = dataset.getOutput(i);
             forwardComputation(x);
             arma::vec yhat = h.back();
@@ -223,7 +220,6 @@ private:
         }
 
         Omega = new L2_Regularization();
-        normalization = new NoNormalization();
 
         //Create the network
         aux_mem = new double[paramSize];
@@ -330,7 +326,7 @@ protected:
 
         for(unsigned int i = 0; i < featureDataset.size(); i++)
         {
-            const arma::vec& x = normalization->normalizeInput(featureDataset.getInput(i));
+            const arma::vec& x = featureDataset.getInput(i);
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
@@ -598,7 +594,6 @@ protected:
 
     //Regularization class
     Regularization* Omega;
-    Normalization* normalization;
 
     //Optimization data
     OptimizationParameters params;
