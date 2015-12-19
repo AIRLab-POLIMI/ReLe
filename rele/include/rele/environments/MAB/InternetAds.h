@@ -52,7 +52,11 @@ public:
     };
 
 public:
-    InternetAds(unsigned int nAds, double gamma = 1, ExperimentLabel experimentType = First);
+    InternetAds(unsigned int nAds, ExperimentLabel experimentType = First);
+    unsigned int getVisitors();
+
+protected:
+	unsigned int visitors;
 };
 
 }

@@ -45,10 +45,11 @@ class SimpleMAB: public MAB<FiniteAction>
      */
 
 public:
-    SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon = 1);
-    SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon = 1);
+    SimpleMAB(arma::vec P, arma::vec R, unsigned int horizon = 1);
+    SimpleMAB(arma::vec P, double r, unsigned int horizon = 1);
+    SimpleMAB(unsigned int nArms, double r, unsigned int horizon = 1);
+    SimpleMAB(unsigned int nArms, unsigned int horizon = 1);
+    arma::vec getP();
     virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
 
 protected:

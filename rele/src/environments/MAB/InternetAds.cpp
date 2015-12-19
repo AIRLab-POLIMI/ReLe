@@ -31,20 +31,27 @@
 namespace ReLe
 {
 
-InternetAds::InternetAds(unsigned int nAds, double gamma, ExperimentLabel experimentType) :
-    SimpleMAB(arma::ones(nAds), 1, gamma)
+InternetAds::InternetAds(unsigned int nAds, ExperimentLabel experimentType) :
+    SimpleMAB(arma::ones(nAds), 1)
 {
-    EnvironmentSettings& task = getWritableSettings();
     if(experimentType == First)
     {
-        P = arma::vec(nAds, arma::fill::ones) * 0.5;
-        task.horizon = 100000;
+    	P = arma::vec(nAds, arma::fill::ones) * 0.5;
+    	visitors = 100000;
     }
     else
     {
-        P = 0.02 + (0.05 - 0.02) * arma::vec(nAds, arma::fill::randu);
-        task.horizon = 300000;
+    	P = 0.02 + (0.05 - 0.02) * arma::vec(nAds, arma::fill::randu);
+    	visitors = 300000;
     }
+
+    EnvironmentSettings& task = getWritableSettings();
+    task.gamma = 0;
+}
+
+unsigned int InternetAds::getVisitors()
+{
+	return visitors;
 }
 
 }

@@ -54,39 +54,44 @@ int main(int argc, char *argv[])
 
     if(e == iAds)
     {
-        InternetAds mab(10, 0.95, InternetAds::Second);
+    	unsigned int nAds = 10;
 
-        unsigned int episodeLength = 10;
+        InternetAds mab(nAds, InternetAds::First);
 
-        SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
+        SequentialPolicy policy(mab.getSettings().finiteActionDim);
         //Q_Learning agent(policy);
         DoubleQ_Learning agent(policy);
 
         auto&& core = buildCore(mab, agent);
-        core.getSettings().episodeLength = episodeLength;
-        for(unsigned int i = 0; i < 20000; i++)
+        core.getSettings().episodeLength = 1;
+        for(unsigned int i = 0; i < mab.getVisitors(); i++)
         {
             cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();
+
+            arma::vec P = mab.getP();
+            cout << endl << "P: " << P << endl;
         }
     }
     else
     {
-        Roulette mab(0.95);
+        Roulette mab;
 
-        unsigned int episodeLength = mab.getSettings().finiteActionDim;
-
-        SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
+        SequentialPolicy policy(mab.getSettings().finiteActionDim);
         Q_Learning agent(policy);
         //DoubleQ_Learning agent(policy);
 
         auto&& core = buildCore(mab, agent);
-        core.getSettings().episodeLength = episodeLength;
-        for(unsigned int i = 1; i <= 2000; i++)
+        core.getSettings().episodeLength = 1;
+        for(unsigned int i = 1; i <= 50000; i++)
         {
-            agent.setAlpha(1.0 / i);
+            agent.setAlpha(1.0 / pow(1, 1));
             cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();
+
+            arma::mat currentQ = *policy.getQ();
+
+            cout << endl << "Average Q: " << arma::mean(arma::mean(currentQ)) << endl;
         }
     }
 }

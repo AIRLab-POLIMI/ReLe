@@ -45,12 +45,12 @@ class MAB: public Environment<ActionC, FiniteState>
      */
 
 public:
-    MAB(double gamma, unsigned int horizon = 1) : Environment<ActionC, FiniteState>()
+    MAB(unsigned int horizon = 1) : Environment<ActionC, FiniteState>()
     {
         EnvironmentSettings& task = this->getWritableSettings();
         task.isFiniteHorizon = true;
         task.horizon = horizon;
-        task.gamma = gamma;
+        task.gamma = 1;
         task.isAverageReward = false;
         task.isEpisodic = true;
         task.finiteStateDim = 1;

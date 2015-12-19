@@ -43,7 +43,7 @@ class Roulette: public MAB<FiniteAction>
      */
 
 public:
-    Roulette(double gamma = 1);
+    Roulette();
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
     virtual double computeReward(const FiniteAction& action);

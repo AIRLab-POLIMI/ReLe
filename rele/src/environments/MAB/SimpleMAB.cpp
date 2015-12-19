@@ -31,19 +31,19 @@
 namespace ReLe
 {
 
-SimpleMAB::SimpleMAB(arma::vec P, arma::vec R, double gamma, unsigned int horizon) :
+SimpleMAB::SimpleMAB(arma::vec P, arma::vec R, unsigned int horizon) :
     P(P),
     R(R),
-    MAB(gamma, horizon)
+    MAB(horizon)
 {
     EnvironmentSettings& task = getWritableSettings();
     task.finiteActionDim = P.n_elem;
     task.continuosActionDim = 0;
 }
 
-SimpleMAB::SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon) :
+SimpleMAB::SimpleMAB(arma::vec P, double r, unsigned int horizon) :
     P(P),
-    MAB(gamma, horizon)
+    MAB(horizon)
 {
     R = arma::vec(P.n_elem, arma::fill::ones) * r;
 
@@ -52,8 +52,8 @@ SimpleMAB::SimpleMAB(arma::vec P, double r, double gamma, unsigned int horizon) 
     task.continuosActionDim = 0;
 }
 
-SimpleMAB::SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int horizon) :
-    MAB(gamma, horizon)
+SimpleMAB::SimpleMAB(unsigned int nArms, double r, unsigned int horizon) :
+    MAB(horizon)
 {
     P = arma::vec(nArms, arma::fill::randu);
     R = arma::vec(P.n_elem, arma::fill::ones) * r;
@@ -63,8 +63,8 @@ SimpleMAB::SimpleMAB(unsigned int nArms, double r, double gamma, unsigned int ho
     task.continuosActionDim = 0;
 }
 
-SimpleMAB::SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon) :
-    MAB(gamma, horizon)
+SimpleMAB::SimpleMAB(unsigned int nArms, unsigned int horizon) :
+    MAB(horizon)
 {
     P = arma::vec(nArms, arma::fill::randu);
     R = arma::vec(nArms, arma::fill::randn);
@@ -72,6 +72,11 @@ SimpleMAB::SimpleMAB(unsigned int nArms, double gamma, unsigned int horizon) :
     EnvironmentSettings& task = getWritableSettings();
     task.finiteActionDim = nArms;
     task.continuosActionDim = 0;
+}
+
+arma::vec SimpleMAB::getP()
+{
+	return P;
 }
 
 void SimpleMAB::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)

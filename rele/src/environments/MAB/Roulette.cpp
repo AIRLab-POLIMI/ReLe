@@ -31,8 +31,8 @@
 namespace ReLe
 {
 
-Roulette::Roulette(double gamma) :
-    MAB<FiniteAction>(gamma)
+Roulette::Roulette() :
+    MAB<FiniteAction>()
 {
     EnvironmentSettings& task = getWritableSettings();
     task.continuosActionDim = 0;
@@ -49,6 +49,7 @@ Roulette::Roulette(double gamma) :
     nSquares = {1, 2, 3, 4, 5, 6, 12, 18, 0};
 
     task.finiteActionDim = actionsId(actionsId.n_elem - 1);
+    task.gamma = 0;
 
     // The amount to bet
     bet = 1;

@@ -137,27 +137,20 @@ public:
         return new MiniBatchData_<OutputC, dense>(this, indexes);
     }
 
-    virtual std::vector<const BatchData_*> getMiniBatches(unsigned int mSize) const
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int mSize) const
     {
-        std::vector<const BatchData_*> minibatches;
+    	unsigned int nMiniBatches = size() / mSize + ((size() % mSize == 0) ? 0 : 1);
 
-        arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
-        indexes = arma::shuffle(indexes);
+        return miniBatchesVector(nMiniBatches, mSize);
+    }
 
-        const unsigned int mNumber = indexes.n_elem / mSize + (indexes.n_elem % mSize == 0) ? 0 : 1;
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getNMiniBatches(double nMiniBatches) const
+    {
+    	unsigned int mSize = size() / nMiniBatches;
+    	if(size() % 2 != 0)
+    		nMiniBatches--;
 
-        for (unsigned int i = 0; i < mNumber; i++)
-        {
-            unsigned int start = i * mSize;
-            unsigned int last = indexes.n_elem;
-            unsigned int end = std::min(start + mSize, last) -1;
-
-            auto* miniBatch = new MiniBatchData_<OutputC, dense>(this, indexes.rows(start, end));
-
-            minibatches.push_back(miniBatch);
-        }
-
-        return minibatches;
+    	return miniBatchesVector(nMiniBatches, mSize);
     }
 
     OutputC getMean() const
@@ -188,6 +181,35 @@ public:
     }
 
 protected:
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> miniBatchesVector(unsigned int nMiniBatches, unsigned int mSize) const
+	{
+    	assert(mSize > 0 && nMiniBatches > 0);
+
+    	std::vector<MiniBatchData_<OutputC, dense>*> miniBatches;
+
+        arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
+        indexes = arma::shuffle(indexes);
+
+        unsigned int end;
+        for (unsigned int i = 0; i < nMiniBatches; i++)
+        {
+            unsigned int start = i * mSize;
+            end = start + mSize - 1;
+
+            auto* miniBatch = new MiniBatchData_<OutputC, dense>(this, indexes.rows(start, end));
+            miniBatches.push_back(miniBatch);
+        }
+
+        if(end < size() - 1)
+        {
+        	auto* miniBatch = new MiniBatchData_<OutputC, dense>(
+        		this, indexes.rows(nMiniBatches * mSize, size()));
+        	miniBatches.push_back(miniBatch);
+        }
+
+    	return miniBatches;
+	}
+
     void computeMeanVariance() const
     {
         if (size() == 0)
@@ -261,12 +283,12 @@ public:
             return BatchData_<OutputC, dense>::shuffle();
     }
 
-    virtual std::vector<const BatchData_<OutputC, dense>*> getMiniBatches(unsigned int mSize) const override
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int mSize) const override
     {
         if (data.size() == indexes.n_elem)
             return data.getMiniBatches(mSize);
         else
-            return BatchData_<OutputC, dense>::getMiniBatches(mSize);
+            return MiniBatchData_<OutputC, dense>::getMiniBatches(mSize);
     }
 
     virtual features_type getInput(unsigned int index) const override
@@ -302,6 +324,10 @@ public:
         return data.getFeatures().cols(indexes);
     }
 
+    const arma::uvec getIndexes() const
+    {
+    	return indexes;
+    }
 
     void setIndexes(const arma::uvec& indexes)
     {
