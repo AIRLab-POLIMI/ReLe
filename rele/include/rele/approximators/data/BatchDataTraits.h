@@ -72,6 +72,11 @@ struct output_traits
         return o1 == o2;
     }
 
+    static double errorSquared(const OutputC& o1, const OutputC& o2)
+    {
+    	return 0;
+    }
+
 };
 
 template<>
@@ -89,6 +94,12 @@ struct output_traits<arma::vec>
     static bool isAlmostEqual(const arma::vec& o1, const arma::vec& o2)
     {
         return arma::norm(o1 - o2) < 1e-7;
+    }
+
+    static double errorSquared(const arma::vec& o1, const arma::vec& o2)
+    {
+    	arma::vec e = o1 - o2;
+       	return arma::as_scalar(e.t()*e);
     }
 
 };
@@ -110,6 +121,12 @@ struct output_traits<unsigned int>
     static bool isAlmostEqual(const unsigned int& o1, const unsigned int& o2)
     {
         return std::abs(o1 - o2) < 1e-7;
+    }
+
+    static double errorSquared(const unsigned int& o1, const unsigned int& o2)
+    {
+       	double e = o1 - o2;
+        return e*e;
     }
 };
 

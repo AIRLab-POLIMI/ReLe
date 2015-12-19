@@ -63,6 +63,13 @@ public:
             regressor->trainFeatures(featureDataset);
     }
 
+    virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    {
+    	//FIXME implement, probably this method cannot be called by ensemble...
+    	assert(false);
+    	return 0;
+    }
+
     BatchRegressor_<InputC, OutputC, denseOutput>& getRegressor(unsigned int index)
     {
         return *regressors[index];

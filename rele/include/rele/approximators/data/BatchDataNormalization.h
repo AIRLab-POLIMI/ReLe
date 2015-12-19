@@ -31,41 +31,45 @@ namespace ReLe
 {
 
 template<class OutputC, bool dense>
-BatchDataSimple_<OutputC, dense> normalizeDataset(const BatchData_<OutputC, dense>& dataset, Normalization<dense>& normalization)
+BatchDataSimple_<OutputC, dense> normalizeDataset(
+    const BatchData_<OutputC, dense>& dataset,
+    Normalization<dense>& normalization, bool computeNormalization =
+        false)
 {
     auto features = dataset.getFeatures;
-    normalization.readData(features);
 
-    for(unsigned int i = 0; i < features.n_cols; i++)
+    if (computeNormalization)
+        normalization.readData(features);
+
+    for (unsigned int i = 0; i < features.n_cols; i++)
     {
-    	features.col(i) = featuresNormalization(features.col(i));
+        features.col(i) = featuresNormalization(features.col(i));
     }
 
     return BatchDataSimple_<OutputC, dense>(features, dataset.getOutputs());
 }
 
 template<bool dense>
-BatchDataSimple_<arma::vec, dense> normalizeDatasetFull(const BatchData_<arma::vec, dense>& dataset,
-        Normalization<dense>& featuresNormalization,
-        Normalization<true>& outputNormalization)
+BatchDataSimple_<arma::vec, dense> normalizeDatasetFull(
+    const BatchData_<arma::vec, dense>& dataset,
+    Normalization<dense>& featuresNormalization,
+    Normalization<true>& outputNormalization,
+    bool computeNormalization = false)
 {
     auto features = dataset.getFeatures();
     auto outputs = dataset.getOutputs();
     featuresNormalization.readData(features);
     outputNormalization.readData(outputs);
 
-    for(unsigned int i = 0; i < features.n_cols; i++)
+    for (unsigned int i = 0; i < features.n_cols; i++)
     {
-    	features.col(i) = featuresNormalization(features.col(i));
-    	outputs.col(i) = featuresNormalization(outputs.col(i));
+        features.col(i) = featuresNormalization(features.col(i));
+        outputs.col(i) = outputNormalization(outputs.col(i));
     }
-
 
     return BatchDataSimple_<arma::vec, dense>(features, dataset.getOutputs());
 }
 
-
 }
-
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_DATA_BATCHDATANORMALIZATION_H_ */

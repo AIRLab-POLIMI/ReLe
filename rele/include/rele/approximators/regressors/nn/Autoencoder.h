@@ -64,7 +64,7 @@ public	:
     double computeJFeatures(const arma::mat& features)
     {
         BatchDataSimple data(features, features);
-        return FFNeuralNetwork_<InputC, denseOutput>::computeJFeatures(data, 0);
+        return FFNeuralNetwork_<InputC, denseOutput>::computeJFeatures(data);
     }
 
     virtual ~Autoencoder_()

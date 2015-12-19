@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     cout << "plane(-0.5) = " << planeNet({-0.5}) << endl;
     cout << "plane(-1.0) = " << planeNet({-1.0}) <<  endl;
 
-    cout << "J = " << planeNet.computeJ(datasetPlane, 0) << endl;
+    cout << "J = " << planeNet.computeJ(datasetPlane) << endl;
 
 
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     test(1) = cos(M_PI/3);
     cout << "net =" << atan2Net(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
 
-    cout << "J = " << atan2Net.computeJ(dataset, 0) << endl;
+    cout << "J = " << atan2Net.computeJ(dataset) << endl;
 
 
     //Train xor
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     cout << "xor(0, 1) =" << xorNet(i2) << "gt = " << "1" << endl;
     cout << "xor(1, 1) =" << xorNet(i3) << "gt = " << "0" <<  endl;
 
-    cout << "J = " << xorNet.computeJ(datasetXor, 0) << endl;
+    cout << "J = " << xorNet.computeJ(datasetXor) << endl;
 
 }
 

@@ -333,6 +333,12 @@ public:
         assert(features.n_cols == outputs.n_cols);
     }
 
+    BatchDataSimple_(FeaturesCollection&& features, OutputCollection&& outputs) :
+        features(features), outputs(outputs)
+    {
+        assert(features.n_cols == outputs.n_cols);
+    }
+
     virtual size_t size() const override
     {
         return features.n_cols;
@@ -380,8 +386,8 @@ public:
     }
 
 private:
-    const FeaturesCollection& features;
-    const OutputCollection& outputs;
+    FeaturesCollection features;
+    OutputCollection outputs;
 
 };
 

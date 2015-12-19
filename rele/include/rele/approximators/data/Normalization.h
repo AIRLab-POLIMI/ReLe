@@ -90,8 +90,7 @@ public:
     virtual void readData(const collection_type& dataset) override
     {
         min = arma::min(dataset, 1);
-        arma::vec delta = arma::max(dataset, 1);
-        - min;
+        arma::vec delta = arma::max(dataset, 1) - min;
 
         newMin.ones(dataset.n_rows);
         newMin *= minValue;
@@ -104,7 +103,7 @@ public:
 
     virtual features_type normalize(const features_type& features) const override
     {
-        return (features - min)/deltaFactor+newMin;
+        return (features - min)%deltaFactor+newMin;
     }
 
     virtual ~MinMaxNormalization()

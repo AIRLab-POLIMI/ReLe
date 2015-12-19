@@ -144,7 +144,27 @@ public:
         trainFeatures(featureDataset);
     }
 
+    double computeJ(const BatchDataRaw_<InputC, arma::vec>& dataset)
+    {
+        unsigned int N = dataset.size();
+
+        //compute features matrix
+        FeaturesCollection features(this->phi.rows(), N);
+        OutputCollection outputs(this->outputDimension, N);
+
+        for(int i = 0; i < N; i++)
+        {
+            features.col(i) = this->phi(dataset.getInput(i));
+            outputs.col(i) = dataset.getOutput(i);
+        }
+
+        BatchDataSimple_<OutputC, denseOutput> featureDataset(features, outputs);
+
+        return computeJFeatures(featureDataset);
+    }
+
     virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) = 0;
+    virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& dataset) = 0;
 
     virtual ~BatchRegressor_()
     {

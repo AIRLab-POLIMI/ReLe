@@ -24,10 +24,10 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 
-#include "../trees_bits/nodes/EmptyTreeNode.h"
-#include "../trees_bits/nodes/InternalTreeNode.h"
-#include "../trees_bits/nodes/LeafTreeNode.h"
-#include "../trees_bits/nodes/TreeNode.h"
+#include "nodes/EmptyTreeNode.h"
+#include "nodes/InternalTreeNode.h"
+#include "nodes/LeafTreeNode.h"
+#include "nodes/TreeNode.h"
 #include "Regressors.h"
 #include "Features.h"
 
@@ -49,40 +49,37 @@ public:
 
     }
 
-    virtual arma::vec operator() (const InputC& input) override
+    virtual OutputC operator() (const InputC& input) override
     {
-        arma::vec output(this->outputDimension);
-        output = evaluate(input);
-        return output;
+    	if (!root)
+    	{
+    		throw std::runtime_error("Empty tree evaluated");
+    	}
+
+    	return root->getValue(phi(input));
     }
 
-    /**
-     * Evaluate the tree
-     * @return OutputC
-     * @param  input The input data on which the model is evaluated
-     */
-    virtual OutputC evaluate(const InputC& input)
+    virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& dataset) override
     {
-        if (!root)
-        {
-            throw std::runtime_error("Empty tree evaluated");
-        }
+    	double J = 0;
 
-        return root->getValue(phi(input));
+    	for(unsigned int i = 0; i < dataset.size(); i++)
+    	{
+    		OutputC yhat = root->getValue(dataset.getInput(i));
+    		OutputC y = dataset.getOutput(i);
+    		J += output_traits<OutputC>::errorSquared(yhat, y);
+    	}
+
+    	return J / dataset.size();
     }
 
-    /**
-     * Set nMin
-     * @param nm the minimum number of inputs for splitting
-     */
+
     void setNMin(int nm)
     {
         nMin = nm;
     }
 
-    /**
-     * Get nmin
-     */
+
     int getNMin()
     {
         return nMin;
@@ -90,10 +87,7 @@ public:
 
     virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override = 0;
 
-    /**
-     * Get the root of the tree
-     * @return a pointer to the root
-     */
+
     TreeNode<OutputC>* getRoot()
     {
         return root;

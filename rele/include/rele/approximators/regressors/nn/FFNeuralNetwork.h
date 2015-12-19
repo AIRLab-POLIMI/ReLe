@@ -101,14 +101,14 @@ public:
 
     virtual arma::vec operator()(const InputC& input) override
     {
-        const arma::vec& x = Base::phi(input);
+        const arma::vec& x = normalizationF->normalize(Base::phi(input));
         forwardComputation(x);
         return h.back();
     }
 
     virtual arma::vec diff(const InputC& input) override
     {
-        const arma::vec& x = Base::phi(input);
+        const arma::vec& x = normalizationF->normalize(Base::phi(input));
         forwardComputation(x);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
@@ -134,26 +134,33 @@ public:
 
     void trainFeatures(const BatchData& featureDataset) override
     {
-    	NoNormalization<true> norm1;
-    	NoNormalization<true> norm2;
-    	normalizeDatasetFull(featureDataset, norm1, norm2);
+        if(normalizationF)
+            delete normalizationF;
+
+        if(normalizationO)
+            delete normalizationO;
+
+        normalizationF = new MinMaxNormalization<denseOutput>();
+        normalizationO = new MinMaxNormalization<denseOutput>();
+
+        auto&& normalizedDataset = normalizeDatasetFull(featureDataset, *normalizationF, *normalizationO);
 
         switch (params.alg)
         {
         case GradientDescend:
-            gradientDescend(featureDataset);
+            gradientDescend(normalizedDataset);
             break;
 
         case StochasticGradientDescend:
-            stochasticGradientDescend(featureDataset);
+            stochasticGradientDescend(normalizedDataset);
             break;
 
         case Adadelta:
-            adadelta(featureDataset);
+            adadelta(normalizedDataset);
             break;
 
         case ScaledConjugateGradient:
-            scaledConjugateGradient(featureDataset);
+            scaledConjugateGradient(normalizedDataset);
             break;
 
         default:
@@ -162,43 +169,10 @@ public:
 
     }
 
-    double computeJFeatures(const BatchData& featureDataset, double lambda)
+    virtual double computeJFeatures(const BatchData& featureDataset) override
     {
-        double J = 0;
-        unsigned int nSamples = featureDataset.size();
-
-        for(unsigned int i = 0; i < nSamples; i++)
-        {
-            const arma::vec& x = featureDataset.getInput(i);
-            const arma::vec& y = featureDataset.getOutput(i);
-
-            forwardComputation(x);
-            arma::vec yhat = h.back();
-            J += arma::norm(y - yhat);
-        }
-
-        J /= (2 * nSamples);
-
-        return J;
-    }
-
-    //TODO rewrite using computeJfeatures
-    double computeJ(const BatchDataRaw_<InputC, arma::vec>& dataset, double lambda)
-    {
-        double J = 0;
-
-        for (unsigned int i = 0; i < dataset.size(); i++)
-        {
-            const InputC& x = Base::phi(dataset.getInput(i));
-            const arma::vec& y = dataset.getOutput(i);
-            forwardComputation(x);
-            arma::vec yhat = h.back();
-            J += arma::norm(y - yhat) / 2; // + lambda * Omega->cost(w);
-        }
-
-        J /= dataset.size();
-
-        return J;
+        const BatchData& normalizedDataset = normalizeDatasetFull(featureDataset, *normalizationF, *normalizationO);
+        return computeJlowLevel(normalizedDataset);
     }
 
     OptimizationParameters& getHyperParameters()
@@ -220,6 +194,8 @@ private:
         }
 
         Omega = new L2_Regularization();
+        normalizationF = new NoNormalization<denseOutput>();
+        normalizationO = new NoNormalization<denseOutput>();
 
         //Create the network
         aux_mem = new double[paramSize];
@@ -319,8 +295,7 @@ protected:
         return gradW;
     }
 
-    void computeGradient(const BatchData& featureDataset,
-                         double lambda, arma::vec& g)
+    void computeGradient(const BatchData& featureDataset, arma::vec& g)
     {
         g.zeros();
 
@@ -336,7 +311,7 @@ protected:
         }
 
         g /= static_cast<double>(featureDataset.size());
-        g += lambda*Omega->diff(*w);
+        g += params.lambda*Omega->diff(*w);
     }
 
     void computeGradientNumerical(const BatchDataRaw_<InputC, arma::vec>& dataset, arma::vec& g)
@@ -371,6 +346,28 @@ protected:
 
     }
 
+    double computeJlowLevel(const BatchData& featureDataset)
+    {
+        double J = 0;
+        unsigned int nSamples = featureDataset.size();
+
+        for(unsigned int i = 0; i < nSamples; i++)
+        {
+            const arma::vec& x = featureDataset.getInput(i);
+            const arma::vec& y = featureDataset.getOutput(i);
+
+            forwardComputation(x);
+            arma::vec yhat = h.back();
+            J += arma::norm(y - yhat);
+        }
+
+        J /= (2 * nSamples);
+
+        J += params.lambda*Omega->cost(*w);
+
+        return J;
+    }
+
 private:
 
     void gradientDescend(const BatchData& featureDataset)
@@ -380,10 +377,8 @@ private:
 
         for (unsigned k = 0; k < params.maxIterations; k++)
         {
-            computeGradient(featureDataset, params.lambda, g);
+            computeGradient(featureDataset, g);
             w -= params.alpha * g;
-
-            //std::cout << computeJFeatures(featureDataset, 0) << std::endl;
         }
     }
 
@@ -395,12 +390,10 @@ private:
         {
             for(auto* miniBatch : featureDataset.getMiniBatches(params.minibatchSize))
             {
-                computeGradient(*miniBatch, params.lambda, g);
+                computeGradient(*miniBatch, g);
                 w -= params.alpha * g;
                 delete miniBatch;
             }
-
-            //std::cout << computeJFeatures(featureDataset, 0) << std::endl;
         }
     }
 
@@ -417,7 +410,7 @@ private:
 
             for(auto* miniBatch : featureDataset.getMiniBatches(params.minibatchSize))
             {
-                computeGradient(*miniBatch, params.lambda, g);
+                computeGradient(*miniBatch, g);
 
                 r = params.rho * r + (1 - params.rho) * arma::square(g);
 
@@ -448,11 +441,11 @@ private:
         double sigmaPar = 5e-5;
 
         //compute initial error
-        double errorOld = computeJFeatures(featureDataset, params.lambda);
+        double errorOld = computeJlowLevel(featureDataset);
 
         //Compute first gradient
         arma::vec g(paramSize, arma::fill::zeros);
-        computeGradient(featureDataset, params.lambda, g);
+        computeGradient(featureDataset, g);
 
         //first order info
         arma::vec r = -g;
@@ -478,7 +471,7 @@ private:
                 w += sigma*p;
 
                 arma::vec gn(paramSize, arma::fill::zeros);
-                computeGradient(featureDataset, params.lambda, gn);
+                computeGradient(featureDataset, gn);
 
                 s = (gn - g)/sigma;
                 delta = arma::as_scalar(p.t()*s);
@@ -501,13 +494,13 @@ private:
 
             // calculate comparison parameter
             w = wOld + alfa*p;
-            double error = computeJFeatures(featureDataset, params.lambda);
+            double error = computeJlowLevel(featureDataset);
             double Delta = 2*delta*(errorOld - error)/std::pow(mu, 2);
 
             // if Delta >= 0 a reduction in error can be made
             if(Delta >= 0)
             {
-                computeGradient(featureDataset, params.lambda, g);
+                computeGradient(featureDataset, g);
                 arma::vec rn = -g;
 
                 lBar = 0;
@@ -594,6 +587,10 @@ protected:
 
     //Regularization class
     Regularization* Omega;
+
+    //Normalization class
+    Normalization<denseOutput>* normalizationF;
+    Normalization<denseOutput>* normalizationO;
 
     //Optimization data
     OptimizationParameters params;
