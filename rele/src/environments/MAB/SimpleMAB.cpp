@@ -76,7 +76,7 @@ SimpleMAB::SimpleMAB(unsigned int nArms, unsigned int horizon) :
 
 arma::vec SimpleMAB::getP()
 {
-	return P;
+    return P;
 }
 
 void SimpleMAB::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)

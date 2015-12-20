@@ -51,26 +51,26 @@ public:
 
     virtual OutputC operator() (const InputC& input) override
     {
-    	if (!root)
-    	{
-    		throw std::runtime_error("Empty tree evaluated");
-    	}
+        if (!root)
+        {
+            throw std::runtime_error("Empty tree evaluated");
+        }
 
-    	return root->getValue(phi(input));
+        return root->getValue(phi(input));
     }
 
     virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& dataset) override
     {
-    	double J = 0;
+        double J = 0;
 
-    	for(unsigned int i = 0; i < dataset.size(); i++)
-    	{
-    		OutputC yhat = root->getValue(dataset.getInput(i));
-    		OutputC y = dataset.getOutput(i);
-    		J += output_traits<OutputC>::errorSquared(yhat, y);
-    	}
+        for(unsigned int i = 0; i < dataset.size(); i++)
+        {
+            OutputC yhat = root->getValue(dataset.getInput(i));
+            OutputC y = dataset.getOutput(i);
+            J += output_traits<OutputC>::errorSquared(yhat, y);
+        }
 
-    	return J / dataset.size();
+        return J / dataset.size();
     }
 
 

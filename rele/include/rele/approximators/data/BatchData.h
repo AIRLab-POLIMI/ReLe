@@ -139,18 +139,18 @@ public:
 
     virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int mSize) const
     {
-    	unsigned int nMiniBatches = size() / mSize + ((size() % mSize == 0) ? 0 : 1);
+        unsigned int nMiniBatches = size() / mSize + ((size() % mSize == 0) ? 0 : 1);
 
         return miniBatchesVector(nMiniBatches, mSize);
     }
 
     virtual const std::vector<MiniBatchData_<OutputC, dense>*> getNMiniBatches(double nMiniBatches) const
     {
-    	unsigned int mSize = size() / nMiniBatches;
-    	if(size() % 2 != 0)
-    		nMiniBatches--;
+        unsigned int mSize = size() / nMiniBatches;
+        if(size() % 2 != 0)
+            nMiniBatches--;
 
-    	return miniBatchesVector(nMiniBatches, mSize);
+        return miniBatchesVector(nMiniBatches, mSize);
     }
 
     OutputC getMean() const
@@ -182,10 +182,10 @@ public:
 
 protected:
     virtual const std::vector<MiniBatchData_<OutputC, dense>*> miniBatchesVector(unsigned int nMiniBatches, unsigned int mSize) const
-	{
-    	assert(mSize > 0 && nMiniBatches > 0);
+    {
+        assert(mSize > 0 && nMiniBatches > 0);
 
-    	std::vector<MiniBatchData_<OutputC, dense>*> miniBatches;
+        std::vector<MiniBatchData_<OutputC, dense>*> miniBatches;
 
         arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
         indexes = arma::shuffle(indexes);
@@ -202,13 +202,13 @@ protected:
 
         if(end < size() - 1)
         {
-        	auto* miniBatch = new MiniBatchData_<OutputC, dense>(
-        		this, indexes.rows(nMiniBatches * mSize, size()));
-        	miniBatches.push_back(miniBatch);
+            auto* miniBatch = new MiniBatchData_<OutputC, dense>(
+                this, indexes.rows(nMiniBatches * mSize, size()));
+            miniBatches.push_back(miniBatch);
         }
 
-    	return miniBatches;
-	}
+        return miniBatches;
+    }
 
     void computeMeanVariance() const
     {
@@ -326,7 +326,7 @@ public:
 
     const arma::uvec getIndexes() const
     {
-    	return indexes;
+        return indexes;
     }
 
     void setIndexes(const arma::uvec& indexes)

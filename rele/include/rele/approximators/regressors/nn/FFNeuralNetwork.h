@@ -103,7 +103,7 @@ public:
     {
         const arma::vec& x = normalizationF->normalize(Base::phi(input));
         forwardComputation(x);
-        return h.back();
+        return normalizationO->restore(h.back());
     }
 
     virtual arma::vec diff(const InputC& input) override
@@ -112,7 +112,7 @@ public:
         forwardComputation(x);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
-        return backPropagation(g);
+        return backPropagation(normalizationO->rescale(g));
     }
 
     inline arma::vec getParameters() const override
@@ -143,7 +143,7 @@ public:
         normalizationF = new MinMaxNormalization<denseOutput>();
         normalizationO = new MinMaxNormalization<denseOutput>();
 
-        auto&& normalizedDataset = normalizeDatasetFull(featureDataset, *normalizationF, *normalizationO);
+        auto&& normalizedDataset = normalizeDatasetFull(featureDataset, *normalizationF, *normalizationO, true);
 
         switch (params.alg)
         {
@@ -279,11 +279,11 @@ protected:
 
             //Compute gradients on bias
             unsigned int start = end - b(layer).n_elem + 1;
-            gradW(arma::span(start, end)) = g;// + dOmega(arma::span(start, end));
+            gradW(arma::span(start, end)) = g;
             end = start - 1;
 
             start = end - W(layer).n_elem + 1;
-            gradW(arma::span(start, end)) = arma::vectorise(g * h[layer].t());// + dOmega(arma::span(start, end));
+            gradW(arma::span(start, end)) = arma::vectorise(g * h[layer].t());
             end = start - 1;
 
             //Propagate the gradients w.r.t. the next lower-level hidden layers activations
@@ -305,7 +305,7 @@ protected:
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
-            arma::vec yhat = h.back();
+            arma::vec yhat = normalizationO->restore(h.back());
             arma::vec gs = yhat - y;
             g += backPropagation(gs);
         }
@@ -357,7 +357,7 @@ protected:
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
-            arma::vec yhat = h.back();
+            arma::vec yhat = normalizationO->restore(h.back());
             J += arma::norm(y - yhat);
         }
 

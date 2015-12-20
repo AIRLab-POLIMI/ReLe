@@ -44,6 +44,8 @@ public:
     }
 
     virtual features_type normalize(const features_type& features) const = 0;
+    virtual features_type restore(const features_type& features) const = 0;
+    virtual features_type rescale(const features_type& features) const = 0;
     virtual void readData(const collection_type& dataset) = 0;
 
 
@@ -63,6 +65,16 @@ public:
     virtual features_type normalize(const features_type& features) const override
     {
         return features;
+    }
+
+    virtual features_type restore(const features_type& features) const override
+    {
+        return features;
+    }
+
+    virtual features_type rescale(const features_type& features) const override
+    {
+       	return features;
     }
 
     virtual void readData(const collection_type& dataset) override
@@ -87,6 +99,21 @@ public:
 
     }
 
+    virtual features_type normalize(const features_type& features) const override
+    {
+        return (features - min)%deltaFactor+newMin;
+    }
+
+    virtual features_type restore(const features_type& features) const override
+    {
+        return (features - newMin)/deltaFactor + min;
+    }
+
+    virtual features_type rescale(const features_type& features) const override
+    {
+    	return features/deltaFactor;
+    }
+
     virtual void readData(const collection_type& dataset) override
     {
         min = arma::min(dataset, 1);
@@ -99,11 +126,6 @@ public:
         newDelta *= maxValue - minValue;
 
         deltaFactor = newDelta/delta;
-    }
-
-    virtual features_type normalize(const features_type& features) const override
-    {
-        return (features - min)%deltaFactor+newMin;
     }
 
     virtual ~MinMaxNormalization()
@@ -132,16 +154,28 @@ public:
 
     }
 
+    virtual features_type normalize(const features_type& features) const override
+    {
+        return (features - mean)/stddev;
+    }
+
+    virtual features_type restore(const features_type& features) const override
+    {
+        return features%stddev + mean;
+    }
+
+    virtual features_type rescale(const features_type& features) const override
+    {
+       	return features%stddev;
+    }
+
     virtual void readData(const collection_type& dataset) override
     {
         mean = arma::mean(dataset, 1);
         stddev = arma::stddev(dataset, 0, 1);
     }
 
-    virtual features_type normalize(const features_type& features) const override
-    {
-        return (features - mean)/stddev;
-    }
+
 
     virtual ~ZscoreNormalization_()
     {

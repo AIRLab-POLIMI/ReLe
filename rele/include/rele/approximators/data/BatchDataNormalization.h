@@ -36,14 +36,14 @@ BatchDataSimple_<OutputC, dense> normalizeDataset(
     Normalization<dense>& normalization, bool computeNormalization =
         false)
 {
-    auto features = dataset.getFeatures;
+    auto&& features = dataset.getFeatures();
 
     if (computeNormalization)
         normalization.readData(features);
 
     for (unsigned int i = 0; i < features.n_cols; i++)
     {
-        features.col(i) = featuresNormalization(features.col(i));
+        features.col(i) = normalization(features.col(i));
     }
 
     return BatchDataSimple_<OutputC, dense>(features, dataset.getOutputs());
@@ -56,18 +56,10 @@ BatchDataSimple_<arma::vec, dense> normalizeDatasetFull(
     Normalization<true>& outputNormalization,
     bool computeNormalization = false)
 {
-    auto features = dataset.getFeatures();
-    auto outputs = dataset.getOutputs();
-    featuresNormalization.readData(features);
-    outputNormalization.readData(outputs);
+    if(computeNormalization)
+    	outputNormalization.readData(dataset.getOutputs());
 
-    for (unsigned int i = 0; i < features.n_cols; i++)
-    {
-        features.col(i) = featuresNormalization(features.col(i));
-        outputs.col(i) = outputNormalization(outputs.col(i));
-    }
-
-    return BatchDataSimple_<arma::vec, dense>(features, dataset.getOutputs());
+    return normalizeDataset(dataset, featuresNormalization, computeNormalization);
 }
 
 }

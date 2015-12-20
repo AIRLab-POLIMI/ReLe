@@ -36,13 +36,13 @@ InternetAds::InternetAds(unsigned int nAds, ExperimentLabel experimentType) :
 {
     if(experimentType == First)
     {
-    	P = arma::vec(nAds, arma::fill::ones) * 0.5;
-    	visitors = 100000;
+        P = arma::vec(nAds, arma::fill::ones) * 0.5;
+        visitors = 100000;
     }
     else
     {
-    	P = 0.02 + (0.05 - 0.02) * arma::vec(nAds, arma::fill::randu);
-    	visitors = 300000;
+        P = 0.02 + (0.05 - 0.02) * arma::vec(nAds, arma::fill::randu);
+        visitors = 300000;
     }
 
     EnvironmentSettings& task = getWritableSettings();
@@ -51,7 +51,7 @@ InternetAds::InternetAds(unsigned int nAds, ExperimentLabel experimentType) :
 
 unsigned int InternetAds::getVisitors()
 {
-	return visitors;
+    return visitors;
 }
 
 }

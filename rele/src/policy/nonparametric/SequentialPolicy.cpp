@@ -34,7 +34,7 @@ namespace ReLe
 SequentialPolicy::SequentialPolicy(unsigned int nActions) :
     currentAction(0)
 {
-	this->nactions = nActions;
+    this->nactions = nActions;
 }
 
 unsigned int SequentialPolicy::operator()(const size_t& state)
@@ -43,7 +43,7 @@ unsigned int SequentialPolicy::operator()(const size_t& state)
     currentAction++;
 
     if(currentAction == nactions * 2 - 1)
-    	currentAction = -1;
+        currentAction = -1;
 
     return returnValue;
 }

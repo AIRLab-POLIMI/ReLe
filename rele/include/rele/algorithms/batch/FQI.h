@@ -56,7 +56,7 @@ public:
         nStates(nStates),
         nActions(nActions),
         gamma(gamma),
-		nMiniBatches(nMiniBatches)
+        nMiniBatches(nMiniBatches)
     {
         // Compute the overall number of samples
         unsigned int nEpisodes = data.size();
@@ -91,11 +91,11 @@ public:
         unsigned int i = 0;
         arma::vec nextStates(nSamples, arma::fill::zeros);
         for(auto& episode : data)
-        	for(auto& tr : episode)
-        	{
-        		nextStates(i) = tr.xn;
-        		i++;
-        	}
+            for(auto& tr : episode)
+            {
+                nextStates(i) = tr.xn;
+                i++;
+            }
 
 
         /* First iteration of FQI is performed here training
@@ -106,10 +106,10 @@ public:
         BatchDataSimple featureDatasetStart(input, rewards);
         const std::vector<MiniBatchData*> miniBatches = (featureDatasetStart.getNMiniBatches(nMiniBatches));
         for(unsigned int i = 0; i < miniBatches.size(); i++)
-		{
-			QRegressor.trainFeatures(*miniBatches[i]);
-			nextStatesMiniBatch.push_back(nextStates(miniBatches[i]->getIndexes()));
-		}
+        {
+            QRegressor.trainFeatures(*miniBatches[i]);
+            nextStatesMiniBatch.push_back(nextStates(miniBatches[i]->getIndexes()));
+        }
 
         // Initial QHat is stored before update
         arma::vec prevQHat = QHat;
@@ -167,24 +167,24 @@ public:
 
     virtual void step(const std::vector<MiniBatchData*> miniBatches, arma::mat& output)
     {
-    	arma::mat input = miniBatches[0]->getFeatures();
-    	arma::mat rewards = miniBatches[0]->getOutputs();
+        arma::mat input = miniBatches[0]->getFeatures();
+        arma::mat rewards = miniBatches[0]->getOutputs();
 
-    	for(unsigned int i = 0; i < input.n_cols; i++)
-    	{
-			/* In order to be able to fill the output vector (i.e. regressor
-			 * target values), we need to compute the Q values for each
-			 * s' sample in the dataset and for each action in the
-			 * set of actions of the problem. Recalling the fact that the values
-			 * are zero for each action in an absorbing state, we check if s' is
-			 * absorbing and, if it is, we leave the Q-values fixed to zero.
-			 */
-			arma::vec Q_xn(nActions, arma::fill::zeros);
-			FiniteState nextState = FiniteState(nextStatesMiniBatch[0](i));
-			if(!nextState.isAbsorbing())
-				for(unsigned int u = 0; u < nActions; u++)
-					Q_xn(u) = arma::as_scalar(QRegressor(nextState,
-														 FiniteAction(u)));
+        for(unsigned int i = 0; i < input.n_cols; i++)
+        {
+            /* In order to be able to fill the output vector (i.e. regressor
+             * target values), we need to compute the Q values for each
+             * s' sample in the dataset and for each action in the
+             * set of actions of the problem. Recalling the fact that the values
+             * are zero for each action in an absorbing state, we check if s' is
+             * absorbing and, if it is, we leave the Q-values fixed to zero.
+             */
+            arma::vec Q_xn(nActions, arma::fill::zeros);
+            FiniteState nextState = FiniteState(nextStatesMiniBatch[0](i));
+            if(!nextState.isAbsorbing())
+                for(unsigned int u = 0; u < nActions; u++)
+                    Q_xn(u) = arma::as_scalar(QRegressor(nextState,
+                                                         FiniteAction(u)));
 
             /* For the current s', Q values for each action are stored in
              * Q_xn. The optimal Bellman equation can be computed
@@ -192,7 +192,7 @@ public:
              * xn is an absorbing state.
              */
             output(i) = rewards(0, i) + this->gamma * arma::max(Q_xn);
-    	}
+        }
 
         // The regressor is trained
         BatchDataSimple featureDataset(input, output);
@@ -219,8 +219,8 @@ public:
     }
 
     virtual void printInfo(arma::mat output,
-						   arma::vec prevQHat,
-						   double& J1)
+                           arma::vec prevQHat,
+                           double& J1)
     {
         double J2;
 

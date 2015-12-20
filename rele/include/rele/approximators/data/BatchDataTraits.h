@@ -74,7 +74,7 @@ struct output_traits
 
     static double errorSquared(const OutputC& o1, const OutputC& o2)
     {
-    	return 0;
+        return 0;
     }
 
 };
@@ -98,8 +98,8 @@ struct output_traits<arma::vec>
 
     static double errorSquared(const arma::vec& o1, const arma::vec& o2)
     {
-    	arma::vec e = o1 - o2;
-       	return arma::as_scalar(e.t()*e);
+        arma::vec e = o1 - o2;
+        return arma::as_scalar(e.t()*e);
     }
 
 };
@@ -125,7 +125,7 @@ struct output_traits<unsigned int>
 
     static double errorSquared(const unsigned int& o1, const unsigned int& o2)
     {
-       	double e = o1 - o2;
+        double e = o1 - o2;
         return e*e;
     }
 };

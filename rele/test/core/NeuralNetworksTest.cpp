@@ -34,30 +34,7 @@ int main(int argc, char *argv[])
 {
     cout << "## Neural Network Test ##" << endl;
 
-    arma::vec input = {1.0, 1.0};
-
-    BasisFunctions basis = IdentityBasis::generate(input.size());
-    DenseFeatures phi(basis);
-
-    FFNeuralNetwork net(phi, 3, 1);
-    arma::vec p = net.getParameters();
-
-    arma::vec out1 = net(input);
-    cout << "f(1.0, 1.0) =" << out1 << endl;
-
-    p.randn();
-    net.setParameters(p);
-    arma::vec out2 = net(input);
-    cout << "f(1.0, 1.0) =" << out2 << endl;
-
-    arma::vec diff = net.diff(input);
-    cout << "f'(1.0, 1.0) =" << diff.t() << endl;
-
-    arma::vec numerical = NumericalGradient::compute(net, p, input);
-    cout << "numerical: " << numerical.t();
-    cout << "error norm: " << norm(numerical - net.diff(input)) << endl;
-
-    //Train xor
+    //Train plane
     BasisFunctions basisPlane = IdentityBasis::generate(1);
     DenseFeatures phiPlane(basisPlane);
 
@@ -68,24 +45,34 @@ int main(int argc, char *argv[])
     for(int i = -100; i < 100; i++)
     {
         double f = i;
-        arma::vec input = { f/100.0 };
-        arma::vec output = { f/100.0 };
+        arma::vec input = { f };
+        arma::vec output = { f /50.0 };
         datasetPlane.addSample(input, output);
     }
 
     planeNet.train(datasetPlane);
 
-    cout << "plane(1) = " << planeNet({1.0}) <<  endl;
-    cout << "plane(0.5) = " << planeNet({0.5}) << endl;
-    cout << "plane(0.3) = " << planeNet({0.3}) <<  endl;
-    cout << "plane(0) = " << planeNet({0.0}) << endl;
-    cout << "plane(-0.3) = " << planeNet({-0.3}) <<  endl;
-    cout << "plane(-0.5) = " << planeNet({-0.5}) << endl;
-    cout << "plane(-1.0) = " << planeNet({-1.0}) <<  endl;
+    cout << "plane(100)  = " << planeNet({100.0}) <<  endl;
+    cout << "plane(50)   = " << planeNet({50.0}) << endl;
+    cout << "plane(30)   = " << planeNet({30.0}) <<  endl;
+    cout << "plane(0)    = " << planeNet({0.0}) << endl;
+    cout << "plane(-30)  = " << planeNet({-30.0}) <<  endl;
+    cout << "plane(-50)  = " << planeNet({-50.0}) << endl;
+    cout << "plane(-100) = " << planeNet({-100.0}) <<  endl;
+
+    arma::vec input = {1.0};
+    arma::vec numerical = NumericalGradient::compute(planeNet, planeNet.getParameters(), input);
+    cout << "numerical: " << numerical.t();
+    cout << "exact:     " << planeNet.diff(input).t();
+    cout << "n/e:       " << numerical.t()/planeNet.diff(input).t();
+    cout << "error norm: " << norm(numerical - planeNet.diff(input)) << endl;
 
     cout << "J = " << planeNet.computeJ(datasetPlane) << endl;
 
 
+    // Generate adequate basis
+    BasisFunctions basis = IdentityBasis::generate(2);
+    DenseFeatures phi(basis);
 
 
     //Train atan2

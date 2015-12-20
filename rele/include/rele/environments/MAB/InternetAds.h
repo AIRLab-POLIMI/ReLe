@@ -56,7 +56,7 @@ public:
     unsigned int getVisitors();
 
 protected:
-	unsigned int visitors;
+    unsigned int visitors;
 };
 
 }
