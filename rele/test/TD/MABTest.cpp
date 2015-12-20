@@ -26,7 +26,6 @@
  */
 
 #include "MAB/InternetAds.h"
-#include "MAB/Roulette.h"
 #include "td/DoubleQ-Learning.h"
 #include "nonparametric/SequentialPolicy.h"
 #include "Core.h"
@@ -38,61 +37,32 @@ using namespace ReLe;
 
 
 /*
- * MAB test with InternetAds or Roulette. Sequential policy is used
+ * MAB test with InternetAds Sequential policy is used
  * with the purpose to execute each possible action sequentially until
  * the end of the episode.
  */
 
-enum EnvironmentLabel
-{
-    iAds, R
-};
-
 int main(int argc, char *argv[])
 {
-    EnvironmentLabel e = EnvironmentLabel::R;
+	unsigned int nAds = 10;
+	unsigned int episodeLength = 1;
 
-    if(e == iAds)
-    {
-    	unsigned int nAds = 10;
+	InternetAds mab(nAds, InternetAds::Second);
 
-        InternetAds mab(nAds, InternetAds::First);
+	SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
+	Q_Learning agent(policy);
+	//DoubleQ_Learning agent(policy);
 
-        SequentialPolicy policy(mab.getSettings().finiteActionDim);
-        //Q_Learning agent(policy);
-        DoubleQ_Learning agent(policy);
+	auto&& core = buildCore(mab, agent);
+	core.getSettings().episodeLength = episodeLength;
+	for(unsigned int i = 0; i < mab.getVisitors(); i++)
+	{
+		agent.setAlpha(0.05);
+		cout << endl << "### Starting episode " << i << " ###" << endl;
+		core.runEpisode();
 
-        auto&& core = buildCore(mab, agent);
-        core.getSettings().episodeLength = 1;
-        for(unsigned int i = 0; i < mab.getVisitors(); i++)
-        {
-            cout << endl << "### Starting episode " << i << " ###" << endl;
-            core.runEpisode();
-
-            arma::vec P = mab.getP();
-            cout << endl << "P: " << P << endl;
-        }
-    }
-    else
-    {
-        Roulette mab;
-
-        SequentialPolicy policy(mab.getSettings().finiteActionDim);
-        Q_Learning agent(policy);
-        //DoubleQ_Learning agent(policy);
-
-        auto&& core = buildCore(mab, agent);
-        core.getSettings().episodeLength = 1;
-        for(unsigned int i = 1; i <= 50000; i++)
-        {
-            agent.setAlpha(1.0 / pow(1, 1));
-            cout << endl << "### Starting episode " << i << " ###" << endl;
-            core.runEpisode();
-
-            arma::mat currentQ = *policy.getQ();
-
-            cout << endl << "Average Q: " << arma::mean(arma::mean(currentQ)) << endl;
-        }
-    }
+		arma::vec P = mab.getP();
+		cout << endl << "P: " << P << endl;
+	}
 }
 

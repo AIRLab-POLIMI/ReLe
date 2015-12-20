@@ -70,6 +70,18 @@ public:
          * contain the approximated Q values of each sample in the dataset.
          */
         QHat.zeros(nSamples);
+
+        unsigned int i = 0;
+        nextStates.zeros(nSamples);
+        for(auto& episode : data)
+        	for(auto& tr : episode)
+        	{
+        		if(tr.xn.isAbsorbing())
+        			absorbingStates.insert(tr.xn);
+
+        		nextStates(i) = tr.xn;
+        		i++;
+        	}
     }
 
     virtual void run(Features& phi, unsigned int maxiterations, double epsilon)
@@ -88,34 +100,18 @@ public:
          */
         arma::mat output(1, nSamples, arma::fill::zeros);
 
-        unsigned int i = 0;
-        arma::vec nextStates(nSamples, arma::fill::zeros);
-        for(auto& episode : data)
-        	for(auto& tr : episode)
-        	{
-        		nextStates(i) = tr.xn;
-        		i++;
-        	}
-
-
         /* First iteration of FQI is performed here training
          * the regressor with a dataset that has the rewards as
          * output. The dataset is divided into two minibatches
          * with shuffled samples.
          */
         BatchDataSimple featureDatasetStart(input, rewards);
-        const std::vector<MiniBatchData*> miniBatches = (featureDatasetStart.getNMiniBatches(nMiniBatches));
-        for(unsigned int i = 0; i < miniBatches.size(); i++)
+        std::vector<MiniBatchData*> miniBatches = featureDatasetStart.getNMiniBatches(nMiniBatches);
+        for(unsigned int i = 0; i < nMiniBatches; i++)
 		{
 			QRegressor.trainFeatures(*miniBatches[i]);
 			nextStatesMiniBatch.push_back(nextStates(miniBatches[i]->getIndexes()));
 		}
-
-        // Initial QHat is stored before update
-        arma::vec prevQHat = QHat;
-
-        // Update QHat
-        computeQHat(data);
 
         unsigned int iteration = 0;
         double J;
@@ -123,10 +119,10 @@ public:
         std::cout << std::endl << "*********************************************************" << std::endl;
         std::cout << "FQI iteration: " << iteration << std::endl;
         std::cout << "*********************************************************" << std::endl;
-        printInfo(rewards, prevQHat, J);
+        printInfo(miniBatches, rewards, J);
 
         // Main FQI loop
-        while(iteration < maxiterations)// && J > epsilon)
+        while(iteration < maxiterations && J > epsilon)
         {
             // Update and print the iteration number
             iteration++;
@@ -137,15 +133,8 @@ public:
             // Iteration of FQI
             step(miniBatches, output);
 
-            // Previous Q approximated values are stored
-            prevQHat = QHat;
-            /* New QHat values are computed using the regressor trained with the
-             * new output values.
-             */
-            computeQHat(data);
-
             // Print info
-            printInfo(output, prevQHat, J);
+            printInfo(miniBatches, output, J);
         }
 
         // Print final info
@@ -165,7 +154,7 @@ public:
         printPolicy();
     }
 
-    virtual void step(const std::vector<MiniBatchData*> miniBatches, arma::mat& output)
+    virtual void step(std::vector<MiniBatchData*>& miniBatches, arma::mat& output)
     {
     	arma::mat input = miniBatches[0]->getFeatures();
     	arma::mat rewards = miniBatches[0]->getOutputs();
@@ -181,7 +170,7 @@ public:
 			 */
 			arma::vec Q_xn(nActions, arma::fill::zeros);
 			FiniteState nextState = FiniteState(nextStatesMiniBatch[0](i));
-			if(!nextState.isAbsorbing())
+			if(absorbingStates.count(nextState) == 0)
 				for(unsigned int u = 0; u < nActions; u++)
 					Q_xn(u) = arma::as_scalar(QRegressor(nextState,
 														 FiniteAction(u)));
@@ -218,23 +207,35 @@ public:
                 QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
     }
 
-    virtual void printInfo(arma::mat output,
-						   arma::vec prevQHat,
+    virtual void printInfo(std::vector<MiniBatchData*> miniBatches,
+    					   arma::mat output,
 						   double& J1)
     {
-        double J2;
+        // Previous Q approximated values are stored
+        arma::vec prevQHat = QHat;
+        /* New QHat values are computed using the regressor trained with the
+         * new output values.
+         */
+        computeQHat(data);
 
         /* Evaluate the distance between the previous approximation of Q
          * and the current one.
          */
         J1 = arma::norm(QHat - prevQHat);
+
         /* Evaluate the error mean squared error between the current approximation
          * of Q and the target output in the dataset.
          */
-        J2 = arma::sum(arma::square(QHat - output.t()))  / nSamples;
+        double J2 = 0;
+        for(unsigned int i = 0; i < nMiniBatches; i++)
+        	J2 += arma::sum(arma::square(
+        		QHat(miniBatches[i]->getIndexes()) - output(i)));
+        J2 /= nSamples;
 
-        std::cout << std::endl << std::endl << "Bellman Q-values: " << std::endl << output.cols(0, 40) << std::endl;
-        std::cout << "Approximated Q-values: " << std::endl << QHat.rows(0, 40).t() << std::endl;
+        std::cout << std::endl << "Some Q-values:" << std::endl;
+        for(unsigned int i = 0; i < 40; i++)
+        	std::cout << "(" << miniBatches[0]->getInput(i)(0) << ", " << miniBatches[0]->getInput(i)(1) <<
+				")  " << QHat((miniBatches[0]->getIndexes())(i)) << output.col(i) << std::endl;
         std::cout << "QHat - Previous QHat: " << J1 << std::endl;
         std::cout << "QHat - Q Bellman: " << J2 << std::endl;
     }
@@ -263,8 +264,10 @@ protected:
     unsigned int nSamples;
     unsigned int nStates;
     unsigned int nActions;
+    arma::vec nextStates;
     double gamma;
     unsigned int nMiniBatches;
+    std::set<FiniteState> absorbingStates;
     std::vector<arma::vec> nextStatesMiniBatch;
 };
 
