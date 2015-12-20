@@ -139,16 +139,21 @@ public:
 
     virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int mSize) const
     {
-        unsigned int nMiniBatches = size() / mSize + ((size() % mSize == 0) ? 0 : 1);
+        assert(mSize > 0);
+
+        // Number of minibatches of the same size
+        unsigned int nMiniBatches = size() / mSize;
 
         return miniBatchesVector(nMiniBatches, mSize);
     }
 
-    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getNMiniBatches(double nMiniBatches) const
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getNMiniBatches(unsigned int nMiniBatches) const
     {
+        assert(nMiniBatches > 0);
+
+        // Size for each miniBatch (sometimes the last one has a different size)
         unsigned int mSize = size() / nMiniBatches;
-        if(size() % 2 != 0)
-            nMiniBatches--;
+        nMiniBatches--;
 
         return miniBatchesVector(nMiniBatches, mSize);
     }
@@ -183,27 +188,27 @@ public:
 protected:
     virtual const std::vector<MiniBatchData_<OutputC, dense>*> miniBatchesVector(unsigned int nMiniBatches, unsigned int mSize) const
     {
-        assert(mSize > 0 && nMiniBatches > 0);
+        assert(mSize > 0);
 
         std::vector<MiniBatchData_<OutputC, dense>*> miniBatches;
 
         arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
         indexes = arma::shuffle(indexes);
 
-        unsigned int end;
+        unsigned int end = 0;
         for (unsigned int i = 0; i < nMiniBatches; i++)
         {
             unsigned int start = i * mSize;
-            end = start + mSize - 1;
+            end = start + mSize;
 
-            auto* miniBatch = new MiniBatchData_<OutputC, dense>(this, indexes.rows(start, end));
+            auto* miniBatch = new MiniBatchData_<OutputC, dense>(this, indexes.rows(start, end - 1));
             miniBatches.push_back(miniBatch);
         }
 
-        if(end < size() - 1)
+        if(end < size())
         {
             auto* miniBatch = new MiniBatchData_<OutputC, dense>(
-                this, indexes.rows(nMiniBatches * mSize, size()));
+                this, indexes.rows(end * nMiniBatches, size() - 1));
             miniBatches.push_back(miniBatch);
         }
 

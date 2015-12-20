@@ -57,7 +57,7 @@ BatchDataSimple_<arma::vec, dense> normalizeDatasetFull(
     bool computeNormalization = false)
 {
     if(computeNormalization)
-    	outputNormalization.readData(dataset.getOutputs());
+        outputNormalization.readData(dataset.getOutputs());
 
     return normalizeDataset(dataset, featuresNormalization, computeNormalization);
 }

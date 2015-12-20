@@ -74,7 +74,7 @@ public:
 
     virtual features_type rescale(const features_type& features) const override
     {
-       	return features;
+        return features;
     }
 
     virtual void readData(const collection_type& dataset) override
@@ -111,7 +111,7 @@ public:
 
     virtual features_type rescale(const features_type& features) const override
     {
-    	return features/deltaFactor;
+        return features/deltaFactor;
     }
 
     virtual void readData(const collection_type& dataset) override
@@ -166,7 +166,7 @@ public:
 
     virtual features_type rescale(const features_type& features) const override
     {
-       	return features%stddev;
+        return features%stddev;
     }
 
     virtual void readData(const collection_type& dataset) override
