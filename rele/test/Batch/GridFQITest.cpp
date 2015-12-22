@@ -37,7 +37,6 @@
 #include "regressors/nn/FFNeuralNetwork.h"
 #include "regressors/nn/FFNeuralNetworkEnsemble.h"
 #include "basis/IdentityBasis.h"
-#include "IdToGridBasis.h"
 #include "regressors/trees/KDTree.h"
 #include "regressors/trees/ExtraTree.h"
 #include "regressors/trees/ExtraTreeEnsemble.h"
@@ -134,7 +133,6 @@ int main(int argc, char *argv[])
      */
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(2);
-    // bfs.push_back(new IdToGridBasis(8, 8, 7, 7));
 
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
@@ -144,7 +142,7 @@ int main(int argc, char *argv[])
     // Neural Network
     //FFNeuralNetwork QRegressorA(phi, 50, 1);
     //FFNeuralNetwork QRegressorB(phi, 50, 1);
-    //QRegressorA.getHyperParameters().lambda = 0.3;
+    //QRegressorA.getHyperParameters().lambda = 0.0005;
     //QRegressorA.getHyperParameters().maxIterations = 10;
     //QRegressorB.getHyperParameters().maxIterations = 10;
     //QRegressorB.getHyperParameters().maxIterations = 10;

@@ -56,9 +56,7 @@ protected:
     virtual void updateQ();
 
 protected:
-    arma::mat QA;
-    arma::mat QB;
-
+    arma::cube doubleQ;
 };
 
 }

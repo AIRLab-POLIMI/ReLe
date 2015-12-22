@@ -57,36 +57,21 @@ void DoubleQ_Learning::sampleAction(const FiniteState& state, FiniteAction& acti
 void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
                             FiniteAction& action)
 {
-    size_t xn = nextState.getStateN();
-    double r = reward[0];
     unsigned int selectedQ;
 
     selectedQ = RandomGenerator::sampleUniformInt(0, 1);
-    if(selectedQ == 0)
-    {
-        const rowvec& Qxn = QA.row(xn);
-        double qmax = Qxn.max();
-        uvec maxIndex = find(Qxn == qmax);
-        unsigned int index = RandomGenerator::sampleUniformInt(0,
-                             maxIndex.n_elem - 1);
+    const arma::mat& Qxn = doubleQ.subcube(span(nextState, nextState), span::all, span(selectedQ, selectedQ));
+    double qmax = Qxn.max();
+    arma::uvec maxIndex = find(Qxn == qmax);
+    unsigned int index = RandomGenerator::sampleUniformInt(0,
+                         maxIndex.n_elem - 1);
 
-        double delta = r + task.gamma * QB(xn, FiniteAction(index)) - QA(x, u);
-        QA(x, u) = QA(x, u) + alpha * delta;
-    }
-    else
-    {
-        const rowvec& Qxn = QB.row(xn);
-        double qmax = Qxn.max();
-        uvec maxIndex = find(Qxn == qmax);
-        unsigned int index = RandomGenerator::sampleUniformInt(0,
-                             maxIndex.n_elem - 1);
-
-        double delta = r + task.gamma * QA(xn, FiniteAction(index)) - QB(x, u);
-        QB(x, u) = QB(x, u) + alpha * delta;
-    }
+    double delta = reward[0] +
+                   task.gamma * doubleQ(nextState, FiniteAction(maxIndex(index)), selectedQ) - doubleQ(x, u, selectedQ);
+    doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha * delta;
 
     // Update action and state
-    x = xn;
+    x = nextState;
     updateQ();
     u = policy(x);
 
@@ -95,35 +80,24 @@ void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
 
 void DoubleQ_Learning::endEpisode(const Reward& reward)
 {
-    // Last update
-    double r = reward[0];
-
     unsigned int selectedQ = RandomGenerator::sampleUniformInt(0, 1);
-    if(selectedQ == 0)
-    {
-        // In the last update, the Q of the absorbing state is forced to be 0
-        double delta = r - QA(x, u);
-        QA(x, u) = QA(x, u) + alpha * delta;
-    }
-    else
-    {
-        double delta = r - QB(x, u);
-        QB(x, u) = QB(x, u) + alpha * delta;
-    }
+
+    // In the last update, the Q of the absorbing state is forced to be 0
+    double delta = reward[0] - doubleQ(x, u, selectedQ);
+    doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha * delta;
 
     updateQ();
 }
 
 void DoubleQ_Learning::updateQ()
 {
-    Q = (QA + QB) / 2;
+    Q = (doubleQ.slice(0) + doubleQ.slice(1)) / 2;
 }
 
 void DoubleQ_Learning::init()
 {
     FiniteTD::init();
-    QA.zeros(task.finiteStateDim, task.finiteActionDim);
-    QB.zeros(task.finiteStateDim, task.finiteActionDim);
+    doubleQ.zeros(task.finiteStateDim, task.finiteActionDim, 2);
 }
 
 DoubleQ_Learning::~DoubleQ_Learning()

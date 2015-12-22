@@ -40,10 +40,17 @@ class DoubleFQIEnsemble : public Ensemble
 public:
     DoubleFQIEnsemble(BatchRegressor& QRegressorA,
                       BatchRegressor& QRegressorB) :
-        Ensemble(QRegressorA.getFeatures())
+        Ensemble(QRegressorA.getFeatures()),
+        currentRegressor(0)
     {
         regressors.push_back(&QRegressorA);
         regressors.push_back(&QRegressorB);
+    }
+
+    virtual void trainFeatures(const BatchData& miniBatch) override
+    {
+        regressors[currentRegressor]->trainFeatures(miniBatch);
+        currentRegressor = 1 - currentRegressor;
     }
 
     virtual void writeOnStream(std::ofstream& out) override
@@ -60,6 +67,9 @@ public:
     {
         regressors.clear();
     }
+
+protected:
+    unsigned int currentRegressor;
 };
 
 template<class StateC>
@@ -84,7 +94,7 @@ public:
     {
     }
 
-    void step(std::vector<MiniBatchData*>& miniBatches, arma::mat& output) override
+    void step(std::vector<MiniBatchData*>& miniBatches, std::vector<arma::mat>& outputs) override
     {
         if(shuffle)
             for(unsigned int i = 0; i < this->nMiniBatches; i++)
@@ -94,13 +104,11 @@ public:
             }
 
         std::vector<arma::mat> inputs;
-        std::vector<arma::mat> outputs;
 
         for(unsigned int miniBatchIndex = 0; miniBatchIndex < this->nMiniBatches; miniBatchIndex++)
         {
             arma::mat miniBatchInput = miniBatches[miniBatchIndex]->getFeatures();
             arma::mat miniBatchRewards = miniBatches[miniBatchIndex]->getOutputs();
-            arma::mat miniBatchOutput(1, miniBatches[miniBatchIndex]->size(), arma::fill::zeros);
 
             for(unsigned int i = 0; i < miniBatchInput.n_cols; i++)
             {
@@ -117,8 +125,8 @@ public:
                 {
                     arma::vec Q_xn(this->nActions, arma::fill::zeros);
                     for(unsigned int u = 0; u < this->nActions; u++)
-                        Q_xn(u) = arma::as_scalar(QRegressorEnsemble.getRegressor(
-                                                      miniBatchIndex)(nextState, FiniteAction(u)));
+                        Q_xn(u) = arma::as_scalar(
+                                      QRegressorEnsemble.getRegressor(miniBatchIndex)(nextState, FiniteAction(u)));
 
                     double qmax = Q_xn.max();
                     arma::uvec maxIndex = find(Q_xn == qmax);
@@ -129,28 +137,17 @@ public:
                      * finding the maximum value inside Q_xn. They are zero if
                      * xn is an absorbing state.
                      */
-                    miniBatchOutput(i) = miniBatchRewards(0, i) +
-                                         this->gamma * arma::as_scalar(QRegressorEnsemble.getRegressor(
-                                                     1 - miniBatchIndex)(nextState, FiniteAction(index)));
+                    outputs[miniBatchIndex](i) = miniBatchRewards(0, i) +
+                                                 this->gamma * arma::as_scalar(QRegressorEnsemble.getRegressor(
+                                                         1 - miniBatchIndex)(nextState, FiniteAction(maxIndex(index))));
                 }
                 else
-                    miniBatchOutput(i) = miniBatchRewards(0, i);
+                    outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
             }
 
-            inputs.push_back(miniBatchInput);
-            outputs.push_back(miniBatchOutput);
+            BatchDataSimple featureDataset(miniBatchInput, outputs[miniBatchIndex]);
+            QRegressorEnsemble.trainFeatures(featureDataset);
         }
-
-        // The regressors are trained
-        for(unsigned int i = 0; i < this->nMiniBatches; i++)
-        {
-            BatchDataSimple featureDataset(inputs[i], outputs[i]);
-            QRegressorEnsemble.getRegressor(i).trainFeatures(featureDataset);
-        }
-
-        // Output vector for printInfo function is loaded
-        output.cols(0, miniBatches[0]->size() - 1) = outputs[0];
-        output.cols(miniBatches[0]->size(), this->nSamples - 1) = outputs[1];
     }
 
 protected:

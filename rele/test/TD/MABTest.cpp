@@ -44,25 +44,25 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	unsigned int nAds = 10;
-	unsigned int episodeLength = 1;
+    unsigned int nAds = 10;
+    unsigned int episodeLength = 1;
 
-	InternetAds mab(nAds, InternetAds::Second);
+    InternetAds mab(nAds, InternetAds::Second);
 
-	SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
-	Q_Learning agent(policy);
-	//DoubleQ_Learning agent(policy);
+    SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
+    Q_Learning agent(policy);
+    //DoubleQ_Learning agent(policy);
 
-	auto&& core = buildCore(mab, agent);
-	core.getSettings().episodeLength = episodeLength;
-	for(unsigned int i = 0; i < mab.getVisitors(); i++)
-	{
-		agent.setAlpha(0.05);
-		cout << endl << "### Starting episode " << i << " ###" << endl;
-		core.runEpisode();
+    auto&& core = buildCore(mab, agent);
+    core.getSettings().episodeLength = episodeLength;
+    for(unsigned int i = 0; i < mab.getVisitors(); i++)
+    {
+        agent.setAlpha(0.05);
+        cout << endl << "### Starting episode " << i << " ###" << endl;
+        core.runEpisode();
 
-		arma::vec P = mab.getP();
-		cout << endl << "P: " << P << endl;
-	}
+        arma::vec P = mab.getP();
+        cout << endl << "P: " << P << endl;
+    }
 }
 
