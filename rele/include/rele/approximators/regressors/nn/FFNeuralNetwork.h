@@ -305,45 +305,13 @@ protected:
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
-            arma::vec yhat = normalizationO->restore(h.back());
+            arma::vec yhat = h.back();
             arma::vec gs = yhat - y;
             g += backPropagation(gs);
         }
 
         g /= static_cast<double>(featureDataset.size());
         g += params.lambda*Omega->diff(*w);
-    }
-
-    void computeGradientNumerical(const BatchDataRaw_<InputC, arma::vec>& dataset, arma::vec& g)
-    {
-        g.zeros();
-
-        for (unsigned int i = 0; i < dataset.size(); i++)
-        {
-            const InputC& x = dataset.getInput(i);
-            const arma::vec& y = dataset.getOutput(i);
-
-            FFNeuralNetwork_& net = *this;
-
-            arma::vec wold = net.getParameters();
-
-            auto lambda = [&](const arma::vec& par)
-            {
-
-                net.setParameters(par);
-                double value = arma::as_scalar(net(x) - y);
-
-                return 0.5*value*value;
-
-            };
-
-            g += NumericalGradient::compute(lambda, wold);
-
-            net.setParameters(wold);
-        }
-
-        g /= static_cast<double>(dataset.size());
-
     }
 
     double computeJlowLevel(const BatchData& featureDataset)
@@ -357,7 +325,7 @@ protected:
             const arma::vec& y = featureDataset.getOutput(i);
 
             forwardComputation(x);
-            arma::vec yhat = normalizationO->restore(h.back());
+            arma::vec yhat = h.back();
             J += arma::norm(y - yhat);
         }
 

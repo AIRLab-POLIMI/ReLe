@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     {
         double f = i;
         arma::vec input = { f };
-        arma::vec output = { f /50.0 };
+        arma::vec output = { f };
         datasetPlane.addSample(input, output);
     }
 
