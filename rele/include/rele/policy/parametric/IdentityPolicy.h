@@ -20,12 +20,12 @@ public:
     }
 
 public:
-    virtual unsigned int operator() (typename state_type<StateC>::const_type_ref state)
+    virtual unsigned int operator() (typename state_type<StateC>::const_type_ref state) override
     {
         return action;
     }
 
-    virtual double operator() (typename state_type<StateC>::const_type_ref state, const unsigned int& action)
+    virtual double operator() (typename state_type<StateC>::const_type_ref state, const unsigned int& action) override
     {
         return this->action == action;
     }
