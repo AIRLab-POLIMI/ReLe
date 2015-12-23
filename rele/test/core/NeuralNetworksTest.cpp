@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     DenseFeatures phiPlane(basisPlane);
 
     FFNeuralNetwork planeNet(phiPlane, 10, 1);
+
     BatchDataRaw_<arma::vec, arma::vec> datasetPlane;
 
     //Config parameters
@@ -50,6 +51,8 @@ int main(int argc, char *argv[])
         datasetPlane.addSample(input, output);
     }
 
+    planeNet.getHyperParameters().normalizationF = new MinMaxNormalization<>();
+    //planeNet.getHyperParameters().normalizationO = new MinMaxNormalization<>();
     planeNet.train(datasetPlane);
 
     cout << "plane(100)  = " << planeNet({100.0}) <<  endl;
@@ -81,17 +84,8 @@ int main(int argc, char *argv[])
     BatchDataRaw_<arma::vec, arma::vec> dataset;
 
     //Config parameters
-    /*atan2Net.getHyperParameters().alg = FFNeuralNetwork::Adadelta;
-    atan2Net.getHyperParameters().epsilon = 0.1;
-    atan2Net.getHyperParameters().rho = 0.1;
-    atan2Net.getHyperParameters().maxIterations = 10000;
-    atan2Net.getHyperParameters().lambda = 0;
-    atan2Net.getHyperParameters().minibatchSize = dataset.size();*/
+    atan2Net.getHyperParameters().optimizator = new GradientDescend<arma::vec>(10000, 0.2);
 
-    atan2Net.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    atan2Net.getHyperParameters().alpha = 0.2;
-    atan2Net.getHyperParameters().maxIterations = 10000;
-    atan2Net.getHyperParameters().lambda = 0;
 
 
     for(int i = 0; i < 300; i++)
@@ -125,10 +119,7 @@ int main(int argc, char *argv[])
     BatchDataRaw_<arma::vec, arma::vec> datasetXor;
 
     //Config parameters
-    xorNet.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    xorNet.getHyperParameters().alpha = 0.2;
-    xorNet.getHyperParameters().maxIterations = 10000;
-    xorNet.getHyperParameters().lambda = 0;
+    xorNet.getHyperParameters().optimizator = new GradientDescend<arma::vec>(10000, 0.2);
 
     arma::vec i0 = {0.0, 0.0};
     arma::vec i1 = {1.0, 0.0};

@@ -40,7 +40,9 @@ public	:
     Autoencoder_(Features_<InputC, denseOutput>& phi, unsigned int outputs)
         : FFNeuralNetwork_<InputC, denseOutput>(phi, outputs, phi.rows()), UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
     {
-
+        //FIXME fix the issue with not ready normalization
+        this->getHyperParameters().normalizationF = new MinMaxNormalization<denseOutput>();
+        this->getHyperParameters().normalizationO = new MinMaxNormalization<denseOutput>();
     }
 
     virtual arma::vec operator()(const InputC& input) override
@@ -51,7 +53,7 @@ public	:
 
     virtual arma::vec diff(const InputC& input) override
     {
-        //TODO implement
+        //FIXME implement
         return arma::vec();
     }
 

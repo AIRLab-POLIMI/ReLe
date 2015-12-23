@@ -53,18 +53,11 @@ int main(int argc, char *argv[])
     features.row(2) = features3;
     features.row(3) = features4;
 
-    //encoder.getHyperParameters().alg = FFNeuralNetwork::GradientDescend;
-    //encoder.getHyperParameters().alg = FFNeuralNetwork::Adadelta;
-    encoder.getHyperParameters().alg = FFNeuralNetwork::ScaledConjugateGradient;
-    encoder.getHyperParameters().alpha = 0.2;
-    encoder.getHyperParameters().maxIterations = 5000;
+    encoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(5000);
     encoder.getHyperParameters().lambda = 0;
-    encoder.getHyperParameters().minibatchSize = 1000;
-    encoder.getHyperParameters().rho = 0.95;
-    encoder.getHyperParameters().epsilon = 1e-2;
 
 
-    std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl;
+    //std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl; FIXME
     encoder.trainFeatures(features);
     std::cout << "J  = " << encoder.computeJFeatures(features) << std::endl;
 
