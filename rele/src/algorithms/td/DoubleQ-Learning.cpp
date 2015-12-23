@@ -67,13 +67,12 @@ void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
                          maxIndex.n_elem - 1);
 
     double delta = reward[0] +
-                   task.gamma * doubleQ(nextState, FiniteAction(maxIndex(index)), selectedQ) - doubleQ(x, u, selectedQ);
+                   task.gamma * doubleQ(nextState, FiniteAction(maxIndex(index)), 1 - selectedQ) - doubleQ(x, u, selectedQ);
     doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha * delta;
 
     // Update action and state
-    x = nextState;
     updateQ();
-    u = policy(x);
+    u = policy(nextState);
 
     action.setActionN(u);
 }
