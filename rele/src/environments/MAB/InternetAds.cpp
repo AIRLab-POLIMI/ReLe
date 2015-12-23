@@ -32,7 +32,7 @@ namespace ReLe
 {
 
 InternetAds::InternetAds(unsigned int nAds, ExperimentLabel experimentType) :
-    SimpleMAB(arma::ones(nAds), 1)
+    DiscreteMAB(arma::ones(nAds), 1)
 {
     if(experimentType == First)
     {

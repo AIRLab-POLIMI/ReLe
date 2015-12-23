@@ -28,13 +28,13 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_
 #define INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_
 
-#include "MAB/SimpleMAB.h"
+#include "MAB/DiscreteMAB.h"
 
 
 namespace ReLe
 {
 
-class InternetAds: public SimpleMAB
+class InternetAds: public DiscreteMAB
 {
 
     /*

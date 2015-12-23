@@ -34,21 +34,41 @@
 namespace ReLe
 {
 
-class SimpleMAB: public MAB<FiniteAction>
+class DiscreteMAB: public MAB<FiniteAction>
 {
 
     /*
      * This class represents the simple MAB environment in which
-     * each action has Pi probability to give a reward. Probabilities
+     * each action i has Pi probability to give a reward. Probabilities
      * of each action are stored in P and respective rewards in R.
      * Different kinds of constructors are available.
+     * Actions are identified by the indexes of P and R.
      */
 
 public:
-    SimpleMAB(arma::vec P, arma::vec R, unsigned int horizon = 1);
-    SimpleMAB(arma::vec P, double r, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, double r, unsigned int horizon = 1);
-    SimpleMAB(unsigned int nArms, unsigned int horizon = 1);
+    /**
+     *
+     * @param P probability vector
+     * @param R reward vector
+     * @param horizon decision horizon for the associated MAB algorithm
+     *
+     */
+    DiscreteMAB(arma::vec P, arma::vec R, unsigned int horizon = 1);
+    DiscreteMAB(arma::vec P, double r = 1, unsigned int horizon = 1);
+    /**
+     *
+     * @param P probability vector (has to be of dimension nArms)
+     * @param minRange minimum of the reward
+     * @param maxRange maximum of the reward
+     * @param nArms number of different rewards, which increases linearly
+     * @param horizon decision horizon for the associated MAB algorithm
+     *
+     */
+    /*
+        DiscreteMAB(arma::vec P, unsigned int nArms, double minRange = 0, double maxRange = 1, unsigned int horizon = 1);
+    */
+    DiscreteMAB(unsigned int nArms, double r, unsigned int horizon = 1);
+    DiscreteMAB(unsigned int nArms, unsigned int horizon = 1);
     arma::vec getP();
     virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
 

@@ -25,13 +25,13 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "MAB/SimpleMAB.h"
+#include "MAB/DiscreteMAB.h"
 
 
 namespace ReLe
 {
 
-SimpleMAB::SimpleMAB(arma::vec P, arma::vec R, unsigned int horizon) :
+DiscreteMAB::DiscreteMAB(arma::vec P, arma::vec R, unsigned int horizon) :
     P(P),
     R(R),
     MAB(horizon)
@@ -41,7 +41,7 @@ SimpleMAB::SimpleMAB(arma::vec P, arma::vec R, unsigned int horizon) :
     task.continuosActionDim = 0;
 }
 
-SimpleMAB::SimpleMAB(arma::vec P, double r, unsigned int horizon) :
+DiscreteMAB::DiscreteMAB(arma::vec P, double r, unsigned int horizon) :
     P(P),
     MAB(horizon)
 {
@@ -51,8 +51,24 @@ SimpleMAB::SimpleMAB(arma::vec P, double r, unsigned int horizon) :
     task.finiteActionDim = P.n_elem;
     task.continuosActionDim = 0;
 }
+/*
+DiscreteMAB::DiscreteMAB(arma::vec P, unsigned int nArms, double minRange, double maxRange,
+		unsigned int horizon) :
+	P(P),
+	MAB(horizon)
+{
+	R = arma::vec(nArms);
+	for (unsigned int i = 0; i < nArms; i++)
+	{
+		R(i) = minRange + (maxRange - minRange) * (1.0 * i) / (nArms - 1);
+	}
 
-SimpleMAB::SimpleMAB(unsigned int nArms, double r, unsigned int horizon) :
+	EnvironmentSettings& task = getWritableSettings();
+    task.finiteActionDim = P.n_elem;
+    task.continuosActionDim = 0;
+}
+*/
+DiscreteMAB::DiscreteMAB(unsigned int nArms, double r, unsigned int horizon) :
     MAB(horizon)
 {
     P = arma::vec(nArms, arma::fill::randu);
@@ -63,7 +79,7 @@ SimpleMAB::SimpleMAB(unsigned int nArms, double r, unsigned int horizon) :
     task.continuosActionDim = 0;
 }
 
-SimpleMAB::SimpleMAB(unsigned int nArms, unsigned int horizon) :
+DiscreteMAB::DiscreteMAB(unsigned int nArms, unsigned int horizon) :
     MAB(horizon)
 {
     P = arma::vec(nArms, arma::fill::randu);
@@ -74,12 +90,13 @@ SimpleMAB::SimpleMAB(unsigned int nArms, unsigned int horizon) :
     task.continuosActionDim = 0;
 }
 
-arma::vec SimpleMAB::getP()
+arma::vec DiscreteMAB::getP()
 {
     return P;
 }
 
-void SimpleMAB::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)
+
+void DiscreteMAB::step(const FiniteAction& action, FiniteState& nextState, Reward& reward)
 {
     nextState.setStateN(0);
 
