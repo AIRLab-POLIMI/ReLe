@@ -46,7 +46,7 @@ unsigned int SequentialPolicy::operator()(const size_t& state)
 
     if(currentEpisodeStep == episodeLength)
     {
-        currentAction = -1;
+    	currentAction--;
         currentEpisodeStep = -1;
     }
     else if(currentAction == nactions)
