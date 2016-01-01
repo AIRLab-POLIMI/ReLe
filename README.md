@@ -1,7 +1,5 @@
-# ReLe
+# ReLe [![Build Status](http://131.175.56.232:8080/buildStatus/icon?job=ReLe-CI)](http://131.175.56.232:8080/job/ReLe-CI/)
 Reinforcement Learning Library of Politecnico di Milano
-
-[![Build Status](http://131.175.56.232:8080/job/ReLe-CI/badge/icon)](http://131.175.56.232:8080/job/ReLe-CI/)
 
 External dependencies
 ---------------------
