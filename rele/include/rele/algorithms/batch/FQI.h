@@ -25,8 +25,8 @@
  * Written by: Alessandro Nuara, Carlo D'Eramo
  */
 
-#ifndef FQI_H_
-#define FQI_H_
+#ifndef INCLUDE_RELE_ALGORITHMS_BATCH_FQI_H_
+#define INCLUDE_RELE_ALGORITHMS_BATCH_FQI_H_
 
 namespace ReLe
 {
@@ -276,4 +276,4 @@ protected:
 
 }
 
-#endif //FQI_H
+#endif //INCLUDE_RELE_ALGORITHMS_BATCH_FQI_H_
