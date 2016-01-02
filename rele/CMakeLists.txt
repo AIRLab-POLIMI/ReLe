@@ -115,7 +115,7 @@ file(GLOB_RECURSE ReLe_SOURCE
                   src/solvers/*.cpp)
 
 if(NOT ${GSL_FOUND})
-	list(REMOVE_ITEM ReLe_SOURCE "WQ-Learning.cpp")
+	list(REMOVE_ITEM ReLe_SOURCE src/algorithms/td/WQ-Learning.cpp)
 endif()
 
 file(GLOB_RECURSE ReLe_INCLUDE
