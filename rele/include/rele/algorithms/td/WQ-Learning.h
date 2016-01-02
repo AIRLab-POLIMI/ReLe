@@ -22,43 +22,49 @@
  */
 
 /*
- * Written by: Alessandro Nuara, Carlo D'Eramo
+ * Written by: Carlo D'Eramo
  */
 
-#ifndef INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
-#define INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
+#ifndef INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
+#define INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
 
 #include "Q-Learning.h"
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_randist.h>
+#include <gsl/gsl_cdf.h>
+
+/*
+ * This is a first implementation of an experimental estimator for Q-Learning.
+ */
 
 namespace ReLe
 {
-/*
- * Double Q-Learning
- *
- * "Double Q-Learning"
- * Hado Van Hasselt
- */
 
-class DoubleQ_Learning: public Q_Learning
+class WQ_Learning: public Q_Learning
 {
 public:
-    DoubleQ_Learning(ActionValuePolicy<FiniteState>& policy);
+    WQ_Learning(ActionValuePolicy<FiniteState>& policy);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
                       FiniteAction& action) override;
     virtual void endEpisode(const Reward& reward) override;
 
-    virtual ~DoubleQ_Learning();
+    virtual ~WQ_Learning();
+
+protected:
+    arma::mat idxs;
+    arma::mat meanQ;
+    arma::mat sampleStdQ;
+    arma::mat sumQ;
+    arma::mat sumSquareQ;
+    arma::mat nUpdatesQ;
 
 protected:
     virtual void init() override;
-    inline virtual void updateQ();
-
-protected:
-    arma::cube doubleQ;
+    inline void updateMeanAndSampleStdQ(double q);
 };
 
 }
 
-#endif /* INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_ */
+#endif /* INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_ */

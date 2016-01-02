@@ -88,15 +88,15 @@ void DoubleQ_Learning::endEpisode(const Reward& reward)
     updateQ();
 }
 
-void DoubleQ_Learning::updateQ()
-{
-    Q = (doubleQ.slice(0) + doubleQ.slice(1)) / 2;
-}
-
 void DoubleQ_Learning::init()
 {
     FiniteTD::init();
     doubleQ.zeros(task.finiteStateDim, task.finiteActionDim, 2);
+}
+
+inline void DoubleQ_Learning::updateQ()
+{
+    Q = (doubleQ.slice(0) + doubleQ.slice(1)) / 2;
 }
 
 DoubleQ_Learning::~DoubleQ_Learning()

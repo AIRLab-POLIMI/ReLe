@@ -78,6 +78,11 @@ target_link_libraries(mab rele)
 add_executable(grid_world TD/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
 
+if(${GSL_FOUND})
+	add_executable(grid_world2 TD/GridWorldTest2.cpp)
+	target_link_libraries(grid_world2 rele ${GSL_LIBRARIES})
+endif()
+
 add_executable(mountain_car TD/MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
 

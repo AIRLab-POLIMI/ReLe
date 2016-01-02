@@ -59,6 +59,11 @@ else()
         if(Boost_FOUND)
                 include_directories(${Boost_INCLUDE_DIRS})
         endif()
+        #GSL
+        find_package(GSL QUIET)
+        if(${GSL_FOUND})
+       			include_directories(${GSL_INCLUDE_DIRS})
+       	endif()
 endif()
 include_directories(${ARMADILLO_INCLUDE_DIR})
 
