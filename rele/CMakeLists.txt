@@ -103,7 +103,7 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 # ------------------------ BUILD -------------------------------
 
-file(GLOB_RECURSE ReLe_SOURCE 
+file(GLOB_RECURSE ReLe_SOURCE
                   src/core/*.cpp 
                   src/policy/*.cpp
                   src/algorithms/*.cpp
