@@ -96,7 +96,7 @@ public:
     }
 };
 
-class Rectifier: public Function
+class SoftPlus: public Function
 {
 public:
     inline virtual double eval(double x) override
@@ -107,6 +107,20 @@ public:
     inline virtual double diff(double x) override
     {
         return 1.0 / (1.0 + std::exp(-x));
+    }
+};
+
+class ReLU: public Function
+{
+public:
+    inline virtual double eval(double x) override
+    {
+        return std::max(0.0, x);
+    }
+
+    inline virtual double diff(double x) override
+    {
+        return (x > 0) ? 1.0 : 0.0;
     }
 };
 
