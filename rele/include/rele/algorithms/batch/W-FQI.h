@@ -137,7 +137,7 @@ public:
     }
 
 protected:
-    arma::mat idxs;
+    arma::mat id
     arma::mat meanQ;
     arma::mat sampleStdQ;
     arma::mat sumQ;
