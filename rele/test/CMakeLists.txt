@@ -234,6 +234,11 @@ target_link_libraries(taxi_PG rele)
 add_executable(deep_off Batch/DeepBatchTest.cpp)
 target_link_libraries(deep_off rele)
 
+if(${GSL_FOUND})
+	add_executable(gridFQI2 Batch/GridFQITest2.cpp)
+	target_link_libraries(gridFQI2 rele ${GSL_LIBRARIES})
+endif()
+
 add_executable(gridFQI Batch/GridFQITest.cpp)
 target_link_libraries(gridFQI rele)
 

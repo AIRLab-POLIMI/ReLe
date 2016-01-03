@@ -51,8 +51,8 @@ double fun(double x, void* params)
 
     arma::vec cdf(idxs.n_cols, arma::fill::zeros);
     for(unsigned int i = 0; i < cdf.n_elem; i++)
-        cdf(i) = gsl_cdf_gaussian_P(x - meanQ(xn, idxs(u, i)), sampleStdQ(xn, idxs(u, i)) + 1e-15);
-    double f = (gsl_ran_gaussian_pdf(x - meanQ(xn, u), sampleStdQ(xn, u) + 1e-15)) * arma::prod(cdf);
+        cdf(i) = gsl_cdf_gaussian_P(x - meanQ(xn, idxs(u, i)), sampleStdQ(xn, idxs(u, i)));
+    double f = gsl_ran_gaussian_pdf(x - meanQ(xn, u), sampleStdQ(xn, u)) * arma::prod(cdf);
 
     return f;
 }
@@ -85,29 +85,37 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
     size_t xn = nextState.getStateN();
     double r = reward[0];
 
-    arma::vec integrals(task.finiteActionDim, arma::fill::zeros);
-    for(unsigned int i = 0; i < integrals.n_elem; i++)
+    double delta;
+    if(nUpdatesQ(x, u) > 0)
     {
-        gsl_function f;
-        f.function = &fun;
+        arma::vec integrals(task.finiteActionDim, arma::fill::zeros);
         pars p;
         p.xn = (unsigned int) xn;
-        p.u = i;
         p.meanQ = meanQ;
         p.sampleStdQ = sampleStdQ;
         p.idxs = idxs;
-        f.params = &p;
+        for(unsigned int i = 0; i < integrals.n_elem; i++)
+        {
+            gsl_function f;
+            f.function = &fun;
+            p.u = i;
+            f.params = &p;
 
-        double result, error;
-        gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
-        gsl_integration_qagi(&f, 0, 1e-8, 1000, w, &result, &error);
-        gsl_integration_workspace_free(w);
+            double result, error;
+            gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
+            //gsl_integration_qagi(&f, 0, 1e-8, 1000, w, &result, &error);
+            gsl_integration_qags(&f, -10, 10, 0, 1e-8, 1000, w, &result, &error);
+            gsl_integration_workspace_free(w);
 
-        integrals(i) = result;
+            integrals(i) = result;
+        }
+        double W = arma::dot(integrals, Q.row(xn));
+
+        delta = r + task.gamma * W - Q(x, u);
     }
-    double W = arma::dot(integrals, Q.row(xn));
+    else
+        delta = r - Q(x, u);
 
-    double delta = r + task.gamma * W - Q(x, u);
     Q(x, u) = Q(x, u) + alpha * delta;
 
     updateMeanAndSampleStdQ(Q(x, u));
@@ -144,7 +152,8 @@ void WQ_Learning::init()
         idxs.row(i) = actions(arma::find(actions != i)).t();
 
     meanQ = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
-    sampleStdQ = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
+    // There are 0 elements at the beginning, variance is infinite
+    sampleStdQ = arma::mat(Q.n_rows, Q.n_cols).fill(STD_INF_VALUE);
     sumQ = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
     sumSquareQ = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
     nUpdatesQ = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
@@ -153,11 +162,19 @@ void WQ_Learning::init()
 inline void WQ_Learning::updateMeanAndSampleStdQ(double q)
 {
     nUpdatesQ(x, u)++;
-    sumQ(x, u) += q;
-    sumSquareQ(x, u) += pow(q, 2);
-    meanQ(x, u) = sumQ(x, u) / nUpdatesQ(x, u);
-    sampleStdQ(x, u) = sqrt(((sumSquareQ(x, u) - pow(sumQ(x, u), 2) / nUpdatesQ(x, u)) /
-                             nUpdatesQ(x,u) - 1 == 0 ? 1 : nUpdatesQ(x, u) - 1) / nUpdatesQ(x, u));
+
+    if(nUpdatesQ(x, u) > 1)
+    {
+        sumQ(x, u) += q;
+        sumSquareQ(x, u) += pow(q, 2);
+        meanQ(x, u) = sumQ(x, u) / nUpdatesQ(x, u);
+        double diff = sumSquareQ(x, u) - pow(sumQ(x, u), 2) / nUpdatesQ(x, u);
+
+        if(diff > 0)
+            sampleStdQ(x, u) = sqrt((diff / (nUpdatesQ(x, u) - 1)) / nUpdatesQ(x, u));
+        else
+            sampleStdQ(x, u) = STD_ZERO_VALUE;
+    }
 }
 
 }
