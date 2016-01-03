@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 
         FiniteMDP&& mdp = generator.getMDP(1.0);
 
-        e_Greedy policy;sad
+        e_Greedy policy;
         // SARSA_lambda agent(policy, false);
         // SARSA agent(policy);
         //Q_Learning agent(policy);
