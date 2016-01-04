@@ -72,8 +72,10 @@ target_link_libraries(simple_chain rele)
 add_executable(simple_chain_mean TD/SimpleChainMeanReward.cpp)
 target_link_libraries(simple_chain_mean rele)
 
-add_executable(mab TD/MABTest.cpp)
-target_link_libraries(mab rele)
+if(${GSL_FOUND})
+	add_executable(mab_q_learning MAB/MABQLearningTest.cpp)
+	target_link_libraries(mab_q_learning rele ${GSL_LIBRARIES})
+endif()
 
 add_executable(grid_world TD/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)

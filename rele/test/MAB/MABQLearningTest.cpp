@@ -27,6 +27,7 @@
 
 #include "MAB/InternetAds.h"
 #include "td/DoubleQ-Learning.h"
+#include "td/WQ-Learning.h"
 #include "nonparametric/SequentialPolicy.h"
 #include "Core.h"
 
@@ -37,9 +38,9 @@ using namespace ReLe;
 
 
 /*
- * MAB test with InternetAds Sequential policy is used
- * with the purpose to execute each possible action sequentially until
- * the end of the episode.
+ * MAB test with InternetAds environment and Q-Learning algorithm.
+ * Sequential policy is used with the purpose to execute each possible
+ * action sequentially until the end of the episode.
  */
 
 int main(int argc, char *argv[])
@@ -47,17 +48,18 @@ int main(int argc, char *argv[])
     unsigned int nAds = 10;
     unsigned int episodeLength = 1;
 
-    InternetAds mab(nAds, InternetAds::Second);
+    InternetAds mab(nAds, InternetAds::First);
 
     SequentialPolicy policy(mab.getSettings().finiteActionDim, episodeLength);
-    Q_Learning agent(policy);
+    //Q_Learning agent(policy);
     //DoubleQ_Learning agent(policy);
+    WQ_Learning agent(policy);
+    agent.setAlpha(0.005);
 
     auto&& core = buildCore(mab, agent);
     core.getSettings().episodeLength = episodeLength;
     for(unsigned int i = 0; i < mab.getVisitors(); i++)
     {
-        agent.setAlpha(0.05);
         cout << endl << "### Starting episode " << i << " ###" << endl;
         core.runEpisode();
 
