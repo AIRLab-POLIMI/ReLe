@@ -33,8 +33,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-#define STD_ZERO_VALUE 1E-15
-#define STD_INF_VALUE 1000
+#define STD_ZERO_VALUE 1E-3
+#define STD_INF_VALUE 1E3
 
 
 struct pars
@@ -102,6 +102,7 @@ public:
         p.sampleStdQ = sampleStdQ;
         p.idxs = idxs;
 
+        gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
         for(unsigned int i = 0; i < input.n_cols; i++)
         {
             unsigned int nextState = this->nextStatesMiniBatch[0](i);
@@ -117,10 +118,9 @@ public:
                     f.params = &p;
 
                     double result, error;
-                    gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
-                    //gsl_integration_qagi(&f, 0, 1e-8, 1000, w, &result, &error);
-                    gsl_integration_qags(&f, -10, 10, 0, 1e-8, 1000, w, &result, &error);
-                    gsl_integration_workspace_free(w);
+                    double lowerLimit = meanQ(nextState, j) - 2 * sampleStdQ(nextState, j);
+                    double upperLimit = meanQ(nextState, j) + 2 * sampleStdQ(nextState, j);
+                    gsl_integration_qags(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, w, &result, &error);
 
                     integrals(j) = result;
                 }
@@ -131,6 +131,7 @@ public:
             else
                 outputs[0](i) = rewards(0, i);
         }
+        gsl_integration_workspace_free(w);
 
         BatchDataSimple featureDataset(input, outputs[0]);
         this->QRegressor.trainFeatures(featureDataset);

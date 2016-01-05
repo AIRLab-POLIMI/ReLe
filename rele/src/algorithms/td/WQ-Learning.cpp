@@ -85,6 +85,7 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
     size_t xn = nextState.getStateN();
     double r = reward[0];
 
+    gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
     double delta;
     if(nUpdatesQ(x, u) > 0)
     {
@@ -102,10 +103,9 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
             f.params = &p;
 
             double result, error;
-            gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
-            //gsl_integration_qagi(&f, 0, 1e-8, 1000, w, &result, &error);
-            gsl_integration_qags(&f, -10, 10, 0, 1e-8, 1000, w, &result, &error);
-            gsl_integration_workspace_free(w);
+            double lowerLimit = meanQ(xn, i) - 2 * sampleStdQ(xn, i);
+            double upperLimit = meanQ(xn, i) + 2 * sampleStdQ(xn, i);
+            gsl_integration_qags(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, w, &result, &error);
 
             integrals(i) = result;
         }
@@ -115,6 +115,8 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
     }
     else
         delta = r - Q(x, u);
+
+    gsl_integration_workspace_free(w);
 
     Q(x, u) = Q(x, u) + alpha * delta;
 

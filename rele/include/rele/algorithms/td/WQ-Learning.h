@@ -33,8 +33,9 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-#define STD_ZERO_VALUE 1E-15
-#define STD_INF_VALUE 1000
+#define STD_ZERO_VALUE 1E-3
+#define STD_INF_VALUE 1E3
+
 
 /*
  * This is a first implementation of an experimental estimator for Q-Learning.
