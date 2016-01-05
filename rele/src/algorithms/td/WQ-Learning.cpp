@@ -103,8 +103,8 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
             f.params = &p;
 
             double result, error;
-            double lowerLimit = meanQ(xn, i) - 2 * sampleStdQ(xn, i);
-            double upperLimit = meanQ(xn, i) + 2 * sampleStdQ(xn, i);
+            double lowerLimit = meanQ(xn, i) - 3 * sampleStdQ(xn, i);
+            double upperLimit = meanQ(xn, i) + 3 * sampleStdQ(xn, i);
             gsl_integration_qags(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, w, &result, &error);
 
             integrals(i) = result;

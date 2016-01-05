@@ -33,8 +33,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-#define STD_ZERO_VALUE 1E-3
-#define STD_INF_VALUE 1E3
+#define STD_ZERO_VALUE 1E-8
+#define STD_INF_VALUE 1E8
 
 
 struct pars
@@ -118,8 +118,8 @@ public:
                     f.params = &p;
 
                     double result, error;
-                    double lowerLimit = meanQ(nextState, j) - 2 * sampleStdQ(nextState, j);
-                    double upperLimit = meanQ(nextState, j) + 2 * sampleStdQ(nextState, j);
+                    double lowerLimit = meanQ(nextState, j) - 3 * sampleStdQ(nextState, j);
+                    double upperLimit = meanQ(nextState, j) + 3 * sampleStdQ(nextState, j);
                     gsl_integration_qags(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, w, &result, &error);
 
                     integrals(j) = result;

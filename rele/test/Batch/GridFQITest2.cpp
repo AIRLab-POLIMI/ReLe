@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 50, 1e-15);
+    fqi.run(phi, 500, 1e-15);
 
     return 0;
 }

@@ -33,8 +33,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-#define STD_ZERO_VALUE 1E-3
-#define STD_INF_VALUE 1E3
+#define STD_ZERO_VALUE 1E-8
+#define STD_INF_VALUE 1E8
 
 
 /*
