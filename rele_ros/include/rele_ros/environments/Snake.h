@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_ROS_environmentS_SNAKE_H_
 #define INCLUDE_RELE_ROS_environmentS_SNAKE_H_
 
-#include "../core/SimulatedEnvironment.h"
+#include "rele_ros/core/SimulatedEnvironment.h"
 
 namespace ReLe_ROS
 {
