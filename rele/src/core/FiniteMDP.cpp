@@ -23,8 +23,8 @@
 
 #include <stdexcept>
 
-#include "FiniteMDP.h"
-#include "RandomGenerator.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/utils/RandomGenerator.h"
 
 using namespace std;
 

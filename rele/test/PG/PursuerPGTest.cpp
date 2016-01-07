@@ -21,22 +21,22 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
-#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
-#include "policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
-#include "policy_search/gradient/onpolicy/ENACAlgorithm.h"
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "parametric/differentiable/GenericNormalPolicy.h"
-#include "basis/GaussianRbf.h"
-#include "basis/SubspaceBasis.h"
-#include "basis/ModularBasis.h"
-#include "basis/NormBasis.h"
-#include "features/SparseFeatures.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
-#include "Pursuer.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/ENACAlgorithm.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericNormalPolicy.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/SubspaceBasis.h"
+#include "rele/approximators/basis/ModularBasis.h"
+#include "rele/approximators/basis/NormBasis.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
+#include "rele/environments/Pursuer.h"
 
 
 #include <iostream>

@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "SimpleChainGenerator.h"
+#include "rele/generators/SimpleChainGenerator.h"
 using namespace std;
 
 namespace ReLe

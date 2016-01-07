@@ -1,8 +1,8 @@
 #ifndef OFFGRADIENTOUTPUTDATA_H_
 #define OFFGRADIENTOUTPUTDATA_H_
 
-#include "Basics.h"
-#include "policy_search/gradient/onpolicy/GradientOutputData.h"
+#include "rele/core/Basics.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GradientOutputData.h"
 
 namespace ReLe
 {

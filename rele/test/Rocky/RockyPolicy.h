@@ -24,7 +24,7 @@
 #ifndef SRC_TEST_ROCKY_ROCKYPOLICY_H_
 #define SRC_TEST_ROCKY_ROCKYPOLICY_H_
 
-#include "Policy.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

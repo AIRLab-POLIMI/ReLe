@@ -21,26 +21,26 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "features/SparseFeatures.h"
-#include "features/DenseFeatures.h"
-#include "regressors/others/GaussianMixtureModels.h"
-#include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/GaussianRbf.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/GaussianMixtureModels.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/GaussianRbf.h"
 
-#include "parametric/differentiable/NormalPolicy.h"
-#include "parametric/differentiable/LinearPolicy.h"
-#include "DifferentiableNormals.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/statistics/DifferentiableNormals.h"
 
-#include "ShipSteering.h"
+#include "rele/environments/ShipSteering.h"
 
-#include "PolicyEvalAgent.h"
-#include "Core.h"
-#include "ParametricRewardMDP.h"
-#include "algorithms/EMIRL.h"
-#include "policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/core/Core.h"
+#include "rele/IRL/ParametricRewardMDP.h"
+#include "rele/IRL/algorithms/EMIRL.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
 
-#include "FileManager.h"
+#include "rele/utils/FileManager.h"
 
 using namespace std;
 using namespace arma;

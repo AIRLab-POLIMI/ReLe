@@ -21,17 +21,17 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FiniteMDP.h"
-#include "td/R-Learning.h"
-#include "Core.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/algorithms/td/R-Learning.h"
+#include "rele/core/Core.h"
 
-#include "q_policy/e_Greedy.h"
-#include "q_policy/Boltzmann.h"
+#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/policy/q_policy/Boltzmann.h"
 
-#include "SimpleChainGenerator.h"
+#include "rele/generators/SimpleChainGenerator.h"
+#include "rele/algorithms/policy_search/REPS/TabularREPS.h"
 
 #include <iostream>
-#include "policy_search/REPS/TabularREPS.h"
 
 using namespace std;
 using namespace ReLe;

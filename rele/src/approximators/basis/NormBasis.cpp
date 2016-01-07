@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/NormBasis.h"
+#include "rele/approximators/basis/NormBasis.h"
 
 using namespace std;
 using namespace arma;

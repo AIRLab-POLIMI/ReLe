@@ -24,7 +24,7 @@
 #ifndef DAM_H_
 #define DAM_H_
 
-#include "ContinuousMDP.h"
+#include "rele/core/ContinuousMDP.h"
 
 namespace ReLe
 {

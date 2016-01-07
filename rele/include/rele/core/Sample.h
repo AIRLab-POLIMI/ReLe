@@ -24,7 +24,7 @@
 #ifndef SAMPLE_H_
 #define SAMPLE_H_
 
-#include "BasicsTraits.h"
+#include "rele/core/BasicsTraits.h"
 
 namespace ReLe
 {

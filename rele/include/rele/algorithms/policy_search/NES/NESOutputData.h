@@ -1,7 +1,7 @@
 #ifndef NESOUTPUTDATA_H_
 #define NESOUTPUTDATA_H_
 
-#include "policy_search/PGPE/PGPEOutputData.h"
+#include "rele/algorithms/policy_search/PGPE/PGPEOutputData.h"
 
 namespace ReLe
 {

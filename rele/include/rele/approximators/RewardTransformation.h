@@ -24,7 +24,7 @@
 #ifndef REWARDTRANSFORMATION_H_
 #define REWARDTRANSFORMATION_H_
 
-#include "Transition.h"
+#include "rele/core/Transition.h"
 #include <cassert>
 
 namespace ReLe

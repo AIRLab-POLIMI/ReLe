@@ -25,8 +25,8 @@
  * Written by: Alessandro Nuara, Carlo D'Eramo
  */
 
-#include "td/DoubleQ-Learning.h"
-#include "RandomGenerator.h"
+#include "rele/algorithms/td/DoubleQ-Learning.h"
+#include "rele/utils/RandomGenerator.h"
 
 using namespace std;
 using namespace arma;

@@ -24,7 +24,7 @@
 #ifndef CONDITIONBASISFUNCTION_H_
 #define CONDITIONBASISFUNCTION_H_
 
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 
 namespace ReLe
 {

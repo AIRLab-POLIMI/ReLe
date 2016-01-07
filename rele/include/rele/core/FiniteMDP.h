@@ -24,11 +24,11 @@
 #ifndef FINITEMDP_H_
 #define FINITEMDP_H_
 
-#include "Basics.h"
-#include <set>
+#include "rele/core/Environment.h"
+#include "rele/core/Basics.h"
 
+#include <set>
 #include <armadillo>
-#include "Environment.h"
 
 namespace ReLe
 {

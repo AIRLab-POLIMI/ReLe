@@ -24,14 +24,13 @@
 #ifndef INCLUDE_UTILS_LOGGER_H_
 #define INCLUDE_UTILS_LOGGER_H_
 
-#include "Basics.h"
-#include "LoggerStrategy.h"
-
+#include "rele/core/Basics.h"
+#include "rele/utils/logger/LoggerStrategy.h"
+#include "rele/core/Transition.h"
 
 #include <vector>
 #include <iostream>
 #include <memory>
-#include "Transition.h"
 
 namespace ReLe
 {

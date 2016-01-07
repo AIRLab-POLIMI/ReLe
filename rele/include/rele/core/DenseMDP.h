@@ -24,7 +24,7 @@
 #ifndef DENSEMDP_H_
 #define DENSEMDP_H_
 
-#include "Environment.h"
+#include "rele/core/Environment.h"
 
 namespace ReLe
 {

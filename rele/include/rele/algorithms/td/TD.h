@@ -24,10 +24,10 @@
 #ifndef INCLUDE_ALGORITHMS_TD_TD_H_
 #define INCLUDE_ALGORITHMS_TD_TD_H_
 
-#include "Agent.h"
+#include "rele/core/Agent.h"
 #include <armadillo>
-#include "regressors/others/LinearApproximator.h"
-#include "q_policy/e_Greedy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/policy/q_policy/e_Greedy.h"
 
 namespace ReLe
 {

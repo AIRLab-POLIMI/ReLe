@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_
 #define INCLUDE_RELE_SOLVERS_LQRSOLVER_CPP_
 
-#include "Solver.h"
-#include "LQR.h"
-#include "parametric/differentiable/LinearPolicy.h"
+#include "rele/core/Solver.h"
+#include "rele/environments/LQR.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
 
 namespace ReLe
 {

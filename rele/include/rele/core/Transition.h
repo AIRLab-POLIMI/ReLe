@@ -27,10 +27,10 @@
 #include <vector>
 #include <fstream>
 
-#include "BasicFunctions.h"
-#include "BasicsTraits.h"
-#include "Features.h"
-#include "CSV.h"
+#include "rele/core/BasicFunctions.h"
+#include "rele/core/BasicsTraits.h"
+#include "rele/approximators/Features.h"
+#include "rele/utils/CSV.h"
 
 
 namespace ReLe

@@ -24,7 +24,7 @@
 #ifndef LQR_H_
 #define LQR_H_
 
-#include "ContinuousMDP.h"
+#include "rele/core/ContinuousMDP.h"
 
 namespace ReLe
 {

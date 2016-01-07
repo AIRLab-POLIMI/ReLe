@@ -21,12 +21,12 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "parametric/differentiable/GenericNormalPolicy.h"
-#include "basis/IdentityBasis.h"
-#include "features/SparseFeatures.h"
-#include "regressors/others/LinearApproximator.h"
+#include "rele/policy/parametric/differentiable/GenericNormalPolicy.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 
-#include "NumericalGradient.h"
+#include "rele/utils/NumericalGradient.h"
 
 using namespace ReLe;
 

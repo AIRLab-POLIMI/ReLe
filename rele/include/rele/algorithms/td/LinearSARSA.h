@@ -24,7 +24,7 @@
 #ifndef INCLUDE_ALGORITHMS_TD_LINEARSARSA_H_
 #define INCLUDE_ALGORITHMS_TD_LINEARSARSA_H_
 
-#include "td/TD.h"
+#include "rele/algorithms/td/TD.h"
 #include <armadillo>
 
 namespace ReLe

@@ -24,9 +24,9 @@
 #ifndef CORE_H_
 #define CORE_H_
 
-#include "Agent.h"
-#include "Environment.h"
-#include "logger/Logger.h"
+#include "rele/core/Agent.h"
+#include "rele/core/Environment.h"
+#include "rele/utils/logger/Logger.h"
 
 namespace ReLe
 {

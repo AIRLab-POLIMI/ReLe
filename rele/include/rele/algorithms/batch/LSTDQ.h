@@ -24,10 +24,10 @@
 #ifndef LSTDQ_H_
 #define LSTDQ_H_
 
-#include "Features.h"
-#include "Transition.h"
-#include "q_policy/e_Greedy.h"
-#include "regressors/others/LinearApproximator.h"
+#include "rele/approximators/Features.h"
+#include "rele/core/Transition.h"
+#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 #include <armadillo>
 #include <cassert>
 

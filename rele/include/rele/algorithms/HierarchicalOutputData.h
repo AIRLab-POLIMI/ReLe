@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_HIERARCHICALOUTPUTDATA_H_
 #define INCLUDE_RELE_ALGORITHMS_HIERARCHICALOUTPUTDATA_H_
 
-#include "Basics.h"
+#include "rele/core/Basics.h"
 
 namespace ReLe
 {

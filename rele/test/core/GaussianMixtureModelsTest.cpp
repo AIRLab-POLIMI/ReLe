@@ -21,14 +21,14 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
-#include "regressors/others/GaussianMixtureModels.h"
-#include "regressors/others/LinearApproximator.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/GaussianMixtureModels.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 
 #include <nlopt.hpp>
 
-#include "NumericalGradient.h"
+#include "rele/utils/NumericalGradient.h"
 
 using namespace std;
 using namespace ReLe;

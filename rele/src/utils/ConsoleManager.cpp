@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ConsoleManager.h"
+#include "rele/utils/ConsoleManager.h"
 
 #include <iostream>
 #include <sstream>

@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALREINFORCE_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALREINFORCE_H_
 
-#include "policy_search/gradient/HierarchicalPolicyGradient.h"
+#include "rele/algorithms/policy_search/gradient/HierarchicalPolicyGradient.h"
 
 namespace ReLe
 {

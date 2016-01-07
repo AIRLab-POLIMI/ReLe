@@ -24,10 +24,10 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_MWAL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_MWAL_H_
 
-#include "BasisFunctions.h"
-#include "regressors/others/LinearApproximator.h"
-#include "IRLAlgorithm.h"
-#include "IRLSolver.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/IRL/IRLAlgorithm.h"
+#include "rele/IRL/IRLSolver.h"
 
 namespace ReLe
 {

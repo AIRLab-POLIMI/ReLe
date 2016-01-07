@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "q_policy/Boltzmann.h"
-#include "RandomGenerator.h"
+#include "rele/policy/q_policy/Boltzmann.h"
+#include "rele/utils/RandomGenerator.h"
 
 using namespace arma;
 using namespace std;

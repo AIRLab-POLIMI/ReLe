@@ -23,7 +23,7 @@
 
 #include <armadillo>
 #include <cassert>
-#include "ArmadilloExtensions.h"
+#include "rele/utils/ArmadilloExtensions.h"
 
 using namespace std;
 using namespace ReLe;

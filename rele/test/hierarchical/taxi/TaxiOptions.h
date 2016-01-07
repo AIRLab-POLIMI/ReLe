@@ -24,7 +24,7 @@
 #ifndef SRC_TEST_HIERARCHICAL_TAXI_TAXIOPTIONS_H_
 #define SRC_TEST_HIERARCHICAL_TAXI_TAXIOPTIONS_H_
 
-#include "Options.h"
+#include "rele/policy/Options.h"
 
 namespace ReLe
 {

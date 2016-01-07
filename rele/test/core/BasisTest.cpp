@@ -24,10 +24,10 @@
 #ifndef SRC_TEST_CORE_ANDCONDITIONFEATURESTEST_CPP_
 #define SRC_TEST_CORE_ANDCONDITIONFEATURESTEST_CPP_
 
-#include "Features.h"
-#include "basis/IdentityBasis.h"
-#include "basis/ConditionBasedFunction.h"
-#include "features/DenseFeatures.h"
+#include "rele/approximators/Features.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
 using namespace std;
 using namespace ReLe;

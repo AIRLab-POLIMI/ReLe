@@ -24,7 +24,7 @@
 #ifndef SRC_TEST_ROCKY_ROCKYOPTIONS_H_
 #define SRC_TEST_ROCKY_ROCKYOPTIONS_H_
 
-#include "Options.h"
+#include "rele/policy/Options.h"
 
 namespace ReLe
 {

@@ -21,20 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Policy.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "parametric/differentiable/LinearPolicy.h"
-#include "parametric/differentiable/PortfolioNormalPolicy.h"
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "parametric/differentiable/GenericNormalPolicy.h"
-#include "parametric/differentiable/ParametricMixturePolicy.h"
-#include "nonparametric/RandomPolicy.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
-#include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
-#include "features/DenseFeatures.h"
-#include "features/SparseFeatures.h"
+#include "rele/policy/Policy.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/policy/parametric/differentiable/PortfolioNormalPolicy.h"
+#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericNormalPolicy.h"
+#include "rele/policy/parametric/differentiable/ParametricMixturePolicy.h"
+#include "rele/policy/nonparametric/RandomPolicy.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/features/SparseFeatures.h"
 
 #include <iostream>
 #include <iomanip>

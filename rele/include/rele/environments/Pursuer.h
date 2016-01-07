@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_PURSUER_H_
 #define INCLUDE_RELE_ENVIRONMENTS_PURSUER_H_
 
-#include "ContinuousMDP.h"
-#include "Range.h"
+#include "rele/core/ContinuousMDP.h"
+#include "rele/utils/Range.h"
 
 #include <vector>
 

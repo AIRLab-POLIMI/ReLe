@@ -21,16 +21,17 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "PolicyEvalAgent.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "policy_search/gradient/offpolicy/OffPolicyREINFORCE.h"
-#include "policy_search/gradient/offpolicy/OffPolicyGPOMDP.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/core/Core.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/algorithms/policy_search/gradient/offpolicy/OffPolicyREINFORCE.h"
+#include "rele/algorithms/policy_search/gradient/offpolicy/OffPolicyGPOMDP.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
+#include "rele/environments/NLS.h"
 
 #include <iostream>
 #include <iomanip>
@@ -38,7 +39,6 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "NLS.h"
 
 using namespace std;
 using namespace ReLe;

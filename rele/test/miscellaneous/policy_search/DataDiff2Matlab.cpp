@@ -21,25 +21,25 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "BasisFunctions.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/GaussianRbf.h"
-#include "basis/ConditionBasedFunction.h"
-#include "features/DenseFeatures.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
-#include "Dam.h"
-#include "PolicyEvalAgent.h"
-#include "policy_search/PGPE/PGPE.h"
-#include "ParametricRewardMDP.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/environments/Dam.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/algorithms/policy_search/PGPE/PGPE.h"
+#include "rele/IRL/ParametricRewardMDP.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
-#include "policy_search/gradient/onpolicy/FunctionGradient.h"
-#include "policy_search/gradient/onpolicy/FunctionHessian.h"
-#include "policy_search/gradient/PolicyGradientAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/FunctionGradient.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/FunctionHessian.h"
+#include "rele/algorithms/policy_search/gradient/PolicyGradientAlgorithm.h"
 
 using namespace std;
 using namespace ReLe;

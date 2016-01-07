@@ -28,16 +28,7 @@ set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules)
 
 # ----------------------- INCLUDES ----------------------------
 
-include_directories(include/rele/core
-                    include/rele/policy
-                    include/rele/utils
-                    include/rele/generators
-                    include/rele/algorithms
-                    include/rele/environments
-                    include/rele/approximators
-                    include/rele/statistics
-                    include/rele/IRL
-                    include/rele/solvers)
+include_directories(include)
 
 # ----------------------- LIBRARIES ---------------------------
 

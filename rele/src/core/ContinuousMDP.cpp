@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ContinuousMDP.h"
+#include "rele/core/ContinuousMDP.h"
 
 using namespace std;
 

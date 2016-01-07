@@ -21,15 +21,16 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "BasisFunctions.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
-#include "regressors/others/LinearApproximator.h"
-#include "ParametricRewardMDP.h"
-
-#include "FileManager.h"
-#include "ConsoleManager.h"
+#include "rele/core/Core.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/IRL/ParametricRewardMDP.h"
+#include "rele/environments/DeepSeaTreasure.h"
+#include "rele/environments/LQR.h"
+#include "rele/utils/FileManager.h"
+#include "rele/utils/ConsoleManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -37,8 +38,6 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "DeepSeaTreasure.h"
-#include "LQR.h"
 
 using namespace std;
 using namespace ReLe;

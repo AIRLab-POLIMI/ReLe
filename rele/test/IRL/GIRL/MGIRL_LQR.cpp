@@ -21,20 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "features/SparseFeatures.h"
-#include "features/DenseFeatures.h"
-#include "regressors/others/LinearApproximator.h"
-#include "basis/IdentityBasis.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/approximators/basis/IdentityBasis.h"
 
-#include "parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
 
-#include "LQR.h"
-#include "LQRsolver.h"
-#include "PolicyEvalAgent.h"
-#include "algorithms/MGIRL.h"
-#include "algorithms/PGIRL.h"
+#include "rele/environments/LQR.h"
+#include "rele/solvers/LQRsolver.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/IRL/algorithms/MGIRL.h"
+#include "rele/IRL/algorithms/PGIRL.h"
 
-#include "FileManager.h"
+#include "rele/utils/FileManager.h"
 
 #include "../RewardBasisLQR.h"
 

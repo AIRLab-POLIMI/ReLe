@@ -24,12 +24,12 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_BATCHDATA_H_
 #define INCLUDE_RELE_APPROXIMATORS_BATCHDATA_H_
 
-#include "RandomGenerator.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/approximators/data/BatchDataTraits.h"
 
 #include <set>
 #include <vector>
 #include <cassert>
-#include "data/BatchDataTraits.h"
 
 #define BATCH_DATA_TYPES(OutputC, dense) \
 	using typename BatchData_<OutputC, dense>::features_type; \

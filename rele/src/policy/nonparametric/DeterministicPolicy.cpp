@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nonparametric/DeterministicPolicy.h"
+#include "rele/policy/nonparametric/DeterministicPolicy.h"
 
 #include <sstream>
 

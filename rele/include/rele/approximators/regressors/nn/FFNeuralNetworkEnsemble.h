@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_FFNEURALNETWORKENSEMBLE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_FFNEURALNETWORKENSEMBLE_H_
 
-#include "FFNeuralNetwork.h"
-#include "Ensemble.h"
+#include "rele/approximators/regressors/nn/FFNeuralNetwork.h"
+#include "rele/approximators/Ensemble.h"
 
 
 namespace ReLe

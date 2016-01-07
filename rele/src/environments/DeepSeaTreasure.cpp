@@ -23,7 +23,7 @@
 
 #include "../../include/rele/environments/DeepSeaTreasure.h"
 
-#include "RandomGenerator.h"
+#include "rele/utils/RandomGenerator.h"
 #include <cassert>
 
 using namespace std;

@@ -24,10 +24,10 @@
 #ifndef UNDERWATERVEHICLE_H_
 #define UNDERWATERVEHICLE_H_
 
-#include "DenseMDP.h"
-#include "Range.h"
 #include <boost/numeric/odeint.hpp>
-#include "ArmadilloOdeint.h"
+#include "rele/core/DenseMDP.h"
+#include "rele/utils/Range.h"
+#include "rele/utils/ArmadilloOdeint.h"
 
 
 /**

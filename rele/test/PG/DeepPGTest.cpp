@@ -21,20 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
-#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
-#include "policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
-#include "policy_search/gradient/onpolicy/ENACAlgorithm.h"
-#include "Core.h"
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/ConditionBasedFunction.h"
-#include "features/DenseFeatures.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/ENACAlgorithm.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
-#include "RandomGenerator.h"
-#include "FileManager.h"
-#include "DeepSeaTreasure.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
+#include "rele/environments/DeepSeaTreasure.h"
 
 #include <iostream>
 #include <iomanip>

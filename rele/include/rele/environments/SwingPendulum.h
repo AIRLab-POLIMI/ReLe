@@ -24,8 +24,8 @@
 #ifndef SWINGPENDULUM_H_
 #define SWINGPENDULUM_H_
 
-#include "DenseMDP.h"
-#include "Range.h"
+#include "rele/core/DenseMDP.h"
+#include "rele/utils/Range.h"
 
 /**
  * Environment designed according to

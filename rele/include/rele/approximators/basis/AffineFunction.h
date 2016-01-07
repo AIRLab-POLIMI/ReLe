@@ -24,7 +24,7 @@
 #ifndef AFFINEFUNCTION_H_
 #define AFFINEFUNCTION_H_
 
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 
 namespace ReLe
 {

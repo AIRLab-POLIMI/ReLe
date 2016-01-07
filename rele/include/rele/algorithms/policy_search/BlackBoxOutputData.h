@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_BLACKBOXOUTPUTDATA_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_BLACKBOXOUTPUTDATA_H_
 
-#include "Basics.h"
+#include "rele/core/Basics.h"
 
 #include <vector>
 #include <armadillo>

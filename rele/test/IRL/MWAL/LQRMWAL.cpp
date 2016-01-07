@@ -21,20 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "parametric/differentiable/LinearPolicy.h"
-#include "DifferentiableNormals.h"
-#include "basis/IdentityBasis.h"
-#include "basis/QuadraticBasis.h"
-#include "features/DenseFeatures.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/QuadraticBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
-#include "LQR.h"
-#include "LQRsolver.h"
-#include "solvers/IrlLQRSolver.h"
-#include "PolicyEvalAgent.h"
-#include "algorithms/MWAL.h"
-#include "policy_search/PGPE/PGPE.h"
-#include "ParametricRewardMDP.h"
+#include "rele/environments/LQR.h"
+#include "rele/solvers/LQRsolver.h"
+#include "rele/IRL/solvers/IrlLQRSolver.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/IRL/algorithms/MWAL.h"
+#include "rele/algorithms/policy_search/PGPE/PGPE.h"
+#include "rele/IRL/ParametricRewardMDP.h"
 
 using namespace std;
 using namespace ReLe;

@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_POLICY_PARAMETRIC_DIFFERENTIABLE_GENERICNORMALPOLICY_H_
 #define INCLUDE_RELE_POLICY_PARAMETRIC_DIFFERENTIABLE_GENERICNORMALPOLICY_H_
 
-#include "Policy.h"
-#include "Regressors.h"
-#include "ArmadilloPDFs.h"
+#include "rele/policy/Policy.h"
+#include "rele/approximators/Regressors.h"
+#include "rele/statistics/ArmadilloPDFs.h"
 
 #include <cassert>
 

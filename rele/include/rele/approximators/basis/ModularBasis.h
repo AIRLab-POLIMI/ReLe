@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_MODULARBASIS_H_
 #define INCLUDE_RELE_APPROXIMATORS_BASIS_MODULARBASIS_H_
 
-#include "BasisFunctions.h"
-#include "ModularRange.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/utils/ModularRange.h"
 
 #include <functional>
 

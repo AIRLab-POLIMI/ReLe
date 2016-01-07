@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_TILES_BASICTILES_H_
 #define INCLUDE_RELE_APPROXIMATORS_TILES_BASICTILES_H_
 
-#include "Tiles.h"
-#include "Range.h"
+#include "rele/approximators/Tiles.h"
+#include "rele/utils/Range.h"
 
 namespace ReLe
 {

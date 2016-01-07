@@ -22,12 +22,12 @@
  */
 
 
-#include "FiniteMDP.h"
-#include "td/WQ-Learning.h"
-#include "Core.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/algorithms/td/WQ-Learning.h"
+#include "rele/core/Core.h"
+#include "rele/generators/GridWorldGenerator.h"
 
 #include <iostream>
-#include "GridWorldGenerator.h"
 
 /*
  * Test for an experimental estimator for Q-Learning

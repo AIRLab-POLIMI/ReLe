@@ -21,9 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "regressors/others/NearestNeighbourRegressor.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/NearestNeighbourRegressor.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
 using namespace ReLe;
 

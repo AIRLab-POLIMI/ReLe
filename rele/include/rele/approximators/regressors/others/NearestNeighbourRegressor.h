@@ -24,11 +24,12 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NEARESTNEIGHBOURREGRESSOR_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NEARESTNEIGHBOURREGRESSOR_H_
 
-#include "Features.h"
+#include "rele/approximators/Features.h"
+#include "rele/approximators/Regressors.h"
+
 #include <armadillo>
 #include <vector>
 #include <cassert>
-#include "Regressors.h"
 
 namespace ReLe
 {

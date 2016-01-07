@@ -24,7 +24,7 @@
 #ifndef CONTINUOUSMDP_H_
 #define CONTINUOUSMDP_H_
 
-#include "Environment.h"
+#include "rele/core/Environment.h"
 
 namespace ReLe
 {

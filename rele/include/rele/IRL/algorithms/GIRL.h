@@ -24,15 +24,14 @@
 #ifndef GIRL_H_
 #define GIRL_H_
 
-#include "IRLAlgorithm.h"
-#include "Policy.h"
-#include "Transition.h"
-#include "ArmadilloExtensions.h"
+#include "rele/IRL/IRLAlgorithm.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Transition.h"
+#include "rele/utils/ArmadilloExtensions.h"
+#include "rele/algorithms/policy_search/step_rules/StepRules.h"
 #include <nlopt.hpp>
 #include <cassert>
 #include <stdexcept>
-
-#include "policy_search/step_rules/StepRules.h"
 
 namespace ReLe
 {

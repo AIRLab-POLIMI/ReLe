@@ -24,15 +24,15 @@
 #ifndef OFFPOLICYGRADIENTALGORITHM_H_
 #define OFFPOLICYGRADIENTALGORITHM_H_
 
-#include "Agent.h"
-#include "Distribution.h"
-#include "Policy.h"
-#include "Basics.h"
-#include "BasicFunctions.h"
+#include "rele/core/Agent.h"
+#include "rele/statistics/Distribution.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Basics.h"
+#include "rele/core/BasicFunctions.h"
+#include "rele/algorithms/policy_search/gradient/offpolicy/OffGradientOutputData.h"
+#include "rele/algorithms/policy_search/step_rules/StepRules.h"
 #include <cassert>
 #include <iomanip>
-#include "policy_search/gradient/offpolicy/OffGradientOutputData.h"
-#include "policy_search/step_rules/StepRules.h"
 
 namespace ReLe
 {

@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_EM_EPISODE_BASED_RWR_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_EM_EPISODE_BASED_RWR_H_
 
-#include "policy_search/BlackBoxAlgorithm.h"
-#include "policy_search/em/episode_based/EMOutputData.h"
+#include "rele/algorithms/policy_search/BlackBoxAlgorithm.h"
+#include "rele/algorithms/policy_search/em/episode_based/EMOutputData.h"
 
 namespace ReLe
 {

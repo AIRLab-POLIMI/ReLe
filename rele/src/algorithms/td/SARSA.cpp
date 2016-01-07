@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "td/SARSA.h"
+#include "rele/algorithms/td/SARSA.h"
 
 using namespace std;
 using namespace arma;

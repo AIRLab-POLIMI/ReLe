@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DifferentiableNormals.h"
-#include "RandomGenerator.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/utils/RandomGenerator.h"
 
 #include <iostream>
 #include <iomanip>

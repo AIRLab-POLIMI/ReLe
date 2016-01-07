@@ -28,8 +28,8 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_MAB_H_
 #define INCLUDE_RELE_ENVIRONMENTS_MAB_MAB_H_
 
-#include "Environment.h"
-#include "RandomGenerator.h"
+#include "rele/core/Environment.h"
+#include "rele/utils/RandomGenerator.h"
 
 
 namespace ReLe

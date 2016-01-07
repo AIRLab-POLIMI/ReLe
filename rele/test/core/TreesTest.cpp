@@ -21,11 +21,11 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "regressors/trees/KDTree.h"
-#include "regressors/trees/ExtraTree.h"
-#include "regressors/trees/ExtraTreeEnsemble.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
+#include "rele/approximators/regressors/trees/KDTree.h"
+#include "rele/approximators/regressors/trees/ExtraTree.h"
+#include "rele/approximators/regressors/trees/ExtraTreeEnsemble.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
 #include <iostream>
 

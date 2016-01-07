@@ -24,13 +24,13 @@
 #ifndef POLICYGRADIENTALGORITHM_H_
 #define POLICYGRADIENTALGORITHM_H_
 
-#include "Agent.h"
-#include "Policy.h"
-#include "Basics.h"
-#include "BasicFunctions.h"
-#include "policy_search/gradient/onpolicy/GradientOutputData.h"
-#include "policy_search/step_rules/StepRules.h"
-#include "RewardTransformation.h"
+#include "rele/core/Agent.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Basics.h"
+#include "rele/core/BasicFunctions.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GradientOutputData.h"
+#include "rele/algorithms/policy_search/step_rules/StepRules.h"
+#include "rele/approximators/RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
 

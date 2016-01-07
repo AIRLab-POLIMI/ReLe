@@ -25,7 +25,7 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "nonparametric/SequentialPolicy.h"
+#include "rele/policy/nonparametric/SequentialPolicy.h"
 
 
 namespace ReLe

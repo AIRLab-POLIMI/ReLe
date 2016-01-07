@@ -24,7 +24,7 @@
 #ifndef OFFPOLICYREINFORCE_H_
 #define OFFPOLICYREINFORCE_H_
 
-#include "policy_search/gradient/OffPolicyGradientAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/OffPolicyGradientAlgorithm.h"
 
 namespace ReLe
 {

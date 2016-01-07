@@ -1,7 +1,7 @@
 #ifndef GAUSSIANRBF_H
 #define GAUSSIANRBF_H
 
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 #include <armadillo>
 
 namespace ReLe

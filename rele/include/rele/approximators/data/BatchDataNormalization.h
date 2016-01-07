@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_DATA_BATCHDATANORMALIZATION_H_
 #define INCLUDE_RELE_APPROXIMATORS_DATA_BATCHDATANORMALIZATION_H_
 
-#include "data/BatchData.h"
-#include "data/Normalization.h"
+#include "rele/approximators/data/BatchData.h"
+#include "rele/approximators/data/Normalization.h"
 
 namespace ReLe
 {

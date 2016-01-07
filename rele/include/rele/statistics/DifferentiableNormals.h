@@ -1,9 +1,9 @@
 #ifndef DIFFERENTIABLENORMALS_H_
 #define DIFFERENTIABLENORMALS_H_
 
-#include "Distribution.h"
+#include "rele/statistics/Distribution.h"
 
-#include "Utils.h"
+#include "rele/utils/Utils.h"
 
 namespace ReLe
 {

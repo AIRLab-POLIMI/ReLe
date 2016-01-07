@@ -24,10 +24,10 @@
 #ifndef PGPE_H_
 #define PGPE_H_
 
-#include "Distribution.h"
-#include "policy_search/BlackBoxAlgorithm.h"
-#include "Policy.h"
-#include "Basics.h"
+#include "rele/statistics/Distribution.h"
+#include "rele/algorithms/policy_search/BlackBoxAlgorithm.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Basics.h"
 #include <cassert>
 #include <iomanip>
 

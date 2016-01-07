@@ -21,17 +21,17 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Rocky.h"
+#include "rele/environments/Rocky.h"
 
-#include "policy_search/REPS/REPS.h"
-#include "DifferentiableNormals.h"
-#include "Core.h"
-//#include "parametric/differentiable/LinearPolicy.h"
+#include "rele/algorithms/policy_search/REPS/REPS.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/core/Core.h"
+//#include "rele/policy/parametric/differentiable/LinearPolicy.h"
 #include "RockyPolicy.h"
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 
-#include "FileManager.h"
-#include "ConsoleManager.h"
+#include "rele/utils/FileManager.h"
+#include "rele/utils/ConsoleManager.h"
 
 #include <iostream>
 

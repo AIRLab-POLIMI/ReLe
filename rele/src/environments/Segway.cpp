@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Segway.h"
+#include "rele/environments/Segway.h"
 
 using namespace std;
 using namespace boost::numeric::odeint;

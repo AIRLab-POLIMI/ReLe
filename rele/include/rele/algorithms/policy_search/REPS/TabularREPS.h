@@ -24,10 +24,10 @@
 #ifndef TABULARREPS_H_
 #define TABULARREPS_H_
 
-#include "Agent.h"
+#include "rele/core/Agent.h"
 #include "SampleManager.h"
-#include "nonparametric/TabularPolicy.h"
-#include "features/DenseFeatures.h"
+#include "rele/policy/nonparametric/TabularPolicy.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
 #include <nlopt.hpp>
 

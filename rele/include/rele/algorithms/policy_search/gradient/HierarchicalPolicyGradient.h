@@ -24,11 +24,11 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICALPOLICYGRADIENT_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICALPOLICYGRADIENT_H_
 
-#include "HierarchicalAlgorithm.h"
-#include "policy_search/gradient/hierarchical/HierarchicalGradientOutputData.h"
-#include "policy_search/step_rules/StepRules.h"
-#include "options/DifferentiableOptions.h"
-#include "RewardTransformation.h"
+#include "rele/algorithms/HierarchicalAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/hierarchical/HierarchicalGradientOutputData.h"
+#include "rele/algorithms/policy_search/step_rules/StepRules.h"
+#include "rele/policy/options/DifferentiableOptions.h"
+#include "rele/approximators/RewardTransformation.h"
 
 namespace ReLe
 {

@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "RandomGenerator.h"
+#include "rele/utils/RandomGenerator.h"
 
 std::random_device ReLe::RandomGenerator::rd;
 ReLe::RngGenerators ReLe::RandomGenerator::gen(ReLe::RandomGenerator::rd());

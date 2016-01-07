@@ -24,11 +24,11 @@
 #ifndef PGIRL_H_
 #define PGIRL_H_
 
-#include "IRLAlgorithm.h"
-#include "Policy.h"
-#include "Transition.h"
-#include "algorithms/GIRL.h" //TODO togliere, sola dipendenza gradient type
-#include "ArmadilloExtensions.h"
+#include "rele/IRL/IRLAlgorithm.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Transition.h"
+#include "rele/IRL/algorithms/GIRL.h" //TODO togliere, sola dipendenza gradient type
+#include "rele/utils/ArmadilloExtensions.h"
 
 #include <nlopt.hpp>
 #include <cassert>

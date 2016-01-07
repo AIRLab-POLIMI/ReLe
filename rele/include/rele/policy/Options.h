@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_CORE_OPTIONS_H_
 #define INCLUDE_RELE_CORE_OPTIONS_H_
 
-#include "Basics.h"
-#include "RandomGenerator.h"
-#include "BasicsTraits.h"
+#include "rele/core/Basics.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/core/BasicsTraits.h"
 
 namespace ReLe
 {

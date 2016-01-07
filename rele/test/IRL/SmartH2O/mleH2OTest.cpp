@@ -21,32 +21,32 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "parametric/differentiable/LinearPolicy.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "parametric/differentiable/GenericNormalPolicy.h"
-#include "parametric/differentiable/ParametricMixturePolicy.h"
-#include "features/DenseFeatures.h"
-#include "DifferentiableNormals.h"
-#include "basis/IdentityBasis.h"
-#include "basis/GaussianRbf.h"
-#include "basis/PolynomialFunction.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericNormalPolicy.h"
+#include "rele/policy/parametric/differentiable/ParametricMixturePolicy.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
 
-#include "LQR.h"
-#include "LQRsolver.h"
-#include "PolicyEvalAgent.h"
-#include "algorithms/GIRL.h"
-#include "policy_search/PGPE/PGPE.h"
-#include "ParametricRewardMDP.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/environments/LQR.h"
+#include "rele/solvers/LQRsolver.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/IRL/algorithms/GIRL.h"
+#include "rele/algorithms/policy_search/PGPE/PGPE.h"
+#include "rele/IRL/ParametricRewardMDP.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
-#include "policy_search/gradient/onpolicy/FunctionGradient.h"
-#include "policy_search/gradient/PolicyGradientAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/FunctionGradient.h"
+#include "rele/algorithms/policy_search/gradient/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>
 
-#include "MLE.h"
+#include "rele/statistics/MLE.h"
 
 using namespace boost::timer;
 using namespace std;

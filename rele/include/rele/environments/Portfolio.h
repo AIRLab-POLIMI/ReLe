@@ -24,7 +24,7 @@
 #ifndef PORTFOLIO_H_
 #define PORTFOLIO_H_
 
-#include "DenseMDP.h"
+#include "rele/core/DenseMDP.h"
 
 #define T_STEPS 50
 #define N_STEPS 4

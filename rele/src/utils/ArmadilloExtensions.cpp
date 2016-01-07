@@ -1,4 +1,4 @@
-#include "ArmadilloExtensions.h"
+#include "rele/utils/ArmadilloExtensions.h"
 
 namespace ReLe
 {

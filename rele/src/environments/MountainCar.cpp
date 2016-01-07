@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MountainCar.h"
-#include "RandomGenerator.h"
+#include "rele/environments/MountainCar.h"
+#include "rele/utils/RandomGenerator.h"
 
 using namespace std;
 

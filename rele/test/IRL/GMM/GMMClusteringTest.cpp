@@ -21,19 +21,19 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "features/DenseFeatures.h"
-#include "regressors/others/GaussianMixtureModels.h"
-#include "parametric/differentiable/LinearPolicy.h"
-#include "basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/GaussianMixtureModels.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/approximators/basis/IdentityBasis.h"
 
-#include "DifferentiableNormals.h"
+#include "rele/statistics/DifferentiableNormals.h"
 
-#include "NLS.h"
+#include "rele/environments/NLS.h"
 
-#include "PolicyEvalAgent.h"
-#include "Core.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/core/Core.h"
 
-#include "FileManager.h"
+#include "rele/utils/FileManager.h"
 
 using namespace std;
 using namespace arma;

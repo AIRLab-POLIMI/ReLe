@@ -21,9 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Unicycle.h"
-#include "RandomGenerator.h"
-#include "ArmadilloExtensions.h"
+#include "rele/environments/Unicycle.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/ArmadilloExtensions.h"
 
 using namespace std;
 using namespace boost::numeric::odeint;

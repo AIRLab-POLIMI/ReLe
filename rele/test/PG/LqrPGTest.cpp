@@ -21,18 +21,18 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
-#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
-#include "policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
-#include "policy_search/gradient/onpolicy/ENACAlgorithm.h"
-#include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "BasisFunctions.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/ENACAlgorithm.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -40,7 +40,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "LQR.h"
+#include "rele/environments/LQR.h"
 
 using namespace std;
 using namespace ReLe;

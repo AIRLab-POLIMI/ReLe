@@ -21,9 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Portfolio.h"
+#include "rele/environments/Portfolio.h"
 
-#include "RandomGenerator.h"
+#include "rele/utils/RandomGenerator.h"
 #include <cassert>
 
 using namespace std;

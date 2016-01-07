@@ -5,11 +5,11 @@
  *      Author: francesco
  */
 
-#include "MAB/InternetAds.h"
-#include "td/DoubleQ-Learning.h"
-#include "parametric/IdentityPolicy.h"
-#include "Core.h"
-#include "MABAlgorithm/UCB1.h"
+#include "rele/environments/MAB/InternetAds.h"
+#include "rele/algorithms/td/DoubleQ-Learning.h"
+#include "rele/policy/parametric/IdentityPolicy.h"
+#include "rele/core/Core.h"
+#include "rele/algorithms/MABAlgorithm/UCB1.h"
 
 #include <iostream>
 

@@ -24,7 +24,7 @@
 #ifndef E_GREEDY_H_
 #define E_GREEDY_H_
 
-#include "q_policy/ActionValuePolicy.h"
+#include "rele/policy/q_policy/ActionValuePolicy.h"
 
 namespace ReLe
 {

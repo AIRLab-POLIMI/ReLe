@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
 #define INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
 
-#include "regressors/others/NearestNeighbourRegressor.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/NearestNeighbourRegressor.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
 namespace ReLe
 {

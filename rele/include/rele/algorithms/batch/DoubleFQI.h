@@ -28,8 +28,8 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_DOUBLEFQI_H_
 #define INCLUDE_RELE_ALGORITHMS_BATCH_DOUBLEFQI_H_
 
-#include "FQI.h"
-#include "Ensemble.h"
+#include "rele/algorithms/batch/FQI.h"
+#include "rele/approximators/Ensemble.h"
 
 
 namespace ReLe

@@ -22,8 +22,8 @@
  */
 
 
-#include "parametric/differentiable/GenericNormalPolicy.h"
-#include "RandomGenerator.h"
+#include "rele/policy/parametric/differentiable/GenericNormalPolicy.h"
+#include "rele/utils/RandomGenerator.h"
 
 namespace ReLe
 {

@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LQRsolver.h"
+#include "rele/solvers/LQRsolver.h"
 #include <cassert>
 
 using namespace arma;

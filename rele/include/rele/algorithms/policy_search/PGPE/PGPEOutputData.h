@@ -1,8 +1,8 @@
 #ifndef PGPEOUTPUTDATA_H_
 #define PGPEOUTPUTDATA_H_
 
-#include "policy_search/BlackBoxOutputData.h"
-#include "Basics.h"
+#include "rele/algorithms/policy_search/BlackBoxOutputData.h"
+#include "rele/core/Basics.h"
 
 namespace ReLe
 {

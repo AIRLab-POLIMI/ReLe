@@ -21,28 +21,28 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "PolicyEvalAgent.h"
+#include "rele/core/Core.h"
+#include "rele/core/PolicyEvalAgent.h"
 
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "features/DenseFeatures.h"
-#include "features/SparseFeatures.h"
-#include "DifferentiableNormals.h"
-#include "q_policy/e_Greedy.h"
-#include "basis/IdentityBasis.h"
-#include "basis/GaussianRbf.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/ConditionBasedFunction.h"
+#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
 
-#include "ParametricRewardMDP.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/IRL/ParametricRewardMDP.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
-#include "MountainCar.h"
-#include "MLE.h"
-#include "batch/LSPI.h"
-#include "ArmadilloExtensions.h"
-#include "nonparametric/RandomPolicy.h"
+#include "rele/environments/MountainCar.h"
+#include "rele/statistics/MLE.h"
+#include "rele/algorithms/batch/LSPI.h"
+#include "rele/utils/ArmadilloExtensions.h"
+#include "rele/policy/nonparametric/RandomPolicy.h"
 
 #include <boost/timer/timer.hpp>
 

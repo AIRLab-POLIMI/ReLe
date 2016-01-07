@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_SEGWAY_H_
 #define INCLUDE_RELE_ENVIRONMENTS_SEGWAY_H_
 
-#include "ContinuousMDP.h"
+#include "rele/utils/ArmadilloOdeint.h"
+#include "rele/core/ContinuousMDP.h"
 #include <boost/numeric/odeint.hpp>
-#include "ArmadilloOdeint.h"
 
 namespace ReLe
 {

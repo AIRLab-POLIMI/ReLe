@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_FEATURES_SPARSEFEATURES_H_
 #define INCLUDE_RELE_APPROXIMATORS_FEATURES_SPARSEFEATURES_H_
 
-#include "Features.h"
+#include "rele/approximators/Features.h"
 
 namespace ReLe
 {

@@ -25,21 +25,21 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "Core.h"
-#include "PolicyEvalAgent.h"
-#include "q_policy/e_Greedy.h"
-#include "batch/W-FQI.h"
-#include "td/Q-Learning.h"
-#include "features/DenseFeatures.h"
-#include "FileManager.h"
-#include "FiniteMDP.h"
-#include "GridWorldGenerator.h"
-#include "regressors/nn/FFNeuralNetwork.h"
-#include "regressors/nn/FFNeuralNetworkEnsemble.h"
-#include "basis/IdentityBasis.h"
-#include "regressors/trees/KDTree.h"
-#include "regressors/trees/ExtraTree.h"
-#include "regressors/trees/ExtraTreeEnsemble.h"
+#include "rele/core/Core.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/algorithms/batch/W-FQI.h"
+#include "rele/algorithms/td/Q-Learning.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/utils/FileManager.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/generators/GridWorldGenerator.h"
+#include "rele/approximators/regressors/nn/FFNeuralNetwork.h"
+#include "rele/approximators/regressors/nn/FFNeuralNetworkEnsemble.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/regressors/trees/KDTree.h"
+#include "rele/approximators/regressors/trees/ExtraTree.h"
+#include "rele/approximators/regressors/trees/ExtraTreeEnsemble.h"
 
 #include <iostream>
 

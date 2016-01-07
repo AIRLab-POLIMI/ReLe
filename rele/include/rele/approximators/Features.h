@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_FEATURES_H_
 #define INCLUDE_RELE_APPROXIMATORS_FEATURES_H_
 
-#include "BasisFunctions.h"
-#include "BasicFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/core/BasicFunctions.h"
 
 namespace ReLe
 {

@@ -21,9 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "RandomGenerator.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/core/Core.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -32,7 +33,6 @@
 #include <random>
 #include <cmath>
 #include <cassert>
-#include "FileManager.h"
 
 using namespace std;
 using namespace ReLe;

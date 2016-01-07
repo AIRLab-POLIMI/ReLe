@@ -1,9 +1,9 @@
 #ifndef GIBBSPOLICY_H_
 #define GIBBSPOLICY_H_
 
-#include "Policy.h"
-#include "regressors/others/LinearApproximator.h"
-#include "RandomGenerator.h"
+#include "rele/policy/Policy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/utils/RandomGenerator.h"
 
 #include <stdexcept>
 

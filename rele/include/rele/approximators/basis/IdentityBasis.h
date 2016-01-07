@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_IDENTITYBASIS_H_
 #define INCLUDE_RELE_APPROXIMATORS_BASIS_IDENTITYBASIS_H_
 
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 
 namespace ReLe
 {

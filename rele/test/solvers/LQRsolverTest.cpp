@@ -21,9 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "LQRsolver.h"
-#include "basis/IdentityBasis.h"
-#include "features/SparseFeatures.h"
+#include "rele/solvers/LQRsolver.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/SparseFeatures.h"
 
 using namespace ReLe;
 using namespace std;

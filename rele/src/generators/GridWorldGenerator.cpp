@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "GridWorldGenerator.h"
+#include "rele/generators/GridWorldGenerator.h"
 #include <iostream>
 
 using namespace std;

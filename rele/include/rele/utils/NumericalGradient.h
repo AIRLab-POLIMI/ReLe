@@ -26,8 +26,8 @@
 #define INCLUDE_RELE_UTILS_NUMERICALGRANDIENTS_H_
 
 #include <armadillo>
-#include "Regressors.h"
-#include "Policy.h"
+#include "rele/approximators/Regressors.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

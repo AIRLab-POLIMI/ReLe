@@ -23,8 +23,8 @@
 
 #include <iostream>
 #include <limits>
-#include "policy_search/REPS/TabularREPS.h"
-#include "policy_search/REPS/REPSOutputData.h"
+#include "rele/algorithms/policy_search/REPS/TabularREPS.h"
+#include "rele/algorithms/policy_search/REPS/REPSOutputData.h"
 
 using namespace arma;
 

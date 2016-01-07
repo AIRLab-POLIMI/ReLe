@@ -8,7 +8,7 @@
 #ifndef UCB1_H_
 #define UCB1_H_
 
-#include "MABAlgorithm/MABAlgorithm.h"
+#include "rele/algorithms/MABAlgorithm/MABAlgorithm.h"
 
 namespace ReLe
 {

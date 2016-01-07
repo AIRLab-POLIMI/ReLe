@@ -28,7 +28,7 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_LINEARMAB_H_
 #define INCLUDE_RELE_ENVIRONMENTS_MAB_LINEARMAB_H_
 
-#include "MAB/MAB.h"
+#include "rele/environments/MAB/MAB.h"
 
 namespace ReLe
 {

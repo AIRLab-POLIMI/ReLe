@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "feature_selection/PrincipalFeatureAnalysis.h"
+#include "rele/IRL/feature_selection/PrincipalFeatureAnalysis.h"
 using namespace ReLe;
 
 int main(int argc, char *argv[])

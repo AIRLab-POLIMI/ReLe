@@ -24,9 +24,9 @@
 #ifndef RANDOMPOLICY_H_
 #define RANDOMPOLICY_H_
 
-#include "Policy.h"
-#include "Range.h"
-#include "RandomGenerator.h"
+#include "rele/policy/Policy.h"
+#include "rele/utils/Range.h"
+#include "rele/utils/RandomGenerator.h"
 
 #include <cassert>
 

@@ -24,12 +24,11 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_EMIRL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_EMIRL_H_
 
-#include "IRLAlgorithm.h"
-#include "Policy.h"
-#include "Transition.h"
-#include "ArmadilloExtensions.h"
-
-#include "feature_selection/PrincipalFeatureAnalysis.h"
+#include "rele/IRL/IRLAlgorithm.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Transition.h"
+#include "rele/utils/ArmadilloExtensions.h"
+#include "rele/IRL/feature_selection/PrincipalFeatureAnalysis.h"
 
 #include <nlopt.hpp>
 

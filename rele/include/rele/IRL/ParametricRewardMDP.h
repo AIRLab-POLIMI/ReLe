@@ -26,10 +26,10 @@
 
 #include <armadillo>
 
-#include "../approximators/Regressors.h"
-#include "../core/Environment.h"
+#include "rele/approximators/Regressors.h"
+#include "rele/core/Environment.h"
 
-#include "BasicFunctions.h"
+#include "rele/core/BasicFunctions.h"
 
 namespace ReLe
 {

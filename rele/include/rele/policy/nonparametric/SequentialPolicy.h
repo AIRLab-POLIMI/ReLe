@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_
 #define INCLUDE_RELE_POLICY_NONPARAMETRIC_SEQUENTIALPOLICY_H_
 
-#include "q_policy/ActionValuePolicy.h"
+#include "rele/policy/q_policy/ActionValuePolicy.h"
 
 
 namespace ReLe

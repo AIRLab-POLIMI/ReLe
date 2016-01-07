@@ -25,8 +25,8 @@
 #define MLE_H_
 
 #include <armadillo>
-#include "Policy.h"
-#include "Transition.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Transition.h"
 
 #include <nlopt.hpp>
 #include <cassert>

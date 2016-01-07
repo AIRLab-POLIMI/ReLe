@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/PolynomialFunction.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
 
 #include <cassert>
 

@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/gradient/onpolicy/GradientOutputData.h"
-#include "CSV.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GradientOutputData.h"
+#include "rele/utils/CSV.h"
 
 using namespace std;
 using namespace arma;

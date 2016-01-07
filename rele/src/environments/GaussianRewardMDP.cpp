@@ -21,10 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "GaussianRewardMDP.h"
+#include "rele/environments/GaussianRewardMDP.h"
 
-#include "RandomGenerator.h"
-#include "ArmadilloPDFs.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/statistics/ArmadilloPDFs.h"
 
 namespace ReLe
 {

@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_NORMBASIS_H_
 #define INCLUDE_RELE_APPROXIMATORS_BASIS_NORMBASIS_H_
 
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 
 #include <string>
 

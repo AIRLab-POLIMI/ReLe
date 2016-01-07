@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "td/TD.h"
-#include "CSV.h"
+#include "rele/algorithms/td/TD.h"
+#include "rele/utils/CSV.h"
 
 using namespace std;
 using namespace arma;

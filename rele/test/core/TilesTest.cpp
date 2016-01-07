@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "features/TilesCoder.h"
-#include "tiles/BasicTiles.h"
+#include "rele/approximators/features/TilesCoder.h"
+#include "rele/approximators/tiles/BasicTiles.h"
 
 using namespace std;
 using namespace ReLe;

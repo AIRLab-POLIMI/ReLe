@@ -22,14 +22,13 @@
  */
 
 
-#include "FiniteMDP.h"
-#include "td/SARSA.h"
-#include "td/DoubleQ-Learning.h"
-#include "Core.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/algorithms/td/SARSA.h"
+#include "rele/algorithms/td/DoubleQ-Learning.h"
+#include "rele/core/Core.h"
+#include "rele/generators/GridWorldGenerator.h"
 
 #include <iostream>
-#include "GridWorldGenerator.h"
-
 
 
 using namespace std;

@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_GAUSSIANREWARDMDP_H_
 #define INCLUDE_RELE_ENVIRONMENTS_GAUSSIANREWARDMDP_H_
 
-#include "ContinuousMDP.h"
+#include "rele/core/ContinuousMDP.h"
 
 namespace ReLe
 {

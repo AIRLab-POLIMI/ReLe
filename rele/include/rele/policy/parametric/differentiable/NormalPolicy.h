@@ -24,9 +24,9 @@
 #ifndef NORMALPOLICY_H
 #define NORMALPOLICY_H
 
-#include "Policy.h"
-#include "regressors/others/LinearApproximator.h"
-#include "ArmadilloPDFs.h"
+#include "rele/policy/Policy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/statistics/ArmadilloPDFs.h"
 
 #define NORMALP_NAME "NormalPolicy"
 

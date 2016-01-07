@@ -24,10 +24,10 @@
 #ifndef POLICYEVALAGENT_H_
 #define POLICYEVALAGENT_H_
 
-#include "Agent.h"
-#include "Policy.h"
-#include "Distribution.h"
-#include "BasicFunctions.h"
+#include "rele/core/Agent.h"
+#include "rele/policy/Policy.h"
+#include "rele/statistics/Distribution.h"
+#include "rele/core/BasicFunctions.h"
 
 namespace ReLe
 {

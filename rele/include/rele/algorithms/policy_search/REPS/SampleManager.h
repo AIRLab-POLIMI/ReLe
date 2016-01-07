@@ -24,9 +24,9 @@
 #ifndef SAMPLEMANAGER_H_
 #define SAMPLEMANAGER_H_
 
-#include "BasicsTraits.h"
-#include "Sample.h"
-#include "Features.h"
+#include "rele/core/BasicsTraits.h"
+#include "rele/core/Sample.h"
+#include "rele/approximators/Features.h"
 
 #include <map>
 #include <vector>

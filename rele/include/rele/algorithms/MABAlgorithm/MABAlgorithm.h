@@ -24,8 +24,8 @@
 #ifndef MABALGORITHM_H_
 #define MABALGORITHM_H_
 
-#include "Agent.h"
-#include "Basics.h"
+#include "rele/core/Agent.h"
+#include "rele/core/Basics.h"
 
 
 namespace ReLe

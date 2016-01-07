@@ -24,12 +24,12 @@
 #ifndef REPS_H_
 #define REPS_H_
 
-#include "DifferentiableNormals.h"
-#include "ArmadilloPDFs.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/statistics/ArmadilloPDFs.h"
 #include "REPSOutputData.h"
+#include "rele/algorithms/policy_search/BlackBoxAlgorithm.h"
 
 #include <nlopt.hpp>
-#include "policy_search/BlackBoxAlgorithm.h"
 
 namespace ReLe
 {

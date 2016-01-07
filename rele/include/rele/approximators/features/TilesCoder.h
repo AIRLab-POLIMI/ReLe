@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_FEATURES_TILESCODER_H_
 #define INCLUDE_RELE_APPROXIMATORS_FEATURES_TILESCODER_H_
 
-#include "Features.h"
-#include "Tiles.h"
+#include "rele/approximators/Features.h"
+#include "rele/approximators/Tiles.h"
 
 namespace ReLe
 {

@@ -25,7 +25,7 @@
 #define DISTRIBUTION_H_
 
 #include <armadillo>
-#include "Interfaces.h"
+#include "rele/utils/Interfaces.h"
 
 namespace ReLe
 {

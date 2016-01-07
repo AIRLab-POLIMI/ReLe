@@ -26,7 +26,7 @@
 
 #include "TreeNode.h"
 
-#include "data/BatchData.h"
+#include "rele/approximators/data/BatchData.h"
 
 namespace ReLe
 {

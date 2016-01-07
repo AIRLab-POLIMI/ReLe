@@ -21,14 +21,14 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nonparametric/RandomPolicy.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
-#include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/GaussianRbf.h"
-#include "features/DenseFeatures.h"
-#include "features/SparseFeatures.h"
+#include "rele/policy/nonparametric/RandomPolicy.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/features/SparseFeatures.h"
 
 #include <iostream>
 #include <iomanip>

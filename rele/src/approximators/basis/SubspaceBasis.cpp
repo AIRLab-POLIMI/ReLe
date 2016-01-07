@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/SubspaceBasis.h"
+#include "rele/approximators/basis/SubspaceBasis.h"
 #include <cassert>
 
 namespace ReLe

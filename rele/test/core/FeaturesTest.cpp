@@ -21,11 +21,11 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Features.h"
-#include "basis/PolynomialFunction.h"
-#include "features/SparseFeatures.h"
-#include "features/DenseFeatures.h"
-#include "regressors/others/LinearApproximator.h"
+#include "rele/approximators/Features.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 
 using namespace std;
 using namespace ReLe;

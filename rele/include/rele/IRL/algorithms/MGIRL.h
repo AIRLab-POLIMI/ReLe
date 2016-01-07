@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_MGIRL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_MGIRL_H_
 
-#include "algorithms/GIRL.h"
+#include "rele/IRL/algorithms/GIRL.h"
 
 namespace ReLe
 {

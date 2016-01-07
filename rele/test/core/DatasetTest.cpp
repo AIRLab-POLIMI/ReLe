@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Transition.h"
-#include "RandomGenerator.h"
+#include "rele/core/Transition.h"
+#include "rele/utils/RandomGenerator.h"
 
 #include <sstream>
 

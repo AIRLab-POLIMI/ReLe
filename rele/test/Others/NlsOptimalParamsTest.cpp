@@ -28,15 +28,15 @@
 #include <random>
 #include <cmath>
 
-#include "NLS.h"
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "parametric/differentiable/NormalPolicy.h"
-#include "BasisFunctions.h"
-#include "basis/IdentityBasis.h"
-#include "features/DenseFeatures.h"
-#include "RandomGenerator.h"
-#include "PolicyEvalAgent.h"
+#include "rele/environments/NLS.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/core/PolicyEvalAgent.h"
 
 using namespace std;
 using namespace ReLe;

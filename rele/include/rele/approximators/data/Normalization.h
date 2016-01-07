@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_DATA_NORMALIZATION_H_
 #define INCLUDE_RELE_APPROXIMATORS_DATA_NORMALIZATION_H_
 
-#include "data/BatchDataTraits.h"
+#include "rele/approximators/data/BatchDataTraits.h"
 
 #define FEATURES_TRAITS(dense) \
 	using features_type = typename input_traits<dense>::column_type; \

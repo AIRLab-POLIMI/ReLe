@@ -21,9 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/em/episode_based/EMOutputData.h"
+#include "rele/algorithms/policy_search/em/episode_based/EMOutputData.h"
 
-#include "CSV.h"
+#include "rele/utils/CSV.h"
 
 using namespace std;
 

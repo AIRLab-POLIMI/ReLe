@@ -22,9 +22,9 @@
  */
 
 #include "RockyOptions.h"
-#include "Rocky.h"
+#include "rele/environments/Rocky.h"
 
-#include "ModularRange.h"
+#include "rele/utils/ModularRange.h"
 
 #include <cassert>
 

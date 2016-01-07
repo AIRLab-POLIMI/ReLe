@@ -22,8 +22,8 @@
  */
 
 
-#include "parametric/differentiable/PortfolioNormalPolicy.h"
-#include "RandomGenerator.h"
+#include "rele/policy/parametric/differentiable/PortfolioNormalPolicy.h"
+#include "rele/utils/RandomGenerator.h"
 
 using namespace std;
 

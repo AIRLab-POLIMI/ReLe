@@ -24,7 +24,7 @@
 #ifndef NLS_H_
 #define NLS_H_
 
-#include "ContinuousMDP.h"
+#include "rele/core/ContinuousMDP.h"
 
 /**
  * Environment designed according to

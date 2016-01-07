@@ -21,12 +21,11 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "MountainCar.h"
-
-#include "Core.h"
-#include "td/LinearSARSA.h"
-#include "basis/PolynomialFunction.h"
-#include "features/DenseFeatures.h"
+#include "rele/environments/MountainCar.h"
+#include "rele/core/Core.h"
+#include "rele/algorithms/td/LinearSARSA.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
 using namespace std;
 using namespace ReLe;

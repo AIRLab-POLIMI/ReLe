@@ -24,11 +24,12 @@
 #ifndef LINEARAPPROXIMATOR_H
 #define LINEARAPPROXIMATOR_H
 
-#include "Features.h"
+#include "rele/approximators/Features.h"
+#include "rele/approximators/Regressors.h"
+
 #include <armadillo>
 #include <vector>
 #include <cassert>
-#include "Regressors.h"
 
 namespace ReLe
 {

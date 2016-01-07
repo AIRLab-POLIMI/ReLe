@@ -21,19 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "FiniteMDP.h"
-#include "td/SARSA.h"
-#include "td/Q-Learning.h"
-#include "Core.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/algorithms/td/SARSA.h"
+#include "rele/algorithms/td/Q-Learning.h"
+#include "rele/core/Core.h"
 
-#include "q_policy/e_Greedy.h"
-#include "q_policy/Boltzmann.h"
+#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/policy/q_policy/Boltzmann.h"
 
-#include "SimpleChainGenerator.h"
+#include "rele/generators/SimpleChainGenerator.h"
+
+#include "rele/algorithms/policy_search/REPS/TabularREPS.h"
+#include "rele/approximators/basis/IdentityBasis.h"
 
 #include <iostream>
-#include "policy_search/REPS/TabularREPS.h"
-#include "basis/IdentityBasis.h"
 
 using namespace std;
 using namespace ReLe;

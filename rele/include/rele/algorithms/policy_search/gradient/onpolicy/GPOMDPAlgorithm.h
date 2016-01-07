@@ -24,7 +24,7 @@
 #ifndef GPOMDPALGORITHM_H_
 #define GPOMDPALGORITHM_H_
 
-#include "policy_search/gradient/PolicyGradientAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/PolicyGradientAlgorithm.h"
 
 namespace ReLe
 {

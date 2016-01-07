@@ -21,19 +21,19 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "policy_search/NES/NES.h"
-#include "policy_search/REPS/REPS.h"
-#include "DifferentiableNormals.h"
-#include "Core.h"
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "BasisFunctions.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/ConditionBasedFunction.h"
-#include "basis/GaussianRbf.h"
-#include "basis/AffineFunction.h"
-#include "features/DenseFeatures.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/algorithms/policy_search/NES/NES.h"
+#include "rele/algorithms/policy_search/REPS/REPS.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/AffineFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -41,7 +41,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "MultiHeat.h"
+#include "rele/environments/MultiHeat.h"
 
 using namespace std;
 using namespace ReLe;

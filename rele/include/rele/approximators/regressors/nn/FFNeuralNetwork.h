@@ -24,20 +24,20 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_FFNEURALNETWORK_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_FFNEURALNETWORK_H_
 
-#include "Features.h"
+#include "rele/approximators/Features.h"
 #include <armadillo>
 #include <vector>
 #include <cassert>
 #include <algorithm>
 
-#include "Regressors.h"
+#include "rele/approximators/Regressors.h"
 
 #include "nn_bits/ActivationFunctions.h"
 #include "nn_bits/Regularization.h"
 #include "nn_bits/Optimizators.h"
-#include "NumericalGradient.h"
+#include "rele/utils/NumericalGradient.h"
 
-#include "data/BatchDataNormalization.h"
+#include "rele/approximators/data/BatchDataNormalization.h"
 
 namespace ReLe
 {

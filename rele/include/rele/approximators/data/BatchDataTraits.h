@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_BATCHDATATRAITS_H_
 #define INCLUDE_RELE_APPROXIMATORS_BATCHDATATRAITS_H_
 
-#include "Basics.h"
+#include "rele/core/Basics.h"
 
 namespace ReLe
 {

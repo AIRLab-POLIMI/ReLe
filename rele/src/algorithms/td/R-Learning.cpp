@@ -21,10 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "td/R-Learning.h"
-#include "RandomGenerator.h"
+#include "rele/algorithms/td/R-Learning.h"
+#include "rele/utils/RandomGenerator.h"
 
-#include "CSV.h"
+#include "rele/utils/CSV.h"
 
 using namespace std;
 using namespace arma;

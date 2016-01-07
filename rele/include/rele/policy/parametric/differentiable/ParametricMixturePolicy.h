@@ -24,8 +24,8 @@
 #ifndef PARAMETRICMIXTUREPOLICY_H_
 #define PARAMETRICMIXTUREPOLICY_H_
 
-#include "Policy.h"
-#include "RandomGenerator.h"
+#include "rele/policy/Policy.h"
+#include "rele/utils/RandomGenerator.h"
 #include <cassert>
 
 namespace ReLe

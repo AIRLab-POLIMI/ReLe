@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_REPS_REPSOUTPUTDATA_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_REPS_REPSOUTPUTDATA_H_
 
-#include "Basics.h"
+#include "rele/core/Basics.h"
 
-#include "policy_search/BlackBoxOutputData.h"
+#include "rele/algorithms/policy_search/BlackBoxOutputData.h"
 
 namespace ReLe
 {

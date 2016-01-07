@@ -21,10 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Pursuer.h"
+#include "rele/environments/Pursuer.h"
 
-#include "ModularRange.h"
-#include "RandomGenerator.h"
+#include "rele/utils/ModularRange.h"
+#include "rele/utils/RandomGenerator.h"
 
 using namespace arma;
 using namespace std;

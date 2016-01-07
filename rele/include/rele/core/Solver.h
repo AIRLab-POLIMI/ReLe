@@ -24,11 +24,10 @@
 #ifndef INCLUDE_RELE_CORE_SOLVER_H_
 #define INCLUDE_RELE_CORE_SOLVER_H_
 
-#include "Transition.h"
-#include "Core.h"
-#include "PolicyEvalAgent.h"
-
-#include "Policy.h"
+#include "rele/core/Transition.h"
+#include "rele/core/Core.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

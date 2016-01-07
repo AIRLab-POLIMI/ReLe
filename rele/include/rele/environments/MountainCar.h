@@ -24,7 +24,7 @@
 #ifndef MOUNTAINCAR_H_
 #define MOUNTAINCAR_H_
 
-#include "DenseMDP.h"
+#include "rele/core/DenseMDP.h"
 
 namespace ReLe
 {

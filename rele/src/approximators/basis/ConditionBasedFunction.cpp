@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/ConditionBasedFunction.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
 
 #include <cassert>
 

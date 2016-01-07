@@ -24,9 +24,9 @@
 #ifndef POLICY_H_
 #define POLICY_H_
 
-#include "BasicsTraits.h"
-#include "Interfaces.h"
-#include "ActionMask.h"
+#include "rele/core/BasicsTraits.h"
+#include "rele/utils/Interfaces.h"
+#include "rele/core/ActionMask.h"
 
 #include <string>
 

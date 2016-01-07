@@ -1,4 +1,4 @@
-#include "td/LinearSARSA.h"
+#include "rele/algorithms/td/LinearSARSA.h"
 
 using namespace std;
 using namespace arma;

@@ -24,7 +24,7 @@
 #ifndef DEEPSEATREASURE_H_
 #define DEEPSEATREASURE_H_
 
-#include "DenseMDP.h"
+#include "rele/core/DenseMDP.h"
 
 /**
  * Environment designed according to

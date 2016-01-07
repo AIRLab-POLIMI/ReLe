@@ -21,14 +21,14 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "parametric/differentiable/LinearPolicy.h"
-#include "PolicyEvalAgent.h"
-#include "features/DenseFeatures.h"
-#include "basis/IdentityBasis.h"
-#include "basis/GaussianRbf.h"
-#include "RandomGenerator.h"
-#include "FileManager.h"
+#include "rele/core/Core.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/utils/RandomGenerator.h"
+#include "rele/utils/FileManager.h"
 
 #include <iostream>
 #include <iomanip>
@@ -36,7 +36,7 @@
 #include <map>
 #include <random>
 #include <cmath>
-#include "MultiHeat.h"
+#include "rele/environments/MultiHeat.h"
 
 using namespace std;
 using namespace ReLe;

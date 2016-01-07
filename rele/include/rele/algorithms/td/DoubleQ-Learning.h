@@ -28,7 +28,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
 #define INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
 
-#include "Q-Learning.h"
+#include "rele/algorithms/td/Q-Learning.h"
 
 namespace ReLe
 {

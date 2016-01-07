@@ -24,12 +24,12 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_REGRESSIONTREE_H_
 
-#include "nodes/EmptyTreeNode.h"
-#include "nodes/InternalTreeNode.h"
-#include "nodes/LeafTreeNode.h"
-#include "nodes/TreeNode.h"
-#include "Regressors.h"
-#include "Features.h"
+#include "rele/approximators/regressors/trees/trees_bits/nodes/EmptyTreeNode.h"
+#include "rele/approximators/regressors/trees/trees_bits/nodes/InternalTreeNode.h"
+#include "rele/approximators/regressors/trees/trees_bits/nodes/LeafTreeNode.h"
+#include "rele/approximators/regressors/trees/trees_bits/nodes/TreeNode.h"
+#include "rele/approximators/Regressors.h"
+#include "rele/approximators/Features.h"
 
 namespace ReLe
 {

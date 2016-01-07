@@ -24,14 +24,14 @@
 #ifndef BLACKBOXALGORITHM_H_
 #define BLACKBOXALGORITHM_H_
 
-#include "Agent.h"
-#include "Distribution.h"
-#include "Policy.h"
-#include "Basics.h"
-#include "BasicFunctions.h"
-#include "policy_search/BlackBoxOutputData.h"
-#include "policy_search/step_rules/StepRules.h"
-#include "RewardTransformation.h"
+#include "rele/core/Agent.h"
+#include "rele/statistics/Distribution.h"
+#include "rele/policy/Policy.h"
+#include "rele/core/Basics.h"
+#include "rele/core/BasicFunctions.h"
+#include "rele/algorithms/policy_search/BlackBoxOutputData.h"
+#include "rele/algorithms/policy_search/step_rules/StepRules.h"
+#include "rele/approximators/RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
 

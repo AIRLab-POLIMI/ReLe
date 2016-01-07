@@ -24,10 +24,10 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_UNICYCLE_H_
 #define INCLUDE_RELE_ENVIRONMENTS_UNICYCLE_H_
 
-#include "ContinuousMDP.h"
 #include <boost/numeric/odeint.hpp>
-#include "ArmadilloOdeint.h"
-#include "Policy.h"
+#include "rele/core/ContinuousMDP.h"
+#include "rele/utils/ArmadilloOdeint.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

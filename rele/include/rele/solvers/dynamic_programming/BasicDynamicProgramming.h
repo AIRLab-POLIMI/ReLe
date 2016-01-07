@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_SOLVERS_DYNAMIC_PROGRAMMING_BASICDYNAMICPROGRAMMING_H_
 #define INCLUDE_RELE_SOLVERS_DYNAMIC_PROGRAMMING_BASICDYNAMICPROGRAMMING_H_
 
-#include "Solver.h"
-#include "FiniteMDP.h"
-#include "nonparametric/DeterministicPolicy.h"
+#include "rele/core/Solver.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/policy/nonparametric/DeterministicPolicy.h"
 
 #include <armadillo>
 

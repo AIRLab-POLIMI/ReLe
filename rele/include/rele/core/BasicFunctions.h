@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_CORE_BASICFUNCTIONS_H_
 #define INCLUDE_RELE_CORE_BASICFUNCTIONS_H_
 
-#include "Basics.h"
-#include "BasicsTraits.h"
-#include "Policy.h"
+#include "rele/core/Basics.h"
+#include "rele/core/BasicsTraits.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

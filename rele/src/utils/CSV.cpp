@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CSV.h"
+#include "rele/utils/CSV.h"
 
 using namespace std;
 using namespace arma;

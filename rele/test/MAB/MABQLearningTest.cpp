@@ -25,11 +25,11 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "MAB/InternetAds.h"
-#include "td/DoubleQ-Learning.h"
-#include "td/WQ-Learning.h"
-#include "nonparametric/SequentialPolicy.h"
-#include "Core.h"
+#include "rele/environments/MAB/InternetAds.h"
+#include "rele/algorithms/td/DoubleQ-Learning.h"
+#include "rele/algorithms/td/WQ-Learning.h"
+#include "rele/policy/nonparametric/SequentialPolicy.h"
+#include "rele/core/Core.h"
 
 #include <iostream>
 

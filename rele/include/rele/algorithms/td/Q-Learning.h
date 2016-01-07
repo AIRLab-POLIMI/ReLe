@@ -24,7 +24,7 @@
 #ifndef INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_
 #define INCLUDE_ALGORITHMS_TD_Q_LEARNING_H_
 
-#include "TD.h"
+#include "rele/algorithms/td/TD.h"
 
 namespace ReLe
 {

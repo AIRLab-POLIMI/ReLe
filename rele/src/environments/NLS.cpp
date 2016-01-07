@@ -23,7 +23,7 @@
 
 #include "../../include/rele/environments/NLS.h"
 
-#include "RandomGenerator.h"
+#include "rele/utils/RandomGenerator.h"
 #include <cassert>
 
 #define NLS_NOISE_MEAN      0.0

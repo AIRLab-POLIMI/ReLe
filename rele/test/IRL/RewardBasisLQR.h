@@ -24,7 +24,7 @@
 #ifndef SRC_TEST_IRL_GIRL_REWARDBASISLQR_H_
 #define SRC_TEST_IRL_GIRL_REWARDBASISLQR_H_
 
-#include "basis/QuadraticBasis.h"
+#include "rele/approximators/basis/QuadraticBasis.h"
 
 namespace ReLe
 {

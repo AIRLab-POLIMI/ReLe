@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/ModularBasis.h"
+#include "rele/approximators/basis/ModularBasis.h"
 
 namespace ReLe
 {

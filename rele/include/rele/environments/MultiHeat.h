@@ -24,7 +24,7 @@
 #ifndef MULTIHEAT_H_
 #define MULTIHEAT_H_
 
-#include "DenseMDP.h"
+#include "rele/core/DenseMDP.h"
 
 namespace ReLe
 {

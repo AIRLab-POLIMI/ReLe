@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "nonparametric/TabularPolicy.h"
-#include "RandomGenerator.h"
+#include "rele/policy/nonparametric/TabularPolicy.h"
+#include "rele/utils/RandomGenerator.h"
 
 #include <sstream>
 

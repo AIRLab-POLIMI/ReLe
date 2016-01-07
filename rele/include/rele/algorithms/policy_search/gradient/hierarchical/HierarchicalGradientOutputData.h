@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_
 #define INCLUDE_RELE_ALGORITHMS_POLICY_SEARCH_GRADIENT_HIERARCHICAL_HIERARCHICALGRADIENTOUTPUTDATA_H_
 
-#include "HierarchicalOutputData.h"
-#include "policy_search/gradient/onpolicy/GradientOutputData.h"
+#include "rele/algorithms/HierarchicalOutputData.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GradientOutputData.h"
 
 namespace ReLe
 {

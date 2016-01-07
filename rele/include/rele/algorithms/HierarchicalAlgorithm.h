@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_HIERARCHICALALGORITHM_H_
 #define INCLUDE_RELE_ALGORITHMS_HIERARCHICALALGORITHM_H_
 
-#include "Agent.h"
-#include "Options.h"
+#include "rele/core/Agent.h"
+#include "rele/policy/Options.h"
 #include "HierarchicalOutputData.h"
 
 namespace ReLe

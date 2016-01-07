@@ -24,8 +24,8 @@
 #ifndef LSPI_H_
 #define LSPI_H_
 
-#include "batch/LSTDQ.h"
-#include "RandomGenerator.h"
+#include "rele/algorithms/batch/LSTDQ.h"
+#include "rele/utils/RandomGenerator.h"
 
 namespace ReLe
 {

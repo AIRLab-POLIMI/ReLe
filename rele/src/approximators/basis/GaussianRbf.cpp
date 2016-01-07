@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/GaussianRbf.h"
+#include "rele/approximators/basis/GaussianRbf.h"
 #include <cassert>
 
 using namespace arma;

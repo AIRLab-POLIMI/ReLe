@@ -21,21 +21,21 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Core.h"
-#include "PolicyEvalAgent.h"
+#include "rele/core/Core.h"
+#include "rele/core/PolicyEvalAgent.h"
 
-#include "FiniteMDP.h"
-#include "SimpleChainGenerator.h"
-#include "dynamic_programming/BasicDynamicProgramming.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/generators/SimpleChainGenerator.h"
+#include "rele/solvers/dynamic_programming/BasicDynamicProgramming.h"
 
-#include "td/SARSA.h"
-#include "q_policy/e_Greedy.h"
+#include "rele/algorithms/td/SARSA.h"
+#include "rele/policy/q_policy/e_Greedy.h"
 
-#include "features/DenseFeatures.h"
+#include "rele/approximators/features/DenseFeatures.h"
 
-#include "ParametricRewardMDP.h"
+#include "rele/IRL/ParametricRewardMDP.h"
 
-#include "algorithms/MWAL.h"
+#include "rele/IRL/algorithms/MWAL.h"
 
 using namespace ReLe;
 

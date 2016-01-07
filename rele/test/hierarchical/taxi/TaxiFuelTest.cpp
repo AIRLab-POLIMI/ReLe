@@ -21,22 +21,22 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "TaxiFuel.h"
+#include "rele/environments/TaxiFuel.h"
 
-#include "Core.h"
+#include "rele/core/Core.h"
 
-#include "policy_search/gradient/hierarchical/HierarchicalGPOMDP.h"
-#include "policy_search/gradient/hierarchical/HierarchicalREINFORCE.h"
+#include "rele/algorithms/policy_search/gradient/hierarchical/HierarchicalGPOMDP.h"
+#include "rele/algorithms/policy_search/gradient/hierarchical/HierarchicalREINFORCE.h"
 
-#include "parametric/differentiable/GibbsPolicy.h"
-#include "features/DenseFeatures.h"
-#include "basis/IdentityBasis.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/GaussianRbf.h"
-#include "basis/ConditionBasedFunction.h"
+#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
 
-#include "FileManager.h"
-#include "ConsoleManager.h"
+#include "rele/utils/FileManager.h"
+#include "rele/utils/ConsoleManager.h"
 
 #include "TaxiOptions.h"
 

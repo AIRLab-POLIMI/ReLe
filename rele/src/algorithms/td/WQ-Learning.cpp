@@ -25,7 +25,7 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "td/WQ-Learning.h"
+#include "rele/algorithms/td/WQ-Learning.h"
 
 using namespace std;
 using namespace arma;

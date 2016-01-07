@@ -21,9 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Rocky.h"
+#include "rele/environments/Rocky.h"
 
-#include "ModularRange.h"
+#include "rele/utils/ModularRange.h"
 
 using namespace arma;
 using namespace std;

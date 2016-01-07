@@ -24,8 +24,8 @@
 #ifndef LINEARPOLICY_H_
 #define LINEARPOLICY_H_
 
-#include "Policy.h"
-#include "regressors/others/LinearApproximator.h"
+#include "rele/policy/Policy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 #include <armadillo>
 
 namespace ReLe

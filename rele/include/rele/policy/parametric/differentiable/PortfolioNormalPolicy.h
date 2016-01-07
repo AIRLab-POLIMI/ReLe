@@ -24,9 +24,9 @@
 #ifndef PORTFOLIONORMALPOLICY_H
 #define PORTFOLIONORMALPOLICY_H
 
-#include "Policy.h"
-#include "regressors/others/LinearApproximator.h"
-#include "ArmadilloPDFs.h"
+#include "rele/policy/Policy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/statistics/ArmadilloPDFs.h"
 
 namespace ReLe
 {

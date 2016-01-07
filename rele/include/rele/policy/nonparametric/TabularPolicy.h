@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_POLICY_NONPARAMETRIC_TABULARPOLICY_H_
 #define INCLUDE_RELE_POLICY_NONPARAMETRIC_TABULARPOLICY_H_
 
-#include "Policy.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

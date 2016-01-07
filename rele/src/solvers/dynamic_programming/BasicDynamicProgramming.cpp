@@ -21,10 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dynamic_programming/BasicDynamicProgramming.h"
-
-#include "CSV.h"
-#include "Core.h"
+#include "rele/solvers/dynamic_programming/BasicDynamicProgramming.h"
+#include "rele/utils/CSV.h"
+#include "rele/core/Core.h"
 
 using namespace std;
 using namespace arma;

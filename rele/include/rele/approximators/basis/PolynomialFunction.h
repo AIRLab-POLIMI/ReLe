@@ -24,7 +24,7 @@
 #ifndef POLYNOMIALFUNCTION_H
 #define POLYNOMIALFUNCTION_H
 
-#include "BasisFunctions.h"
+#include "rele/approximators/BasisFunctions.h"
 
 namespace ReLe
 {

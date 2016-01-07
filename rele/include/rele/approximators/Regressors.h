@@ -24,9 +24,9 @@
 #ifndef REGRESSORS_H_
 #define REGRESSORS_H_
 
-#include "Basics.h"
-#include "data/BatchData.h"
-#include "Features.h"
+#include "rele/core/Basics.h"
+#include "rele/approximators/data/BatchData.h"
+#include "rele/approximators/Features.h"
 
 namespace ReLe
 {

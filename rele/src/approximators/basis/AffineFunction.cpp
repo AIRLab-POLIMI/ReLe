@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "basis/AffineFunction.h"
+#include "rele/approximators/basis/AffineFunction.h"
 
 using namespace arma;
 

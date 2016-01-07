@@ -28,7 +28,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
 #define INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
 
-#include "Q-Learning.h"
+#include "rele/algorithms/td/Q-Learning.h"
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>

@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_GENERATORS_FINITEGENERATOR_H_
 #define INCLUDE_RELE_GENERATORS_FINITEGENERATOR_H_
 
-#include "FiniteMDP.h"
+#include "rele/core/FiniteMDP.h"
 
 #include <iostream>
 

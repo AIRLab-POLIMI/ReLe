@@ -25,7 +25,7 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "MAB/DiscreteMAB.h"
+#include "rele/environments/MAB/DiscreteMAB.h"
 
 
 namespace ReLe

@@ -25,7 +25,7 @@
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_EXTRATREEENSEMBLE_H_
 
 #include "ExtraTree.h"
-#include "Ensemble.h"
+#include "rele/approximators/Ensemble.h"
 
 
 namespace ReLe

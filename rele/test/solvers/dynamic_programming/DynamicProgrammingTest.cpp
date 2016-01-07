@@ -22,9 +22,9 @@
  */
 
 
-#include "dynamic_programming/BasicDynamicProgramming.h"
-#include "FiniteMDP.h"
-#include "SimpleChainGenerator.h"
+#include "rele/solvers/dynamic_programming/BasicDynamicProgramming.h"
+#include "rele/core/FiniteMDP.h"
+#include "rele/generators/SimpleChainGenerator.h"
 
 
 

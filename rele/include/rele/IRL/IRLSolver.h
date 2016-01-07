@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_IRL_IRLSOLVER_H_
 #define INCLUDE_RELE_IRL_IRLSOLVER_H_
 
-#include "Solver.h"
-#include "ParametricRewardMDP.h"
+#include "rele/core/Solver.h"
+#include "rele/IRL/ParametricRewardMDP.h"
 
 namespace ReLe
 {

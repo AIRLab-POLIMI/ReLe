@@ -1,5 +1,5 @@
-#include "policy_search/NES/NESOutputData.h"
-#include "CSV.h"
+#include "rele/algorithms/policy_search/NES/NESOutputData.h"
+#include "rele/utils/CSV.h"
 
 using namespace std;
 using namespace arma;

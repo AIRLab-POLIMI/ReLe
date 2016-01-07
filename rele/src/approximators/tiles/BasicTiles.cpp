@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "tiles/BasicTiles.h"
-#include "CSV.h"
+#include "rele/approximators/tiles/BasicTiles.h"
+#include "rele/utils/CSV.h"
 #include <cassert>
 
 namespace ReLe

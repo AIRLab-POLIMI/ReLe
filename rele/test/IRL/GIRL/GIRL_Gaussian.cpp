@@ -21,24 +21,24 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "features/SparseFeatures.h"
-#include "features/DenseFeatures.h"
-#include "regressors/others/GaussianMixtureModels.h"
-#include "basis/PolynomialFunction.h"
-#include "basis/IdentityBasis.h"
+#include "rele/approximators/features/SparseFeatures.h"
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/GaussianMixtureModels.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/IdentityBasis.h"
 
-#include "parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
 
-#include "GaussianRewardMDP.h"
-#include "LQRsolver.h"
-#include "PolicyEvalAgent.h"
-#include "algorithms/GIRL.h"
-#include "algorithms/NoGIRL.h"
-#include "policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/environments/GaussianRewardMDP.h"
+#include "rele/solvers/LQRsolver.h"
+#include "rele/core/PolicyEvalAgent.h"
+#include "rele/IRL/algorithms/GIRL.h"
+#include "rele/IRL/algorithms/NoGIRL.h"
+#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 
-#include "ParametricRewardMDP.h"
+#include "rele/IRL/ParametricRewardMDP.h"
 
-#include "FileManager.h"
+#include "rele/utils/FileManager.h"
 
 using namespace std;
 using namespace arma;
