@@ -6,16 +6,6 @@ project(rele)
 
 if(catkin_FOUND)
 	catkin_package(INCLUDE_DIRS include
-	                            include/rele/core
-	                            include/rele/policy
-                                include/rele/utils
-                                include/rele/generators
-                                include/rele/algorithms
-                                include/rele/environments
-                                include/rele/approximators
-                                include/rele/statistics
-                                include/rele/IRL
-                                include/rele/solvers
 	               LIBRARIES rele)
 	set(CATKIN_MSG TRUE)
 else()

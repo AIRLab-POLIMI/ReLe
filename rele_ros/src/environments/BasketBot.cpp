@@ -21,7 +21,7 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "BasketBot.h"
+#include "rele_ros/environments/BasketBot.h"
 
 
 namespace ReLe_ROS

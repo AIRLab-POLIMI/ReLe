@@ -23,7 +23,7 @@
 
 #include <rele/core/Core.h>
 #include <rele/core/Agent.h>
-#include "Snake.h"
+#include "rele_ros/environments/Snake.h"
 
 using namespace ReLe;
 

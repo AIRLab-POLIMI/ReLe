@@ -16,7 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ros/ros.h>
-#include "v_repConst.h"
+#include "rele_ros/core/v_repConst.h"
 #include <geometry_msgs/Twist.h>
 // Used data structures:
 #include "vrep_common/ProximitySensorData.h"

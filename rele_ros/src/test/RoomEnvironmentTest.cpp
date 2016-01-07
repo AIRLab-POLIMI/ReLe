@@ -23,7 +23,7 @@
 
 #include <rele/core/Core.h>
 #include <rele/core/Agent.h>
-#include "RoomEnvironment.h"
+#include "rele_ros/environments/RoomEnvironment.h"
 
 using namespace ReLe;
 

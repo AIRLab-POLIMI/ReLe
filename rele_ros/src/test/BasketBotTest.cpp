@@ -23,7 +23,7 @@
 
 #include <rele/core/Core.h>
 #include <rele/core/Agent.h>
-#include "BasketBot.h"
+#include "rele_ros/environments/BasketBot.h"
 
 using namespace ReLe;
 

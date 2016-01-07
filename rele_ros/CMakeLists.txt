@@ -6,14 +6,13 @@ find_package(catkin REQUIRED COMPONENTS rele
                                         vrep_common)
 project(rele_ros)
 
-catkin_package(INCLUDE_DIRS include/rele_ros
+catkin_package(INCLUDE_DIRS include
                LIBRARIES releROS)
 
 
 # ----------------------- INCLUDES ----------------------------
 
-include_directories(include/rele_ros/core
-                    include/rele_ros/environments
+include_directories(include
                     ${catkin_INCLUDE_DIRS})
 
 # ----------------------- LIBRARIES ---------------------------

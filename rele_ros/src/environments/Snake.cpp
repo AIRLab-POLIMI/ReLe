@@ -21,7 +21,7 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Snake.h"
+#include "rele_ros/environments/Snake.h"
 
 #include <vrep_common/JointSetStateData.h>
 
