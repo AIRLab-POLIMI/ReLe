@@ -118,9 +118,10 @@ public:
                     f.params = &p;
 
                     double result, error;
-                    double lowerLimit = meanQ(nextState, j) - 3 * sampleStdQ(nextState, j);
-                    double upperLimit = meanQ(nextState, j) + 3 * sampleStdQ(nextState, j);
-                    gsl_integration_qags(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, w, &result, &error);
+                    arma::rowvec means = meanQ.row(nextState);
+                    double lowerLimit = arma::min(means) - 2;
+                    double upperLimit = arma::max(means) + 2;
+                    gsl_integration_qag(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, 6, w, &result, &error);
 
                     integrals(j) = result;
                 }

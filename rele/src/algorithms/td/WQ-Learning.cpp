@@ -103,9 +103,16 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
             f.params = &p;
 
             double result, error;
-            double lowerLimit = meanQ(xn, i) - 3 * sampleStdQ(xn, i);
-            double upperLimit = meanQ(xn, i) + 3 * sampleStdQ(xn, i);
-            gsl_integration_qags(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, w, &result, &error);
+            arma::rowvec means = meanQ.row(xn);
+            double lowerLimit = arma::min(means) - 2;
+            double upperLimit = arma::max(means) + 2;
+            /*std::cout << "mean: " << meanQ(xn, i) << ", std: " << sampleStdQ(xn, i)
+            << ", mean: " << meanQ(xn, idxs(i, 0)) << ", std: " << sampleStdQ(xn, idxs(i, 0))
+            << ", mean: " << meanQ(xn, idxs(i, 1)) << ", std: " << sampleStdQ(xn, idxs(i, 1))
+            << ", mean: " << meanQ(xn, idxs(i, 2)) << ", std: " << sampleStdQ(xn, idxs(i, 2))
+            << ", lower: " << lowerLimit << ", upper: " << upperLimit;*/
+            gsl_integration_qag(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, 6, w, &result, &error);
+            //std::cout << ", result: " << result << std::endl;
 
             integrals(i) = result;
         }
