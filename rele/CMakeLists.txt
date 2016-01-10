@@ -128,6 +128,19 @@ if(catkin_FOUND)
 	DESTINATION ${CATKIN_GLOBAL_INCLUDE_DESTINATION}
 	PATTERN ".svn" EXCLUDE
 	)
+	
+else()
+	# Non-catkin installation
+	# Install libraries
+	install(TARGETS rele 
+	  ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	  LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	)
+	# Install headers
+	install(DIRECTORY include/rele
+	  DESTINATION ${CMAKE_INSTALL_PREFIX}
+	)
+
 endif()
 
 # --------------------------------------------------------------
