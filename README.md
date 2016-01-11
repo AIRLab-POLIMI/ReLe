@@ -39,8 +39,17 @@ cmake ../src/rele
 make
 ```
 
+To install the library just use also the following command:
+
+```
+sudo make install
+```
+
+By default the library is installed in `/usr/local/`. You can change this by setting the cmake variable `${CMAKE_INSTALL_PREFIX}` 
+
 Ros features will be disabled.
-Currently plain cmake installation is not supported.
+
+
 
 
 
