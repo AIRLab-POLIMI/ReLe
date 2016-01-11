@@ -138,7 +138,7 @@ else()
 	)
 	# Install headers
 	install(DIRECTORY include/rele
-	  DESTINATION ${CMAKE_INSTALL_PREFIX}
+	  DESTINATION ${CMAKE_INSTALL_PREFIX}/include
 	)
 
 endif()
