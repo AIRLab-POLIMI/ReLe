@@ -119,8 +119,12 @@ public:
 
                     double result, error;
                     arma::rowvec means = meanQ.row(nextState);
-                    double lowerLimit = arma::min(means) - 2;
-                    double upperLimit = arma::max(means) + 2;
+                    arma::rowvec stds = sampleStdQ.row(nextState);
+                    double minMean = arma::min(means);
+                    double maxMean = arma::max(means);
+                    double pdfSampleStd = stds(j);
+                    double lowerLimit = minMean - 3 * pdfSampleStd;
+                    double upperLimit = maxMean + 3 * pdfSampleStd;
                     gsl_integration_qag(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, 6, w, &result, &error);
 
                     integrals(j) = result;
