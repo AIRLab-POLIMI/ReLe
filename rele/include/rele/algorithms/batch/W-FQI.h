@@ -33,8 +33,8 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>
 
-#define STD_ZERO_VALUE 1E-8
-#define STD_INF_VALUE 1E8
+#define STD_ZERO_VALUE 1E-100
+#define STD_INF_VALUE 1E100
 
 
 struct pars
@@ -118,13 +118,10 @@ public:
                     f.params = &p;
 
                     double result, error;
-                    arma::rowvec means = meanQ.row(nextState);
-                    arma::rowvec stds = sampleStdQ.row(nextState);
-                    double minMean = arma::min(means);
-                    double maxMean = arma::max(means);
-                    double pdfSampleStd = stds(j);
-                    double lowerLimit = minMean - 3 * pdfSampleStd;
-                    double upperLimit = maxMean + 3 * pdfSampleStd;
+                    double pdfMean = meanQ(nextState, j);
+                    double pdfSampleStd = sampleStdQ(nextState, j);
+                    double lowerLimit = pdfMean - 8 * pdfSampleStd;
+                    double upperLimit = pdfMean + 8 * pdfSampleStd;
                     gsl_integration_qag(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, 6, w, &result, &error);
 
                     integrals(j) = result;

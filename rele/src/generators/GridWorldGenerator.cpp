@@ -206,4 +206,3 @@ int GridWorldGenerator::getActionState(std::size_t i, std::size_t j, int action)
 }
 
 }
-
