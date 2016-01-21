@@ -95,7 +95,7 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
         p.meanQ = meanQ;
         p.sampleStdQ = sampleStdQ;
         p.idxs = idxs;
-        for(unsigned int i = 0; i < integrals.n_elem; i++)
+        for(unsigned int i = 0; i < integrals.n_elem - 1; i++)
         {
             gsl_function f;
             f.function = &fun;
@@ -117,6 +117,8 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
 
             integrals(i) = result;
         }
+        integrals(integrals.n_elem - 1) = 1 - arma::sum(integrals(arma::span(0, integrals.n_elem - 2)));
+
         double W = arma::dot(integrals, Q.row(xn));
 
         delta = r + task.gamma * W - Q(x, u);

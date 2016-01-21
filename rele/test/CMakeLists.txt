@@ -85,6 +85,11 @@ if(${GSL_FOUND})
 	target_link_libraries(grid_world2 rele ${GSL_LIBRARIES})
 endif()
 
+if(${GSL_FOUND})
+	add_executable(forex TD/ForexTest.cpp)
+	target_link_libraries(forex rele ${GSL_LIBRARIES})
+endif()
+
 add_executable(mountain_car TD/MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
 

@@ -109,7 +109,7 @@ public:
             if(this->absorbingStates.count(nextState) == 0)
             {
                 arma::vec integrals(this->nActions, arma::fill::zeros);
-                for(unsigned int j = 0; j < integrals.n_elem; j++)
+                for(unsigned int j = 0; j < integrals.n_elem - 1; j++)
                 {
                     gsl_function f;
                     f.function = &fun;
@@ -126,6 +126,8 @@ public:
 
                     integrals(j) = result;
                 }
+                integrals(integrals.n_elem - 1) = 1 - arma::sum(integrals(arma::span(0, integrals.n_elem - 2)));
+
                 double W = arma::dot(integrals, this->QTable.row(nextState));
 
                 outputs[0](i) = rewards(0, i) + this->gamma * W;

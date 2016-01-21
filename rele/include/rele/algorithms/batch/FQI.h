@@ -255,6 +255,11 @@ public:
         }
     }
 
+    arma::mat& getQ()
+    {
+        return QTable;
+    }
+
     virtual ~FQI()
     {
     }
