@@ -43,13 +43,15 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
+    // ****** Online ******
+
+
+    // ******* FQI *******
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(2);
 
     // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
-
-    // ******* FQI *******
 
     // Tree
     arma::vec defaultValue = {0};
@@ -59,47 +61,45 @@ int main(int argc, char *argv[])
 
     Dataset<FiniteAction, FiniteState> data;
     // Dataset is loaded from a file
-    FileManager fm("forex", "FQI");
-    fm.createDir();
-    fm.cleanDir();
-    ifstream in(fm.addPath("..."), ios_base::in);
+    ifstream in("/home/shirokuma/Dropbox/Università/Dottorato/Projects/ICML2016/Experiments/Forex/sarsRele.csv", ios_base::in);
     in >> std::setprecision(OS_PRECISION);
     if(in.is_open())
         data.readFromStream(in);
     in.close();
 
+    arma::mat testSet;
+    testSet.load(
+        "/home/shirokuma/Dropbox/Università/Dottorato/Projects/ICML2016/Experiments/Forex/trainingSet_d_7.txt");
+
     arma::uvec indicators = {0, 1, 2, 3, 4, 5, 6};
     unsigned int priceCol = 7;
-    unsigned int nStates;
+    unsigned int nStates = arma::prod(testSet.row(0));
 
-    //FQI<FiniteState> fqi(data, QRegressorA, nStates, 3, 1);
-    DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, 3, 1);
+    FQI<FiniteState> fqi(data, QRegressorA, nStates, 3, 1);
+    //DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, 3, 1);
     //W_FQI<FiniteState> fqi(data, QRegressorA, nStates, 3, 1);
 
     cout << "Starting FQI..." << endl;
     // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 4, 1e-8);
+    fqi.run(phi, 3, 1e-8);
 
     // Policy Evaluation
-    arma::mat testSet;
-    testSet.load("/home/shirokuma/Desktop/ForexDataset/testSet_d_7.txt");
-
     e_Greedy fqiPolicy;
     fqiPolicy.setEpsilon(0);
     fqiPolicy.setQ(&fqi.getQ());
-    PolicyEvalAgent<FiniteAction,FiniteState> evalAgent(fqiPolicy);
+    PolicyEvalAgent<FiniteAction, FiniteState> evalAgent(fqiPolicy);
 
     unsigned int nExperiments = 10;
     arma::vec profits(nExperiments, arma::fill::zeros);
     for(unsigned int i = 0; i < nExperiments; i++)
     {
-    	Forex&& mdpTest = Forex(testSet, indicators, priceCol);
+        Forex&& mdpTest = Forex(testSet, indicators, priceCol);
 
         auto&& coreTest = buildCore(mdpTest, evalAgent);
         coreTest.getSettings().episodeLength = mdpTest.getDataset().n_rows - 1;
 
-    	coreTest.runTestEpisode();
-    	profits(i) = mdpTest.getProfit();
+        coreTest.runTestEpisode();
+        profits(i) = mdpTest.getProfit();
     }
 
     cout << "PROFIT: " << arma::mean(profits) << endl;
