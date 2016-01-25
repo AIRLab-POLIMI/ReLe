@@ -23,6 +23,9 @@
 
 /*
  * Written by: Carlo D'Eramo
+ *
+ * TODO: This version only works for tabular regression.
+ * 		 Fix Q estimation as done in WQ-Learning.
  */
 
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_W_FQI_H_
