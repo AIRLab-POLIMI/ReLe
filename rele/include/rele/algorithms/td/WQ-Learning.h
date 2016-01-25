@@ -60,13 +60,12 @@ protected:
     arma::mat idxs;
     arma::mat meanQ;
     arma::mat sampleStdQ;
-    arma::mat sumQ;
-    arma::mat sumSquareQ;
-    arma::mat nUpdatesQ;
+    arma::mat weightsVar;
+    arma::mat Q2;
 
 protected:
     virtual void init() override;
-    inline void updateMeanAndSampleStdQ(double q);
+    inline void updateMeanAndSampleStdQ(double q, double q2);
 };
 
 }
