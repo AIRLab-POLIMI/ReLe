@@ -62,10 +62,11 @@ protected:
     arma::mat sampleStdQ;
     arma::mat weightsVar;
     arma::mat Q2;
+    arma::mat n_updates;
 
 protected:
     virtual void init() override;
-    inline void updateMeanAndSampleStdQ(double q, double q2);
+    inline void updateMeanAndSampleStdQ(double target);
 };
 
 }

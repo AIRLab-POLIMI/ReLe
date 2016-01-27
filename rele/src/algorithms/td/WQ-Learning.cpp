@@ -128,10 +128,9 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
 
     gsl_integration_workspace_free(w);
 
-    Q(x, u) = (1 - alpha) * Q(x, u) + alpha * target;
-    Q2(x, u) = (1 - alpha) * Q2(x, u) + alpha * target * target;
+    n_updates(x, u)++;
 
-    updateMeanAndSampleStdQ(Q(x, u), Q2(x, u));
+    updateMeanAndSampleStdQ(target);
 
     //update action and state
     x = xn;
@@ -146,10 +145,8 @@ void WQ_Learning::endEpisode(const Reward& reward)
     //Last update
     double r = reward[0];
     double target = r;
-    Q(x, u) = (1 - alpha) * Q(x, u) + alpha * target;
-    Q2(x, u) = (1 - alpha) * Q2(x, u) + alpha * target * target;
 
-    updateMeanAndSampleStdQ(Q(x, u), Q2(x, u));
+    updateMeanAndSampleStdQ(target);
 }
 
 WQ_Learning::~WQ_Learning()
@@ -170,17 +167,22 @@ void WQ_Learning::init()
     sampleStdQ = arma::mat(Q.n_rows, Q.n_cols).fill(STD_INF_VALUE);
     Q2 = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
     weightsVar = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
+    n_updates = arma::mat(Q.n_rows, Q.n_cols, arma::fill::zeros);
 }
 
-inline void WQ_Learning::updateMeanAndSampleStdQ(double q, double q2)
+inline void WQ_Learning::updateMeanAndSampleStdQ(double target)
 {
-    weightsVar(x, u) = ((1 - alpha) * (1 - alpha) * weightsVar(x, u) + alpha * alpha);
-    double n = 1 / weightsVar(x, u);
+    Q(x, u) = (1 - alpha) * Q(x, u) + alpha * target;
+    Q2(x, u) = (1 - alpha) * Q2(x, u) + alpha * target * target;
 
-    if(n > 1)
+	meanQ(x, u) = Q(x, u);
+	weightsVar(x, u) = (1 - alpha) * (1 - alpha) * weightsVar(x, u) + alpha * alpha;
+
+    if(n_updates(x, u) > 1)
     {
-        meanQ(x, u) = q;
-        double var = (q2 - q * q) / n;
+        double n = 1 / weightsVar(x, u);
+
+        double var = (Q2(x, u) - Q(x, u) * Q(x, u)) / n;
 
         if(var > 0)
             sampleStdQ(x, u) = sqrt(var);
