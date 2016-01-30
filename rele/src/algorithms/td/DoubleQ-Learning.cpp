@@ -57,22 +57,24 @@ void DoubleQ_Learning::sampleAction(const FiniteState& state, FiniteAction& acti
 void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
                             FiniteAction& action)
 {
+	size_t xn = nextState.getStateN();
     unsigned int selectedQ;
 
     selectedQ = RandomGenerator::sampleUniformInt(0, 1);
-    const arma::mat& Qxn = doubleQ.subcube(span(nextState, nextState), span::all, span(selectedQ, selectedQ));
+    const arma::mat& Qxn = doubleQ.subcube(span(xn, xn), span::all, span(selectedQ, selectedQ));
     double qmax = Qxn.max();
     arma::uvec maxIndex = find(Qxn == qmax);
     unsigned int index = RandomGenerator::sampleUniformInt(0,
                          maxIndex.n_elem - 1);
 
     double delta = reward[0] +
-                   task.gamma * doubleQ(nextState, FiniteAction(maxIndex(index)), 1 - selectedQ) - doubleQ(x, u, selectedQ);
+                   task.gamma * doubleQ(xn, FiniteAction(maxIndex(index)), 1 - selectedQ) - doubleQ(x, u, selectedQ);
     doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha * delta;
 
     // Update action and state
     updateQ();
-    u = policy(nextState);
+    x = xn;
+    u = policy(xn);
 
     action.setActionN(u);
 }
