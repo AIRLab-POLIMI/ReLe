@@ -35,7 +35,7 @@ class MGIRL: public GIRL<ActionC, StateC>
 public:
     MGIRL(Dataset<ActionC, StateC>& dataset,
           DifferentiablePolicy<ActionC, StateC>& policy,
-          ParametricRegressor& rewardf, double gamma, IRLGradType aType, bool normalizeGradient = false) :
+          ParametricRegressor& rewardf, double gamma, IrlGrad aType, bool normalizeGradient = false) :
         GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType), normalizeGradient(normalizeGradient)
     {
 

@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
 
-    IRLGradType atype = IRLGradType::R;
+	IrlGrad atype = IrlGrad::REINFORCE;
     int nbEpisodes = 3000;
 
     FileManager fm("nls", "PGIRL");
@@ -122,9 +122,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     PlaneGIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, basisReward,
-            mdp.getSettings().gamma, atype, false);
-    PlaneGIRL<DenseAction,DenseState> irlAlg2(data, expertPolicy, basisReward,
-            mdp.getSettings().gamma, atype, true);
+            mdp.getSettings().gamma, atype);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -138,20 +136,8 @@ int main(int argc, char *argv[])
     //Run GIRL
 #ifdef RUN_GIRL
     irlAlg1.run();
-    arma::vec weights1 = irlAlg1.getWeights();
-
-    irlAlg2.run();
-    arma::vec weights2 = irlAlg2.getWeights();
-
-
-    cout << "weights (hessian): " << weights1.t();
-    cout << "weights  (sparse): " << weights2.t();
-
-    arma::mat weights(weights1.n_rows, 2);
-
-    weights.col(0) = weights1;
-    weights.col(1) = weights2;
-
+    arma::vec weights = irlAlg1.getWeights();
+    cout << "weights: " << weights.t();
 #endif
 
 #ifdef RECOVER

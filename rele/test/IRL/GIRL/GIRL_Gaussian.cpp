@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::GB;
+    IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
     NormalizationType ntype = NormalizationType::LogDisparity;
     int dim = 2;
     int nbEpisodes = 3000;

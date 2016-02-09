@@ -29,22 +29,15 @@
 #include "rele/core/Transition.h"
 #include "rele/utils/ArmadilloExtensions.h"
 #include "rele/algorithms/policy_search/step_rules/StepRules.h"
+
+#include "rele/IRL/utils/IrlGradType.h"
+
 #include <nlopt.hpp>
 #include <cassert>
 #include <stdexcept>
 
 namespace ReLe
 {
-
-enum IRLGradType
-{
-    R, RB, G, GB, ENAC, NATR, NATRB, NATG, NATGB
-};
-
-enum NormalizationType
-{
-    None, Disparity, SquareNorm, LogDisparity, LogSquareNorm
-};
 
 template<class ActionC, class StateC>
 class GIRL: public IRLAlgorithm<ActionC, StateC>
@@ -53,10 +46,10 @@ public:
 
     GIRL(Dataset<ActionC, StateC>& dataset,
          DifferentiablePolicy<ActionC, StateC>& policy,
-         ParametricRegressor& rewardf, double gamma, IRLGradType aType,
-         NormalizationType nType = None, bool useSimplexConstraints = true) :
+         ParametricRegressor& rewardf, double gamma, IrlGrad aType,
+         bool useSimplexConstraints = true) :
         policy(policy), data(dataset), rewardf(rewardf), gamma(gamma),
-        aType(aType), nType(nType), useSimplexConstraints(useSimplexConstraints),
+        aType(aType), useSimplexConstraints(useSimplexConstraints),
         isRewardLinear(false)
     {
         nbFunEvals = 0;
@@ -68,8 +61,8 @@ public:
 
     GIRL(Dataset<ActionC, StateC>& dataset,
          DifferentiablePolicy<ActionC, StateC>& policy,
-         LinearApproximator& rewardf, double gamma, IRLGradType aType, NormalizationType nType = None) :
-        GIRL(dataset, policy, rewardf, gamma, aType, nType, true)
+         LinearApproximator& rewardf, double gamma, IrlGrad aType) :
+        GIRL(dataset, policy, rewardf, gamma, aType, true)
     {
         isRewardLinear = true;
 
@@ -1176,19 +1169,19 @@ public:
         fisher /= nbEpisodes;
 
         arma::vec gradient;
-        if (aType == IRLGradType::NATR)
+        if (aType == NATURAL_REINFORCE)
         {
             gradient = ReinforceGradient(gGradient);
         }
-        else if (aType == IRLGradType::NATRB)
+        else if (aType == NATURAL_REINFORCE_BASELINE)
         {
             gradient = ReinforceBaseGradient(gGradient);
         }
-        else if (aType == IRLGradType::NATG)
+        else if (aType == NATURAL_GPOMDP)
         {
             gradient = GpomdpGradient(gGradient);
         }
-        else if (aType == IRLGradType::NATGB)
+        else if (aType == NATURAL_GPOMDP_BASELINE)
         {
             gradient = GpomdpBaseGradient(gGradient);
         }
@@ -1258,19 +1251,19 @@ private:
     {
         switch(aType)
         {
-        case R:
+        case REINFORCE:
             gradient = ReinforceGradient(dGradient);
             break;
 
-        case RB:
+        case REINFORCE_BASELINE:
             gradient = ReinforceBaseGradient(dGradient);
             break;
 
-        case G:
+        case GPOMDP:
             gradient = GpomdpGradient(dGradient);
             break;
 
-        case GB:
+        case GPOMDP_BASELINE:
             gradient = GpomdpBaseGradient(dGradient);
             break;
 
@@ -1278,10 +1271,10 @@ private:
             gradient = ENACGradient(dGradient);
             break;
 
-        case NATR:
-        case NATRB:
-        case NATG:
-        case NATGB:
+        case NATURAL_REINFORCE:
+        case NATURAL_REINFORCE_BASELINE:
+        case NATURAL_GPOMDP:
+        case NATURAL_GPOMDP_BASELINE:
             gradient = NaturalGradient(dGradient);
             break;
 
@@ -1355,8 +1348,7 @@ protected:
     ParametricRegressor& rewardf;
     double gamma;
     unsigned int maxSteps;
-    IRLGradType aType;
-    NormalizationType nType;
+    IrlGrad aType;
     unsigned int nbFunEvals;
     bool useSimplexConstraints, isRewardLinear;
     arma::uvec active_feat;

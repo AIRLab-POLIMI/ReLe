@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::GB;
+	IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
     vec eReward = {0.2, 0.7, 0.1};
     int nbEpisodes = 5000;
 

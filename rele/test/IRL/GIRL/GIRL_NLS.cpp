@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
 
-    IRLGradType atype = IRLGradType::RB;
+	IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     int nbEpisodes = 3000;
 
     FileManager fm("nls", "GIRL");
