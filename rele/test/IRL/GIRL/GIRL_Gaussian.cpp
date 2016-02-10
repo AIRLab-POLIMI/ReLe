@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
     IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
-    NormalizationType ntype = NormalizationType::LogDisparity;
     int dim = 2;
     int nbEpisodes = 3000;
 
@@ -129,7 +128,7 @@ int main(int argc, char *argv[])
     std::vector<double> lowerBounds(rewardRegressor.getParametersSize(), -10.0);
     std::vector<double> upperBounds(rewardRegressor.getParametersSize(), 10.0);
     NoGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                          mdp.getSettings().gamma, atype, ntype, lowerBounds, upperBounds);
+                                          mdp.getSettings().gamma, atype, lowerBounds, upperBounds);
 
 #ifdef RUN
     //Run GIRL

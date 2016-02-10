@@ -122,10 +122,8 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
     LinearApproximator rewardRegressor(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype, None);
-    GIRL<DenseAction,DenseState> irlAlg2(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype, LogDisparity);
+    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+                                         mdp.getSettings().gamma, atype);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -138,20 +136,10 @@ int main(int argc, char *argv[])
 
     //Run GIRL
 #ifdef RUN_GIRL
-    irlAlg1.run();
-    arma::vec weights1 = irlAlg1.getWeights();
+    irlAlg.run();
+    arma::vec weights = irlAlg.getWeights();
 
-    irlAlg2.run();
-    arma::vec weights2 = irlAlg2.getWeights();
-
-
-    cout << "weights         (None): " << weights1.t();
-    cout << "weights (LogDisparity): " << weights2.t();
-
-    arma::mat weights(weights1.n_rows, 2);
-
-    weights.col(0) = weights1;
-    weights.col(1) = weights2;
+    cout << "weights :" << weights.t();
 
 #endif
 
@@ -232,10 +220,10 @@ int main(int argc, char *argv[])
         arma::mat gGrad(2, 2);
         arma::vec dJ;
         arma::vec dD;
-        arma::vec g = irlAlg1.ReinforceBaseGradient(gGrad);
+        arma::vec g = irlAlg.ReinforceBaseGradient(gGrad);
 
-        double Je = irlAlg1.computeJ(dJ);
-        double D = irlAlg1.computeDisparity(dD);
+        double Je = irlAlg.computeJ(dJ);
+        double D = irlAlg.computeDisparity(dD);
         double G2 = as_scalar(g.t()*g);
         valuesG(i) = std::sqrt(G2);
         valuesJ(i) = Je;

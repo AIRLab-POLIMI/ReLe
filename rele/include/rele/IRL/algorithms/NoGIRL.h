@@ -35,9 +35,9 @@ class NoGIRL :public GIRL<ActionC, StateC>
 public:
     NoGIRL(Dataset<ActionC, StateC>& dataset,
            DifferentiablePolicy<ActionC, StateC>& policy,
-           ParametricRegressor& rewardf, double gamma, IrlGrad aType, NormalizationType nType,
+           ParametricRegressor& rewardf, double gamma, IrlGrad aType,
            std::vector<double>& lowerBounds, std::vector<double>& upperBounds) :
-        GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType, nType),
+        GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType),
         upperBounds(upperBounds), lowerBounds(lowerBounds)
     {
 

@@ -252,7 +252,8 @@ public:
         computeGradient(gradient, dGradient);
 
         //nomalize the gradient
-        double f = normalizeGradient(gradient, dGradient, df);
+        double f = arma::as_scalar(gradient.t() * gradient);
+        df = 2.0 * dGradient.t() * gradient;
 
 
         arma::vec df_full = df;
@@ -272,9 +273,7 @@ public:
 
         }
 
-        std::cout << "g2: " << arma::as_scalar(gradient.t() * gradient)
-                  << std::endl;
-        std::cout << "f: " << f << std::endl;
+        std::cout << "g2: " << f << std::endl;
         std::cout << "dwdj: " << dGradient;
         std::cout << "df: " << df.t();
         std::cout << "df_full: " << df_full.t();
@@ -282,87 +281,8 @@ public:
         std::cout << "x_full:  " << parV.t();
         std::cout << "-----------------------------------------" << std::endl;
 
-        // abort();
         return f;
 
-    }
-
-    //======================================================================
-    // METRICS THAT CAN BE INTEGRATED IN THE GIRL OPTIMIZATION
-    //----------------------------------------------------------------------
-    double computeJ(arma::vec& dR)
-    {
-        double J = 0;
-        dR.zeros(rewardf.getParametersSize());
-        int nbEpisodes = data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            //core setup
-            int nbSteps = data[i].size();
-            double df = 1.0;
-
-            //iterate the episode
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                auto tr = data[i][t];
-                J += df
-                     * arma::as_scalar(rewardf(tr.x, tr.u, tr.xn));
-                dR += df * rewardf.diff(tr.x, tr.u, tr.xn);
-                df *= gamma;
-            }
-        }
-
-        return J / static_cast<double>(nbEpisodes);
-
-    }
-
-    double computeDisparity(arma::vec& dD)
-    {
-        double D = 0;
-        dD.zeros(rewardf.getParametersSize());
-
-        int nEpisodes = data.size();
-        for (int i = 0; i < nEpisodes; ++i)
-        {
-            double R = 0;
-            double R2 = 0;
-            arma::vec dR(rewardf.getParametersSize(), arma::fill::zeros);
-            arma::vec dR2(rewardf.getParametersSize(), arma::fill::zeros);
-
-            double Gamma = 0;
-
-            //Compute episode J
-            int nbSteps = data[i].size();
-            double df = 1.0;
-
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                Gamma += df;
-                auto tr = data[i][t];
-                double r = arma::as_scalar(
-                               rewardf(tr.x, tr.u, tr.xn));
-                arma::vec dr = rewardf.diff(tr.x, tr.u, tr.xn);
-                R += df * r;
-                dR += df * dr;
-                R2 += df * r * r;
-                dR2 += df * dr * r;
-
-                df *= gamma;
-            }
-
-            R /= Gamma;
-            R2 /= Gamma;
-
-            D += R2 - R * R;
-            dD += 2.0 * (dR2 - R * dR) / Gamma;
-
-        }
-
-        double N = nEpisodes;
-
-        dD /= N;
-
-        return D / N;
     }
 
     //======================================================================
@@ -1080,9 +1000,9 @@ public:
             double df = 1.0;
             Rew = 0.0;
             phi.zeros();
-            //    #ifdef AUGMENTED
+
             phi(dp) = 1.0;
-            //    #endif
+
             // ********************** //
 
             //iterate the episode
@@ -1190,7 +1110,7 @@ public:
 
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
-        //        std::cout << rnk << " " << fisher << std::endl;
+
         if (rnk == fisher.n_rows)
         {
             nat_grad = arma::solve(fisher, gradient);
@@ -1283,63 +1203,6 @@ private:
             break;
         }
 
-    }
-
-    double normalizeGradient(const arma::vec& gradient,
-                             const arma::mat& dGradient, arma::vec& df)
-    {
-        double g2 = arma::as_scalar(gradient.t() * gradient);
-        arma::vec dg2 = 2.0 * dGradient.t() * gradient;
-
-        switch (nType)
-        {
-        case None:
-            df = dg2;
-            return g2;
-
-        case Disparity:
-        case LogDisparity:
-        {
-            arma::vec dD;
-            double D = computeDisparity(dD);
-            double D2 = D * D;
-
-            arma::vec dD2 = 2.0 * dD * D;
-
-            return normalizeGradientLow(g2, dg2, D2, dD2, df);
-        }
-
-        case SquareNorm:
-        case LogSquareNorm:
-        {
-            arma::vec dJ;
-            double J = computeJ(dJ);
-            double J4 = std::pow(J, 4);
-
-            arma::vec dJ4 = 4.0*dJ*std::pow(J, 3);
-
-            return normalizeGradientLow(g2, dg2, J4, dJ4, df);
-        }
-
-        default:
-            throw std::runtime_error("Normalization type not implemented");
-        }
-    }
-
-    double normalizeGradientLow(double g2, const arma::vec& dg2,
-                                double J, const arma::vec& dJ,
-                                arma::vec& df)
-    {
-        if(nType == LogDisparity || nType == LogSquareNorm)
-        {
-            df = dg2 / g2 - dJ / J;
-            return std::log(g2) - std::log(J);
-        }
-        else
-        {
-            df = (dg2*J - dJ*g2) / (J*J);
-            return g2/J;
-        }
     }
 
 protected:

@@ -122,9 +122,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     GIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype, None);
-    GIRL<DenseAction,DenseState> irlAlg2(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype, LogDisparity);
+                                         mdp.getSettings().gamma, atype);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -138,19 +136,9 @@ int main(int argc, char *argv[])
     //Run GIRL
 #ifdef RUN_GIRL
     irlAlg1.run();
-    arma::vec weights1 = irlAlg1.getWeights();
+    arma::vec weights = irlAlg1.getWeights();
 
-    irlAlg2.run();
-    arma::vec weights2 = irlAlg2.getWeights();
-
-
-    cout << "weights         (None): " << weights1.t();
-    cout << "weights (LogDisparity): " << weights2.t();
-
-    arma::mat weights(weights1.n_rows, 2);
-
-    weights.col(0) = weights1;
-    weights.col(1) = weights2;
+    cout << "weights: " << weights.t();
 
 #endif
 
