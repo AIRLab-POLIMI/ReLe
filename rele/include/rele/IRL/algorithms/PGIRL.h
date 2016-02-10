@@ -44,29 +44,19 @@ public:
 
     PlaneGIRL(Dataset<ActionC,StateC>& dataset,
               DifferentiablePolicy<ActionC,StateC>& policy,
-              BasisFunctions& rewardBasis,
+              LinearApproximator& rewardFunction,
               double gamma, IrlGrad type)
-        : policy(policy), data(dataset), rewardBasis(rewardBasis),
+        : policy(policy), data(dataset), rewardFunction(rewardFunction),
           gamma(gamma)
     {
         nbFunEvals = 0;
 
-        calculator = GradientCalculatorFactory<ActionC, StateC>::build(type, rewardBasis, dataset, policy, gamma);
+        calculator = GradientCalculatorFactory<ActionC, StateC>::build(type, rewardFunction.getFeatures(), dataset, policy, gamma);
     }
 
     virtual ~PlaneGIRL()
     {
         delete calculator;
-    }
-
-    virtual arma::vec getWeights() override
-    {
-        return weights;
-    }
-
-    virtual Policy<ActionC, StateC>* getPolicy() override
-    {
-        return &policy;
     }
 
     void setData(Dataset<ActionC,StateC>& dataset)
@@ -80,8 +70,8 @@ public:
     virtual void run() override
     {
         int dp = policy.getParametersSize();
-        int dr = rewardBasis.size();
-        std::vector<arma::vec> gradients(dr, arma::vec());
+        int dr = rewardFunction.getParametersSize();
+
         arma::mat A = calculator->getGradientDiff();
 
         A.save("/tmp/ReLe/grad.log", arma::raw_ascii);
@@ -197,6 +187,8 @@ public:
 
         //Normalize (L1) weights
         weights /= arma::sum(weights);
+
+        rewardFunction.setParameters(weights);
 
     }
 
@@ -320,7 +312,7 @@ public:
 protected:
     Dataset<ActionC,StateC>& data;
     DifferentiablePolicy<ActionC,StateC>& policy;
-    BasisFunctions& rewardBasis;
+    LinearApproximator& rewardFunction;
     double gamma;
     arma::vec weights;
     unsigned int nbFunEvals;

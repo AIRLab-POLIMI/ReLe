@@ -472,15 +472,6 @@ public:
     //======================================================================
     // GETTERS and SETTERS
     //----------------------------------------------------------------------
-    virtual arma::vec getWeights() override
-    {
-        return rewardf.getParameters();
-    }
-
-    virtual Policy<ActionC, StateC>* getPolicy() override
-    {
-        return &policy;
-    }
 
     void setData(Dataset<ActionC, StateC>& dataset)
     {

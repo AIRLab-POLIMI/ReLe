@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
 
-	IrlGrad atype = IrlGrad::REINFORCE;
+    IrlGrad atype = IrlGrad::REINFORCE;
     int nbEpisodes = 3000;
 
     FileManager fm("nls", "PGIRL");
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
     LinearApproximator rewardRegressor(phiReward);
-    PlaneGIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, basisReward,
+    PlaneGIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, rewardRegressor,
             mdp.getSettings().gamma, atype);
 
     //Info print
@@ -136,66 +136,62 @@ int main(int argc, char *argv[])
     //Run GIRL
 #ifdef RUN_GIRL
     irlAlg1.run();
-    arma::vec weights = irlAlg1.getWeights();
+    arma::vec weights = rewardRegressor.getParameters();
     cout << "weights: " << weights.t();
 #endif
 
 #ifdef RECOVER
 
-    for(unsigned int i = 0; i < weights.n_cols; i++)
-    {
-        rewardRegressor.setParameters(weights.col(i));
+    //Try to recover the initial policy
+    int episodesPerPolicy = 1;
+    int policyPerUpdate = 100;
+    int updates = 400;
+    int episodes = episodesPerPolicy*policyPerUpdate*updates;
 
-        //Try to recover the initial policy
-        int episodesPerPolicy = 1;
-        int policyPerUpdate = 100;
-        int updates = 400;
-        int episodes = episodesPerPolicy*policyPerUpdate*updates;
+    NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
+    AdaptiveStep stepRule(0.01);
+    int nparams = phi.rows();
+    arma::vec mean(nparams, fill::zeros);
 
-        NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
-        AdaptiveStep stepRule(0.01);
-        int nparams = phi.rows();
-        arma::vec mean(nparams, fill::zeros);
+    imitatorPolicy.setParameters(mean);
+    GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
+            mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
 
-        imitatorPolicy.setParameters(mean);
-        GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
-                mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+    ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
+    Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
+    EmptyStrategy<DenseAction, DenseState> emptyStrategy;
+    imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
+    imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    imitatorCore.getSettings().episodeN = episodes;
+    imitatorCore.getSettings().testEpisodeN = nbEpisodes;
+    imitatorCore.runEpisodes();
 
-        ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
-        Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
-        EmptyStrategy<DenseAction, DenseState> emptyStrategy;
-        imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
-        imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
-        imitatorCore.getSettings().episodeN = episodes;
-        imitatorCore.getSettings().testEpisodeN = nbEpisodes;
-        imitatorCore.runEpisodes();
+    cout << "----------------------------------------------------------" << endl;
+    cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
+    cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
 
-        cout << "----------------------------------------------------------" << endl;
-        cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
-        cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
+    //Evaluate policy against the real mdp
+    Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
+    CollectorStrategy<DenseAction, DenseState> collector2;
+    evaluationCore.getSettings().loggerStrategy = &collector2;
+    evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    evaluationCore.getSettings().episodeN = episodes;
+    evaluationCore.getSettings().testEpisodeN = nbEpisodes;
 
-        //Evaluate policy against the real mdp
-        Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
-        CollectorStrategy<DenseAction, DenseState> collector2;
-        evaluationCore.getSettings().loggerStrategy = &collector2;
-        evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
-        evaluationCore.getSettings().episodeN = episodes;
-        evaluationCore.getSettings().testEpisodeN = nbEpisodes;
+    evaluationCore.runTestEpisodes();
 
-        evaluationCore.runTestEpisodes();
+    Dataset<DenseAction,DenseState>& data2 = collector2.data;
 
-        Dataset<DenseAction,DenseState>& data2 = collector2.data;
-
-        double gamma = mdp.getSettings().gamma;
-        cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-        cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
+    double gamma = mdp.getSettings().gamma;
+    cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
+    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
 
 
-        stringstream ss;
-        ss << "TrajectoriesImitator" << i << ".txt";
-        ofstream ofs(fm.addPath(ss.str()));
-        data2.writeToStream(ofs);
-    }
+    stringstream ss;
+    ss << "TrajectoriesImitator" << ".txt";
+    ofstream ofsI(fm.addPath(ss.str()));
+    data2.writeToStream(ofsI);
+
 #endif
 
 

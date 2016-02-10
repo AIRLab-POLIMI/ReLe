@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::GPOMDP;
+    IrlGrad atype = IrlGrad::REINFORCE;
 #ifndef PRINT
     vec eReward = {0.2, 0.7, 0.1};
 #else
@@ -112,21 +112,22 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
 
-    LinearApproximator rewardRegressor(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
+    LinearApproximator rewardRegressor1(phiReward);
+    LinearApproximator rewardRegressor2(phiReward);
+    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor1,
                                         mdp.getSettings().gamma, atype);
 
-    PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, basisReward,
+    PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, rewardRegressor2,
             mdp.getSettings().gamma, atype);
 
 #ifdef RUN
     //Run GIRL
     irlAlg.run();
-    arma::vec gnormw = irlAlg.getWeights();
+    arma::vec gnormw = rewardRegressor1.getParameters();
 
     //Run PGIRL
     irlAlg2.run();
-    arma::vec planew = irlAlg2.getWeights();
+    arma::vec planew = rewardRegressor2.getParameters();
 
 
     //Print results

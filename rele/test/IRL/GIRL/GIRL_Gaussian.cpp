@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 #ifdef RUN
     //Run GIRL
     irlAlg.run();
-    arma::vec gnormw = irlAlg.getWeights();
+    arma::vec gnormw = rewardRegressor.getParameters();
 
     //Print results
     cout << "Optimal Weights: " << arma::zeros(dim).t() << endl;

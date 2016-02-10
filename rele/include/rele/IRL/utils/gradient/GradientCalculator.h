@@ -24,6 +24,8 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_
 
+#include <cassert>
+
 namespace ReLe
 {
 
@@ -31,26 +33,27 @@ template<class ActionC, class StateC>
 class GradientCalculator
 {
 public:
-    GradientCalculator(BasisFunctions& basis,
+    GradientCalculator(Features& phi,
                        Dataset<ActionC,StateC>& data,
                        DifferentiablePolicy<ActionC,StateC>& policy,
                        double gamma):
-        basis(basis), data(data), policy(policy), gamma(gamma),
-        gradientDiff(policy.getParametersSize(), basis.size(), arma::fill::zeros)
+        phi(phi), data(data), policy(policy), gamma(gamma),
+        gradientDiff(policy.getParametersSize(), phi.rows(), arma::fill::zeros)
     {
-    	computed = false;
+        assert(phi.cols() == 1);
+        computed = false;
     }
 
     arma::vec computeGradient(const arma::vec& w)
     {
-    	computeGradientDiff();
+        computeGradientDiff();
 
         return gradientDiff*w;
     }
 
     arma::mat getGradientDiff()
     {
-    	computeGradientDiff();
+        computeGradientDiff();
 
         return gradientDiff;
     }
@@ -62,27 +65,10 @@ public:
 
 
 protected:
-    virtual arma::vec computeGradientFeature(BasisFunction& basis) = 0;
-
-private:
-    virtual void computeGradientDiff()
-    {
-    	if(!computed)
-    	{
-			unsigned int parametersN = policy.getParametersSize();
-			unsigned int featuresN = basis.size();
-
-			for(int i = 0; i < basis.size(); i++)
-			{
-				gradientDiff.col(i) = computeGradientFeature(*basis[i]);
-			}
-
-			computed = true;
-    	}
-    }
+    virtual arma::mat computeGradientDiff() = 0;
 
 protected:
-    BasisFunctions& basis;
+    Features& phi;
     Dataset<ActionC,StateC>& data;
     DifferentiablePolicy<ActionC,StateC>& policy;
     double gamma;
@@ -97,11 +83,13 @@ private:
 }
 
 #define USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC) \
+			protected: \
 			typedef GradientCalculator<ActionC,StateC> Base; \
-			using Base::basis; \
+			using Base::phi; \
 			using Base::data; \
 			using Base::policy; \
-			using Base::gamma;
+			using Base::gamma; \
+			private:
 
 
 #endif /* INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_ */

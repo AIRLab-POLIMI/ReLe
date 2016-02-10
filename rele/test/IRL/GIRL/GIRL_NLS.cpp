@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(8763575);
 
 
-	IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
+    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     int nbEpisodes = 3000;
 
     FileManager fm("nls", "GIRL");
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype);
+                                        mdp.getSettings().gamma, atype);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
     //Run GIRL
 #ifdef RUN_GIRL
     irlAlg.run();
-    arma::vec weights = irlAlg.getWeights();
+    arma::vec weights = rewardRegressor.getParameters();
 
     cout << "weights :" << weights.t();
 

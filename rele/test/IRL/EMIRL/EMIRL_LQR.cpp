@@ -110,13 +110,13 @@ int main(int argc, char *argv[])
 
     arma::mat theta = expert.getParams();
     EMIRL<DenseAction,DenseState> irlAlg(data, theta, p, arma::eye(p.n_elem, p.n_elem),
-                                         phiReward, mdp.getSettings().gamma);
+                                         rewardRegressor, mdp.getSettings().gamma);
 
 
 
     //Run GIRL
     irlAlg.run();
-    arma::vec omega = irlAlg.getWeights();
+    arma::vec omega = rewardRegressor.getParameters();
 
     //Print results
     cout << "Weights (EM): " << omega.t();

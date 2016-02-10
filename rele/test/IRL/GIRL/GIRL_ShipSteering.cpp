@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-	IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
+    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     int nbEpisodes = 3000;
 
     //Learning parameters
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     //Run GIRL
 #ifdef RUN_GIRL
     irlAlg1.run();
-    arma::vec weights = irlAlg1.getWeights();
+    arma::vec weights = rewardRegressor.getParameters();
 
     cout << "weights: " << weights.t();
 

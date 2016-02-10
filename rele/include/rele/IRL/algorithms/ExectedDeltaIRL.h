@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,30 +21,42 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_IRLALGORITHM_H_
-#define INCLUDE_RELE_IRL_IRLALGORITHM_H_
+#ifndef INCLUDE_RELE_IRL_ALGORITHMS_EXECTEDDELTAIRL_H_
+#define INCLUDE_RELE_IRL_ALGORITHMS_EXECTEDDELTAIRL_H_
 
-#include "rele/core/Basics.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class IRLAlgorithm
+class ExpectedDeltaIRL: public IRLAlgorithm<ActionC, StateC>
 {
-    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
-    virtual void run() = 0;
-    virtual ~IRLAlgorithm() { }
+    ExpectedDeltaIRL(Dataset<ActionC, StateC>& data,
+                     DifferentiablePolicy<ActionC, StateC>& policy,
+                     LinearApproximator& rewardf) : data(data), policy(policy), rewardf(rewardf)
+    {
+
+    }
+
+    virtual ~ExpectedDeltaIRL()
+    {
+
+    }
 
 
+    virtual void run() override
+    {
 
+    }
 
+private:
+    Dataset<ActionC, StateC>& data;
+    DifferentiablePolicy<ActionC, StateC>& policy;
+    LinearApproximator& rewardf;
 };
 
 
 }
 
-
-#endif /* INCLUDE_RELE_IRL_IRLALGORITHM_H_ */
+#endif /* INCLUDE_RELE_IRL_ALGORITHMS_EXECTEDDELTAIRL_H_ */
