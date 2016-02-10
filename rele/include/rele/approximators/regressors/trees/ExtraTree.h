@@ -53,12 +53,7 @@ class ExtraTree: public RegressionTree<InputC, OutputC, denseOutput>
     };
 
 public:
-    /**
-     * Basic constructor
-     * @param ex a vector containing the training set
-     * @param k number of selectable attributes to be randomly picked
-     * @param nmin minimum number of tuples in a leaf
-     */
+  
     ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
               unsigned int output_size = 1, int k = 5, unsigned int nmin = 2, double score_th = 0.0)
         : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nmin), leafType(leafType)
@@ -68,17 +63,11 @@ public:
         computeFeaturerelevance = false;
     }
 
-    /**
-     * Empty destructor
-     */
     virtual ~ExtraTree()
     {
 
     }
 
-    /**
-     * Initialize data structures for feature ranking
-     */
     void initFeatureRanks(unsigned int featureSize)
     {
         computeFeaturerelevance = true;
@@ -92,35 +81,23 @@ public:
         root = buildExtraTree(featureDataset);
     }
 
-    /**
-     *
-     */
     virtual void writeOnStream(std::ofstream& out)
     {
         //TODO implement
     }
 
-    /**
-     *
-     */
     virtual void readFromStream(std::ifstream& in)
     {
         //TODO implement
     }
 
-    /**
-     *
-     */
     std::vector<double> evaluateFeatures()
     {
         return featureRelevance;
     }
 
 private:
-    /**
-     * This method build the Extra Tree
-     * @param ex the vector containing the training set
-     */
+
     TreeNode<InputC>* buildExtraTree(const BatchData_<OutputC, denseOutput>& ds)
     {
         /*************** part 1 - END CONDITIONS ********************/
@@ -318,14 +295,6 @@ private:
         }
     }
 
-
-    /**
-     * This method picks a split randomly choosen such that it's greater than the minimum
-     * observations of vector ex and it's less or equal than the maximum one
-     * @param ex the vector containing the observations
-     * @param attsplit number of attribute to split
-     * @return the split value
-     */
     double pickRandomSplit(const BatchData_<OutputC, denseOutput>& ds, int attsplit)
     {
 #ifdef SPLIT_UNIFORM
@@ -381,13 +350,6 @@ private:
 #endif
     }
 
-    /**
-     * This method computes the variance reduction on splitting a dataset
-     * @param ds original dataset
-     * @param dsl one partition
-     * @param dsr the other one
-     * @return the percentage of variance
-     */
     double varianceReduction(const BatchData_<OutputC, denseOutput>& ds,
                              const BatchData_<OutputC, denseOutput>& dsl,
                              const BatchData_<OutputC, denseOutput>& dsr)
@@ -422,13 +384,6 @@ private:
         }
     }
 
-    /**
-     * This method computes the probability that two partition of a dataset has different means
-     * @param ds original dataset
-     * @param dsl one partition
-     * @param dsr the other one
-     * @return the probability value
-     */
     double probabilityDifferentMeans(const BatchData_<OutputC, denseOutput>& ds,
                                      const BatchData_<OutputC, denseOutput>& dsl,
                                      const BatchData_<OutputC, denseOutput>& dsr)
@@ -499,13 +454,6 @@ private:
         return score;
     }
 
-    /**
-     * This method compute the score (relative variance reduction) given by a split
-     * @param s the vector containing the observations
-     * @param sl the left partition of the observations set
-     * @param sr the right partition of the observations set
-     * @return the score
-     */
     double score(const BatchData_<OutputC, denseOutput>& ds,
                  const BatchData_<OutputC, denseOutput>& dsl,
                  const BatchData_<OutputC, denseOutput>& dsr)

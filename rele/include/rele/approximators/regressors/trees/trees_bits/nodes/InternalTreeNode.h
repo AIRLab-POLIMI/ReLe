@@ -31,62 +31,32 @@
 namespace ReLe
 {
 
-/**
- * InternalTreeNode is a template class that represents an internal node
- * of a regression tree.
- * This class extends TreeNode and contains methods to set/get the index
- * used to split the tree, the split value and the pointers to the left
- * and right childs of the node (binary trees).
- * The splitting value is of type double.
- */
 template<class OutputC>
 class InternalTreeNode: public TreeNode<OutputC>
 {
 public:
 
-    /**
-     * Empty constructor
-     */
     InternalTreeNode() :
         axis(-1), split(0), left(nullptr), right(nullptr)
     {
     }
 
-    /**
-     * Basic contructor
-     * @param a the index of splitting
-     * @param s the split value
-     * @param l the pointer to left child
-     * @param r the pointer to right child
-     */
     InternalTreeNode(int a, double s, TreeNode<OutputC>* l,
                      TreeNode<OutputC>* r) :
         axis(a), split(s), left(l), right(r)
     {
     }
 
-    /**
-     * Get axis, axis is the index of the split
-     * @return the axis
-     */
     virtual int getAxis() override
     {
         return axis;
     }
 
-    /**
-     * Get Split
-     * @return the split value
-     */
     virtual double getSplit() override
     {
         return split;
     }
 
-    /**
-     * Get the value of the subtree
-     * @return the value
-     */
     virtual OutputC getValue(const arma::vec& input) override
     {
         if (input[axis] < split)
@@ -99,62 +69,36 @@ public:
         }
     }
 
-    /**
-     * Get Left Child
-     * @return a pointer to the left chid node
-     */
     virtual TreeNode<OutputC>* getLeft() override
     {
         return left;
     }
 
-    /**
-     * Get Right Child
-     * @return a pointer to the right child node
-     */
     virtual TreeNode<OutputC>* getRight() override
     {
         return right;
     }
 
-    /**
-     * Set te axis
-     * @param a the axis
-     */
     void setAxis(int a)
     {
         axis = a;
     }
 
-    /**
-     * Set the split
-     * @param s the split value
-     */
     void setSplit(double s)
     {
         split = s;
     }
 
-    /**
-     * Set the left child
-     * @param l a pointer to the left child node
-     */
     void setLeft(TreeNode<OutputC>* l)
     {
         left = l;
     }
 
-    /**
-     * Set the right child     * @param r a pointer to the right child node
-     */
     void setRight(TreeNode<OutputC>* r)
     {
         right = r;
     }
 
-    /**
-     * Empty destructor
-     */
     virtual ~InternalTreeNode()
     {
         if (left != nullptr && !left->isEmpty())
@@ -167,9 +111,6 @@ public:
         }
     }
 
-    /**
-     *
-     */
     virtual void writeOnStream(std::ofstream& out) override
     {
         out << "N" << std::endl;
@@ -193,9 +134,6 @@ public:
         }
     }
 
-    /**
-     *
-     */
     virtual void readFromStream(std::ifstream& in) override
     {
         //TODO implement

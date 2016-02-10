@@ -35,19 +35,8 @@ class BasisFunction_
 public:
     virtual double operator()(const InputC& input) = 0;
 
-    /**
-     * @brief Write a complete description of the instance to
-     * a stream.
-     * @param out the output stream
-     */
     virtual void writeOnStream(std::ostream& out) = 0;
 
-    /**
-     * @brief Read the description of the basis function from
-     * a file and reset the internal state according to that.
-     * This function is complementary to WriteOnStream
-     * @param in the input stream
-     */
     virtual void readFromStream(std::istream& in) = 0;
 
     /**

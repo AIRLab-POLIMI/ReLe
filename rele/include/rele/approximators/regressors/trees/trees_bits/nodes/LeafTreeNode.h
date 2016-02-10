@@ -29,10 +29,6 @@
 namespace ReLe
 {
 
-/**
- * LeafType is an enum that list all possible leaf types for a tree
- */
-
 enum LeafType
 {
     Constant,
@@ -40,75 +36,43 @@ enum LeafType
     Samples
 };
 
-/**
- * LeafTreeNode is a template class that represents a leaf of a
- * regression tree.
- * This class extends TreeNode and contains methods to set/get the value
- * saved in the node, this value is of type OutputC.
- */
 template<class OutputC, bool denseOutput>
 class LeafTreeNode : public TreeNode<OutputC>
 {
 
 public:
 
-    /**
-     * Empty Constructor
-     */
     LeafTreeNode()
     {
 
     }
 
-    /**
-     * Basic constructor
-     * @param val the value to store in the node
-     */
     LeafTreeNode(const BatchData_<OutputC, denseOutput>& data)
     {
         fit(data);
     }
 
-    /**
-     *
-     */
     virtual ~LeafTreeNode()
     {
 
     }
 
-    /**
-     * Set the value
-     * @param val the value
-     */
     virtual void fit(const BatchData_<OutputC, denseOutput>& data)
     {
         value = data.getMean();
         variance = data.getVariance();
     }
 
-    /**
-     * Get the value
-     * @return the value
-     */
     virtual OutputC getValue(const arma::vec& input) override
     {
         return value;
     }
 
-    /**
-     * This method is used to determine if the object is a leaf or an
-     * internal node
-     * @return true if it is a leaf, false otherwise
-     */
     virtual bool isLeaf() override
     {
         return true;
     }
 
-    /**
-     *
-     */
     virtual void writeOnStream(std::ofstream& out) override
     {
         out << "L" << std::endl;
@@ -116,9 +80,6 @@ public:
         out << variance << std::endl;
     }
 
-    /**
-     *
-     */
     virtual void readFromStream(std::ifstream& in) override
     {
         //TODO implement

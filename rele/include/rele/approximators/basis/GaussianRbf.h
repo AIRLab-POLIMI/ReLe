@@ -34,15 +34,6 @@ public:
         return mean.n_rows;
     }
 
-    /**
-     * @brief generate
-     * It computes equally distributed radial basis functions with 25% of
-     * overlapping and confidence between 95-99%.
-     *
-     * @param n_centers number of centers (same for all dimensions)
-     * @param range N-by-2 matrix with min and max values for the N-dimensional input state
-     * @return the set of Gaussin RBF
-     */
     static BasisFunctions generate(arma::vec& numb_centers, arma::mat& range);
 
     static BasisFunctions generate(unsigned int n_centers, std::initializer_list<double> l);

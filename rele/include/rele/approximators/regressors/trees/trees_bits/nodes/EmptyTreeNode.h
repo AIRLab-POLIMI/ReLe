@@ -38,45 +38,27 @@ public:
 
     }
 
-    /**
-     * Get the value
-     * @return the value
-     */
     virtual OutputC getValue(const arma::vec& input) override
     {
         return defaultValue;
     }
 
-    /**
-     * This method is used to determine if the object is a leaf or an
-     * internal node
-     * @return true if it is a leaf, false otherwise
-     */
     virtual bool isLeaf() override
     {
         return true;
     }
 
-    /**
-     * This method is used to determine if the object is an empty node leaf or not
-     * @return true if it is an empty leaf, false otherwise
-     */
+
     virtual bool isEmpty() override
     {
         return true;
     }
 
-    /**
-     *
-     */
     virtual void writeOnStream (std::ofstream& out) override
     {
         out << "EmptyNode" << std::endl;
     }
 
-    /**
-     *
-     */
     virtual void readFromStream (std::ifstream& in) override
     {
 
