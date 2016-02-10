@@ -52,7 +52,7 @@ protected:
     virtual arma::mat computeGradientDiff() override
     {
         arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
-        arma::vec gradient_J(policy.getParametersSize(), arma::fill::zeros);
+        arma::mat gradient_J(policy.getParametersSize(), phi.rows(), arma::fill::zeros);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -78,8 +78,7 @@ protected:
         for (int t = 0; t < nbSteps; ++t)
         {
             Transition<ActionC, StateC>& tr = episode[t];
-            localg = policy.difflog(tr.x, tr.u);
-            sumGradLog += localg;
+            sumGradLog += policy.difflog(tr.x, tr.u);
         }
 
         return sumGradLog;
@@ -135,7 +134,8 @@ protected:
 
         for (int ep = 0; ep < nbEpisodes; ep++)
         {
-            gradient_J += (Rew.col(ep) - baseline.col(ep)) % sumGradLog_CompEp.col(ep);
+        	for(int r = 0; r < phi.rows(); r++)
+        		gradient_J.col(r) += (Rew(r, ep) - baseline.col(r)) % sumGradLog_CompEp.col(ep);
         }
 
 

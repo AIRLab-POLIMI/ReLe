@@ -46,14 +46,14 @@ public:
 
     arma::vec computeGradient(const arma::vec& w)
     {
-        computeGradientDiff();
+        compute();
 
         return gradientDiff*w;
     }
 
     arma::mat getGradientDiff()
     {
-        computeGradientDiff();
+        compute();
 
         return gradientDiff;
     }
@@ -66,6 +66,19 @@ public:
 
 protected:
     virtual arma::mat computeGradientDiff() = 0;
+
+private:
+    void compute()
+    {
+    	if(!computed)
+    	{
+    		gradientDiff = computeGradientDiff();
+    		computed = true;
+    	}
+
+    }
+
+
 
 protected:
     Features& phi;
