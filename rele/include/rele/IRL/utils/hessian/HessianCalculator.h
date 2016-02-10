@@ -35,12 +35,12 @@ template<class ActionC, class StateC>
 class HessianCalculator
 {
 public:
-    HessianCalculator(BasisFunctions& basis,
+    HessianCalculator(Features& phi,
                       Dataset<ActionC,StateC>& data,
                       DifferentiablePolicy<ActionC,StateC>& policy,
                       double gamma)
     {
-        computeHessianDiff(basis, data, policy, gamma);
+        computeHessianDiff(phi, data, policy, gamma);
     }
 
     arma::mat computeHessian(const arma::vec& w)
@@ -62,13 +62,13 @@ public:
     }
 
 private:
-    void computeHessianDiff(BasisFunctions& basis,
+    void computeHessianDiff(Features& phi,
                             Dataset<ActionC,StateC>& data,
                             DifferentiablePolicy<ActionC,StateC>& policy,
                             double gamma)
     {
         unsigned int parameterSize = policy.getParametersSize();
-        Hdiff.zeros(parameterSize, parameterSize, basis.size());
+        Hdiff.zeros(parameterSize, parameterSize, phi.rows());
 
         for(unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
         {
@@ -80,11 +80,11 @@ private:
                 Transition<ActionC,StateC>& tr = episode[t];
                 arma::mat K = computeK(policy, tr);
 
-                for(unsigned int f = 0; f < basis.size(); f++)
+                arma::vec phi_t = phi(tr.x, tr.u, tr.xn);
+
+                for(unsigned int f = 0; f < phi.rows(); f++)
                 {
-                    BasisFunction& bf = *basis[f];
-                    double phi = bf(vectorize(tr.x, tr.u, tr.xn));
-                    Hdiff.slice(f) += df*K*phi;
+                    Hdiff.slice(f) += df*K*phi_t(f);
                 }
 
                 df *= gamma;

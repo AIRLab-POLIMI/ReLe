@@ -134,35 +134,8 @@ target_link_libraries(gmm_features_test rele)
 add_executable(mleH2O_test IRL/SmartH2O/mleH2OTest.cpp)
 target_link_libraries(mleH2O_test rele)
 
-#add_executable(lqr_GIRL IRL/LQRGIRL.cpp)
-#target_link_libraries(lqr_GIRL rele)
-
-#add_executable(lqr_GMGIRL IRL/GMLQRGIRL.cpp)
-#target_link_libraries(lqr_GMGIRL rele)
-
-#add_executable(lqr_MLEGIRL IRL/MLELQRGIRL.cpp)
-#target_link_libraries(lqr_MLEGIRL rele)
-
-#add_executable(lqr_MLEGIRLALL IRL/MLELQRGIRLALL.cpp)
-#target_link_libraries(lqr_MLEGIRLALL rele)
-
-#add_executable(lqr_MLEGIRLALL1D IRL/MLELQRGIRLALL1D.cpp)
-#target_link_libraries(lqr_MLEGIRLALL1D rele)
-
-#add_executable(lqr_GIRLALL IRL/LQRGIRLALL.cpp)
-#target_link_libraries(lqr_GIRLALL rele)
-
-#add_executable(deep_GIRL IRL/DeepGIRL.cpp)
-#target_link_libraries(deep_GIRL rele)
-
-#add_executable(dam_GIRL IRL/DamGIRL.cpp)
-#target_link_libraries(dam_GIRL rele)
-
-#add_executable(mc_GIRL IRL/McGIRLTest.cpp)
-#target_link_libraries(mc_GIRL rele)
-
-#add_executable(hw_GIRL IRL/HwGIRLTest.cpp)
-#target_link_libraries(hw_GIRL rele)
+add_executable(lqr_ExpectedDeltaIRL IRL/ExpectedDeltaIRL/ExpectedDeltaIRL_LQR.cpp)
+target_link_libraries(lqr_ExpectedDeltaIRL rele)
 
 #Solvers tests
 add_executable(lqr_solver_test solvers/LQRsolverTest.cpp)
