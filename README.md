@@ -6,10 +6,11 @@ External dependencies
 
 To properly compile the ReLe library you must install
 - [Armadillo](http://arma.sourceforge.net/) (>=6.1)
-- [NLopt](http://ab-initio.mit.edu/wiki/index.php/NLopt)
+- [NLopt](http://ab-initio.mit.edu/wiki/index.php/NLopt) (>= 2.4.2)
 - [Boost](http://www.boost.org/) (>= 1.53)
 
-For example, in many Linux distributions you can use the package manager to install them.
+### Linux
+In many Linux distributions you can use the package manager to install them.
 
 **Ubuntu**
 ```
@@ -19,6 +20,15 @@ apt-get install libboost-dev libboost-all-dev libnlopt-dev liblapack-dev libarma
 ```
 yum install boost-devel armadillo-devel openblas-devel lapack-devel
 ```
+
+### Mac OS X
+The easiest way to compile the library in a MAC OS X environment is to use [Homebrew](http://brew.sh/), which provides a package manager for OS X.
+All the external libraries are available in the repository and can be installed using the following command
+```
+brew install boost homebrew/science/armadillo homebrew/science/nlopt
+```
+
+Homebrew provides also cmake package (`brew install cmake`).
 
 COMPILING
 ---------
@@ -45,11 +55,6 @@ To install the library just use also the following command:
 sudo make install
 ```
 
-By default the library is installed in `/usr/local/`. You can change this by setting the cmake variable `${CMAKE_INSTALL_PREFIX}` 
+By default the library is installed in `/usr/local/`. You can change this by setting the cmake variable `${CMAKE_INSTALL_PREFIX}`
 
 Ros features will be disabled.
-
-
-
-
-
