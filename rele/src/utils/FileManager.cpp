@@ -22,6 +22,7 @@
  */
 
 #include "rele/utils/FileManager.h"
+#include <cstdlib>
 
 using namespace std;
 

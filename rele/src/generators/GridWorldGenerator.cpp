@@ -141,11 +141,12 @@ void GridWorldGenerator::handleChar(size_t i, size_t j)
 double GridWorldGenerator::computeProbability(int currentS, int consideredS,
         int actionS)
 {
-    if (currentS == getGoalStateN())
+    if (currentS == getGoalStateN()) {
         if (currentS == consideredS)
             return 1.0;
         else
             return 0;
+    }
 
     if (actionS == consideredS)
         return p;
