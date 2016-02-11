@@ -31,6 +31,7 @@
 #include "rele/algorithms/policy_search/step_rules/StepRules.h"
 
 #include "rele/IRL/utils/IrlGradType.h"
+#include "rele/IRL/utils/FisherMatrixCalculator.h"
 
 #include <nlopt.hpp>
 #include <cassert>
@@ -1045,59 +1046,33 @@ public:
         return nat_grad.rows(0, dp - 1);
     }
 
-    arma::vec NaturalGradient(arma::mat& gGradient)
+    arma::vec NaturalGradient(arma::mat& gNatGradient)
     {
         int dp = policy.getParametersSize();
         int dpr = rewardf.getParametersSize();
-        arma::vec localg;
-        arma::mat fisher(dp, dp, arma::fill::zeros);
-
-        int nbEpisodes = data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            //core setup
-            int nbSteps = data[i].size();
-
-            //iterate the episode
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                Transition<ActionC, StateC>& tr = data[i][t];
-                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
-
-                // *** eNAC CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
-                fisher += localg * localg.t();
-                // ********************** //
-
-                if (tr.xn.isAbsorbing())
-                {
-                    assert(nbSteps == t + 1);
-                    break;
-                }
-            }
-
-        }
-        fisher /= nbEpisodes;
+        arma::mat fisher = FisherMatrixcalculator<ActionC, StateC>::computeFisherMatrix(policy, data);
 
         arma::vec gradient;
-        if (aType == NATURAL_REINFORCE)
-        {
-            gradient = ReinforceGradient(gGradient);
-        }
-        else if (aType == NATURAL_REINFORCE_BASELINE)
-        {
-            gradient = ReinforceBaseGradient(gGradient);
-        }
-        else if (aType == NATURAL_GPOMDP)
-        {
-            gradient = GpomdpGradient(gGradient);
-        }
-        else if (aType == NATURAL_GPOMDP_BASELINE)
-        {
-            gradient = GpomdpBaseGradient(gGradient);
-        }
+        arma::mat gGradient;
 
-        gGradient.zeros(dp, dpr);
+        switch(aType)
+        {
+        case NATURAL_REINFORCE:
+            gradient = ReinforceGradient(gGradient);
+            break;
+
+        case NATURAL_REINFORCE_BASELINE:
+            gradient = ReinforceBaseGradient(gGradient);
+            break;
+
+        case NATURAL_GPOMDP:
+            gradient = GpomdpGradient(gGradient);
+            break;
+
+        case NATURAL_GPOMDP_BASELINE:
+            gradient = GpomdpBaseGradient(gGradient);
+            break;
+        }
 
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
@@ -1105,6 +1080,7 @@ public:
         if (rnk == fisher.n_rows)
         {
             nat_grad = arma::solve(fisher, gradient);
+            gNatGradient = arma::solve(fisher, gGradient);
         }
         else
         {
@@ -1113,6 +1089,7 @@ public:
 
             arma::mat H = arma::pinv(fisher);
             nat_grad = H * gradient;
+            gNatGradient = H * gGradient;
         }
 
         return nat_grad;

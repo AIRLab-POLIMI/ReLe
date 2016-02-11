@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
+    IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
 #ifndef PRINT
     vec eReward = {0.2, 0.7, 0.1};
 #else
