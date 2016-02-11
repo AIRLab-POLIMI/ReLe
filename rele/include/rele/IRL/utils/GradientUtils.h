@@ -25,9 +25,9 @@
 #define INCLUDE_RELE_IRL_UTILS_GRADIENTUTILS_H_
 
 #include "rele/IRL/utils/gradient/ReinforceGradientCalculator.h"
-/*#include "rele/IRL/utils/gradient/GPOMDPGradientCalculator.h"
-#include "rele/IRL/utils/gradient/ENACGradientCalculator.h"
-#include "rele/IRL/utils/gradient/NaturalGradientCalculator.h"*/
+#include "rele/IRL/utils/gradient/GPOMDPGradientCalculator.h"
+/*#include "rele/IRL/utils/gradient/ENACGradientCalculator.h"*/
+#include "rele/IRL/utils/gradient/NaturalGradientCalculator.h"
 #include "rele/IRL/utils/IrlGradType.h"
 
 namespace ReLe
@@ -53,13 +53,13 @@ public:
         case REINFORCE_BASELINE:
             return new ReinforceBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        /*case GPOMDP:
-            return new GPOMDPGradientCalculator<ActionC, StateC>(basis, data, policy, gamma);
+        case GPOMDP:
+            return new GPOMDPGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
         case GPOMDP_BASELINE:
-            return new GPOMDPBaseGradientCalculator<ActionC, StateC>(basis, data, policy, gamma);
+            return new GPOMDPBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        case ENAC:
+        /*case ENAC:
             return new ENACGradientCalculator<ActionC, StateC>(basis, data, policy, gamma);
 
         case ENAC_BASELINE:
@@ -80,17 +80,17 @@ private:
     {
         switch(type)
         {
-        /*case NATURAL_REINFORCE:
-            return new NaturalGradientCalculator<ActionC, StateC, ReinforceGradientCalculator<ActionC, StateC>>(basis, data, policy, gamma);
+        case NATURAL_REINFORCE:
+            return new NaturalGradientCalculator<ActionC, StateC, ReinforceGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
         case NATURAL_REINFORCE_BASELINE:
-            return new NaturalGradientCalculator<ActionC, StateC, ReinforceBaseGradientCalculator<ActionC, StateC>>(basis, data, policy, gamma);
+            return new NaturalGradientCalculator<ActionC, StateC, ReinforceBaseGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
         case NATURAL_GPOMDP:
-            return new NaturalGradientCalculator<ActionC, StateC, GPOMDPGradientCalculator<ActionC, StateC>>(basis, data, policy, gamma);
+            return new NaturalGradientCalculator<ActionC, StateC, GPOMDPGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
         case NATURAL_GPOMDP_BASELINE:
-            return new NaturalGradientCalculator<ActionC, StateC, GPOMDPBaseGradientCalculator<ActionC, StateC>>(basis, data, policy, gamma);*/
+            return new NaturalGradientCalculator<ActionC, StateC, GPOMDPBaseGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
         default:
             return nullptr;

@@ -37,11 +37,11 @@ class NaturalGradientCalculator : public Calculator
     static_assert(std::is_base_of<GradientCalculator<ActionC, StateC>, Calculator>::value,
                   "Not valid Calculator class as template parameter");
 public:
-    NaturalGradientCalculator(BasisFunctions& basis,
+    NaturalGradientCalculator(Features& phi,
                               Dataset<ActionC,StateC>& data,
                               DifferentiablePolicy<ActionC,StateC>& policy,
                               double gamma):
-        Calculator(basis, data, policy,gamma)
+        Calculator(phi, data, policy, gamma)
     {
         fisher = FisherMatrixcalculator<ActionC, StateC>::computeFisherMatrix(policy, data);
     }
@@ -52,12 +52,12 @@ public:
     }
 
 protected:
-    virtual arma::vec computeGradientFeature(BasisFunction& basis) override
+    virtual arma::mat computeGradientDiff() override
     {
-        arma::vec gradient = Calculator::computeGradientFeature(basis);
+        arma::mat gradient = Calculator::computeGradientDiff();
 
 
-        arma::vec nat_grad;
+        arma::mat nat_grad;
         int rnk = arma::rank(fisher);
 
         if (rnk == fisher.n_rows)

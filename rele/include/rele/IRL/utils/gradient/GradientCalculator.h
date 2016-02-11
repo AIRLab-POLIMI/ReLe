@@ -70,11 +70,11 @@ protected:
 private:
     void compute()
     {
-    	if(!computed)
-    	{
-    		gradientDiff = computeGradientDiff();
-    		computed = true;
-    	}
+        if(!computed)
+        {
+            gradientDiff = computeGradientDiff();
+            computed = true;
+        }
 
     }
 

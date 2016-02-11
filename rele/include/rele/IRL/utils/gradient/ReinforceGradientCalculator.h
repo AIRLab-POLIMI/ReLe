@@ -38,7 +38,7 @@ public:
                                 Dataset<ActionC,StateC>& data,
                                 DifferentiablePolicy<ActionC,StateC>& policy,
                                 double gamma):
-        GradientCalculator<ActionC, StateC>(phi, data, policy,gamma)
+        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -52,19 +52,19 @@ protected:
     virtual arma::mat computeGradientDiff() override
     {
         arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
-        arma::mat gradient_J(policy.getParametersSize(), phi.rows(), arma::fill::zeros);
+        arma::mat gradient(policy.getParametersSize(), phi.rows(), arma::fill::zeros);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
             arma::vec sumGradLog = computeSumGradLog(data[i]);
-            gradient_J += sumGradLog * Rew.col(i).t();
+            gradient += sumGradLog * Rew.col(i).t();
         }
 
         // compute mean values
-        gradient_J /= nbEpisodes;
+        gradient /= nbEpisodes;
 
-        return gradient_J;
+        return gradient;
     }
 
 
@@ -89,7 +89,7 @@ protected:
 template<class ActionC, class StateC>
 class ReinforceBaseGradientCalculator : public ReinforceGradientCalculator<ActionC, StateC>
 {
-	USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+    USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
     ReinforceBaseGradientCalculator(Features& phi,
                                     Dataset<ActionC,StateC>& data,
@@ -112,16 +112,16 @@ protected:
         int nbEpisodes = data.size();
 
         arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
-        arma::mat gradient_J(dp, phi.rows(), arma::fill::zeros);
+        arma::mat gradient(dp, phi.rows(), arma::fill::zeros);
 
         arma::mat baseline_num(dp, phi.rows(), arma::fill::zeros);
         arma::vec baseline_den(dp, arma::fill::zeros);
-        arma::mat sumGradLog_CompEp(dp,nbEpisodes);
+        arma::mat sumGradLog_Ep(dp,nbEpisodes);
 
         for (int i = 0; i < nbEpisodes; ++i)
         {
             arma::vec sumGradLog = this->computeSumGradLog(data[i]);
-            sumGradLog_CompEp.col(i) = sumGradLog;
+            sumGradLog_Ep.col(i) = sumGradLog;
 
             // compute the baselines
             baseline_num += (sumGradLog % sumGradLog) * Rew.col(i).t() ;
@@ -134,15 +134,15 @@ protected:
 
         for (int ep = 0; ep < nbEpisodes; ep++)
         {
-        	for(int r = 0; r < phi.rows(); r++)
-        		gradient_J.col(r) += (Rew(r, ep) - baseline.col(r)) % sumGradLog_CompEp.col(ep);
+            for(int r = 0; r < phi.rows(); r++)
+                gradient.col(r) += (Rew(r, ep) - baseline.col(r)) % sumGradLog_Ep.col(ep);
         }
 
 
         // compute mean values
-        gradient_J /= nbEpisodes;
+        gradient /= nbEpisodes;
 
-        return gradient_J;
+        return gradient;
     }
 
 };

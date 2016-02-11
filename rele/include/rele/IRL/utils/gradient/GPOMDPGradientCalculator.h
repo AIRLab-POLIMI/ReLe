@@ -35,11 +35,11 @@ class GPOMDPGradientCalculator : public GradientCalculator<ActionC, StateC>
 {
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
-    GPOMDPGradientCalculator(BasisFunctions& basis,
+    GPOMDPGradientCalculator(Features& phi,
                              Dataset<ActionC,StateC>& data,
                              DifferentiablePolicy<ActionC,StateC>& policy,
                              double gamma):
-        GradientCalculator<ActionC, StateC>(basis, data, policy,gamma)
+        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -50,12 +50,12 @@ public:
     }
 
 protected:
-    virtual arma::vec computeGradientFeature(BasisFunction& rewardf) override
+    virtual arma::mat computeGradientDiff() override
     {
-        int dp  = policy.getParametersSize();
-        arma::vec sumGradLog(dp), localg;
-        arma::vec gradient_J(dp, arma::fill::zeros);
-        double Rew;
+        unsigned int dp  = policy.getParametersSize();
+        unsigned int dr = phi.rows();
+
+        arma::mat gradient(dp, dr, arma::fill::zeros);
 
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
@@ -63,47 +63,29 @@ protected:
             //core setup
             int nbSteps = data[i].size();
 
-
-            // *** GPOMDP CORE *** //
-            sumGradLog.zeros();
+            arma::vec sumGradLog(dp, arma::fill::zeros);
             double df = 1.0;
-            Rew = 0.0;
-            // ********************** //
 
             //iterate the episode
             for (int t = 0; t < nbSteps; ++t)
             {
                 Transition<ActionC, StateC>& tr = data[i][t];
-                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
 
-                // *** GPOMDP CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
-                sumGradLog += localg;
-                double creward = rewardf(vectorize(tr.x, tr.u, tr.xn));
-                Rew += df * creward;
+                sumGradLog += policy.difflog(tr.x, tr.u);
+                arma::vec creward = phi(tr.x, tr.u, tr.xn);
 
                 // compute the gradients
-                Rew += df * creward;
-                for (int p = 0; p < dp; ++p)
-                {
-                    gradient_J[p] += df * creward * sumGradLog(p);
-                }
-                // ********************** //
+                gradient += df * sumGradLog * creward.t();
 
                 df *= gamma;
-
-                if (tr.xn.isAbsorbing())
-                {
-                    assert(nbSteps == t+1);
-                    break;
-                }
             }
 
         }
-        // compute mean values
-        gradient_J /= nbEpisodes;
 
-        return gradient_J;
+        // compute mean values
+        gradient /= nbEpisodes;
+
+        return gradient;
     }
 };
 
@@ -112,11 +94,11 @@ class GPOMDPBaseGradientCalculator : public GradientCalculator<ActionC, StateC>
 {
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
-    GPOMDPBaseGradientCalculator(BasisFunctions& basis,
+    GPOMDPBaseGradientCalculator(Features& phi,
                                  Dataset<ActionC,StateC>& data,
                                  DifferentiablePolicy<ActionC,StateC>& policy,
                                  double gamma):
-        GradientCalculator<ActionC, StateC>(basis, data, policy,gamma)
+        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -127,27 +109,21 @@ public:
     }
 
 protected:
-    virtual arma::vec computeGradientFeature(BasisFunction& rewardf) override
+    virtual arma::mat computeGradientDiff() override
     {
         int dp  = policy.getParametersSize();
+        unsigned int dr = phi.rows();
         int nbEpisodes = data.size();
 
-        int maxSteps = 0;
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            int nbSteps = data[i].size();
-            if (maxSteps < nbSteps)
-                maxSteps = nbSteps;
-        }
+        int maxSteps = data.getEpisodeMaxLength();
 
-        arma::vec sumGradLog(dp), localg;
-        arma::vec gradient_J(dp, arma::fill::zeros);
-        double Rew;
+        arma::mat gradient(dp, dr, arma::fill::zeros);
 
-        arma::mat baseline_J_num(dp, maxSteps, arma::fill::zeros);
+        arma::cube baseline_num(dp, dr, maxSteps, arma::fill::zeros);
         arma::mat baseline_den(dp, maxSteps, arma::fill::zeros);
-        arma::mat reward_J_ObjEpStep(nbEpisodes, maxSteps);
-        arma::cube sumGradLog_CompEpStep(dp,nbEpisodes, maxSteps);
+
+        arma::cube reward_EpStep(nbEpisodes, maxSteps, dr);
+        arma::cube sumGradLog_EpStep(nbEpisodes, maxSteps, dp);
         arma::vec  maxsteps_Ep(nbEpisodes);
 
         for (int ep = 0; ep < nbEpisodes; ++ep)
@@ -155,80 +131,55 @@ protected:
             //core setup
             int nbSteps = data[ep].size();
 
-            sumGradLog.zeros();
             double df = 1.0;
-            Rew = 0.0;
+            arma::vec sumGradLog(dp, arma::fill::zeros);
 
             //iterate the episode
             for (int t = 0; t < nbSteps; ++t)
             {
                 Transition<ActionC, StateC>& tr = data[ep][t];
-                //            std::cout << tr.x << " " << tr.u << " " << tr.xn << " " << tr.r[0] << std::endl;
+                sumGradLog += policy.difflog(tr.x, tr.u);
 
-                // *** GPOMDP CORE *** //
-                localg = policy.difflog(tr.x, tr.u);
-                sumGradLog += localg;
+                // Store the basic elements used to compute the gradients
+                arma::vec creward = phi(tr.x, tr.u, tr.xn);
+                reward_EpStep.tube(ep,t) = df * creward;
+                sumGradLog_EpStep.tube(ep,t) = sumGradLog;
 
-                // store the basic elements used to compute the gradients
-                double creward = rewardf(vectorize(tr.x, tr.u, tr.xn));
-                Rew += df * creward;
-                reward_J_ObjEpStep(ep,t) = df * creward;
-
-
-                for (int p = 0; p < dp; ++p)
-                {
-                    sumGradLog_CompEpStep(p,ep,t) = sumGradLog(p);
-                }
-
-                // compute the baselines
-                for (int p = 0; p < dp; ++p)
-                {
-                    baseline_J_num(p,t) += df * creward * sumGradLog(p) * sumGradLog(p);
-                }
-
-                for (int p = 0; p < dp; ++p)
-                {
-                    baseline_den(p,t) += sumGradLog(p) * sumGradLog(p);
-                }
+                // Compute baseline elements
+                baseline_num.slice(t) += df * (sumGradLog % sumGradLog) * creward.t();
+                baseline_den.col(t) += sumGradLog % sumGradLog;
 
                 df *= gamma;
-
-                if (tr.xn.isAbsorbing())
-                {
-                    assert(nbSteps == t+1);
-                    break;
-                }
             }
 
             // store the actual length of the current episode (<= maxsteps)
             maxsteps_Ep(ep) = nbSteps;
-
         }
 
         // compute the gradients
-        for (int p = 0; p < dp; ++p)
+        for (int ep = 0; ep < nbEpisodes; ++ep)
         {
-            for (int ep = 0; ep < nbEpisodes; ++ep)
+            for (int t = 0; t < maxsteps_Ep(ep); ++t)
             {
-                for (int t = 0; t < maxsteps_Ep(ep); ++t)
-                {
+                //Compute baseline
+                arma::mat baseline = baseline_num.slice(t).each_col() / baseline_den.col(t);
+                baseline(arma::find_nonfinite(baseline)).zeros();
 
-                    double baseline_J = 0;
-                    if (baseline_den(p,t) != 0)
-                    {
-                        baseline_J = baseline_J_num(p,t) / baseline_den(p,t);
-                    }
+                //Get sum of gradients of logarithms of the current step
+                arma::vec sumGradLog_ep_t = sumGradLog_EpStep.tube(ep,t);
 
-                    gradient_J[p] += (reward_J_ObjEpStep(ep,t) - baseline_J) * sumGradLog_CompEpStep(p,ep,t);
-                }
+                //Compute gradient
+                for(int r = 0; r < dr; r++)
+                    gradient.col(r) += (reward_EpStep(ep,t,r) - baseline.col(r)) % sumGradLog_ep_t;
             }
         }
 
         // compute mean values
-        gradient_J /= nbEpisodes;
+        gradient /= nbEpisodes;
 
-        return gradient_J;
+        return gradient;
     }
+
 };
 
 

@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     LinearApproximator rewardRegressor1(phiReward);
     LinearApproximator rewardRegressor2(phiReward);
     ExpectedDeltaIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor1,
-                                        mdp.getSettings().gamma, atype);
+            mdp.getSettings().gamma, atype);
 
     //Run GIRL
     irlAlg.run();
