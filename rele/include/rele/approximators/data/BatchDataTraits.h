@@ -120,12 +120,12 @@ struct output_traits<unsigned int>
 
     static bool isAlmostEqual(const unsigned int& o1, const unsigned int& o2)
     {
-        return std::abs(o1 - o2) < 1e-7;
+        return o1 == o2;
     }
 
     static double errorSquared(const unsigned int& o1, const unsigned int& o2)
     {
-        double e = o1 - o2;
+        double e = static_cast<double>(o1) - o2;
         return e*e;
     }
 };
