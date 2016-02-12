@@ -24,6 +24,8 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENT_ENACGRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENT_ENACGRADIENTCALCULATOR_H_
 
+#include "rele/IRL/utils/gradient/GradientCalculator.h"
+
 namespace ReLe
 {
 
@@ -34,11 +36,11 @@ class ENACGradientCalculator : public GradientCalculator<ActionC, StateC>
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 
 public:
-    ENACGradientCalculator(BasisFunctions& basis,
+    ENACGradientCalculator(Features& phi,
                            Dataset<ActionC,StateC>& data,
                            DifferentiablePolicy<ActionC,StateC>& policy,
                            double gamma):
-        GradientCalculator<ActionC, StateC>(basis, data, policy,gamma)
+        GradientCalculator<ActionC, StateC>(phi, data, policy,gamma)
     {
 
     }
@@ -49,12 +51,12 @@ public:
     }
 
 protected:
-    virtual arma::vec computeGradientFeature(BasisFunction& rewardf) override
+    virtual arma::mat computeGradientDiff() override
     {
         int dp  = policy.getParametersSize();
         arma::vec localg;
         double Rew;
-        arma::vec g(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::vec g(dp+1, arma::fill::zeros), phiP(dp+1);
         arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
 
         int nbEpisodes = data.size();
@@ -65,8 +67,8 @@ protected:
 
             double df = 1.0;
             Rew = 0.0;
-            phi.zeros();
-            phi(dp) = 1.0;
+            phiP.zeros();
+            phiP(dp) = 1.0;
 
             //iterate the episode
             for (int t = 0; t < nbSteps; ++t)
@@ -79,7 +81,7 @@ protected:
 
                 //Construct basis functions
                 for (unsigned int i = 0; i < dp; ++i)
-                    phi[i] += df * localg[i];
+                    phiP[i] += df * localg[i];
 
                 df *= gamma;
 
@@ -90,8 +92,8 @@ protected:
                 }
             }
 
-            fisher += phi * phi.t();
-            g += Rew * phi;
+            fisher += phiP * phiP.t();
+            g += Rew * phiP;
 
         }
 
@@ -119,11 +121,11 @@ class ENACBaseGradientCalculator : public GradientCalculator<ActionC, StateC>
 {
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
-    ENACBaseGradientCalculator(BasisFunctions& basis,
+    ENACBaseGradientCalculator(Features& phi,
                                Dataset<ActionC,StateC>& data,
                                DifferentiablePolicy<ActionC,StateC>& policy,
                                double gamma):
-        GradientCalculator<ActionC, StateC>(basis, data, policy,gamma)
+        GradientCalculator<ActionC, StateC>(phi, data, policy,gamma)
     {
 
     }
@@ -134,12 +136,12 @@ public:
     }
 
 protected:
-    virtual arma::vec computeGradientFeature(BasisFunction& basis) override
+    virtual arma::mat computeGradientDiff() override
     {
         int dp  = policy.getParametersSize();
         arma::vec localg;
         double Rew;
-        arma::vec g(dp+1, arma::fill::zeros), eligibility(dp+1, arma::fill::zeros), phi(dp+1);
+        arma::vec g(dp+1, arma::fill::zeros), eligibility(dp+1, arma::fill::zeros), phiP(dp+1);
         arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
         double Jpol = 0.0;
 
@@ -151,8 +153,8 @@ protected:
 
             double df = 1.0;
             Rew = 0.0;
-            phi.zeros();
-            phi(dp) = 1.0;
+            phiP.zeros();
+            phiP(dp) = 1.0;
 
             //iterate the episode
             for (int t = 0; t < nbSteps; ++t)
@@ -165,7 +167,7 @@ protected:
 
                 //Construct basis functions
                 for (unsigned int i = 0; i < dp; ++i)
-                    phi[i] += df * localg[i];
+                    phiP[i] += df * localg[i];
 
                 df *= gamma;
 
@@ -177,9 +179,9 @@ protected:
             }
 
             Jpol += Rew;
-            fisher += phi * phi.t();
-            g += Rew * phi;
-            eligibility += phi;
+            fisher += phiP * phiP.t();
+            g += Rew * phiP;
+            eligibility += phiP;
 
         }
 

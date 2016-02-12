@@ -26,7 +26,7 @@
 
 #include "rele/IRL/utils/gradient/ReinforceGradientCalculator.h"
 #include "rele/IRL/utils/gradient/GPOMDPGradientCalculator.h"
-/*#include "rele/IRL/utils/gradient/ENACGradientCalculator.h"*/
+#include "rele/IRL/utils/gradient/ENACGradientCalculator.h"
 #include "rele/IRL/utils/gradient/NaturalGradientCalculator.h"
 #include "rele/IRL/utils/IrlGradType.h"
 
@@ -59,11 +59,11 @@ public:
         case GPOMDP_BASELINE:
             return new GPOMDPBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        /*case ENAC:
-            return new ENACGradientCalculator<ActionC, StateC>(basis, data, policy, gamma);
+        case ENAC:
+            return new ENACGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
         case ENAC_BASELINE:
-            return new ENACGradientCalculator<ActionC, StateC>(basis, data, policy, gamma);*/
+            return new ENACGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
         default:
             return buildNatural(type, phi, data, policy, gamma);
