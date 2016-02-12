@@ -434,18 +434,6 @@ public:
             std::cout << "NO feature reduction!" << std::endl;
     }
 
-    /**
-     * @brief Compute the feature expectation and identifies the constant features
-     * The function computes the features expectation over trajecteries that can be
-     * used to remove the features that are never or rarelly visited under the given
-     * samples.
-     * Moreover, it identifies the features that are constant. We consider a feature
-     * constant when its range (max-min) over an episode is less then a threshold.
-     * Clearly, this condition must hold for every episode.
-     * @param const_features vector storing the indexis of the constant features
-     * @param tol threshold used to test the range
-     * @return the feature expectation
-     */
     arma::vec preproc_linear_reward(arma::uvec& const_features, double tol =
                                         1e-4)
     {

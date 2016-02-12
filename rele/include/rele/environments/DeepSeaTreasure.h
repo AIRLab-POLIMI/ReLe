@@ -26,12 +26,6 @@
 
 #include "rele/core/DenseMDP.h"
 
-/**
- * Environment designed according to
- *
- * TODO
- */
-
 namespace ReLe
 {
 
