@@ -1,0 +1,809 @@
+
+///////////////////////////////
+// GaussianRbf
+///////////////////////////////
+
+/**
+ * @brief generate
+ * It computes equally distributed radial basis functions with 25% of
+ * overlapping and confidence between 95-99%.
+ *
+ * @param n_centers number of centers (same for all dimensions)
+ * @param range N-by-2 matrix with min and max values for the N-dimensional input state
+ * @return the set of Gaussin RBF
+ */
+static BasisFunctions generate(arma::vec& numb_centers, arma::mat& range);
+
+///////////////////////////////
+// EmptyTreeNode
+///////////////////////////////
+
+/**
+ * Get the value
+ * @return the value
+ */
+virtual OutputC getValue(const arma::vec& input) override
+
+/**
+ * This method is used to determine if the object is a leaf or an
+ * internal node
+ * @return true if it is a leaf, false otherwise
+ */
+virtual bool isLeaf() override
+
+/**
+ * This method is used to determine if the object is an empty node leaf or not
+ * @return true if it is an empty leaf, false otherwise
+ */
+virtual bool isEmpty() override
+
+
+///////////////////////////////
+// InternalTreeNode
+///////////////////////////////
+/**
+ * InternalTreeNode is a template class that represents an internal node
+ * of a regression tree.
+ * This class extends TreeNode and contains methods to set/get the index
+ * used to split the tree, the split value and the pointers to the left
+ * and right childs of the node (binary trees).
+ * The splitting value is of type double.
+ */
+template<class OutputC>
+class InternalTreeNode: public TreeNode<OutputC>
+{
+public:
+
+    /**
+     * Empty constructor
+     */
+    InternalTreeNode() :
+        axis(-1), split(0), left(nullptr), right(nullptr)
+    {
+    }
+
+    /**
+     * Basic contructor
+     * @param a the index of splitting
+     * @param s the split value
+     * @param l the pointer to left child
+     * @param r the pointer to right child
+     */
+    InternalTreeNode(int a, double s, TreeNode<OutputC>* l,
+                     TreeNode<OutputC>* r) :
+        axis(a), split(s), left(l), right(r)
+    {
+    }
+
+    /**
+     * Get axis, axis is the index of the split
+     * @return the axis
+     */
+    virtual int getAxis() override
+    {
+        return axis;
+    }
+
+    /**
+     * Get Split
+     * @return the split value
+     */
+    virtual double getSplit() override
+    {
+        return split;
+    }
+
+    /**
+     * Get the value of the subtree
+     * @return the value
+     */
+    virtual OutputC getValue(const arma::vec& input) override
+    {
+        if (input[axis] < split)
+        {
+            return left->getValue(input);
+        }
+        else
+        {
+            return right->getValue(input);
+        }
+    }
+
+    /**
+     * Get Left Child
+     * @return a pointer to the left chid node
+     */
+    virtual TreeNode<OutputC>* getLeft() override
+    {
+        return left;
+    }
+
+    /**
+     * Get Right Child
+     * @return a pointer to the right child node
+     */
+    virtual TreeNode<OutputC>* getRight() override
+    {
+        return right;
+    }
+
+    /**
+     * Set te axis
+     * @param a the axis
+     */
+    void setAxis(int a)
+    {
+        axis = a;
+    }
+
+    /**
+     * Set the split
+     * @param s the split value
+     */
+    void setSplit(double s)
+    {
+        split = s;
+    }
+
+    /**
+     * Set the left child
+     * @param l a pointer to the left child node
+     */
+    void setLeft(TreeNode<OutputC>* l)
+    {
+        left = l;
+    }
+
+    /**
+     * Set the right child     * @param r a pointer to the right child node
+     */
+    void setRight(TreeNode<OutputC>* r)
+    {
+        right = r;
+    }
+
+    /**
+     * Empty destructor
+     */
+    virtual ~InternalTreeNode()
+    {
+        if (left != nullptr && !left->isEmpty())
+        {
+            delete left;
+        }
+        if (right != nullptr && !right->isEmpty())
+        {
+            delete right;
+        }
+    }
+
+    /**
+     *
+     */
+    virtual void writeOnStream(std::ofstream& out) override
+    {
+        out << "N" << std::endl;
+        out << axis << " " << split;
+        out << std::endl;
+        if (left)
+        {
+            out << *left;
+        }
+        else
+        {
+            out << "Empty" << std::endl;
+        }
+        if (right)
+        {
+            out << *right;
+        }
+        else
+        {
+            out << "Empty" << std::endl;
+        }
+    }
+
+    /**
+     *
+     */
+    virtual void readFromStream(std::ifstream& in) override
+    {
+        //TODO implement
+    }
+
+private:
+    int axis;  // the axis of split
+    double split;  // the value of split
+    TreeNode<OutputC>* left;  // pointer to right child
+    TreeNode<OutputC>* right;  // pointer to left child
+};
+
+}
+
+///////////////////////////
+// LeafTreeNode
+//////////////////////////
+
+/**
+ * LeafType is an enum that list all possible leaf types for a tree
+ */
+enum LeafType
+{
+    Constant,
+    Linear,
+    Samples
+};
+
+/**
+ * LeafTreeNode is a template class that represents a leaf of a
+ * regression tree.
+ * This class extends TreeNode and contains methods to set/get the value
+ * saved in the node, this value is of type OutputC.
+ */
+template<class OutputC, bool denseOutput>
+class LeafTreeNode : public TreeNode<OutputC>
+{
+
+public:
+
+    /**
+     * Empty Constructor
+     */
+    LeafTreeNode()
+    {
+
+    }
+
+    /**
+     * Basic constructor
+     * @param val the value to store in the node
+     */
+    LeafTreeNode(const BatchData_<OutputC, denseOutput>& data)
+    {
+        fit(data);
+    }
+
+    /**
+     *
+     */
+    virtual ~LeafTreeNode()
+    {
+
+    }
+
+    /**
+     * Set the value
+     * @param val the value
+     */
+    virtual void fit(const BatchData_<OutputC, denseOutput>& data)
+    {
+        value = data.getMean();
+        variance = data.getVariance();
+    }
+
+    /**
+     * Get the value
+     * @return the value
+     */
+    virtual OutputC getValue(const arma::vec& input) override
+    {
+        return value;
+    }
+
+    /**
+     * This method is used to determine if the object is a leaf or an
+     * internal node
+     * @return true if it is a leaf, false otherwise
+     */
+    virtual bool isLeaf() override
+    {
+        return true;
+    }
+
+    /**
+     *
+     */
+    virtual void writeOnStream(std::ofstream& out) override
+    {
+        out << "L" << std::endl;
+        out << value << std::endl;
+        out << variance << std::endl;
+    }
+
+    /**
+     *
+     */
+    virtual void readFromStream(std::ifstream& in) override
+    {
+        //TODO implement
+    }
+
+protected:
+    OutputC value; // The value
+    arma::mat variance; //The variance
+
+};
+
+template<class OutputC, bool denseOutput>
+class SampleLeafTreeNode : public LeafTreeNode<OutputC, denseOutput>
+{
+public:
+    SampleLeafTreeNode(BatchData_<OutputC, denseOutput>* dataSet)
+        : LeafTreeNode<OutputC, denseOutput>(*dataSet), dataSet(dataSet)
+    {
+
+    }
+
+    ~SampleLeafTreeNode()
+    {
+        delete dataSet;
+    }
+
+private:
+    BatchData_<OutputC, denseOutput>* dataSet;
+};
+
+template<class OutputC, bool denseOutput>
+class LinearLeafTreeNode : public LeafTreeNode<OutputC, denseOutput>
+{
+
+};
+
+}
+
+//////////////////////////////////
+// TreeNode
+//////////////////////////////////
+
+/**
+ * AbstractTreeNode is a class that represents an abstract node of a regression
+ * tree. The method isLeaf() is used to determine if it is a leaf or an
+ * internal node.
+ */
+template<class OutputC>
+class TreeNode
+{
+public:
+
+    /**
+     * Empty Constructor
+     */
+    TreeNode() {}
+
+    /**
+     * Empty Destructor
+     */
+    virtual ~TreeNode() {}
+
+    /**
+     * This method is used to determine if the object is a leaf or an
+     * internal node
+     * @return true if it is a leaf, false otherwise
+     */
+    virtual bool isLeaf()
+    {
+        return false;
+    }
+
+    /**
+     * This method is used to determine if the object is an empty node leaf or not
+     * @return true if it is an empty leaf, false otherwise
+     */
+    virtual bool isEmpty()
+    {
+        return false;
+    }
+
+    /**
+     * Get axis, axis is the index of the split
+     * @return the axis
+     */
+    virtual int getAxis()
+    {
+        return -1;
+    }
+
+    /**
+     * Get the value of the subtree
+     * @return the value
+     */
+    virtual OutputC getValue(const arma::vec& input) = 0;
+
+    /**
+     * Get Split
+     * @return the split value
+     */
+    virtual double getSplit()
+    {
+        return -1;
+    }
+
+    /**
+     * Get Left Child
+     * @return a pointer to the left child node
+     */
+    virtual TreeNode<OutputC>* getLeft()
+    {
+        return nullptr;
+    }
+
+    /**
+     * Get Right Child
+     * @return a pointer to the right child node
+     */
+    virtual TreeNode<OutputC>* getRight()
+    {
+        return nullptr;
+    }
+
+    /**
+     *
+     */
+    virtual void writeOnStream (std::ofstream& out) = 0;
+
+    /**
+     *
+     */
+    virtual void readFromStream (std::ifstream& in) = 0;
+
+    /**
+     *
+     */
+    friend std::ofstream& operator<< (std::ofstream& out, TreeNode<OutputC>& n)
+    {
+        n.writeOnStream(out);
+        return out;
+    }
+
+    /**
+     *
+     */
+    friend std::ifstream& operator>> (std::ifstream& in, TreeNode<OutputC>& n)
+    {
+        n.readFromStream(in);
+        return in;
+    }
+
+};
+
+
+}
+
+
+/////////////////////////////////
+// ExtraTree
+/////////////////////////////////
+
+    /**
+     * Basic constructor
+     * @param ex a vector containing the training set
+     * @param k number of selectable attributes to be randomly picked
+     * @param nmin minimum number of tuples in a leaf
+     */
+    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
+              unsigned int output_size = 1, int k = 5, unsigned int nmin = 2, double score_th = 0.0) {}
+
+/**
+ * Initialize data structures for feature ranking
+ */
+void initFeatureRanks(unsigned int featureSize)
+{}
+
+    /**
+     * This method build the Extra Tree
+     * @param ex the vector containing the training set
+     */
+    TreeNode<InputC>* buildExtraTree(const BatchData_<OutputC, denseOutput>& ds){}
+
+/**
+ * This method picks a split randomly choosen such that it's greater than the minimum
+ * observations of vector ex and it's less or equal than the maximum one
+ * @param ex the vector containing the observations
+ * @param attsplit number of attribute to split
+ * @return the split value
+ */
+double pickRandomSplit(const BatchData_<OutputC, denseOutput>& ds, int attsplit){}
+
+
+    /**
+     * This method computes the variance reduction on splitting a dataset
+     * @param ds original dataset
+     * @param dsl one partition
+     * @param dsr the other one
+     * @return the percentage of variance
+     */
+    double varianceReduction(const BatchData_<OutputC, denseOutput>& ds,
+                             const BatchData_<OutputC, denseOutput>& dsl,
+                             const BatchData_<OutputC, denseOutput>& dsr){}
+
+                             /**
+                              * This method computes the probability that two partition of a dataset has different means
+                              * @param ds original dataset
+                              * @param dsl one partition
+                              * @param dsr the other one
+                              * @return the probability value
+                              */
+                             double probabilityDifferentMeans(const BatchData_<OutputC, denseOutput>& ds,
+                                                              const BatchData_<OutputC, denseOutput>& dsl,
+                                                              const BatchData_<OutputC, denseOutput>& dsr)
+                                                              {}
+
+                                                              /**
+                                                               * This method compute the score (relative variance reduction) given by a split
+                                                               * @param s the vector containing the observations
+                                                               * @param sl the left partition of the observations set
+                                                               * @param sr the right partition of the observations set
+                                                               * @return the score
+                                                               */
+                                                              double score(const BatchData_<OutputC, denseOutput>& ds,
+                                                                           const BatchData_<OutputC, denseOutput>& dsl,
+                                                                           const BatchData_<OutputC, denseOutput>& dsr) {}
+
+
+////////////////////////////////////
+// KDTree
+////////////////////////////////////
+
+/**
+ * This class implements kd-tree algorithm.
+ * KD-Trees (K-Dimensional Trees) are a particular type of regression
+ * trees, in fact this class extends the RegressionTree one.
+ * In this method the regression tree is built from the training set by
+ * choosing the cut-point at the local median of the cut-direction so
+ * that the tree partitions the local training set into two subsets of
+ * the same cardinality. The cut-directions alternate from one node to
+ * the other: if the direction of cut is i j for the parent node, it is
+ * equal to i j+1 for the two children nodes if j+1 < n with n the number
+ * of possible cut-directions and i1 otherwise. A node is a leaf (i.e.,
+ * is not partitioned) if the training sample corresponding to this node
+ * contains less than nmin tuples. In this method the tree structure is
+ * independent of the output values of the training sample.
+ */
+template<class InputC, class OutputC, bool denseOutput = true>
+class KDTree: public RegressionTree<InputC, OutputC, denseOutput>
+{
+    USE_REGRESSION_TREE_MEMBERS
+
+public:
+
+    /**
+     * Basic constructor
+     * @param nm nmin, the minimum number of tuples for splitting
+     */
+    KDTree(Features_<InputC, denseOutput>& phi, const EmptyTreeNode<OutputC>& emptyNode,
+           unsigned int output_size = 1, unsigned int nMin = 2)
+        : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nMin)
+    {
+
+    }
+
+    /**
+     * Empty destructor
+     */
+    virtual ~KDTree()
+    {
+
+    }
+
+    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    {
+        this->cleanTree();
+        root = buildKDTree(featureDataset, 0);
+    }
+
+    /**
+     *
+     */
+    virtual void writeOnStream(std::ofstream& out)
+    {
+        out << *root;
+    }
+
+    /**
+     *
+     */
+    virtual void readFromStream(std::ifstream& in)
+    {
+        //TODO implement
+    }
+
+private:
+
+    /**
+     * This method checks if all the inputs of a cut direction are constant
+     * @param ex the vector containing the inputs
+     * @param cutDir the cut direction
+     * @return true if all the inputs are constant, false otherwise
+     */
+    double computeMedian(const BatchData_<OutputC, denseOutput>& ds, int cutDir)
+    {
+        std::vector<double> tmp;
+
+        for (unsigned int i = 0; i < ds.size(); i++)
+        {
+            auto&& element = ds.getInput(i);
+            tmp.push_back(element[cutDir]);
+        }
+
+        sort(tmp.begin(), tmp.end());
+        tmp.erase(unique(tmp.begin(), tmp.end()), tmp.end());
+
+        return tmp.at(tmp.size() / 2);
+
+    }
+
+    bool fixedInput(const BatchData_<OutputC, denseOutput>& ds, int cutDir)
+    {
+        if (ds.size() == 0)
+        {
+            return true;
+        }
+
+        auto&& element = ds.getInput(0);
+        double val = element[cutDir];
+        for (unsigned int i = 1; i < ds.size(); i++)
+        {
+            auto&& newElement = ds.getInput(i);
+            double newVal = newElement[cutDir];
+            if (std::abs(val - newVal) > THRESHOLD)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * This method build the KD-Tree
+     * @param ex the vector containing the training set
+     * @param cutDir the current cut direction
+     * @param store_sample allow to store samples into leaves
+     * @return a pointer to the root
+     */
+    TreeNode<OutputC>* buildKDTree(const BatchData_<OutputC, denseOutput>& ds,
+                                   int cutDir, bool store_sample = false)
+    {
+        unsigned int size = ds.size();
+        /*****************part 1: end conditions*********************/
+        if (size < nMin)
+        {
+            // if true -> leaf
+            if (size == 0)
+            {
+                // if true -> empty leaf
+                return &emptyNode;
+            }
+            else
+            {
+                return this->buildLeaf(ds, store_sample ? Samples : Constant);
+            }
+        }
+
+        // control if inputs are all constants
+        int cutTmp = cutDir;
+        bool equal = false;
+        while (fixedInput(ds, cutTmp) && !equal)
+        {
+            cutTmp = (cutTmp + 1) % ds.featuresSize();
+            if (cutTmp == cutDir)
+            {
+                equal = true;
+            }
+        }
+
+        // if constants create a leaf
+        if (equal)
+        {
+            return this->buildLeaf(ds, store_sample ? Samples : Constant);
+        }
+
+        /****************part 2: generate the tree**************/
+        //  begin operations to split the training set
+        double cutPoint = computeMedian(ds, cutDir);
+
+        arma::uvec indexesLow;
+        arma::uvec indexesHigh;
+
+        // split inputs in two subsets
+        this->splitDataset(ds, cutDir, cutPoint, indexesLow, indexesHigh);
+
+        BatchData_<OutputC, denseOutput>* lowEx = ds.cloneSubset(indexesLow);
+        BatchData_<OutputC, denseOutput>* highEx = ds.cloneSubset(indexesHigh);
+
+        // recall the method for left and right child
+        TreeNode<OutputC>* left = buildKDTree(*lowEx, (cutDir + 1) % ds.featuresSize(), store_sample);
+        TreeNode<OutputC>* right = buildKDTree(*highEx, (cutDir + 1) % ds.featuresSize(), store_sample);
+
+        delete lowEx;
+        delete highEx;
+
+        // return the current node
+        return new InternalTreeNode<OutputC>(cutDir, cutPoint, left, right);
+    }
+
+private:
+    static constexpr double THRESHOLD = 1e-8;
+
+};
+
+////////////////////////////////////
+// INTERNETMAB
+////////////////////////////////////
+
+/*
+ * This class is very related to the experiments presented in
+ * "Estimating the Maximum Expected Value: An Analysis of (Nested) Cross
+ * Validation and the Maximum Sample Average" (Hado Van Hasselt). Thus, it has not to be
+ * used as a general interface for internet ads experiments. Nevertheless,
+ * it can be easily changed for other type of experiments.
+ */
+
+ ////////////////////////////////////
+ // DISCRETEADS
+ ////////////////////////////////////
+
+ class DiscreteMAB: public MAB<FiniteAction>
+ {
+
+     /*
+      * This class represents the simple MAB environment in which
+      * each action i has Pi probability to give a reward. Probabilities
+      * of each action are stored in P and respective rewards in R.
+      * Different kinds of constructors are available.
+      * Actions are identified by the indexes of P and R.
+      */
+
+ public:
+     /**
+      *
+      * @param P probability vector
+      * @param R reward vector
+      * @param horizon decision horizon for the associated MAB algorithm
+      *
+      */
+     DiscreteMAB(arma::vec P, arma::vec R, unsigned int horizon = 1);
+     DiscreteMAB(arma::vec P, double r = 1, unsigned int horizon = 1);
+     /**
+      *
+      * @param P probability vector (has to be of dimension nArms)
+      * @param minRange minimum of the reward
+      * @param maxRange maximum of the reward
+      * @param nArms number of different rewards, which increases linearly
+      * @param horizon decision horizon for the associated MAB algorithm
+      *
+      */
+     /*
+         DiscreteMAB(arma::vec P, unsigned int nArms, double minRange = 0, double maxRange = 1, unsigned int horizon = 1);
+     */
+     DiscreteMAB(unsigned int nArms, double r, unsigned int horizon = 1);
+     DiscreteMAB(unsigned int nArms, unsigned int horizon = 1);
+     arma::vec getP();
+     virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
+
+ protected:
+     arma::vec P;
+     arma::vec R;
+ };
+
+
+
+  ////////////////////////////////////
+  // GIRL
+  ////////////////////////////////////
+
+ /**
+  * @brief Compute the feature expectation and identifies the constant features
+  * The function computes the features expectation over trajecteries that can be
+  * used to remove the features that are never or rarelly visited under the given
+  * samples.
+  * Moreover, it identifies the features that are constant. We consider a feature
+  * constant when its range (max-min) over an episode is less then a threshold.
+  * Clearly, this condition must hold for every episode.
+  * @param const_features vector storing the indexis of the constant features
+  * @param tol threshold used to test the range
+  * @return the feature expectation
+  */
+ arma::vec preproc_linear_reward(arma::uvec& const_features, double tol =
+                                     1e-4)
+ {}
