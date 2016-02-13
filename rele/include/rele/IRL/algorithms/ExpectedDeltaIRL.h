@@ -47,6 +47,8 @@ public:
                      LinearApproximator& rewardf, double gamma, IrlGrad type) :
         data(data), policy(policy), rewardf(rewardf)
     {
+        nbFunEvals = 0;
+
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);
         hessianCalculator = new HessianCalculator<ActionC, StateC>(

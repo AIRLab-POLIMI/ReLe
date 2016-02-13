@@ -29,18 +29,15 @@
 namespace ReLe
 {
 
-
 template<class ActionC, class StateC>
-class ENACGradientCalculator : public GradientCalculator<ActionC, StateC>
+class ENACGradientCalculator: public GradientCalculator<ActionC, StateC>
 {
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 
 public:
-    ENACGradientCalculator(Features& phi,
-                           Dataset<ActionC,StateC>& data,
-                           DifferentiablePolicy<ActionC,StateC>& policy,
-                           double gamma):
-        GradientCalculator<ActionC, StateC>(phi, data, policy,gamma)
+    ENACGradientCalculator(Features& phi, Dataset<ActionC, StateC>& data,
+                           DifferentiablePolicy<ActionC, StateC>& policy, double gamma) :
+        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -53,52 +50,31 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() override
     {
-        int dp  = policy.getParametersSize();
-        arma::vec localg;
-        double Rew;
-        arma::vec g(dp+1, arma::fill::zeros), phiP(dp+1);
-        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
+        int dp = policy.getParametersSize();
+        int dr = phi.rows();
+        arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
 
+        arma::mat g(dp + 1, dr, arma::fill::zeros);
+        arma::mat fisher(dp + 1, dp + 1, arma::fill::zeros);
+
+        // compute gradient and extended fisher matrix
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
-            //core setup
-            int nbSteps = data[i].size();
+            arma::vec psi(dp + 1);
 
-            double df = 1.0;
-            Rew = 0.0;
-            phiP.zeros();
-            phiP(dp) = 1.0;
+            psi.rows(0, dp - 1) = this->computeSumGradLog(data[i]);
+            psi(dp) = 1.0;
 
-            //iterate the episode
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                Transition<ActionC, StateC>& tr = data[i][t];
-
-                localg = policy.difflog(tr.x, tr.u);
-                double creward = rewardf(vectorize(tr.x, tr.u, tr.xn));
-                Rew += df * creward;
-
-                //Construct basis functions
-                for (unsigned int i = 0; i < dp; ++i)
-                    phiP[i] += df * localg[i];
-
-                df *= gamma;
-
-                if (tr.xn.isAbsorbing())
-                {
-                    assert(nbSteps == t+1);
-                    break;
-                }
-            }
-
-            fisher += phiP * phiP.t();
-            g += Rew * phiP;
-
+            fisher += psi * psi.t();
+            g += psi * Rew.col(i).t();
         }
 
+        // compute mean value
+        fisher /= nbEpisodes;
+        g /= nbEpisodes;
 
-        arma::vec nat_grad;
+        arma::mat nat_grad;
         int rnk = arma::rank(fisher);
         if (rnk == fisher.n_rows)
         {
@@ -106,26 +82,25 @@ protected:
         }
         else
         {
-            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk
+                      << ")!!! Should be " << fisher.n_rows << std::endl;
 
             arma::mat H = arma::pinv(fisher);
             nat_grad = H * g;
         }
 
-        return nat_grad.rows(0,dp-1);
+        return nat_grad.rows(0, dp - 1);
     }
 };
 
 template<class ActionC, class StateC>
-class ENACBaseGradientCalculator : public GradientCalculator<ActionC, StateC>
+class ENACBaseGradientCalculator: public GradientCalculator<ActionC, StateC>
 {
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
-    ENACBaseGradientCalculator(Features& phi,
-                               Dataset<ActionC,StateC>& data,
-                               DifferentiablePolicy<ActionC,StateC>& policy,
-                               double gamma):
-        GradientCalculator<ActionC, StateC>(phi, data, policy,gamma)
+    ENACBaseGradientCalculator(Features& phi, Dataset<ActionC, StateC>& data,
+                               DifferentiablePolicy<ActionC, StateC>& policy, double gamma) :
+        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -138,51 +113,28 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() override
     {
-        int dp  = policy.getParametersSize();
-        arma::vec localg;
-        double Rew;
-        arma::vec g(dp+1, arma::fill::zeros), eligibility(dp+1, arma::fill::zeros), phiP(dp+1);
-        arma::mat fisher(dp+1,dp+1, arma::fill::zeros);
-        double Jpol = 0.0;
+        int dp = policy.getParametersSize();
+        int dr = phi.rows();
+        arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
 
+        arma::mat g(dp + 1, dr, arma::fill::zeros);
+        arma::mat fisher(dp + 1, dp + 1, arma::fill::zeros);
+        arma::vec Jpol(dr, arma::fill::zeros);
+        arma::vec eligibility(dp + 1, arma::fill::zeros);
+
+        // compute gradient and extended fisher matrix
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
-            //core setup
-            int nbSteps = data[i].size();
 
-            double df = 1.0;
-            Rew = 0.0;
-            phiP.zeros();
-            phiP(dp) = 1.0;
+            arma::vec psi(dp + 1);
+            psi.rows(0, dp - 1) = this->computeSumGradLog(data[i]);
+            psi(dp) = 1.0;
 
-            //iterate the episode
-            for (int t = 0; t < nbSteps; ++t)
-            {
-                Transition<ActionC, StateC>& tr = data[i][t];
-
-                localg = policy.difflog(tr.x, tr.u);
-                double creward = rewardf(tr.x, tr.u, tr.xn);
-                Rew += df * creward;
-
-                //Construct basis functions
-                for (unsigned int i = 0; i < dp; ++i)
-                    phiP[i] += df * localg[i];
-
-                df *= gamma;
-
-                if (tr.xn.isAbsorbing())
-                {
-                    assert(nbSteps == t+1);
-                    break;
-                }
-            }
-
-            Jpol += Rew;
-            fisher += phiP * phiP.t();
-            g += Rew * phiP;
-            eligibility += phiP;
-
+            fisher += psi * psi.t();
+            g += psi * Rew.col(i).t();
+            eligibility += psi;
+            Jpol += Rew.col(i);
         }
 
         // compute mean value
@@ -191,35 +143,36 @@ protected:
         eligibility /= nbEpisodes;
         Jpol /= nbEpisodes;
 
-        arma::vec nat_grad;
+        arma::mat nat_grad;
         int rnk = arma::rank(fisher);
 
         if (rnk == fisher.n_rows)
         {
-            arma::mat tmp = arma::solve(nbEpisodes * fisher - eligibility * eligibility.t(), eligibility);
-            arma::mat Q = (1 + eligibility.t() * tmp) / nbEpisodes;
-            arma::mat b = Q * (Jpol - eligibility.t() * arma::solve(fisher, g));
-            arma::vec grad = g - eligibility * b;
+            arma::mat tmp = arma::solve(
+                                nbEpisodes * fisher - eligibility * eligibility.t(),
+                                eligibility);
+            double Q = (1 + arma::as_scalar(eligibility.t() * tmp)) / nbEpisodes;
+            arma::rowvec b = Q * (Jpol.t() - eligibility.t() * arma::solve(fisher, g));
+            arma::mat grad = g - eligibility * b;
             nat_grad = arma::solve(fisher, grad);
         }
         else
         {
-            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk
+                      << ")!!! Should be " << fisher.n_rows << std::endl;
 
             arma::mat H = arma::pinv(fisher);
-            arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodes * fisher - eligibility * eligibility.t()) * eligibility)
-                          * (Jpol - eligibility.t() * H * g)/ nbEpisodes;
-            arma::vec grad = g - eligibility * b;
+            arma::mat tmp = arma::pinv(nbEpisodes * fisher - eligibility * eligibility.t());
+            double Q = 1 + arma::as_scalar(eligibility.t() * tmp * eligibility);
+            arma::rowvec b = Q * (Jpol.t() - eligibility.t() * H * g) / nbEpisodes;
+            arma::mat grad = g - eligibility * b;
             nat_grad = H * (grad);
         }
 
-        return nat_grad.rows(0,dp-1);
+        return nat_grad.rows(0, dp - 1);
     }
 };
 
-
 }
-
-
 
 #endif /* INCLUDE_RELE_IRL_UTILS_GRADIENT_ENACGRADIENTCALCULATOR_H_ */

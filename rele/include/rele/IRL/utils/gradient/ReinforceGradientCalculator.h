@@ -57,7 +57,7 @@ protected:
         int nbEpisodes = data.size();
         for (int i = 0; i < nbEpisodes; ++i)
         {
-            arma::vec sumGradLog = computeSumGradLog(data[i]);
+            arma::vec sumGradLog = this->computeSumGradLog(data[i]);
             gradient += sumGradLog * Rew.col(i).t();
         }
 
@@ -65,23 +65,6 @@ protected:
         gradient /= nbEpisodes;
 
         return gradient;
-    }
-
-
-    arma::vec computeSumGradLog(Episode<ActionC, StateC>& episode)
-    {
-        int dp  = policy.getParametersSize();
-        int nbSteps = episode.size();
-        arma::vec sumGradLog(dp, arma::fill::zeros), localg;
-
-        //iterate the episode
-        for (int t = 0; t < nbSteps; ++t)
-        {
-            Transition<ActionC, StateC>& tr = episode[t];
-            sumGradLog += policy.difflog(tr.x, tr.u);
-        }
-
-        return sumGradLog;
     }
 
 };

@@ -67,6 +67,22 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() = 0;
 
+    arma::vec computeSumGradLog(Episode<ActionC, StateC>& episode)
+    {
+        int dp  = policy.getParametersSize();
+        int nbSteps = episode.size();
+        arma::vec sumGradLog(dp, arma::fill::zeros), localg;
+
+        //iterate the episode
+        for (int t = 0; t < nbSteps; ++t)
+        {
+            Transition<ActionC, StateC>& tr = episode[t];
+            sumGradLog += policy.difflog(tr.x, tr.u);
+        }
+
+        return sumGradLog;
+    }
+
 private:
     void compute()
     {
