@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_UTILS_GRADIENTUTILS_H_
-#define INCLUDE_RELE_IRL_UTILS_GRADIENTUTILS_H_
+#ifndef INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_
+#define INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_
 
 #include "rele/IRL/utils/gradient/ReinforceGradientCalculator.h"
 #include "rele/IRL/utils/gradient/GPOMDPGradientCalculator.h"
@@ -63,7 +63,7 @@ public:
             return new ENACGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
         case ENAC_BASELINE:
-            return new ENACGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
+            return new ENACBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
         default:
             return buildNatural(type, phi, data, policy, gamma);
@@ -104,4 +104,4 @@ private:
 
 
 
-#endif /* INCLUDE_RELE_IRL_UTILS_GRADIENTUTILS_H_ */
+#endif /* INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_ */

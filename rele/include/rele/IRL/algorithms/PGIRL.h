@@ -29,10 +29,9 @@
 #include "rele/core/Transition.h"
 #include "rele/utils/ArmadilloExtensions.h"
 
-#include "rele/IRL/utils/GradientUtils.h"
-
 #include <nlopt.hpp>
 #include <cassert>
+#include "rele/IRL/utils/GradientCalculatorFactory.h"
 
 namespace ReLe
 {

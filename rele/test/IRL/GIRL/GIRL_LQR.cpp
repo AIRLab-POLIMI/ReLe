@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
 #ifdef RUN
     //Run GIRL
-    //irlAlg.run();
+    irlAlg.run();
     arma::vec gnormw = rewardRegressor1.getParameters();
 
     //Run PGIRL

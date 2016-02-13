@@ -27,13 +27,13 @@
 #include "rele/IRL/IRLAlgorithm.h"
 #include "rele/policy/Policy.h"
 #include "rele/core/Transition.h"
-#include "rele/IRL/utils/GradientUtils.h"
 #include "rele/IRL/utils/hessian/HessianCalculator.h"
 
 #include "rele/IRL/utils/IrlGradType.h"
 
 #include <nlopt.hpp>
 #include <cassert>
+#include "rele/IRL/utils/GradientCalculatorFactory.h"
 
 namespace ReLe
 {
