@@ -25,9 +25,10 @@
 #define INCLUDE_RELE_POLICY_Q_POLICY_ACTIONVALUEPOLICY_H_
 
 #include "rele/policy/Policy.h"
+#include "rele/approximators/Regressors.h"
+
 #include <type_traits>
 #include <sstream>
-#include "../../approximators/Regressors.h"
 
 namespace ReLe
 {
