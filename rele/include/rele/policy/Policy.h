@@ -33,6 +33,9 @@
 namespace ReLe
 {
 
+/*! \brief
+ *
+ */
 template<class ActionC, class StateC>
 class Policy
 {
