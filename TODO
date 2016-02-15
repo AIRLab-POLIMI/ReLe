@@ -1,31 +1,23 @@
 TODO:
 
-### 6 May 2015
-SISTEMARE GLI ENVIRONMENT PER ESSERE PIU' FLESSIBILI
-
-MOUNTAIN CAR AGGIUNGERE STATI DI PARTENZA (SUTTON, KLEIN, RANDOM)
-AGGIORNARE REWARD IRL
-DISCUTERE IMPLEMENTAZIONE ALGORITMI BATCH (vedasi LSPI and batch gradients)
-MLE con LASSO
-CPIRL
-RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP
-
-### older
-0d) non capisco come mai eNES con calcolo della matrice di fisher in forma chiusa non funzioni (anche in matlab non funziona)
-0e) aggiungere condizione di termine agli algoritmi
-
+### 16 Feb 2016
 DAVE:
-1a) eliminare la necessità di differenziare tra state/azioni finite e dense
-1b) eliminare DenseBasisVector mettendo DenseBasisMatrix e SparseBasisMatrix
-1c) i metodi che adesso sono in DenseBasisVector che servono a creare vettori di basis (e.g., generatepolbasis) vanno
-    messi neel singole basis functions come metodi factory
-1d) templetizzare anche le basis functions
+1) Testare e implementare i gradienti per IRL
+2) Cleanup interfaccia serializzazione
+3) scegliere una lib per scrivere json
+
 
 TEO:
-2a) implementare off-policy gradients
-2b) implementare IRL
+1) Fixare Enac
+2) scegliere una lib per binding python/altro
 
-1) interfaccia RL-glue in pacchetto separato?
-2) interfaccia ROS 
-3) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
-4) Cambiare nota di copyright: mettere tutti gli autori, e soprattutto mettere politecnico di milano
+
+VARIE:
+1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
+2) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
+3) interfaccia ROS (supportare Gazeebo)
+4) MLE con LASSO ?
+5) CPIRL ?
+6) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
+7) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
+8) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
