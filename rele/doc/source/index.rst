@@ -1,23 +1,34 @@
-.. ReLe documentation master file, created by
-   sphinx-quickstart on Sun Feb 14 17:45:25 2016.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to ReLe's documentation!
+ReLe documentation
 ================================
 
-Contents:
+This is the documentation for ReLe |release|, last updated |today|.
+
+Introduction
+------------
+ReLe is a C++ library for REinforcement LEarning developped and maintained by the Politecnico di Milano.
+Its main features and design principles are:
+
+- Template
+- C++11
+-
+
+ReLe is licensed under the `MIT license`_; see LICENSE in the
+source distribution for details.
+
+.. _`MIT license`: http://www.opensource.org/licenses/mit-license.php
+
+Contents
+--------
 
 .. toctree::
    :maxdepth: 2
 
-.. doxygenclass:: ReLe::NormalPolicy
-   :members:
+   gettingstarted
+   tutorial
+   apireference
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
-

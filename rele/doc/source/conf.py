@@ -39,7 +39,7 @@ extensions = [
     'breathe'
 ]
 
-breathe_projects = { "ReLe": "/home/matteo/Projects/ReLe/rele/docs/build/doxyxml/" }
+breathe_projects = { "ReLe": "../build/doxyxml/" }
 
 breathe_default_project = "ReLe"
 breathe_domain_by_extension = {"h" : "cpp"}

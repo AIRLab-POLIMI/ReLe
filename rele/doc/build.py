@@ -36,8 +36,8 @@ def build_docs(srcPath):
                           FMT_API=
       EXCLUDE_SYMBOLS   = fmt::internal::* StringValue write_str
     '''.format(os.path.join(srcPath, 'include/rele/'),os.path.join(srcPath, 'doc/build')).encode('UTF-8'))
-  b = Popen('make', stdin=PIPE)
-  b.communicate(input=r''' html''')
+  b = Popen(['make', 'html'], stdin=PIPE, cwd=os.path.join(srcPath, 'doc/'))
+  b.communicate(input=r' ')
 
 if __name__ == '__main__':
   build_docs(sys.argv[1])
