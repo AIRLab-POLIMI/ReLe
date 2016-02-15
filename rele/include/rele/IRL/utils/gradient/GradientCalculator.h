@@ -26,6 +26,10 @@
 
 #include <cassert>
 
+#include "rele/policy/Policy.h"
+#include "rele/core/Transition.h"
+#include "rele/approximators/Features.h"
+
 namespace ReLe
 {
 

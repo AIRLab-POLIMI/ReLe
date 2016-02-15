@@ -27,7 +27,7 @@
 #include "rele/IRL/utils/gradient_nonlinear/NonlinearReinforceCalculator.h"
 #include "rele/IRL/utils/gradient_nonlinear/NonlinearGPOMDPCalculator.h"
 #include "rele/IRL/utils/gradient_nonlinear/NonlinearENACCalculator.h"
-//#include "rele/IRL/utils/gradient_nonlinear/NaturalGradientCalculator.h"
+#include "rele/IRL/utils/gradient_nonlinear/NonlinearNaturalGradientCalculator.h"
 #include "rele/IRL/utils/IrlGradType.h"
 
 namespace ReLe
@@ -37,8 +37,8 @@ template<class ActionC, class StateC>
 class NonlinearGradientFactory
 {
 public:
-    static GradientCalculator<ActionC, StateC>* build(IrlGrad type,
-            Regressor& rewardFunc,
+    static NonlinearGradientCalculator<ActionC, StateC>* build(IrlGrad type,
+            ParametricRegressor& rewardFunc,
             Dataset<ActionC,StateC>& data,
             DifferentiablePolicy<ActionC,StateC>& policy,
             double gamma)
@@ -71,33 +71,31 @@ public:
     }
 
 private:
-    static GradientCalculator<ActionC, StateC>* buildNatural(IrlGrad type,
-            Regressor& rewardFunc,
+    static NonlinearGradientCalculator<ActionC, StateC>* buildNatural(IrlGrad type,
+            ParametricRegressor& rewardFunc,
             Dataset<ActionC,StateC>& data,
             DifferentiablePolicy<ActionC,StateC>& policy,
             double gamma)
     {
         switch(type)
         {
-        /*case NATURAL_REINFORCE:
-            return new NonlinaerNaturalGradientCalculator<ActionC, StateC, ReinforceGradientCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
+        case NATURAL_REINFORCE:
+            return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearReinforceCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
         case NATURAL_REINFORCE_BASELINE:
-            return new NonlinaerNaturalGradientCalculator<ActionC, StateC, ReinforceBaseGradientCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
+            return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearReinforceBaseCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
         case NATURAL_GPOMDP:
-            return new NonlinaerNaturalGradientCalculator<ActionC, StateC, GPOMDPGradientCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
+            return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearGPOMDPCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
         case NATURAL_GPOMDP_BASELINE:
-            return new NonlinaerNaturalGradientCalculator<ActionC, StateC, GPOMDPBaseGradientCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
-        */
+            return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearGPOMDPBaseCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
+
         default:
             return nullptr;
         }
     }
 
-
-};
 
 };
 

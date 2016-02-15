@@ -31,15 +31,65 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NonlinearENACCalculator
+class NonlinearENACCalculator : public NonlinearGradientCalculator<ActionC,StateC>
 {
+protected:
+    USE_NONLINEAR_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+
 public:
-    NonlinearENACCalculator(Regressor& rewardFunc,
+    NonlinearENACCalculator(ParametricRegressor& rewardFunc,
                             Dataset<ActionC,StateC>& data,
                             DifferentiablePolicy<ActionC,StateC>& policy,
-                            double gamma) : NonlinearGradientCalculator(rewardFunc, data, policy, gamma)
+                            double gamma) : NonlinearGradientCalculator<ActionC,StateC>(rewardFunc, data, policy, gamma)
     {
 
+    }
+
+    virtual void compute() override
+    {
+        int dp = policy.getParametersSize();
+        int dr = rewardFunc.getParametersSize();
+
+        double Rew;
+        arma::vec g(dp + 1, arma::fill::zeros), psi(dp + 1);
+        arma::mat fisher(dp + 1, dp + 1, arma::fill::zeros);
+
+        unsigned int nbEpisodes = data.size();
+        unsigned int totSteps;
+
+
+        for (int i = 0; i < nbEpisodes; ++i)
+        {
+            double Rew;
+            arma::rowvec dRew(dr);
+            arma::vec sumGradLog(dp);
+            this->computeEpisodeStatistics(data[i], Rew, dRew, sumGradLog);
+
+            psi.rows(0, dp-1) = sumGradLog;
+            psi(dp) = 1.0;
+
+            fisher += psi * psi.t();
+            g += psi * Rew;
+
+            totSteps += data[i].size();
+        }
+
+        arma::vec nat_grad;
+        int rnk = arma::rank(fisher);
+        if (rnk == fisher.n_rows)
+        {
+            nat_grad = arma::solve(fisher, g);
+        }
+        else
+        {
+            std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk
+                      << ")!!! Should be " << fisher.n_rows << std::endl;
+
+            arma::mat H = arma::pinv(fisher);
+            nat_grad = H * g;
+        }
+
+        gradient = nat_grad.rows(0, dp - 1);
     }
 
     virtual ~NonlinearENACCalculator()
@@ -49,15 +99,20 @@ public:
 };
 
 template<class ActionC, class StateC>
-class NonlinearENACBaseCalculator
+class NonlinearENACBaseCalculator : public NonlinearGradientCalculator<ActionC,StateC>
 {
 public:
-    NonlinearENACBaseCalculator(Regressor& rewardFunc,
+    NonlinearENACBaseCalculator(ParametricRegressor& rewardFunc,
                                 Dataset<ActionC,StateC>& data,
                                 DifferentiablePolicy<ActionC,StateC>& policy,
-                                double gamma) : NonlinearGradientCalculator(rewardFunc, data, policy, gamma)
+                                double gamma) : NonlinearGradientCalculator<ActionC,StateC>(rewardFunc, data, policy, gamma)
     {
 
+    }
+
+    virtual void compute() override
+    {
+        //TODO implement
     }
 
     virtual ~NonlinearENACBaseCalculator()

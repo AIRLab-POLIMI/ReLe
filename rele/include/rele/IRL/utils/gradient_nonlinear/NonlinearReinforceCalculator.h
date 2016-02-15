@@ -30,14 +30,49 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class NonlinearReinforceCalculator
+class NonlinearReinforceCalculator : public NonlinearGradientCalculator<ActionC,StateC>
 {
+
+protected:
+    USE_NONLINEAR_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+
 public:
-    NonlinearReinforceCalculator(Regressor& rewardFunc,
+    NonlinearReinforceCalculator(ParametricRegressor& rewardFunc,
                                  Dataset<ActionC,StateC>& data,
                                  DifferentiablePolicy<ActionC,StateC>& policy,
-                                 double gamma) : NonlinearGradientCalculator(rewardFunc, data, policy, gamma)
+                                 double gamma) : NonlinearGradientCalculator<ActionC,StateC>(rewardFunc, data, policy, gamma)
     {
+
+    }
+
+    virtual void compute() override
+    {
+        int dp = policy.getParametersSize();
+        int dr = rewardFunc.getParametersSize();
+
+        // Reset computed results
+        gradient.zeros(dp);
+        dGradient.zeros(dp, dr);
+
+        unsigned int totStep = 0;
+        unsigned int episodeN = data.size();
+
+        //iterate episodes
+        for (int i = 0; i < episodeN; ++i)
+        {
+            double Rew;
+            arma::rowvec dRew(dr);
+            arma::vec sumGradLog(dp);
+            this->computeEpisodeStatistics(data[i], Rew, dRew, sumGradLog);
+
+            gradient += sumGradLog * Rew;
+            dGradient += sumGradLog * dRew;
+
+            totStep += data[i].size();
+        }
+
+        // compute mean values
+        this->normalizeGradient(totStep, episodeN);
 
     }
 
@@ -48,14 +83,83 @@ public:
 };
 
 template<class ActionC, class StateC>
-class NonlinearReinforceBaseCalculator
+class NonlinearReinforceBaseCalculator : public NonlinearGradientCalculator<ActionC,StateC>
 {
+
+protected:
+    USE_NONLINEAR_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+
 public:
-    NonlinearReinforceBaseCalculator(Regressor& rewardFunc,
+    NonlinearReinforceBaseCalculator(ParametricRegressor& rewardFunc,
                                      Dataset<ActionC,StateC>& data,
                                      DifferentiablePolicy<ActionC,StateC>& policy,
-                                     double gamma) : NonlinearGradientCalculator(rewardFunc, data, policy, gamma)
+                                     double gamma) : NonlinearGradientCalculator<ActionC,StateC>(rewardFunc, data, policy, gamma)
     {
+
+    }
+
+    virtual void compute() override
+    {
+        int dp = policy.getParametersSize();
+        int dr = rewardFunc.getParametersSize();
+        int episodeN = data.size();
+
+        // Reset computed results
+        gradient.zeros(dp);
+        dGradient.zeros(dp, dr);
+
+        // gradient basics
+        arma::vec Rew_ep(episodeN);
+        arma::mat dRew_ep(episodeN, dr);
+        arma::mat sumGradLog_ep(dp, episodeN);
+
+        // baselines
+        arma::vec baseline_den(dp, arma::fill::zeros);
+        arma::vec baseline_num_Rew(dp, arma::fill::zeros);
+        arma::mat baseline_num_dRew(dp, dr, arma::fill::zeros);
+
+
+        int totStep = 0;
+        for (int i = 0; i < episodeN; ++i)
+        {
+            // compute basic elements
+            double Rew;
+            arma::rowvec dRew(dr);
+            arma::vec sumGradLog(dp);
+            this->computeEpisodeStatistics(data[i], Rew, dRew, sumGradLog);
+
+            // store them
+            Rew_ep(i) = Rew;
+            Rew_ep.row(i) = dRew;
+            sumGradLog_ep.col(i) = sumGradLog;
+
+            // compute baseline num and den
+            arma::vec sumGradLog2 = sumGradLog % sumGradLog;
+            baseline_den += sumGradLog2;
+            baseline_num_Rew += sumGradLog2 * Rew;
+            baseline_num_dRew += sumGradLog2 * dRew;
+
+            // update total step count
+            totStep += data[i].size();
+        }
+
+        // compute the gradients
+        arma::vec baseline = baseline_num_Rew / baseline_den;
+        baseline(arma::find_nonfinite(baseline)).zeros();
+
+        arma::mat baseline_d = baseline_num_dRew.each_col() / baseline_den;
+        baseline_d(arma::find_nonfinite(baseline_d)).zeros();
+
+        for (int ep = 0; ep < episodeN; ep++)
+        {
+            gradient += (Rew_ep(ep) - baseline) % sumGradLog_ep.col(ep);
+
+            for(unsigned int r = 0; r < dr; r++)
+                dGradient.col(r) += (dRew_ep(ep, r) - baseline_d.col(r)) % sumGradLog_ep.col(ep);
+        }
+
+        // compute mean values
+        this->normalizeGradient(totStep, episodeN);
 
     }
 

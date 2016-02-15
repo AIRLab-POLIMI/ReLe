@@ -36,71 +36,71 @@ template<class ActionC, class StateC>
 class NonlinearHessianCalculator
 {
 public:
-	NonlinearHessianCalculator(Regressor& rewardFunc,
-				Dataset<ActionC, StateC>& data,
-				DifferentiablePolicy<ActionC, StateC>& policy, double gamma) :
-				rewardFunc(rewardFunc), data(data), policy(policy), gamma(gamma)
-	{
+    NonlinearHessianCalculator(Regressor& rewardFunc,
+                               Dataset<ActionC, StateC>& data,
+                               DifferentiablePolicy<ActionC, StateC>& policy, double gamma) :
+        rewardFunc(rewardFunc), data(data), policy(policy), gamma(gamma)
+    {
 
-	}
+    }
 
-	virtual void compute(bool computeDerivative = true)
-	{
-		unsigned int dp = policy.getParametersSize();
-		H.zeros(dp, dp);
+    virtual void compute(bool computeDerivative = true)
+    {
+        unsigned int dp = policy.getParametersSize();
+        H.zeros(dp, dp);
 
-		for (unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
-		{
-			Episode<ActionC, StateC>& episode = data[ep];
-			double df = 1.0;
+        for (unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
+        {
+            Episode<ActionC, StateC>& episode = data[ep];
+            double df = 1.0;
 
-			for (unsigned int t = 0; t < episode.size(); t++)
-			{
-				Transition<ActionC, StateC>& tr = episode[t];
-				arma::mat K = computeK(policy, tr);
+            for (unsigned int t = 0; t < episode.size(); t++)
+            {
+                Transition<ActionC, StateC>& tr = episode[t];
+                arma::mat K = computeK(policy, tr);
 
-				double r = rewardFunc(tr.x, tr.u, tr.xn);
+                double r = rewardFunc(tr.x, tr.u, tr.xn);
 
-				H += df*K*r;
+                H += df*K*r;
 
-				df *= gamma;
-			}
-		}
-	}
+                df *= gamma;
+            }
+        }
+    }
 
-	arma::mat getHessian()
-	{
-		return H;
-	}
+    arma::mat getHessian()
+    {
+        return H;
+    }
 
-	arma::cube getHessianDiff()
-	{
-		return Hdiff;
-	}
+    arma::cube getHessianDiff()
+    {
+        return Hdiff;
+    }
 
-	virtual ~NonlinearHessianCalculator()
-	{
+    virtual ~NonlinearHessianCalculator()
+    {
 
-	}
-
-private:
-	//TODO in common class
-	arma::mat computeK(DifferentiablePolicy<ActionC, StateC>& policy,
-				Transition<ActionC, StateC>& tr)
-	{
-		arma::vec logDiff = policy.difflog(tr.x, tr.xn);
-		arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
-		return logDiff2 + logDiff * logDiff.t();
-	}
+    }
 
 private:
-	Regressor& rewardFunc;
-	Dataset<ActionC, StateC>& data;
-	DifferentiablePolicy<ActionC, StateC>& policy;
-	double gamma;
+    //TODO in common class
+    arma::mat computeK(DifferentiablePolicy<ActionC, StateC>& policy,
+                       Transition<ActionC, StateC>& tr)
+    {
+        arma::vec logDiff = policy.difflog(tr.x, tr.xn);
+        arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
+        return logDiff2 + logDiff * logDiff.t();
+    }
 
-	arma::mat H;
-	arma::cube Hdiff;
+private:
+    Regressor& rewardFunc;
+    Dataset<ActionC, StateC>& data;
+    DifferentiablePolicy<ActionC, StateC>& policy;
+    double gamma;
+
+    arma::mat H;
+    arma::cube Hdiff;
 
 };
 

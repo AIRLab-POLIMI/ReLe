@@ -25,22 +25,25 @@
 #define INCLUDE_RELE_IRL_ALGORITHMS_NOGIRL_H_
 
 #include "rele/IRL/algorithms/GIRL.h"
+#include "rele/IRL/utils/NonlinearGradientFactory.h"
 
 namespace ReLe
 {
 
 template <class ActionC, class StateC>
-class NoGIRL :public GIRL<ActionC, StateC>
+class NoGIRL :  public IRLAlgorithm<ActionC, StateC>
 {
 public:
     NoGIRL(Dataset<ActionC, StateC>& dataset,
            DifferentiablePolicy<ActionC, StateC>& policy,
            ParametricRegressor& rewardf, double gamma, IrlGrad aType,
            std::vector<double>& lowerBounds, std::vector<double>& upperBounds) :
-        GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType),
+        policy(policy), data(dataset), rewardf(rewardf), gamma(gamma), aType(aType),
         upperBounds(upperBounds), lowerBounds(lowerBounds)
     {
+        nbFunEvals = 0;
 
+        gradientCalculator = NonlinearGradientFactory<ActionC, StateC>::build(aType,rewardf, dataset, policy, gamma);
     }
 
     virtual ~NoGIRL() { }
@@ -51,7 +54,7 @@ public:
     }
 
     virtual void run(arma::vec starting,
-                     unsigned int maxFunEvals) override
+                     unsigned int maxFunEvals)
     {
         int dpr = this->rewardf.getParametersSize();
         assert(dpr > 0);
@@ -69,16 +72,7 @@ public:
         if (maxFunEvals == 0)
             maxFunEvals = std::min(30*dpr, 600);
 
-        this->nbFunEvals = 0;
-
-        this->maxSteps = 0;
-        int nbEpisodes = this->data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            int nbSteps = this->data[i].size();
-            if (this->maxSteps < nbSteps)
-                this->maxSteps = nbSteps;
-        }
+        nbFunEvals = 0;
 
 
         //setup optimization algorithm
@@ -129,8 +123,18 @@ public:
     }
 
 private:
+    Dataset<ActionC, StateC>& data;
+    DifferentiablePolicy<ActionC, StateC>& policy;
+    ParametricRegressor& rewardf;
+    double gamma;
+    IrlGrad aType;
+
     std::vector<double>& upperBounds;
     std::vector<double>& lowerBounds;
+
+    NonlinearGradientCalculator<ActionC, StateC>* gradientCalculator;
+
+    unsigned int nbFunEvals;
 
 
 };
