@@ -103,7 +103,6 @@ public:
         // simplex constraint reduces the parameter by one element
         --effective_dim;
 
-        // optimizator = nlopt::opt(nlopt::algorithm::LN_COBYLA, effective_dim);
         optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, effective_dim);
 
         std::vector<double> lowerBounds(effective_dim, 0.0);
@@ -123,7 +122,7 @@ public:
 
         std::cout << "Optimization dim: " << effective_dim << std::endl << std::endl;
 
-        optimizator.set_min_objective(GIRL::wrapper, this);
+        optimizator.set_min_objective(Optimization::objFunctionWrapper<GIRL<ActionC, StateC>> , this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-8);
         optimizator.set_ftol_abs(1e-8);
@@ -184,29 +183,8 @@ public:
     }
 
     //======================================================================
-    // OPTIMIZATION: WRAPPER AND OBJECTIVE FUNCTION
+    // OBJECTIVE FUNCTION
     //----------------------------------------------------------------------
-    static double wrapper(unsigned int n, const double* x, double* grad,
-                          void* o)
-    {
-        arma::vec df;
-        arma::vec parV(const_cast<double*>(x), n, true);
-        double value = static_cast<GIRL*>(o)->objFunction(parV, df);
-
-        //Save gradient
-        if (grad)
-        {
-            for (int i = 0; i < df.n_elem; ++i)
-            {
-                grad[i] = df[i];
-            }
-        }
-
-        //Print gradient and value
-        //printOptimizationInfo(value, n, x, grad);
-
-        return value;
-    }
 
     double objFunction(const arma::vec& x, arma::vec& df)
     {
@@ -242,7 +220,6 @@ public:
         std::cout << "-----------------------------------------" << std::endl;
 
         return f;
-
     }
 
     //======================================================================

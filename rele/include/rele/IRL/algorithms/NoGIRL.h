@@ -84,7 +84,7 @@ public:
 
         localOptimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
 
-        optimizator.set_min_objective(GIRL<ActionC, StateC>::wrapper, this);
+        optimizator.set_min_objective(Optimization::objFunctionWrapper<NoGIRL<ActionC, StateC>>, this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-8);
         optimizator.set_ftol_abs(1e-8);

@@ -76,29 +76,66 @@ public:
         return val;
     }
 
-    void printOptimizationInfo(double value, unsigned int n, const double* x,
-                               double* grad)
+public:
+    template<class Class, bool print = false>
+    static double objFunctionWrapper(unsigned int n, const double* x, double* grad,
+                                     void* o)
     {
-        std::cout << "v= " << value << " ";
-        std::cout << "x= ";
-        for (int i = 0; i < n; i++)
-        {
-            std::cout << x[i] << " ";
-        }
-        std::cout << std::endl;
+        arma::vec df;
+        arma::vec parV(const_cast<double*>(x), n, true);
+        double value = static_cast<Class*>(o)->objFunction(parV, df);
+
+        //Save gradient
         if (grad)
         {
-            std::cout << "g= ";
+            for (int i = 0; i < df.n_elem; ++i)
+            {
+                grad[i] = df[i];
+            }
+        }
+
+        //Print gradient and value
+        printOptimizationInfo<Class, print>(value, n, x, grad);
+
+        return value;
+    }
+
+private:
+    template<class Class, bool print>
+    static void printOptimizationInfo(double value, unsigned int n, const double* x,
+                                      double* grad)
+    {
+        if (print)
+        {
+            std::cout << "J(x) = " << value << " ";
+            std::cout << "x = ";
+
             for (int i = 0; i < n; i++)
             {
-                std::cout << grad[i] << " ";
+                std::cout << x[i] << " ";
             }
+
             std::cout << std::endl;
+
+            if (grad)
+            {
+                std::cout << "dJ/dx = ";
+
+                for (int i = 0; i < n; i++)
+                    std::cout << grad[i] << " ";
+
+                std::cout << std::endl;
+            }
         }
     }
 
 
+
+
 };
+
+
+
 
 
 }
