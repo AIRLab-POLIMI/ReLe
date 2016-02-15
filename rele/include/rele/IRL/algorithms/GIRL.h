@@ -26,7 +26,6 @@
 
 #include "rele/IRL/IRLAlgorithm.h"
 #include "rele/utils/ArmadilloExtensions.h"
-//#include "rele/algorithms/policy_search/step_rules/StepRules.h"
 
 #include "rele/IRL/utils/GradientCalculatorFactory.h"
 #include "rele/IRL/utils/Optimization.h"
