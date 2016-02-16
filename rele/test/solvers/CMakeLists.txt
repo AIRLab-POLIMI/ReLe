@@ -1,0 +1,6 @@
+#Solvers tests
+add_executable(lqr_solver_test LQRsolverTest.cpp)
+target_link_libraries(lqr_solver_test rele)
+
+add_executable(dynamic_programming_test dynamic_programming/DynamicProgrammingTest.cpp)
+target_link_libraries(dynamic_programming_test rele)
