@@ -7,18 +7,19 @@ DAVE:
 3) Cleanup interfaccia serializzazione
 4) scegliere una lib per scrivere json
 
-
 TEO:
-1) scegliere una lib per binding python/altro
+1) Scegliere stile doc
+2) scegliere una lib per binding python/altro
 
 CARLO:
 1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
 2) Test case policy Gradient
 
 VARIE:
-2) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
+1) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
+2) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
 3) interfaccia ROS (supportare Gazeebo)
 4) CPIRL 
+5) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
 6) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
-7) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
-8) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
+
