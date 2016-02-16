@@ -44,7 +44,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    IrlGrad type = ENAC_BASELINE;
+    IrlGrad type = ENAC;
     //  RandomGenerator::seed(45423424);
     //  RandomGenerator::seed(8763575);
 
