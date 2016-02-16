@@ -16,5 +16,11 @@ In many unix distributions you can use the package manager to install them.
 
 **Ubuntu**
 ```
-apt-get install doxygen python-sphinx python-breathe 
+apt-get install doxygen python-sphinx python-breathe
+```
+**Mac OS X**
+```
+brew install doxygen
+pip install -U Sphinx
+pip install breathe
 ```

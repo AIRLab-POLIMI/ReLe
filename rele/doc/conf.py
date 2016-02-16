@@ -25,21 +25,21 @@ import os
 # If your documentation needs a minimal Sphinx version, state it here.
 needs_sphinx = '1.2'
 
-if os.environ.get('READTHEDOCS', None) == 'True':
-  subprocess.call('doxygen')
+read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
+if read_the_docs_build:
+    subprocess.call('doxygen')
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'breathe'
 ]
 
-breathe_projects = { "ReLe": "../build/doxyxml/" }
+breathe_projects = { "ReLe": "doxyxml/" }
 
 breathe_default_project = "ReLe"
 breathe_domain_by_extension = {"h" : "cpp"}
@@ -81,7 +81,7 @@ copyright = u'2016, Matteo Pirotta, Davide Tateo'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['virtualenv']
+exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -277,4 +277,4 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'http://docs.python.org/': None}
+# intersphinx_mapping = {'http://docs.python.org/': None}

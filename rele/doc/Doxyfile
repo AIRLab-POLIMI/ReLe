@@ -1,0 +1,24 @@
+PROJECT_NAME      = ReLe
+GENERATE_LATEX    = NO
+GENERATE_MAN      = NO
+GENERATE_RTF      = NO
+CASE_SENSE_NAMES  = NO
+INPUT             = ../include/rele
+FILE_PATTERNS     = *.h
+RECURSIVE         = YES
+QUIET             = YES
+JAVADOC_AUTOBRIEF = NO
+AUTOLINK_SUPPORT  = NO
+GENERATE_HTML     = NO
+GENERATE_XML      = YES
+XML_OUTPUT        = doxyxml
+HTML_OUTPUT       = doxyhtml
+ALIASES           = "rst=\verbatim embed:rst"
+ALIASES          += "endrst=\endverbatim"
+MACRO_EXPANSION   = YES
+PREDEFINED        = _WIN32=1 \
+                    FMT_USE_VARIADIC_TEMPLATES=1 \
+                    FMT_USE_RVALUE_REFERENCES=1 \
+                    FMT_USE_USER_DEFINED_LITERALS=1 \
+                    FMT_API=
+EXCLUDE_SYMBOLS   = fmt::internal::* StringValue write_str
