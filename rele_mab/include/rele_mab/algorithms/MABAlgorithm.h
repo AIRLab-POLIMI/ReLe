@@ -26,6 +26,7 @@
 
 #include "rele/core/Agent.h"
 #include "rele/core/Basics.h"
+#include "rele/policy/Policy.h"
 
 
 namespace ReLe

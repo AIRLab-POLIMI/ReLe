@@ -28,7 +28,7 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_
 #define INCLUDE_RELE_ENVIRONMENTS_MAB_INTERNETADS_H_
 
-#include "rele/environments/MAB/DiscreteMAB.h"
+#include "rele_mab/environments/DiscreteMAB.h"
 
 
 namespace ReLe

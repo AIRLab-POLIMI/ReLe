@@ -25,33 +25,34 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "rele/environments/MAB/InternetAds.h"
+#ifndef INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_
+#define INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_
+
+#include "rele_mab/environments/MAB.h"
 
 
 namespace ReLe
 {
 
-InternetAds::InternetAds(unsigned int nAds, ExperimentLabel experimentType) :
-    DiscreteMAB(arma::ones(nAds), 1)
+class DiscreteMAB: public MAB<FiniteAction>
 {
-    if(experimentType == First)
-    {
-        P = arma::vec(nAds, arma::fill::ones) * 0.5;
-        visitors = 100000;
-    }
-    else
-    {
-        P = 0.02 + (0.05 - 0.02) * arma::vec(nAds, arma::fill::randu);
-        visitors = 300000;
-    }
 
-    EnvironmentSettings& task = getWritableSettings();
-    task.gamma = 0;
-}
+public:
 
-unsigned int InternetAds::getVisitors()
-{
-    return visitors;
-}
+    DiscreteMAB(arma::vec P, arma::vec R, unsigned int horizon = 1);
+    DiscreteMAB(arma::vec P, double r = 1, unsigned int horizon = 1);
+
+
+    DiscreteMAB(unsigned int nArms, double r, unsigned int horizon = 1);
+    DiscreteMAB(unsigned int nArms, unsigned int horizon = 1);
+    arma::vec getP();
+    virtual void step(const FiniteAction& action, FiniteState& nextState, Reward& reward) override;
+
+protected:
+    arma::vec P;
+    arma::vec R;
+};
 
 }
+
+#endif /* INCLUDE_RELE_ENVIRONMENTS_MAB_SIMPLEMAB_H_ */

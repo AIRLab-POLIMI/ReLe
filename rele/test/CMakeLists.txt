@@ -72,11 +72,6 @@ target_link_libraries(simple_chain rele)
 add_executable(simple_chain_mean TD/SimpleChainMeanReward.cpp)
 target_link_libraries(simple_chain_mean rele)
 
-if(${GSL_FOUND})
-	add_executable(mab_q_learning MAB/MABQLearningTest.cpp)
-	target_link_libraries(mab_q_learning rele ${GSL_LIBRARIES})
-endif()
-
 add_executable(grid_world TD/GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
 
@@ -262,7 +257,3 @@ target_link_libraries(nls_OptParams rele)
 #MultiHeat tests
 add_executable(mh_test MultiHeat/MultiHeatTest.cpp)
 target_link_libraries(mh_test rele)
-
-#UCB1
-add_executable(ucb1_test MAB/UCB1Test.cpp)
-target_link_libraries(ucb1_test rele)

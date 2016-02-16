@@ -25,7 +25,7 @@
  * Written by: Carlo D'Eramo
  */
 
-#include "rele/environments/MAB/InternetAds.h"
+#include "rele_mab/environments/InternetAds.h"
 #include "rele/algorithms/td/DoubleQ-Learning.h"
 #include "rele/algorithms/td/WQ-Learning.h"
 #include "rele/policy/nonparametric/SequentialPolicy.h"
