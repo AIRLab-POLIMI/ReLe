@@ -74,7 +74,7 @@ public:
                 sumGradLog += policy.difflog(tr.x, tr.u);
 
                 gradient += sumGradLog * Rew;
-                dGradient += sumGradLog % dRew;
+                dGradient += sumGradLog * dRew;
 
                 df *= gamma;
             }
@@ -159,7 +159,7 @@ public:
                 arma::vec sumGradLog2 = sumGradLog % sumGradLog;
                 baseline_num_Rew.col(t) += sumGradLog2 * Rew;
                 baseline_num_dRew.slice(t) += sumGradLog2 * dRew;
-                baseline_den += sumGradLog2;
+                baseline_den.col(t) += sumGradLog2;
 
                 df *= gamma;
             }
@@ -177,18 +177,18 @@ public:
             for (int t = 0; t < maxsteps_Ep(ep); ++t)
             {
                 // compute the gradients
-                arma::vec baseline_t = baseline_num_Rew.col(t) / baseline_den;
+                arma::vec baseline_t = baseline_num_Rew.col(t) / baseline_den.col(t);
                 baseline_t(arma::find_nonfinite(baseline_t)).zeros();
 
-                arma::mat baseline_d_t = baseline_num_dRew.slice(t).each_col() / baseline_den;
+                arma::mat baseline_d_t = baseline_num_dRew.slice(t).each_col() / baseline_den.col(t);
                 baseline_d_t(arma::find_nonfinite(baseline_d_t)).zeros();
 
                 arma::vec sumGradLog_ep_t = sumGradLog_epStep.tube(ep,t);
                 arma::vec dRew_ep_t = dRew_epStep.tube(ep, t);
 
-                gradient += sumGradLog_ep_t * (Rew_epStep(ep, t) - baseline_t);
+                gradient += sumGradLog_ep_t % (Rew_epStep(ep, t) - baseline_t);
                 for (unsigned int r = 0; r < dr; r++)
-                    dGradient.col(r) += sumGradLog_ep_t * (dRew_ep_t(r) - baseline_d_t.col(r));
+                    dGradient.col(r) += sumGradLog_ep_t % (dRew_ep_t(r) - baseline_d_t.col(r));
 
             }
         }

@@ -27,6 +27,7 @@
 #include "rele/policy/Policy.h"
 #include "rele/core/Transition.h"
 #include "rele/approximators/Features.h"
+#include "rele/approximators/Regressors.h"
 #include <cassert>
 
 namespace ReLe
@@ -51,7 +52,7 @@ public:
         return gradient;
     }
 
-    inline arma::vec getGradientDiff()
+    inline arma::mat getGradientDiff()
     {
         return dGradient;
     }

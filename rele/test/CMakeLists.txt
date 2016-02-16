@@ -134,6 +134,9 @@ target_link_libraries(mleH2O_test rele)
 add_executable(lqr_ExpectedDeltaIRL IRL/ExpectedDeltaIRL/ExpectedDeltaIRL_LQR.cpp)
 target_link_libraries(lqr_ExpectedDeltaIRL rele)
 
+add_executable(gradient_irl_test IRL/gradient/GradientIRLTest.cpp)
+target_link_libraries(gradient_irl_test rele)
+
 #Solvers tests
 add_executable(lqr_solver_test solvers/LQRsolverTest.cpp)
 target_link_libraries(lqr_solver_test rele)

@@ -130,7 +130,7 @@ public:
 
             // store them
             Rew_ep(i) = Rew;
-            Rew_ep.row(i) = dRew;
+            dRew_ep.row(i) = dRew;
             sumGradLog_ep.col(i) = sumGradLog;
 
             // compute baseline num and den

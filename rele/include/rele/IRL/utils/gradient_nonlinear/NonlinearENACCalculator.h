@@ -52,6 +52,7 @@ public:
 
         double Rew;
         arma::vec g(dp + 1, arma::fill::zeros), psi(dp + 1);
+        arma::mat dg(dp+1, dr, arma::fill::zeros);
         arma::mat fisher(dp + 1, dp + 1, arma::fill::zeros);
 
         unsigned int nbEpisodes = data.size();
@@ -70,15 +71,18 @@ public:
 
             fisher += psi * psi.t();
             g += psi * Rew;
+            dg += psi * dRew;
 
             totSteps += data[i].size();
         }
 
         arma::vec nat_grad;
+        arma::mat nat_grad_diff;
         int rnk = arma::rank(fisher);
         if (rnk == fisher.n_rows)
         {
             nat_grad = arma::solve(fisher, g);
+            nat_grad_diff = arma::solve(fisher, dg);
         }
         else
         {
@@ -87,9 +91,11 @@ public:
 
             arma::mat H = arma::pinv(fisher);
             nat_grad = H * g;
+            nat_grad_diff = H * dg;
         }
 
         gradient = nat_grad.rows(0, dp - 1);
+        dGradient = nat_grad_diff.rows(0, dp -1);
     }
 
     virtual ~NonlinearENACCalculator()
