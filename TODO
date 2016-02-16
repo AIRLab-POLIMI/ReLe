@@ -2,22 +2,23 @@ TODO:
 
 ### 16 Feb 2016
 DAVE:
-1) Testare e implementare i gradienti per IRL
-2) Cleanup interfaccia serializzazione
-3) scegliere una lib per scrivere json
+1) Fixare Enac
+2) Testare e implementare i gradienti per IRL
+3) Cleanup interfaccia serializzazione
+4) scegliere una lib per scrivere json
 
 
 TEO:
-1) Fixare Enac
-2) scegliere una lib per binding python/altro
+1) scegliere una lib per binding python/altro
 
+CARLO:
+1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
+2) Test case policy Gradient
 
 VARIE:
-1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
 2) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
 3) interfaccia ROS (supportare Gazeebo)
-4) MLE con LASSO ?
-5) CPIRL ?
+4) CPIRL 
 6) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
 7) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
 8) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
