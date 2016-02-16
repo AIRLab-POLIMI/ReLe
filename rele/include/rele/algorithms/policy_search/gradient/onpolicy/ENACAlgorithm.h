@@ -39,8 +39,6 @@ namespace ReLe
  * http://www.kyb.mpg.de/fileadmin/user_upload/files/publications/attachments/IROS2006-Peters_%5b0%5d.pdf
  */
 
-#define AUGMENTED
-
 template<class ActionC, class StateC>
 class eNACAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC>
 {
@@ -75,26 +73,19 @@ protected:
         unsigned int dp = policy.getParametersSize();
         AbstractPolicyGradientAlgorithm<ActionC, StateC>::init();
         history_sumdlogpi.assign(nbEpisodesToEvalPolicy,arma::vec(dp));
-#ifdef AUGMENTED
+
         fisher.zeros(dp+1,dp+1);
         g.zeros(dp+1);
         eligibility.zeros(dp+1);
-        phi.zeros(dp+1);
-#else
-        fisher.zeros(dp,dp);
-        g.zeros(dp);
-        eligibility.zeros(dp);
-        phi.zeros(dp);
-#endif
+        psi.zeros(dp+1);
+
         Jpol = 0.0;
     }
 
     virtual void initializeVariables() override
     {
-        phi.zeros();
-#ifdef AUGMENTED
-        phi(policy.getParametersSize()) = 1.0;
-#endif
+        psi.zeros();
+        psi(policy.getParametersSize()) = 1.0;
     }
 
     virtual void updateStep(const Reward& reward) override
@@ -107,16 +98,15 @@ protected:
         arma::vec grad = policy.difflog(currentState, currentAction);
 
         //Construct basis functions
-        for (unsigned int i = 0; i < dp; ++i)
-            phi[i] += df * grad[i];
+        psi.rows(0, dp-1) += grad;
     }
 
     virtual void updateAtEpisodeEnd() override
     {
         Jpol += Jep;
-        fisher += phi * phi.t();
-        g += Jep * phi;
-        eligibility += phi;
+        fisher += psi * psi.t();
+        g += Jep * psi;
+        eligibility += psi;
     }
 
     virtual void updatePolicy() override
@@ -146,7 +136,6 @@ protected:
         arma::vec step_size;
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
-        //        std::cout << rnk << " " << fisher << std::endl;
         if (rnk == fisher.n_rows)
         {
             arma::vec grad;
@@ -186,34 +175,26 @@ protected:
             }
             step_size = stepLength.stepLength(grad, fisher);
         }
-        //---
 
         //--- save actual policy performance
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad.rows(0,dp-1);
         currentItStats->stepLength = step_size;
-        //---
-
-        //        std::cout << stepLength <<std::endl;
-        //        std::cout << nat_grad.t();
 
         arma::vec newvalues = policy.getParameters() + nat_grad.rows(0,dp-1) * step_size;
         policy.setParameters(newvalues);
-        //        std::cout << "new_params: "  << newvalues.t();
 
-        for (int p = 0; p < nbParams; ++p)
-        {
-            eligibility[p] = 0.0;
-            g[p] = 0.0;
-        }
+        eligibility.zeros();
+        g.zeros();
+
         fisher.zeros();
         Jpol = 0.0;
     }
 
 protected:
     std::vector<arma::vec> history_sumdlogpi;
-    arma::vec g, eligibility, phi;
+    arma::vec g, eligibility, psi;
 
     arma::mat fisher;
     double Jpol;
