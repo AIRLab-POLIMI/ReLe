@@ -40,7 +40,7 @@
 
 #include "rele/environments/MountainCar.h"
 #include "rele/statistics/MLE.h"
-#include "rele/algorithms/batch/LSPI.h"
+#include "rele/algorithms/batch/td/LSPI.h"
 #include "rele/utils/ArmadilloExtensions.h"
 #include "rele/policy/nonparametric/RandomPolicy.h"
 

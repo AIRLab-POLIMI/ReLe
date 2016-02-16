@@ -228,8 +228,9 @@ add_executable(taxi_PG PG/TaxiFuelPGTest.cpp)
 target_link_libraries(taxi_PG rele)
 
 #Batch test
-add_executable(deep_off Batch/DeepBatchTest.cpp)
-target_link_libraries(deep_off rele)
+
+#add_executable(deep_off Batch/DeepBatchTest.cpp)
+#target_link_libraries(deep_off rele)
 
 if(${GSL_FOUND})
 	add_executable(gridFQI2 Batch/GridFQITest2.cpp)
@@ -244,8 +245,8 @@ endif()
 add_executable(gridFQI Batch/GridFQITest.cpp)
 target_link_libraries(gridFQI rele)
 
-add_executable(nls_off Batch/NlsBatchTest.cpp)
-target_link_libraries(nls_off rele)
+#add_executable(nls_off Batch/NlsBatchTest.cpp)
+#target_link_libraries(nls_off rele)
 
 add_executable(mc_LSPI Batch/McLSPITest.cpp)
 target_link_libraries(mc_LSPI rele)

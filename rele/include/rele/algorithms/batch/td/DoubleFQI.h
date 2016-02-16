@@ -28,7 +28,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_DOUBLEFQI_H_
 #define INCLUDE_RELE_ALGORITHMS_BATCH_DOUBLEFQI_H_
 
-#include "rele/algorithms/batch/FQI.h"
+#include "rele/algorithms/batch/td/FQI.h"
 #include "rele/approximators/Ensemble.h"
 
 
