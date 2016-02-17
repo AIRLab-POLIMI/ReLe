@@ -28,7 +28,7 @@
 #include "rele/core/Core.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/q_policy/e_Greedy.h"
-#include "rele/algorithms/batch/W-FQI.h"
+#include "rele/algorithms/batch/td/W-FQI.h"
 #include "rele/algorithms/td/Q-Learning.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/utils/FileManager.h"

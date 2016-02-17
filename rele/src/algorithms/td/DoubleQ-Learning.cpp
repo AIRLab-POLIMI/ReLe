@@ -57,7 +57,7 @@ void DoubleQ_Learning::sampleAction(const FiniteState& state, FiniteAction& acti
 void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
                             FiniteAction& action)
 {
-	size_t xn = nextState.getStateN();
+    size_t xn = nextState.getStateN();
     unsigned int selectedQ;
 
     selectedQ = RandomGenerator::sampleUniformInt(0, 1);

@@ -31,7 +31,7 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_W_FQI_H_
 #define INCLUDE_RELE_ALGORITHMS_BATCH_W_FQI_H_
 
-#include "rele/algorithms/batch/FQI.h"
+#include "rele/algorithms/batch/td/FQI.h"
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_cdf.h>

@@ -175,8 +175,8 @@ inline void WQ_Learning::updateMeanAndSampleStdQ(double target)
     Q(x, u) = (1 - alpha) * Q(x, u) + alpha * target;
     Q2(x, u) = (1 - alpha) * Q2(x, u) + alpha * target * target;
 
-	meanQ(x, u) = Q(x, u);
-	weightsVar(x, u) = (1 - alpha) * (1 - alpha) * weightsVar(x, u) + alpha * alpha;
+    meanQ(x, u) = Q(x, u);
+    weightsVar(x, u) = (1 - alpha) * (1 - alpha) * weightsVar(x, u) + alpha * alpha;
 
     if(n_updates(x, u) > 1)
     {
