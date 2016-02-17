@@ -32,6 +32,7 @@ namespace ReLe
 template<class ActionC, class StateC>
 class ENACGradientCalculator: public GradientCalculator<ActionC, StateC>
 {
+protected:
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 
 public:
@@ -96,6 +97,7 @@ protected:
 template<class ActionC, class StateC>
 class ENACBaseGradientCalculator: public GradientCalculator<ActionC, StateC>
 {
+protected:
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
     ENACBaseGradientCalculator(Features& phi, Dataset<ActionC, StateC>& data,

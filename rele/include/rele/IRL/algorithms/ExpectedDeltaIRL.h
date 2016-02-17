@@ -25,15 +25,12 @@
 #define INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
 
 #include "rele/IRL/IRLAlgorithm.h"
-#include "rele/policy/Policy.h"
-#include "rele/core/Transition.h"
-#include "rele/IRL/utils/hessian/HessianCalculator.h"
-
-#include "rele/IRL/utils/IrlGradType.h"
+#include "rele/IRL/utils/HessianCalculatorFactory.h"
+#include "rele/IRL/utils/GradientCalculatorFactory.h"
 
 #include <nlopt.hpp>
 #include <cassert>
-#include "rele/IRL/utils/GradientCalculatorFactory.h"
+
 
 namespace ReLe
 {
@@ -51,8 +48,8 @@ public:
 
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);
-        hessianCalculator = new HessianCalculator<ActionC, StateC>(
-            rewardf.getFeatures(), data, policy, gamma);
+        hessianCalculator = HessianCalculatorFactory<ActionC, StateC>::build(
+                                type, rewardf.getFeatures(), data, policy, gamma);
     }
 
     virtual ~ExpectedDeltaIRL()

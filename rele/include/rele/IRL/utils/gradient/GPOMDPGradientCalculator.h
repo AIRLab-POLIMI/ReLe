@@ -33,6 +33,7 @@ namespace ReLe
 template<class ActionC, class StateC>
 class GPOMDPGradientCalculator : public GradientCalculator<ActionC, StateC>
 {
+protected:
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
     GPOMDPGradientCalculator(Features& phi,
@@ -92,6 +93,7 @@ protected:
 template<class ActionC, class StateC>
 class GPOMDPBaseGradientCalculator : public GradientCalculator<ActionC, StateC>
 {
+protected:
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
     GPOMDPBaseGradientCalculator(Features& phi,

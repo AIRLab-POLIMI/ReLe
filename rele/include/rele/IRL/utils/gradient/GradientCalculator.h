@@ -116,13 +116,11 @@ private:
 }
 
 #define USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC) \
-			protected: \
 			typedef GradientCalculator<ActionC,StateC> Base; \
 			using Base::phi; \
 			using Base::data; \
 			using Base::policy; \
-			using Base::gamma; \
-			private:
+			using Base::gamma;
 
 
 #endif /* INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_ */

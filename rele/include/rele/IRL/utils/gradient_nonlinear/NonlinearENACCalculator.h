@@ -142,10 +142,10 @@ public:
         for (int i = 0; i < nbEpisodes; ++i)
         {
 
-        	double Rew;
-        	arma::rowvec dRew(dr);
-        	arma::vec sumGradLog(dp);
-        	this->computeEpisodeStatistics(data[i], Rew, dRew, sumGradLog);
+            double Rew;
+            arma::rowvec dRew(dr);
+            arma::vec sumGradLog(dp);
+            this->computeEpisodeStatistics(data[i], Rew, dRew, sumGradLog);
 
             arma::vec psi(dp + 1);
             psi.rows(0, dp - 1) = sumGradLog;

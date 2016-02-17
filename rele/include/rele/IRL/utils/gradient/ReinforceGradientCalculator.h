@@ -32,6 +32,7 @@ namespace ReLe
 template<class ActionC, class StateC>
 class ReinforceGradientCalculator : public GradientCalculator<ActionC, StateC>
 {
+protected:
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
     ReinforceGradientCalculator(Features& phi,
@@ -72,6 +73,8 @@ protected:
 template<class ActionC, class StateC>
 class ReinforceBaseGradientCalculator : public ReinforceGradientCalculator<ActionC, StateC>
 {
+
+protected:
     USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
 public:
     ReinforceBaseGradientCalculator(Features& phi,

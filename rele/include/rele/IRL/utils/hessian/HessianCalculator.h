@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_
 
-#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/Features.h"
 #include "rele/policy/Policy.h"
 #include "rele/core/Transition.h"
 
@@ -38,13 +38,15 @@ public:
     HessianCalculator(Features& phi,
                       Dataset<ActionC,StateC>& data,
                       DifferentiablePolicy<ActionC,StateC>& policy,
-                      double gamma)
+                      double gamma) : phi(phi), data(data), policy(policy), gamma(gamma)
     {
-        computeHessianDiff(phi, data, policy, gamma);
+        computed = false;
     }
 
     arma::mat computeHessian(const arma::vec& w)
     {
+        compute();
+
         arma::mat H(Hdiff.n_rows, Hdiff.n_cols, arma::fill::zeros);
 
         for(unsigned int i = 0; i < Hdiff.n_slices; i++)
@@ -58,56 +60,71 @@ public:
 
     arma::cube getHessianDiff()
     {
+        compute();
         return Hdiff;
     }
 
-private:
-    void computeHessianDiff(Features& phi,
-                            Dataset<ActionC,StateC>& data,
-                            DifferentiablePolicy<ActionC,StateC>& policy,
-                            double gamma)
+    virtual ~HessianCalculator()
     {
-        unsigned int parameterSize = policy.getParametersSize();
-        Hdiff.zeros(parameterSize, parameterSize, phi.rows());
-
-        for(unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
-        {
-            Episode<ActionC,StateC>& episode = data[ep];
-            double df = 1.0;
-
-            for (unsigned int t = 0; t < episode.size(); t++)
-            {
-                Transition<ActionC,StateC>& tr = episode[t];
-                arma::mat K = computeK(policy, tr);
-
-                arma::vec phi_t = phi(tr.x, tr.u, tr.xn);
-
-                for(unsigned int f = 0; f < phi.rows(); f++)
-                {
-                    Hdiff.slice(f) += df*K*phi_t(f);
-                }
-
-                df *= gamma;
-
-            }
-        }
 
     }
 
-    arma::mat computeK(DifferentiablePolicy<ActionC,StateC>& policy,
-                       Transition<ActionC,StateC>& tr)
+protected:
+    virtual arma::cube computeHessianDiff() = 0;
+
+
+    arma::mat computeLocalG(Transition<ActionC,StateC>& tr)
     {
-        arma::vec logDiff = policy.difflog(tr.x, tr.xn);
-        arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
+        arma::vec logDiff = policy.difflog(tr.x, tr.u);
+        arma::mat logDiff2 = policy.diff2log(tr.x, tr.u);
         return logDiff2 + logDiff*logDiff.t();
     }
 
+    arma::mat computeG(Episode<ActionC,StateC>& episode)
+    {
+        int dp  = policy.getParametersSize();
+        int nbSteps = episode.size();
+        arma::mat G(dp, dp, arma::fill::zeros);
+
+        //iterate the episode
+        for (int t = 0; t < nbSteps; ++t)
+        {
+            Transition<ActionC, StateC>& tr = episode[t];
+            G += computeLocalG(tr);
+        }
+
+        return G;
+    }
+
+private:
+    void compute()
+    {
+        if(!computed)
+        {
+            Hdiff = computeHessianDiff();
+            computed = true;
+        }
+    }
+
+protected:
+    Features& phi;
+    Dataset<ActionC,StateC>& data;
+    DifferentiablePolicy<ActionC,StateC>& policy;
+    double gamma;
 
 private:
     arma::cube Hdiff;
+    bool computed;
 };
 
 }
+
+#define USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC) \
+			typedef HessianCalculator<ActionC,StateC> Base; \
+			using Base::phi; \
+			using Base::data; \
+			using Base::policy; \
+			using Base::gamma;
 
 
 #endif /* INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_ */
