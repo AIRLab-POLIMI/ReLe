@@ -27,6 +27,7 @@
 #include "rele/IRL/IRLAlgorithm.h"
 #include "rele/IRL/utils/HessianCalculatorFactory.h"
 #include "rele/IRL/utils/GradientCalculatorFactory.h"
+#include "rele/IRL/utils/Optimization.h"
 
 #include <nlopt.hpp>
 #include <cassert>
@@ -88,7 +89,7 @@ public:
         std::cout << "Optimization dim: " << effective_dim << std::endl
                   << std::endl;
 
-        optimizator.set_min_objective(ExpectedDeltaIRL::wrapper, this);
+        optimizator.set_min_objective(Optimization::objFunctionWrapper<ExpectedDeltaIRL<ActionC, StateC>>, this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-8);
         optimizator.set_ftol_abs(1e-8);
@@ -96,7 +97,7 @@ public:
 
         std::vector<double> tols(effective_dim + 1, 1e-5);
         optimizator.add_inequality_mconstraint(
-            ExpectedDeltaIRL::InequalitySimplexConstraints, nullptr,
+            Optimization::inequalitySimplexConstraints, nullptr,
             tols);
 
         // define initial point
@@ -156,29 +157,8 @@ public:
     }
 
     //======================================================================
-    // OPTIMIZATION: WRAPPER AND OBJECTIVE FUNCTION
+    // OBJECTIVE FUNCTION
     //----------------------------------------------------------------------
-    static double wrapper(unsigned int n, const double* x, double* grad,
-                          void* o)
-    {
-        arma::vec df;
-        arma::vec parV(const_cast<double*>(x), n, true);
-        double value = static_cast<ExpectedDeltaIRL*>(o)->objFunction(parV, df);
-
-        //Save gradient
-        if (grad)
-        {
-            for (int i = 0; i < df.n_elem; ++i)
-            {
-                grad[i] = df[i];
-            }
-        }
-
-        //Print gradient and value
-        //printOptimizationInfo(value, n, x, grad);
-
-        return value;
-    }
 
     double objFunction(const arma::vec& x, arma::vec& df)
     {
@@ -191,7 +171,7 @@ public:
 
         double f_linear = -arma::as_scalar(g.t() * arma::inv(H) * g);
         double f_quadratic = 0.5 * arma::as_scalar(g.t() * arma::inv(H) * g);
-        double f_trace = arma::trace(H * Sigma)/1e15;
+        double f_trace = arma::trace(H * Sigma);
         double f = f_linear + f_quadratic + f_trace;
 
         std::cout << "f: " << f << std::endl;
@@ -202,39 +182,6 @@ public:
 
         return f;
 
-    }
-
-    static void InequalitySimplexConstraints(unsigned m, double* result,
-            unsigned n, const double* x, double* grad, void* f_data)
-    {
-        result[n] = -1.0;
-        for (unsigned int i = 0; i < n; ++i)
-        {
-            // -x_i <= 0
-            result[i] = -x[i];
-            // sum x_i - 1 <= 0
-            result[n] += x[i];
-        }
-        //compute the gradient: d c_i / d x_j = g(i*n+j)
-        if (grad != nullptr)
-        {
-            for (unsigned int j = 0; j < n; ++j)
-            {
-                for (unsigned int i = 0; i < n; ++i)
-                {
-                    if (i == j)
-                    {
-                        grad[i * n + j] = -1.0;
-                    }
-                    else
-                    {
-                        grad[i * n + j] = 0.0;
-                    }
-
-                }
-                grad[n * n + j] = 1.0;
-            }
-        }
     }
 
 private:
