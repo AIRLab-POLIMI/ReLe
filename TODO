@@ -21,5 +21,6 @@ VARIE:
 3) interfaccia ROS (supportare Gazeebo)
 4) CPIRL 
 5) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
-6) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
+6) Modificare la LoggerStrategy per gestire più esperimenti di test (rimuovere runBatchTest in Core.h)
+7) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
 
