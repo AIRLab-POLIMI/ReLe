@@ -30,37 +30,6 @@ namespace ReLe
 class Optimization
 {
 public:
-    static void inequalitySimplexConstraints(unsigned m, double* result,
-            unsigned n, const double* x, double* grad, void* f_data)
-    {
-        result[n] = -1.0;
-        for (unsigned int i = 0; i < n; ++i)
-        {
-            // -x_i <= 0
-            result[i] = -x[i];
-            // sum x_i - 1 <= 0
-            result[n] += x[i];
-        }
-
-        //compute the gradient: d c_i / d x_j = g(i*n+j)
-        if (grad != nullptr)
-        {
-            for (unsigned int j = 0; j < n; ++j)
-            {
-                for (unsigned int i = 0; i < n; ++i)
-                {
-                    if (i == j)
-                        grad[i * n + j] = -1.0;
-                    else
-                        grad[i * n + j] = 0.0;
-
-                }
-
-                grad[n * n + j] = 1.0;
-            }
-        }
-    }
-
     static double oneSumConstraint(unsigned int n, const double *x,
                                    double *grad, void *data)
     {
