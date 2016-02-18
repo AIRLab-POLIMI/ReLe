@@ -49,7 +49,10 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
-doxy:
+createdir:
+	mkdir -p _static _template _build
+
+doxy: createdir
 	doxygen Doxyfile
 	@echo
 	@echo "Doxygen build finished. The output is in doxyhtml"

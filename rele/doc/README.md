@@ -1,8 +1,8 @@
 To build the documentation, invoke
 ```
-	./build.py <path_to_source>
+	make html
 ```
-Them point your browser to build/html/index.html.
+Them point your browser to \_build/html/index.html.
 
 
 #### External dependencies

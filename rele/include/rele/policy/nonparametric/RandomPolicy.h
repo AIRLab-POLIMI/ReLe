@@ -33,13 +33,12 @@
 namespace ReLe
 {
 
-/**
- * This agent selects a purely random action given any input state.
+/*!
+ * This policy selects a purely random action given any input state.
  * Each action value is selected within the given range, i.e., it is
  * drawn from an uniform bounded distribution:
  * \f[ \pi(a|s) = \mathcal{U}(\Omega)\f]
  * where \f$\Omega \subseteq R^{n}\f$.
- * @brief Purely continuous random policy
  */
 template<class StateC>
 class RandomPolicy : public Policy<DenseAction,StateC>
@@ -47,7 +46,11 @@ class RandomPolicy : public Policy<DenseAction,StateC>
 
 protected:
 
+    ///Vector of ranges, each one representing
+    /// the range of the i-th element of an action,
+    /// i.e., \f$a_i \sim U(Omega_i)\f$
     std::vector<Range> mpRanges;
+    /// Action pointer
     DenseAction mpAction;
 
 public:

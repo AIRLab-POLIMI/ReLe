@@ -8,7 +8,7 @@
 
 
 API Reference
-#########
+######################
 
 .. highlight:: c++
 
@@ -27,3 +27,12 @@ Policy Representations
 
 .. doxygenclass:: ReLe::DifferentiablePolicy
    :members:
+
+Normal Policies
+-----------------------
+
+.. doxygenclass:: ReLe::GenericMVNPolicy
+
+.. doxygenclass:: ReLe::GenericMVNDiagonalPolicy
+
+.. doxygenclass:: ReLe::GenericMVNStateDependantStddevPolicy

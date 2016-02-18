@@ -33,33 +33,50 @@
 namespace ReLe
 {
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// MVN POLICY
-///////////////////////////////////////////////////////////////////////////////////////
+// ================================================
+// MVN POLICY
+// ------------------------------------------------
 
-/**
- * @brief Multivariate Normal policy with fixed covariance matrix
- *
+
+/*!
  * This class represents a multivariate Normal policy with fixed covariance matrix
- * and generic approximation of the mean value:
- * \f[ \pi^{\theta} (a|s) = \mathcal{N}(s; \mu(\phi(s),\theta), \Sigma),\qquad
- * \forall s \in R^{n_s}, a \in R^{n_a},\f]
- * where \f$\phi(s)\f$ is an \f$(n_a \times k)\f$ matrix and
- * \f$\theta\f$ is a \f$k\f$-dimensional vector.
+ * and generic parametric approximation of the mean value:
+ * \f[
+ *  \pi^{\theta} (a|s) = \mathcal{N}\left(a; \mu(s,\theta), \Sigma\right),\qquad
+ * \forall s \in R^{n_s}, a \in R^{n_a},
+ * \f]
+ * where \f$\theta\f$ is a \f$k\f$-dimensional vector.
+ *
+ * The parameters to be optimized are the one of the mean approximator, i.e., \f$\theta\f$.
+ *
+ *
+ * Example:
+ *
+ *      BasisFunctions basis = IdentityBasis::generate(2);
+ *      SparseFeatures phi;
+ *      phi.setDiagonal(basis);
+ *      arma::vec w = {1.0, 1.0};
+ *      LinearApproximator regressor(phi);
+ *      regressor.setParameters(w);
+ *      GenericMVNPolicy policy(regressor);
+ *
+ *      arma::vec state  = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({10.0, 10.0})));
+ *      arma::vec action = policy(state);
+ *      arma::vec diff = policy.difflog(state, action);
+ *
  */
 class GenericMVNPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
 
-    /**
+    /*!
      * Create an instance of the class using the given projector.
      * Covariance matrix is initialized to the unit matrix.
      * Note that the weights of the mean approximation are not
      * changed, i.e., the initial weights are specified by the
      * instance of the regressor received as parameter.
      *
-     * @brief The constructor.
-     * @param approximator The regressor used for mean approximation
+     * \param approximator The regressor used for mean approximation
      */
     GenericMVNPolicy(ParametricRegressor& approximator) :
         meanApproximator(approximator),
@@ -72,6 +89,17 @@ public:
         determinant = arma::det(Sigma);
     }
 
+    //@{
+    /*!
+     * Create an instance of the class using the given projector and
+     * covariance matrix.
+     * Note that the weights of the mean approximation are not
+     * changed, i.e., the initial weights are specified by the
+     * instance of the regressor received as parameter.
+     *
+     * \param approximator The regressor used for mean approximation.
+     * \param covariance The covariance matrix (\f$n_a \times n_a\f$).
+     */
     GenericMVNPolicy(ParametricRegressor& approximator, arma::mat& covariance) :
         meanApproximator(approximator),
         mean(approximator.getOutputSize(), arma::fill::zeros),
@@ -82,23 +110,15 @@ public:
         determinant = arma::det(Sigma);
     }
 
-    /**
-     * Create an instance of the class using the given projector and
-     * covariance matrix.
-     *
-     * @brief The constructor.
-     * @param approximator The regressor used for mean approximation.
-     * @param initialCov The covariance matrix (\f$n_a \times n_a\f$).
-     */
     GenericMVNPolicy(ParametricRegressor& approximator,
-                     std::initializer_list<double> initialCov) :
+                     std::initializer_list<double> covariance) :
         meanApproximator(approximator),
         mean(approximator.getOutputSize(), arma::fill::zeros)
     {
         int output_dim = approximator.getOutputSize();
         Sigma.zeros(output_dim, output_dim);
         int row = 0, col = 0;
-        for (double x : initialCov)
+        for (double x : covariance)
         {
             Sigma(row, col++) = x;
             if (col == output_dim)
@@ -130,6 +150,7 @@ public:
         choleskySigma = arma::chol(Sigma);
         determinant = arma::det(Sigma);
     }
+    //@}
 
     virtual ~GenericMVNPolicy()
     {
@@ -184,7 +205,7 @@ public:
 
 protected:
 
-    /**
+    /*!
      * This function is deputed to the computatio of the mean and covariance
      * values in the given state. Moreover, the function must compute all the
      * informations required for the generation of samples from the Gaussian
@@ -195,9 +216,8 @@ protected:
      * In this base version only the mean value is updated since the covariance
      * matrix is indipendent from the state value.
      *
-     * @brief Update internal state.
-     * @param state The state where the policy is evaluated.
-     * @param cholesky_dec A flag used to require the Cholesky decomposition of the
+     * \param state The state where the policy is evaluated.
+     * \param cholesky_dec A flag used to require the Cholesky decomposition of the
      * covariance matrix.
      */
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
@@ -213,10 +233,24 @@ protected:
     arma::vec mean;
 };
 
+// ================================================
+// Generic MVN POLICY with Diagonal covariance (parameters: mean, diagonal standard deviations)
+// ------------------------------------------------
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// Generic MVN POLICY with Diagonal covariance (parameters: mean, diagonal standard deviations)
-///////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * This class implements a generic multivariate normal policy
+ * with mean represented through a generic parametric regressor
+ * and diagonal covariance matrix:
+ * \f[
+ *  \pi^{\theta} (a|s) = \mathcal{N}\left(a; \mu(s,\omega), diag(\sigma^2)\right),\qquad
+ * \forall s \in R^{n_s}, a \in R^{n_a},
+ * \f]
+ * where \f$\omega\f$ is a \f$k\f$-dimensional vector and \f$\sigma\f$ is
+ * a \f$d\f$-dimensional vector. Note that the power operator is to be considered
+ * component-wise.
+ *
+ * The parameters to be optimized are \f$\theta=[\omega,\sigma]\f$.
+ */
 class GenericMVNDiagonalPolicy : public GenericMVNPolicy
 {
 public:
@@ -277,10 +311,9 @@ public:
 
 private:
     /**
-     * Compute the covariance matrix from the logistic parameters and
-     * compute the Cholesky decomposition of it.
-     *
-     * @brief Update the covariance matrix
+     * Update the internal representation that is (state,action)-independent.
+     * It computes the covariance matrix from the vector of standard deviation
+     * parameters. This function is called after an update of the parameters.
      */
     void UpdateCovarianceMatrix();
 
@@ -289,9 +322,25 @@ protected:
 };
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// Generic MVN POLICY with state dependant diagonal standard deviation (parameters: mean, std dev weights)
-///////////////////////////////////////////////////////////////////////////////////////
+// ================================================
+// Generic MVN POLICY with state dependant diagonal standard deviation (parameters: mean, std dev weights)
+// ------------------------------------------------
+/*!
+ * This class implements a multivariate normal policy
+ * with both mean and covariance represented through parametric functions.
+ * Let \f$f_\mu : S \times \Omega \to n_a\f$ and \f$f_\Sigma : S \times \Sigma \to n_a\f$.
+ * Then the policy class is defined as
+ * \f[
+ *  \pi^{\theta} (a|s) = \mathcal{N}\left(a; f_\mu(s,\omega), diag(f_\Sigma(s,\sigma)^2)\right),\qquad
+ * \forall s \in R^{n_s}, a \in R^{n_a},
+ * \f]
+ * where \f$\omega\f$ is a \f$k\f$-dimensional vector and \f$\sigma\f$ is
+ * a \f$d\f$-dimensional vector.
+ * Note that the power operator is to be considered
+ * component-wise.
+ *
+ * The parameters to be optimized are \f$\theta=[\omega, \sigma]\f$.
+ */
 class GenericMVNStateDependantStddevPolicy : public GenericMVNPolicy
 {
 public:

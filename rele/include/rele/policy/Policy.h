@@ -93,7 +93,21 @@ public:
      */
     virtual std::string getPolicyName() = 0;
 
+    /*!
+     * Map the name of the hyperparameters to their
+     * value and return such representation.
+     *
+     * \return the hyperparameters of the policy
+     */
     virtual std::string getPolicyHyperparameters() = 0;
+
+    /*!
+     * Generate a textual representation of the status
+     * of the policy. It is used to visualize the policy.
+     * Such representation must be human friendly.
+     *
+     * \return The textual description of the policy
+     */
     virtual std::string printPolicy() = 0;
 
     /*!
@@ -107,6 +121,11 @@ public:
      */
     virtual Policy<ActionC, StateC>* clone() = 0;
 
+    /*!
+     * Set a new action mask. Note that the old pointer
+     * is not deleted.
+     * \param mask the new action mask
+     */
     void setMask(ActionMask<StateC, bool>* mask)
     {
         this->actionMask = mask;
@@ -127,6 +146,8 @@ protected:
     }
 
 protected:
+    /// Check a condition on the provided state
+    /// Can be used to check if an action is valid in a given state
     ActionMask<StateC, bool>* actionMask; //FIXME add template parameter if needed, or enable if
 };
 
