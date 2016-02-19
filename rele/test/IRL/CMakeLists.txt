@@ -26,9 +26,6 @@ target_link_libraries(nls_PGIRL rele)
 add_executable(simple_PGIRL PGIRL/SimpleTest.cpp)
 target_link_libraries(simple_PGIRL rele)
 
-add_executable(lqr_MGIRL GIRL/MGIRL_LQR.cpp)
-target_link_libraries(lqr_MGIRL rele)
-
 add_executable(lqr_EMIRL EMIRL/EMIRL_LQR.cpp)
 target_link_libraries(lqr_EMIRL rele)
 
