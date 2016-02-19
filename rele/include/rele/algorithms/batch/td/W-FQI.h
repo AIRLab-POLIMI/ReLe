@@ -74,12 +74,11 @@ template<class StateC>
 class W_FQI: public FQI<StateC>
 {
 public:
-    W_FQI(Dataset<FiniteAction, StateC>& data,
-          BatchRegressor& QRegressor,
+    W_FQI(BatchRegressor& QRegressor,
           unsigned int nStates,
           unsigned int nActions,
           double gamma) :
-        FQI<StateC>(data, QRegressor, nStates, nActions, gamma, 1),
+        FQI<StateC>(QRegressor, nStates, nActions, gamma, 1),
         meanQ(arma::mat(nStates, nActions, arma::fill::zeros)),
         // There are 0 elements at the beginning, variance is infinite
         sampleStdQ(arma::mat(nStates, nActions).fill(STD_INF_VALUE)),
@@ -93,8 +92,20 @@ public:
             idxs.row(i) = actions(arma::find(actions != i)).t();
     }
 
-    void step(std::vector<MiniBatchData*>& miniBatches, std::vector<arma::mat>& outputs) override
+    void step() override
     {
+        std::vector<arma::mat> outputs;
+        std::vector<arma::vec> nextStatesMiniBatch;
+
+        auto&& miniBatches = this->featureDatasetStart->getNMiniBatches(this->nMiniBatches);
+
+        for(unsigned int i = 0; i < this->nMiniBatches; i++)
+        {
+            this->QRegressor.trainFeatures(*miniBatches[i]);
+            nextStatesMiniBatch.push_back(this->nextStates(miniBatches[i]->getIndexes()));
+            outputs.push_back(miniBatches[i]->getOutputs());
+        }
+
         updateMeanAndSampleStdQ();
 
         arma::mat input = miniBatches[0]->getFeatures();
@@ -108,7 +119,7 @@ public:
         gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
         for(unsigned int i = 0; i < input.n_cols; i++)
         {
-            unsigned int nextState = this->nextStatesMiniBatch[0](i);
+            unsigned int nextState = nextStatesMiniBatch[0](i);
             if(this->absorbingStates.count(nextState) == 0)
             {
                 arma::vec integrals(this->nActions, arma::fill::zeros);
@@ -136,12 +147,14 @@ public:
                 outputs[0](i) = rewards(0, i) + this->gamma * W;
             }
             else
-                outputs[0](i) = rewards(0, i);
+            	outputs[0](i) = rewards(0, i);
         }
         gsl_integration_workspace_free(w);
 
         BatchDataSimple featureDataset(input, outputs[0]);
         this->QRegressor.trainFeatures(featureDataset);
+
+        MiniBatchData::cleanMiniBatches(miniBatches);
     }
 
 protected:

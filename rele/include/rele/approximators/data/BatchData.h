@@ -345,6 +345,13 @@ public:
 
     }
 
+public:
+    static void cleanMiniBatches(std::vector<MiniBatchData_<OutputC, dense>*> miniBatches)
+    {
+    	for(auto* mb : miniBatches)
+    		delete mb;
+    }
+
 private:
     const BatchData_<OutputC, dense>& data;
     arma::uvec indexes;

@@ -81,26 +81,37 @@ public:
      * a dataset of (s, a, r, s') transitions, together with the regressors that
      * it is used to approximate the target distribution of Q values.
      */
-    DoubleFQI(Dataset<FiniteAction, StateC>& data,
-              BatchRegressor& QRegressorA,
+    DoubleFQI(BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
               unsigned int nStates,
               unsigned int nActions,
               double gamma,
               bool shuffle = false) :
-        FQI<StateC>(data, QRegressorEnsemble, nStates, nActions, gamma, 2),
+        FQI<StateC>(QRegressorEnsemble, nStates, nActions, gamma, 2),
         QRegressorEnsemble(QRegressorA, QRegressorB),
         shuffle(shuffle)
     {
     }
 
-    void step(std::vector<MiniBatchData*>& miniBatches, std::vector<arma::mat>& outputs) override
+    void step() override
     {
+        std::vector<arma::mat> outputs;
+        std::vector<arma::vec> nextStatesMiniBatch;
+
+        auto&& miniBatches = this->featureDatasetStart->getNMiniBatches(this->nMiniBatches);
+
+        for(unsigned int i = 0; i < this->nMiniBatches; i++)
+        {
+            this->QRegressor.trainFeatures(*miniBatches[i]);
+            nextStatesMiniBatch.push_back(this->nextStates(miniBatches[i]->getIndexes()));
+            outputs.push_back(miniBatches[i]->getOutputs());
+        }
+
         if(shuffle)
             for(unsigned int i = 0; i < this->nMiniBatches; i++)
             {
                 miniBatches[i]->shuffle();
-                this->nextStatesMiniBatch[i] = this->nextStates(miniBatches[i]->getIndexes());
+                nextStatesMiniBatch[i] = this->nextStates(miniBatches[i]->getIndexes());
             }
 
         std::vector<arma::mat> inputs;
@@ -119,8 +130,7 @@ public:
                  * are zero for each action in an absorbing state, we check if s' is
                  * absorbing and, if it is, we leave the Q-values fixed to zero.
                  */
-                FiniteState nextState = FiniteState(
-                                            this->nextStatesMiniBatch[miniBatchIndex](i));
+                FiniteState nextState = FiniteState(nextStatesMiniBatch[miniBatchIndex](i));
                 if(this->absorbingStates.count(nextState) == 0)
                 {
                     arma::vec Q_xn(this->nActions, arma::fill::zeros);
@@ -142,12 +152,14 @@ public:
                                                          1 - miniBatchIndex)(nextState, FiniteAction(maxIndex(index))));
                 }
                 else
-                    outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
+                	outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
             }
 
             BatchDataSimple featureDataset(miniBatchInput, outputs[miniBatchIndex]);
             QRegressorEnsemble.trainFeatures(featureDataset);
         }
+
+        MiniBatchData::cleanMiniBatches(miniBatches);
     }
 
 protected:

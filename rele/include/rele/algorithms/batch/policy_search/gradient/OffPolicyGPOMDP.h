@@ -24,7 +24,7 @@
 #ifndef OFFPOLICYGPOMDP_H_
 #define OFFPOLICYGPOMDP_H_
 
-#include "rele/algorithms/policy_search/gradient/OffPolicyGradientAlgorithm.h"
+#include "rele/algorithms/batch/policy_search/OffPolicyGradientAlgorithm.h"
 
 namespace ReLe
 {

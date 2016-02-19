@@ -26,6 +26,7 @@
  */
 
 #include "rele/core/Core.h"
+#include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/algorithms/batch/td/W-FQI.h"
@@ -149,11 +150,19 @@ int main(int argc, char *argv[])
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     KDTree<arma::vec, arma::vec> QRegressor(phi, defaultNode, 1, 1);
 
-    W_FQI<FiniteState> fqi(data, QRegressor, nStates, nActions, 0.9);
+    W_FQI<FiniteState> fqi(QRegressor, nStates, nActions, 0.9);
+
+    auto&& core = buildCore(data, fqi);
 
     cout << "Starting FQI..." << endl;
-    // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 500, 1e-15);
+
+    for(unsigned int i = 0; i < 1; i++)
+    {
+    	core.getSettings().maxIterations = 5;
+    	core.getSettings().epsilon = 1e-8;
+
+    	core.runEpisode();
+    }
 
     return 0;
 }

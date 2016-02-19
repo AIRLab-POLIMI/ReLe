@@ -37,17 +37,27 @@ namespace ReLe
  * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
  */
 template<class ActionC>
-class LSPI
+class LSPI : public BatchAgent<ActionC, DenseState>
 {
 public:
     LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
          Features_<arma::vec>& phi, double gamma) :
+        BatchAgent<ActionC, DenseState>(gamma),
         critic(data, policy, phi, gamma)
     {
     }
 
+    virtual void init(Dataset<ActionC, DenseState>& data) override
+	{
+    	// FIXME
+	}
 
-    void run(unsigned int maxiterations, double epsilon = 0.1)
+    virtual void step() override
+    {
+    	// FIXME
+    }
+
+    virtual void run(unsigned int maxiterations, double epsilon = 0.1)
     {
         /*** Initialize policy iteration ***/
         unsigned int iteration = 0;
@@ -100,6 +110,9 @@ public:
         std::cout << "********************************************************* " << std::endl;
     }
 
+    virtual ~LSPI()
+    {
+    }
 
 protected:
     LSTDQ<ActionC> critic;

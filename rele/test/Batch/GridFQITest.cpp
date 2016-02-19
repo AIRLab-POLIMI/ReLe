@@ -26,6 +26,7 @@
  */
 
 #include "rele/core/Core.h"
+#include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/algorithms/batch/td/DoubleFQI.h"
@@ -153,12 +154,20 @@ int main(int argc, char *argv[])
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    //FQI<FiniteState> fqi(data, QRegressorA, nStates, nActions, 0.9);
-    DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, nActions, 0.9);
+    //FQI<FiniteState> fqi(QRegressorA, nStates, nActions, 0.9);
+    DoubleFQI<FiniteState> fqi(QRegressorA, QRegressorB, nStates, nActions, 0.9);
+
+    auto&& core = buildCore(data, fqi);
 
     cout << "Starting FQI..." << endl;
-    // The FQI procedure starts. It takes the feature vector to be passed to the regressor
-    fqi.run(phi, 1000, 1e-15);
+
+    for(unsigned int i = 0; i < 4; i++)
+    {
+    	core.getSettings().maxIterations = 1000;
+    	core.getSettings().epsilon = 1e-8;
+
+    	core.runEpisode();
+    }
 
     return 0;
 }

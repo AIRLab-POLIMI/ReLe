@@ -30,6 +30,7 @@
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include <armadillo>
 #include <cassert>
+#include "rele/core/BatchAgent.h"
 
 namespace ReLe
 {
@@ -60,11 +61,11 @@ public:
     arma::vec run(bool firstTime)
     {
         /*** Initialize variables ***/
-        int nbEpisodes = data.size();
+        int nbEpisodes = this->data.size();
         //compute the overall number of samples
         int nbSamples = 0;
         for (int k = 0; k < nbEpisodes; ++k)
-            nbSamples += data[k].size();
+            nbSamples += this->data[k].size();
 
         Features_<arma::vec>& basis = Q.getFeatures();
         int df = basis.rows(); //number of features
@@ -82,7 +83,7 @@ public:
             arma::vec a(1);
             arma::mat phi;
             unsigned int idx = 0;
-            for (auto episode : data)
+            for (auto episode : this->data)
             {
                 for (auto tr : episode)
                 {
@@ -106,7 +107,7 @@ public:
         unsigned int idx = 0;
         arma::vec a(1), input;
         arma::mat nextPhi;
-        for (auto episode : data)
+        for (auto episode : this->data)
         {
             for (auto tr : episode)
             {
@@ -158,11 +159,6 @@ public:
 
     virtual ~LSTDQ_()
     {
-    }
-
-    Dataset<ActionC, DenseState>& getData()
-    {
-        return data;
     }
 
     e_GreedyApproximate& getPolicy()
