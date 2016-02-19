@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,30 +21,20 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_IRLALGORITHM_H_
-#define INCLUDE_RELE_IRL_IRLALGORITHM_H_
-
-#include "rele/core/Basics.h"
+#ifndef INCLUDE_RELE_IRL_UTILS_IRLGRADTYPE_H_
+#define INCLUDE_RELE_IRL_UTILS_IRLGRADTYPE_H_
 
 namespace ReLe
 {
 
-template<class ActionC, class StateC>
-class IRLAlgorithm
+enum IrlGrad
 {
-    static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
-    static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
-public:
-    virtual void run() = 0;
-    virtual ~IRLAlgorithm() { }
-
-
-
-
+    REINFORCE, REINFORCE_BASELINE, GPOMDP, GPOMDP_BASELINE, ENAC, ENAC_BASELINE,
+    NATURAL_REINFORCE, NATURAL_REINFORCE_BASELINE, NATURAL_GPOMDP, NATURAL_GPOMDP_BASELINE
 };
-
 
 }
 
 
-#endif /* INCLUDE_RELE_IRL_IRLALGORITHM_H_ */
+
+#endif /* INCLUDE_RELE_IRL_UTILS_IRLGRADTYPE_H_ */

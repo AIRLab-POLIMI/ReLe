@@ -43,3 +43,9 @@ target_link_libraries(gmm_features_test rele)
 
 add_executable(mleH2O_test SmartH2O/mleH2OTest.cpp)
 target_link_libraries(mleH2O_test rele)
+
+add_executable(lqr_ExpectedDeltaIRL ExpectedDeltaIRL/ExpectedDeltaIRL_LQR.cpp)
+target_link_libraries(lqr_ExpectedDeltaIRL rele)
+
+add_executable(gradient_irl_test gradient/GradientIRLTest.cpp)
+target_link_libraries(gradient_irl_test rele)

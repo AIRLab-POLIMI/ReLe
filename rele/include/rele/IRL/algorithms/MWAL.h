@@ -97,12 +97,12 @@ public:
         }
     }
 
-    virtual arma::vec getWeights() override
+    virtual arma::vec getWeights()
     {
         return wOpt;
     }
 
-    virtual Policy<ActionC, StateC>* getPolicy() override
+    virtual Policy<ActionC, StateC>* getPolicy()
     {
         return policyOpt;
     }

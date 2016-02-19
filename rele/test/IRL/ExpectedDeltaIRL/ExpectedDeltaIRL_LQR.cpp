@@ -31,8 +31,7 @@
 #include "rele/environments/LQR.h"
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
-#include "rele/IRL/algorithms/MGIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
+#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
 
 #include "rele/utils/FileManager.h"
 
@@ -42,14 +41,18 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
+#define RUN
+//#define PRINT
 
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IRLGradType atype = IRLGradType::GB;
+    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
+
     vec eReward = {0.2, 0.7, 0.1};
+
     int nbEpisodes = 5000;
 
     FileManager fm("lqr", "GIRL");
@@ -106,26 +109,19 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
 
-    LinearApproximator rewardRegressor(phiReward);
-    MGIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype);
-
-    PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, basisReward,
+    LinearApproximator rewardRegressor1(phiReward);
+    LinearApproximator rewardRegressor2(phiReward);
+    ExpectedDeltaIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor1,
             mdp.getSettings().gamma, atype);
-
 
     //Run GIRL
     irlAlg.run();
-    arma::vec gnormw = irlAlg.getWeights();
-
-    //Run PGIRL
-    irlAlg2.run();
-    arma::vec planew = irlAlg2.getWeights();
+    arma::vec weights = rewardRegressor1.getParameters();
 
 
     //Print results
-    cout << "Weights (gnorm): " << gnormw.t();
-    cout << "Weights (plane): " << planew.t();
+    cout << "Weights (weights): " << weights.t();
+
 
     return 0;
 }

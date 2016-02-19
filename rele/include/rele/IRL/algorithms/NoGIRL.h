@@ -25,33 +25,39 @@
 #define INCLUDE_RELE_IRL_ALGORITHMS_NOGIRL_H_
 
 #include "rele/IRL/algorithms/GIRL.h"
+#include "rele/IRL/utils/NonlinearGradientFactory.h"
 
 namespace ReLe
 {
 
-template <class ActionC, class StateC>
-class NoGIRL :public GIRL<ActionC, StateC>
+template<class ActionC, class StateC>
+class NoGIRL: public IRLAlgorithm<ActionC, StateC>
 {
 public:
     NoGIRL(Dataset<ActionC, StateC>& dataset,
            DifferentiablePolicy<ActionC, StateC>& policy,
-           ParametricRegressor& rewardf, double gamma, IRLGradType aType, NormalizationType nType,
-           std::vector<double>& lowerBounds, std::vector<double>& upperBounds) :
-        GIRL<ActionC, StateC>(dataset, policy, rewardf, gamma, aType, nType),
-        upperBounds(upperBounds), lowerBounds(lowerBounds)
+           ParametricRegressor& rewardf, double gamma, IrlGrad aType,
+           std::vector<double>& lowerBounds,
+           std::vector<double>& upperBounds) :
+        policy(policy), data(dataset), rewardf(rewardf), gamma(gamma),
+        aType(aType), upperBounds(upperBounds), lowerBounds(lowerBounds)
     {
+        nbFunEvals = 0;
 
+        gradientCalculator = NonlinearGradientFactory<ActionC, StateC>::build(
+                                 aType, rewardf, dataset, policy, gamma);
     }
 
-    virtual ~NoGIRL() { }
+    virtual ~NoGIRL()
+    {
+    }
 
     virtual void run() override
     {
         run(arma::vec(), 0);
     }
 
-    virtual void run(arma::vec starting,
-                     unsigned int maxFunEvals) override
+    virtual void run(arma::vec starting, unsigned int maxFunEvals)
     {
         int dpr = this->rewardf.getParametersSize();
         assert(dpr > 0);
@@ -67,19 +73,9 @@ public:
         }
 
         if (maxFunEvals == 0)
-            maxFunEvals = std::min(30*dpr, 600);
+            maxFunEvals = std::min(30 * dpr, 600);
 
-        this->nbFunEvals = 0;
-
-        this->maxSteps = 0;
-        int nbEpisodes = this->data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
-        {
-            int nbSteps = this->data[i].size();
-            if (this->maxSteps < nbSteps)
-                this->maxSteps = nbSteps;
-        }
-
+        nbFunEvals = 0;
 
         //setup optimization algorithm
         nlopt::opt optimizator;
@@ -90,7 +86,9 @@ public:
 
         localOptimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, dpr);
 
-        optimizator.set_min_objective(GIRL<ActionC, StateC>::wrapper, this);
+        optimizator.set_min_objective(
+            Optimization::objFunctionWrapper<NoGIRL<ActionC, StateC>>,
+            this);
         optimizator.set_xtol_rel(1e-8);
         optimizator.set_ftol_rel(1e-8);
         optimizator.set_ftol_abs(1e-8);
@@ -111,14 +109,16 @@ public:
             //refine result
             localOptimizator.set_xtol_abs(1e-20);
             localOptimizator.set_ftol_abs(1e-20);
-            localOptimizator.set_min_objective(GIRL<ActionC, StateC>::wrapper, this);
+            localOptimizator.set_min_objective(
+                Optimization::objFunctionWrapper<NoGIRL<ActionC, StateC>>,
+                this);
 
             localOptimizator.optimize(parameters, minf);
 
             std::cout << "found minimum = " << minf << std::endl;
 
             arma::vec finalP(dpr);
-            for(int i = 0; i < dpr; ++i)
+            for (int i = 0; i < dpr; ++i)
             {
                 finalP(i) = parameters[i];
             }
@@ -128,15 +128,45 @@ public:
         }
     }
 
+    //======================================================================
+    // OBJECTIVE FUNCTION
+    //----------------------------------------------------------------------
+
+    double objFunction(const arma::vec& x, arma::vec& df)
+    {
+        ++nbFunEvals;
+
+        // set new parameters
+        rewardf.setParameters(x);
+
+        //compute gradient
+        gradientCalculator->compute();
+        arma::vec gradient = gradientCalculator->getGradient();
+        arma::mat dGradient = gradientCalculator->getGradientDiff();
+
+        //compute objective function and derivative
+        double f = arma::as_scalar(gradient.t() * gradient);
+        df = 2.0 * dGradient.t() * gradient;
+
+        return f;
+    }
+
 private:
+    Dataset<ActionC, StateC>& data;
+    DifferentiablePolicy<ActionC, StateC>& policy;
+    ParametricRegressor& rewardf;
+    double gamma;
+    IrlGrad aType;
+
     std::vector<double>& upperBounds;
     std::vector<double>& lowerBounds;
 
+    NonlinearGradientCalculator<ActionC, StateC>* gradientCalculator;
+
+    unsigned int nbFunEvals;
 
 };
 
-
 }
-
 
 #endif /* INCLUDE_RELE_IRL_ALGORITHMS_NOGIRL_H_ */

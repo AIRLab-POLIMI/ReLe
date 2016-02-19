@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,6 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "rele/IRL/utils/GradientCalculatorFactory.h"
+#include "rele/IRL/utils/NonlinearGradientFactory.h"
+
 #include "rele/approximators/features/SparseFeatures.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/regressors/others/LinearApproximator.h"
@@ -31,37 +34,22 @@
 #include "rele/environments/LQR.h"
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
-#include "rele/IRL/algorithms/GIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
 
 #include "rele/utils/FileManager.h"
 
 #include "../RewardBasisLQR.h"
 
-using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define RUN
-//#define PRINT
-
 int main(int argc, char *argv[])
 {
-//  RandomGenerator::seed(45423424);
-//  RandomGenerator::seed(8763575);
+    IrlGrad type = ENAC;
+    //  RandomGenerator::seed(45423424);
+    //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
-#ifndef PRINT
     vec eReward = {0.2, 0.7, 0.1};
-#else
-    vec eReward = {0.3, 0.7};
-#endif
     int nbEpisodes = 5000;
-
-    FileManager fm("lqr", "GIRL");
-    fm.createDir();
-    fm.cleanDir();
-    std::cout << std::setprecision(OS_PRECISION);
 
     /* Learn lqr correct policy */
     int dim = eReward.n_elem;
@@ -112,64 +100,25 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
 
-    LinearApproximator rewardRegressor1(phiReward);
-    LinearApproximator rewardRegressor2(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor1,
-                                        mdp.getSettings().gamma, atype);
+    LinearApproximator rewardRegressor(phiReward);
 
-    PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, rewardRegressor2,
-            mdp.getSettings().gamma, atype);
-
-#ifdef RUN
-    //Run GIRL
-    irlAlg.run();
-    arma::vec gnormw = rewardRegressor1.getParameters();
-
-    //Run PGIRL
-    irlAlg2.run();
-    arma::vec planew = rewardRegressor2.getParameters();
+    /* select test weights */
+    arma::vec wTest = { 0.15, 0.8, 0.05 };
+    rewardRegressor.setParameters(wTest);
 
 
-    //Print results
-    cout << "Weights (gnorm): " << gnormw.t();
-    cout << "Weights (plane): " << planew.t();
-#endif
+    /* Create the gradients calculators */
+    auto linearGradient = GradientCalculatorFactory<DenseAction, DenseState>::build(type, phiReward, data,
+                          expertPolicy, mdp.getSettings().gamma);
+    auto nonlinearGradient = NonlinearGradientFactory<DenseAction, DenseState>::build(type, rewardRegressor, data,
+                             expertPolicy, mdp.getSettings().gamma);
 
-#ifdef PRINT
-    //calculate full grid function
-    int samplesParams = 101;
-    arma::vec valuesG(samplesParams);
-    arma::vec valuesJ(samplesParams);
-    arma::vec valuesD(samplesParams);
-    arma::mat valuesdG2(dim, samplesParams);
 
-    for(int i = 0; i < samplesParams; i++)
-    {
-        cerr << i << endl;
-        double step = 0.01;
-        arma::vec wm(2);
-        wm(0) = i*step;
-        wm(1) = 1.0 - wm(0);
-        rewardRegressor.setParameters(wm);
-        arma::mat dGradient(dim, dim);
-        arma::vec dJ;
-        arma::vec g = irlAlg.ReinforceBaseGradient(dGradient);
-        arma::vec dg2 = 2.0*dGradient.t() * g;
+    std::cout << "linear:" << std::endl << linearGradient->computeGradient(wTest);
+    std::cout << "linear diff:" << std::endl << linearGradient->getGradientDiff();
 
-        double Je = irlAlg.computeJ(dJ);
-        double D = irlAlg.computeDisparity();
-        double G = norm(g);
-        valuesG(i) = G;
-        valuesJ(i) = Je;
-        valuesD(i) = D;
-        valuesdG2.col(i) = dg2;
-    }
+    nonlinearGradient->compute();
+    std::cout << "non linear:" << std::endl << nonlinearGradient->getGradient();
+    std::cout << "non linear diff:" << std::endl << nonlinearGradient->getGradientDiff();
 
-    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
-    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
-    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
-    valuesdG2.save("/tmp/ReLe/dG2.txt", arma::raw_ascii);
-#endif
-
-    return 0;
 }

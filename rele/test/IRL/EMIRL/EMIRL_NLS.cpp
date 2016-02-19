@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     LinearApproximator rewardRegressor(phiReward);
     arma::mat theta = expert.getParams();
     EMIRL<DenseAction,DenseState> irlAlg(data, theta, p, arma::eye(p.n_elem, p.n_elem),
-                                         phiReward, mdp.getSettings().gamma);
+                                         rewardRegressor, mdp.getSettings().gamma);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -113,9 +113,7 @@ int main(int argc, char *argv[])
 
     //Run
     irlAlg.run();
-    arma::vec weights = irlAlg.getWeights();
-
-    rewardRegressor.setParameters(weights);
+    arma::vec weights = rewardRegressor.getParameters();
 
     //Try to recover the initial policy
     int episodesPerPolicy = 1;

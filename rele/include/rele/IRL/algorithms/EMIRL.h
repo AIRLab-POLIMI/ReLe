@@ -40,16 +40,13 @@ class EMIRL: public IRLAlgorithm<ActionC, StateC>
 {
 public:
     EMIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, const arma::vec& wBar, const arma::mat& sigma,
-          Features& phi, double gamma) //TODO correct Features with template params
-        : data(data), theta(theta), phiBar(phi.rows(), data.size()), wBar(wBar), sigmaInv(arma::inv(sigma))
+          LinearApproximator& rewardFunction, double gamma)
+        : data(data), rewardFunction(rewardFunction), theta(theta), wBar(wBar), sigmaInv(arma::inv(sigma))
     {
+        Features& phi = rewardFunction.getFeatures();
         phiBar = data.computeEpisodeFeatureExpectation(phi, gamma);
 
         preprocess();
-        /*active_feat = PrincipalFeatureAnalysis::selectFeatures(phiBar, 0.9);
-        std::cout << "active_feat" << std::endl << active_feat << std::endl;
-        phiBar = phiBar.rows(active_feat);*/
-
 
         omega = arma::vec(phi.rows(), arma::fill::zeros);
     }
@@ -102,6 +99,8 @@ public:
             }
 
             omega(active_feat(effective_dim)) = 1.0 - sumx;
+
+            rewardFunction.setParameters(omega);
         }
 
     }
@@ -256,19 +255,6 @@ public:
             std::cout << "=========== WARNING!!! ZERO RANK PRODUCT ============" << std::endl;
     }
 
-    //======================================================================
-    // GETTERS and SETTERS
-    //----------------------------------------------------------------------
-    virtual arma::vec getWeights() override
-    {
-        return omega;
-    }
-
-    virtual Policy<ActionC, StateC>* getPolicy() override
-    {
-        return nullptr; //TODO implement
-    }
-
 
     //======================================================================
     // DESTRUCTOR
@@ -302,6 +288,7 @@ protected:
 
 private:
     Dataset<ActionC, StateC>& data;
+    LinearApproximator& rewardFunction;
     arma::mat theta;
 
     arma::mat phiBar;
