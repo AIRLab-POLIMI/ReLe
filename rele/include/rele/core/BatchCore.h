@@ -49,8 +49,8 @@ public:
 
 public:
     BatchCore(Dataset<ActionC, StateC>& data, BatchAgent<ActionC, StateC>& agent) :
-    	data(data),
-    	agent(agent)
+        data(data),
+        agent(agent)
     {
     }
 
@@ -97,7 +97,7 @@ protected:
 
 template<class ActionC, class StateC>
 BatchCore<ActionC, StateC> buildCore(Dataset<ActionC, StateC>& data,
-										  BatchAgent<ActionC, StateC>& agent)
+                                     BatchAgent<ActionC, StateC>& agent)
 {
     return BatchCore<ActionC, StateC>(data, agent);
 }

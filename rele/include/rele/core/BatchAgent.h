@@ -33,15 +33,15 @@ template<class ActionC, class StateC>
 class BatchAgent
 {
 public:
-	BatchAgent(double gamma, unsigned int nMiniBatches = 1) :
-		nMiniBatches(nMiniBatches),
-		gamma(gamma),
-		terminalCond(nullptr)
-	{
-	}
+    BatchAgent(double gamma, unsigned int nMiniBatches = 1) :
+        nMiniBatches(nMiniBatches),
+        gamma(gamma),
+        terminalCond(nullptr)
+    {
+    }
 
-	virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
-	virtual void step() = 0;
+    virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
+    virtual void step() = 0;
 
     virtual AgentOutputData* getAgentOutputData()
     {
@@ -56,13 +56,13 @@ public:
             return terminalCond->checkCond();
     }
 
-	virtual ~BatchAgent()
-	{
-	}
+    virtual ~BatchAgent()
+    {
+    }
 
 protected:
-	unsigned int nMiniBatches;
-	double gamma;
+    unsigned int nMiniBatches;
+    double gamma;
     TerminalCondition* terminalCond;
 };
 

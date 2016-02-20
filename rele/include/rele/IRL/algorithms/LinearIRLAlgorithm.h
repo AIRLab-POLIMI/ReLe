@@ -45,7 +45,7 @@ public:
                        LinearApproximator& rewardf, double gamma) :
         policy(policy), data(dataset), rewardf(rewardf), gamma(gamma), simplex(rewardf.getParametersSize())
     {
-    	optAlg = nlopt::algorithm::LD_SLSQP;
+        optAlg = nlopt::algorithm::LD_SLSQP;
         nbFunEvals = 0;
     }
 
@@ -266,7 +266,7 @@ private:
     }
 
 protected:
-	// Data
+    // Data
     Dataset<ActionC, StateC>& data;
     DifferentiablePolicy<ActionC, StateC>& policy;
     LinearApproximator& rewardf;

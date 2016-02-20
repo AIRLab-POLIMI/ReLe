@@ -34,9 +34,9 @@ class R_LearningOutput : public FiniteTDOutput
 public:
     R_LearningOutput(double alpha,
                      double beta,
-                     std::string policyName,
-                     std::string policyHPar,
-                     arma::mat Q,
+                     const std::string& policyName,
+                     const hyperparameters_map& policyHPar,
+                     const arma::mat& Q,
                      double ro);
 
     virtual void writeData(std::ostream& os) override;

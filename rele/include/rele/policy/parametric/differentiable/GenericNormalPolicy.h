@@ -161,10 +161,7 @@ public:
     {
         return "MVNPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";
@@ -276,10 +273,7 @@ public:
     {
         return "GenericMVNDiagonalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";
@@ -360,10 +354,7 @@ public:
     {
         return "GenericMVNStateDependantStddevPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";

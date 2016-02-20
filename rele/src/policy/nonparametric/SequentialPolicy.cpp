@@ -68,11 +68,6 @@ inline std::string SequentialPolicy::getPolicyName()
     return "Sequential";
 }
 
-std::string SequentialPolicy::getPolicyHyperparameters()
-{
-    return "";
-}
-
 SequentialPolicy* SequentialPolicy::clone()
 {
     return new SequentialPolicy(*this);

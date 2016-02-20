@@ -39,7 +39,7 @@ public:
     GIRL(Dataset<ActionC, StateC>& dataset,
          DifferentiablePolicy<ActionC, StateC>& policy,
          LinearApproximator& rewardf, double gamma, IrlGrad aType) :
-        	 LinearIRLAlgorithm<ActionC, StateC>(dataset, policy, rewardf, gamma), aType(aType)
+        LinearIRLAlgorithm<ActionC, StateC>(dataset, policy, rewardf, gamma), aType(aType)
     {
         // build gradient calculator
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(aType, rewardf.getFeatures(),

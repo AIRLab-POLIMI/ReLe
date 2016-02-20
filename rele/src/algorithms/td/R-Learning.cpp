@@ -111,9 +111,9 @@ R_Learning::~R_Learning()
 
 R_LearningOutput::R_LearningOutput(double alpha,
                                    double beta,
-                                   std::string policyName,
-                                   std::string policyHPar,
-                                   arma::mat Q,
+                                   const std::string& policyName,
+                                   const hyperparameters_map& policyHPar,
+                                   const arma::mat& Q,
                                    double ro)
     : FiniteTDOutput(1.0, alpha, policyName, policyHPar, Q) , beta(beta), ro(ro)
 {
@@ -126,7 +126,7 @@ void R_LearningOutput::writeData(std::ostream& os)
     os << "gamma: " << gamma << endl;
     os << "alpha: " << alpha << endl;
     os << "beta: " << beta << endl;
-    os << policyHPar; //TODO change this
+    os << policyHPar << endl;
 
     CSVutils::matrixToCSV(Q, os);
     os << ro << endl;
@@ -141,7 +141,7 @@ void R_LearningOutput::writeDecoratedData(std::ostream& os)
     os << "gamma: " << gamma << endl;
     os << "alpha: " << alpha << endl;
     os << "beta: " << beta << endl;
-    os << policyHPar;
+    os << policyHPar << endl;
 
     os << "- Action-value function" << endl;
     for (unsigned int i = 0; i < Q.n_rows; i++)

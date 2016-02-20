@@ -211,11 +211,6 @@ public:
         return std::string("StochasticDiscretePolicy");
     }
 
-    std::string getPolicyHyperparameters() override
-    {
-        return std::string("");
-    }
-
     std::string printPolicy() override
     {
         return std::string("");

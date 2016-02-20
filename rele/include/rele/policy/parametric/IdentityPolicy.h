@@ -35,11 +35,6 @@ public:
         return "Identity Policy";
     }
 
-    virtual std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
-
     virtual std::string printPolicy() override
     {
         std::stringstream ss;
@@ -103,11 +98,6 @@ public:
     virtual std::string getPolicyName() override
     {
         return "Dense Identity Policy";
-    }
-
-    virtual std::string getPolicyHyperparameters() override
-    {
-        return "";
     }
 
     virtual std::string printPolicy() override

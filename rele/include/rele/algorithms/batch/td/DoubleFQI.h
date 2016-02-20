@@ -152,7 +152,7 @@ public:
                                                          1 - miniBatchIndex)(nextState, FiniteAction(maxIndex(index))));
                 }
                 else
-                	outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
+                    outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
             }
 
             BatchDataSimple featureDataset(miniBatchInput, outputs[miniBatchIndex]);

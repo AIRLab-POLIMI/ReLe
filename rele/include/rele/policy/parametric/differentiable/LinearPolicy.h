@@ -70,11 +70,6 @@ public:
         return std::string("DeterministicLinearPolicy");
     }
 
-    std::string getPolicyHyperparameters() override
-    {
-        return std::string("");
-    }
-
     std::string printPolicy() override
     {
         std::stringstream ss;

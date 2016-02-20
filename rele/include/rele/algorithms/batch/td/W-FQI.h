@@ -147,7 +147,7 @@ public:
                 outputs[0](i) = rewards(0, i) + this->gamma * W;
             }
             else
-            	outputs[0](i) = rewards(0, i);
+                outputs[0](i) = rewards(0, i);
         }
         gsl_integration_workspace_free(w);
 

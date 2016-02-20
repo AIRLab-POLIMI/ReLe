@@ -43,7 +43,6 @@ public:
     unsigned int operator()(const size_t& state) override;
     double operator()(const size_t& state, const unsigned int& action) override;
     inline std::string getPolicyName() override;
-    std::string getPolicyHyperparameters() override;
     SequentialPolicy* clone() override;
 
 protected:

@@ -55,9 +55,9 @@ void FiniteTD::init()
 
 FiniteTDOutput::FiniteTDOutput(double gamma,
                                double alpha,
-                               string policyName,
-                               string policyHPar,
-                               mat Q) :
+                               const std::string& policyName,
+                               const hyperparameters_map& policyHPar,
+                               const mat& Q) :
     AgentOutputData(true),gamma(gamma), alpha(alpha),
     policyName(policyName),policyHPar(policyHPar), Q(Q)
 {
@@ -69,7 +69,7 @@ void FiniteTDOutput::writeData(ostream& os)
     os << policyName << endl;
     os << "gamma: " << gamma << endl;
     os << "alpha: " << alpha << endl;
-    os << policyHPar; //TODO change this
+    os << policyHPar << endl;
 
     CSVutils::matrixToCSV(Q, os);
 
@@ -83,7 +83,7 @@ void FiniteTDOutput::writeDecoratedData(ostream& os)
     os << "- Parameters" << endl;
     os << "gamma: " << gamma << endl;
     os << "alpha: " << alpha << endl;
-    os << policyHPar;
+    os << policyHPar << endl;
 
     os << "- Action-value function" << endl;
     for (unsigned int i = 0; i < Q.n_rows; i++)
@@ -125,9 +125,9 @@ void LinearTD::init()
 
 LinearTDOutput::LinearTDOutput(double gamma,
                                double alpha,
-                               string policyName,
-                               string policyHPar,
-                               vec Qw) :
+                               const std::string& policyName,
+                               const hyperparameters_map& policyHPar,
+                               const arma::vec Qw) :
     AgentOutputData(true),gamma(gamma), alpha(alpha),
     policyName(policyName),policyHPar(policyHPar), Qw(Qw)
 {
@@ -139,7 +139,7 @@ void LinearTDOutput::writeData(ostream& os)
     os << policyName << endl;
     os << "gamma: " << gamma << endl;
     os << "alpha: " << alpha << endl;
-    os << policyHPar; //TODO change this
+    os << policyHPar << endl;
 
     CSVutils::vectorToCSV(Qw, os);
 
@@ -153,7 +153,7 @@ void LinearTDOutput::writeDecoratedData(ostream& os)
     os << "- Parameters" << endl ;
     os << "gamma: " << gamma << endl;
     os << "alpha: " << alpha << endl;
-    os << policyHPar;
+    os << policyHPar  << endl;
 
     os << "- Action-value function" << endl;
     os << Qw.t() << endl;

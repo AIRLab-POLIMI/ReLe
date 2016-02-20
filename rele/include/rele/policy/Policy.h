@@ -29,9 +29,37 @@
 #include "rele/core/ActionMask.h"
 
 #include <string>
+#include <map>
 
 namespace ReLe
 {
+
+/*!
+ * A commodity alias for storing hyperparameters into a map of string/double
+ */
+typedef std::map<std::string, double> hyperparameters_map;
+
+/*!
+ * A commodity overloading to print hyperparameters maps
+ */
+inline std::ostream& operator<<(std::ostream& os, const hyperparameters_map& hyperParameters)
+{
+    bool first = true;
+
+    for(auto pair : hyperParameters)
+    {
+        if(!first)
+        {
+            os << std::endl;
+            first = false;
+        }
+
+        os << pair.first << ": " << pair.second;
+
+    }
+
+    return os;
+}
 
 /*!
  * A policy provides a distribution over the action space in each state.
@@ -99,7 +127,10 @@ public:
      *
      * \return the hyperparameters of the policy
      */
-    virtual std::string getPolicyHyperparameters() = 0;
+    virtual hyperparameters_map getPolicyHyperparameters()
+    {
+        return hyperparameters_map();
+    }
 
     /*!
      * Generate a textual representation of the status
@@ -149,6 +180,7 @@ protected:
     /// Check a condition on the provided state
     /// Can be used to check if an action is valid in a given state
     ActionMask<StateC, bool>* actionMask; //FIXME add template parameter if needed, or enable if
+
 };
 
 template<class ActionC, class StateC>

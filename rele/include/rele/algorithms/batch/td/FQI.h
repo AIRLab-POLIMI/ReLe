@@ -42,9 +42,9 @@ class FQI : public BatchAgent<FiniteAction, StateC>
 public:
 
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
-    		double gamma, unsigned int nMiniBatches = 1) :
-    	BatchAgent<FiniteAction, StateC>(gamma, nMiniBatches),
-		featureDatasetStart(nullptr),
+        double gamma, unsigned int nMiniBatches = 1) :
+        BatchAgent<FiniteAction, StateC>(gamma, nMiniBatches),
+        featureDatasetStart(nullptr),
         QRegressor(QRegressor),
         nStates(nStates),
         nActions(nActions)
@@ -75,8 +75,8 @@ public:
         arma::mat rewards = data.rewardAsMatrix();
         arma::mat input = data.featuresAsMatrix(QRegressor.getFeatures());
 
-    	if(featureDatasetStart)
-    		delete featureDatasetStart;
+        if(featureDatasetStart)
+            delete featureDatasetStart;
 
         featureDatasetStart = new BatchDataSimple(input, rewards);
     }
@@ -178,8 +178,8 @@ public:
 
     virtual ~FQI()
     {
-    	if(featureDatasetStart)
-    		delete featureDatasetStart;
+        if(featureDatasetStart)
+            delete featureDatasetStart;
     }
 
 protected:

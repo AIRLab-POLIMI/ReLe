@@ -44,11 +44,6 @@ public:
         return "Rocky Policy";
     }
 
-    inline virtual std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
-
     inline virtual std::string printPolicy() override
     {
         return "";

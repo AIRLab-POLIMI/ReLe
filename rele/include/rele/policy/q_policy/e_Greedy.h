@@ -42,7 +42,7 @@ public:
     {
         return "e-Greedy";
     }
-    virtual std::string getPolicyHyperparameters() override;
+    virtual hyperparameters_map getPolicyHyperparameters() override;
 
     inline void setEpsilon(double eps)
     {
@@ -76,7 +76,7 @@ public:
     {
         return "Approximate e-Greedy";
     }
-    virtual std::string getPolicyHyperparameters() override;
+    virtual hyperparameters_map getPolicyHyperparameters() override;
 
     inline void setEpsilon(double eps)
     {

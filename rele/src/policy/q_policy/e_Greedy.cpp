@@ -24,7 +24,6 @@
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/utils/RandomGenerator.h"
 
-#include <sstream>
 #include <cassert>
 
 using namespace arma;
@@ -79,19 +78,18 @@ double e_Greedy::operator()(const size_t& state, const unsigned int& action)
         if (maxIndex[i] == action)
             found = true;
     }
+
     if (found)
-    {
         return 1.0 - eps + eps / Q->n_cols;
-    }
-    return eps / Q->n_cols;
+    else
+        return eps / Q->n_cols;
 }
 
-string e_Greedy::getPolicyHyperparameters()
+hyperparameters_map e_Greedy::getPolicyHyperparameters()
 {
-    stringstream ss;
-    ss << "eps: " << eps << endl;
-
-    return ss.str();
+    hyperparameters_map hyperParameters;
+    hyperParameters["eps"] = eps;
+    return hyperParameters;
 }
 
 e_GreedyApproximate::e_GreedyApproximate()
@@ -159,11 +157,11 @@ double e_GreedyApproximate::operator()(const arma::vec& state, const unsigned in
     return 0.0;
 }
 
-string e_GreedyApproximate::getPolicyHyperparameters()
+hyperparameters_map e_GreedyApproximate::getPolicyHyperparameters()
 {
-    stringstream ss;
-    ss << "eps: " << eps << endl;
-    return ss.str();
+    hyperparameters_map hyperParameters;
+    hyperParameters["eps"] = eps;
+    return hyperParameters;
 }
 
 }

@@ -348,8 +348,8 @@ public:
 public:
     static void cleanMiniBatches(std::vector<MiniBatchData_<OutputC, dense>*> miniBatches)
     {
-    	for(auto* mb : miniBatches)
-    		delete mb;
+        for(auto* mb : miniBatches)
+            delete mb;
     }
 
 private:

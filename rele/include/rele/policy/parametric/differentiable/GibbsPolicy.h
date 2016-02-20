@@ -7,8 +7,6 @@
 
 #include <stdexcept>
 
-//#define DEBUG_GIBBS
-
 namespace ReLe
 {
 
@@ -42,9 +40,11 @@ public:
         return std::string("GibbsPolicy");
     }
 
-    std::string getPolicyHyperparameters() override
+    hyperparameters_map getPolicyHyperparameters() override
     {
-        return std::string("");
+    	hyperparameters_map hyperParameters;
+    	hyperParameters["tau"] = tau;
+        return hyperParameters;
     }
 
     std::string printPolicy() override
@@ -230,9 +230,11 @@ public:
         return std::string("ParametricGibbsPolicyAllPref");
     }
 
-    std::string getPolicyHyperparameters() override
+    hyperparameters_map getPolicyHyperparameters() override
     {
-        return std::string("");
+    	hyperparameters_map hyperParameters;
+    	hyperParameters["tau"] = tau;
+    	return hyperParameters;
     }
 
     std::string printPolicy() override

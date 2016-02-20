@@ -64,10 +64,7 @@ public:
     {
         return "PortfolioNormalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";

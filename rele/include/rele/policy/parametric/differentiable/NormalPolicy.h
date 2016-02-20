@@ -71,10 +71,6 @@ public:
     {
         return "NormalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
     virtual inline std::string printPolicy() override
     {
         return "";
@@ -151,11 +147,6 @@ public:
     virtual inline std::string getPolicyName() override
     {
         return "NormalStateDependantStddevPolicy";
-    }
-
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
     }
 
     virtual inline std::string printPolicy() override
@@ -366,10 +357,7 @@ public:
     {
         return "MVNPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";
@@ -464,10 +452,7 @@ public:
     {
         return "MVNStateDependantStddevPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";
@@ -521,10 +506,7 @@ public:
     {
         return "MVNDiagonalPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";
@@ -651,10 +633,7 @@ public:
     {
         return "MVNLogisticPolicy";
     }
-    virtual inline std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
+
     virtual inline std::string printPolicy() override
     {
         return "";

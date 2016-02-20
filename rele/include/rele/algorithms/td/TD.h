@@ -37,9 +37,9 @@ class FiniteTDOutput : virtual public AgentOutputData
 public:
     FiniteTDOutput(double gamma,
                    double alpha,
-                   std::string policyName,
-                   std::string policyHPar,
-                   arma::mat Q);
+                   const std::string& policyName,
+                   const hyperparameters_map& policyHPar,
+                   const arma::mat& Q);
 
     virtual void writeData(std::ostream& os) override;
     virtual void writeDecoratedData(std::ostream& os) override;
@@ -48,7 +48,7 @@ protected:
     double gamma;
     double alpha;
     std::string policyName;
-    std::string policyHPar;
+    hyperparameters_map policyHPar;
     arma::mat Q;
 };
 
@@ -57,9 +57,9 @@ class LinearTDOutput : virtual public AgentOutputData
 public:
     LinearTDOutput(double gamma,
                    double alpha,
-                   std::string policyName,
-                   std::string policyHPar,
-                   arma::vec Qw);
+                   const std::string& policyName,
+                   const hyperparameters_map& policyHPar,
+                   const arma::vec Qw);
 
     virtual void writeData(std::ostream& os) override;
     virtual void writeDecoratedData(std::ostream& os) override;
@@ -68,7 +68,7 @@ protected:
     double gamma;
     double alpha;
     std::string policyName;
-    std::string policyHPar;
+    hyperparameters_map policyHPar;
     arma::vec Qw;
 };
 

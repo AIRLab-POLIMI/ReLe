@@ -155,11 +155,6 @@ public:
         return "UnicycleControlLaw";
     }
 
-    inline std::string getPolicyHyperparameters() override
-    {
-        return " ";
-    }
-
     inline std::string printPolicy() override
     {
         return " ";

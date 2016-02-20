@@ -84,11 +84,6 @@ public:
         return "GenericParametricMixturePolicy";
     }
 
-    virtual std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
-
     virtual std::string printPolicy() override
     {
         return "";

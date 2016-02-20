@@ -43,7 +43,7 @@ public:
         return "Boltzmann";
     }
 
-    virtual std::string getPolicyHyperparameters() override;
+    virtual hyperparameters_map getPolicyHyperparameters() override;
 
     void setTemperature(double tau)
     {
@@ -80,7 +80,7 @@ public:
     {
         return "Approximate Boltzmann";
     }
-    virtual std::string getPolicyHyperparameters() override;
+    virtual hyperparameters_map getPolicyHyperparameters() override;
 
     void setTemperature(double tau)
     {

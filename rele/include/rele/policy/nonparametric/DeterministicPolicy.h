@@ -41,11 +41,6 @@ public:
         return "Deterministic";
     }
 
-    virtual std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
-
     virtual std::string printPolicy() override;
 
     inline void update(size_t state, unsigned int action)

@@ -65,13 +65,11 @@ double Boltzmann::operator()(const size_t& state, const unsigned int& action)
     }
 }
 
-string Boltzmann::getPolicyHyperparameters()
+hyperparameters_map Boltzmann::getPolicyHyperparameters()
 {
-    stringstream ss;
-
-    ss << "tau: " << tau << endl;
-
-    return ss.str();
+    hyperparameters_map hyperParameters;
+    hyperParameters["tau"] = tau;
+    return hyperParameters;
 }
 
 Boltzmann::~Boltzmann()
@@ -129,13 +127,11 @@ double BoltzmannApproximate::operator()(const arma::vec& state, const unsigned i
     }
 }
 
-string BoltzmannApproximate::getPolicyHyperparameters()
+hyperparameters_map BoltzmannApproximate::getPolicyHyperparameters()
 {
-    stringstream ss;
-
-    ss << "tau: " << tau << endl;
-
-    return ss.str();
+    hyperparameters_map hyperParameters;
+    hyperParameters["tau"] = tau;
+    return hyperParameters;
 }
 
 

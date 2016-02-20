@@ -44,11 +44,6 @@ public:
         return "Tabular";
     }
 
-    virtual std::string getPolicyHyperparameters() override
-    {
-        return "";
-    }
-
     virtual std::string printPolicy() override;
 
     updater update(size_t state)

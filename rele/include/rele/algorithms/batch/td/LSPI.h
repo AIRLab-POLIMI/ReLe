@@ -48,13 +48,13 @@ public:
     }
 
     virtual void init(Dataset<ActionC, DenseState>& data) override
-	{
-    	// FIXME
-	}
+    {
+        // FIXME
+    }
 
     virtual void step() override
     {
-    	// FIXME
+        // FIXME
     }
 
     virtual void run(unsigned int maxiterations, double epsilon = 0.1)
