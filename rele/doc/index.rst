@@ -12,10 +12,10 @@ Its main features and design principles are:
 - C++11
 -
 
-ReLe is licensed under the `MIT license`_; see LICENSE in the
+ReLe is licensed under the `GPLV3 license`_; see LICENSE in the
 source distribution for details.
 
-.. _`MIT license`: http://www.opensource.org/licenses/mit-license.php
+.. _`GPLV3 license`: https://opensource.org/licenses/GPL-3.0
 
 Contents
 --------
