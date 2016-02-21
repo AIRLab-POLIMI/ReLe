@@ -44,15 +44,15 @@ public:
          Features_<arma::vec>& phi, double gamma, double epsilon) :
         BatchAgent<ActionC, DenseState>(gamma),
         critic(data, policy, phi, gamma),
-		oldWeights(arma::vec(critic.getQ().getParametersSize(), arma::fill::zeros)),
-		epsilon(epsilon),
-		firstStep(true)
+        oldWeights(arma::vec(critic.getQ().getParametersSize(), arma::fill::zeros)),
+        epsilon(epsilon),
+        firstStep(true)
     {
     }
 
     virtual void init(Dataset<ActionC, DenseState>& data) override
-	{
-	}
+    {
+    }
 
     virtual void step() override
     {
@@ -94,10 +94,10 @@ public:
         std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
                   "   L2 : " << L2norm << std::endl;
 
-       	if(arma::norm(QWeights - oldWeights, 2 < epsilon))
-    		this->converged = true;
+        if(arma::norm(QWeights - oldWeights, 2 < epsilon))
+            this->converged = true;
 
-       	oldWeights = QWeights;
+        oldWeights = QWeights;
     }
 
     virtual ~LSPI()

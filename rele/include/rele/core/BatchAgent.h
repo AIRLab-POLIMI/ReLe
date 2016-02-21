@@ -33,14 +33,14 @@ template<class ActionC, class StateC>
 class BatchAgent
 {
 public:
-	BatchAgent(double gamma) :
-		gamma(gamma),
-		converged(false)
-	{
-	}
+    BatchAgent(double gamma) :
+        gamma(gamma),
+        converged(false)
+    {
+    }
 
-	virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
-	virtual void step() = 0;
+    virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
+    virtual void step() = 0;
 
     virtual AgentOutputData* getAgentOutputData()
     {
@@ -49,15 +49,15 @@ public:
 
     virtual bool isConverged()
     {
-    	return converged;
+        return converged;
     }
 
-	virtual ~BatchAgent()
-	{
-	}
+    virtual ~BatchAgent()
+    {
+    }
 
 protected:
-	double gamma;
+    double gamma;
     bool converged;
 };
 

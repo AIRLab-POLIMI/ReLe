@@ -78,7 +78,7 @@ public:
           unsigned int nStates,
           unsigned int nActions,
           double gamma,
-		  double epsilon) :
+          double epsilon) :
         FQI<StateC>(QRegressor, nStates, nActions, gamma, epsilon),
         meanQ(arma::mat(nStates, nActions, arma::fill::zeros)),
         sampleStdQ(arma::mat(nStates, nActions).fill(STD_INF_VALUE)),
@@ -94,7 +94,7 @@ public:
 
     void step() override
     {
-    	arma::mat outputs(1, this->nSamples, arma::fill::zeros);
+        arma::mat outputs(1, this->nSamples, arma::fill::zeros);
 
         pars p;
         p.meanQ = meanQ;
@@ -104,7 +104,7 @@ public:
         gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
         for(unsigned int i = 0; i < this->nSamples; i++)
         {
-        	FiniteState nextState = FiniteState(this->nextStates(i));
+            FiniteState nextState = FiniteState(this->nextStates(i));
             if(this->absorbingStates.count(nextState) == 0 && !this->firstStep)
             {
                 arma::vec integrals(this->nActions, arma::fill::zeros);
@@ -132,7 +132,7 @@ public:
                 outputs(i) = this->rewards(i) + this->gamma * W;
             }
             else
-            	outputs(i) = this->rewards(i);
+                outputs(i) = this->rewards(i);
         }
         gsl_integration_workspace_free(w);
 

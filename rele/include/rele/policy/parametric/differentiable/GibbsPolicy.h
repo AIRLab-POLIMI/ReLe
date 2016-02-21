@@ -42,8 +42,8 @@ public:
 
     hyperparameters_map getPolicyHyperparameters() override
     {
-    	hyperparameters_map hyperParameters;
-    	hyperParameters["tau"] = tau;
+        hyperparameters_map hyperParameters;
+        hyperParameters["tau"] = tau;
         return hyperParameters;
     }
 
@@ -232,9 +232,9 @@ public:
 
     hyperparameters_map getPolicyHyperparameters() override
     {
-    	hyperparameters_map hyperParameters;
-    	hyperParameters["tau"] = tau;
-    	return hyperParameters;
+        hyperparameters_map hyperParameters;
+        hyperParameters["tau"] = tau;
+        return hyperParameters;
     }
 
     std::string printPolicy() override

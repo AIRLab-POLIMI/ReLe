@@ -54,7 +54,7 @@ public:
 
     void setCurrentRegressor(unsigned int currentRegressor)
     {
-    	this->currentRegressor = currentRegressor;
+        this->currentRegressor = currentRegressor;
     }
 
     virtual void writeOnStream(std::ofstream& out) override
@@ -83,7 +83,7 @@ public:
               unsigned int nStates,
               unsigned int nActions,
               double gamma,
-			  double epsilon,
+              double epsilon,
               bool shuffle = false) :
         FQI<StateC>(QRegressorEnsemble, nStates, nActions, gamma, epsilon),
         QRegressorEnsemble(QRegressorA, QRegressorB),
@@ -93,18 +93,18 @@ public:
 
     void step() override
     {
-    	arma::uvec allIndexes = arma::conv_to<arma::uvec>::from(
-    			arma::linspace(0, this->nSamples - 1, this->nSamples));
+        arma::uvec allIndexes = arma::conv_to<arma::uvec>::from(
+                                    arma::linspace(0, this->nSamples - 1, this->nSamples));
         if(shuffle)
-        	allIndexes = arma::shuffle(allIndexes);
+            allIndexes = arma::shuffle(allIndexes);
 
         std::vector<arma::mat> features;
         std::vector<arma::vec> rewards;
         std::vector<arma::vec> nextStates;
         std::vector<arma::mat> outputs;
 
-		indexes.push_back(allIndexes(arma::span(0, floor(this->nSamples / 2) - 1)));
-		indexes.push_back(allIndexes(arma::span(floor(this->nSamples / 2), this->nSamples - 1)));
+        indexes.push_back(allIndexes(arma::span(0, floor(this->nSamples / 2) - 1)));
+        indexes.push_back(allIndexes(arma::span(floor(this->nSamples / 2), this->nSamples - 1)));
         for(unsigned int i = 0; i < 2; i++)
         {
             features.push_back(this->features.cols(indexes[i]));
@@ -127,20 +127,20 @@ public:
                     unsigned int index = RandomGenerator::sampleUniformInt(0, maxIndex.n_elem - 1);
 
                     outputs[i](j) = rewards[i](j) + this->gamma * arma::as_scalar(
-                    		QRegressorEnsemble.getRegressor(1 - i)(
-                    				nextState, FiniteAction(maxIndex(index))));
+                                        QRegressorEnsemble.getRegressor(1 - i)(
+                                            nextState, FiniteAction(maxIndex(index))));
                 }
                 else
-                	outputs[i](j) = rewards[i](j);
+                    outputs[i](j) = rewards[i](j);
             }
         }
 
         for(unsigned int i = 0; i < 2; i++)
         {
-        	QRegressorEnsemble.setCurrentRegressor(i);
+            QRegressorEnsemble.setCurrentRegressor(i);
 
-        	BatchDataSimple featureDataset(features[i], outputs[i]);
-        	QRegressorEnsemble.trainFeatures(featureDataset);
+            BatchDataSimple featureDataset(features[i], outputs[i]);
+            QRegressorEnsemble.trainFeatures(featureDataset);
         }
 
         this->firstStep = false;

@@ -156,9 +156,9 @@ int main(int argc, char *argv[])
 
     cout << "Starting FQI..." << endl;
 
-	core.getSettings().maxIterations = 5;
+    core.getSettings().maxIterations = 5;
 
-	core.run();
+    core.run();
 
     return 0;
 }

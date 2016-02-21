@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
     core.getSettings().maxIterations = 3;
 
-   	core.run();
+    core.run();
 
     // Policy Evaluation
     e_Greedy fqiPolicy;

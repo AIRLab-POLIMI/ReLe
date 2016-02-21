@@ -42,15 +42,15 @@ class FQI : public BatchAgent<FiniteAction, StateC>
 public:
 
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
-    		double gamma, double epsilon) :
-    	BatchAgent<FiniteAction, StateC>(gamma),
+        double gamma, double epsilon) :
+        BatchAgent<FiniteAction, StateC>(gamma),
         QRegressor(QRegressor),
         nStates(nStates),
         nActions(nActions),
-		QTable(arma::mat(nStates, nActions, arma::fill::zeros)),
-		nSamples(0),
-		firstStep(true),
-		epsilon(epsilon)
+        QTable(arma::mat(nStates, nActions, arma::fill::zeros)),
+        nSamples(0),
+        firstStep(true),
+        epsilon(epsilon)
     {
     }
 
@@ -81,7 +81,7 @@ public:
 
     virtual void step() override
     {
-    	arma::mat outputs(1, nSamples, arma::fill::zeros);
+        arma::mat outputs(1, nSamples, arma::fill::zeros);
 
         for(unsigned int i = 0; i < nSamples; i++)
         {
@@ -89,7 +89,7 @@ public:
             FiniteState nextState = FiniteState(nextStates(i));
             if(absorbingStates.count(nextState) == 0 && !firstStep)
                 for(unsigned int u = 0; u < nActions; u++)
-                	Q_xn(u) = arma::as_scalar(QRegressor(nextState,
+                    Q_xn(u) = arma::as_scalar(QRegressor(nextState,
                                                          FiniteAction(u)));
 
             outputs(i) = rewards(i) + this->gamma * arma::max(Q_xn);
@@ -105,12 +105,12 @@ public:
 
     virtual void checkCond()
     {
-    	arma::vec prevQHat = QHat;
+        arma::vec prevQHat = QHat;
 
-    	computeQHat();
+        computeQHat();
 
-    	if(arma::norm(QHat - prevQHat) < epsilon)
-    		this->converged = true;
+        if(arma::norm(QHat - prevQHat) < epsilon)
+            this->converged = true;
     }
 
     virtual void computeQHat()
@@ -140,13 +140,13 @@ public:
 
     arma::mat& getQ()
     {
-    	computeQTable();
+        computeQTable();
 
         return QTable;
     }
 
     virtual ~FQI()
-	{
+    {
     }
 
 protected:
