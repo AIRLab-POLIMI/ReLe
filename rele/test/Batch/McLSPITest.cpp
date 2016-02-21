@@ -22,6 +22,7 @@
  */
 
 #include "rele/core/Core.h"
+#include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
 
 #include "rele/policy/parametric/differentiable/GibbsPolicy.h"
@@ -176,8 +177,16 @@ int main(int argc, char *argv[])
     e_GreedyApproximate lspiPolicy;
     lspiPolicy.setEpsilon(-0.0);
     lspiPolicy.setNactions(actions.size());
-    LSPI<FiniteAction> lspi(dataLSPI, lspiPolicy, qphi, 0.9);
-    lspi.run(20,0.01);
+    LSPI<FiniteAction> lspi(dataLSPI, lspiPolicy, qphi, 0.9, 0.01);
+
+    auto&& core = buildCore(dataLSPI, lspi);
+
+    cout << "Starting FQI..." << endl;
+
+    core.getSettings().maxIterations = 20;
+
+    core.run();
+
 
 //    cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 

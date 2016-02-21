@@ -50,17 +50,19 @@ public:
     virtual void trainFeatures(const BatchData& miniBatch) override
     {
         regressors[currentRegressor]->trainFeatures(miniBatch);
-        currentRegressor = 1 - currentRegressor;
+    }
+
+    void setCurrentRegressor(unsigned int currentRegressor)
+    {
+    	this->currentRegressor = currentRegressor;
     }
 
     virtual void writeOnStream(std::ofstream& out) override
     {
-        // TODO: Implement
     }
 
     virtual void readFromStream(std::ifstream& in) override
     {
-        // TODO: Implement
     }
 
     virtual ~DoubleFQIEnsemble()
@@ -76,18 +78,14 @@ template<class StateC>
 class DoubleFQI: public FQI<StateC>
 {
 public:
-
-    /* This class implements the Double FQI algorithm. As a batch algorithm, it takes
-     * a dataset of (s, a, r, s') transitions, together with the regressors that
-     * it is used to approximate the target distribution of Q values.
-     */
     DoubleFQI(BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
               unsigned int nStates,
               unsigned int nActions,
               double gamma,
+			  double epsilon,
               bool shuffle = false) :
-        FQI<StateC>(QRegressorEnsemble, nStates, nActions, gamma, 2),
+        FQI<StateC>(QRegressorEnsemble, nStates, nActions, gamma, epsilon),
         QRegressorEnsemble(QRegressorA, QRegressorB),
         shuffle(shuffle)
     {
@@ -95,75 +93,70 @@ public:
 
     void step() override
     {
-        std::vector<arma::mat> outputs;
-        std::vector<arma::vec> nextStatesMiniBatch;
-
-        auto&& miniBatches = this->featureDatasetStart->getNMiniBatches(this->nMiniBatches);
-
-        for(unsigned int i = 0; i < this->nMiniBatches; i++)
-        {
-            this->QRegressor.trainFeatures(*miniBatches[i]);
-            nextStatesMiniBatch.push_back(this->nextStates(miniBatches[i]->getIndexes()));
-            outputs.push_back(miniBatches[i]->getOutputs());
-        }
-
+    	arma::uvec allIndexes = arma::conv_to<arma::uvec>::from(
+    			arma::linspace(0, this->nSamples - 1, this->nSamples));
         if(shuffle)
-            for(unsigned int i = 0; i < this->nMiniBatches; i++)
-            {
-                miniBatches[i]->shuffle();
-                nextStatesMiniBatch[i] = this->nextStates(miniBatches[i]->getIndexes());
-            }
+        	allIndexes = arma::shuffle(allIndexes);
 
-        std::vector<arma::mat> inputs;
+        std::vector<arma::mat> features;
+        std::vector<arma::vec> rewards;
+        std::vector<arma::vec> nextStates;
+        std::vector<arma::mat> outputs;
 
-        for(unsigned int miniBatchIndex = 0; miniBatchIndex < this->nMiniBatches; miniBatchIndex++)
+		indexes.push_back(allIndexes(arma::span(0, floor(this->nSamples / 2) - 1)));
+		indexes.push_back(allIndexes(arma::span(floor(this->nSamples / 2), this->nSamples - 1)));
+        for(unsigned int i = 0; i < 2; i++)
         {
-            arma::mat miniBatchInput = miniBatches[miniBatchIndex]->getFeatures();
-            arma::mat miniBatchRewards = miniBatches[miniBatchIndex]->getOutputs();
+            features.push_back(this->features.cols(indexes[i]));
+            rewards.push_back(this->rewards(indexes[i]));
+            nextStates.push_back(this->nextStates(indexes[i]));
+            outputs.push_back(arma::mat(1, indexes[i].n_elem, arma::fill::zeros));
 
-            for(unsigned int i = 0; i < miniBatchInput.n_cols; i++)
+            for(unsigned int j = 0; j < indexes[i].n_elem; j++)
             {
-                /* In order to be able to fill the output vector (i.e. regressor
-                 * target values), we need to compute the Q values for each
-                 * s' sample in the dataset and for each action in the
-                 * set of actions of the problem. Recalling the fact that the values
-                 * are zero for each action in an absorbing state, we check if s' is
-                 * absorbing and, if it is, we leave the Q-values fixed to zero.
-                 */
-                FiniteState nextState = FiniteState(nextStatesMiniBatch[miniBatchIndex](i));
-                if(this->absorbingStates.count(nextState) == 0)
+                FiniteState nextState = FiniteState(nextStates[i](j));
+                if(this->absorbingStates.count(nextState) == 0 && !this->firstStep)
                 {
                     arma::vec Q_xn(this->nActions, arma::fill::zeros);
                     for(unsigned int u = 0; u < this->nActions; u++)
                         Q_xn(u) = arma::as_scalar(
-                                      QRegressorEnsemble.getRegressor(miniBatchIndex)(nextState, FiniteAction(u)));
+                                      QRegressorEnsemble.getRegressor(i)(nextState, FiniteAction(u)));
 
                     double qmax = Q_xn.max();
                     arma::uvec maxIndex = find(Q_xn == qmax);
                     unsigned int index = RandomGenerator::sampleUniformInt(0, maxIndex.n_elem - 1);
 
-                    /* For the current s', Q values for each action are stored in
-                     * Q_xn. The optimal Bellman equation can be computed
-                     * finding the maximum value inside Q_xn. They are zero if
-                     * xn is an absorbing state.
-                     */
-                    outputs[miniBatchIndex](i) = miniBatchRewards(0, i) +
-                                                 this->gamma * arma::as_scalar(QRegressorEnsemble.getRegressor(
-                                                         1 - miniBatchIndex)(nextState, FiniteAction(maxIndex(index))));
+                    outputs[i](j) = rewards[i](j) + this->gamma * arma::as_scalar(
+                    		QRegressorEnsemble.getRegressor(1 - i)(
+                    				nextState, FiniteAction(maxIndex(index))));
                 }
                 else
+<<<<<<< Updated upstream
                     outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
+=======
+                	outputs[i](j) = rewards[i](j);
+>>>>>>> Stashed changes
             }
-
-            BatchDataSimple featureDataset(miniBatchInput, outputs[miniBatchIndex]);
-            QRegressorEnsemble.trainFeatures(featureDataset);
         }
 
-        MiniBatchData::cleanMiniBatches(miniBatches);
+        for(unsigned int i = 0; i < 2; i++)
+        {
+        	QRegressorEnsemble.setCurrentRegressor(i);
+
+        	BatchDataSimple featureDataset(features[i], outputs[i]);
+        	QRegressorEnsemble.trainFeatures(featureDataset);
+        }
+
+        this->firstStep = false;
+
+        this->checkCond();
+
+        indexes.clear();
     }
 
 protected:
     DoubleFQIEnsemble QRegressorEnsemble;
+    std::vector<arma::uvec> indexes;
     bool shuffle;
 };
 

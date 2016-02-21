@@ -42,35 +42,48 @@ class FQI : public BatchAgent<FiniteAction, StateC>
 public:
 
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
+<<<<<<< Updated upstream
         double gamma, unsigned int nMiniBatches = 1) :
         BatchAgent<FiniteAction, StateC>(gamma, nMiniBatches),
         featureDatasetStart(nullptr),
+=======
+    		double gamma, double epsilon) :
+    	BatchAgent<FiniteAction, StateC>(gamma),
+>>>>>>> Stashed changes
         QRegressor(QRegressor),
         nStates(nStates),
-        nActions(nActions)
+        nActions(nActions),
+		QTable(arma::mat(nStates, nActions, arma::fill::zeros)),
+		nSamples(0),
+		firstStep(true),
+		epsilon(epsilon)
     {
-        QTable.zeros(nStates, nActions);
-        QHat.zeros(this->nSamples);
     }
 
     virtual void init(Dataset<FiniteAction, StateC>& data) override
     {
-        nSamples = 0;
-        unsigned int nEpisodes = data.size();
-        for(unsigned int k = 0; k < nEpisodes; k++)
-            nSamples += data[k].size();
+        features = data.featuresAsMatrix(QRegressor.getFeatures());
+        nSamples = features.n_cols;
+        states = arma::vec(nSamples, arma::fill::zeros);
+        actions = arma::vec(nSamples, arma::fill::zeros);
+        nextStates = arma::vec(nSamples, arma::fill::zeros);
+        rewards = arma::vec(nSamples, arma::fill::zeros);
+        QHat = arma::vec(nSamples, arma::fill::zeros);
 
         unsigned int i = 0;
-        nextStates.zeros(this->nSamples);
         for(auto& episode : data)
             for(auto& tr : episode)
             {
                 if(tr.xn.isAbsorbing())
                     absorbingStates.insert(tr.xn);
 
+                states(i) = tr.x;
+                actions(i) = tr.u;
                 nextStates(i) = tr.xn;
+                rewards(i) = tr.r[0];
                 i++;
             }
+<<<<<<< Updated upstream
 
         arma::mat rewards = data.rewardAsMatrix();
         arma::mat input = data.featuresAsMatrix(QRegressor.getFeatures());
@@ -79,54 +92,48 @@ public:
             delete featureDatasetStart;
 
         featureDatasetStart = new BatchDataSimple(input, rewards);
+=======
+>>>>>>> Stashed changes
     }
 
     virtual void step() override
     {
-        std::vector<arma::mat> outputs;
-        std::vector<arma::vec> nextStatesMiniBatch;
+    	arma::mat outputs(1, nSamples, arma::fill::zeros);
 
-        auto&& miniBatches = featureDatasetStart->getNMiniBatches(this->nMiniBatches);
-        for(unsigned int i = 0; i < this->nMiniBatches; i++)
-        {
-            QRegressor.trainFeatures(*miniBatches[i]);
-            nextStatesMiniBatch.push_back(nextStates(miniBatches[i]->getIndexes()));
-            outputs.push_back(miniBatches[i]->getOutputs());
-        }
-
-        arma::mat input = miniBatches[0]->getFeatures();
-        arma::mat rewards = miniBatches[0]->getOutputs();
-
-        for(unsigned int i = 0; i < input.n_cols; i++)
+        for(unsigned int i = 0; i < nSamples; i++)
         {
             arma::vec Q_xn(nActions, arma::fill::zeros);
-            FiniteState nextState = FiniteState(nextStatesMiniBatch[0](i));
-            if(absorbingStates.count(nextState) == 0)
+            FiniteState nextState = FiniteState(nextStates(i));
+            if(absorbingStates.count(nextState) == 0 && !firstStep)
                 for(unsigned int u = 0; u < nActions; u++)
-                    Q_xn(u) = arma::as_scalar(QRegressor(nextState,
+                	Q_xn(u) = arma::as_scalar(QRegressor(nextState,
                                                          FiniteAction(u)));
 
-            outputs[0](i) = rewards(0, i) + this->gamma * arma::max(Q_xn);
+            outputs(i) = rewards(i) + this->gamma * arma::max(Q_xn);
         }
 
-        BatchDataSimple featureDataset(input, outputs[0]);
+        BatchDataSimple featureDataset(features, outputs);
         QRegressor.trainFeatures(featureDataset);
 
-        double J;
-        printInfo(J);
+        firstStep = false;
 
-        MiniBatchData::cleanMiniBatches(miniBatches);
+        checkCond();
+    }
+
+    virtual void checkCond()
+    {
+    	arma::vec prevQHat = QHat;
+
+    	computeQHat();
+
+    	if(arma::norm(QHat - prevQHat) < epsilon)
+    		this->converged = true;
     }
 
     virtual void computeQHat()
     {
-        unsigned int i = 0;
-        /*for(auto& episode : this->data)
-            for(auto& tr : episode)
-            {
-                QHat(i) = arma::as_scalar(QRegressor(tr.x, tr.u));
-                i++;
-            }*/
+        for(unsigned int i = 0; i < states.n_elem; i++)
+            QHat(i) = arma::as_scalar(QRegressor(FiniteState(states(i)), FiniteAction(actions(i))));
     }
 
     virtual void computeQTable()
@@ -134,29 +141,6 @@ public:
         for(unsigned int i = 0; i < nStates; i++)
             for(unsigned int j = 0; j < nActions; j++)
                 QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
-    }
-
-    virtual void printInfo(double& J1)
-    {
-        arma::vec prevQHat = QHat;
-
-        computeQHat();
-
-        J1 = arma::norm(QHat - prevQHat);
-
-        /*double J2 = 0;
-        for(unsigned int i = 0; i < this->nMiniBatches; i++)
-            J2 += arma::sum(
-                      arma::square(QHat(this->miniBatches[i]->getIndexes()).t() - this->outputs[i]));
-        J2 /= this->nSamples;
-
-        arma::vec temp = QHat(this->miniBatches[0]->getIndexes());
-        std::cout << std::endl << "Some Q-values (approximation, target):" << std::endl;
-        for(unsigned int i = 0; i < 40; i++)
-            std::cout << "(" << this->miniBatches[0]->getInput(i)(0) << ", " << this->miniBatches[0]->getInput(i)(1) <<
-                      ", " << nextStatesMiniBatch[0](i) << ")  " << temp(i) << this->outputs[0].col(i) << std::endl;
-        std::cout << "QHat - Previous QHat: " << J1 << std::endl;
-        std::cout << "QHat - Q Bellman: " << J2 << std::endl;*/
     }
 
     virtual void printPolicy()
@@ -173,25 +157,36 @@ public:
 
     arma::mat& getQ()
     {
+    	computeQTable();
+
         return QTable;
     }
 
     virtual ~FQI()
+<<<<<<< Updated upstream
     {
         if(featureDatasetStart)
             delete featureDatasetStart;
+=======
+	{
+>>>>>>> Stashed changes
     }
 
 protected:
     arma::vec QHat;
     arma::mat QTable;
+    arma::mat features;
+    arma::vec states;
+    arma::vec actions;
     arma::vec nextStates;
+    arma::vec rewards;
     BatchRegressor& QRegressor;
     unsigned int nSamples;
     unsigned int nStates;
     unsigned int nActions;
     std::set<FiniteState> absorbingStates;
-    BatchDataSimple* featureDatasetStart;
+    double epsilon;
+    bool firstStep;
 };
 
 }

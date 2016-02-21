@@ -154,20 +154,16 @@ int main(int argc, char *argv[])
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    //FQI<FiniteState> fqi(QRegressorA, nStates, nActions, 0.9);
-    DoubleFQI<FiniteState> fqi(QRegressorA, QRegressorB, nStates, nActions, 0.9);
+    FQI<FiniteState> fqi(QRegressorA, nStates, nActions, 0.9, 1e-8);
+    //DoubleFQI<FiniteState> fqi(QRegressorA, QRegressorB, nStates, nActions, 0.9, 1e-8);
 
     auto&& core = buildCore(data, fqi);
 
     cout << "Starting FQI..." << endl;
 
-    for(unsigned int i = 0; i < 4; i++)
-    {
-    	core.getSettings().maxIterations = 1000;
-    	core.getSettings().epsilon = 1e-8;
+    core.getSettings().maxIterations = 1000;
 
-    	core.runEpisode();
-    }
+    core.run();
 
     return 0;
 }

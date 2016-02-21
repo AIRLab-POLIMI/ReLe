@@ -25,7 +25,7 @@
 #include "rele/core/Core.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/parametric/differentiable/GibbsPolicy.h"
-#include "rele/algorithms/policy_search/gradient/offpolicy/OffPolicyREINFORCE.h"
+#include "rele/algorithms/batch/policy_search/gradient/OffPolicyREINFORCE.h"
 #include "rele/approximators/BasisFunctions.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"

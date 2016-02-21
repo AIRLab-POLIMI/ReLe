@@ -76,21 +76,17 @@ int main(int argc, char *argv[])
     unsigned int priceCol = 7;
     unsigned int nStates = arma::prod(testSet.row(0));
 
-    FQI<FiniteState> fqi(QRegressorA, nStates, 3, 1);
-    //DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, 3, 1);
-    //W_FQI<FiniteState> fqi(data, QRegressorA, nStates, 3, 1);
+    FQI<FiniteState> fqi(QRegressorA, nStates, 3, 1, 1e-8);
+    //DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, 3, 1, 1e-8);
+    //W_FQI<FiniteState> fqi(data, QRegressorA, nStates, 3, 1, 1e-8);
 
     auto&& core = buildCore(data, fqi);
 
     cout << "Starting FQI..." << endl;
 
-    for(unsigned int i = 0; i < 4; i++)
-    {
-    	core.getSettings().maxIterations = 3;
-    	core.getSettings().epsilon = 1e-8;
+    core.getSettings().maxIterations = 3;
 
-    	core.runEpisode();
-    }
+   	core.run();
 
     // Policy Evaluation
     e_Greedy fqiPolicy;

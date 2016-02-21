@@ -39,12 +39,10 @@ public:
         {
             loggerStrategy = nullptr;
             maxIterations = 1;
-            epsilon = 0.01;
         }
 
         LoggerStrategy<ActionC, StateC>* loggerStrategy;
         unsigned int maxIterations;
-        double epsilon;
     };
 
 public:
@@ -59,35 +57,27 @@ public:
         return settings;
     }
 
-    void runEpisode()
+    void run()
     {
         //core setup
-        //Logger<ActionC, StateC> logger;
+        Logger<ActionC, StateC> logger;
 
-        //logger.setStrategy(settings.loggerStrategy);
+        logger.setStrategy(settings.loggerStrategy);
 
         //Start episode
         agent.init(data);
 
         for(unsigned int i = 0;
                 i < settings.maxIterations
-                && !agent.isTerminalConditionReached(); i++)
+                && !agent.isConverged(); i++)
         {
             agent.step();
-            //logger.log(agent.getAgentOutputData(), i);
+            logger.log(agent.getAgentOutputData(), i);
         }
 
-        //logger.log(agent.getAgentOutputDataEnd(), settings.episodeLength);
+        //logger.log(agent.getAgentOutputDataEnd(), settings.maxIterations);
         //logger.printStatistics();
     }
-
-    /*void runSteps()
-    {
-        for(unsigned int i = 0; i < settings.maxIterations; i++)
-        {
-            runEpisode();
-        }
-    }*/
 
 protected:
     Dataset<ActionC, StateC>& data;

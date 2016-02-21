@@ -41,13 +41,17 @@ class LSPI : public BatchAgent<ActionC, DenseState>
 {
 public:
     LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
-         Features_<arma::vec>& phi, double gamma) :
+         Features_<arma::vec>& phi, double gamma, double epsilon) :
         BatchAgent<ActionC, DenseState>(gamma),
-        critic(data, policy, phi, gamma)
+        critic(data, policy, phi, gamma),
+		oldWeights(arma::vec(critic.getQ().getParametersSize(), arma::fill::zeros)),
+		epsilon(epsilon),
+		firstStep(true)
     {
     }
 
     virtual void init(Dataset<ActionC, DenseState>& data) override
+<<<<<<< Updated upstream
     {
         // FIXME
     }
@@ -56,58 +60,55 @@ public:
     {
         // FIXME
     }
+=======
+	{
+	}
 
-    virtual void run(unsigned int maxiterations, double epsilon = 0.1)
+    virtual void step() override
     {
-        /*** Initialize policy iteration ***/
-        unsigned int iteration = 0;
-        double distance = 10 * epsilon;
-        arma::vec old_weights(critic.getQ().getParametersSize(), arma::fill::zeros);
+        //Evaluate the current policy (and implicitly improve)
+        //            RandomGenerator::seed(1000);
+        arma::vec QWeights = critic.run(firstStep);
+        //            RandomGenerator::seed(1000);
+        //            arma::vec Q_weights2 = critic.run_slow();
+        //            arma::mat X = arma::join_horiz(Q_weights,Q_weights2);
+        //            std::cout << X << std::endl;
+        //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
+
+        critic.getQ().setParameters(QWeights);
+        //            char ddd[100];
+        //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
+        //            Q_weights.save(ddd, arma::raw_ascii);
+>>>>>>> Stashed changes
 
 
-        /*** Main LSPI loop ***/
-        bool firsttime = true;
-        while ( (iteration < maxiterations) && (distance > epsilon) )
-        {
-            //Update and print the number of iterations
-            ++iteration;
+        firstStep = false;
 
-            std::cout << "*********************************************************" << std::endl;
-            std::cout << "LSPI iteration : " << iteration << std::endl;
-
-            //Evaluate the current policy (and implicitly improve)
-            //            RandomGenerator::seed(1000);
-            arma::vec Q_weights = critic.run(firsttime);
-            //            RandomGenerator::seed(1000);
-            //            arma::vec Q_weights2 = critic.run_slow();
-            //            arma::mat X = arma::join_horiz(Q_weights,Q_weights2);
-            //            std::cout << X << std::endl;
-            //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
-
-            critic.getQ().setParameters(Q_weights);
-            //            char ddd[100];
-            //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
-            //            Q_weights.save(ddd, arma::raw_ascii);
-
-            //Compute the distance between the current and the previous policy
-            double LMAXnorm = arma::norm(Q_weights - old_weights, "inf");
-            double L2norm   = arma::norm(Q_weights - old_weights, 2);
-            distance = L2norm;
-            std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
-                      "   L2 : " << L2norm << std::endl;
-
-            firsttime = false;
-            old_weights = Q_weights;
-        }
+        checkCond(QWeights);
 
         /*** Display some info ***/
-        std::cout << "*********************************************************" << std::endl;
+        /*std::cout << "*********************************************************" << std::endl;
         if (distance > epsilon)
             std::cout << "LSPI finished in " << iteration <<
                       " iterations WITHOUT CONVERGENCE to a fixed point" << std::endl;
         else
             std::cout << "LSPI converged in " << iteration << " iterations" << std::endl;
-        std::cout << "********************************************************* " << std::endl;
+        std::cout << "********************************************************* " << std::endl;*/
+    }
+
+    virtual void checkCond(const arma::vec& QWeights)
+    {
+        //Compute the distance between the current and the previous policy
+        double LMAXnorm = arma::norm(QWeights - oldWeights, "inf");
+        double L2norm   = arma::norm(QWeights - oldWeights, 2);
+        double distance = L2norm;
+        std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
+                  "   L2 : " << L2norm << std::endl;
+
+       	if(arma::norm(QWeights - oldWeights, 2 < epsilon))
+    		this->converged = true;
+
+       	oldWeights = QWeights;
     }
 
     virtual ~LSPI()
@@ -116,7 +117,9 @@ public:
 
 protected:
     LSTDQ<ActionC> critic;
-
+    arma::vec oldWeights;
+    double epsilon;
+    bool firstStep;
 };
 
 }

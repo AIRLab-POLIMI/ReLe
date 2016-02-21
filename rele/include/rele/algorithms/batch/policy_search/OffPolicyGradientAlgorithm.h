@@ -29,7 +29,7 @@
 #include "rele/policy/Policy.h"
 #include "rele/core/Basics.h"
 #include "rele/core/BasicFunctions.h"
-#include "rele/algorithms/policy_search/gradient/offpolicy/OffGradientOutputData.h"
+#include "rele/algorithms/batch/policy_search/gradient/OffGradientOutputData.h"
 #include "rele/algorithms/policy_search/step_rules/StepRules.h"
 #include <cassert>
 #include <iomanip>
