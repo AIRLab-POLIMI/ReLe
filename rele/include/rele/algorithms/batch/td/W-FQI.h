@@ -132,11 +132,7 @@ public:
                 outputs(i) = this->rewards(i) + this->gamma * W;
             }
             else
-<<<<<<< Updated upstream
-                outputs[0](i) = rewards(0, i);
-=======
             	outputs(i) = this->rewards(i);
->>>>>>> Stashed changes
         }
         gsl_integration_workspace_free(w);
 

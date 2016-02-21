@@ -42,14 +42,8 @@ class FQI : public BatchAgent<FiniteAction, StateC>
 public:
 
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
-<<<<<<< Updated upstream
-        double gamma, unsigned int nMiniBatches = 1) :
-        BatchAgent<FiniteAction, StateC>(gamma, nMiniBatches),
-        featureDatasetStart(nullptr),
-=======
     		double gamma, double epsilon) :
     	BatchAgent<FiniteAction, StateC>(gamma),
->>>>>>> Stashed changes
         QRegressor(QRegressor),
         nStates(nStates),
         nActions(nActions),
@@ -83,17 +77,6 @@ public:
                 rewards(i) = tr.r[0];
                 i++;
             }
-<<<<<<< Updated upstream
-
-        arma::mat rewards = data.rewardAsMatrix();
-        arma::mat input = data.featuresAsMatrix(QRegressor.getFeatures());
-
-        if(featureDatasetStart)
-            delete featureDatasetStart;
-
-        featureDatasetStart = new BatchDataSimple(input, rewards);
-=======
->>>>>>> Stashed changes
     }
 
     virtual void step() override
@@ -163,13 +146,7 @@ public:
     }
 
     virtual ~FQI()
-<<<<<<< Updated upstream
-    {
-        if(featureDatasetStart)
-            delete featureDatasetStart;
-=======
 	{
->>>>>>> Stashed changes
     }
 
 protected:

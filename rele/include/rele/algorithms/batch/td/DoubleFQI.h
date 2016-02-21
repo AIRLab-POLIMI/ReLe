@@ -131,11 +131,7 @@ public:
                     				nextState, FiniteAction(maxIndex(index))));
                 }
                 else
-<<<<<<< Updated upstream
-                    outputs[miniBatchIndex](i) = miniBatchRewards(0, i);
-=======
                 	outputs[i](j) = rewards[i](j);
->>>>>>> Stashed changes
             }
         }
 

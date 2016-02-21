@@ -33,23 +33,14 @@ template<class ActionC, class StateC>
 class BatchAgent
 {
 public:
-<<<<<<< Updated upstream
-    BatchAgent(double gamma, unsigned int nMiniBatches = 1) :
-        nMiniBatches(nMiniBatches),
-        gamma(gamma),
-        terminalCond(nullptr)
-    {
-    }
-=======
 	BatchAgent(double gamma) :
 		gamma(gamma),
 		converged(false)
 	{
 	}
->>>>>>> Stashed changes
 
-    virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
-    virtual void step() = 0;
+	virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
+	virtual void step() = 0;
 
     virtual AgentOutputData* getAgentOutputData()
     {
@@ -61,19 +52,13 @@ public:
     	return converged;
     }
 
-    virtual ~BatchAgent()
-    {
-    }
+	virtual ~BatchAgent()
+	{
+	}
 
 protected:
-<<<<<<< Updated upstream
-    unsigned int nMiniBatches;
-    double gamma;
-    TerminalCondition* terminalCond;
-=======
 	double gamma;
     bool converged;
->>>>>>> Stashed changes
 };
 
 }

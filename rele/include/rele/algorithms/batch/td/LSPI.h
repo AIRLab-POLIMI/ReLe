@@ -51,16 +51,6 @@ public:
     }
 
     virtual void init(Dataset<ActionC, DenseState>& data) override
-<<<<<<< Updated upstream
-    {
-        // FIXME
-    }
-
-    virtual void step() override
-    {
-        // FIXME
-    }
-=======
 	{
 	}
 
@@ -79,7 +69,6 @@ public:
         //            char ddd[100];
         //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
         //            Q_weights.save(ddd, arma::raw_ascii);
->>>>>>> Stashed changes
 
 
         firstStep = false;
