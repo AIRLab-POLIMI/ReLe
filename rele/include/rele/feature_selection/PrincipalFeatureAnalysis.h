@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
-#define INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
+#ifndef INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
+#define INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
 
 #include "rele/approximators/regressors/others/NearestNeighbourRegressor.h"
 #include "rele/approximators/basis/IdentityBasis.h"
@@ -161,4 +161,4 @@ private:
 }
 
 
-#endif /* INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_ */
+#endif /* INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_ */

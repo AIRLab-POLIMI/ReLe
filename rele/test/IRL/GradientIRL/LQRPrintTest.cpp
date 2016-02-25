@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -31,7 +31,8 @@
 #include "rele/environments/LQR.h"
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
-#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
+#include "rele/IRL/algorithms/GIRL.h"
+#include "rele/IRL/algorithms/PGIRL.h"
 
 #include "rele/utils/FileManager.h"
 
@@ -41,18 +42,13 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define RUN
-//#define PRINT
-
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-
+    IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
     vec eReward = {0.2, 0.7, 0.1};
-
     int nbEpisodes = 5000;
 
     FileManager fm("lqr", "GIRL");
@@ -109,19 +105,41 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
 
-    LinearApproximator rewardRegressor1(phiReward);
-    LinearApproximator rewardRegressor2(phiReward);
-    ExpectedDeltaIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor1,
-            mdp.getSettings().gamma, atype);
+    LinearApproximator rewardRegressor(phiReward);
 
-    //Run GIRL
-    irlAlg.run();
-    arma::vec weights = rewardRegressor1.getParameters();
+    //calculate full grid function
+    int samplesParams = 101;
+    arma::vec valuesG(samplesParams);
+    arma::vec valuesJ(samplesParams);
+    arma::vec valuesD(samplesParams);
+    arma::mat valuesdG2(dim, samplesParams);
 
+    for(int i = 0; i < samplesParams; i++)
+    {
+        cerr << i << endl;
+        double step = 0.01;
+        arma::vec wm(2);
+        wm(0) = i*step;
+        wm(1) = 1.0 - wm(0);
+        rewardRegressor.setParameters(wm);
+        arma::mat dGradient(dim, dim);
+        arma::vec dJ;
+        arma::vec g = irlAlg.ReinforceBaseGradient(dGradient);
+        arma::vec dg2 = 2.0*dGradient.t() * g;
 
-    //Print results
-    cout << "Weights (weights): " << weights.t();
+        double Je = irlAlg.computeJ(dJ);
+        double D = irlAlg.computeDisparity();
+        double G = norm(g);
+        valuesG(i) = G;
+        valuesJ(i) = Je;
+        valuesD(i) = D;
+        valuesdG2.col(i) = dg2;
+    }
 
+    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
+    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
+    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
+    valuesdG2.save("/tmp/ReLe/dG2.txt", arma::raw_ascii);
 
     return 0;
 }

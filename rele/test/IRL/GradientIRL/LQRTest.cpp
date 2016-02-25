@@ -31,10 +31,10 @@
 #include "rele/environments/LQR.h"
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
-#include "rele/IRL/algorithms/GIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
 
 #include "rele/utils/FileManager.h"
+
+#include "GradientIRLCommandLineParser.h"
 
 #include "../RewardBasisLQR.h"
 
@@ -42,28 +42,26 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define RUN
-//#define PRINT
-
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
+    LinearIRLCommandLineParser parser;
 
-    IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
-#ifndef PRINT
-    vec eReward = {0.2, 0.7, 0.1};
-#else
-    vec eReward = {0.3, 0.7};
-#endif
-    int nbEpisodes = 5000;
+    auto irlConfig = parser.getConfig(argc, argv);
 
-    FileManager fm("lqr", "GIRL");
+    IrlGrad atype = irlConfig.gradient;
+    int nbEpisodes = irlConfig.episodes;
+
+    FileManager fm("lqr", irlConfig.algorithm);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    /* Learn lqr correct policy */
+    //Set reward policy
+    vec eReward = {0.2, 0.7, 0.1};
+
+    // Learn lqr correct policy
     int dim = eReward.n_elem;
     LQR mdp(dim, dim);
 
@@ -78,7 +76,7 @@ int main(int argc, char *argv[])
 
     MVNPolicy expertPolicy(phi);
 
-    /*** solve the problem in exact way ***/
+    // Solve the problem in exact way
     LQRsolver solver(mdp,phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
@@ -95,7 +93,7 @@ int main(int argc, char *argv[])
 
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
-    /* Generate LQR expert dataset */
+    // Generate LQR expert dataset
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
@@ -105,71 +103,25 @@ int main(int argc, char *argv[])
     Dataset<DenseAction,DenseState>& data = collection.data;
 
 
-    /* Create parametric reward */
+    // Create parametric reward
     BasisFunctions basisReward;
     for(unsigned int i = 0; i < eReward.n_elem; i++)
         basisReward.push_back(new LQR_RewardBasis(i, dim));
     DenseFeatures phiReward(basisReward);
+    LinearApproximator rewardRegressor(phiReward);
 
 
-    LinearApproximator rewardRegressor1(phiReward);
-    LinearApproximator rewardRegressor2(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg(data, expertPolicy, rewardRegressor1,
-                                        mdp.getSettings().gamma, atype);
+    // Run algorithm
+    IRLAlgorithm<DenseAction,DenseState>* irlAlg = buildIRLalg(data, expertPolicy, rewardRegressor,
+            mdp.getSettings().gamma, atype, irlConfig.algorithm);
 
-    PlaneGIRL<DenseAction, DenseState> irlAlg2(data, expertPolicy, rewardRegressor2,
-            mdp.getSettings().gamma, atype);
+    irlAlg->run();
+    arma::vec weights = rewardRegressor.getParameters();
 
-#ifdef RUN
-    //Run GIRL
-    irlAlg.run();
-    arma::vec gnormw = rewardRegressor1.getParameters();
+    cout << "weights :" << weights.t();
 
-    //Run PGIRL
-    irlAlg2.run();
-    arma::vec planew = rewardRegressor2.getParameters();
-
-
-    //Print results
-    cout << "Weights (gnorm): " << gnormw.t();
-    cout << "Weights (plane): " << planew.t();
-#endif
-
-#ifdef PRINT
-    //calculate full grid function
-    int samplesParams = 101;
-    arma::vec valuesG(samplesParams);
-    arma::vec valuesJ(samplesParams);
-    arma::vec valuesD(samplesParams);
-    arma::mat valuesdG2(dim, samplesParams);
-
-    for(int i = 0; i < samplesParams; i++)
-    {
-        cerr << i << endl;
-        double step = 0.01;
-        arma::vec wm(2);
-        wm(0) = i*step;
-        wm(1) = 1.0 - wm(0);
-        rewardRegressor.setParameters(wm);
-        arma::mat dGradient(dim, dim);
-        arma::vec dJ;
-        arma::vec g = irlAlg.ReinforceBaseGradient(dGradient);
-        arma::vec dg2 = 2.0*dGradient.t() * g;
-
-        double Je = irlAlg.computeJ(dJ);
-        double D = irlAlg.computeDisparity();
-        double G = norm(g);
-        valuesG(i) = G;
-        valuesJ(i) = Je;
-        valuesD(i) = D;
-        valuesdG2.col(i) = dg2;
-    }
-
-    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
-    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
-    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
-    valuesdG2.save("/tmp/ReLe/dG2.txt", arma::raw_ascii);
-#endif
+    // Save Reward Function
+    weights.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
 
     return 0;
 }

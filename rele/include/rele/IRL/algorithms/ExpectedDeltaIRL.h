@@ -74,7 +74,7 @@ public:
         double f = f_linear + f_quadratic + f_trace;
 
         arma::vec e = arma::eig_sym(H);
-        
+
         std::cout << "f: " << f << std::endl;
         std::cout << "g: " << g.t() << std::endl;
         std::cout << "e: " << e.t() << std::endl;

@@ -41,6 +41,8 @@
 
 #include "rele/utils/FileManager.h"
 
+#include "GradientIRLCommandLineParser.h"
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
@@ -54,9 +56,18 @@ int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
+    LinearIRLCommandLineParser parser;
 
-    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-    int nbEpisodes = 3000;
+    auto irlConfig = parser.getConfig(argc, argv);
+
+
+    IrlGrad atype = irlConfig.gradient;
+    int nbEpisodes = irlConfig.episodes;
+
+    FileManager fm("nls", irlConfig.algorithm);
+    fm.createDir();
+    fm.cleanDir();
+    std::cout << std::setprecision(OS_PRECISION);
 
     //Learning parameters
     int episodesPerPolicy = 1;
@@ -65,11 +76,6 @@ int main(int argc, char *argv[])
     int episodes = episodesPerPolicy*policyPerUpdate*updates;
     int testEpisodes = 100;
     AdaptiveStep stepRule(0.01);
-
-    FileManager fm("ship", "GIRL");
-    fm.createDir();
-    fm.cleanDir();
-    std::cout << std::setprecision(OS_PRECISION);
 
     //Empty strategy
     EmptyStrategy<DenseAction, DenseState> empty;
@@ -121,8 +127,6 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
     LinearApproximator rewardRegressor(phiReward);
-    GIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, rewardRegressor,
-                                         mdp.getSettings().gamma, atype);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -132,72 +136,58 @@ int main(int argc, char *argv[])
     ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
     data.writeToStream(ofs);
 
+    //Run algorithm
+    IRLAlgorithm<DenseAction,DenseState>* irlAlg = buildIRLalg(data, expertPolicy, rewardRegressor,
+            mdp.getSettings().gamma, atype, irlConfig.algorithm);
 
-    //Run GIRL
-#ifdef RUN_GIRL
-    irlAlg1.run();
+    irlAlg->run();
     arma::vec weights = rewardRegressor.getParameters();
 
-    cout << "weights: " << weights.t();
+    cout << "weights :" << weights.t();
 
-#endif
+    rewardRegressor.setParameters(weights);
 
-#ifdef RECOVER
+    //Try to recover the initial policy
+    NormalPolicy imitatorPolicy(epsilon, phi);
+    int nparams = phi.rows();
+    arma::vec mean(nparams, fill::zeros);
 
-    for(unsigned int i = 0; i < weights.n_cols; i++)
-    {
-        rewardRegressor.setParameters(weights.col(i));
+    imitatorPolicy.setParameters(mean);
+    REINFORCEAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate, stepRule);
 
-        //Try to recover the initial policy
-        int episodesPerPolicy = 1;
-        int policyPerUpdate = 100;
-        int updates = 400;
-        int episodes = episodesPerPolicy*policyPerUpdate*updates;
+    ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
+    Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
+    EmptyStrategy<DenseAction, DenseState> emptyStrategy;
+    imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
+    imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    imitatorCore.getSettings().episodeN = episodes;
+    imitatorCore.getSettings().testEpisodeN = nbEpisodes;
+    imitatorCore.runEpisodes();
 
-        NormalPolicy imitatorPolicy(epsilon, phi);
-        AdaptiveStep stepRule(0.01);
-        int nparams = phi.rows();
-        arma::vec mean(nparams, fill::zeros);
+    cout << "----------------------------------------------------------" << endl;
+    cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
+    cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
 
-        imitatorPolicy.setParameters(mean);
-        REINFORCEAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate, stepRule);
+    //Evaluate policy against the real mdp
+    Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
+    CollectorStrategy<DenseAction, DenseState> collector2;
+    evaluationCore.getSettings().loggerStrategy = &collector2;
+    evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    evaluationCore.getSettings().episodeN = episodes;
+    evaluationCore.getSettings().testEpisodeN = nbEpisodes;
 
-        ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
-        Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
-        EmptyStrategy<DenseAction, DenseState> emptyStrategy;
-        imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
-        imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
-        imitatorCore.getSettings().episodeN = episodes;
-        imitatorCore.getSettings().testEpisodeN = nbEpisodes;
-        imitatorCore.runEpisodes();
+    evaluationCore.runTestEpisodes();
 
-        cout << "----------------------------------------------------------" << endl;
-        cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
-        cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
+    Dataset<DenseAction,DenseState>& data2 = collector2.data;
 
-        //Evaluate policy against the real mdp
-        Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
-        CollectorStrategy<DenseAction, DenseState> collector2;
-        evaluationCore.getSettings().loggerStrategy = &collector2;
-        evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
-        evaluationCore.getSettings().episodeN = episodes;
-        evaluationCore.getSettings().testEpisodeN = nbEpisodes;
+    double gamma = mdp.getSettings().gamma;
+    cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
+    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
 
-        evaluationCore.runTestEpisodes();
+    ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
+    data2.writeToStream(ofs2);
 
-        Dataset<DenseAction,DenseState>& data2 = collector2.data;
-
-        double gamma = mdp.getSettings().gamma;
-        cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-        cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
-
-
-        stringstream ss;
-        ss << "TrajectoriesImitator" << i << ".txt";
-        ofstream ofs(fm.addPath(ss.str()));
-        data2.writeToStream(ofs);
-    }
-#endif
-
+    // Save Reward Function
+    weights.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
     return 0;
 }

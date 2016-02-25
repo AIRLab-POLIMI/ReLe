@@ -36,7 +36,7 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class LinearIRLAlgorithm : IRLAlgorithm<ActionC, StateC>
+class LinearIRLAlgorithm : public IRLAlgorithm<ActionC, StateC>
 {
 
 public:

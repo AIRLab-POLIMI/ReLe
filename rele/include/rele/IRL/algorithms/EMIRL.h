@@ -28,7 +28,6 @@
 #include "rele/policy/Policy.h"
 #include "rele/core/Transition.h"
 #include "rele/utils/ArmadilloExtensions.h"
-#include "rele/IRL/feature_selection/PrincipalFeatureAnalysis.h"
 
 #include <nlopt.hpp>
 

@@ -53,9 +53,9 @@ public:
 
     virtual void step() override
     {
-    	arma::vec gradient = calculator->computeGradient();
+        arma::vec gradient = calculator->computeGradient();
 
-    	// compute step size
+        // compute step size
         arma::mat eMetric = arma::eye(dp,dp);
         arma::vec step_size = stepRule.stepLength(gradient, eMetric);
 

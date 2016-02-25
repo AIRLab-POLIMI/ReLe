@@ -3,6 +3,7 @@
 add_subdirectory(Batch)
 add_subdirectory(BBO)
 add_subdirectory(core)
+add_subdirectory(feature_selection)
 add_subdirectory(hierarchical)
 add_subdirectory(IRL)
 add_subdirectory(miscellaneous)

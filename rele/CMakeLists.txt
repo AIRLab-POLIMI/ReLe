@@ -84,15 +84,7 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 # ------------------------ BUILD -------------------------------
 
 file(GLOB_RECURSE ReLe_SOURCE
-    src/core/*.cpp
-    src/policy/*.cpp
-    src/algorithms/*.cpp
-    src/environments/*.cpp
-    src/utils/*.cpp
-    src/generators/*.cpp
-    src/approximators/*.cpp
-    src/statistics/*.cpp
-    src/solvers/*.cpp)
+    src/*.cpp)
 
 if(NOT ${GSL_FOUND})
     list(REMOVE_ITEM ReLe_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/algorithms/td/WQ-Learning.cpp)

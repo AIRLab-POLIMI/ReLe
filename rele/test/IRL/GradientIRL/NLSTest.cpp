@@ -21,9 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/approximators/features/SparseFeatures.h"
 #include "rele/approximators/features/DenseFeatures.h"
-#include "rele/approximators/regressors/others/GaussianMixtureModels.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/GaussianRbf.h"
@@ -35,29 +33,35 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
 #include "rele/IRL/ParametricRewardMDP.h"
-#include "rele/IRL/algorithms/PGIRL.h"
 #include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
 
+#include "rele/IRL/algorithms/GIRL.h"
+#include "rele/IRL/algorithms/PGIRL.h"
+#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
+
 #include "rele/utils/FileManager.h"
+
+#include "GradientIRLCommandLineParser.h"
+
 
 using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-//#define PRINT
-#define RUN_GIRL
-#define RECOVER
 
 int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
+    LinearIRLCommandLineParser parser;
+
+    auto irlConfig = parser.getConfig(argc, argv);
 
 
-    IrlGrad atype = IrlGrad::REINFORCE;
-    int nbEpisodes = 3000;
+    IrlGrad atype = irlConfig.gradient;
+    int nbEpisodes = irlConfig.episodes;
 
-    FileManager fm("nls", "PGIRL");
+    FileManager fm("nls", irlConfig.algorithm);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -97,50 +101,30 @@ int main(int argc, char *argv[])
 
 
     // Create parametric reward
-    //BasisFunctions basisReward = IdentityBasis::generate(2);
-    unsigned int nbasis = 3;
-    double anglePart = nbasis;
-    double sigma = 1.0/anglePart;
-
-    /*arma::vec cT = {0, 0};
-    arma::vec cF = {10, 10};
-    BasisFunction* bfT = new GaussianRbf(cT, sigma);
-    BasisFunction* bfF = new GaussianRbf(cF, sigma);
-    BasisFunctions basisReward;
-    basisReward.push_back(bfT);
-    basisReward.push_back(bfF);
-
-    for(unsigned int i = 0; i < nbasis; i++)
-    {
-        double angle = i*2.0/anglePart*M_PI;
-        basisReward.push_back(new GaussianRbf({cos(angle), sin(angle)}, sigma));
-    }*/
-
-    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-1, 2, -1, 2});
-
+    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-2, 2, -2, 2});
     DenseFeatures phiReward(basisReward);
-
     LinearApproximator rewardRegressor(phiReward);
-    PlaneGIRL<DenseAction,DenseState> irlAlg1(data, expertPolicy, rewardRegressor,
-            mdp.getSettings().gamma, atype);
 
     //Info print
-    std::cout << "Basis size: " << phiReward.rows();
-    std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
+    std::cout << "Reward Basis size: " << phiReward.rows() << std::endl;
+    std::cout << "Policy Params size: " << expertPolicy.getParametersSize() << std::endl;
+    std::cout << "Policy Params: " << expertPolicy.getParameters().t();
     std::cout << "Features Expectation " << data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).t();
 
     ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
     data.writeToStream(ofs);
 
 
-    //Run GIRL
-#ifdef RUN_GIRL
-    irlAlg1.run();
-    arma::vec weights = rewardRegressor.getParameters();
-    cout << "weights: " << weights.t();
-#endif
+    //Run algorithm
+    IRLAlgorithm<DenseAction,DenseState>* irlAlg = buildIRLalg(data, expertPolicy, rewardRegressor,
+            mdp.getSettings().gamma, atype, irlConfig.algorithm);
 
-#ifdef RECOVER
+    irlAlg->run();
+    arma::vec weights = rewardRegressor.getParameters();
+
+    cout << "weights :" << weights.t();
+
+    rewardRegressor.setParameters(weights);
 
     //Try to recover the initial policy
     int episodesPerPolicy = 1;
@@ -186,51 +170,16 @@ int main(int argc, char *argv[])
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
     cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
 
+    ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
+    data2.writeToStream(ofs2);
 
-    stringstream ss;
-    ss << "TrajectoriesImitator" << ".txt";
-    ofstream ofsI(fm.addPath(ss.str()));
-    data2.writeToStream(ofsI);
-
-#endif
-
-
-#ifdef PRINT
-    //calculate full grid function
-    int samplesParams = 101;
-    arma::vec valuesG(samplesParams);
-    arma::vec valuesJ(samplesParams);
-    arma::vec valuesD(samplesParams);
-
-    for(int i = 0; i < samplesParams; i++)
-    {
-        cerr << i << endl;
-        double step = 0.01;
-        arma::vec wm(2);
-        wm(0) = i*step;
-        wm(1) = 1.0 - wm(0);
-        rewardRegressor.setParameters(wm);
-        arma::mat gGrad(2, 2);
-        arma::vec dJ;
-        arma::vec dD;
-        arma::vec g = irlAlg1.ReinforceBaseGradient(gGrad);
-
-        double Je = irlAlg1.computeJ(dJ);
-        double D = irlAlg1.computeDisparity(dD);
-        double G2 = as_scalar(g.t()*g);
-        valuesG(i) = std::sqrt(G2);
-        valuesJ(i) = Je;
-        valuesD(i) = D;
-    }
-
-    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
-    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
-    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
-
-#endif
 
     // Save Reward Function
     weights.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
 
     return 0;
 }
+
+
+
+
