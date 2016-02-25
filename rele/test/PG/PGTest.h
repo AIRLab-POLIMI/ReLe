@@ -56,7 +56,7 @@ public:
         desc.add_options() //
         ("help, h", "produce help message") //
         ("algorithm, a", boost::program_options::value<std::string>()->default_value("r"),
-         "set the algorithm") //
+         "set the algorithm (choices: r | rb | g | gb | gsb | natg | natr | enac)") //
         ("updates, u", boost::program_options::value<int>()->default_value(400),
          "set the number of updates") //
         ("episodes, e", boost::program_options::value<int>()->default_value(100),
