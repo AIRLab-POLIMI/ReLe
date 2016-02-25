@@ -31,7 +31,7 @@ for i = 1:lastindex
     
     figure(i)
     subplot(3, 1, 1);
-    title(['Trajectories -', alg{i}])
+    title(['Trajectories - ', alg{i}])
     xlabel('t')
     ylabel('x1')
     zlabel('x2')
@@ -56,7 +56,7 @@ for i = 1:lastindex
     traj = readDataset(csv);
     
     subplot(3, 1,2);
-    title(['Expert -', alg{i}])
+    title(['Expert - ', alg{i}])
     xlabel('t')
     ylabel('x1')
     zlabel('x2')
@@ -78,19 +78,19 @@ for i = 1:lastindex
     % Plot recovered reward Function
     w = load(['/tmp/ReLe/nls/', alg{i}, '/Weights.txt'] , '-ascii');
     
-    [X,Y] = meshgrid(-10:0.1:10);
+    [X,Y] = meshgrid(-2:0.1:2);
     
     Z = zeros(size(X));
     
     for l = 1:length(X)
         for j = 1:length(X)
-            Z(l, j) = w'*basis_krbf(5,[-10, 10; -10, 10], [X(l, j); Y(l, j)]);
+            Z(l, j) = w'*basis_krbf(5,[-2, 2; -2, 2], [X(l, j); Y(l, j)]);
         end
         
     end
     
     subplot(3, 1,3);
-    mesh(Z)
+    mesh(X, Y, Z)
     title(['weights - ', alg{i}]);
     
 end
