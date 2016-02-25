@@ -31,8 +31,9 @@
 #include "rele/environments/LQR.h"
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
-#include "rele/IRL/algorithms/GIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
+
+#include "rele/IRL/utils/GradientCalculatorFactory.h"
+#include "rele/IRL/utils/HessianCalculatorFactory.h"
 
 #include "rele/utils/FileManager.h"
 
@@ -47,35 +48,31 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::GPOMDP_BASELINE;
-    vec eReward = {0.2, 0.7, 0.1};
+    IrlGrad atype = IrlGrad::REINFORCE;
+    vec eReward =
+    { 0.3, 0.7 };
     int nbEpisodes = 5000;
+    int dim = eReward.n_elem;
 
     FileManager fm("lqr", "GIRL");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    /* Learn lqr correct policy */
-    int dim = eReward.n_elem;
-    LQR mdp(dim, dim);
-
-    BasisFunctions basis;
-    for (int i = 0; i < dim; ++i)
-    {
-        basis.push_back(new IdentityBasis(i));
-    }
-
+    // create policy basis functions
+    BasisFunctions basis = IdentityBasis::generate(dim);
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    MVNPolicy expertPolicy(phi);
-
-    /*** solve the problem in exact way ***/
-    LQRsolver solver(mdp,phi);
+    // solve the problem in exact way
+    LQR mdp(dim, dim);
+    LQRsolver solver(mdp, phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
+
+    // Create expert policy
+    MVNPolicy expertPolicy(phi);
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
@@ -85,61 +82,83 @@ int main(int argc, char *argv[])
     }
     std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
 
-
     PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
-    /* Generate LQR expert dataset */
+    // Generate LQR expert dataset
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
     expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().testEpisodeN = nbEpisodes;
     expertCore.runTestEpisodes();
-    Dataset<DenseAction,DenseState>& data = collection.data;
+    Dataset<DenseAction, DenseState>& data = collection.data;
 
-
-    /* Create parametric reward */
+    // Create parametric reward
     BasisFunctions basisReward;
-    for(unsigned int i = 0; i < eReward.n_elem; i++)
+    for (unsigned int i = 0; i < eReward.n_elem; i++)
         basisReward.push_back(new LQR_RewardBasis(i, dim));
     DenseFeatures phiReward(basisReward);
 
 
-    LinearApproximator rewardRegressor(phiReward);
+    // init calculators methods
+    auto gradientCalculator = GradientCalculatorFactory<DenseAction, DenseState>::build(atype,
+                              phiReward, data, expertPolicy,
+                              mdp.getSettings().gamma);
 
-    //calculate full grid function
-    int samplesParams = 101;
-    arma::vec valuesG(samplesParams);
-    arma::vec valuesJ(samplesParams);
-    arma::vec valuesD(samplesParams);
-    arma::mat valuesdG2(dim, samplesParams);
+    auto hessianCalculator = HessianCalculatorFactory<DenseAction, DenseState>::build(atype,
+                             phiReward, data, expertPolicy,
+                             mdp.getSettings().gamma);
 
-    for(int i = 0; i < samplesParams; i++)
+    arma::vec rvec = data.computefeatureExpectation(phiReward, mdp.getSettings().gamma);
+
+
+    unsigned int samplesParams = 101;
+    arma::vec valuesJ(samplesParams, arma::fill::zeros);
+    arma::vec valuesG(samplesParams, arma::fill::zeros);
+    arma::vec valuesT(samplesParams, arma::fill::zeros);
+    arma::vec valuesF(samplesParams, arma::fill::zeros);
+    arma::vec valuesFs(samplesParams, arma::fill::zeros);
+
+
+    // sample functions
+    for (int i = 0; i < samplesParams; i++)
     {
-        cerr << i << endl;
-        double step = 0.01;
-        arma::vec wm(2);
-        wm(0) = i*step;
-        wm(1) = 1.0 - wm(0);
-        rewardRegressor.setParameters(wm);
-        arma::mat dGradient(dim, dim);
-        arma::vec dJ;
-        arma::vec g = irlAlg.ReinforceBaseGradient(dGradient);
-        arma::vec dg2 = 2.0*dGradient.t() * g;
+        double w1 = i / 100.0;
+        arma::vec w = { w1, 1.0 - w1 };
 
-        double Je = irlAlg.computeJ(dJ);
-        double D = irlAlg.computeDisparity();
-        double G = norm(g);
-        valuesG(i) = G;
-        valuesJ(i) = Je;
-        valuesD(i) = D;
-        valuesdG2.col(i) = dg2;
+        // compute gradient and hessian
+        arma::vec g = gradientCalculator->computeGradient(w);
+        arma::mat H = hessianCalculator->computeHessian(w);
+
+        // compute signed hessian
+        arma::mat V;
+        arma::vec Lambda;
+        arma::eig_sym(Lambda, V, H);
+
+        arma::mat Hs = V*arma::diagmat(arma::abs(Lambda))*V.i();
+
+        // compute J
+        valuesJ.row(i) = rvec.t()*w;
+
+        // compute gradient norm
+        valuesG.row(i) = g.t()*g;
+
+        //compute trace of the hessian
+        valuesT.row(i) = arma::trace(H);
+
+        //compute expectedDeltaIRL function
+        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H);
+
+        //compute the signed expectedDeltaIRL function
+        valuesFs.row(i) = -g.t()*Hs*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H);
+
     }
 
-    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
     valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
-    valuesD.save("/tmp/ReLe/D.txt", arma::raw_ascii);
-    valuesdG2.save("/tmp/ReLe/dG2.txt", arma::raw_ascii);
+    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
+    valuesT.save("/tmp/ReLe/T.txt", arma::raw_ascii);
+    valuesF.save("/tmp/ReLe/F.txt", arma::raw_ascii);
+    valuesFs.save("/tmp/ReLe/Fs.txt", arma::raw_ascii);
 
     return 0;
 }

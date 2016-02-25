@@ -24,6 +24,9 @@ target_link_libraries(mleH2O_test rele)
 # LinearIRL
 find_package(Boost REQUIRED COMPONENTS  program_options)
 
+add_executable(lqr_print GradientIRL/LQRPrintTest.cpp)
+target_link_libraries(lqr_print rele)
+
 add_executable(lqr_LinearIRL GradientIRL/LQRTest.cpp)
 target_link_libraries(lqr_LinearIRL rele ${Boost_LIBRARIES})
 

@@ -131,12 +131,12 @@ IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
         return new GIRL<DenseAction,DenseState>(dataset, policy, rewardf,
                                                 gamma, type);
     else if(algorithm == "PGIRL")
-    	return new PlaneGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-    	                gamma, type);
+        return new PlaneGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
+                gamma, type);
 
     else if(algorithm == "ExpectedDeltaIRL")
-    	return new ExpectedDeltaIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-    	                gamma, type);
+        return new ExpectedDeltaIRL<DenseAction,DenseState>(dataset, policy, rewardf,
+                gamma, type);
 
 
 
