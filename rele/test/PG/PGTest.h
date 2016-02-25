@@ -56,7 +56,9 @@ public:
         desc.add_options() //
         ("help, h", "produce help message") //
         ("algorithm, a", boost::program_options::value<std::string>()->default_value("r"),
-         "set the algorithm (choices: r | rb | g | gb | gsb | natg | natr | enac)") //
+         "set the algorithm (choices: r (REINFORCE) | rb (REINFORCE BASELINE) "
+         "| g (GPOMDP) | gb (GPOMDP BASELINE) | gsb (GPOMDP SINGLE BASELINE) | natg (NATURAL GPOMDP) "
+         "| natr (NATURAL REINFORCE) | enac (eNAC BASELINE))") //
         ("updates, u", boost::program_options::value<int>()->default_value(400),
          "set the number of updates") //
         ("episodes, e", boost::program_options::value<int>()->default_value(100),
@@ -64,7 +66,7 @@ public:
         ("stepLength, s", boost::program_options::value<double>()->default_value(0.01),
          "set the step length") //
         ("stepRule, r", boost::program_options::value<std::string>()->default_value("adaptive"),
-         "set the step rule");
+         "set the step rule (choices: adaptive | constant)");
     }
 
     inline gradConfig getConfig(int argc, char **argv)
