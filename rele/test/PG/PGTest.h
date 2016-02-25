@@ -35,14 +35,13 @@
 #include <iostream>
 #include <string>
 
-using namespace std;
-using namespace ReLe;
-using namespace boost::program_options;
+namespace ReLe
+{
 
 struct gradConfig
 {
-    string envName;
-    string algorithm;
+	std::string envName;
+    std::string algorithm;
     int nbRuns;
     int nbEpisodes;
     double stepLength;
@@ -56,50 +55,50 @@ public:
     {
         desc.add_options() //
         ("help, h", "produce help message") //
-        ("algorithm, a", value<string>()->default_value("r"),
+        ("algorithm, a", boost::program_options::value<std::string>()->default_value("r"),
          "set the algorithm") //
-        ("updates, u", value<int>()->default_value(400),
+        ("updates, u", boost::program_options::value<int>()->default_value(400),
          "set the number of updates") //
-        ("episodes, e", value<int>()->default_value(100),
+        ("episodes, e", boost::program_options::value<int>()->default_value(100),
          "set the number of episodes") //
-        ("stepLength, s", value<double>()->default_value(0.01),
+        ("stepLength, s", boost::program_options::value<double>()->default_value(0.01),
          "set the step length") //
-        ("stepRule, r", value<string>()->default_value("adaptive"),
+        ("stepRule, r", boost::program_options::value<std::string>()->default_value("adaptive"),
          "set the step rule");
     }
 
-    gradConfig getConfig(int argc, char **argv)
+    inline gradConfig getConfig(int argc, char **argv)
     {
         try
         {
             store(parse_command_line(argc, argv, desc), vm);
             if(vm.count("help"))
             {
-                cout << desc << endl;
+            	std::cout << desc << std::endl;
                 exit(0);
             }
             notify(vm);
         }
-        catch (error& e)
+        catch (boost::program_options::error& e)
         {
-            cout << e.what() << endl;
-            cout << desc << endl;
+        	std::cout << e.what() << std::endl;
+        	std::cout << desc << std::endl;
             exit(0);
         }
 
         if(!validate())
         {
-            cout << "ERROR: wrong parameters. Type --help to get information about parameters.\n";
+        	std::cout << "ERROR: wrong parameters. Type --help to get information about parameters.\n";
             exit(0);
         }
 
-        config.algorithm = vm["algorithm"].as<string>();
+        config.algorithm = vm["algorithm"].as<std::string>();
         config.nbRuns = vm["updates"].as<int>();
         config.nbEpisodes = vm["episodes"].as<int>();
         config.stepLength = vm["stepLength"].as<double>();
-        if(vm["stepRule"].as<string>() == "constant")
+        if(vm["stepRule"].as<std::string>() == "constant")
             config.stepRule = new ConstantStep(config.stepLength);
-        else if(vm["stepRule"].as<string>() == "adaptive")
+        else if(vm["stepRule"].as<std::string>() == "adaptive")
             config.stepRule = new AdaptiveStep(config.stepLength);
 
         return config;
@@ -111,18 +110,18 @@ private:
     gradConfig config;
 
 private:
-    bool validate()
+    inline bool validate()
     {
         if(vm["updates"].as<int>() < 1 ||
                 vm["episodes"].as<int>() < 1 ||
                 vm["stepLength"].as<double>() <= 0)
             return false;
 
-        string stepRule = vm["stepRule"].as<string>();
+        std::string stepRule = vm["stepRule"].as<std::string>();
         if(stepRule != "constant" && stepRule != "adaptive")
             return false;
 
-        string algorithm = vm["algorithm"].as<string>();
+        std::string algorithm = vm["algorithm"].as<std::string>();
         if(algorithm != "r" && algorithm != "rb" && algorithm != "g" && algorithm != "gb"
                 && algorithm != "gsb" && algorithm != "natg" && algorithm != "natr"
                 && algorithm != "enac")
@@ -181,11 +180,11 @@ public:
                 if ((updateCount >= nbUpdates*every) || (updateCount == 1))
                 {
                     int p = std::floor(100 * (updateCount/static_cast<double>(nbUpdates)));
-                    cout << "### " << p << "% ###" << endl;
-                    cout << policy.getParameters().t();
+                    std::cout << "### " << p << "% ###" << std::endl;
+                    std::cout << policy.getParameters().t();
                     core.getSettings().testEpisodeN = 1000;
                     arma::vec J = core.runBatchTest();
-                    cout << "mean score: " << J(0) << endl;
+                    std::cout << "mean score: " << J(0) << std::endl;
                     if (updateCount != 1)
                         every += bevery;
                 }
@@ -197,7 +196,7 @@ public:
 
 protected:
     gradConfig config;
-    string outputName;
+    std::string outputName;
     Environment<ActionC, StateC>& mdp;
     AbstractPolicyGradientAlgorithm<ActionC, StateC>* agent;
     DifferentiablePolicy<ActionC, StateC>& policy;
@@ -209,7 +208,7 @@ protected:
         unsigned int rewardId = 0;
         if(config.algorithm == "r")
         {
-            cout << "REINFORCEAlgorithm" << endl;
+        	std::cout << "REINFORCEAlgorithm" << std::endl;
             bool usebaseline = false;
             agent = new REINFORCEAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     *(config.stepRule), usebaseline, rewardId);
@@ -217,14 +216,14 @@ protected:
         }
         else if(config.algorithm == "g")
         {
-            cout << "GPOMDPAlgorithm" << endl;
+        	std::cout << "GPOMDPAlgorithm" << std::endl;
             agent = new GPOMDPAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     mdp.getSettings().horizon, *(config.stepRule), rewardId);
             outputName = config.envName + "_g.log";
         }
         else if(config.algorithm == "rb")
         {
-            cout << "REINFORCEAlgorithm BASELINE" << endl;
+        	std::cout << "REINFORCEAlgorithm BASELINE" << std::endl;
             bool usebaseline = true;
             agent = new REINFORCEAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     *(config.stepRule), usebaseline, rewardId);
@@ -232,7 +231,7 @@ protected:
         }
         else if(config.algorithm == "gb")
         {
-            cout << "GPOMDPAlgorithm BASELINE" << endl;
+        	std::cout << "GPOMDPAlgorithm BASELINE" << std::endl;
             agent = new GPOMDPAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     mdp.getSettings().horizon, *(config.stepRule),
                     GPOMDPAlgorithm<ActionC, StateC>::BaseLineType::MULTI,
@@ -241,7 +240,7 @@ protected:
         }
         else if(config.algorithm == "gsb")
         {
-            cout << "GPOMDPAlgorithm SINGLE BASELINE" << endl;
+        	std::cout << "GPOMDPAlgorithm SINGLE BASELINE" << std::endl;
             agent = new GPOMDPAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     mdp.getSettings().horizon, *(config.stepRule),
                     GPOMDPAlgorithm<ActionC, StateC>::BaseLineType::SINGLE,
@@ -250,7 +249,7 @@ protected:
         }
         else if(config.algorithm == "natg")
         {
-            cout << "NaturalGPOMDPAlgorithm BASELINE" << endl;
+        	std::cout << "NaturalGPOMDPAlgorithm BASELINE" << std::endl;
             bool usebaseline = true;
             agent = new NaturalGPOMDPAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     mdp.getSettings().horizon, *(config.stepRule), usebaseline, rewardId);
@@ -258,7 +257,7 @@ protected:
         }
         else if(config.algorithm == "natr")
         {
-            cout << "NaturalREINFORCEAlgorithm BASELINE" << endl;
+        	std::cout << "NaturalREINFORCEAlgorithm BASELINE" << std::endl;
             bool usebaseline = true;
             agent = new NaturalREINFORCEAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     *(config.stepRule), usebaseline, rewardId);
@@ -266,7 +265,7 @@ protected:
         }
         else if (config.algorithm == "enac")
         {
-            cout << "eNAC BASELINE" << endl;
+        	std::cout << "eNAC BASELINE" << std::endl;
             bool usebaseline = true;
             agent = new eNACAlgorithm<ActionC, StateC>(policy, nbepperpol,
                     *(config.stepRule), usebaseline, rewardId);
@@ -274,3 +273,5 @@ protected:
         }
     }
 };
+
+}
