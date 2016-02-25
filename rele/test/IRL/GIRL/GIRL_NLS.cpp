@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
 
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-    int nbEpisodes = 3000;
+    int nbEpisodes = 5000;
 
     FileManager fm("nls", "GIRL");
     fm.createDir();
