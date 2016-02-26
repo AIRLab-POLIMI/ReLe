@@ -51,13 +51,8 @@ int main(int argc, char *argv[])
     IrlGrad atype = IrlGrad::REINFORCE;
     vec eReward =
     { 0.3, 0.7 };
-    int nbEpisodes = 5000;
+    int nbEpisodes = 10000;
     int dim = eReward.n_elem;
-
-    FileManager fm("lqr", "GIRL");
-    fm.createDir();
-    fm.cleanDir();
-    std::cout << std::setprecision(OS_PRECISION);
 
     // create policy basis functions
     BasisFunctions basis = IdentityBasis::generate(dim);
@@ -118,6 +113,7 @@ int main(int argc, char *argv[])
     arma::vec valuesT(samplesParams, arma::fill::zeros);
     arma::vec valuesF(samplesParams, arma::fill::zeros);
     arma::vec valuesFs(samplesParams, arma::fill::zeros);
+    arma::mat valuesE(samplesParams, 2, arma::fill::zeros);
 
 
     // sample functions
@@ -147,10 +143,14 @@ int main(int argc, char *argv[])
         valuesT.row(i) = arma::trace(H);
 
         //compute expectedDeltaIRL function
-        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H);
+        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H)*0;
 
         //compute the signed expectedDeltaIRL function
-        valuesFs.row(i) = -g.t()*Hs*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H);
+        valuesFs.row(i) = g.t()*Hs.i()*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H)*0;
+
+        //save eigenvalues
+        valuesE(i, 0) = Lambda(0);
+        valuesE(i, 1) = Lambda(1);
 
     }
 
@@ -159,6 +159,7 @@ int main(int argc, char *argv[])
     valuesT.save("/tmp/ReLe/T.txt", arma::raw_ascii);
     valuesF.save("/tmp/ReLe/F.txt", arma::raw_ascii);
     valuesFs.save("/tmp/ReLe/Fs.txt", arma::raw_ascii);
+    valuesE.save("/tmp/ReLe/E.txt", arma::raw_ascii);
 
     return 0;
 }
