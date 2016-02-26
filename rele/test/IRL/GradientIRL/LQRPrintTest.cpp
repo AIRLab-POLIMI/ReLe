@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     LQRsolver solver(mdp, phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
-    arma::vec p = K.diag();
+    arma::vec p = K.diag()+ arma::vec({0.1, 0.3});
 
     // Create expert policy
     MVNPolicy expertPolicy(phi);
@@ -143,10 +143,10 @@ int main(int argc, char *argv[])
         valuesT.row(i) = arma::trace(H);
 
         //compute expectedDeltaIRL function
-        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H)*0;
+        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H)*1e-3;
 
         //compute the signed expectedDeltaIRL function
-        valuesFs.row(i) = g.t()*Hs.i()*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H)*0;
+        valuesFs.row(i) = g.t()*Hs.i()*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H)*1e-3;
 
         //save eigenvalues
         valuesE(i, 0) = Lambda(0);
