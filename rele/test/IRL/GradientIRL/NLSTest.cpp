@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
     double gamma = mdp.getSettings().gamma;
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
+    cout << "reward: " << arma::as_scalar(data2.getMeanReward(gamma)) << endl;
 
     ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
     data2.writeToStream(ofs2);

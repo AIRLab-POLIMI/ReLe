@@ -26,7 +26,7 @@ lastindex = 2;
 %% Plot stuff
 for i = 1:lastindex
     % plot trajectories of imitator
-    csv = csvread(['/tmp/ReLe/nls/', alg{i}, '/TrajectoriesImitator0.txt']);
+    csv = csvread(['/tmp/ReLe/nls/', alg{i}, '/TrajectoriesImitator.txt']);
     traj = readDataset(csv);
     
     figure(i)

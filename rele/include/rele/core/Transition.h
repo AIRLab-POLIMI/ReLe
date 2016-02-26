@@ -185,6 +185,32 @@ public:
         return dataset[0][0].r.size();
     }
 
+    arma::vec getMeanReward(double gamma)
+    {
+        auto& dataset = *this;
+
+        unsigned int rewardSize = getRewardSize();
+        unsigned int nTransitions = getTransitionsNumber();
+        arma::vec rewards(rewardSize, arma::fill::zeros);
+
+        unsigned int idx = 0;
+
+        for(auto& episode : dataset)
+        {
+            double df = 1.0;
+            for(auto& tr : episode)
+            {
+                for(unsigned int i = 0; i < rewardSize; i++)
+                    rewards(i) += df*tr.r[i];
+                df *= gamma;
+            }
+        }
+
+        rewards /= dataset.size();
+
+        return rewards;
+    }
+
     arma::mat rewardAsMatrix()
     {
         auto& dataset = *this;
