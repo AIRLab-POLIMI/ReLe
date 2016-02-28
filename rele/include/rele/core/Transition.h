@@ -26,6 +26,8 @@
 
 #include <vector>
 #include <fstream>
+#include <type_traits>
+#include <string>
 
 #include "rele/core/BasicFunctions.h"
 #include "rele/core/BasicsTraits.h"
@@ -185,13 +187,13 @@ public:
         return dataset[0][0].r.size();
     }
 
-    arma::vec getMeanReward(double gamma)
+    arma::mat getEpisodesReward(double gamma)
     {
         auto& dataset = *this;
 
         unsigned int rewardSize = getRewardSize();
-        unsigned int nTransitions = getTransitionsNumber();
-        arma::vec rewards(rewardSize, arma::fill::zeros);
+        unsigned int episodeN = dataset.size();
+        arma::mat rewards(rewardSize, episodeN, arma::fill::zeros);
 
         unsigned int idx = 0;
 
@@ -201,14 +203,20 @@ public:
             for(auto& tr : episode)
             {
                 for(unsigned int i = 0; i < rewardSize; i++)
-                    rewards(i) += df*tr.r[i];
+                    rewards(i, idx) += df*tr.r[i];
                 df *= gamma;
             }
+
+
+            idx++;
         }
 
-        rewards /= dataset.size();
-
         return rewards;
+    }
+
+    arma::vec getMeanReward(double gamma)
+    {
+        return arma::mean(this->getEpisodesReward(gamma), 1);
     }
 
     arma::mat rewardAsMatrix()

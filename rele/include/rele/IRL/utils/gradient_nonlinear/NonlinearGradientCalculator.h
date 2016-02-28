@@ -79,7 +79,7 @@ protected:
 
     void computeEpisodeStatistics(Episode<ActionC,StateC>& episode, double& Rew,  arma::rowvec& dRew, arma::vec& sumGradLog)
     {
-        //reste data
+        //reset data
         Rew = 0;
         dRew.zeros();
         sumGradLog.zeros();

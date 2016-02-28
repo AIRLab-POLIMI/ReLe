@@ -30,13 +30,13 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class ReinforceOffGradientCalculator
+class ReinforceOffGradientCalculator : public OffGradientCalculator<ActionC, StateC>
 {
 public:
     ReinforceOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
                                    Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
                                    double gamma)
-        : GradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
+        : OffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
 
     {
 
@@ -44,6 +44,30 @@ public:
 
     virtual arma::vec computeGradient() override
     {
+        unsigned int episodeN = this->data.size();
+        unsigned int parametersN = this->policy.getParametersSize();
+
+        double importanceWeightsSum = 0;
+
+        arma::vec gradient(parametersN, arma::fill::zeros);
+
+        //iterate episodes
+        for (int i = 0; i < episodeN; ++i)
+        {
+            double Rew;
+            double iw;
+            arma::vec sumGradLog(parametersN);
+            this->computeEpisodeStatistics(this->data[i], Rew, iw, sumGradLog);
+
+            gradient += sumGradLog * Rew * iw;
+
+            importanceWeightsSum += iw;
+        }
+
+        // Compute mean values
+        gradient /= importanceWeightsSum;
+
+        return gradient;
 
     }
 
@@ -55,13 +79,13 @@ public:
 };
 
 template<class ActionC, class StateC>
-class ReinforceBaseOffGradientCalculator
+class ReinforceBaseOffGradientCalculator : public OffGradientCalculator<ActionC, StateC>
 {
 public:
     ReinforceBaseOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
                                        Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
                                        double gamma)
-        : GradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
+        : OffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
 
     {
 
@@ -69,6 +93,51 @@ public:
 
     virtual arma::vec computeGradient() override
     {
+        int parametersN = this->policy.getParametersSize();
+        int episodeN = this->data.size();
+
+        // Reset computed results
+        arma::vec gradient(parametersN, arma::fill::zeros);
+
+        // gradient basics
+        arma::vec Rew_ep(episodeN);
+        arma::vec iw_ep(episodeN);
+        arma::mat sumGradLog_ep(parametersN, episodeN);
+
+        // baselines
+        arma::vec baseline_den(parametersN, arma::fill::zeros);
+        arma::vec baseline_num(parametersN, arma::fill::zeros);
+
+        for (int i = 0; i < episodeN; ++i)
+        {
+            // compute basic elements
+            double Rew;
+            double iw;
+            arma::vec sumGradLog(parametersN);
+            this->computeEpisodeStatistics(this->data[i], Rew, iw, sumGradLog);
+
+            // store them
+            Rew_ep(i) = Rew;
+            iw_ep(i) = iw;
+            sumGradLog_ep.col(i) = sumGradLog;
+
+            // compute baseline num and den
+            arma::vec sumGradLog2 = sumGradLog % sumGradLog;
+            baseline_den += sumGradLog2 * iw * iw;
+            baseline_num += sumGradLog2 * Rew * iw * iw;
+        }
+
+        // compute the gradients
+        arma::vec baseline = baseline_num / baseline_den;
+        baseline(arma::find_nonfinite(baseline)).zeros();
+
+        for (int ep = 0; ep < episodeN; ep++)
+        {
+            gradient += (Rew_ep(ep) - baseline) % sumGradLog_ep.col(ep) * iw_ep(ep);
+        }
+
+        // compute mean values
+        gradient /= arma::sum(iw_ep);
 
     }
 

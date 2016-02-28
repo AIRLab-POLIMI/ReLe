@@ -49,6 +49,35 @@ public:
     }
 
 protected:
+    void computeEpisodeStatistics(Episode<ActionC,StateC>& episode, double& Rew, double& importanceWeights, arma::vec& sumGradLog)
+    {
+        //reset data
+        Rew = 0;
+        sumGradLog.zeros();
+
+        double df = 1.0;
+        double targetIW = 1.0;
+        double behavoiourIW = 1.0;
+
+        //iterate the episode
+        for (int t = 0; t < episode.size(); ++t)
+        {
+            Transition<ActionC, StateC>& tr = episode[t];
+            sumGradLog += this->policy.difflog(tr.x, tr.u);
+
+            targetIW *= policy(tr.x, tr.u);
+            behavoiourIW *= behaviour(tr.x, tr.u);
+
+            Rew += df * arma::as_scalar(rewardf(tr.r));
+
+            df *= gamma;
+        }
+
+        importanceWeights = targetIW / behavoiourIW;
+
+    }
+
+protected:
     RewardTransformation& rewardf;
     Dataset<ActionC,StateC>& data;
     Policy<ActionC,StateC>& behaviour;
