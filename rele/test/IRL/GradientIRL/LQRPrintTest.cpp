@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::REINFORCE;
+    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     vec eReward =
     { 0.3, 0.7 };
     int nbEpisodes = 10000;
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     LQRsolver solver(mdp, phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
-    arma::vec p = K.diag()+ arma::vec({0.1, 0.3});
+    arma::vec p = K.diag();
 
     // Create expert policy
     MVNPolicy expertPolicy(phi);
@@ -133,6 +133,11 @@ int main(int argc, char *argv[])
 
         arma::mat Hs = V*arma::diagmat(arma::abs(Lambda))*V.i();
 
+        //compute the sigma matrix
+        double eps = 0.0;
+        arma::mat Sigma = arma::eye(2, 2)*eps;
+
+
         // compute J
         valuesJ.row(i) = rvec.t()*w;
 
@@ -143,10 +148,10 @@ int main(int argc, char *argv[])
         valuesT.row(i) = arma::trace(H);
 
         //compute expectedDeltaIRL function
-        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H)*1e-3;
+        valuesF.row(i) = -0.5*g.t()*H.i()*g+0.5*arma::trace(H*Sigma);
 
         //compute the signed expectedDeltaIRL function
-        valuesFs.row(i) = g.t()*Hs.i()*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H)*1e-3;
+        valuesFs.row(i) = g.t()*Hs.i()*g + 0.5*g.t()*H.i()*g + 0.5*arma::trace(H*Sigma);
 
         //save eigenvalues
         valuesE(i, 0) = Lambda(0);
@@ -154,12 +159,17 @@ int main(int argc, char *argv[])
 
     }
 
+    std::cout << "Saving results" << std::endl;
+
     valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
     valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
     valuesT.save("/tmp/ReLe/T.txt", arma::raw_ascii);
     valuesF.save("/tmp/ReLe/F.txt", arma::raw_ascii);
     valuesFs.save("/tmp/ReLe/Fs.txt", arma::raw_ascii);
     valuesE.save("/tmp/ReLe/E.txt", arma::raw_ascii);
+
+    std::cout << "Work complete" << std::endl;
+
 
     return 0;
 }

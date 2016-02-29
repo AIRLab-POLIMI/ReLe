@@ -13,32 +13,27 @@ load([path, 'T.txt'] ,'ascii')
 load([path, 'J.txt'] ,'ascii')
 load([path, 'E.txt'] ,'ascii')
 
-%% Find optimal values
-[minF, indF] = min(F);
-[minFs, indFs] = min(Fs);
-[minG, indG] = min(G);
-
 
 %% plot data
 figure(1)
 subplot(2,3,1)
 hold on
 plot(F)
-plot(indF, minF, 'dm')
+plot(min(F), 'dm')
 title('ExpectedDelta')
 axis tight
 
 subplot(2,3,2)
 hold on
 plot(Fs)
-plot(indFs, minFs, 'dm')
+plot(min(Fs), 'dm')
 title('SignedExpectedDelta')
 axis tight
 
 subplot(2,3,3)
 hold on
 plot(G)
-plot(indG, minG, 'dm')
+plot(min(G), 'dm')
 title('GradientNorm')
 axis tight
 
@@ -59,7 +54,5 @@ plot(E(:, 2))
 title('Eigenvalues of Hessian')
 axis tight
 
-disp(indF)
-disp(indFs)
-disp(indG)
+disp(min(F))
 
