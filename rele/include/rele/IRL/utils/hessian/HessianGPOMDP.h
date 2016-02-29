@@ -40,7 +40,15 @@ public:
                   DifferentiablePolicy<ActionC,StateC>& policy,
                   double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
+    	for(auto& episode : data)
+    	{
 
+    		for(auto& tr : episode)
+    		{
+
+    		}
+
+    	}
     }
 
     virtual ~HessianGPOMDP()

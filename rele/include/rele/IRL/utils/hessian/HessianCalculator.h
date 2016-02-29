@@ -72,28 +72,22 @@ public:
 protected:
     virtual arma::cube computeHessianDiff() = 0;
 
-
-    arma::mat computeLocalG(Transition<ActionC,StateC>& tr)
-    {
-        arma::vec logDiff = policy.difflog(tr.x, tr.u);
-        arma::mat logDiff2 = policy.diff2log(tr.x, tr.u);
-        return logDiff2 + logDiff*logDiff.t();
-    }
-
     arma::mat computeG(Episode<ActionC,StateC>& episode)
     {
         int dp  = policy.getParametersSize();
         int nbSteps = episode.size();
-        arma::mat G(dp, dp, arma::fill::zeros);
+        arma::vec logDiff(dp, arma::fill::zeros);
+        arma::mat logDiff2(dp, dp, arma::fill::zeros);
 
         //iterate the episode
         for (int t = 0; t < nbSteps; ++t)
         {
             Transition<ActionC, StateC>& tr = episode[t];
-            G += computeLocalG(tr);
+            logDiff += policy.difflog(tr.x, tr.u);
+            logDiff2 += policy.diff2log(tr.x, tr.u);
         }
 
-        return G;
+        return logDiff*logDiff.t()+logDiff2;
     }
 
 private:

@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     vec eReward =
     { 0.3, 0.7 };
-    int nbEpisodes = 500000;
+    int nbEpisodes = 10000;
     int dim = eReward.n_elem;
 
     // create policy basis functions
