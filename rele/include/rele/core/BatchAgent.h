@@ -33,7 +33,7 @@ template<class ActionC, class StateC>
 class BatchAgent
 {
 public:
-    BatchAgent(double gamma) :
+	BatchAgent(double gamma) :
         gamma(gamma),
         converged(false)
     {
@@ -47,7 +47,7 @@ public:
         return nullptr;
     }
 
-    virtual bool isConverged()
+    virtual bool hasConverged()
     {
         return converged;
     }

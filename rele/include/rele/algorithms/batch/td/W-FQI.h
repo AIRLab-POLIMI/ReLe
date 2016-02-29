@@ -139,6 +139,8 @@ public:
         BatchDataSimple featureDataset(this->features, outputs);
         this->QRegressor.trainFeatures(featureDataset);
 
+        updateMeanAndSampleStdQ();
+
         this->firstStep = false;
 
         this->checkCond();
