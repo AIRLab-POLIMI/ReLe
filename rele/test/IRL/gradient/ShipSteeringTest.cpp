@@ -21,32 +21,35 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "rele/approximators/features/SparseFeatures.h"
 #include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/GaussianRbf.h"
 
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
 
-#include "rele/environments/NLS.h"
+#include "rele/environments/ShipSteering.h"
 
+#include "../gradient/GradientIRLCommandLineParser.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
 #include "rele/IRL/ParametricRewardMDP.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
-
 #include "rele/IRL/algorithms/GIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
-#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
+
+#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
 
 #include "rele/utils/FileManager.h"
-
-#include "GradientIRLCommandLineParser.h"
 
 
 using namespace std;
 using namespace arma;
 using namespace ReLe;
+
+//#define PRINT
+#define RUN_GIRL
+#define RECOVER
 
 
 int main(int argc, char *argv[])
@@ -66,54 +69,72 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
+    //Learning parameters
+    int episodesPerPolicy = 1;
+    int policyPerUpdate = 100;
+    int updates = 400;
+    int episodes = episodesPerPolicy*policyPerUpdate*updates;
+    int testEpisodes = 100;
+    AdaptiveStep stepRule(0.01);
 
-    NLS mdp;
+    //Empty strategy
+    EmptyStrategy<DenseAction, DenseState> empty;
 
-    //Setup expert policy
+    // Learn Ship correct policy
+    ShipSteering mdp;
+
     int dim = mdp.getSettings().continuosStateDim;
 
-    BasisFunctions basis = IdentityBasis::generate(dim);
+    BasisFunctions basis = GaussianRbf::generate(
+    {
+        3,
+        3,
+        6,
+        2
+    },
+    {
+        0.0, 150.0,
+        0.0, 150.0,
+        -M_PI, M_PI,
+        -15.0, 15.0
+    });
+
     DenseFeatures phi(basis);
 
-    BasisFunctions stdBasis = PolynomialFunction::generate(1, dim);
-    DenseFeatures stdPhi(stdBasis);
-    arma::vec stdWeights(stdPhi.rows());
-    stdWeights.fill(0.1);
+    double epsilon = 0.05;
+    NormalPolicy expertPolicy(epsilon, phi);
 
-    NormalStateDependantStddevPolicy expertPolicy(phi, stdPhi, stdWeights);
+    // Solve the problem with REINFORCE
+    REINFORCEAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate, stepRule);
 
-    arma::vec p(2);
-    p(0) = 6.5178;
-    p(1) = -2.5994;
+    Core<DenseAction, DenseState> expertCore(mdp, expert);
+    expertCore.getSettings().loggerStrategy = &empty;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    expertCore.getSettings().episodeN = episodes;
+    expertCore.getSettings().testEpisodeN = testEpisodes;
+    expertCore.runEpisodes();
 
-    expertPolicy.setParameters(p);
-
-    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
     // Generate expert dataset
-    Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
-    expertCore.getSettings().testEpisodeN = nbEpisodes;
     expertCore.runTestEpisodes();
     Dataset<DenseAction,DenseState>& data = collection.data;
 
 
     // Create parametric reward
-    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-2, 2, -2, 2});
+    BasisFunctions basisReward = GaussianRbf::generate({20, 20}, {0, 150, 0, 150});
     DenseFeatures phiReward(basisReward);
+
     LinearApproximator rewardRegressor(phiReward);
 
     //Info print
-    std::cout << "Reward Basis size: " << phiReward.rows() << std::endl;
-    std::cout << "Policy Params size: " << expertPolicy.getParametersSize() << std::endl;
-    std::cout << "Policy Params: " << expertPolicy.getParameters().t();
+    std::cout << "Basis size: " << phiReward.rows();
+    std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
     std::cout << "Features Expectation " << data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).t();
 
     ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
     data.writeToStream(ofs);
-
 
     //Run algorithm
     IRLAlgorithm<DenseAction,DenseState>* irlAlg = buildIRLalg(data, expertPolicy, rewardRegressor,
@@ -127,19 +148,12 @@ int main(int argc, char *argv[])
     rewardRegressor.setParameters(weights);
 
     //Try to recover the initial policy
-    int episodesPerPolicy = 1;
-    int policyPerUpdate = 100;
-    int updates = 400;
-    int episodes = episodesPerPolicy*policyPerUpdate*updates;
-
-    NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
-    AdaptiveStep stepRule(0.01);
+    NormalPolicy imitatorPolicy(epsilon, phi);
     int nparams = phi.rows();
     arma::vec mean(nparams, fill::zeros);
 
     imitatorPolicy.setParameters(mean);
-    GPOMDPAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate,
-            mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
+    REINFORCEAlgorithm<DenseAction, DenseState> imitator(imitatorPolicy, policyPerUpdate, stepRule);
 
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
     Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
@@ -168,18 +182,12 @@ int main(int argc, char *argv[])
 
     double gamma = mdp.getSettings().gamma;
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-    cout << "reward: " << arma::as_scalar(data2.getMeanReward(gamma)) << endl;
+    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
 
     ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
     data2.writeToStream(ofs2);
 
-
     // Save Reward Function
     weights.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
-
     return 0;
 }
-
-
-
-

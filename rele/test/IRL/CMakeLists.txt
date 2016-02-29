@@ -21,20 +21,26 @@ target_link_libraries(ship_EMIRL rele)
 add_executable(mleH2O_test SmartH2O/mleH2OTest.cpp)
 target_link_libraries(mleH2O_test rele)
 
-# LinearIRL
+# gradient
 find_package(Boost REQUIRED COMPONENTS  program_options)
 
-add_executable(lqr_print GradientIRL/LQRPrintTest.cpp)
+add_executable(lqr_print gradient/LQRPrintTest.cpp)
 target_link_libraries(lqr_print rele)
 
-add_executable(lqr_LinearIRL GradientIRL/LQRTest.cpp)
+add_executable(lqr_LinearIRL gradient/LQRTest.cpp)
 target_link_libraries(lqr_LinearIRL rele ${Boost_LIBRARIES})
 
-add_executable(nls_LinearIRL GradientIRL/NLSTest.cpp)
+add_executable(nls_LinearIRL gradient/NLSTest.cpp)
 target_link_libraries(nls_LinearIRL rele ${Boost_LIBRARIES})
 
-add_executable(gaussian_LinearIRL GradientIRL/GaussianTest.cpp)
+add_executable(gaussian_LinearIRL gradient/GaussianTest.cpp)
 target_link_libraries(gaussian_LinearIRL rele ${Boost_LIBRARIES})
 
-add_executable(ship_LinearIRL GradientIRL/ShipSteeringTest.cpp)
+add_executable(ship_LinearIRL gradient/ShipSteeringTest.cpp)
 target_link_libraries(ship_LinearIRL rele ${Boost_LIBRARIES})
+
+add_executable(gradientIRL_test gradient/GradientIRLTest.cpp)
+target_link_libraries(gradientIRL_test rele)
+
+add_executable(hessianIRL_test gradient/HessianIRLTest.cpp)
+target_link_libraries(hessianIRL_test rele)

@@ -40,15 +40,7 @@ public:
                   DifferentiablePolicy<ActionC,StateC>& policy,
                   double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
-    	for(auto& episode : data)
-    	{
 
-    		for(auto& tr : episode)
-    		{
-
-    		}
-
-    	}
     }
 
     virtual ~HessianGPOMDP()
@@ -59,8 +51,38 @@ public:
 protected:
     virtual arma::cube computeHessianDiff() override
     {
-        //TODO implement
-        return arma::cube();
+        unsigned int dp = policy.getParametersSize();
+        unsigned int dr = phi.rows();
+        unsigned int episodeN = data.size();
+
+        arma::cube Hdiff(dp, dp, phi.rows(), arma::fill::zeros);
+
+        for(auto& episode : data)
+        {
+            //core setup
+            arma::vec sumGradLog(dp, arma::fill::zeros);
+            arma::mat sumHessLog(dp, dp, arma::fill::zeros);
+            double df = 1.0;
+
+            for(auto& tr : episode)
+            {
+                sumGradLog += policy.difflog(tr.x, tr.u);
+                arma::vec creward = phi(tr.x, tr.u, tr.xn);
+
+                arma::mat G = sumGradLog*sumGradLog.t() + sumHessLog;
+
+                // compute the gradients
+                for(unsigned int r = 0; r < dr; r++)
+                    Hdiff.slice(r) += df * G * creward(r);
+
+                df *= gamma;
+            }
+
+        }
+
+        Hdiff /= episodeN;
+
+        return Hdiff;
     }
 
 

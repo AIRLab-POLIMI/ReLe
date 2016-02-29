@@ -21,22 +21,21 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_
-#define INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_
+#ifndef INCLUDE_RELE_IRL_UTILS_NONLINEARHESSIANCALCULATOR_H_
+#define INCLUDE_RELE_IRL_UTILS_NONLINEARHESSIANCALCULATOR_H_
 
-#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/Regressors.h"
 #include "rele/policy/Policy.h"
 #include "rele/core/Transition.h"
 
 namespace ReLe
 {
 
-//TODO implement
 template<class ActionC, class StateC>
 class NonlinearHessianCalculator
 {
 public:
-    NonlinearHessianCalculator(Regressor& rewardFunc,
+    NonlinearHessianCalculator(ParametricRegressor& rewardFunc,
                                Dataset<ActionC, StateC>& data,
                                DifferentiablePolicy<ActionC, StateC>& policy, double gamma) :
         rewardFunc(rewardFunc), data(data), policy(policy), gamma(gamma)
@@ -44,29 +43,7 @@ public:
 
     }
 
-    virtual void compute(bool computeDerivative = true)
-    {
-        unsigned int dp = policy.getParametersSize();
-        H.zeros(dp, dp);
-
-        for (unsigned int ep = 0; ep < data.getEpisodesNumber(); ep++)
-        {
-            Episode<ActionC, StateC>& episode = data[ep];
-            double df = 1.0;
-
-            for (unsigned int t = 0; t < episode.size(); t++)
-            {
-                Transition<ActionC, StateC>& tr = episode[t];
-                arma::mat K = computeK(policy, tr);
-
-                double r = rewardFunc(tr.x, tr.u, tr.xn);
-
-                H += df*K*r;
-
-                df *= gamma;
-            }
-        }
-    }
+    virtual void compute() = 0;
 
     arma::mat getHessian()
     {
@@ -83,18 +60,8 @@ public:
 
     }
 
-private:
-    //TODO in common class
-    arma::mat computeK(DifferentiablePolicy<ActionC, StateC>& policy,
-                       Transition<ActionC, StateC>& tr)
-    {
-        arma::vec logDiff = policy.difflog(tr.x, tr.xn);
-        arma::mat logDiff2 = policy.diff2log(tr.x, tr.xn);
-        return logDiff2 + logDiff * logDiff.t();
-    }
-
-private:
-    Regressor& rewardFunc;
+protected:
+    ParametricRegressor& rewardFunc;
     Dataset<ActionC, StateC>& data;
     DifferentiablePolicy<ActionC, StateC>& policy;
     double gamma;
@@ -106,4 +73,4 @@ private:
 
 }
 
-#endif /* INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_ */
+#endif /* INCLUDE_RELE_IRL_UTILS_NONLINEARHESSIANCALCULATOR_H_ */

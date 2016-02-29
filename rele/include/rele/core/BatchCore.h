@@ -126,7 +126,7 @@ public:
 
 public:
     BatchCore(Environment<ActionC, StateC>& mdp,
-    		  BatchAgent<ActionC, StateC>& batchAgent) :
+              BatchAgent<ActionC, StateC>& batchAgent) :
         mdp(mdp),
         batchAgent(batchAgent)
     {
@@ -139,7 +139,7 @@ public:
 
     void run(Policy<ActionC, StateC>& policy)
     {
-    	PolicyEvalAgent<ActionC, StateC> agent(policy);
+        PolicyEvalAgent<ActionC, StateC> agent(policy);
 
         auto&& core = buildCore(mdp, agent);
 

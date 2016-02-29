@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
+    IrlGrad atype = IrlGrad::GPOMDP;
     vec eReward =
     { 0.3, 0.7 };
     int nbEpisodes = 10000;
@@ -182,8 +182,8 @@ int main(int argc, char *argv[])
     valuesFs.save("/tmp/ReLe/Fs.txt", arma::raw_ascii);
     valuesE.save("/tmp/ReLe/E.txt", arma::raw_ascii);
 
-    /*std::ofstream ofs("/tmp/ReLe/Trajectories.txt");
-    data.writeToStream(ofs);*/
+    std::ofstream ofs("/tmp/ReLe/Trajectories.txt");
+    data.writeToStream(ofs);
 
     std::cout << "Work complete" << std::endl;
 

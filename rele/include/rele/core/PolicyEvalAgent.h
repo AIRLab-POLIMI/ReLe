@@ -64,17 +64,17 @@ public:
 
     void step(const Reward &reward, const StateC &nextState, ActionC &action) override
     {
-    	throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
+        throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
     void endEpisode(const Reward& reward) override
     {
-    	throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
+        throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
     void endEpisode() override
     {
-    	throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
+        throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
 private:

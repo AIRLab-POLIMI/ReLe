@@ -65,7 +65,6 @@ protected:
 
             for(unsigned int f = 0; f < phi.rows(); f++)
                 Hdiff.slice(f) += G*Rew(f, ep);
-
         }
 
         Hdiff /= episodeN;

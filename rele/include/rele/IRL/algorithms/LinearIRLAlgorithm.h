@@ -24,6 +24,8 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_LINEARIRLALGORITHM_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_LINEARIRLALGORITHM_H_
 
+#include "rele/core/Transition.h"
+
 #include "rele/IRL/IRLAlgorithm.h"
 #include "rele/IRL/optimization/Optimization.h"
 #include "rele/IRL/optimization/Simplex.h"

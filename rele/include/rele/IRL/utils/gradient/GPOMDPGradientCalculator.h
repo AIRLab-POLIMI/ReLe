@@ -55,23 +55,19 @@ protected:
     {
         unsigned int dp  = policy.getParametersSize();
         unsigned int dr = phi.rows();
+        int nbEpisodes = data.size();
 
         arma::mat gradient(dp, dr, arma::fill::zeros);
 
-        int nbEpisodes = data.size();
-        for (int i = 0; i < nbEpisodes; ++i)
+        for (auto& episode : data)
         {
             //core setup
-            int nbSteps = data[i].size();
-
             arma::vec sumGradLog(dp, arma::fill::zeros);
             double df = 1.0;
 
             //iterate the episode
-            for (int t = 0; t < nbSteps; ++t)
+            for (auto& tr : episode)
             {
-                Transition<ActionC, StateC>& tr = data[i][t];
-
                 sumGradLog += policy.difflog(tr.x, tr.u);
                 arma::vec creward = phi(tr.x, tr.u, tr.xn);
 
