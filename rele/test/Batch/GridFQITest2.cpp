@@ -59,12 +59,6 @@ int main(int argc, char *argv[])
     unsigned int nActions = mdp.getSettings().finiteActionDim;
     unsigned int nStates = mdp.getSettings().finiteStateDim;
 
-    e_Greedy policy;
-    policy.setEpsilon(0.25);
-    policy.setNactions(nActions);
-
-    Q_Learning agent(policy);
-
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(2);
 
@@ -80,7 +74,7 @@ int main(int argc, char *argv[])
 
     W_FQI<FiniteState> batchAgent(QRegressor, nStates, nActions, 0.9, 1e-8);
 
-    auto&& core = buildBatchCore(mdp, agent, batchAgent);
+    auto&& core = buildBatchCore(mdp, batchAgent);
 
     core.getSettings().envName = "gw";
     core.getSettings().algName = "fqi";
@@ -89,7 +83,10 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 
-    core.run();
+    e_Greedy policy;
+    policy.setNactions(nActions);
+
+    core.run(policy);
 
     return 0;
 }

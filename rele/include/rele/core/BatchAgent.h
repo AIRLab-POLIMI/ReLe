@@ -33,7 +33,7 @@ template<class ActionC, class StateC>
 class BatchAgent
 {
 public:
-    BatchAgent(double gamma) :
+	BatchAgent(double gamma) :
         gamma(gamma),
         converged(false)
     {
@@ -41,7 +41,6 @@ public:
 
     virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
     virtual void step() = 0;
-    //virtual const Policy<ActionC, StateC>& getPolicy() = 0;
 
     virtual AgentOutputData* getAgentOutputData()
     {

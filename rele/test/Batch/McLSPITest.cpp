@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     lspiPolicy.setNactions(actions.size());
     LSPI<FiniteAction> batchAgent(dataLSPI, lspiPolicy, qphi, 0.9, 0.01);
 
-    auto&& core = BatchCore<FiniteAction, DenseState>::buildBatchOnlyCore(dataLSPI, batchAgent);
+    auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
 
     core.getSettings().envName = envName;
     core.getSettings().algName = algName;
