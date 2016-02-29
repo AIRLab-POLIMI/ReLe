@@ -24,7 +24,11 @@
 #ifndef INCLUDE_RELE_CORE_BATCHCORE_H_
 #define INCLUDE_RELE_CORE_BATCHCORE_H_
 
+#include "rele/core/Core.h"
 #include "rele/core/BatchAgent.h"
+#include "rele/utils/FileManager.h"
+
+#include <iostream>
 
 namespace ReLe
 {
@@ -32,64 +36,170 @@ namespace ReLe
 template<class ActionC, class StateC>
 class BatchCore
 {
-public:
-    struct CoreSettings
+    class BatchOnlyCore
     {
-        CoreSettings()
+    public:
+        struct BatchOnlyCoreSettings
         {
-            loggerStrategy = nullptr;
-            maxIterations = 1;
+            BatchOnlyCoreSettings()
+            {
+                loggerStrategy = nullptr;
+                envName = "env";
+                algName = "alg";
+                maxBatchIterations = 1;
+            }
+
+            LoggerStrategy<ActionC, StateC>* loggerStrategy;
+            std::string envName;
+            std::string algName;
+            unsigned int maxBatchIterations;
+        };
+
+    public:
+        BatchOnlyCore(Dataset<ActionC, StateC> data,
+                      BatchAgent<ActionC, StateC>& batchAgent) :
+            data(data),
+            batchAgent(batchAgent)
+        {
         }
 
-        LoggerStrategy<ActionC, StateC>* loggerStrategy;
-        unsigned int maxIterations;
+        BatchOnlyCoreSettings& getSettings()
+        {
+            return settings;
+        }
+
+        void run()
+        {
+            //core setup
+            Logger<ActionC, StateC> logger;
+
+            logger.setStrategy(settings.loggerStrategy);
+
+            //Start episode
+            batchAgent.init(data);
+
+            for(unsigned int i = 0;
+                    i < settings.maxBatchIterations
+                    && !batchAgent.hasConverged(); i++)
+            {
+                batchAgent.step();
+                logger.log(batchAgent.getAgentOutputData(), i);
+            }
+
+            //logger.log(agent.getAgentOutputDataEnd(), settings.maxIterations);
+            //logger.printStatistics();
+        }
+
+    protected:
+        Dataset<ActionC, StateC> data;
+        BatchAgent<ActionC, StateC>& batchAgent;
+        BatchOnlyCoreSettings settings;
     };
 
 public:
-    BatchCore(Dataset<ActionC, StateC>& data, BatchAgent<ActionC, StateC>& agent) :
-        data(data),
-        agent(agent)
+    struct BatchCoreSettings
+    {
+        BatchCoreSettings()
+        {
+            loggerStrategy = nullptr;
+            nTransitions = 100;
+            episodeLength = 100;
+            nEpisodes = 100;
+            envName = "env";
+            algName = "alg";
+            datafileName = "dataset.csv";
+            maxBatchIterations = 1;
+        }
+
+        LoggerStrategy<ActionC, StateC>* loggerStrategy;
+        std::string envName;
+        std::string algName;
+        std::string datafileName;
+        unsigned int nTransitions;
+        unsigned int episodeLength;
+        unsigned int nEpisodes;
+        unsigned int maxBatchIterations;
+    };
+
+public:
+    BatchCore(Environment<ActionC, StateC>& mdp,
+              Agent<ActionC, StateC>& agent,
+              BatchAgent<ActionC, StateC>& batchAgent) :
+        mdp(mdp),
+        agent(agent),
+        batchAgent(batchAgent)
     {
     }
 
-    CoreSettings& getSettings()
+    BatchCoreSettings& getSettings()
     {
         return settings;
     }
 
     void run()
     {
-        //core setup
-        Logger<ActionC, StateC> logger;
+        // TODO: get policy from batchAgent to copy into agent
 
-        logger.setStrategy(settings.loggerStrategy);
+        runMDP();
+    }
 
-        //Start episode
-        agent.init(data);
-
-        for(unsigned int i = 0;
-                i < settings.maxIterations
-                && !agent.isConverged(); i++)
-        {
-            agent.step();
-            logger.log(agent.getAgentOutputData(), i);
-        }
-
-        //logger.log(agent.getAgentOutputDataEnd(), settings.maxIterations);
-        //logger.printStatistics();
+    static BatchOnlyCore buildBatchOnlyCore(
+        Dataset<ActionC, StateC> data,
+        BatchAgent<ActionC, StateC>& batchAgent)
+    {
+        return BatchOnlyCore(data, batchAgent);
     }
 
 protected:
-    Dataset<ActionC, StateC>& data;
-    BatchAgent<ActionC, StateC>& agent;
-    CoreSettings settings;
+    Environment<ActionC, StateC>& mdp;
+    Agent<ActionC, StateC>& agent;
+    BatchAgent<ActionC, StateC>& batchAgent;
+    BatchCoreSettings settings;
+
+protected:
+    void runMDP()
+    {
+        auto&& core = buildCore(mdp, agent);
+
+        CollectorStrategy<ActionC, StateC> collection;
+        core.getSettings().loggerStrategy = &collection;
+
+        core.getSettings().episodeLength = settings.nTransitions;
+        core.getSettings().episodeN = settings.nEpisodes;
+
+        core.runEpisodes();
+
+        Dataset<ActionC, StateC> data = collection.data;
+
+        FileManager fm(settings.envName, settings.algName);
+        fm.createDir();
+        fm.cleanDir();
+        std::ofstream out(fm.addPath(settings.datafileName), std::ios_base::out);
+        out << std::setprecision(OS_PRECISION);
+        if(out.is_open())
+            data.writeToStream(out);
+        out.close();
+
+        std::cout << std::endl << "# Ended data collection and save" << std::endl << std::endl;
+
+        auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
+
+        batchCore.getSettings().loggerStrategy = settings.loggerStrategy;
+        batchCore.getSettings().envName = settings.envName;
+        batchCore.getSettings().algName = settings.algName;
+        batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
+
+        batchCore.run();
+    }
 };
 
 template<class ActionC, class StateC>
-BatchCore<ActionC, StateC> buildCore(Dataset<ActionC, StateC>& data,
-                                     BatchAgent<ActionC, StateC>& agent)
+BatchCore<ActionC, StateC> buildBatchCore(
+    Environment<ActionC, StateC>& mdp,
+    Agent<ActionC, StateC>& agent,
+    BatchAgent<ActionC, StateC>& batchAgent)
 {
-    return BatchCore<ActionC, StateC>(data, agent);
+    return BatchCore<ActionC, StateC>(mdp, agent, batchAgent);
 }
 
 }

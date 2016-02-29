@@ -32,7 +32,6 @@
 #include "rele/algorithms/batch/td/W-FQI.h"
 #include "rele/algorithms/td/Q-Learning.h"
 #include "rele/approximators/features/DenseFeatures.h"
-#include "rele/utils/FileManager.h"
 #include "rele/core/FiniteMDP.h"
 #include "rele/generators/GridWorldGenerator.h"
 #include "rele/approximators/regressors/nn/FFNeuralNetwork.h"
@@ -52,111 +51,43 @@ using namespace arma;
 // This simple test is used to verify the correctness of the FQI implementation
 int main(int argc, char *argv[])
 {
-    bool acquireData = true;
-
-    FileManager fm("gw", "FQI");
-    fm.createDir();
-    fm.cleanDir();
-
-    // A grid world is generated
     GridWorldGenerator generator;
     generator.load(argv[1]);
 
-    // The MDP w.r.t. the generated grid world is extracted
     FiniteMDP&& mdp = generator.getMDP(1.0);
 
     unsigned int nActions = mdp.getSettings().finiteActionDim;
     unsigned int nStates = mdp.getSettings().finiteStateDim;
 
-    /* Decide whether to acquire data with a policy, or to use already
-     * collected ones.
-     */
-    Dataset<FiniteAction, FiniteState> data;
-    if(acquireData)
-    {
-        // Policy declaration
-        e_Greedy policy;
-        policy.setEpsilon(0.25);
-        policy.setNactions(nActions);
+    e_Greedy policy;
+    policy.setEpsilon(0.25);
+    policy.setNactions(nActions);
 
-        // The agent is instantiated. It takes the policy as parameter.
-        Q_Learning expert(policy);
+    Q_Learning agent(policy);
 
-        /* The Core class is what ReLe uses to move the agent in the MDP. It is
-         *  instantiated using the MDP and the agent itself.
-         */
-        auto&& expertCore = buildCore(mdp, expert);
-
-        /* The CollectorStrategy is used to collect data from the agent that is
-         * moving in the MDP. Here, it is used to store the transition that are used
-         * as the inputs of the dataset provided to FQI.
-         */
-        CollectorStrategy<FiniteAction, FiniteState> collection;
-        expertCore.getSettings().loggerStrategy = &collection;
-
-        // Number of transitions in an episode
-        unsigned int nTransitions = 1000;
-        expertCore.getSettings().episodeLength = nTransitions;
-        // Number of episodes
-        unsigned int nEpisodes = 100;
-        expertCore.getSettings().episodeN = nEpisodes;
-
-        /* The agent start the exploration that will last for the provided number of
-         *  episodes.
-         */
-        expertCore.runEpisodes();
-
-        // The dataset is build from the data collected by the CollectorStrategy.
-        data = collection.data;
-
-        // Dataset is written into a file
-        ofstream out(fm.addPath("dataset.csv"), ios_base::out);
-        out << std::setprecision(OS_PRECISION);
-        if(out.is_open())
-            data.writeToStream(out);
-        out.close();
-
-        cout << endl << "# Ended data collection and save" << endl << endl;
-    }
-    else
-    {
-        // Dataset is loaded from a file
-        ifstream in(fm.addPath("dataset.csv"), ios_base::in);
-        in >> std::setprecision(OS_PRECISION);
-        if(in.is_open())
-            data.readFromStream(in);
-        in.close();
-    }
-
-    /* The basis functions for the features of the regressor are created here.
-     * IdentityBasis functions are features that simply replicate the input. We can use
-     * Manhattan distance from s' to goal as feature of the input vector (state, action).
-     */
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(2);
 
-    // The feature vector is build using the chosen basis functions
     DenseFeatures phi(bfs);
 
-    // ******* FQI *******
-
-    // Neural Network
     //FFNeuralNetwork QRegressor(phi, 50, 1);
     //QRegressor.getHyperParameters().lambda = 0.0005;
     //QRegressor.getHyperParameters().maxIterations = 10;
 
-    // Tree
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     KDTree<arma::vec, arma::vec> QRegressor(phi, defaultNode, 1, 1);
 
-    W_FQI<FiniteState> fqi(QRegressor, nStates, nActions, 0.9, 1e-8);
+    W_FQI<FiniteState> batchAgent(QRegressor, nStates, nActions, 0.9, 1e-8);
 
-    auto&& core = buildCore(data, fqi);
+    auto&& core = buildBatchCore(mdp, agent, batchAgent);
 
-    cout << "Starting FQI..." << endl;
-
-    core.getSettings().maxIterations = 5;
+    core.getSettings().envName = "gw";
+    core.getSettings().algName = "fqi";
+    core.getSettings().nEpisodes = 100;
+    core.getSettings().nTransitions = 1000;
+    core.getSettings().episodeLength = 100;
+    core.getSettings().maxBatchIterations = 100;
 
     core.run();
 

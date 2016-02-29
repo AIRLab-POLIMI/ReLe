@@ -56,7 +56,7 @@ public:
             return new GPOMDPOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
         case GPOMDP_BASELINE_SINGLE:
-        	return new GPOMDPSingleBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
+            return new GPOMDPSingleBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
         case GPOMDP_BASELINE_MULTY:
             return new GPOMDPMultyBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);

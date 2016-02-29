@@ -41,13 +41,14 @@ public:
 
     virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
     virtual void step() = 0;
+    //virtual const Policy<ActionC, StateC>& getPolicy() = 0;
 
     virtual AgentOutputData* getAgentOutputData()
     {
         return nullptr;
     }
 
-    virtual bool isConverged()
+    virtual bool hasConverged()
     {
         return converged;
     }

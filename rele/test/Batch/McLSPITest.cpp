@@ -115,12 +115,6 @@ protected:
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("mc", "LSPI");
-    fm.createDir();
-    fm.cleanDir();
-    std::cout << std::setprecision(OS_PRECISION);
-
-
     vector<FiniteAction> actions;
     for (int i = 0; i < 3; ++i)
         actions.push_back(FiniteAction(i));
@@ -155,13 +149,17 @@ int main(int argc, char *argv[])
     // dd.save(fm.addPath("cbasis.dat"), arma::raw_ascii);
     // return 1;
 
-    /*** save data ***/
+    string envName = "mc";
+    string algName = "lspi";
+    FileManager fm(envName, algName);
+
+    /*** load data ***/
     ifstream is(fm.addPath("mc_lspi_data.dat"));
-    Dataset<FiniteAction,DenseState> dataLSPI;
+    Dataset<FiniteAction, DenseState> dataLSPI;
     dataLSPI.readFromStream(is);
     is.close();
 
-    ofstream of(fm.addPath("daaa.log"));
+    ofstream of(fm.addPath("data.log"));
     of << std::setprecision(OS_PRECISION);
     for (auto ep : dataLSPI)
     {
@@ -177,16 +175,15 @@ int main(int argc, char *argv[])
     e_GreedyApproximate lspiPolicy;
     lspiPolicy.setEpsilon(-0.0);
     lspiPolicy.setNactions(actions.size());
-    LSPI<FiniteAction> lspi(dataLSPI, lspiPolicy, qphi, 0.9, 0.01);
+    LSPI<FiniteAction> batchAgent(dataLSPI, lspiPolicy, qphi, 0.9, 0.01);
 
-    auto&& core = buildCore(dataLSPI, lspi);
+    auto&& core = BatchCore<FiniteAction, DenseState>::buildBatchOnlyCore(dataLSPI, batchAgent);
 
-    cout << "Starting FQI..." << endl;
-
-    core.getSettings().maxIterations = 20;
+    core.getSettings().envName = envName;
+    core.getSettings().algName = algName;
+    core.getSettings().maxBatchIterations = 100;
 
     core.run();
-
 
 //    cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 
