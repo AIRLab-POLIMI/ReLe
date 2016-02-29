@@ -3,6 +3,8 @@ close all
 clear
 clc
 
+addpath(genpath('../..'));
+
 %% load data
 path = '/tmp/ReLe/';
 
@@ -59,7 +61,34 @@ plot(E(:, 2))
 title('Eigenvalues of Hessian')
 axis tight
 
-disp(indF)
-disp(indFs)
-disp(indG)
+%% Plot trajectories
+csv = csvread('/tmp/ReLe/Trajectories.txt');
+traj = readDataset(csv);
+
+figure(2)
+
+title('Trajectories')
+xlabel('t')
+ylabel('x1')
+zlabel('x2')
+
+hold on;
+
+
+hop = 5;
+for episode = 1:hop:size(traj,1)
+    
+    if(size(traj(episode).x, 2) == 1)
+        plot(traj(episode).x);
+    else if(size(traj(episode).x, 2) == 2)
+            plot3(1:size(traj(episode).x,1), traj(episode).x(:, 1), traj(episode).x(:,2));
+        end
+    end
+end
+
+
+%% print weight
+disp((indF-1)/100)
+disp((indFs-1)/100)
+disp((indG-1)/100)
 

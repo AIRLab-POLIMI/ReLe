@@ -101,9 +101,9 @@ template<class ActionC, class StateC>
 class GPOMDPSingleBaseOffGradientCalculator : public OffGradientCalculator<ActionC, StateC>
 {
 public:
-	GPOMDPSingleBaseOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
-                                    Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
-                                    double gamma)
+    GPOMDPSingleBaseOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
+                                          Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
+                                          double gamma)
         : OffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
 
     {
@@ -179,11 +179,11 @@ public:
         // compute the gradients
         for (int ep = 0; ep < episodeN; ++ep)
         {
-        	// compute the gradients
-        	arma::vec baseline_num = baseline_num1 % baseline_num2;
-        	arma::vec baseline_den = baseline_num2 % baseline_num2;
-        	arma::vec baseline = baseline_num / baseline_den;
-        	baseline(arma::find_nonfinite(baseline)).zeros();
+            // compute the gradients
+            arma::vec baseline_num = baseline_num1 % baseline_num2;
+            arma::vec baseline_den = baseline_num2 % baseline_num2;
+            arma::vec baseline = baseline_num / baseline_den;
+            baseline(arma::find_nonfinite(baseline)).zeros();
 
             for (int t = 0; t < maxsteps_Ep(ep); ++t)
             {
@@ -212,8 +212,8 @@ class GPOMDPMultyBaseOffGradientCalculator : public OffGradientCalculator<Action
 {
 public:
     GPOMDPMultyBaseOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
-                                    Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
-                                    double gamma)
+                                         Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
+                                         double gamma)
         : OffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
 
     {

@@ -25,6 +25,7 @@
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
 
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
 
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     vec eReward =
     { 0.3, 0.7 };
-    int nbEpisodes = 10000;
+    int nbEpisodes = 500000;
     int dim = eReward.n_elem;
 
     // create policy basis functions
@@ -59,15 +60,28 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
+    BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
+    SparseFeatures phiStdDev(basisStdDev, dim);
+    arma::mat stdDevW(dim, phiStdDev.rows(), fill::zeros);
+
+    for(int i = 0; i < stdDevW.n_rows; i++)
+        for(int j = i*basis.size(); j < (i+1)*basis.size(); j++)
+        {
+            stdDevW(i, j) = 1;
+        }
+
+    stdDevW *= 0.1;
+
+
     // solve the problem in exact way
     LQR mdp(dim, dim);
     LQRsolver solver(mdp, phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
-    arma::vec p = K.diag();
+    arma::vec p = K.diag() /*+ arma::vec({0.1, 0.1})*/;
 
     // Create expert policy
-    MVNPolicy expertPolicy(phi);
+    MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
@@ -134,7 +148,7 @@ int main(int argc, char *argv[])
         arma::mat Hs = V*arma::diagmat(arma::abs(Lambda))*V.i();
 
         //compute the sigma matrix
-        double eps = 0.0;
+        double eps = 0;
         arma::mat Sigma = arma::eye(2, 2)*eps;
 
 
@@ -167,6 +181,9 @@ int main(int argc, char *argv[])
     valuesF.save("/tmp/ReLe/F.txt", arma::raw_ascii);
     valuesFs.save("/tmp/ReLe/Fs.txt", arma::raw_ascii);
     valuesE.save("/tmp/ReLe/E.txt", arma::raw_ascii);
+
+    /*std::ofstream ofs("/tmp/ReLe/Trajectories.txt");
+    data.writeToStream(ofs);*/
 
     std::cout << "Work complete" << std::endl;
 

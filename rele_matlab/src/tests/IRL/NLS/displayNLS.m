@@ -1,6 +1,6 @@
 %% Print Trajectories
 close all
-clear all
+clear
 
 addpath(genpath('../../..'));
 

@@ -65,11 +65,7 @@ int main(int argc, char *argv[])
     int dim = eReward.n_elem;
     LQR mdp(dim, dim);
 
-    BasisFunctions basis;
-    for (int i = 0; i < dim; ++i)
-    {
-        basis.push_back(new IdentityBasis(i));
-    }
+    BasisFunctions basis = IdentityBasis::generate(dim);
 
     SparseFeatures phi;
     phi.setDiagonal(basis);

@@ -75,7 +75,7 @@ protected:
     {
         int dp  = policy.getParametersSize();
         int nbSteps = episode.size();
-        arma::vec sumGradLog(dp, arma::fill::zeros), localg;
+        arma::vec sumGradLog(dp, arma::fill::zeros);
 
         //iterate the episode
         for (int t = 0; t < nbSteps; ++t)
