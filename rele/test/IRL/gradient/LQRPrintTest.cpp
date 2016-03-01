@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
+    /*BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
     SparseFeatures phiStdDev(basisStdDev, dim);
     arma::mat stdDevW(dim, phiStdDev.rows(), fill::zeros);
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
             stdDevW(i, j) = 1;
         }
 
-    stdDevW *= 0.1;
+    stdDevW *= 0.1;*/
 
 
     // solve the problem in exact way
@@ -81,7 +81,8 @@ int main(int argc, char *argv[])
     arma::vec p = K.diag() /*+ arma::vec({0.1, 0.1})*/;
 
     // Create expert policy
-    MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
+    //MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
+    MVNPolicy expertPolicy(phi);
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";

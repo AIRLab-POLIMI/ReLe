@@ -61,6 +61,23 @@ public:
     }
 
 protected:
+    void computeEpisodeStatistics(Episode<ActionC,StateC>& episode, double& Rew,
+                                  arma::vec& dRew, arma::vec& sumGradLog, arma::mat& sumHessLog)
+    {
+        double df = 1.0;
+        for (auto& tr : episode)
+        {
+            Rew += df*arma::as_scalar(this->rewardFunc(tr.x, tr.u, tr.xn));;
+            dRew += df*this->rewardFunc.diff(tr.x, tr.u, tr.xn);
+            sumGradLog += this->policy.difflog(tr.x, tr.u);
+            sumHessLog += this->policy.diff2log(tr.x, tr.u);
+
+            df *= this->gamma;
+        }
+    }
+
+
+protected:
     ParametricRegressor& rewardFunc;
     Dataset<ActionC, StateC>& data;
     DifferentiablePolicy<ActionC, StateC>& policy;

@@ -67,13 +67,14 @@ protected:
             for(auto& tr : episode)
             {
                 sumGradLog += policy.difflog(tr.x, tr.u);
+                sumHessLog += policy.diff2log(tr.x, tr.u);
                 arma::vec creward = phi(tr.x, tr.u, tr.xn);
 
                 arma::mat G = sumGradLog*sumGradLog.t() + sumHessLog;
 
                 // compute the gradients
                 for(unsigned int r = 0; r < dr; r++)
-                    Hdiff.slice(r) += df * G * creward(r);
+                    Hdiff.slice(r) += df*creward(r)*G;
 
                 df *= gamma;
             }

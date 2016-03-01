@@ -106,12 +106,14 @@ int main(int argc, char *argv[])
     arma::vec wTest = { 0.15, 0.8, 0.05 };
     rewardRegressor.setParameters(wTest);
 
+    std::cout << "Reward test: " << wTest.t();
+
 
     /* Create the gradients calculators */
     auto linearHessian = HessianCalculatorFactory<DenseAction, DenseState>::build(type, phiReward, data,
-                          expertPolicy, mdp.getSettings().gamma);
+                         expertPolicy, mdp.getSettings().gamma);
     auto nonlinearHessian = NonlinearHessianFactory<DenseAction, DenseState>::build(type, rewardRegressor, data,
-                             expertPolicy, mdp.getSettings().gamma);
+                            expertPolicy, mdp.getSettings().gamma);
 
 
     std::cout << "linear:" << std::endl << linearHessian->computeHessian(wTest);

@@ -56,18 +56,18 @@ public:
 
             for (auto& tr : episode)
             {
-                double creward = df*arma::as_scalar(this->rewardFunc(tr.x, tr.u, tr.xn));
-                arma::vec dcreward = df*this->rewardFunc.diff(tr.x, tr.u, tr.xn);
+                double creward = arma::as_scalar(this->rewardFunc(tr.x, tr.u, tr.xn));
+                arma::vec dcreward = this->rewardFunc.diff(tr.x, tr.u, tr.xn);
 
                 sumGradLog += this->policy.difflog(tr.x, tr.u);
                 sumHessLog += this->policy.diff2log(tr.x, tr.u);
 
                 arma::mat G = sumGradLog*sumGradLog.t()+sumHessLog;
 
-                this->H += creward*G;
+                this->H += df*creward*G;
 
                 for(unsigned int r = 0; r < dr; r++)
-                    this->Hdiff.slice(r) += dcreward(r) * G;
+                    this->Hdiff.slice(r) += df*dcreward(r)*G;
 
                 df *= this->gamma;
             }

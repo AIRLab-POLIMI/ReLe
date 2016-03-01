@@ -50,21 +50,13 @@ public:
 
         for (auto& episode : this->data)
         {
-            double df = 1.0;
+
             double Rew = 0;
             arma::vec dRew(dr, arma::fill::zeros);
             arma::vec sumGradLog(dp, arma::fill::zeros);
             arma::mat sumHessLog(dp, dp, arma::fill::zeros);
 
-            for (auto& tr : episode)
-            {
-                Rew += df*arma::as_scalar(this->rewardFunc(tr.x, tr.u, tr.xn));;
-                dRew += df*this->rewardFunc.diff(tr.x, tr.u, tr.xn);
-                sumGradLog += this->policy.difflog(tr.x, tr.u);
-                sumHessLog += this->policy.diff2log(tr.x, tr.u);
-
-                df *= this->gamma;
-            }
+            this->computeEpisodeStatistics(episode, Rew, dRew, sumGradLog, sumHessLog);
 
             arma::mat G = sumGradLog*sumGradLog.t()+sumHessLog;
 
@@ -100,6 +92,64 @@ public:
 
     virtual void compute() override
     {
+        unsigned int dp = this->policy.getParametersSize();
+        unsigned int dr = this->rewardFunc.getParametersSize();
+        unsigned int episodeN = this->data.size();
+
+        this->H.zeros(dp, dp);
+        this->Hdiff.zeros(dp, dp, dr);
+
+        arma::vec Rew_ep(episodeN, arma::fill::zeros);
+        arma::mat dRew_ep(dr, episodeN, arma::fill::zeros);
+        arma::mat baseline_num_Rew(dp, dp, arma::fill::zeros);
+        arma::cube baseline_num_dRew(dp, dp, dr, arma::fill::zeros);
+        arma::mat baseline_den(dp, dp, arma::fill::zeros);
+        arma::cube G_ep(dp, dp, episodeN);
+
+        for(unsigned int ep = 0; ep < episodeN; ep++)
+        {
+            double Rew;
+            arma::vec dRew(dr, arma::fill::zeros);
+            arma::vec sumGradLog(dp, arma::fill::zeros);
+            arma::mat sumHessLog(dp, dp, arma::fill::zeros);
+
+            this->computeEpisodeStatistics(this->data[ep], Rew, dRew, sumGradLog, sumHessLog);
+
+            // compute hessian essential
+            arma::mat G = sumGradLog*sumGradLog.t()+sumHessLog;
+            arma::mat G2 = G % G;
+
+            // store hessian essentials
+            Rew_ep(ep) = Rew;
+            dRew_ep.col(ep) = dRew;
+            G_ep.slice(ep) = G;
+
+            // Compute baselines
+            baseline_den += G2;
+            baseline_num_Rew += Rew*G2;
+
+            for(unsigned int r = 0; r < dr; r++)
+                baseline_num_dRew.slice(r) += dRew(r)*G2;
+        }
+
+        // compute the hessian
+        arma::mat baseline_Rew = baseline_num_Rew / baseline_den;
+        baseline_Rew(arma::find_nonfinite(baseline_Rew)).zeros();
+
+        arma::cube baseline_dRew = baseline_num_dRew.each_slice() / baseline_den;
+        baseline_dRew(arma::find_nonfinite(baseline_dRew)).zeros();
+
+        for (int ep = 0; ep < episodeN; ep++)
+        {
+            this->H += (Rew_ep(ep) - baseline_Rew) % G_ep.slice(ep);
+
+            for(int r = 0; r < dr; r++)
+                this->Hdiff.slice(r) += (dRew_ep(r, ep) - baseline_dRew.slice(r)) % G_ep.slice(ep);
+        }
+
+        // compute mean values
+        this->Hdiff /= episodeN;
+        this->H /= episodeN;
 
     }
 
