@@ -28,8 +28,8 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/BatchAgent.h"
 #include "rele/utils/FileManager.h"
-#include "rele/utils/logger/BatchLogger.h"
-#include "rele/utils/logger/BatchLoggerStrategy.h"
+#include "rele/core/logger/BatchLogger.h"
+#include "rele/core/logger/BatchLoggerStrategy.h"
 
 #include <iostream>
 

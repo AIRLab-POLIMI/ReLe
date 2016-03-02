@@ -26,7 +26,7 @@
 
 #include "rele/core/Agent.h"
 #include "rele/core/Environment.h"
-#include "rele/utils/logger/Logger.h"
+#include "rele/core/logger/Logger.h"
 
 namespace ReLe
 {

@@ -25,7 +25,7 @@
 #define INCLUDE_RELE_UTILS_LOGGERSTRATEGY_H_
 
 #include <iostream>
-#include "rele/utils/logger/StateStatisticGenerator.h"
+#include "rele/core/logger/StateStatisticGenerator.h"
 #include "rele/core/Transition.h"
 
 namespace ReLe

@@ -25,7 +25,7 @@
 #define INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGER_H_
 
 #include "rele/core/BatchCore.h"
-#include "rele/utils/logger/BatchLoggerStrategy.h"
+#include "rele/core/logger/BatchLoggerStrategy.h"
 
 namespace ReLe
 {

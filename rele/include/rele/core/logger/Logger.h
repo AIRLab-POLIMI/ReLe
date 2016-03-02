@@ -25,7 +25,7 @@
 #define INCLUDE_UTILS_LOGGER_H_
 
 #include "rele/core/Basics.h"
-#include "rele/utils/logger/LoggerStrategy.h"
+#include "rele/core/logger/LoggerStrategy.h"
 #include "rele/core/Transition.h"
 
 #include <vector>
