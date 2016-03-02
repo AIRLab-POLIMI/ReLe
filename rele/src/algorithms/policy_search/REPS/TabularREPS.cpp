@@ -46,9 +46,6 @@ TabularREPS::TabularREPS(DenseFeatures_<size_t>& phi) :
 
     //sample iteration counter
     currentIteration = 0;
-
-    //TODO levami!
-    iteration = 0;
 }
 
 void TabularREPS::initEpisode(const FiniteState& state, FiniteAction& action)
@@ -129,18 +126,10 @@ TabularREPS::~TabularREPS()
 
 void TabularREPS::updatePolicy()
 {
-
-    //TODO levami!
-    iteration = 0;
-
     //optimize dual function
     std::vector<double> parameters(thetaOpt.begin(), thetaOpt.end());
     parameters.push_back(etaOpt);
     auto&& newParameters = optimizator.optimize(parameters);
-
-#ifdef DEBUG_REPS
-    cout << "----------------------------" << endl;
-#endif
 
     //update parameters
     etaOpt = newParameters.back();
@@ -198,12 +187,6 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
         sum3 += std::exp(eps + deltaxu / eta) * s.lambda(sample.x, sample.u);
     }
 
-#ifdef DEBUG_REPS
-    cout << "sum1 " << sum1 << endl;
-    cout << "sum2 " << sum2 << endl;
-    cout << "sum3" << sum3.t();
-#endif
-
     //Avoid NaN
     if(sum1 < std::numeric_limits<double>::epsilon())
     {
@@ -223,12 +206,6 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
     double& dEta = grad[this->thetaOpt.size()];
     dEta = std::log(sum1) - sum2 / sum1;
 
-#ifdef DEBUG_REPS
-    //TODO levami
-    iteration++;
-    cout << "iteration: " << iteration << endl;
-#endif
-
     //compute dual function
     return eta * std::log(sum1 / N);
 }
@@ -236,29 +213,8 @@ double TabularREPS::computeObjectiveFunction(const double* x, double* grad)
 double TabularREPS::wrapper(unsigned int n, const double* x, double* grad,
                             void* o)
 {
-#ifdef DEBUG_REPS
-    cout << "x = [" << x[0];
-    for (int i = 1; i < n; i++)
-    {
-        cout << "," << x[i];
-    }
-    cout << "]" << endl;
-#endif
-
     double value = reinterpret_cast<TabularREPS*>(o)->computeObjectiveFunction(
                        x, grad);
-
-#ifdef DEBUG_REPS
-    cout << "grad = [" << grad[0];
-    for (int i = 1; i < n; i++)
-    {
-        cout << "," << grad[i];
-    }
-    cout << "]" << endl;
-    cout << "value " << value << endl;
-
-    cout << "---" << endl;
-#endif
 
     return value;
 }
@@ -271,7 +227,7 @@ void TabularREPS::init()
     etaOpt = 1;
 
     //setup optimization algorithm
-    optimizator = nlopt::opt(nlopt::algorithm::LD_MMA, thetaOpt.size() + 1);
+    optimizator = nlopt::opt(nlopt::algorithm::LD_SLSQP, thetaOpt.size() + 1);
     optimizator.set_min_objective(TabularREPS::wrapper, this);
     optimizator.set_xtol_rel(1e-8);
     optimizator.set_ftol_rel(1e-12);

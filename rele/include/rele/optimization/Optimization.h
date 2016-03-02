@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_UTILS_OPTIMIZATION_H_
-#define INCLUDE_RELE_IRL_UTILS_OPTIMIZATION_H_
+#ifndef INCLUDE_RELE_OPTIMIZATION_OPTIMIZATION_H_
+#define INCLUDE_RELE_OPTIMIZATION_OPTIMIZATION_H_
 
 namespace ReLe
 {
@@ -106,10 +106,7 @@ private:
 };
 
 
-
-
-
 }
 
 
-#endif /* INCLUDE_RELE_IRL_UTILS_OPTIMIZATION_H_ */
+#endif /* INCLUDE_RELE_OPTIMIZATION_OPTIMIZATION_H_ */

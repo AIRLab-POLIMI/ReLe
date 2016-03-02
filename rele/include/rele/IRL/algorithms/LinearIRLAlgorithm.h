@@ -27,12 +27,11 @@
 #include "rele/core/Transition.h"
 
 #include "rele/IRL/IRLAlgorithm.h"
-#include "rele/IRL/optimization/Optimization.h"
-#include "rele/IRL/optimization/Simplex.h"
-
 #include "rele/utils/ArmadilloExtensions.h"
 
 #include <nlopt.hpp>
+#include "rele/optimization/Optimization.h"
+#include "rele/optimization/Simplex.h"
 
 namespace ReLe
 {

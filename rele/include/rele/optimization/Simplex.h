@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_OPTIMIZATION_SIMPLEX_H_
-#define INCLUDE_RELE_IRL_OPTIMIZATION_SIMPLEX_H_
+#ifndef INCLUDE_RELE_OPTIMIZATION_SIMPLEX_H_
+#define INCLUDE_RELE_OPTIMIZATION_SIMPLEX_H_
 
 #include <armadillo>
 #include <vector>
@@ -129,4 +129,4 @@ private:
 
 }
 
-#endif /* INCLUDE_RELE_IRL_OPTIMIZATION_SIMPLEX_H_ */
+#endif /* INCLUDE_RELE_OPTIMIZATION_SIMPLEX_H_ */

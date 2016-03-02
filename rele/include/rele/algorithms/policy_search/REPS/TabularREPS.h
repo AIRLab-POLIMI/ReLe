@@ -83,9 +83,6 @@ private:
 
     nlopt::opt optimizator;
 
-    //debug TODO togliere
-    int iteration;
-
 };
 
 }
