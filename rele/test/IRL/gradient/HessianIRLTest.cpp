@@ -44,7 +44,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    IrlGrad type = GPOMDP;
+    IrlGrad type = REINFORCE_BASELINE;
     //  RandomGenerator::seed(45423424);
     //  RandomGenerator::seed(8763575);
 

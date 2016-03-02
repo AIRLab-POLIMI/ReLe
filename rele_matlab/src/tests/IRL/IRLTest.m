@@ -23,38 +23,38 @@ load([path, 'E.txt'] ,'ascii')
 
 %% plot data
 figure(1)
-subplot(2,3,1)
+subplot(4,3,1)
 hold on
 plot(F)
 plot(indF, minF, 'dm')
 title('ExpectedDelta')
 axis tight
 
-subplot(2,3,2)
+subplot(4,3,2)
 hold on
 plot(Fs)
 plot(indFs, minFs, 'dm')
 title('SignedExpectedDelta')
 axis tight
 
-subplot(2,3,3)
+subplot(4,3,3)
 hold on
 plot(G)
 plot(indG, minG, 'dm')
 title('GradientNorm')
 axis tight
 
-subplot(2,3,4)
+subplot(4,3,4)
 plot(J)
 title('Objective Function')
 axis tight
 
-subplot(2,3,5)
+subplot(4,3,5)
 plot(T)
 title('Trace of hessian')
 axis tight
 
-subplot(2,3,6)
+subplot(4,3,6)
 hold on
 plot(E(:, 1))
 plot(E(:, 2))
@@ -64,13 +64,13 @@ axis tight
 %% Plot trajectories
 csv = csvread('/tmp/ReLe/Trajectories.txt');
 traj = readDataset(csv);
-
-figure(2)
+subplot(4, 3, 7:12)
 
 title('Trajectories')
 xlabel('t')
 ylabel('x1')
 zlabel('x2')
+axis tight
 
 hold on;
 

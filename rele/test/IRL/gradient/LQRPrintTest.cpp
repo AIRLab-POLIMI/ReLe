@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    IrlGrad atype = IrlGrad::GPOMDP;
+    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     vec eReward =
     { 0.3, 0.7 };
     int nbEpisodes = 10000;
@@ -82,7 +82,9 @@ int main(int argc, char *argv[])
 
     // Create expert policy
     //MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
-    MVNPolicy expertPolicy(phi);
+    arma::mat SigmaExpert(dim, dim, arma::fill::eye);
+    //SigmaExpert *= 10;
+    MVNPolicy expertPolicy(phi, SigmaExpert);
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";

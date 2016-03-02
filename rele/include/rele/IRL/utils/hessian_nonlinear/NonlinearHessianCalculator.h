@@ -67,12 +67,12 @@ protected:
         double df = 1.0;
         for (auto& tr : episode)
         {
-            Rew += df*arma::as_scalar(this->rewardFunc(tr.x, tr.u, tr.xn));;
-            dRew += df*this->rewardFunc.diff(tr.x, tr.u, tr.xn);
-            sumGradLog += this->policy.difflog(tr.x, tr.u);
-            sumHessLog += this->policy.diff2log(tr.x, tr.u);
+            Rew += df*arma::as_scalar(rewardFunc(tr.x, tr.u, tr.xn));;
+            dRew += df*rewardFunc.diff(tr.x, tr.u, tr.xn);
+            sumGradLog += policy.difflog(tr.x, tr.u);
+            sumHessLog += policy.diff2log(tr.x, tr.u);
 
-            df *= this->gamma;
+            df *= gamma;
         }
     }
 

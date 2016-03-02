@@ -108,7 +108,7 @@ public:
 
         for(unsigned int ep = 0; ep < episodeN; ep++)
         {
-            double Rew;
+            double Rew = 0;
             arma::vec dRew(dr, arma::fill::zeros);
             arma::vec sumGradLog(dp, arma::fill::zeros);
             arma::mat sumHessLog(dp, dp, arma::fill::zeros);
