@@ -28,6 +28,8 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/BatchAgent.h"
 #include "rele/utils/FileManager.h"
+#include "rele/utils/logger/BatchLogger.h"
+#include "rele/utils/logger/BatchLoggerStrategy.h"
 
 #include <iostream>
 
@@ -45,12 +47,14 @@ public:
             loggerStrategy = nullptr;
             envName = "env";
             algName = "alg";
+            dataFileName = "dataset.csv";
             maxBatchIterations = 1;
         }
 
-        LoggerStrategy<ActionC, StateC>* loggerStrategy;
+        BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
         std::string envName;
         std::string algName;
+        std::string dataFileName;
         unsigned int maxBatchIterations;
     };
 
@@ -70,8 +74,10 @@ public:
     void run()
     {
         //core setup
-        Logger<ActionC, StateC> logger;
-
+        BatchLogger<ActionC, StateC> logger(data,
+                                            settings.envName,
+                                            settings.algName,
+                                            settings.dataFileName);
         logger.setStrategy(settings.loggerStrategy);
 
         //Start episode
@@ -82,11 +88,12 @@ public:
                 && !batchAgent.hasConverged(); i++)
         {
             batchAgent.step();
-            logger.log(batchAgent.getAgentOutputData(), i);
-        }
 
-        //logger.log(agent.getAgentOutputDataEnd(), settings.maxIterations);
-        //logger.printStatistics();
+            if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
+                logger.printStatistics(batchAgent.getAgentOutputData(), i);
+            else
+                logger.printStatistics(batchAgent.getAgentOutputDataEnd(), i);
+        }
     }
 
 protected:
@@ -110,14 +117,14 @@ public:
             nEpisodes = 100;
             envName = "env";
             algName = "alg";
-            datafileName = "dataset.csv";
+            dataFileName = "dataset.csv";
             maxBatchIterations = 1;
         }
 
-        LoggerStrategy<ActionC, StateC>* loggerStrategy;
+        BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
         std::string envName;
         std::string algName;
-        std::string datafileName;
+        std::string dataFileName;
         unsigned int nTransitions;
         unsigned int episodeLength;
         unsigned int nEpisodes;
@@ -153,22 +160,12 @@ public:
 
         Dataset<ActionC, StateC> data = collection.data;
 
-        FileManager fm(settings.envName, settings.algName);
-        fm.createDir();
-        fm.cleanDir();
-        std::ofstream out(fm.addPath(settings.datafileName), std::ios_base::out);
-        out << std::setprecision(OS_PRECISION);
-        if(out.is_open())
-            data.writeToStream(out);
-        out.close();
-
-        std::cout << std::endl << "# Ended data collection and save" << std::endl << std::endl;
-
         auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
 
         batchCore.getSettings().loggerStrategy = settings.loggerStrategy;
         batchCore.getSettings().envName = settings.envName;
         batchCore.getSettings().algName = settings.algName;
+        batchCore.getSettings().dataFileName = settings.dataFileName;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
         batchCore.run();

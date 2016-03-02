@@ -36,6 +36,56 @@ namespace ReLe
  * Journal of Machine Learning Research, 6, 2006, pp. 503-556.
  */
 
+class FQIOutput : virtual public AgentOutputData
+{
+public:
+    FQIOutput(bool isFinal, double gamma, const arma::mat& Q) :
+        AgentOutputData(isFinal),
+        gamma(gamma),
+        Q(Q)
+    {
+    }
+
+    virtual void writeData(std::ostream& os) override
+    {
+        os << "- Parameters" << std::endl;
+        os << "gamma: " << gamma << std::endl;
+
+        os << "- Policy" << std::endl;
+        for(unsigned int i = 0; i < Q.n_rows; i++)
+        {
+            arma::uword policy;
+            Q.row(i).max(policy);
+            os << "policy(" << i << ") = " << policy << std::endl;
+        }
+    }
+
+    virtual void writeDecoratedData(std::ostream& os) override
+    {
+        os << "- Parameters" << std::endl;
+        os << "gamma: " << gamma << std::endl;
+
+        os << "- Action-value function" << std::endl;
+        for(unsigned int i = 0; i < Q.n_rows; i++)
+            for(unsigned int j = 0; j < Q.n_cols; j++)
+            {
+                os << "Q(" << i << ", " << j << ") = " << Q(i, j) << std::endl;
+            }
+
+        os << "- Policy" << std::endl;
+        for(unsigned int i = 0; i < Q.n_rows; i++)
+        {
+            arma::uword policy;
+            Q.row(i).max(policy);
+            os << "policy(" << i << ") = " << policy << std::endl;
+        }
+    }
+
+protected:
+    double gamma;
+    arma::mat Q;
+};
+
 template<class StateC>
 class FQI : public BatchAgent<FiniteAction, StateC>
 {
@@ -126,16 +176,16 @@ public:
                 QTable(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
     }
 
-    virtual void printPolicy()
+    inline virtual AgentOutputData* getAgentOutputData() override
     {
         computeQTable();
-        std::cout << std::endl << "Policy:" << std::endl;
-        for(unsigned int i = 0; i < nStates; i++)
-        {
-            arma::uword policy;
-            QTable.row(i).max(policy);
-            std::cout << "policy(" << i << ") = " << policy << std::endl;
-        }
+        return new FQIOutput(false, this->gamma, QTable);
+    }
+
+    inline virtual AgentOutputData* getAgentOutputDataEnd() override
+    {
+        computeQTable();
+        return new FQIOutput(true, this->gamma, QTable);
     }
 
     arma::mat& getQ()

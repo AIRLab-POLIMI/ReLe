@@ -47,6 +47,11 @@ public:
         return nullptr;
     }
 
+    virtual AgentOutputData* getAgentOutputDataEnd()
+    {
+        return nullptr;
+    }
+
     virtual bool hasConverged()
     {
         return converged;

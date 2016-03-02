@@ -83,8 +83,9 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 
+    arma::mat Q(nStates, nActions, arma::fill::zeros);
     e_Greedy policy;
-    policy.setNactions(nActions);
+    policy.setQ(&Q);
 
     core.run(policy);
 
