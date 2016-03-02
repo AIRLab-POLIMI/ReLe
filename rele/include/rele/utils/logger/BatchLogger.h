@@ -34,12 +34,15 @@ template<class ActionC, class StateC>
 class BatchLogger
 {
 public:
-    BatchLogger(Dataset<ActionC, StateC> data,
-                std::string envName,
-                std::string algName,
-                std::string dataFileName) :
+    BatchLogger(Dataset<ActionC, StateC> data) :
         data(data),
         strategy(nullptr)
+    {
+    }
+
+    void printDataFile(std::string envName,
+                       std::string algName,
+                       std::string dataFileName)
     {
         FileManager fm(envName, algName);
         fm.createDir();

@@ -74,10 +74,10 @@ public:
     void run()
     {
         //core setup
-        BatchLogger<ActionC, StateC> logger(data,
-                                            settings.envName,
-                                            settings.algName,
-                                            settings.dataFileName);
+        BatchLogger<ActionC, StateC> logger(data);
+        logger.printDataFile(settings.envName,
+                             settings.algName,
+                             settings.dataFileName);
         logger.setStrategy(settings.loggerStrategy);
 
         //Start episode
