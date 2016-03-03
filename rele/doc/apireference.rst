@@ -18,9 +18,23 @@ in namespace ``ReLe``.
 Library Core
 ============
 
+Basic Interfaces
+----------------
+
 .. doxygenclass:: ReLe::Agent
    :members:
 
+.. doxygenclass:: ReLe::BatchAgent
+   :members:
+
+Basic Utilities
+---------------
+
+.. doxygenclass:: ReLe::PolicyEvalAgent
+   :members:
+   
+.. doxygenclass:: ReLe::PolicyEvalDistribution
+   :members:   
 
 Policy Representations
 ======================

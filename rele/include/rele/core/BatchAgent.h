@@ -29,6 +29,12 @@
 namespace ReLe
 {
 
+/*!
+ * The BatchAgent is the basic interface of all batch agents.
+ * All batch algorithms should extend this abstract class.
+ * The BatchAgent interface provides all the methods that can be used to interact with an MDP through
+ * the BatchCore class. It includes methods to run the learning over a dataset and log the progress of the algorithm.
+ */
 template<class ActionC, class StateC>
 class BatchAgent
 {
@@ -39,19 +45,44 @@ public:
     {
     }
 
-    virtual void init(Dataset<FiniteAction, StateC>& data) = 0;
+    /*!
+     * This method setup the dataset to be used in the learning process. Must be implemented.
+     * Is called by the BatchCore as the first step of the learning process.
+     * \param data the dataset to be used for learning
+     */
+    virtual void init(Dataset<ActionC, StateC>& data) = 0;
+
+    /*!
+     * This method implement a step of the learning process trough the dataset. Must be implemented.
+     * Is called by the BatchCore until the algorithm converges or the maximum number of iteration is reached.
+     */
     virtual void step() = 0;
 
+    /*!
+     * This method is used to log agent step informations.
+     * Can be overloaded to return information that can be processed by the logger.
+     * By default a null pointer is returned, which means that no data will be logged.
+     * \return the data to be logged from the agent at the current step.
+     */
     virtual AgentOutputData* getAgentOutputData()
     {
         return nullptr;
     }
 
+    /*!
+     * This method is called before each learning step and return if the terminal condition
+     * has been reached. Terminal condition can be implemented by setting the ReLe::Agent::terminalCond private member.
+     * \return whether the terminal condition has been reached.
+     */
     virtual AgentOutputData* getAgentOutputDataEnd()
     {
         return nullptr;
     }
 
+    /*!
+     * This method returns whether the algorithm has converged or not
+     * \return the value of the flag converged
+     */
     virtual bool hasConverged()
     {
         return converged;
@@ -62,7 +93,9 @@ public:
     }
 
 protected:
+    //! The task discount factor
     double gamma;
+    //! flag to signal convergence of the algorithm
     bool converged;
 };
 

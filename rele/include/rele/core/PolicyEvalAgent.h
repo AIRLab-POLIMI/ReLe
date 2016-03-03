@@ -32,10 +32,19 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements a fake agent, that cannot be used for learning but only for evaluating a policy
+ * over an MDP.
+ * This class implements the agent interface, however the methods that implement learning should never be called.
+ */
 template<class ActionC, class StateC>
 class PolicyEvalAgent: public Agent<ActionC, StateC>
 {
 public:
+	/*!
+	 * Constructor
+	 * \params policy the policy to be used in evaluation
+	 */
     PolicyEvalAgent(Policy<ActionC, StateC>& policy): policy(policy)
     {
 
@@ -45,15 +54,18 @@ public:
     {
     }
 
-    // Agent interface
 public:
     virtual void initTestEpisode() override
     {
     }
 
+    /*!
+     * This method should never be called. Throws an exception if used, as policy eval agent
+     * cannot be used for learning.
+     */
     virtual void initEpisode(const StateC &state, ActionC &action) override
     {
-        sampleAction(state, action);
+    	 throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
     void sampleAction(const StateC &state, ActionC &action) override
@@ -62,16 +74,28 @@ public:
         u = policy(state);
     }
 
+    /*!
+     * This method should never be called. Throws an exception if used, as policy eval agent
+     * cannot be used for learning.
+     */
     void step(const Reward &reward, const StateC &nextState, ActionC &action) override
     {
         throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
+    /*!
+     * This method should never be called. Throws an exception if used, as policy eval agent
+     * cannot be used for learning.
+     */
     void endEpisode(const Reward& reward) override
     {
         throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
+    /*!
+     * This method should never be called. Throws an exception if used, as policy eval agent
+     * cannot be used for learning.
+     */
     void endEpisode() override
     {
         throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
@@ -82,21 +106,25 @@ private:
 
 };
 
+
+/*!
+ * This class implements a fake agent, that cannot be used for learning but only for evaluating a
+ * distribution of parametric policies over an MDP.
+ */
 template<class ActionC, class StateC>
 class PolicyEvalDistribution : public PolicyEvalAgent<ActionC, StateC>
 {
 public:
 
+	/*!
+	 * Constructor
+	 * \param dist the distribution of the parameters of the policies
+	 * \param policy the family of parametric policies to be used
+	 */
     PolicyEvalDistribution(Distribution& dist, ParametricPolicy<ActionC, StateC>& policy)
         : PolicyEvalAgent<ActionC, StateC>(policy), policy(policy), dist(dist)
     {
 
-    }
-
-    virtual void initEpisode(const StateC &state, ActionC &action) override
-    {
-        initTestEpisode();
-        this->sampleAction(state, action);
     }
 
     virtual void initTestEpisode() override
@@ -111,6 +139,10 @@ public:
         policy.setParameters(new_params);
     }
 
+    /*!
+     * This method can be used to return the parameters used during the test runs
+     * \return a matrix paramsN \times episodeN
+     */
     arma::mat getParams()
     {
         arma::mat params(policy.getParametersSize(), params_history.size());

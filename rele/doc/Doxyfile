@@ -22,3 +22,4 @@ PREDEFINED        = _WIN32=1 \
                     FMT_USE_USER_DEFINED_LITERALS=1 \
                     FMT_API=
 EXCLUDE_SYMBOLS   = fmt::internal::* StringValue write_str
+INHERIT_DOCS      = YES
