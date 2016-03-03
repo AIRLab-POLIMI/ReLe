@@ -33,6 +33,7 @@ class FileManager
 {
 public:
     FileManager(const std::string& environment, const std::string& algorithm);
+    FileManager(const std::string& testName);
     void createDir();
     void cleanDir();
     std::string addPath(const std::string& fileName);

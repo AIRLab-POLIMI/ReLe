@@ -47,22 +47,22 @@ public:
 
         switch(type)
         {
-        case REINFORCE:
+        case IrlGrad::REINFORCE:
             return new ReinforceGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        case REINFORCE_BASELINE:
+        case IrlGrad::REINFORCE_BASELINE:
             return new ReinforceBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        case GPOMDP:
+        case IrlGrad::GPOMDP:
             return new GPOMDPGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        case GPOMDP_BASELINE:
+        case IrlGrad::GPOMDP_BASELINE:
             return new GPOMDPBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        case ENAC:
+        case IrlGrad::ENAC:
             return new ENACGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
-        case ENAC_BASELINE:
+        case IrlGrad::ENAC_BASELINE:
             return new ENACBaseGradientCalculator<ActionC, StateC>(phi, data, policy, gamma);
 
         default:
@@ -80,16 +80,16 @@ private:
     {
         switch(type)
         {
-        case NATURAL_REINFORCE:
+        case IrlGrad::NATURAL_REINFORCE:
             return new NaturalGradientCalculator<ActionC, StateC, ReinforceGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
-        case NATURAL_REINFORCE_BASELINE:
+        case IrlGrad::NATURAL_REINFORCE_BASELINE:
             return new NaturalGradientCalculator<ActionC, StateC, ReinforceBaseGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
-        case NATURAL_GPOMDP:
+        case IrlGrad::NATURAL_GPOMDP:
             return new NaturalGradientCalculator<ActionC, StateC, GPOMDPGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
-        case NATURAL_GPOMDP_BASELINE:
+        case IrlGrad::NATURAL_GPOMDP_BASELINE:
             return new NaturalGradientCalculator<ActionC, StateC, GPOMDPBaseGradientCalculator<ActionC, StateC>>(phi, data, policy, gamma);
 
         default:

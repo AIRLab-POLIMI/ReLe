@@ -141,6 +141,150 @@ protected:
     }
 };
 
+
+template<class ActionC, class StateC>
+class HessianReinforceTraceBaseSingle : public HessianCalculator<ActionC, StateC>
+{
+protected:
+    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+
+public:
+	HessianReinforceTraceBaseSingle(Features& phi,
+                         Dataset<ActionC,StateC>& data,
+                         DifferentiablePolicy<ActionC,StateC>& policy,
+                         double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+    {
+
+    }
+
+    virtual ~HessianReinforceTraceBaseSingle()
+    {
+
+    }
+
+protected:
+    virtual arma::cube computeHessianDiff() override
+    {
+        unsigned int dp = policy.getParametersSize();
+        unsigned int dr = phi.rows();
+        unsigned int episodeN = data.size();
+
+        arma::cube Hdiff(dp, dp, dr, arma::fill::zeros);
+        arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
+
+        arma::vec baseline_num(dr, arma::fill::zeros);
+        double baseline_den = 0;
+        arma::cube G_ep(dp, dp, episodeN);
+
+        for(unsigned int ep = 0; ep < episodeN; ep++)
+        {
+            // compute hessian essential
+            arma::mat G = this->computeG(data[ep]);
+            double trG = arma::trace(G);
+            double trG2 = trG*trG;
+
+            // store hessian essentials
+            G_ep.slice(ep) = G;
+
+            baseline_den += trG2;
+
+            for(unsigned int r = 0; r < dr; r++)
+                baseline_num(r) += Rew(r, ep)*trG2;
+        }
+
+        // compute the hessian
+        arma::vec baseline = baseline_num / baseline_den;
+        baseline(arma::find_nonfinite(baseline)).zeros();
+
+        for (int ep = 0; ep < episodeN; ep++)
+        {
+            for(int r = 0; r < phi.rows(); r++)
+                Hdiff.slice(r) += (Rew(r, ep) - baseline(r)) * G_ep.slice(ep);
+        }
+
+        // compute mean values
+        Hdiff /= episodeN;
+
+        return Hdiff;
+    }
+};
+
+template<class ActionC, class StateC>
+class HessianReinforceTraceBaseDiag : public HessianCalculator<ActionC, StateC>
+{
+protected:
+    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+
+public:
+	HessianReinforceTraceBaseDiag(Features& phi,
+                         Dataset<ActionC,StateC>& data,
+                         DifferentiablePolicy<ActionC,StateC>& policy,
+                         double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+    {
+
+    }
+
+    virtual ~HessianReinforceTraceBaseDiag()
+    {
+
+    }
+
+protected:
+    virtual arma::cube computeHessianDiff() override
+    {
+        unsigned int dp = policy.getParametersSize();
+        unsigned int dr = phi.rows();
+        unsigned int episodeN = data.size();
+
+        arma::cube Hdiff(dp, dp, dr, arma::fill::zeros);
+        arma::mat Rew = data.computeEpisodeFeatureExpectation(phi, gamma);
+
+        arma::mat baseline_num(dp, dr, arma::fill::zeros);
+        arma::mat baseline_den(dp, dp, arma::fill::zeros);
+        arma::cube G_ep(dp, dp, episodeN);
+
+        for(unsigned int ep = 0; ep < episodeN; ep++)
+        {
+            // compute hessian essential
+            arma::mat G = this->computeG(data[ep]);
+            arma::vec g = G.diag();
+            double trG = arma::trace(G);
+
+            // store hessian essentials
+            G_ep.slice(ep) = G;
+
+            baseline_den += g*g.t();
+
+            for(unsigned int r = 0; r < dr; r++)
+                baseline_num.col(r) += Rew(r, ep)*trG*g;
+        }
+
+        //normalize baseline components for numerical stability
+        baseline_num /= episodeN;
+        baseline_den /= episodeN;
+
+        // compute the hessian
+        arma::mat baseline;
+
+        if(arma::rank(baseline_den) == dp)
+        	baseline = arma::solve(baseline_den, baseline_num);
+        else
+        	baseline = arma::pinv(baseline_den)*baseline_num;
+
+        for (int ep = 0; ep < episodeN; ep++)
+        {
+            for(int r = 0; r < phi.rows(); r++)
+                Hdiff.slice(r) += (Rew(r, ep) - arma::diagmat(baseline.col(r))) % G_ep.slice(ep);
+        }
+
+        // compute mean values
+        Hdiff /= episodeN;
+
+        return Hdiff;
+    }
+};
+
+
 }
 
 

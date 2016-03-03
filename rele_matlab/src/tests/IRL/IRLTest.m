@@ -6,7 +6,7 @@ clc
 addpath(genpath('../..'));
 
 %% load data
-path = '/tmp/ReLe/';
+path = '/tmp/ReLe/lqrPrint/';
 
 load([path, 'F.txt'] ,'ascii')
 load([path, 'Fs.txt'] ,'ascii')
@@ -62,7 +62,7 @@ title('Eigenvalues of Hessian')
 axis tight
 
 %% Plot trajectories
-csv = csvread('/tmp/ReLe/Trajectories.txt');
+csv = csvread([path, 'Trajectories.txt']);
 traj = readDataset(csv);
 subplot(4, 3, 7:12)
 

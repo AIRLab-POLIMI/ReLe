@@ -35,6 +35,11 @@ FileManager::FileManager(const string& environment,
     outputDir = "/tmp/ReLe/" + environment + "/" + algorithm + "/";
 }
 
+FileManager::FileManager(const string& testName)
+{
+    outputDir = "/tmp/ReLe/" + testName + "/";
+}
+
 void FileManager::createDir()
 {
     //TODO windows command also

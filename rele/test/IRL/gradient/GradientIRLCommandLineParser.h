@@ -134,9 +134,10 @@ IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
         return new PlaneGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
                 gamma, type);
 
+    //TODO FIXME use correct hessian
     else if(algorithm == "ExpectedDeltaIRL")
         return new ExpectedDeltaIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                gamma, type);
+                gamma, type, IrlHess::REINFORCE_BASELINE);
 
 
 

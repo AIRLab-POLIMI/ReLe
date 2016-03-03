@@ -45,25 +45,25 @@ std::string IrlGradUtils::toString(IrlGrad type)
 {
     switch(type)
     {
-    case REINFORCE:
+    case IrlGrad::REINFORCE:
         return "REINFORCE";
-    case REINFORCE_BASELINE:
+    case IrlGrad::REINFORCE_BASELINE:
         return "REINFORCE_BASELINE";
-    case GPOMDP:
+    case IrlGrad::GPOMDP:
         return "GPOMDP";
-    case GPOMDP_BASELINE:
+    case IrlGrad::GPOMDP_BASELINE:
         return "GPOMDP_BASELINE";
-    case ENAC:
+    case IrlGrad::ENAC:
         return "ENAC";
-    case ENAC_BASELINE:
+    case IrlGrad::ENAC_BASELINE:
         return "ENAC_BASELINE";
-    case NATURAL_REINFORCE:
+    case IrlGrad::NATURAL_REINFORCE:
         return "NATURAL_REINFORCE";
-    case NATURAL_REINFORCE_BASELINE:
+    case IrlGrad::NATURAL_REINFORCE_BASELINE:
         return "NATURAL_REINFORCE_BASELINE";
-    case NATURAL_GPOMDP:
+    case IrlGrad::NATURAL_GPOMDP:
         return "NATURAL_GPOMDP";
-    case NATURAL_GPOMDP_BASELINE:
+    case IrlGrad::NATURAL_GPOMDP_BASELINE:
         return "NATURAL_GPOMDP_BASELINE";
     default:
         throw std::runtime_error("Unknown type");

@@ -46,22 +46,22 @@ public:
 
         switch(type)
         {
-        case REINFORCE:
+        case IrlGrad::REINFORCE:
             return new NonlinearReinforceCalculator<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case REINFORCE_BASELINE:
+        case IrlGrad::REINFORCE_BASELINE:
             return new NonlinearReinforceBaseCalculator<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case GPOMDP:
+        case IrlGrad::GPOMDP:
             return new NonlinearGPOMDPCalculator<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case GPOMDP_BASELINE:
+        case IrlGrad::GPOMDP_BASELINE:
             return new NonlinearGPOMDPBaseCalculator<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case ENAC:
+        case IrlGrad::ENAC:
             return new NonlinearENACCalculator<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case ENAC_BASELINE:
+        case IrlGrad::ENAC_BASELINE:
             return new NonlinearENACBaseCalculator<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
         default:
@@ -79,16 +79,16 @@ private:
     {
         switch(type)
         {
-        case NATURAL_REINFORCE:
+        case IrlGrad::NATURAL_REINFORCE:
             return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearReinforceCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
-        case NATURAL_REINFORCE_BASELINE:
+        case IrlGrad::NATURAL_REINFORCE_BASELINE:
             return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearReinforceBaseCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
-        case NATURAL_GPOMDP:
+        case IrlGrad::NATURAL_GPOMDP:
             return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearGPOMDPCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
-        case NATURAL_GPOMDP_BASELINE:
+        case IrlGrad::NATURAL_GPOMDP_BASELINE:
             return new NonlinearNaturalGradientCalculator<ActionC, StateC, NonlinearGPOMDPBaseCalculator<ActionC, StateC>>(rewardFunc, data, policy, gamma);
 
         default:

@@ -37,13 +37,13 @@ class ExpectedDeltaIRL: public LinearIRLAlgorithm<ActionC, StateC>
 public:
     ExpectedDeltaIRL(Dataset<ActionC, StateC>& data,
                      DifferentiablePolicy<ActionC, StateC>& policy,
-                     LinearApproximator& rewardf, double gamma, IrlGrad type) :
+                     LinearApproximator& rewardf, double gamma, IrlGrad type, IrlHess htype) :
         LinearIRLAlgorithm<ActionC, StateC>(data, policy, rewardf, gamma)
     {
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);
         hessianCalculator = HessianCalculatorFactory<ActionC, StateC>::build(
-                                type, rewardf.getFeatures(), data, policy, gamma);
+        			htype, rewardf.getFeatures(), data, policy, gamma);
 
         this->optAlg = nlopt::algorithm::LN_COBYLA;
     }

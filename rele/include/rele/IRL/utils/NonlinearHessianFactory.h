@@ -35,7 +35,7 @@ template<class ActionC, class StateC>
 class NonlinearHessianFactory
 {
 public:
-    static NonlinearHessianCalculator<ActionC, StateC>* build(IrlGrad type,
+    static NonlinearHessianCalculator<ActionC, StateC>* build(IrlHess type,
             ParametricRegressor& rewardFunc,
             Dataset<ActionC,StateC>& data,
             DifferentiablePolicy<ActionC,StateC>& policy,
@@ -44,16 +44,16 @@ public:
 
         switch(type)
         {
-        case REINFORCE:
+        case IrlHess::REINFORCE:
             return new NonlinearHessianReinforce<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case REINFORCE_BASELINE:
+        case IrlHess::REINFORCE_BASELINE:
             return new NonlinearHessianReinforceBase<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case GPOMDP:
+        case IrlHess::GPOMDP:
             return new NonlinearHessianGPOMDP<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
-        case GPOMDP_BASELINE:
+        case IrlHess::GPOMDP_BASELINE:
             return new NonlinearHessianGPOMDPBase<ActionC, StateC>(rewardFunc, data, policy, gamma);
 
         default:

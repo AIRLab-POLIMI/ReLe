@@ -49,10 +49,14 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
+	FileManager fm("lqrPrint");
+	fm.createDir();
+
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
+    IrlHess htype = IrlHess::REINFORCE_BASELINE_TRACE_MULTY;
     vec eReward =
     { 0.3, 0.7 };
-    int nbEpisodes = 10000;
+    int nbEpisodes = 1000;
     int dim = eReward.n_elem;
 
     // create policy basis functions
@@ -83,7 +87,7 @@ int main(int argc, char *argv[])
     // Create expert policy
     //MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
     arma::mat SigmaExpert(dim, dim, arma::fill::eye);
-    //SigmaExpert *= 10;
+    SigmaExpert *= 0.1;
     MVNPolicy expertPolicy(phi, SigmaExpert);
     expertPolicy.setParameters(p);
 
@@ -117,7 +121,7 @@ int main(int argc, char *argv[])
                               phiReward, data, expertPolicy,
                               mdp.getSettings().gamma);
 
-    auto hessianCalculator = HessianCalculatorFactory<DenseAction, DenseState>::build(atype,
+    auto hessianCalculator = HessianCalculatorFactory<DenseAction, DenseState>::build(htype,
                              phiReward, data, expertPolicy,
                              mdp.getSettings().gamma);
 
@@ -178,14 +182,14 @@ int main(int argc, char *argv[])
 
     std::cout << "Saving results" << std::endl;
 
-    valuesJ.save("/tmp/ReLe/J.txt", arma::raw_ascii);
-    valuesG.save("/tmp/ReLe/G.txt", arma::raw_ascii);
-    valuesT.save("/tmp/ReLe/T.txt", arma::raw_ascii);
-    valuesF.save("/tmp/ReLe/F.txt", arma::raw_ascii);
-    valuesFs.save("/tmp/ReLe/Fs.txt", arma::raw_ascii);
-    valuesE.save("/tmp/ReLe/E.txt", arma::raw_ascii);
+    valuesJ.save(fm.addPath("J.txt"), arma::raw_ascii);
+    valuesG.save(fm.addPath("G.txt"), arma::raw_ascii);
+    valuesT.save(fm.addPath("T.txt"), arma::raw_ascii);
+    valuesF.save(fm.addPath("F.txt"), arma::raw_ascii);
+    valuesFs.save(fm.addPath("Fs.txt"), arma::raw_ascii);
+    valuesE.save(fm.addPath("E.txt"), arma::raw_ascii);
 
-    std::ofstream ofs("/tmp/ReLe/Trajectories.txt");
+    std::ofstream ofs(fm.addPath("Trajectories.txt"));
     data.writeToStream(ofs);
 
     std::cout << "Work complete" << std::endl;

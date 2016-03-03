@@ -35,7 +35,7 @@ template<class ActionC, class StateC>
 class HessianCalculatorFactory
 {
 public:
-    static HessianCalculator<ActionC, StateC>* build(IrlGrad type,
+    static HessianCalculator<ActionC, StateC>* build(IrlHess type,
             Features& phi,
             Dataset<ActionC,StateC>& data,
             DifferentiablePolicy<ActionC,StateC>& policy,
@@ -44,16 +44,22 @@ public:
 
         switch(type)
         {
-        case REINFORCE:
+        case IrlHess::REINFORCE:
             return new HessianReinforce<ActionC, StateC>(phi, data, policy, gamma);
 
-        case REINFORCE_BASELINE:
+        case IrlHess::REINFORCE_BASELINE:
             return new HessianReinforceBase<ActionC, StateC>(phi, data, policy, gamma);
 
-        case GPOMDP:
+        case IrlHess::REINFORCE_BASELINE_TRACE:
+            return new HessianReinforceTraceBaseSingle<ActionC, StateC>(phi, data, policy, gamma);
+
+        case IrlHess::REINFORCE_BASELINE_TRACE_MULTY:
+             return new HessianReinforceTraceBaseDiag<ActionC, StateC>(phi, data, policy, gamma);
+
+        case IrlHess::GPOMDP:
             return new HessianGPOMDP<ActionC, StateC>(phi, data, policy, gamma);
 
-        case GPOMDP_BASELINE:
+        case IrlHess::GPOMDP_BASELINE:
             return new HessianGPOMDPBase<ActionC, StateC>(phi, data, policy, gamma);
 
         default:
