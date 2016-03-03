@@ -28,7 +28,7 @@
 namespace ReLe
 {
 
-enum OffGradType
+enum class OffGradType
 {
     REINFORCE, REINFORCE_BASELINE, GPOMDP, GPOMDP_BASELINE_SINGLE, GPOMDP_BASELINE_MULTY
 };

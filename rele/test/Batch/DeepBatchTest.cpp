@@ -112,33 +112,10 @@ int main(int argc, char *argv[])
     ParametricGibbsPolicy<DenseState> behavioral(actions, basis, 1);
 
     ParametricGibbsPolicy<DenseState> target(actions, basis, 1);
-    //---
-
-    PolicyEvalAgent<FiniteAction,DenseState> agent(behavioral);
-
-    ReLe::Core<FiniteAction, DenseState> oncore(mdp, agent);
-    CollectorStrategy<FiniteAction, DenseState>* strat = new CollectorStrategy<FiniteAction, DenseState>();
-    oncore.getSettings().loggerStrategy = strat;
-
-    int horiz = mdp.getSettings().horizon;
-    oncore.getSettings().episodeLength = horiz;
-
-    int nbTrajectories = 1e4;
-    for (int n = 0; n < nbTrajectories; ++n)
-        oncore.runTestEpisode();
-
-    Dataset<FiniteAction, DenseState>& data = strat->data;
-    ofstream out(fm.addPath("Dataset.csv"), ios_base::out);
-    if (out.is_open())
-        data.writeToStream(out);
-    out.close();
-
-    cout << "# Ended data collection" << endl;
-
 
     AdaptiveStep stepl(0.1);
 
-    OffpolicyREINFORCE<FiniteAction, DenseState> offagent(target, behavioral, data.size(), stepl);
+    OffPolicyGradientAlgorithm<FiniteAction, DenseState> offagent(target, behavioral, data.size(), stepl);
     BatchCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
     offcore.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
         fm.addPath("deep.log"),
