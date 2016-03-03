@@ -26,8 +26,6 @@
 #include "rele/approximators/regressors/others/GaussianMixtureModels.h"
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 
-#include "rele/utils/Utils.h"
-
 using namespace ReLe;
 using namespace std;
 

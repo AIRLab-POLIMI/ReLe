@@ -57,6 +57,11 @@ public:
         mixtureWeights /= arma::sum(mixtureWeights);
     }
 
+    virtual ~GenericParametricMixturePolicy()
+    {
+
+    }
+
     // Policy interface
 public:
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) override
@@ -201,6 +206,11 @@ public:
     GenericParametricLogisticMixturePolicy(std::vector<DifferentiablePolicy<ActionC, StateC>*>& mixture, arma::vec coeff)
         : GenericParametricMixturePolicy<ActionC, StateC>(mixture, coeff)
     {
+    }
+
+    virtual ~GenericParametricLogisticMixturePolicy()
+    {
+
     }
 
     // Policy interface

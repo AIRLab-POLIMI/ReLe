@@ -140,6 +140,11 @@ void vecToTriangular(const arma::vec& vector, arma::mat& triangular);
  */
 void triangularToVec(const arma::mat& triangular, arma::vec& vector);
 
+/**
+ *
+ */
+arma::mat safeChol(arma::mat& M);
+
 //void meshgrid(const arma::vec& x, const arma::vec& y, const arma::vec& z, arma::mat& xx, arma::mat& yy, arma::mat& zz);
 
 }

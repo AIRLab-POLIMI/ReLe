@@ -25,8 +25,6 @@
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/regressors/nn/Autoencoder.h"
 
-#include "rele/utils/Utils.h"
-
 using namespace std;
 using namespace ReLe;
 

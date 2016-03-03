@@ -25,12 +25,11 @@
 #define DISTRIBUTION_H_
 
 #include <armadillo>
-#include "rele/utils/Interfaces.h"
 
 namespace ReLe
 {
 
-class Distribution : public WritableInterface
+class Distribution
 {
 public:
 

@@ -3,8 +3,6 @@
 
 #include "rele/statistics/Distribution.h"
 
-#include "rele/utils/Utils.h"
-
 namespace ReLe
 {
 
@@ -58,10 +56,9 @@ public:
     virtual arma::vec difflog(const arma::vec &point) override;
     virtual arma::mat diff2log(const arma::vec &point) override;
 
-    // WritableInterface interface
 public:
-    virtual void writeOnStream(std::ostream &out) override;
-    virtual void readFromStream(std::istream &in) override;
+    virtual void writeOnStream(std::ostream &out);
+    virtual void readFromStream(std::istream &in);
 
 
     // Specific Normal policy interface //TODO check this!!!
