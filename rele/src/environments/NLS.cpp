@@ -66,7 +66,7 @@ void NLSSettings::defaultSettings(NLSSettings& settings)
 
 void NLSSettings::WriteToStream(ostream &out) const
 {
-    EnvironmentSettings::WriteToStream(out);
+    EnvironmentSettings::writeToStream(out);
     out << this->noise_mean << std::endl;
     out << this->noise_std << std::endl;
     out << this->pos0_mean << std::endl;
@@ -76,7 +76,7 @@ void NLSSettings::WriteToStream(ostream &out) const
 
 void NLSSettings::ReadFromStream(istream &in)
 {
-    EnvironmentSettings::ReadFromStream(in);
+    EnvironmentSettings::readFromStream(in);
     in >> this->noise_mean;
     in >> this->noise_std;
     in >> this->pos0_mean;

@@ -18,6 +18,34 @@ in namespace ``ReLe``.
 Library Core
 ============
 
+Basic concepts
+--------------
+
+.. doxygenclass:: ReLe::Action
+   :members:
+
+.. doxygenclass:: ReLe::FiniteAction
+   :members:
+   
+.. doxygenclass:: ReLe::DenseAction
+   :members:
+   
+.. doxygenclass:: ReLe::State
+   :members:
+   
+.. doxygenclass:: ReLe::FiniteState
+   :members:
+   
+.. doxygenclass:: ReLe::DenseState
+   :members:
+
+.. doxygenclass:: ReLe::EnvironmentSettings
+   :members:   
+   
+.. doxygenclass:: ReLe::AgentOutputData
+   :members:    
+   
+
 Basic Interfaces
 ----------------
 
@@ -28,6 +56,9 @@ Basic Interfaces
 .. doxygenclass:: ReLe::BatchAgent
    :members:
    :protected-members:
+   
+.. doxygenclass:: ReLe::Solver
+   :members:      
 
 Basic Utilities
 ---------------

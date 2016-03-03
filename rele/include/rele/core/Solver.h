@@ -32,20 +32,50 @@
 namespace ReLe
 {
 
+/*!
+ * A solver is the abstract interface for exact or approximate solvers for a specific family of environments.
+ * Differently from agents, it does not implement a logger interface, and doesn't need to interface with a core.
+ * Often a solver is declared as friend of the class of MDPs that can solve, to access it's internal state.
+ */
 template<class ActionC, class StateC>
 class Solver
 {
 public:
+    /*!
+     * Default Constructor
+     */
     Solver()
     {
         testEpisodeLength = 100;
         testEpisodes = 1;
     }
 
+    /*!
+     * This method run the computation of the optimal policy for the MDP.
+     * Must be implemented.
+     */
     virtual void solve() = 0;
+
+    /*!
+     * This method runs the policy computed by Solver::solve() over the MDP.
+     * Must be implemented. Normally the implementation is simply wrapper for
+     * Solver::test(Environment<ActionC, StateC>& env, Policy<ActionC, StateC>& pi)
+     * \return the set of trajectories sampled with the optimal policy from the MDP
+     */
     virtual Dataset<ActionC, StateC> test() = 0;
+
+    /*!
+     * Getter
+     * \return the set the optimal policy from the MDP
+     */
     virtual Policy<ActionC, StateC>& getPolicy() = 0;
 
+    /*!
+     * Set the episodes number and the episode maximum length
+     * \see Solver::test()
+     * \params testEpisodes the number of test episodes to run
+     * \params testEpisodeLength the maximum length for each test episode
+     */
     inline void setTestParams(unsigned int testEpisodes,
                               unsigned int testEpisodeLength)
     {
@@ -53,11 +83,17 @@ public:
         this->testEpisodes = testEpisodes;
     }
 
+    /*!
+     * Destructor
+     */
     virtual ~Solver()
     {
     }
 
 protected:
+    /*!
+     * This method implements the low level test using the core.
+     */
     virtual Dataset<ActionC, StateC> test(Environment<ActionC, StateC>& env,
                                           Policy<ActionC, StateC>& pi)
     {

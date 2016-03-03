@@ -43,7 +43,7 @@ public:
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);
         hessianCalculator = HessianCalculatorFactory<ActionC, StateC>::build(
-        			htype, rewardf.getFeatures(), data, policy, gamma);
+                                htype, rewardf.getFeatures(), data, policy, gamma);
 
         this->optAlg = nlopt::algorithm::LN_COBYLA;
     }

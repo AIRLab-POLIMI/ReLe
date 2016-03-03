@@ -256,53 +256,53 @@ void triangularToVec(const arma::mat& triangular, arma::vec& vector)
 
 arma::mat safeChol(arma::mat& M)
 {
-        if(M.n_elem == 1 && M(0) <= 0)
+    if(M.n_elem == 1 && M(0) <= 0)
+    {
+        arma::mat C(1, 1, arma::fill::randn);
+        C(0) = std::numeric_limits<double>::epsilon();
+        return C;
+    }
+
+    try
+    {
+        return arma::chol(M);
+    }
+    catch(std::runtime_error& e)
+    {
+        arma::mat B = (M + M.t())/2;
+
+        arma::mat U, V;
+        arma::vec s;
+        bool ok = arma::svd(U, s, V, M);
+
+        if(!ok)
+            throw std::runtime_error("Bad Covariance Matrix, SVD failed");
+
+        arma::mat H = V*arma::diagmat(s)*V.t();
+
+        arma::mat C = (B+H)/2;
+        C = (C + C.t())/2;
+
+        int k = 0;
+        while(true)
         {
-            arma::mat C(1, 1, arma::fill::randn);
-            C(0) = std::numeric_limits<double>::epsilon();
-            return C;
-        }
-
-        try
-        {
-            return arma::chol(M);
-        }
-        catch(std::runtime_error& e)
-        {
-            arma::mat B = (M + M.t())/2;
-
-            arma::mat U, V;
-            arma::vec s;
-            bool ok = arma::svd(U, s, V, M);
-
-            if(!ok)
-                throw std::runtime_error("Bad Covariance Matrix, SVD failed");
-
-            arma::mat H = V*arma::diagmat(s)*V.t();
-
-            arma::mat C = (B+H)/2;
-            C = (C + C.t())/2;
-
-            int k = 0;
-            while(true)
+            try
             {
-                try
-                {
-                    return arma::chol(C);
-                }
-                catch(std::runtime_error& e)
-                {
-                    k++;
-                    double k2 = k*k;
-                    double mineig = arma::min(arma::eig_sym(C));
-                    double relEps = std::nextafter(mineig, std::numeric_limits<double>::infinity()) - mineig;
-                    C += (-mineig*k2 + relEps)*arma::eye(C.n_rows, C.n_cols);
-                }
+                return arma::chol(C);
             }
-
+            catch(std::runtime_error& e)
+            {
+                k++;
+                double k2 = k*k;
+                double mineig = arma::min(arma::eig_sym(C));
+                double relEps = std::nextafter(mineig, std::numeric_limits<double>::infinity()) - mineig;
+                C += (-mineig*k2 + relEps)*arma::eye(C.n_rows, C.n_cols);
+            }
         }
 
     }
+
+}
 
 //void meshgrid(const arma::vec &x, const arma::vec &y, const arma::vec &z, arma::mat &xx, arma::mat &yy, arma::mat &zz)
 //{

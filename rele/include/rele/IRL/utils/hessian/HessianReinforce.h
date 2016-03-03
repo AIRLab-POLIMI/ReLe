@@ -149,10 +149,10 @@ protected:
     USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
 
 public:
-	HessianReinforceTraceBaseSingle(Features& phi,
-                         Dataset<ActionC,StateC>& data,
-                         DifferentiablePolicy<ActionC,StateC>& policy,
-                         double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+    HessianReinforceTraceBaseSingle(Features& phi,
+                                    Dataset<ActionC,StateC>& data,
+                                    DifferentiablePolicy<ActionC,StateC>& policy,
+                                    double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -216,10 +216,10 @@ protected:
     USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
 
 public:
-	HessianReinforceTraceBaseDiag(Features& phi,
-                         Dataset<ActionC,StateC>& data,
-                         DifferentiablePolicy<ActionC,StateC>& policy,
-                         double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+    HessianReinforceTraceBaseDiag(Features& phi,
+                                  Dataset<ActionC,StateC>& data,
+                                  DifferentiablePolicy<ActionC,StateC>& policy,
+                                  double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -267,9 +267,9 @@ protected:
         arma::mat baseline;
 
         if(arma::rank(baseline_den) == dp)
-        	baseline = arma::solve(baseline_den, baseline_num);
+            baseline = arma::solve(baseline_den, baseline_num);
         else
-        	baseline = arma::pinv(baseline_den)*baseline_num;
+            baseline = arma::pinv(baseline_den)*baseline_num;
 
         for (int ep = 0; ep < episodeN; ep++)
         {

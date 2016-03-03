@@ -87,9 +87,8 @@ public:
     {
         arma::vec output = approximator(state);
 
-        //TODO CONTROLLARE ASSEGNAMENTO
-        DenseAction a;
-        a.copy_vec(output);
+        DenseAction a(output);
+
         if (a.isAlmostEqual(action))
         {
             return 1.0;

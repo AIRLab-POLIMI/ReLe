@@ -76,7 +76,7 @@ void DamSettings::defaultSettings(DamSettings& settings)
 
 void DamSettings::WriteToStream(ostream &out) const
 {
-    EnvironmentSettings::WriteToStream(out);
+    EnvironmentSettings::writeToStream(out);
     out << this->S << std::endl;
     out << this->W_IRR << std::endl;
     out << this->H_FLO_U << std::endl;
@@ -99,7 +99,7 @@ void DamSettings::WriteToStream(ostream &out) const
 
 void DamSettings::ReadFromStream(istream &in)
 {
-    EnvironmentSettings::ReadFromStream(in);
+    EnvironmentSettings::readFromStream(in);
     in >> this->S >> this->W_IRR;
     in >> this->H_FLO_U >> this->S_MIN_REL;
     in >> this->DAM_INFLOW_MEAN >> this->DAM_INFLOW_STD;

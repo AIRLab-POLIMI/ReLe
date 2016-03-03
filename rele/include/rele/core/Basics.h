@@ -36,26 +36,43 @@
 namespace ReLe
 {
 
+/*!
+ * Basic struct to describe an environment
+ */
 struct EnvironmentSettings
 {
+    //! Finite horizon flag
     bool isFiniteHorizon;
-    double gamma;
-    unsigned int horizon;
-
+    //! Average reward flag
     bool isAverageReward;
+    //! Episodic environment flag
     bool isEpisodic;
 
+    //! Discount factor
+    double gamma;
+    //! horizon of mdp
+    unsigned int horizon;
+
+    //! number of finite states of the mdp. Should be zero for continuos state spaces
     size_t finiteStateDim;
+    //! number of finite actions of the mdp. Should be zero for continuos action spaces
     unsigned int finiteActionDim;
 
+    //! number of dimensions of the state space states of the mdp. Should be zero for finite state spaces
     unsigned int continuosStateDim;
+    //! number of dimensions of the state space states of the mdp. Should be zero for finite state spaces
     unsigned int continuosActionDim;
 
+    //! number of dimensions of the reward function
     unsigned int rewardDim;
 
+    //! vector of maximum value of each dimension of the reward function
     arma::vec max_obj; //TODO: possiamo mettere un range? (usato per normalizzazione in matlab, default 1)
 
-    inline void WriteToStream(std::ostream& out) const
+    /*!
+     * Writes the struct to stream
+     */
+    inline void writeToStream(std::ostream& out) const
     {
         out << std::setprecision(OS_PRECISION);
         out << finiteStateDim << "\t" << finiteActionDim << std::endl;
@@ -65,7 +82,10 @@ struct EnvironmentSettings
         out << isEpisodic << "\t" << isAverageReward << std::endl;
     }
 
-    inline void ReadFromStream(std::istream& in)
+    /*!
+     * Reads the struct from stream
+     */
+    inline void readFromStream(std::istream& in)
     {
         in >> finiteStateDim >> finiteActionDim;
         in >> continuosStateDim >> continuosActionDim;
@@ -75,32 +95,62 @@ struct EnvironmentSettings
     }
 };
 
-
+/*!
+ * The basic interface to log data from Agents.
+ * In contains some common data and basic methods to process generic data.
+ */
 class AgentOutputData
 {
 public:
+    /*!
+     * Constructor
+     * \param final whether the data logged comes from the end of a run of the algorithm
+     */
     AgentOutputData(bool final = false) : final(final), step(0)
     {
 
     }
 
+    /*!
+     * Basic method to write plain data.
+     * \param os output stream in which the data should be logged
+     */
     virtual void writeData(std::ostream& os) = 0;
+
+    /*!
+     * Basic method to write decorated data, e.g. for printing on screen.
+     * \param os output stream in which the data should be logged
+     */
     virtual void writeDecoratedData(std::ostream& os) = 0;
 
+    /*!
+     * Destructor
+     */
     virtual ~AgentOutputData()
     {
     }
 
+    /*!
+     * Getter.
+     * \return if the data logged comes from the end of the run or not.
+     */
     inline bool isFinal() const
     {
         return final;
     }
 
+    /*!
+     * Getter.
+     * \return the step at which the data was logged.
+     */
     inline unsigned int getStep() const
     {
         return step;
     }
 
+    /*!
+     * Setter. Sets the data step number. Should be used only by the Core.
+     */
     inline void setStep(unsigned int step)
     {
         this->step = step;
@@ -112,54 +162,99 @@ private:
 
 };
 
+/*!
+ * Abstract class for all actions
+ */
 class Action
 {
 public:
+    /*!
+     * writes the action as string. Should be overridden
+     */
     inline virtual std::string to_str() const
     {
         return "action";
     }
 
+    /*!
+     * Getter.
+     * Should be overridden.
+     * \return the size of the action if serialized as a csv string
+     */
     virtual inline int serializedSize()
     {
         return 0;
     }
 
+    /*!
+     * Destructor
+     */
     virtual ~Action()
     {
 
     }
 
+    /*!
+     * factory method that transform a set of strings into an action.
+     * \param begin the iterator of the first element in the range
+     * \param end the iterator to the end of the range
+     * \return the action build from strings
+     */
     static inline Action generate(std::vector<std::string>::iterator& begin,
                                   std::vector<std::string>::iterator& end)
     {
         return Action();
     }
+
 };
 
+/*!
+ * Finite action class.
+ * Actions of this types are described by a finite subset of unsigned integers.
+ */
 class FiniteAction: public Action
 {
 public:
+    /*!
+     * Constructor
+     * \param n the action number
+     */
     FiniteAction(unsigned int n = 0)
     {
         actionN = n;
     }
 
+    /*!
+     * This operator is used to convert the action class to an integer
+     * \return a reference to the action number
+     */
     operator unsigned int&()
     {
         return actionN;
     }
 
+    /*!
+     * This operator is used to convert the action class to an integer
+     * \return a const reference to the action number
+     */
     operator const unsigned int&() const
     {
         return actionN;
     }
 
+    /*!
+     * Getter.
+     * \return the action number
+     */
     inline unsigned int getActionN() const
     {
         return actionN;
     }
 
+    /*!
+     * Setter.
+     * \param actionN the action number to be set
+     */
     inline void setActionN(unsigned int actionN)
     {
         this->actionN = actionN;
@@ -175,11 +270,17 @@ public:
         return 1;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~FiniteAction()
     {
 
     }
 
+    /*!
+     * \copydoc Action::generate
+     */
     static inline FiniteAction generate(std::vector<std::string>::iterator& begin,
                                         std::vector<std::string>::iterator& end)
     {
@@ -187,11 +288,11 @@ public:
         return FiniteAction(actionN);
     }
 
-    inline virtual bool isAlmostEqual(const FiniteAction& other) const
-    {
-        return this->getActionN() == other.getActionN();
-    }
-
+    /*!
+     * factory method that builds the first N actions
+     * \param actionN the number of actions to be build
+     * \return all the actions from 0 to actionN-1
+     */
     inline static std::vector<FiniteAction> generate(size_t actionN)
     {
         std::vector<FiniteAction> actions;
@@ -204,16 +305,34 @@ private:
     unsigned int actionN;
 };
 
+
+/*!
+ * Dense action class.
+ * This class represent an action u, such that u\in\mathbb{R^n}, where n is the dimensionality of action space
+ */
 class DenseAction: public Action, public arma::vec
 {
 public:
+    /*!
+     * Constructor.
+     * Builds an action with zero dimensions
+     */
     DenseAction ()
     { }
 
+    /*!
+     * Constructor.
+     * \params size the action dimensionality
+     */
     DenseAction(std::size_t size) :
         arma::vec(size)
     {    }
 
+    /*!
+     * Constructor.
+     * Initialize the action from an armadillo vector
+     * \param other the vector to copy as action
+     */
     DenseAction(arma::vec& other) :
         arma::vec(other.n_elem)
     {
@@ -242,18 +361,20 @@ public:
         return this->n_elem;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~DenseAction()
     {
 
     }
 
-    inline virtual void copy_vec(const arma::vec& other)
-    {
-        this->set_size(other.n_elem);
-        for (int i = 0; i < other.n_elem; ++i)
-            this->at(i) = other[i];
-    }
-
+    /*!
+     * Check whether two actions are almost equals
+     * \param other the action to chek againts
+     * \param epsilon the tolerance for each element
+     * \return whether all elements differences are below the tolerance
+     */
     inline virtual bool isAlmostEqual(const arma::vec& other, double epsilon = 1e-6) const
     {
         int i, dim = this->n_elem;
@@ -266,6 +387,9 @@ public:
         return true;
     }
 
+    /*!
+     * \copydoc Action::generate
+     */
     static inline DenseAction generate(std::vector<std::string>::iterator& begin,
                                        std::vector<std::string>::iterator& end)
     {
@@ -280,30 +404,53 @@ public:
     }
 };
 
+
+/*!
+ * Abstract class for all states
+ */
 class State
 {
 public:
+    /*!
+     * Constructor.
+     */
     State() :
         absorbing(false)
     {
 
     }
 
+    /*!
+     * Getter.
+     * \return whether this state is an absorbing one
+     */
     inline bool isAbsorbing() const
     {
         return absorbing;
     }
 
+    /*!
+     * Setter.
+     * \param whether to set this state as an absorbing state or not.
+     */
     inline void setAbsorbing(bool absorbing = true)
     {
         this->absorbing = absorbing;
     }
 
+    /*!
+     * writes the state as string. Should be overridden
+     */
     inline virtual std::string to_str() const
     {
         return "state";
     }
 
+    /*!
+     * Getter.
+     * Should be overridden.
+     * \return the size of the state if serialized as a csv string
+     */
     virtual inline int serializedSize()
     {
         return 0;
@@ -324,29 +471,53 @@ private:
     bool absorbing;
 };
 
+/*!
+ * Finite state class.
+ * States of this types are described by a finite subset of unsigned integers.
+ */
 class FiniteState: public State
 {
 public:
+    /*!
+     * Constructor
+     * \param n the state number
+     */
     FiniteState(unsigned int n = 0)
     {
         stateN = n;
     }
 
+    /*!
+     * This operator is used to convert the state class to an integer
+     * \return a reference to the state number
+     */
     operator size_t&()
     {
         return stateN;
     }
 
+    /*!
+     * This operator is used to convert the state class to an integer
+     * \return a const reference to the state number
+     */
     operator const size_t&() const
     {
         return stateN;
     }
 
+    /*!
+     * Getter.
+     * \return the action number
+     */
     inline std::size_t getStateN() const
     {
         return stateN;
     }
 
+    /*!
+     * Setter.
+     * \param actionN the action number to be set
+     */
     inline void setStateN(std::size_t stateN)
     {
         this->stateN = stateN;
@@ -362,11 +533,17 @@ public:
         return 1;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~FiniteState()
     {
 
     }
 
+    /*!
+     * \copydoc State::generate
+     */
     static inline FiniteState generate(std::vector<std::string>::iterator& begin,
                                        std::vector<std::string>::iterator& end)
     {
@@ -379,13 +556,25 @@ private:
 
 };
 
+/*!
+ * Dense action class.
+ * This class represent a state x, such that x\in\mathbb{R^n}, where n is the dimensionality of state space
+ */
 class DenseState: public State, public arma::vec
 {
 public:
+    /*!
+     * Constructor.
+     * Builds a state with zero dimensions
+     */
     DenseState()
     {
     }
 
+    /*!
+     * Constructor.
+     * \params size the state dimensionality
+     */
     DenseState(std::size_t size) :
         arma::vec(size)
     {
@@ -411,11 +600,17 @@ public:
         return this->n_elem;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~DenseState()
     {
 
     }
 
+    /*!
+     * \copydoc State::generate
+     */
     static inline DenseState generate(std::vector<std::string>::iterator& begin,
                                       std::vector<std::string>::iterator& end)
     {
@@ -431,6 +626,9 @@ public:
 
 };
 
+/*!
+ * function to generate a reward instance from strings
+ */
 typedef std::vector<double> Reward;
 inline Reward generate(std::vector<std::string>::iterator& begin,
                        std::vector<std::string>::iterator& end)
@@ -447,18 +645,30 @@ inline Reward generate(std::vector<std::string>::iterator& begin,
 
 }
 
+/*!
+ * Operator to write an action to stream
+ * \param action the action to be written
+ */
 inline std::ostream& operator<<(std::ostream& os, const Action& action)
 {
     os << action.to_str();
     return os;
 }
 
+/*!
+ * Operator to write a state to stream
+ * \param state the state to be written
+ */
 inline std::ostream& operator<<(std::ostream& os, const State& state)
 {
     os << state.to_str();
     return os;
 }
 
+/*!
+ * Operator to write the reward to stream
+ * \param reward the reward to be written
+ */
 inline std::ostream& operator<<(std::ostream& os, const Reward& reward)
 {
     if(!reward.empty())
