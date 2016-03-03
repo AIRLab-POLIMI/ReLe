@@ -10,7 +10,6 @@ Its main features and design principles are:
 
 - Template
 - C++11
--
 
 ReLe is licensed under the `GPLV3 license`_; see LICENSE in the
 source distribution for details.

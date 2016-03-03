@@ -23,6 +23,7 @@ Basic Interfaces
 
 .. doxygenclass:: ReLe::Agent
    :members:
+   :protected-members:
 
 .. doxygenclass:: ReLe::BatchAgent
    :members:
