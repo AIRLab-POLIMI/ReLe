@@ -58,30 +58,6 @@ void AbstractREPSOutputData::writeDecoratedInfo(ostream& os)
     os << "Using " << policyName << " policy" << endl << endl;
 }
 
-TabularREPSOutputData::TabularREPSOutputData(int N, double eps,
-        const string& policyPrinted, bool final) :
-    AbstractREPSOutputData(N, eps, "Tabular", final),
-    policyPrinted(policyPrinted)
-{
-
-}
-
-void TabularREPSOutputData::writeData(ostream& os)
-{
-    writeInfo(os);
-    os << policyPrinted << endl; //TODO change this
-}
-
-void TabularREPSOutputData::writeDecoratedData(ostream& os)
-{
-    writeDecoratedInfo(os);
-    os << policyPrinted << endl;
-}
-
-TabularREPSOutputData::~TabularREPSOutputData()
-{
-
-}
 
 REPSOutputData::REPSOutputData(unsigned int nbIndividual,
                                unsigned int nbParams, unsigned int nbEvals) :

@@ -41,10 +41,10 @@ template<class ActionC, class StateC>
 class PolicyEvalAgent: public Agent<ActionC, StateC>
 {
 public:
-	/*!
-	 * Constructor
-	 * \params policy the policy to be used in evaluation
-	 */
+    /*!
+     * Constructor
+     * \params policy the policy to be used in evaluation
+     */
     PolicyEvalAgent(Policy<ActionC, StateC>& policy): policy(policy)
     {
 
@@ -65,7 +65,7 @@ public:
      */
     virtual void initEpisode(const StateC &state, ActionC &action) override
     {
-    	 throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
+        throw std::runtime_error("PolicyEvalAgent cannot be used for learning!");
     }
 
     void sampleAction(const StateC &state, ActionC &action) override
@@ -116,11 +116,11 @@ class PolicyEvalDistribution : public PolicyEvalAgent<ActionC, StateC>
 {
 public:
 
-	/*!
-	 * Constructor
-	 * \param dist the distribution of the parameters of the policies
-	 * \param policy the family of parametric policies to be used
-	 */
+    /*!
+     * Constructor
+     * \param dist the distribution of the parameters of the policies
+     * \param policy the family of parametric policies to be used
+     */
     PolicyEvalDistribution(Distribution& dist, ParametricPolicy<ActionC, StateC>& policy)
         : PolicyEvalAgent<ActionC, StateC>(policy), policy(policy), dist(dist)
     {

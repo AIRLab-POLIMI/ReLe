@@ -31,7 +31,6 @@
 
 #include "rele/generators/SimpleChainGenerator.h"
 
-#include "rele/algorithms/policy_search/REPS/TabularREPS.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 
 #include <iostream>
@@ -45,15 +44,12 @@ int main(int argc, char *argv[])
     generator.generate(5, 2);
 
     FiniteMDP mdp = generator.getMDP(0.9);
-    //e_Greedy policy;
+    e_Greedy policy;
     //Boltzmann policy;
 
     //SARSA agent(policy);
-    //Q_Learning agent(policy);
+    Q_Learning agent(policy);
 
-    BasisFunctions_<size_t> basis = FiniteIdentityBasis::generate(mdp.getSettings().finiteStateDim);
-    DenseFeatures_<size_t> phi(basis);
-    TabularREPS agent(phi);
     Core<FiniteAction, FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLength = 10000;

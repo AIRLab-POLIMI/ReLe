@@ -29,8 +29,6 @@
 #include "rele/policy/q_policy/Boltzmann.h"
 
 #include "rele/generators/SimpleChainGenerator.h"
-#include "rele/algorithms/policy_search/REPS/TabularREPS.h"
-
 #include <iostream>
 
 using namespace std;
