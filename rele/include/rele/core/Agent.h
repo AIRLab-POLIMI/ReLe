@@ -133,7 +133,7 @@ public:
 
     /*!
      * This method is called before each learning step and return if the terminal condition
-     * has been reached. Terminal condition can be implemented by setting the ReLe::Agent::terminalCond private member.
+     * has been reached. Terminal condition can be implemented by setting the Agent::terminalCond private member.
      * \return whether the terminal condition has been reached.
      */
     inline bool isTerminalConditionReached()
@@ -145,7 +145,7 @@ public:
     }
 
     /*!
-     * This method sets the agent task, i.e. the environment properties. This method also calls ReLe::Agent::init
+     * This method sets the agent task, i.e. the environment properties. This method also calls Agent::init
      * \param task the task properties of the environment
      */
     void setTask(const EnvironmentSettings& task)
