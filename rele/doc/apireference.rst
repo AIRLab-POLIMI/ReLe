@@ -27,6 +27,7 @@ Basic Interfaces
 
 .. doxygenclass:: ReLe::BatchAgent
    :members:
+   :protected-members:
 
 Basic Utilities
 ---------------
