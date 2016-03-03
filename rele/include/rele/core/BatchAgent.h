@@ -70,9 +70,10 @@ public:
     }
 
     /*!
-     * This method is called before each learning step and return if the terminal condition
-     * has been reached. Terminal condition can be implemented by setting the ReLe::Agent::terminalCond private member.
-     * \return whether the terminal condition has been reached.
+     * This method is used to log agent informations at episode end.
+     * Can be overloaded to return information that can be processed by the logger.
+     * By default a null pointer is returned, which means that no data will be logged.
+     * \return the data to be logged from the agent at the episode end.
      */
     virtual AgentOutputData* getAgentOutputDataEnd()
     {

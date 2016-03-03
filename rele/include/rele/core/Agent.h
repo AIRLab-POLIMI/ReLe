@@ -123,7 +123,7 @@ public:
     /*!
      * This method is used to log agent informations at episode end.
      * Can be overloaded to return information that can be processed by the logger.
-     * By default a null pointer is returned, wich means that no data will be logged.
+     * By default a null pointer is returned, which means that no data will be logged.
      * \return the data to be logged from the agent at the episode end.
      */
     virtual AgentOutputData* getAgentOutputDataEnd()
