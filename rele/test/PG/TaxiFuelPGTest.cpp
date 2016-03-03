@@ -25,7 +25,7 @@
 
 #include "rele/core/Core.h"
 
-#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
 
 #include "rele/policy/parametric/differentiable/GibbsPolicy.h"
 #include "rele/approximators/features/DenseFeatures.h"

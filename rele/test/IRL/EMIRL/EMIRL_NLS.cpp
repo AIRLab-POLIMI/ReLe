@@ -38,7 +38,7 @@
 #include "rele/core/Core.h"
 #include "rele/IRL/ParametricRewardMDP.h"
 #include "rele/IRL/algorithms/EMIRL.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
 
 #include "rele/utils/FileManager.h"
 

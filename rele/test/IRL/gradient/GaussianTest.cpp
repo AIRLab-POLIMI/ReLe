@@ -34,7 +34,7 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/IRL/algorithms/GIRL.h"
 #include "rele/IRL/algorithms/NoGIRL.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
 
 #include "rele/IRL/ParametricRewardMDP.h"
 

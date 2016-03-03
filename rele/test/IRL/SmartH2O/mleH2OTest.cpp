@@ -41,7 +41,7 @@
 #include "rele/utils/RandomGenerator.h"
 #include "rele/utils/FileManager.h"
 
-#include "rele/algorithms/policy_search/gradient/onpolicy/FunctionGradient.h"
+#include "rele/algorithms/policy_search/gradient/FunctionGradient.h"
 #include "rele/algorithms/policy_search/gradient/PolicyGradientAlgorithm.h"
 
 #include <boost/timer/timer.hpp>

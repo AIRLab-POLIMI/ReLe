@@ -38,7 +38,7 @@
 #include "rele/IRL/ParametricRewardMDP.h"
 #include "rele/IRL/algorithms/GIRL.h"
 
-#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/REINFORCEAlgorithm.h"
 
 #include "rele/utils/FileManager.h"
 

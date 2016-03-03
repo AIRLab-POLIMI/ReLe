@@ -37,8 +37,8 @@
 #include "rele/utils/RandomGenerator.h"
 #include "rele/utils/FileManager.h"
 
-#include "rele/algorithms/policy_search/gradient/onpolicy/FunctionGradient.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/FunctionHessian.h"
+#include "rele/algorithms/policy_search/gradient/FunctionGradient.h"
+#include "rele/algorithms/policy_search/gradient/FunctionHessian.h"
 #include "rele/algorithms/policy_search/gradient/PolicyGradientAlgorithm.h"
 
 using namespace std;

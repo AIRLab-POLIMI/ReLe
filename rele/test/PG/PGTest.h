@@ -21,10 +21,10 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/algorithms/policy_search/gradient/onpolicy/REINFORCEAlgorithm.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/GPOMDPAlgorithm.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/NaturalPGAlgorithm.h"
-#include "rele/algorithms/policy_search/gradient/onpolicy/ENACAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/REINFORCEAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/NaturalPGAlgorithm.h"
+#include "rele/algorithms/policy_search/gradient/ENACAlgorithm.h"
 #include "rele/core/Core.h"
 
 #include "rele/utils/FileManager.h"
