@@ -122,9 +122,15 @@ int main(int argc, char *argv[])
     batchcore.getSettings().loggerStrategy = new BatchPrintStrategy<FiniteAction, DenseState>();
     batchcore.getSettings().episodeLength = mdp.getSettings().horizon;
     batchcore.getSettings().nEpisodes = 1000;
-    batchcore.getSettings().maxBatchIterations = 10;
+    batchcore.getSettings().maxBatchIterations = 100;
+
+    auto&& dataBegin = batchcore.runTest();
+    std::cout << "initial reward: " << dataBegin.getMeanReward(mdp.getSettings().gamma) << std::endl;
 
     batchcore.run(behavioral);
+    auto&& dataEnd = batchcore.runTest();
+
+    std::cout << "reward end: " << dataEnd.getMeanReward(mdp.getSettings().gamma) << std::endl;
 
     delete pf0;
     delete pfs1;

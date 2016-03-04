@@ -22,10 +22,8 @@
  */
 
 #include "rele/statistics/DifferentiableNormals.h"
-#include "rele/core/Core.h"
-#include "rele/core/PolicyEvalAgent.h"
+#include "rele/core/BatchCore.h"
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
-#include "rele/algorithms/batch/policy_search/gradient/OffPolicyGradientAlgorithm.h"
 #include "rele/algorithms/batch/policy_search/gradient/OffPolicyGradientAlgorithm.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/features/DenseFeatures.h"
@@ -68,7 +66,7 @@ int main(int argc, char *argv[])
     //-2.8000    7.3000    8.5247
     int dim = mdp.getSettings().continuosStateDim;
 
-    //--- define policy (low level)
+    // define policy
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
     arma::vec wB(2);
@@ -83,58 +81,28 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy behavioral(phi, stdPhi, stdWeights);
     behavioral.setParameters(wB);
     NormalStateDependantStddevPolicy target(phi, stdPhi, stdWeights);
-    //---
-
-    PolicyEvalAgent<DenseAction,DenseState> agent(behavioral);
-
-    ReLe::Core<DenseAction, DenseState> oncore(mdp, agent);
-    CollectorStrategy<DenseAction, DenseState>* strat = new CollectorStrategy<DenseAction, DenseState>();
-    oncore.getSettings().loggerStrategy = strat;
-
-    int horiz = mdp.getSettings().horizon;
-    oncore.getSettings().episodeLength = horiz;
-
-    int nbTrajectories = 20e3;
-    for (int n = 0; n < nbTrajectories; ++n)
-        oncore.runTestEpisode();
-
-    Dataset<DenseAction, DenseState>& data = strat->data;
-    ofstream out(fm.addPath("Dataset.csv"), ios_base::out);
-    if (out.is_open())
-        data.writeToStream(out);
-    out.close();
-
-    cout << "# Ended data collection" << endl;
 
 
+    // run batch training
     AdaptiveStep stepl(0.1);
-//    OffpolicyREINFORCE<DenseAction, DenseState> offagent(target, behavioral, data.size(), stepl);
-    OffPolicyGPOMDP<DenseAction, DenseState> offagent(target, behavioral, data.size(), 0.1*data.size(), horiz, stepl);
-    BatchCore<DenseAction, DenseState> offcore(mdp, offagent, data);
-    offcore.getSettings().loggerStrategy = new WriteStrategy<DenseAction, DenseState>(
-        fm.addPath("nls.log"),
-        WriteStrategy<DenseAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
-    offcore.getSettings().episodeLength = horiz;
+    IndexRT rewardF(0);
 
-    int nbUpdates = 40;
-    double every, bevery;
-    every = bevery = 0.1; //%
+    OffGradType type = OffGradType::GPOMDP_BASELINE_SINGLE;
+    OffPolicyGradientAlgorithm<DenseAction, DenseState> offagent(type, target, behavioral, stepl, &rewardF);
+    BatchCore<DenseAction, DenseState> batchcore(mdp, offagent);
+
+    batchcore.getSettings().nEpisodes = 10000;
+    batchcore.getSettings().episodeLength = mdp.getSettings().horizon;
+    batchcore.getSettings().maxBatchIterations = 40;
+
+    auto&& dataBegin = batchcore.runTest();
+    std::cout << "initial reward: " << dataBegin.getMeanReward(mdp.getSettings().gamma) << std::endl;
+
+    batchcore.run(behavioral);
+    auto&& dataEnd = batchcore.runTest();
+
+    std::cout << "reward end: " << dataEnd.getMeanReward(mdp.getSettings().gamma) << std::endl;
 
 
-    for (int i = 0; i < nbUpdates; i++)
-    {
-        offcore.processBatchData();
-        int p = 100 * i/static_cast<double>(nbUpdates);
-        cout << "### " << p << "% ###" << endl;
-        //                cout << dist.getParameters().t();
-        offcore.getSettings().testEpisodeN = 100;
-        arma::vec J = offcore.runBatchTest();
-        cout << "mean score: " << J(0) << endl;
-        every += bevery;
-    }
-
-    delete strat;
     return 0;
 }

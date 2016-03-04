@@ -80,6 +80,10 @@ public:
         return nullptr;
     }
 
+    /*!
+     * Getter.
+     * \return the policy learned by the agent
+     */
     virtual Policy<ActionC, StateC>* getPolicy() = 0;
 
     /*!

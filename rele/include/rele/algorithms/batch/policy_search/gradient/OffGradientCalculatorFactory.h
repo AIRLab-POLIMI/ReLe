@@ -37,7 +37,7 @@ class OffGradientCalculatorFactory
 
 public:
     static OffGradientCalculator<ActionC, StateC>* build(OffGradType type,
-    		RewardTransformation& rewardf,
+            RewardTransformation& rewardf,
             Dataset<ActionC,StateC>& data,
             DifferentiablePolicy<ActionC,StateC>& policy,
             Policy<ActionC,StateC>& behaviour,

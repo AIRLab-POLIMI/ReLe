@@ -57,15 +57,18 @@ public:
 
     void printStatistics(AgentOutputData* outputData, unsigned int step)
     {
-        outputData->setStep(step);
-
-        if(!strategy)
+        if(outputData)
         {
-            BatchPrintStrategy<ActionC, StateC> strategy;
-            strategy.processData(outputData);
+            outputData->setStep(step);
+
+            if(!strategy)
+            {
+                BatchPrintStrategy<ActionC, StateC> strategy;
+                strategy.processData(outputData);
+            }
+            else
+                strategy->processData(outputData);
         }
-        else
-            strategy->processData(outputData);
     }
 
     void setStrategy(BatchLoggerStrategy<ActionC, StateC>* strategy)

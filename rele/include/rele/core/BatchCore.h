@@ -112,7 +112,6 @@ public:
         BatchCoreSettings()
         {
             loggerStrategy = nullptr;
-            nTransitions = 100;
             episodeLength = 100;
             nEpisodes = 100;
             envName = "env";
@@ -125,7 +124,6 @@ public:
         std::string envName;
         std::string algName;
         std::string dataFileName;
-        unsigned int nTransitions;
         unsigned int episodeLength;
         unsigned int nEpisodes;
         unsigned int maxBatchIterations;
@@ -159,9 +157,9 @@ public:
         batchCore.run(mdp.getSettings().gamma);
     }
 
-    void runTest(Agent<ActionC, StateC>* agent)
+    Dataset<ActionC, StateC> runTest()
     {
-    	test(agent->getPolicy());
+        return test(batchAgent.getPolicy());
     }
 
 protected:
@@ -171,7 +169,7 @@ protected:
 
 protected:
     Dataset<ActionC, StateC> test(Policy<ActionC, StateC>* policy)
-	{
+    {
         PolicyEvalAgent<ActionC, StateC> agent(*policy);
 
         auto&& core = buildCore(mdp, agent);
@@ -179,13 +177,13 @@ protected:
         CollectorStrategy<ActionC, StateC> collection;
         core.getSettings().loggerStrategy = &collection;
 
-        core.getSettings().episodeLength = settings.nTransitions;
+        core.getSettings().episodeLength = settings.episodeLength;
         core.getSettings().testEpisodeN = settings.nEpisodes;
 
         core.runTestEpisodes();
 
         return collection.data;
-	}
+    }
 };
 
 template<class ActionC, class StateC>

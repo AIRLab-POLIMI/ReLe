@@ -32,20 +32,20 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class OffPolicyGradientAlgorithm: public BatchAgent<FiniteAction, StateC>
+class OffPolicyGradientAlgorithm: public BatchAgent<ActionC, StateC>
 {
 public:
     OffPolicyGradientAlgorithm(OffGradType type,
                                Policy<ActionC, StateC>& behaviour,
-							   DifferentiablePolicy<ActionC, StateC>& policy,
+                               DifferentiablePolicy<ActionC, StateC>& policy,
                                StepRule& stepRule, RewardTransformation* rewardf) :
-                            	   type(type), behaviour(behaviour), policy(policy),
+        type(type), behaviour(behaviour), policy(policy),
         stepRule(stepRule), rewardf(rewardf)
     {
         calculator = nullptr;
     }
 
-    virtual void init(Dataset<FiniteAction, StateC>& data, double gamma) override
+    virtual void init(Dataset<ActionC, StateC>& data, double gamma) override
     {
         if(calculator)
             delete calculator;
@@ -70,8 +70,7 @@ public:
 
     virtual Policy<ActionC, StateC>* getPolicy() override
     {
-    	// FIXME
-    	return nullptr;
+        return &policy;
     }
 
     virtual ~OffPolicyGradientAlgorithm()

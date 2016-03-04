@@ -105,8 +105,8 @@ public:
 
     virtual Policy<ActionC, DenseState>* getPolicy() override
     {
-    	// FIXME
-    	return nullptr;
+        // FIXME
+        return nullptr;
     }
 
     virtual ~LSPI()

@@ -197,8 +197,8 @@ public:
 
     virtual Policy<FiniteAction, StateC>* getPolicy() override
     {
-    	// FIXME
-    	return nullptr;
+        // FIXME
+        return nullptr;
     }
 
     virtual ~FQI()
