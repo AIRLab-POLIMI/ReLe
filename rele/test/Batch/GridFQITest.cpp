@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    FQI<FiniteState> batchAgent(QRegressorA, nStates, nActions, 0.9, 1e-8);
+    FQI<FiniteState> batchAgent(QRegressorA, nStates, nActions, 1e-8);
     //DoubleFQI<FiniteState> batchAgent(QRegressorA, QRegressorB, nStates, nActions, 0.9, 1e-8);
 
     auto&& core = buildBatchCore(mdp, batchAgent);
@@ -86,11 +86,13 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 
+    double gamma = 0.9;
+
     arma::mat Q(nStates, nActions, arma::fill::zeros);
     e_Greedy policy;
     policy.setQ(&Q);
 
-    core.run(policy);
+    core.run(policy, gamma);
 
     return 0;
 }
