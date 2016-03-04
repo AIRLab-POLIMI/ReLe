@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
 
     //Run algorithm
     IRLAlgorithm<DenseAction,DenseState>* irlAlg = buildIRLalg(data, expertPolicy, rewardRegressor,
-            mdp.getSettings().gamma, atype, irlConfig.algorithm);
+            mdp.getSettings().gamma, irlConfig);
 
     irlAlg->run();
     arma::vec weights = rewardRegressor.getParameters();

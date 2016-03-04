@@ -84,7 +84,7 @@ for i = 1:lastindex
     
     for l = 1:length(X)
         for j = 1:length(X)
-            Z(l, j) = w'*basis_krbf(5,[-2, 2; -2, 2], [X(l, j); Y(l, j)]);
+            Z(l, j) = basis_krbf(5,[-2, 2; -2, 2], [X(l, j); Y(l, j)])'*w;
         end
         
     end

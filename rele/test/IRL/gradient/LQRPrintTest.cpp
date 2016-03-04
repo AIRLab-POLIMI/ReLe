@@ -49,11 +49,11 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-	FileManager fm("lqrPrint");
-	fm.createDir();
+    FileManager fm("lqrPrint");
+    fm.createDir();
 
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-    IrlHess htype = IrlHess::REINFORCE_BASELINE_TRACE_MULTY;
+    IrlHess htype = IrlHess::REINFORCE_BASELINE_TRACE_DIAG;
     vec eReward =
     { 0.3, 0.7 };
     int nbEpisodes = 1000;

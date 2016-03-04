@@ -23,6 +23,8 @@
 
 #include "rele/IRL/utils/IrlGradType.h"
 
+#include <sstream>
+
 namespace ReLe
 {
 
@@ -89,7 +91,111 @@ std::map<std::string, IrlGrad> IrlGradUtils::initGradients()
     return map;
 }
 
+std::string IrlGradUtils::getOptions()
+{
+    std::stringstream ss;
+
+    bool first = true;
+
+
+    ss << "(";
+
+    for(auto& pair : gradients)
+    {
+        if(first)
+            first = false;
+        else
+            ss << " | ";
+
+        ss << pair.first;
+    }
+
+    ss << ")";
+
+    return ss.str();
+}
+
 std::map<std::string, IrlGrad> IrlGradUtils::gradients = IrlGradUtils::initGradients();
+
+
+
+bool IrlHessUtils::isValid(const std::string& type)
+{
+    return hessians.count(type) != 0;
+}
+
+IrlHess IrlHessUtils::fromString(const std::string& type)
+{
+    if(hessians.count(type))
+    {
+        return hessians[type];
+    }
+    else
+        throw std::runtime_error("Unknown type");
+}
+
+std::string IrlHessUtils::toString(IrlHess type)
+{
+    switch(type)
+    {
+    case IrlHess::REINFORCE:
+        return "REINFORCE";
+    case IrlHess::REINFORCE_BASELINE:
+        return "REINFORCE_BASELINE";
+    case IrlHess::REINFORCE_BASELINE_TRACE:
+        return "REINFORCE_BASELINE_TRACE";
+    case IrlHess::REINFORCE_BASELINE_TRACE_DIAG:
+        return "REINFORCE_BASELINE_TRACE_DIAG";
+    case IrlHess::GPOMDP:
+        return "GPOMDP";
+    case IrlHess::GPOMDP_BASELINE:
+        return "GPOMDP_BASELINE";
+    default:
+        throw std::runtime_error("Unknown type");
+    }
+}
+
+
+std::map<std::string, IrlHess> IrlHessUtils::initHessians()
+{
+    std::map<std::string, IrlHess> map;
+
+    map["REINFORCE"] = IrlHess::REINFORCE;
+    map["REINFORCE_BASELINE"] = IrlHess::REINFORCE_BASELINE;
+    map["REINFORCE_BASELINE_TRACE"] = IrlHess::REINFORCE_BASELINE_TRACE;
+    map["REINFORCE_BASELINE_TRACE_DIAG"] = IrlHess::REINFORCE_BASELINE_TRACE_DIAG;
+    map["GPOMDP"] = IrlHess::GPOMDP;
+    map["GPOMDP_BASELINE"] = IrlHess::GPOMDP_BASELINE;
+
+    return map;
+}
+
+std::string IrlHessUtils::getOptions()
+{
+    std::stringstream ss;
+
+    bool first = true;
+
+
+    ss << "(";
+
+    for(auto& pair : hessians)
+    {
+        if(first)
+            first = false;
+        else
+            ss << " | ";
+
+        ss << pair.first;
+
+    }
+
+    ss << ")";
+
+    return ss.str();
+}
+
+std::map<std::string, IrlHess> IrlHessUtils::hessians = IrlHessUtils::initHessians();
 
 }
 

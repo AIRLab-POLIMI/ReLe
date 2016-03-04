@@ -42,7 +42,7 @@ enum class IrlGrad
 enum class IrlHess
 {
     REINFORCE, REINFORCE_BASELINE,
-    REINFORCE_BASELINE_TRACE, REINFORCE_BASELINE_TRACE_MULTY,
+    REINFORCE_BASELINE_TRACE, REINFORCE_BASELINE_TRACE_DIAG,
     GPOMDP, GPOMDP_BASELINE
 };
 
@@ -52,12 +52,31 @@ public:
     static bool isValid(const std::string& type);
     static IrlGrad fromString(const std::string& type);
     static std::string toString(IrlGrad type);
+    static std::string getOptions();
 
 private:
     static std::map<std::string, IrlGrad> initGradients();
 
 private:
     static std::map<std::string, IrlGrad> gradients;
+
+
+};
+
+class IrlHessUtils
+{
+public:
+    static bool isValid(const std::string& type);
+    static IrlHess fromString(const std::string& type);
+    static std::string toString(IrlHess type);
+    static std::string getOptions();
+
+
+private:
+    static std::map<std::string, IrlHess> initHessians();
+
+private:
+    static std::map<std::string, IrlHess> hessians;
 
 
 };

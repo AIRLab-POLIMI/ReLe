@@ -53,7 +53,7 @@ public:
         case IrlHess::REINFORCE_BASELINE_TRACE:
             return new HessianReinforceTraceBaseSingle<ActionC, StateC>(phi, data, policy, gamma);
 
-        case IrlHess::REINFORCE_BASELINE_TRACE_MULTY:
+        case IrlHess::REINFORCE_BASELINE_TRACE_DIAG:
             return new HessianReinforceTraceBaseDiag<ActionC, StateC>(phi, data, policy, gamma);
 
         case IrlHess::GPOMDP:
