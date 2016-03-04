@@ -68,13 +68,13 @@ public:
 
         // compute objective function and derivative
         double f = arma::as_scalar(gradient.t() * gradient);
-        df = 2.0 * dGradient.t() * gradient;
+        arma::vec df_full = 2.0 * dGradient.t() * gradient;
 
         //compute the derivative wrt active features and simplex
-        df = this->simplex.diff(df);
+        df = this->simplex.diff(df_full);
 
         std::cout << "g2: " << f << std::endl;
-        std::cout << "dwdj: " << dGradient;
+        std::cout << "df_full: " << df_full.t();
         std::cout << "df: " << df.t();
         std::cout << "xSimplex:  " << xSimplex.t();
         std::cout << "x:  " << x.t();

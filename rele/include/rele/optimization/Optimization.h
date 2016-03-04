@@ -76,7 +76,7 @@ private:
     {
         if (print)
         {
-            std::cout << "J(x) = " << value << " ";
+            std::cout << "J(x) = " << value << std::endl;
             std::cout << "x = ";
 
             for (int i = 0; i < n; i++)

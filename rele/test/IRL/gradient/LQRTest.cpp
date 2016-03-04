@@ -71,7 +71,9 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    MVNPolicy expertPolicy(phi);
+    arma::mat Sigma = arma::eye(dim, dim);
+    Sigma *= 0.1;
+    MVNPolicy expertPolicy(phi, Sigma);
 
     // Solve the problem in exact way
     LQRsolver solver(mdp,phi);
