@@ -146,19 +146,7 @@ public:
 
     void run(Policy<ActionC, StateC>& policy)
     {
-        PolicyEvalAgent<ActionC, StateC> agent(policy);
-
-        auto&& core = buildCore(mdp, agent);
-
-        CollectorStrategy<ActionC, StateC> collection;
-        core.getSettings().loggerStrategy = &collection;
-
-        core.getSettings().episodeLength = settings.nTransitions;
-        core.getSettings().testEpisodeN = settings.nEpisodes;
-
-        core.runTestEpisodes();
-
-        Dataset<ActionC, StateC> data = collection.data;
+        Dataset<ActionC, StateC> data = test(&policy);
 
         auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
 
@@ -171,11 +159,33 @@ public:
         batchCore.run(mdp.getSettings().gamma);
     }
 
+    void runTest(Agent<ActionC, StateC>* agent)
+    {
+    	test(agent->getPolicy());
+    }
 
 protected:
     Environment<ActionC, StateC>& mdp;
     BatchAgent<ActionC, StateC>& batchAgent;
     BatchCoreSettings settings;
+
+protected:
+    Dataset<ActionC, StateC> test(Policy<ActionC, StateC>* policy)
+	{
+        PolicyEvalAgent<ActionC, StateC> agent(*policy);
+
+        auto&& core = buildCore(mdp, agent);
+
+        CollectorStrategy<ActionC, StateC> collection;
+        core.getSettings().loggerStrategy = &collection;
+
+        core.getSettings().episodeLength = settings.nTransitions;
+        core.getSettings().testEpisodeN = settings.nEpisodes;
+
+        core.runTestEpisodes();
+
+        return collection.data;
+	}
 };
 
 template<class ActionC, class StateC>

@@ -103,6 +103,12 @@ public:
         oldWeights = QWeights;
     }
 
+    virtual Policy<ActionC, DenseState>* getPolicy() override
+    {
+    	// FIXME
+    	return nullptr;
+    }
+
     virtual ~LSPI()
     {
         delete critic;

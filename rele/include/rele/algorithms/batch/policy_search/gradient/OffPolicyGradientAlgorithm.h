@@ -68,6 +68,12 @@ public:
         policy.setParameters(newvalues);
     }
 
+    virtual Policy<ActionC, StateC>* getPolicy() override
+    {
+    	// FIXME
+    	return nullptr;
+    }
+
     virtual ~OffPolicyGradientAlgorithm()
     {
 

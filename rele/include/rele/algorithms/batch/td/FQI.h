@@ -195,6 +195,12 @@ public:
         return QTable;
     }
 
+    virtual Policy<FiniteAction, StateC>* getPolicy() override
+    {
+    	// FIXME
+    	return nullptr;
+    }
+
     virtual ~FQI()
     {
     }

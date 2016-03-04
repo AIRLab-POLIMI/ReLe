@@ -80,6 +80,8 @@ public:
         return nullptr;
     }
 
+    virtual Policy<ActionC, StateC>* getPolicy() = 0;
+
     /*!
      * This method returns whether the algorithm has converged or not
      * \return the value of the flag converged
