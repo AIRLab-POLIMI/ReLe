@@ -22,8 +22,7 @@
  */
 
 #include "rele/statistics/DifferentiableNormals.h"
-#include "rele/core/Core.h"
-#include "rele/core/PolicyEvalAgent.h"
+#include "rele/core/BatchCore.h"
 #include "rele/policy/parametric/differentiable/GibbsPolicy.h"
 #include "rele/algorithms/batch/policy_search/gradient/OffPolicyGradientAlgorithm.h"
 #include "rele/approximators/BasisFunctions.h"
@@ -114,33 +113,19 @@ int main(int argc, char *argv[])
     ParametricGibbsPolicy<DenseState> target(actions, basis, 1);
 
     AdaptiveStep stepl(0.1);
+    IndexRT rewardF(0);
 
-    OffPolicyGradientAlgorithm<FiniteAction, DenseState> offagent(target, behavioral, data.size(), stepl);
-    BatchCore<FiniteAction, DenseState> offcore(mdp, offagent, data);
-    offcore.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(
-        fm.addPath("deep.log"),
-        WriteStrategy<FiniteAction, DenseState>::AGENT,
-        true /*delete file*/
-    );
-    offcore.getSettings().episodeLength = horiz;
+    OffGradType type = OffGradType::GPOMDP_BASELINE_SINGLE;
 
-    int nbUpdates = 10;
-    double every, bevery;
-    every = bevery = 0.1; //%
-    for (int i = 0; i < nbUpdates; i++)
-    {
-        offcore.processBatchData();
+    OffPolicyGradientAlgorithm<FiniteAction, DenseState> offagent(type, target, behavioral, stepl, &rewardF);
+    BatchCore<FiniteAction, DenseState> batchcore(mdp, offagent);
+    batchcore.getSettings().loggerStrategy = new BatchPrintStrategy<FiniteAction, DenseState>();
+    batchcore.getSettings().episodeLength = mdp.getSettings().horizon;
+    batchcore.getSettings().nEpisodes = 1000;
+    batchcore.getSettings().maxBatchIterations = 10;
 
-        int p = 100 * i/static_cast<double>(nbUpdates);
-        cout << "### " << p << "% ###" << endl;
-        //                cout << dist.getParameters().t();
-        offcore.getSettings().testEpisodeN = 100;
-        arma::vec J = offcore.runBatchTest();
-        cout << "mean score: " << J(0) << endl;
-        every += bevery;
-    }
+    batchcore.run(behavioral);
 
-    delete strat;
     delete pf0;
     delete pfs1;
     delete pfs2;

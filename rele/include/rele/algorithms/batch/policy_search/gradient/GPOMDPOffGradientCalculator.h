@@ -65,13 +65,13 @@ public:
 
             for (int t = 0; t < stepN; ++t)
             {
-                Transition<ActionC, StateC>& tr = data[i][t];
+                Transition<ActionC, StateC>& tr = this->data[i][t];
 
                 // compute the reward gradients
                 double Rew = df * this->rewardf(tr.r);
-                sumGradLog += policy.difflog(tr.x, tr.u);
-                targetIW *= policy(tr.x, tr.u);
-                behavoiourIW *= behaviour(tr.x, tr.u);
+                sumGradLog += this->policy.difflog(tr.x, tr.u);
+                targetIW *= this->policy(tr.x, tr.u);
+                behavoiourIW *= this->behaviour(tr.x, tr.u);
                 double iw = targetIW / behavoiourIW;
 
                 gradient += sumGradLog * Rew * iw;
@@ -153,8 +153,8 @@ public:
                 // compute the basic elements used to compute the gradients
                 double Rew = df * this->rewardf(tr.r);
                 sumGradLog += this->policy.difflog(tr.x, tr.u);
-                targetIW *= policy(tr.x, tr.u);
-                behavoiourIW *= behaviour(tr.x, tr.u);
+                targetIW *= this->policy(tr.x, tr.u);
+                behavoiourIW *= this->behaviour(tr.x, tr.u);
                 double iw = targetIW / behavoiourIW;
                 importanceWeightsSum += iw;
 
@@ -188,7 +188,7 @@ public:
             for (int t = 0; t < maxsteps_Ep(ep); ++t)
             {
                 arma::vec sumGradLog_ep_t = sumGradLog_epStep.tube(ep,t);
-                gradient += sumGradLog_ep_t % (Rew_epStep(ep, t) - baseline) * iw_EpStep(ep,t);
+                gradient += sumGradLog_ep_t % (Rew_epStep(ep, t) - baseline) * iw_epStep(ep,t);
             }
         }
 
@@ -263,8 +263,8 @@ public:
                 // compute the basic elements used to compute the gradients
                 double Rew = df * this->rewardf(tr.r);
                 sumGradLog += this->policy.difflog(tr.x, tr.u);
-                targetIW *= policy(tr.x, tr.u);
-                behavoiourIW *= behaviour(tr.x, tr.u);
+                targetIW *= this->policy(tr.x, tr.u);
+                behavoiourIW *= this->behaviour(tr.x, tr.u);
                 double iw = targetIW / behavoiourIW;
                 importanceWeightsSum += iw;
 
@@ -298,7 +298,7 @@ public:
 
                 arma::vec sumGradLog_ep_t = sumGradLog_epStep.tube(ep,t);
 
-                gradient += sumGradLog_ep_t % (Rew_epStep(ep, t) - baseline_t) * iw_EpStep(ep,t);
+                gradient += sumGradLog_ep_t % (Rew_epStep(ep, t) - baseline_t) * iw_epStep(ep,t);
             }
         }
 

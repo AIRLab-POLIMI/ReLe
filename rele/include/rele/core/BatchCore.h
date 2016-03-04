@@ -144,7 +144,7 @@ public:
         return settings;
     }
 
-    void run(Policy<ActionC, StateC>& policy, double gamma)
+    void run(Policy<ActionC, StateC>& policy)
     {
         PolicyEvalAgent<ActionC, StateC> agent(policy);
 
@@ -168,7 +168,7 @@ public:
         batchCore.getSettings().dataFileName = settings.dataFileName;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
-        batchCore.run(gamma);
+        batchCore.run(mdp.getSettings().gamma);
     }
 
 

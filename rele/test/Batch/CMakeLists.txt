@@ -1,7 +1,7 @@
 #Batch test
 
-#add_executable(deep_off DeepBatchTest.cpp)
-#target_link_libraries(deep_off rele)
+add_executable(deep_off DeepBatchTest.cpp)
+target_link_libraries(deep_off rele)
 
 if(${GSL_FOUND})
 	add_executable(gridFQI2 GridFQITest2.cpp)

@@ -26,6 +26,7 @@
 
 #include "rele/core/BatchAgent.h"
 #include "rele/algorithms/batch/policy_search/gradient/OffGradientCalculatorFactory.h"
+#include "rele/algorithms/step_rules/StepRules.h"
 
 namespace ReLe
 {
@@ -34,21 +35,23 @@ template<class ActionC, class StateC>
 class OffPolicyGradientAlgorithm: public BatchAgent<FiniteAction, StateC>
 {
 public:
-    OffPolicyGradientAlgorithm(double gamma, OffGradientType type,
-                               Policy<ActionC, StateC>& behaviour, DifferentiablePolicy<ActionC, StateC>& policy,
-                               StepRule& stepL, RewardTransformation* rewardf) :
-        BatchAgent<ActionC, StateC>(gamma), type(type), behaviour(behaviour), policy(policy),
-        stepL(stepL), rewardf(rewardf)
+    OffPolicyGradientAlgorithm(OffGradType type,
+                               Policy<ActionC, StateC>& behaviour,
+							   DifferentiablePolicy<ActionC, StateC>& policy,
+                               StepRule& stepRule, RewardTransformation* rewardf) :
+                            	   type(type), behaviour(behaviour), policy(policy),
+        stepRule(stepRule), rewardf(rewardf)
     {
         calculator = nullptr;
     }
 
-    virtual void init(Dataset<FiniteAction, StateC>& data) override
+    virtual void init(Dataset<FiniteAction, StateC>& data, double gamma) override
     {
         if(calculator)
             delete calculator;
 
-        calculator = new OffGradientCalculatorFactory<ActionC, StateC>::build(type, *rewardf, data, behaviour, policy, this->gamma);
+        this->gamma = gamma;
+        calculator = OffGradientCalculatorFactory<ActionC, StateC>::build(type, *rewardf, data, policy, behaviour, this->gamma);
     }
 
     virtual void step() override
@@ -56,12 +59,13 @@ public:
         arma::vec gradient = calculator->computeGradient();
 
         // compute step size
+        unsigned int dp = gradient.n_elem;
         arma::mat eMetric = arma::eye(dp,dp);
         arma::vec step_size = stepRule.stepLength(gradient, eMetric);
 
         // Update policy
-        arma::vec newvalues = target.getParameters() + gradient * step_size;
-        target.setParameters(newvalues);
+        arma::vec newvalues = policy.getParameters() + gradient * step_size;
+        policy.setParameters(newvalues);
     }
 
     virtual ~OffPolicyGradientAlgorithm()
@@ -70,12 +74,12 @@ public:
     }
 
 private:
-    OffGradientType type;
+    OffGradType type;
     OffGradientCalculator<ActionC, StateC>* calculator;
     RewardTransformation* rewardf;
     Policy<ActionC, StateC>& behaviour;
     DifferentiablePolicy<ActionC, StateC>& policy;
-    StepRule& stepL;
+    StepRule& stepRule;
 
 
 };

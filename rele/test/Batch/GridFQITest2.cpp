@@ -54,7 +54,8 @@ int main(int argc, char *argv[])
     GridWorldGenerator generator;
     generator.load(argv[1]);
 
-    FiniteMDP&& mdp = generator.getMDP(1.0);
+    double gamma = 0.9;
+    FiniteMDP&& mdp = generator.getMDP(gamma);
 
     unsigned int nActions = mdp.getSettings().finiteActionDim;
     unsigned int nStates = mdp.getSettings().finiteStateDim;
@@ -83,13 +84,11 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 
-    double gamma = 0.9;
-
     arma::mat Q(nStates, nActions, arma::fill::zeros);
     e_Greedy policy;
     policy.setQ(&Q);
 
-    core.run(policy, gamma);
+    core.run(policy);
 
     return 0;
 }

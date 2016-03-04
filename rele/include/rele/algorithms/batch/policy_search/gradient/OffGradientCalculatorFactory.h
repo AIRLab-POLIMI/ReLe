@@ -36,8 +36,8 @@ class OffGradientCalculatorFactory
 {
 
 public:
-    static GradientCalculator<ActionC, StateC>* build(OffGradType type,
-            RewardTransformation& rewardf,
+    static OffGradientCalculator<ActionC, StateC>* build(OffGradType type,
+    		RewardTransformation& rewardf,
             Dataset<ActionC,StateC>& data,
             DifferentiablePolicy<ActionC,StateC>& policy,
             Policy<ActionC,StateC>& behaviour,
@@ -46,19 +46,19 @@ public:
 
         switch(type)
         {
-        case REINFORCE:
+        case OffGradType::REINFORCE:
             return new ReinforceOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
-        case REINFORCE_BASELINE:
+        case OffGradType::REINFORCE_BASELINE:
             return new ReinforceBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
-        case GPOMDP:
+        case OffGradType::GPOMDP:
             return new GPOMDPOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
-        case GPOMDP_BASELINE_SINGLE:
+        case OffGradType::GPOMDP_BASELINE_SINGLE:
             return new GPOMDPSingleBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
-        case GPOMDP_BASELINE_MULTY:
+        case OffGradType::GPOMDP_BASELINE_MULTY:
             return new GPOMDPMultyBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
         default:

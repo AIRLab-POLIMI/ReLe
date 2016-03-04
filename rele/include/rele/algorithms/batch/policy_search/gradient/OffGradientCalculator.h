@@ -24,6 +24,9 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_OFFGRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_OFFGRADIENTCALCULATOR_H_
 
+#include "rele/approximators/RewardTransformation.h"
+#include "rele/core/Transition.h"
+#include "rele/policy/Policy.h"
 
 namespace ReLe
 {

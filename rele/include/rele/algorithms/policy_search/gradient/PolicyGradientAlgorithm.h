@@ -29,7 +29,7 @@
 #include "rele/core/Basics.h"
 #include "rele/core/BasicFunctions.h"
 #include "rele/algorithms/policy_search/gradient/GradientOutputData.h"
-#include "rele/algorithms/policy_search/step_rules/StepRules.h"
+#include "rele/algorithms/step_rules/StepRules.h"
 #include "rele/approximators/RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
