@@ -77,9 +77,8 @@ public:
     W_FQI(BatchRegressor& QRegressor,
           unsigned int nStates,
           unsigned int nActions,
-          double gamma,
           double epsilon) :
-        FQI<StateC>(QRegressor, nStates, nActions, gamma, epsilon),
+        FQI<StateC>(QRegressor, nStates, nActions, epsilon),
         meanQ(arma::mat(nStates, nActions, arma::fill::zeros)),
         sampleStdQ(arma::mat(nStates, nActions).fill(STD_INF_VALUE)),
         sumQ(arma::mat(nStates, nActions, arma::fill::zeros)),

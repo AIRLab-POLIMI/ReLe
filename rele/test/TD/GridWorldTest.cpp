@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         GridWorldGenerator generator;
         generator.load(argv[1]);
 
-        FiniteMDP&& mdp = generator.getMDP(1.0);
+        FiniteMDP&& mdp = generator.getMDP(0.9);
 
         e_Greedy policy;
         // SARSA_lambda agent(policy, false);
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
         //core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, FiniteState>("/home/dave/prova.txt");
         //core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
 
-        for(unsigned int i = 0; i < 2000; i++)
+        for(unsigned int i = 0; i < 10000; i++)
         {
             cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();

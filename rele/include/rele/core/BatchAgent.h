@@ -39,8 +39,8 @@ template<class ActionC, class StateC>
 class BatchAgent
 {
 public:
-    BatchAgent(double gamma) :
-        gamma(gamma),
+    BatchAgent() :
+        gamma(1),
         converged(false)
     {
     }
@@ -50,7 +50,7 @@ public:
      * Is called by the BatchCore as the first step of the learning process.
      * \param data the dataset to be used for learning
      */
-    virtual void init(Dataset<ActionC, StateC>& data) = 0;
+    virtual void init(Dataset<ActionC, StateC>& data, double gamma) = 0;
 
     /*!
      * This method implement a step of the learning process trough the dataset. Must be implemented.

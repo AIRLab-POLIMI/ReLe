@@ -71,7 +71,7 @@ public:
         return settings;
     }
 
-    void run()
+    void run(double gamma)
     {
         //core setup
         BatchLogger<ActionC, StateC> logger(data);
@@ -81,7 +81,7 @@ public:
         logger.setStrategy(settings.loggerStrategy);
 
         //Start episode
-        batchAgent.init(data);
+        batchAgent.init(data, gamma);
 
         for(unsigned int i = 0;
                 i < settings.maxBatchIterations
@@ -144,7 +144,7 @@ public:
         return settings;
     }
 
-    void run(Policy<ActionC, StateC>& policy)
+    void run(Policy<ActionC, StateC>& policy, double gamma)
     {
         PolicyEvalAgent<ActionC, StateC> agent(policy);
 
@@ -168,7 +168,7 @@ public:
         batchCore.getSettings().dataFileName = settings.dataFileName;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
-        batchCore.run();
+        batchCore.run(gamma);
     }
 
 

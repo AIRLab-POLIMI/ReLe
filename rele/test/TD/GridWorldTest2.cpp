@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
         GridWorldGenerator generator;
         generator.load(argv[1]);
 
-        FiniteMDP&& mdp = generator.getMDP(1.0);
+        FiniteMDP&& mdp = generator.getMDP(0.9);
 
         e_Greedy policy;
         WQ_Learning agent(policy);
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
         core.getSettings().episodeLength = 100000;
 
-        for(unsigned int i = 0; i < 2000; i++)
+        for(unsigned int i = 0; i < 10000; i++)
         {
             cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();

@@ -68,10 +68,9 @@ public:
               BatchRegressor& QRegressorB,
               unsigned int nStates,
               unsigned int nActions,
-              double gamma,
               double epsilon,
               bool shuffle = false) :
-        FQI<StateC>(QRegressorEnsemble, nStates, nActions, gamma, epsilon),
+        FQI<StateC>(QRegressorEnsemble, nStates, nActions, epsilon),
         QRegressorEnsemble(QRegressorA, QRegressorB),
         shuffle(shuffle)
     {

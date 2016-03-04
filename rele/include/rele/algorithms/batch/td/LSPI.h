@@ -41,31 +41,34 @@ class LSPI : public BatchAgent<ActionC, DenseState>
 {
 public:
     LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
-         Features_<arma::vec>& phi, double gamma, double epsilon) :
-        BatchAgent<ActionC, DenseState>(gamma),
-        critic(data, policy, phi, gamma),
-        oldWeights(arma::vec(critic.getQ().getParametersSize(), arma::fill::zeros)),
+         Features_<arma::vec>& phi, double epsilon) :
+        data(data),
+        oldWeights(arma::vec(phi.rows(), arma::fill::zeros)),
+        policy(policy),
+        phi(phi),
+        critic(nullptr),
         epsilon(epsilon),
         firstStep(true)
     {
     }
 
-    virtual void init(Dataset<ActionC, DenseState>& data) override
+    virtual void init(Dataset<ActionC, DenseState>& data, double gamma) override
     {
+        critic = new LSTDQ<ActionC>(data, policy, phi, gamma);
     }
 
     virtual void step() override
     {
         //Evaluate the current policy (and implicitly improve)
         //            RandomGenerator::seed(1000);
-        arma::vec QWeights = critic.run(firstStep);
+        arma::vec QWeights = critic->run(firstStep);
         //            RandomGenerator::seed(1000);
         //            arma::vec Q_weights2 = critic.run_slow();
         //            arma::mat X = arma::join_horiz(Q_weights,Q_weights2);
         //            std::cout << X << std::endl;
         //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
 
-        critic.getQ().setParameters(QWeights);
+        critic->getQ().setParameters(QWeights);
         //            char ddd[100];
         //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
         //            Q_weights.save(ddd, arma::raw_ascii);
@@ -102,10 +105,14 @@ public:
 
     virtual ~LSPI()
     {
+        delete critic;
     }
 
 protected:
-    LSTDQ<ActionC> critic;
+    Dataset<ActionC, DenseState>& data;
+    LSTDQ<ActionC>* critic;
+    Features_<arma::vec>& phi;
+    e_GreedyApproximate& policy;
     arma::vec oldWeights;
     double epsilon;
     bool firstStep;

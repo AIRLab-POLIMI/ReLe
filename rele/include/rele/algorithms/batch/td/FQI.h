@@ -92,8 +92,7 @@ class FQI : public BatchAgent<FiniteAction, StateC>
 public:
 
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
-        double gamma, double epsilon) :
-        BatchAgent<FiniteAction, StateC>(gamma),
+        double epsilon) :
         QRegressor(QRegressor),
         nStates(nStates),
         nActions(nActions),
@@ -104,8 +103,9 @@ public:
     {
     }
 
-    virtual void init(Dataset<FiniteAction, StateC>& data) override
+    virtual void init(Dataset<FiniteAction, StateC>& data, double gamma) override
     {
+        this->gamma = gamma;
         features = data.featuresAsMatrix(QRegressor.getFeatures());
         nSamples = features.n_cols;
         states = arma::vec(nSamples, arma::fill::zeros);

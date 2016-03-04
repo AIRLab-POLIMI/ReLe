@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
     e_GreedyApproximate lspiPolicy;
     lspiPolicy.setEpsilon(-0.0);
     lspiPolicy.setNactions(actions.size());
-    LSPI<FiniteAction> batchAgent(dataLSPI, lspiPolicy, qphi, 0.9, 0.01);
+    LSPI<FiniteAction> batchAgent(dataLSPI, lspiPolicy, qphi, 0.01);
 
     auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
 
@@ -183,7 +183,9 @@ int main(int argc, char *argv[])
     core.getSettings().algName = algName;
     core.getSettings().maxBatchIterations = 100;
 
-    core.run();
+    double gamma = 0.9;
+
+    core.run(gamma);
 
 //    cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 
