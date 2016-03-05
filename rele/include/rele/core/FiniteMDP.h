@@ -69,13 +69,13 @@ public:
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings);
 
     /*!
-     * \see Agent::step
+     * \see Environment::step
      */
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
 
     /*!
-     * \see Agent::getInitialState
+     * \see Environment::getInitialState
      */
     virtual void getInitialState(FiniteState& state) override;
 
