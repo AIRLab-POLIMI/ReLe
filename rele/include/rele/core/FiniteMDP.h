@@ -33,17 +33,50 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements a finite MDP, that is an MDP with both finite actions and states.
+ * A finite MDP can be described by the tuple
+ * MDP=\left\langle \mathcal{S},\mathcal{A},\mathcal{P}_{a}(.,..),\mathcal{R}_{a}(.,.),\gamma\right\rangle
+ * where  \mathcal{S} is the set of states,\mathcal{A} is the set of actions,
+ * $\mathcal{P}_{a}:\mathcal{A}\times\mathcal{S}\times\mathcal{S}\rightarrow\mathbb{R}$ is the transition function,
+ * $\mathcal{R}_{a}:\mathcal{A}\times\mathcal{S}\times\mathcal{S}\rightarrow\mathbb{R}$ is the reward function.
+ * This class also support gaussian reward functions, so it's possible to specify the variance of the reward.
+ * A finite MDP can also be solved exactly (or approximately) by a dynamic programming solver.
+ */
 class FiniteMDP: public Environment<FiniteAction, FiniteState>
 {
     friend class DynamicProgrammingAlgorithm;
 public:
+    /*!
+     * Constructor
+     * \param P the transition function, a \mathcal{A}\times\mathcal{S}\times\mathcal{S} cube
+     * \param R the reward function a \mathcal{A}\times\mathcal{S}\times\mathcal{S}
+     * \param Rsigma the reward function variance in each state a \mathcal{A}\times\mathcal{S}\times\mathcal{S} cube
+     * \param isFiniteHorizon if the mdp has a finite horizon
+     * \param gamma the discount factor
+     * \param horizon the mdp horizon
+     */
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma,
               bool isFiniteHorizon, double gamma = 1.0, unsigned int horizon = 0);
 
+    /*!
+     * Constructor
+     * \param P the transition function, a \mathcal{A}\times\mathcal{S}\times\mathcal{S} cube
+     * \param R the reward function a \mathcal{A}\times\mathcal{S}\times\mathcal{S}
+     * \param Rsigma the reward function variance in each state a \mathcal{A}\times\mathcal{S}\times\mathcal{S} cube
+     * \param settings the environment settings
+     */
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings);
 
+    /*!
+     * \see Agent::step
+     */
     virtual void step(const FiniteAction& action, FiniteState& nextState,
                       Reward& reward) override;
+
+    /*!
+     * \see Agent::getInitialState
+     */
     virtual void getInitialState(FiniteState& state) override;
 
 private:

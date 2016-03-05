@@ -29,14 +29,34 @@
 namespace ReLe
 {
 
+/*!
+ * This class is the abstract interface for all MDPs that have continuous state space and finite actions.
+ */
 class DenseMDP: public Environment<FiniteAction, DenseState>
 {
 public:
+    /*!
+     * Constructor.
+     * \params settings the pointer to the environment settings
+     */
     DenseMDP(EnvironmentSettings* settings);
 
+    /*!
+     * Constructor.
+     * \param stateSize the dimensionality of the state space
+     * \param actionN the number of actions
+     * \param rewardSize the dimensionality of the reward function
+     * \param isFiniteHorizon if the MDP has finite horizon
+     * \param isEpisodic if the task is episodic
+     * \param gamma the MDP discount factor
+     * \param horizon the MDP horizon
+     */
     DenseMDP(std::size_t stateSize, unsigned int actionN, size_t rewardSize, bool isFiniteHorizon,
              bool isEpisodic, double gamma = 1.0, unsigned int horizon = 0);
 
+    /*!
+     * Destructor.
+     */
     virtual ~DenseMDP()
     {}
 
@@ -46,6 +66,7 @@ protected:
                           double gamma);
 
 protected:
+    //! the MDP current state
     DenseState currentState;
 
 };

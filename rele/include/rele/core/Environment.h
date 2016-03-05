@@ -30,7 +30,9 @@
 
 namespace ReLe
 {
-
+/*!
+ * The environment is the basic interface
+ */
 template<class ActionC, class StateC>
 class Environment
 {
@@ -38,30 +40,59 @@ class Environment
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 public:
 
+    /*!
+     * Constructor
+     */
     Environment()
         : settings(new EnvironmentSettings()), cleanSettings(true)
     {
     }
 
+    /*!
+     * Constructor
+     * \param settings a pointer to the environment settings
+     */
     Environment(EnvironmentSettings* settings)
         : settings(settings), cleanSettings(false)
     {
     }
 
+    /*!
+     * This function is called to execute an action on the environment. Must be implemented.
+     * \param action the action to be executed at this time step
+     * \param nextState the state reached after performing the action
+     * \param reward the reward achieved by performing the last action on the environment
+     */
     virtual void step(const ActionC& action, StateC& nextState,
                       Reward& reward) = 0;
+
+    /*!
+     * This function is called to get the initial environment state. Must be implemented.
+     * \param state the initial state
+     */
     virtual void getInitialState(StateC& state) = 0;
 
+    /*!
+     * Getter.
+     * \return a const reference to the environment settings
+     */
     inline const EnvironmentSettings& getSettings() const
     {
         return *settings;
     }
 
+    /*!
+     * Setter.
+     * \param h the new environment horizon
+     */
     void setHorizon(unsigned int h)
     {
         settings->horizon = h;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~Environment()
     {
         if (cleanSettings)
@@ -69,12 +100,17 @@ public:
     }
 
 protected:
+    /*!
+     * Getter. To be used in derived classes.
+     * \return a reference to the environment settings
+     */
     inline EnvironmentSettings& getWritableSettings()
     {
         return *settings;
     }
 
 protected:
+    //! the environment settings
     EnvironmentSettings* settings;
 private:
     bool cleanSettings;

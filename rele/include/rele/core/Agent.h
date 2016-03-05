@@ -49,8 +49,8 @@ public:
 /*!
  * The Agent is the basic interface of all online agents.
  * All online algorithms should extend this abstract class.
- * The Agent interface provides all the methods that can be used to interact with an MDP through
- * the Core class. It includes methods to run the learning over an MDP and to test the learned policy.
+ * The Agent interface provides all the methods that can be used to interact with an environment through
+ * the Core class. It includes methods to run the learning over an environment and to test the learned policy.
  */
 template<class ActionC, class StateC>
 class Agent
@@ -71,7 +71,7 @@ public:
     /*!
      * This method is called at the beginning of each learning episode. Must be implemented.
      * Normally this method contains the algorithm initialization.
-     * \param state the initial MDP state
+     * \param state the initial environment state
      * \param action the action selected by the agent in the initial state
      */
     virtual void initEpisode(const StateC& state, ActionC& action) = 0;
@@ -79,7 +79,7 @@ public:
     /*!
      * This method is used to sample an action in test episodes. Must be implemented.
      * Normally, this method is trivial, as it just sample an action from a policy.
-     * \param state the current MDP state
+     * \param state the current environment state
      * \param action the action selected by the agent in the current state
      */
     virtual void sampleAction(const StateC& state, ActionC& action) = 0;

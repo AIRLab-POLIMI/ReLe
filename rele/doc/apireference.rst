@@ -49,6 +49,10 @@ Basic concepts
 Basic Interfaces
 ----------------
 
+.. doxygenclass:: ReLe::Environment
+   :members:
+   :protected-members: 
+
 .. doxygenclass:: ReLe::Agent
    :members:
    :protected-members:
@@ -58,6 +62,18 @@ Basic Interfaces
    :protected-members:
    
 .. doxygenclass:: ReLe::Solver
+   :members:   
+   
+Basic Environments
+------------
+
+.. doxygenclass:: ReLe::FiniteMDP
+   :members:   
+
+.. doxygenclass:: ReLe::DenseMDP
+   :members:   
+   
+.. doxygenclass:: ReLe::ContinuosMDP
    :members:      
 
 Basic Utilities
