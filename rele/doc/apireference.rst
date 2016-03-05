@@ -39,7 +39,7 @@ Basic concepts
 .. doxygenclass:: ReLe::DenseState
    :members:
 
-.. doxygenclass:: ReLe::EnvironmentSettings
+.. doxygenstruct:: ReLe::EnvironmentSettings
    :members:   
    
 .. doxygenclass:: ReLe::AgentOutputData
