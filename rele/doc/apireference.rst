@@ -73,7 +73,7 @@ Basic Environments
 .. doxygenclass:: ReLe::DenseMDP
    :members:   
    
-.. doxygenclass:: ReLe::ContinuosMDP
+.. doxygenclass:: ReLe::ContinuousMDP
    :members:      
 
 Basic Utilities

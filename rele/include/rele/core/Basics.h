@@ -308,7 +308,7 @@ private:
 
 /*!
  * Dense action class.
- * This class represent an action \f$u$\f, such that \f$u\in\mathbb{R^n}$\f, where n is the dimensionality of action space
+ * This class represent an action \f$u\f$, such that \f$u\in\mathbb{R^n}\f$, where n is the dimensionality of action space
  */
 class DenseAction: public Action, public arma::vec
 {
@@ -558,7 +558,7 @@ private:
 
 /*!
  * Dense action class.
- * This class represent a state \f$x$\f, such that \f$x\in\mathbb{R^n}$\f, where n is the dimensionality of state space
+ * This class represent a state \f$x\f$, such that \f$x\in\mathbb{R^n}\f$, where n is the dimensionality of state space
  */
 class DenseState: public State, public arma::vec
 {

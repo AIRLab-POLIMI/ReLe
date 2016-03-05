@@ -36,10 +36,10 @@ namespace ReLe
 /*!
  * This class implements a finite MDP, that is an MDP with both finite actions and states.
  * A finite MDP can be described by the tuple
- * \f$MDP=\left\langle \mathcal{S},\mathcal{A},\mathcal{P}_{a}(.,..),\mathcal{R}_{a}(.,.),\gamma\right\rangle$\f
- * where \f$\mathcal{S}$\f is the set of states, \f$\mathcal{A}$\f is the set of actions,
- * \f$\mathcal{P}_{a}:\mathcal{A}\times\mathcal{S}\times\mathcal{S}\rightarrow\mathbb{R}$\f is the transition function,
- * \f$\mathcal{R}_{a}:\mathcal{A}\times\mathcal{S}\times\mathcal{S}\rightarrow\mathbb{R}$\f is the reward function.
+ * \f$MDP=\left\langle \mathcal{S},\mathcal{A},\mathcal{P}_{a}(.,..),\mathcal{R}_{a}(.,.),\gamma\right\rangle\f$
+ * where \f$\mathcal{S}\f$ is the set of states, \f$\mathcal{A}\f$ is the set of actions,
+ * \f$\mathcal{P}_{a}:\mathcal{A}\times\mathcal{S}\times\mathcal{S}\rightarrow\mathbb{R}\f$ is the transition function,
+ * \f$\mathcal{R}_{a}:\mathcal{A}\times\mathcal{S}\times\mathcal{S}\rightarrow\mathbb{R}\f$ is the reward function.
  * This class also support gaussian reward functions, so it's possible to specify the variance of the reward.
  * A finite MDP can also be solved exactly (or approximately) by a dynamic programming solver.
  */
@@ -49,9 +49,9 @@ class FiniteMDP: public Environment<FiniteAction, FiniteState>
 public:
     /*!
      * Constructor
-     * \param P the transition function, a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}$\f cube
-     * \param R the reward function a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}$\f cube
-     * \param Rsigma the reward function variance in each state a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}$\f cube
+     * \param P the transition function, a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}\f$ cube
+     * \param R the reward function a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}\f$ cube
+     * \param Rsigma the reward function variance in each state a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}\f$ cube
      * \param isFiniteHorizon if the mdp has a finite horizon
      * \param gamma the discount factor
      * \param horizon the mdp horizon
@@ -61,9 +61,9 @@ public:
 
     /*!
      * Constructor
-     * \param P the transition function, a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}$\f cube
-     * \param R the reward function a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}$\f cube
-     * \param Rsigma the reward function variance in each state a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}$\f cube
+     * \param P the transition function, a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}\f$ cube
+     * \param R the reward function a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}\f$ cube
+     * \param Rsigma the reward function variance in each state a \f$\mathcal{A}\times\mathcal{S}\times\mathcal{S}\f$ cube
      * \param settings the environment settings
      */
     FiniteMDP(arma::cube P, arma::cube R, arma::cube Rsigma, EnvironmentSettings* settings);
