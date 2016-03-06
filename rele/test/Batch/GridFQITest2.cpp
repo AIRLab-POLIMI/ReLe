@@ -80,7 +80,6 @@ int main(int argc, char *argv[])
     core.getSettings().envName = "gw";
     core.getSettings().algName = "fqi";
     core.getSettings().nEpisodes = 100;
-    core.getSettings().nTransitions = 1000;
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 

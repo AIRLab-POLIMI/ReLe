@@ -98,15 +98,14 @@ int main(int argc, char *argv[])
             mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);
-    EmptyStrategy<DenseAction, DenseState> emptyS;
-    expertCore.getSettings().loggerStrategy = &emptyS;
+    expertCore.getSettings().loggerStrategy = nullptr;
     expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().episodeN = episodes;
     expertCore.getSettings().testEpisodeN = 100;
     expertCore.runEpisodes();
 
     cout << "Policy weights: " << expertPolicy.getParameters().t() << endl;
-    cout << "Policy performaces: " << as_scalar(expertCore.runBatchTest()) << endl;
+    cout << "Policy performaces: " << as_scalar(expertCore.runEvaluation()) << endl;
 
 
     /*** Collect expert data ***/
@@ -200,7 +199,7 @@ int main(int argc, char *argv[])
             mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);
 
     Core<DenseAction, DenseState> imitatorCore(prMDP, imitator);
-    imitatorCore.getSettings().loggerStrategy = &emptyS;
+    imitatorCore.getSettings().loggerStrategy = nullptr;
     imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
     imitatorCore.getSettings().episodeN = episodes;
     imitatorCore.getSettings().testEpisodeN = 100;

@@ -52,24 +52,6 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class EmptyStrategy : public LoggerStrategy<ActionC, StateC>
-{
-public:
-    virtual void processData(Episode<ActionC, StateC>& samples) override
-    {
-    }
-
-    virtual void processData(std::vector<AgentOutputData*>& outputData) override
-    {
-        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
-    }
-
-    virtual ~EmptyStrategy()
-    {
-    }
-};
-
-template<class ActionC, class StateC>
 class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
@@ -271,6 +253,8 @@ public:
     {
         double df = 1.0;
         bool first = true;
+
+        arma::vec J(samples.getRewardSize(), arma::fill::zeros);
         for (auto sample : samples)
         {
             Reward& r = sample.r;
@@ -283,8 +267,11 @@ public:
             {
                 J[i] += df * r[i];
             }
+
             df *= gamma;
         }
+
+        Jvec.push_back(J);
     }
 
     void processData(std::vector<AgentOutputData*>& outputData) override
@@ -293,7 +280,7 @@ public:
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
-    arma::vec J;
+    std::vector<arma::vec> Jvec;
     double gamma;
 };
 

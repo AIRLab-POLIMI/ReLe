@@ -31,6 +31,13 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements both learning and testing of an agent over an environment.
+ * This class is able to run the agent on the environment, while logging both the environment and agent data.
+ * Both experiment parameters and logger are configurable.
+ * The core takes in account environment terminal states and agent termination conditions.
+ * Also gives to the agent the environment settings, calling Agent::setTask
+ */
 template<class ActionC, class StateC>
 class Core
 {
@@ -38,6 +45,9 @@ class Core
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
 public:
+    /*!
+     * This struct stores the core parameters.
+     */
     struct CoreSettings
     {
         CoreSettings()
@@ -48,14 +58,23 @@ public:
             testEpisodeN = 0;
         }
 
+        //! The logger strategy, or a null pointer if no data should be logged
         LoggerStrategy<ActionC, StateC>* loggerStrategy;
+        //! The length of episodes
         unsigned int episodeLength;
+        //! The number of learning episodes
         unsigned int episodeN;
+        //! The number of testing episodes
         unsigned int testEpisodeN;
 
     };
 
 public:
+    /*!
+     * Constructor.
+     * \param environment the environment used for the experiment
+     * \param agent the agent used for the experiment
+     */
     Core(Environment<ActionC, StateC>& environment,
          Agent<ActionC, StateC>& agent) :
         environment(environment), agent(agent)
@@ -63,11 +82,26 @@ public:
         agent.setTask(environment.getSettings());
     }
 
+    /*!
+     * Getter.
+     * Used to set the core parameters.
+     * Example:
+     *
+     *		core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
+     *		core.getSettings().episodeLength = 100;
+     *		core.getSettings().episodeN = 1000;
+     *		core.getSettings().testEpisodeN = 200;
+     * \return a reference to the core settings.
+     */
     CoreSettings& getSettings()
     {
         return settings;
     }
 
+
+    /*!
+     * This method runs a single learning episode.
+     */
     void runEpisode()
     {
         //core setup
@@ -109,6 +143,9 @@ public:
         logger.printStatistics();
     }
 
+    /*!
+     * This method runs the learning episodes specified in the settings.
+     */
     void runEpisodes()
     {
         for(unsigned int i = 0; i < settings.episodeN; i++)
@@ -117,6 +154,9 @@ public:
         }
     }
 
+    /*!
+     * This method runs a single learning episode.
+     */
     void runTestEpisode()
     {
         //core setup
@@ -144,6 +184,9 @@ public:
         logger.printStatistics();
     }
 
+    /*!
+     * This method runs the test episodes specified in the settings.
+     */
     void runTestEpisodes()
     {
         for(unsigned int i = 0; i < settings.testEpisodeN; i++)
@@ -152,7 +195,11 @@ public:
         }
     }
 
-    arma::vec runBatchTest()
+    /*!
+     * This method runs the test episodes specified in the settings and computes the
+     * expected return of the agent w.r.t. the environment
+     */
+    arma::vec runEvaluation()
     {
         //core setup
         StateC xn;
@@ -163,35 +210,38 @@ public:
         Reward r(environment.getSettings().rewardDim);
         arma::vec J_mean(r.size(), arma::fill::zeros);
 
-        for (unsigned int e = 0; e < settings.testEpisodeN; ++e)
+        //Save old logger
+        auto* tmp = settings.loggerStrategy;
+
+        //Create evaluation strategy
+        EvaluateStrategy<ActionC, StateC> strategy(environment.getSettings().gamma);
+        settings.loggerStrategy = &strategy;
+
+        //Run tests
+        runTestEpisodes();
+
+        //Reset old logger
+        settings.loggerStrategy = tmp;
+
+        //return mean
+        if(strategy.Jvec.size() > 0)
         {
-            Logger<ActionC, StateC> logger;
-            EvaluateStrategy<ActionC, StateC> stat_e(environment.getSettings().gamma);
-            logger.setStrategy(&stat_e);
+        	unsigned int rSize = strategy.Jvec[0].n_elem;
+        	arma::vec meanJ(rSize, arma::fill::zeros);
 
-            //Start episode
-            agent.initTestEpisode();
-            environment.getInitialState(xn);
-            logger.log(xn);
+        	for(auto& J : strategy.Jvec)
+        	{
+        		meanJ += J;
+        	}
 
-            for (unsigned int i = 0;
-                    i < settings.episodeLength && !xn.isAbsorbing(); i++)
-            {
-                agent.sampleAction(xn, u);
-                environment.step(u, xn, r);
-                logger.log(u, xn, r);
-            }
+        	meanJ /= strategy.Jvec.size();
 
-            logger.printStatistics();
-
-            J_mean += stat_e.J;
+        	return meanJ;
         }
-
-        J_mean /= settings.testEpisodeN;
-
-        //standard deviation of J
-
-        return J_mean;
+        else
+        {
+        	return arma::vec();
+        }
     }
 
 protected:
@@ -201,6 +251,14 @@ protected:
 
 };
 
+/*!
+ * This function can be used to get a core instance from an agent and an environment, reducing boilerplate code:
+ * Example:
+ *
+ *		auto&& core = buildCore(environment, agent);
+ *      core.run();
+ *
+ */
 template<class ActionC, class StateC>
 Core<ActionC, StateC> buildCore(Environment<ActionC, StateC>& environment,
                                 Agent<ActionC, StateC>& agent)

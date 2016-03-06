@@ -70,13 +70,7 @@ public:
 
     void printStatistics()
     {
-        if(!strategy)
-        {
-            PrintStrategy<ActionC, StateC> strategy;
-            strategy.processData(episode);
-            strategy.processData(outputData);
-        }
-        else
+        if(strategy)
         {
             strategy->processData(episode);
             strategy->processData(outputData);
