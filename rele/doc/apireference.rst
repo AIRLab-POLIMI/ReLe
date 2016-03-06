@@ -56,15 +56,25 @@ Basic Interfaces
 .. doxygenclass:: ReLe::Agent
    :members:
    :protected-members:
-   
-.. doxygenclass:: ReLe::Core
-   :members:
-   
-.. doxygenfunction:: ReLe::buildCore
 
 .. doxygenclass:: ReLe::BatchAgent
    :members:
    :protected-members:
+   
+.. doxygenclass:: ReLe::Core
+   :members:
+   
+.. doxygenfunction:: ReLe::buildCore      
+   
+.. doxygenclass:: ReLe::BatchOnlyCore
+   :members:   
+   
+.. doxygenfunction:: ReLe::buildBatchOnlyCore      
+   
+.. doxygenclass:: ReLe::BatchCore
+   :members:      
+   
+.. doxygenfunction:: ReLe::buildBatchCore      
    
 .. doxygenclass:: ReLe::Solver
    :members:   
@@ -103,7 +113,7 @@ Policy Representations
    :members:
 
 Normal Policies
------------------------
+---------------
 
 .. doxygenclass:: ReLe::GenericMVNPolicy
 

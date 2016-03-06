@@ -36,10 +36,18 @@
 namespace ReLe
 {
 
+/*!
+ * This class can be used to run a batch agent over a dataset.
+ * This class handles batch agent termination flag and logging.
+ * The maximum number f iterations and the logging strategy can be specified in the settings.
+ */
 template<class ActionC, class StateC>
 class BatchOnlyCore
 {
 public:
+	/*!
+	 * This struct contains the core settings
+	 */
     struct BatchOnlyCoreSettings
     {
         BatchOnlyCoreSettings()
@@ -51,26 +59,41 @@ public:
             maxBatchIterations = 1;
         }
 
+        //! The logger strategy to be used
         BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
         std::string envName;
         std::string algName;
         std::string dataFileName;
+        //! The maximum number of iteration of the algorithm over the dataset
         unsigned int maxBatchIterations;
     };
 
 public:
-    BatchOnlyCore(Dataset<ActionC, StateC> data,
+    /*!
+     * Constructor.
+     * \param data the dataset used for batch learning
+     * \param batchAgent a batch learning agent
+     */
+    BatchOnlyCore(Dataset<ActionC, StateC>& data,
                   BatchAgent<ActionC, StateC>& batchAgent) :
         data(data),
         batchAgent(batchAgent)
     {
     }
 
+    /*!
+     * Getter.
+     * \return the settings of the core.
+     */
     BatchOnlyCoreSettings& getSettings()
     {
         return settings;
     }
 
+    /*!
+     * Run the batch iterations over the dataset specified in the settings.
+     * \param gamma
+     */
     void run(double gamma)
     {
         //core setup
@@ -97,16 +120,24 @@ public:
     }
 
 protected:
-    Dataset<ActionC, StateC> data;
+    Dataset<ActionC, StateC>& data;
     BatchAgent<ActionC, StateC>& batchAgent;
     BatchOnlyCoreSettings settings;
 };
 
+
+/*!
+ * This class is an extension of BatchOnlyCore, that takes care not only to run the batch algorithm,
+ * but also to generate the dataset and test the learned policy over the environment.
+ */
 template<class ActionC, class StateC>
 class BatchCore
 {
 
 public:
+	/*!
+	 * This struct contains the core settings
+	 */
     struct BatchCoreSettings
     {
         BatchCoreSettings()
@@ -130,18 +161,31 @@ public:
     };
 
 public:
-    BatchCore(Environment<ActionC, StateC>& mdp,
+	/*!
+	 * Constructor.
+	 * \param environment the environment used by this experiment
+	 * \param batchAgent the batch learning agent
+	 */
+    BatchCore(Environment<ActionC, StateC>& environment,
               BatchAgent<ActionC, StateC>& batchAgent) :
-        mdp(mdp),
+        environment(environment),
         batchAgent(batchAgent)
     {
     }
 
+    /*!
+     * Getter.
+     * \return the core settings.
+     */
     BatchCoreSettings& getSettings()
     {
         return settings;
     }
 
+    /*!
+     * This method is used to generate a dataset from the environment and
+     * run the batch learning algorithm on it.
+     */
     void run(Policy<ActionC, StateC>& policy)
     {
         Dataset<ActionC, StateC> data = test(&policy);
@@ -154,16 +198,20 @@ public:
         batchCore.getSettings().dataFileName = settings.dataFileName;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
-        batchCore.run(mdp.getSettings().gamma);
+        batchCore.run(environment.getSettings().gamma);
     }
 
+    /*!
+     * This method generates a dataset using the agent learned policy
+     * \return the generated dataset
+     */
     Dataset<ActionC, StateC> runTest()
     {
         return test(batchAgent.getPolicy());
     }
 
 protected:
-    Environment<ActionC, StateC>& mdp;
+    Environment<ActionC, StateC>& environment;
     BatchAgent<ActionC, StateC>& batchAgent;
     BatchCoreSettings settings;
 
@@ -172,7 +220,7 @@ protected:
     {
         PolicyEvalAgent<ActionC, StateC> agent(*policy);
 
-        auto&& core = buildCore(mdp, agent);
+        auto&& core = buildCore(environment, agent);
 
         CollectorStrategy<ActionC, StateC> collection;
         core.getSettings().loggerStrategy = &collection;
@@ -186,6 +234,33 @@ protected:
     }
 };
 
+
+/*!
+ * This function can be used to get a BatchOnlyCore instance from an agent and an environment,
+ * reducing boilerplate code:
+ * Example:
+ *
+ *		auto&& batchOnlyCore = buildBatchOnlyCore(environment, agent);
+ *      core.run();
+ *
+ */
+template<class ActionC, class StateC>
+BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
+    Dataset<ActionC, StateC> data,
+    BatchAgent<ActionC, StateC>& batchAgent)
+{
+    return BatchOnlyCore<ActionC, StateC>(data, batchAgent);
+}
+
+/*!
+ * This function can be used to get a BatchCore instance from an agent and an environment,
+ * reducing boilerplate code:
+ * Example:
+ *
+ *		auto&& batchCore = buildBatchCore(environment, agent);
+ *      core.run();
+ *
+ */
 template<class ActionC, class StateC>
 BatchCore<ActionC, StateC> buildBatchCore(
     Environment<ActionC, StateC>& mdp,
@@ -194,13 +269,6 @@ BatchCore<ActionC, StateC> buildBatchCore(
     return BatchCore<ActionC, StateC>(mdp, batchAgent);
 }
 
-template<class ActionC, class StateC>
-BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
-    Dataset<ActionC, StateC> data,
-    BatchAgent<ActionC, StateC>& batchAgent)
-{
-    return BatchOnlyCore<ActionC, StateC>(data, batchAgent);
-}
 
 }
 
