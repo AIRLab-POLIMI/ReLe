@@ -65,7 +65,7 @@ Basic Interfaces
    :members:   
    
 Basic Environments
-------------
+------------------
 
 .. doxygenclass:: ReLe::FiniteMDP
    :members:   

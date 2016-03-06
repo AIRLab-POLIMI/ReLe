@@ -2,3 +2,4 @@
 --index-url https://pypi.python.org/simple/
 
 breathe==4.1.0
+sphinx_rtd_theme
