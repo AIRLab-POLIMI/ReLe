@@ -244,11 +244,17 @@ public:
  * The derivatives are computed w.r.t. the parameter vector and it is
  * evaluated in the provided (state,action)-pair with the current policy
  * parametrization.
- * Let \f$\hat{s}, \hat{a}, \hat{\theta} \subseteq R^d\f$ be the provided state, action
+ * Let \f$\hat{x}, \hat{u}, \hat{\theta} \subseteq R^d\f$ be the provided state, action
  * and the current policy representation, respectively. Then the first-order
  * derivative of the policy is given by
  * \f[
- * \nabla_{\theta}\pi(\hat{a}|\hat{s},\theta)\big|_{\hat{\theta}}.
+ * \nabla_{\theta}\pi(\hat{u}|\hat{x},\theta)\big|_{\hat{\theta}}.
+ * \f]
+ *
+ * Note that when the policy is deterministic the diff operator works on the
+ * deterministic function, i.e.,
+ * \f[
+ * \nabla_{\theta} \pi(u| \theta)\big|_{\hat{\theta}}.
  * \f]
  */
 template<class ActionC, class StateC>
