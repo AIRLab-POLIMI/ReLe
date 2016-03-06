@@ -53,17 +53,11 @@ public:
         BatchOnlyCoreSettings()
         {
             loggerStrategy = nullptr;
-            envName = "env";
-            algName = "alg";
-            dataFileName = "dataset.csv";
             maxBatchIterations = 1;
         }
 
         //! The logger strategy to be used
         BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
-        std::string envName;
-        std::string algName;
-        std::string dataFileName;
         //! The maximum number of iteration of the algorithm over the dataset
         unsigned int maxBatchIterations;
     };
@@ -74,7 +68,7 @@ public:
      * \param data the dataset used for batch learning
      * \param batchAgent a batch learning agent
      */
-    BatchOnlyCore(Dataset<ActionC, StateC>& data,
+    BatchOnlyCore(Dataset<ActionC, StateC> data,
                   BatchAgent<ActionC, StateC>& batchAgent) :
         data(data),
         batchAgent(batchAgent)
@@ -97,11 +91,9 @@ public:
     void run(double gamma)
     {
         //core setup
-        BatchLogger<ActionC, StateC> logger(data);
-        logger.printDataFile(settings.envName,
-                             settings.algName,
-                             settings.dataFileName);
+        BatchLogger<ActionC, StateC> logger;
         logger.setStrategy(settings.loggerStrategy);
+        logger.log(data);
 
         //Start episode
         batchAgent.init(data, gamma);
@@ -120,7 +112,7 @@ public:
     }
 
 protected:
-    Dataset<ActionC, StateC>& data;
+    Dataset<ActionC, StateC> data;
     BatchAgent<ActionC, StateC>& batchAgent;
     BatchOnlyCoreSettings settings;
 };
@@ -145,16 +137,10 @@ public:
             loggerStrategy = nullptr;
             episodeLength = 100;
             nEpisodes = 100;
-            envName = "env";
-            algName = "alg";
-            dataFileName = "dataset.csv";
             maxBatchIterations = 1;
         }
 
         BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
-        std::string envName;
-        std::string algName;
-        std::string dataFileName;
         unsigned int episodeLength;
         unsigned int nEpisodes;
         unsigned int maxBatchIterations;
@@ -188,14 +174,11 @@ public:
      */
     void run(Policy<ActionC, StateC>& policy)
     {
-        Dataset<ActionC, StateC> data = test(&policy);
+        const Dataset<ActionC, StateC>& data = test(&policy);
 
         auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
 
         batchCore.getSettings().loggerStrategy = settings.loggerStrategy;
-        batchCore.getSettings().envName = settings.envName;
-        batchCore.getSettings().algName = settings.algName;
-        batchCore.getSettings().dataFileName = settings.dataFileName;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
         batchCore.run(environment.getSettings().gamma);

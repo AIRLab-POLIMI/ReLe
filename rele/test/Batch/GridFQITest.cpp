@@ -80,9 +80,12 @@ int main(int argc, char *argv[])
 
     auto&& core = buildBatchCore(mdp, batchAgent);
 
-    core.getSettings().envName = "gw";
-    core.getSettings().algName = "fqi";
     core.getSettings().nEpisodes = 100;
+    FileManager fm("gw", "fqi");
+    fm.createDir();
+    fm.cleanDir();
+    std::string fileName = fm.addPath("gwFQI.txt");
+    core.getSettings().loggerStrategy = new BatchPrintStrategy<FiniteAction, FiniteState>(&fileName);
     core.getSettings().episodeLength = 1000;
     core.getSettings().maxBatchIterations = 100;
 

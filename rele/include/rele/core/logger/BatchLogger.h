@@ -34,25 +34,23 @@ template<class ActionC, class StateC>
 class BatchLogger
 {
 public:
-    BatchLogger(Dataset<ActionC, StateC> data) :
-        data(data),
+    BatchLogger() :
         strategy(nullptr)
     {
     }
 
-    void printDataFile(std::string envName,
-                       std::string algName,
-                       std::string dataFileName)
+    void log(Dataset<ActionC, StateC>& data)
     {
-        FileManager fm(envName, algName);
-        fm.createDir();
-        fm.cleanDir();
-        std::ofstream out(fm.addPath(dataFileName), std::ios_base::out);
+    	std::string* fileName = strategy->getFileName();
+    	if(fileName)
+        {
+        	std::ofstream out(*fileName, std::ios_base::out);
 
-        out << std::setprecision(OS_PRECISION);
-        if(out.is_open())
-            data.writeToStream(out);
-        out.close();
+			out << std::setprecision(OS_PRECISION);
+			if(out.is_open())
+				data.writeToStream(out);
+			out.close();
+        }
     }
 
     void printStatistics(AgentOutputData* outputData, unsigned int step)
@@ -78,7 +76,6 @@ public:
 
 
 private:
-    Dataset<ActionC, StateC> data;
     BatchLoggerStrategy<ActionC, StateC>* strategy;
 };
 

@@ -33,11 +33,26 @@ template<class ActionC, class StateC>
 class BatchLoggerStrategy
 {
 public:
-    virtual void processData(AgentOutputData* outputData) = 0;
+	BatchLoggerStrategy(std::string* fileName) :
+		fileName(fileName)
+	{
+	}
+
+	virtual void processData(AgentOutputData* outputData) = 0;
+
+    std::string* getFileName()
+    {
+    	return fileName;
+    }
 
     virtual ~BatchLoggerStrategy()
     {
+    	delete fileName;
     }
+
+
+protected:
+    std::string* fileName;
 
 protected:
     void cleanAgentOutputData(AgentOutputData* outputData)
@@ -47,26 +62,13 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class BatchEmptyStrategy : public BatchLoggerStrategy<ActionC, StateC>
-{
-public:
-    BatchEmptyStrategy()
-    {
-    }
-
-    void processData(AgentOutputData* outputData) override
-    {
-        this->cleanAgentOutputData(outputData);
-    }
-};
-
-template<class ActionC, class StateC>
 class BatchPrintStrategy : public BatchLoggerStrategy<ActionC, StateC>
 {
 public:
-    BatchPrintStrategy()
-    {
-    }
+	BatchPrintStrategy(std::string* fileName = nullptr) :
+		BatchLoggerStrategy<ActionC, StateC>(fileName)
+	{
+	}
 
     void processData(AgentOutputData* outputData) override
     {

@@ -149,17 +149,13 @@ int main(int argc, char *argv[])
     // dd.save(fm.addPath("cbasis.dat"), arma::raw_ascii);
     // return 1;
 
-    string envName = "mc";
-    string algName = "lspi";
-    FileManager fm(envName, algName);
-
     /*** load data ***/
-    ifstream is(fm.addPath("mc_lspi_data.dat"));
+    ifstream is("mc_lspi_data.dat");
     Dataset<FiniteAction, DenseState> dataLSPI;
     dataLSPI.readFromStream(is);
     is.close();
 
-    ofstream of(fm.addPath("data.log"));
+    ofstream of("data.log");
     of << std::setprecision(OS_PRECISION);
     for (auto ep : dataLSPI)
     {
@@ -179,8 +175,6 @@ int main(int argc, char *argv[])
 
     auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
 
-    core.getSettings().envName = envName;
-    core.getSettings().algName = algName;
     core.getSettings().maxBatchIterations = 100;
 
     double gamma = 0.9;
@@ -203,7 +197,7 @@ int main(int argc, char *argv[])
 
     /*** save data ***/
     Dataset<FiniteAction,DenseState>& dataFinal = collectionFinal.data;
-    ofstream datafile(fm.addPath("finaldata.log"), ios_base::out);
+    ofstream datafile("finaldata.log", ios_base::out);
     datafile << std::setprecision(OS_PRECISION);
     dataFinal.writeToStream(datafile);
     datafile.close();
