@@ -49,7 +49,5 @@ int main(int argc, char *argv[])
     PGTest<DenseAction, DenseState> pgTest(config, mdp, policy);
     pgTest.run();
 
-    delete pf;
-
     return 0;
 }
