@@ -29,6 +29,11 @@
 namespace ReLe
 {
 
+/*!
+ * This class represents a tabular deterministic policy. This means that for each
+ * state a policy is deterministically chosen: \f[u = \pi(x)\f].
+ * The policy is represented by a vector with dimension \f$|\mathcal{X}|\f$.
+ */
 class DeterministicPolicy: public NonParametricPolicy<FiniteAction, FiniteState>
 {
 
@@ -43,11 +48,21 @@ public:
 
     virtual std::string printPolicy() override;
 
+    /*!
+     * Associate an action to a specific state.
+     * \param state the state
+     * \param action the action to be associated to the state
+     */
     inline void update(size_t state, unsigned int action)
     {
         pi[state] = action;
     }
 
+    /*!
+     * Initiate the policy represantation with the provided dimension.
+     * Note that the dimension must equal the number of states.
+     * \param nstates the number states
+     */
     inline void init(size_t nstates)
     {
         pi.zeros(nstates);

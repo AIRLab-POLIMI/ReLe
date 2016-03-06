@@ -42,8 +42,8 @@ namespace ReLe
  * This class represents a multivariate Normal policy with fixed covariance matrix
  * and generic parametric approximation of the mean value:
  * \f[
- *  \pi^{\theta} (a|s) = \mathcal{N}\left(a; \mu(s,\theta), \Sigma\right),\qquad
- * \forall s \in R^{n_s}, a \in R^{n_a},
+ *  \pi^{\theta} (u|x) = \mathcal{N}\left(u; \mu(x,\theta), \Sigma\right),\qquad
+ * \forall x \in \mathbb{R}^{n_x}, u \in \mathbb{R}^{n_u},
  * \f]
  * where \f$\theta\f$ is a \f$k\f$-dimensional vector.
  *
@@ -98,7 +98,7 @@ public:
      * instance of the regressor received as parameter.
      *
      * \param approximator The regressor used for mean approximation.
-     * \param covariance The covariance matrix (\f$n_a \times n_a\f$).
+     * \param covariance The covariance matrix (\f$n_u \times n_u\f$).
      */
     GenericMVNPolicy(ParametricRegressor& approximator, arma::mat& covariance) :
         meanApproximator(approximator),
@@ -239,8 +239,8 @@ protected:
  * with mean represented through a generic parametric regressor
  * and diagonal covariance matrix:
  * \f[
- *  \pi^{\theta} (a|s) = \mathcal{N}\left(a; \mu(s,\omega), diag(\sigma^2)\right),\qquad
- * \forall s \in R^{n_s}, a \in R^{n_a},
+ *  \pi^{\theta} (u|x) = \mathcal{N}\left(u; \mu(x,\omega), diag(\sigma^2)\right),\qquad
+ * \forall s \in R^{n_x}, a \in R^{n_u},
  * \f]
  * where \f$\omega\f$ is a \f$k\f$-dimensional vector and \f$\sigma\f$ is
  * a \f$d\f$-dimensional vector. Note that the power operator is to be considered
@@ -322,11 +322,11 @@ protected:
 /*!
  * This class implements a multivariate normal policy
  * with both mean and covariance represented through parametric functions.
- * Let \f$f_\mu : S \times \Omega \to n_a\f$ and \f$f_\Sigma : S \times \Sigma \to n_a\f$.
+ * Let \f$f_\mu : \mathcal{X} \times \Omega \to n_u\f$ and \f$f_\Sigma : \mathcal{X} \times \Sigma \to n_u\f$.
  * Then the policy class is defined as
  * \f[
- *  \pi^{\theta} (a|s) = \mathcal{N}\left(a; f_\mu(s,\omega), diag(f_\Sigma(s,\sigma)^2)\right),\qquad
- * \forall s \in R^{n_s}, a \in R^{n_a},
+ *  \pi^{\theta} (u|x) = \mathcal{N}\left(u; f_\mu(x,\omega), diag(f_\Sigma(x,\sigma)^2)\right),\qquad
+ * \forall x \in \mathbb{R}^{n_x}, u \in \mathbb{R}^{n_u},
  * \f]
  * where \f$\omega\f$ is a \f$k\f$-dimensional vector and \f$\sigma\f$ is
  * a \f$d\f$-dimensional vector.

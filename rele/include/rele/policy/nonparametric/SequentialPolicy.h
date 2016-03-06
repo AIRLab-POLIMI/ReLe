@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta & Carlo D'Eramo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -30,15 +30,28 @@
 namespace ReLe
 {
 
+/*!
+ * This policy applies each action sequentially untill the end
+ * of the episode. Then, it restarts from the first action.
+ * It assumes that all the episodes have the same fixed length
+ * which must be known at construction time.
+ *
+ * The length of the action sequence can be smaller than the
+ * length of the episode. In this case, the action sequence is
+ * reinitialized multiple times in an episode.
+ * When the action sequence is longer than an episode, an action
+ * sequence is executed over multiple episodes.
+ */
 class SequentialPolicy: public ActionValuePolicy<FiniteState>
 {
 
-    /*
-     * This policy applies each action sequentially till the end
-     * of the episode. Then, it restarts from the first action.
-     */
-
 public:
+    /*!
+     * Construct a Sequential policy with a fixed action sequence
+     * and a fixed episode length.
+     * \param nActions the number of actions in a sequence
+     * \param episodeLength the length of the episodes
+     */
     SequentialPolicy(unsigned int nActions, unsigned int episodeLength);
     unsigned int operator()(const size_t& state) override;
     double operator()(const size_t& state, const unsigned int& action) override;
@@ -46,8 +59,11 @@ public:
     SequentialPolicy* clone() override;
 
 protected:
+    /// The action to be executed
     unsigned int currentAction;
+    /// The currently observed step of an episode
     unsigned int currentEpisodeStep;
+    /// The length of each episode (assumed fixed)
     unsigned int episodeLength;
 };
 
