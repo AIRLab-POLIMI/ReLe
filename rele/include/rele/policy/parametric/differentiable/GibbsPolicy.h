@@ -11,11 +11,34 @@ namespace ReLe
 {
 
 
+/*!
+ * When the action space is finite, a popular choice is to use the Gibbs policy,
+ * a parametric differentiable policy.
+ * Here we consider a linear parametrization of the utility (energy) function:
+ * \f[\pi(u|x,\theta) = \frac{\exp(\theta^T \phi(x,u)/\tau}{\sum_{u'\in mathcal{U}} \exp(\theta^T \phi(x,u'))/\tau},\quad x \in \mathcal{X}, u \in \mathcal{U},\f]
+ * where \f$\phi : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^d\f$ is an appropriate
+ * feature-extraction function and \f$\tau\f$ is the temperature. The temperature is used to
+ * regulate the level of determinism of the policy.
+ *
+ * Since the policy must define a distribution over the actions, we can avoid to associate weights
+ * to the last action since its probability can be obtained from previous actions.
+ * Let \f$\overline{u}\f$ be the last action, then \f$\exp(\theta^T \phi(x,\overline{u})) = 0\f$.
+ *
+ * \see{ParametricGibbsPolicyAllPref}
+ */
 template<class StateC>
 class ParametricGibbsPolicy : public DifferentiablePolicy<FiniteAction, StateC>
 {
 public:
 
+    /*!
+     * Constructor with parameters.
+     * Note that the weights are initialized to zero
+     * by the constructor of the linear approximator
+     * \param actions the vector of finite actions
+     * \param phi the features \f$\phi(x,u)\f$
+     * \param temperature the temperature value
+     */
     ParametricGibbsPolicy(std::vector<FiniteAction> actions,
                           Features& phi, double temperature) :
         mActions(actions), distribution(actions.size(),0),
@@ -145,6 +168,23 @@ public:
     }
 
 private:
+    /*!
+     * Compute the distribution in the current state, i.e., it computes the
+     * vector of probabilities of each action in state \f$x\f$.
+     * \param nactions the finite number of actions
+     * \param tuple a vector of dimension \f$n_x + 1\f$. The first \f$n_x\f$
+     * elements contain the current state \f$x\f$, while the action (0-nactions) is filled
+     * by the function
+     * \param statesize the dimension of the state (\f$n_x\f$)
+     * \return A vector representing the action distribution in state \f$x\f$
+     *
+     * Example:
+     *                  int statesize = state.size();
+     *                  int nactions = mActions.size();
+     *                  arma::vec tuple(1+statesize);
+     *                  tuple(arma::span(0, statesize-1)) = state;
+     *                  arma::vec distribution = computeDistribution(nactions, tuple,	statesize);
+     */
     arma::vec computeDistribution(int nactions, arma::vec tuple, int statesize)
     {
         int na_red = nactions - 1;
@@ -175,6 +215,11 @@ private:
         return distribution;
     }
 
+    /*!
+     * Look for an action in the action list
+     * \param action the action to be searched
+     * \return return the action number
+     */
     unsigned int findActionIndex(const unsigned int& action)
     {
         unsigned int index;
@@ -201,11 +246,28 @@ protected:
 
 };
 
+/*!
+ * When the action space is finite, a popular choice is to use the Gibbs policy,
+ * a parametric differentiable policy.
+ * Here we consider a linear parametrization of the utility (energy) function:
+ * \f[\pi(u|x,\theta) = \frac{\exp(\theta^T \phi(x,u)/\tau}{\sum_{u'\in mathcal{U}} \exp(\theta^T \phi(x,u'))/\tau},\quad x \in \mathcal{X}, u \in \mathcal{U},\f]
+ * where \f$\phi : \mathcal{X} \times \mathcal{U} \to \mathbb{R}^d\f$ is an appropriate
+ * feature-extraction function and \f$\tau\f$ is the temperature. The temperature is used to
+ * regulate the level of determinism of the policy.
+ */
 template<class StateC>
 class ParametricGibbsPolicyAllPref : public DifferentiablePolicy<FiniteAction, StateC>
 {
 public:
 
+    /*!
+     * Constructor with parameters.
+     * Note that the weights are initialized to zero
+     * by the constructor of the linear approximator
+     * \param actions the vector of finite actions
+     * \param phi the features \f$\phi(x,u)\f$
+     * \param temperature the temperature value
+     */
     ParametricGibbsPolicyAllPref(std::vector<FiniteAction> actions,
                                  Features& phi, double temperature) :
         mActions(actions), distribution(actions.size(),0),
@@ -336,6 +398,24 @@ public:
 
 
 private:
+
+    /*!
+     * Compute the distribution in the current state, i.e., it computes the
+     * vector of probabilities of each action in state \f$x\f$.
+     * \param nactions the finite number of actions
+     * \param tuple a vector of dimension \f$n_x + 1\f$. The first \f$n_x\f$
+     * elements contain the current state \f$x\f$, while the action (0-nactions) is filled
+     * by the function
+     * \param statesize the dimension of the state (\f$n_x\f$)
+     * \return A vector representing the action distribution in state \f$x\f$
+     *
+     * Example:
+     *                  int statesize = state.size();
+     *                  int nactions = mActions.size();
+     *                  arma::vec tuple(1+statesize);
+     *                  tuple(arma::span(0, statesize-1)) = state;
+     *                  arma::vec distribution = computeDistribution(nactions, tuple,	statesize);
+     */
     arma::vec computeDistribution(int nactions, arma::vec tuple, int statesize)
     {
         double den = 0.0;
@@ -363,6 +443,11 @@ private:
         return distribution;
     }
 
+    /*!
+     * Look for an action in the action list
+     * \param action the action to be searched
+     * \return return the action number
+     */
     unsigned int findActionIndex(const unsigned int& action)
     {
         unsigned int index;

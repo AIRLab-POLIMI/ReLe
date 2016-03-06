@@ -32,7 +32,6 @@ namespace ReLe
 {
 
 /**
- * @brief Deterministic policy obtained as linear combination of basis functions.
  * This policy is a linear combination of linear/non linear basis functions
  * \f[ \forall s \in S,\qquad \pi(s) = \sum_{i=1}^{n} w_i \phi_i(s)\f]
  * where \f$n\f$ is the number of parameters and basis functions.
@@ -47,12 +46,10 @@ public:
 
     /**
      * Create an instance of the class using the given projector.
-     * Note that the weights of the mean approximation are not
-     * changed, i.e., the initial weights are specified by the
-     * instance of the linear projector received as parameter.
+     * Note that the weights are initialized to zero
+     * by the constructor of the linear approximator
      *
-     * @brief The constructor.
-     * @param projector The linear projector
+     * \param phi the features \f$\phi(x,u)\f$
      */
     DetLinearPolicy(Features& phi) :
         approximator(phi)
