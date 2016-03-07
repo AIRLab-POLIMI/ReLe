@@ -51,19 +51,19 @@ namespace ReLe
  *
  *
  * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * BasisFunctions basis = IdentityBasis::generate(2);
+ * SparseFeatures phi;
+ * phi.setDiagonal(basis);
+ * arma::vec w = {1.0, 1.0};
+ * LinearApproximator regressor(phi);
+ * regressor.setParameters(w);
+ * GenericMVNPolicy policy(regressor);
  *
- *      BasisFunctions basis = IdentityBasis::generate(2);
- *      SparseFeatures phi;
- *      phi.setDiagonal(basis);
- *      arma::vec w = {1.0, 1.0};
- *      LinearApproximator regressor(phi);
- *      regressor.setParameters(w);
- *      GenericMVNPolicy policy(regressor);
- *
- *      arma::vec state  = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({10.0, 10.0})));
- *      arma::vec action = policy(state);
- *      arma::vec diff = policy.difflog(state, action);
- *
+ * arma::vec state  = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({10.0, 10.0})));
+ * arma::vec action = policy(state);
+ * arma::vec diff = policy.difflog(state, action);
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 class GenericMVNPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
