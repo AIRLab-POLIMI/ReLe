@@ -45,9 +45,9 @@ template<class ActionC, class StateC>
 class BatchOnlyCore
 {
 public:
-	/*!
-	 * This struct contains the core settings
-	 */
+    /*!
+     * This struct contains the core settings
+     */
     struct BatchOnlyCoreSettings
     {
         BatchOnlyCoreSettings()
@@ -127,9 +127,9 @@ class BatchCore
 {
 
 public:
-	/*!
-	 * This struct contains the core settings
-	 */
+    /*!
+     * This struct contains the core settings
+     */
     struct BatchCoreSettings
     {
         BatchCoreSettings()
@@ -147,11 +147,11 @@ public:
     };
 
 public:
-	/*!
-	 * Constructor.
-	 * \param environment the environment used by this experiment
-	 * \param batchAgent the batch learning agent
-	 */
+    /*!
+     * Constructor.
+     * \param environment the environment used by this experiment
+     * \param batchAgent the batch learning agent
+     */
     BatchCore(Environment<ActionC, StateC>& environment,
               BatchAgent<ActionC, StateC>& batchAgent) :
         environment(environment),

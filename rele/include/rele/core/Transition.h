@@ -113,7 +113,7 @@ public:
 
     unsigned int getRewardSize()
     {
-    	auto& episode = *this;
+        auto& episode = *this;
         return episode[0].r.size();
     }
 

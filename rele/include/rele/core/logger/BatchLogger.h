@@ -41,15 +41,15 @@ public:
 
     void log(Dataset<ActionC, StateC>& data)
     {
-    	std::string* fileName = strategy->getFileName();
-    	if(fileName)
+        std::string* fileName = strategy->getFileName();
+        if(fileName)
         {
-        	std::ofstream out(*fileName, std::ios_base::out);
+            std::ofstream out(*fileName, std::ios_base::out);
 
-			out << std::setprecision(OS_PRECISION);
-			if(out.is_open())
-				data.writeToStream(out);
-			out.close();
+            out << std::setprecision(OS_PRECISION);
+            if(out.is_open())
+                data.writeToStream(out);
+            out.close();
         }
     }
 

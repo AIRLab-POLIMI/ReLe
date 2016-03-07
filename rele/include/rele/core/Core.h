@@ -227,21 +227,21 @@ public:
         //return mean
         if(strategy.Jvec.size() > 0)
         {
-        	unsigned int rSize = strategy.Jvec[0].n_elem;
-        	arma::vec meanJ(rSize, arma::fill::zeros);
+            unsigned int rSize = strategy.Jvec[0].n_elem;
+            arma::vec meanJ(rSize, arma::fill::zeros);
 
-        	for(auto& J : strategy.Jvec)
-        	{
-        		meanJ += J;
-        	}
+            for(auto& J : strategy.Jvec)
+            {
+                meanJ += J;
+            }
 
-        	meanJ /= strategy.Jvec.size();
+            meanJ /= strategy.Jvec.size();
 
-        	return meanJ;
+            return meanJ;
         }
         else
         {
-        	return arma::vec();
+            return arma::vec();
         }
     }
 

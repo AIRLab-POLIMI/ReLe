@@ -53,10 +53,10 @@ int main(int argc, char *argv[])
     fm.createDir();
 
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-    IrlHess htype = IrlHess::REINFORCE_BASELINE_TRACE_DIAG;
+    IrlHess htype = IrlHess::REINFORCE_BASELINE_TRACE;
     vec eReward =
     { 0.3, 0.7 };
-    int nbEpisodes = 1000;
+    int nbEpisodes = 10000;
     int dim = eReward.n_elem;
 
     // create policy basis functions
@@ -64,17 +64,23 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    /*BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
+    BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
     SparseFeatures phiStdDev(basisStdDev, dim);
     arma::mat stdDevW(dim, phiStdDev.rows(), fill::zeros);
 
     for(int i = 0; i < stdDevW.n_rows; i++)
-        for(int j = i*basis.size(); j < (i+1)*basis.size(); j++)
+    {
+        int first = i*basisStdDev.size();
+        stdDevW(i, first) = 0.1;
+        for(int j =  first + 1; j < (i+1)*basisStdDev.size(); j++)
         {
-            stdDevW(i, j) = 1;
+            stdDevW(i, j) = 0.1;
         }
+    }
 
-    stdDevW *= 0.1;*/
+    std::cout << basisStdDev.size() << std::endl;
+    std::cout << phiStdDev.rows() << ", " << phiStdDev.cols() << std::endl;
+    std::cout << stdDevW << std::endl;
 
 
     // solve the problem in exact way
@@ -82,13 +88,13 @@ int main(int argc, char *argv[])
     LQRsolver solver(mdp, phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
-    arma::vec p = K.diag() /*+ arma::vec({0.1, 0.1})*/;
+    arma::vec p = K.diag();
 
     // Create expert policy
-    //MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
-    arma::mat SigmaExpert(dim, dim, arma::fill::eye);
+    MVNStateDependantStddevPolicy expertPolicy(phi, phiStdDev, stdDevW);
+    /*arma::mat SigmaExpert(dim, dim, arma::fill::eye);
     SigmaExpert *= 0.1;
-    MVNPolicy expertPolicy(phi, SigmaExpert);
+    MVNPolicy expertPolicy(phi, SigmaExpert);*/
     expertPolicy.setParameters(p);
 
     std::cout << "Rewards: ";
