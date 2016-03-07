@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
     auto&& core = buildBatchCore(mdp, batchAgent);
 
     core.getSettings().nEpisodes = 100;
+    core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, FiniteState>();
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 

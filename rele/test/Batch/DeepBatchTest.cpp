@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
     OffPolicyGradientAlgorithm<FiniteAction, DenseState> offagent(type, target, behavioral, stepl, &rewardF);
     BatchCore<FiniteAction, DenseState> batchcore(mdp, offagent);
-    batchcore.getSettings().loggerStrategy = new BatchPrintStrategy<FiniteAction, DenseState>();
+    batchcore.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
     batchcore.getSettings().episodeLength = mdp.getSettings().horizon;
     batchcore.getSettings().nEpisodes = 1000;
     batchcore.getSettings().maxBatchIterations = 100;

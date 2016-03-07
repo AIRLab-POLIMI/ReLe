@@ -28,8 +28,8 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/BatchAgent.h"
 #include "rele/utils/FileManager.h"
-#include "rele/core/logger/BatchLogger.h"
-#include "rele/core/logger/BatchLoggerStrategy.h"
+#include "rele/core/logger/BatchAgentLogger.h"
+#include "rele/core/logger/BatchDatasetLogger.h"
 
 #include <iostream>
 
@@ -52,12 +52,12 @@ public:
     {
         BatchOnlyCoreSettings()
         {
-            loggerStrategy = nullptr;
+            logger = nullptr;
             maxBatchIterations = 1;
         }
 
         //! The logger strategy to be used
-        BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
+        BatchAgentLogger<ActionC, StateC>* logger;
         //! The maximum number of iteration of the algorithm over the dataset
         unsigned int maxBatchIterations;
     };
@@ -90,11 +90,6 @@ public:
      */
     void run(double gamma)
     {
-        //core setup
-        BatchLogger<ActionC, StateC> logger;
-        logger.setStrategy(settings.loggerStrategy);
-        logger.log(data);
-
         //Start episode
         batchAgent.init(data, gamma);
 
@@ -104,10 +99,11 @@ public:
         {
             batchAgent.step();
 
-            if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
-                logger.printStatistics(batchAgent.getAgentOutputData(), i);
-            else
-                logger.printStatistics(batchAgent.getAgentOutputDataEnd(), i);
+            if(settings.logger)
+				if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
+				   settings.logger->log(batchAgent.getAgentOutputData(), i);
+				else
+					settings.logger->log(batchAgent.getAgentOutputDataEnd(), i);
         }
     }
 
@@ -134,13 +130,15 @@ public:
     {
         BatchCoreSettings()
         {
-            loggerStrategy = nullptr;
+        	datasetLogger = nullptr;
+            agentLogger = nullptr;
             episodeLength = 100;
             nEpisodes = 100;
             maxBatchIterations = 1;
         }
 
-        BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
+        BatchDatasetLogger<ActionC, StateC>* datasetLogger;
+        BatchAgentLogger<ActionC, StateC>* agentLogger;
         unsigned int episodeLength;
         unsigned int nEpisodes;
         unsigned int maxBatchIterations;
@@ -174,11 +172,14 @@ public:
      */
     void run(Policy<ActionC, StateC>& policy)
     {
-        const Dataset<ActionC, StateC>& data = test(&policy);
+        Dataset<ActionC, StateC>&& data = test(&policy);
+
+        if(settings.datasetLogger)
+        	settings.datasetLogger->log(data);
 
         auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
 
-        batchCore.getSettings().loggerStrategy = settings.loggerStrategy;
+        batchCore.getSettings().logger = settings.agentLogger;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
         batchCore.run(environment.getSettings().gamma);

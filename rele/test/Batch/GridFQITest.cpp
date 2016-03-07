@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     fm.createDir();
     fm.cleanDir();
     std::string fileName = fm.addPath("gwFQI.txt");
-    core.getSettings().loggerStrategy = new BatchPrintStrategy<FiniteAction, FiniteState>(&fileName);
+    core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, FiniteState>();
     core.getSettings().episodeLength = 1000;
     core.getSettings().maxBatchIterations = 100;
 

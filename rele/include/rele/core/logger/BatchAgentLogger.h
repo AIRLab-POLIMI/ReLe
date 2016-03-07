@@ -21,56 +21,40 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGERSTRATEGY_H_
-#define INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGERSTRATEGY_H_
+#ifndef INCLUDE_RELE_UTILS_LOGGER_BATCHAGENTLOGGER_H_
+#define INCLUDE_RELE_UTILS_LOGGER_BATCHAGENTLOGGER_H_
 
-#include <iostream>
+#include "rele/core/BatchCore.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class BatchLoggerStrategy
+class BatchAgentLogger
 {
 public:
-    BatchLoggerStrategy(std::string* fileName) :
-        fileName(fileName)
+    void log(AgentOutputData* outputData, unsigned int step)
     {
+        if(outputData)
+        {
+            outputData->setStep(step);
+			processData(outputData);
+        }
     }
 
-    virtual void processData(AgentOutputData* outputData) = 0;
-
-    std::string* getFileName()
+    virtual ~BatchAgentLogger()
     {
-        return fileName;
     }
-
-    virtual ~BatchLoggerStrategy()
-    {
-        delete fileName;
-    }
-
 
 protected:
-    std::string* fileName;
-
-protected:
-    void cleanAgentOutputData(AgentOutputData* outputData)
-    {
-        delete outputData;
-    }
+	virtual void processData(AgentOutputData* outputData) = 0;
 };
 
 template<class ActionC, class StateC>
-class BatchPrintStrategy : public BatchLoggerStrategy<ActionC, StateC>
+class BatchAgentPrintLogger : public BatchAgentLogger<ActionC, StateC>
 {
-public:
-    BatchPrintStrategy(std::string* fileName = nullptr) :
-        BatchLoggerStrategy<ActionC, StateC>(fileName)
-    {
-    }
-
-    void processData(AgentOutputData* outputData) override
+protected:
+	void processData(AgentOutputData* outputData) override
     {
         if(outputData->isFinal())
         {
@@ -84,10 +68,10 @@ public:
 
         outputData->writeDecoratedData(std::cout);
 
-        this->cleanAgentOutputData(outputData);
+        delete outputData;
     }
 };
 
 }
 
-#endif /* INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGERSTRATEGY_H_ */
+#endif /* INCLUDE_RELE_UTILS_LOGGER_BATCHAGENTLOGGER_H_ */
