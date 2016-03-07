@@ -86,11 +86,12 @@ public:
      * Getter.
      * Used to set the core parameters.
      * Example:
-     *
-     *		core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
-     *		core.getSettings().episodeLength = 100;
-     *		core.getSettings().episodeN = 1000;
-     *		core.getSettings().testEpisodeN = 200;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
+     * core.getSettings().episodeLength = 100;
+     * core.getSettings().episodeN = 1000;
+     * core.getSettings().testEpisodeN = 200;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * \return a reference to the core settings.
      */
     CoreSettings& getSettings()
@@ -254,10 +255,10 @@ protected:
 /*!
  * This function can be used to get a core instance from an agent and an environment, reducing boilerplate code:
  * Example:
- *
- *		auto&& core = buildCore(environment, agent);
- *      core.run();
- *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto&& core = buildCore(environment, agent);
+ * core.run();
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 template<class ActionC, class StateC>
 Core<ActionC, StateC> buildCore(Environment<ActionC, StateC>& environment,

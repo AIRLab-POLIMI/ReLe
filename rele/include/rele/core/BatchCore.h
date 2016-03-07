@@ -222,9 +222,10 @@ protected:
  * This function can be used to get a BatchOnlyCore instance from an agent and an environment,
  * reducing boilerplate code:
  * Example:
- *
- *		auto&& batchOnlyCore = buildBatchOnlyCore(environment, agent);
- *      core.run();
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto&& batchOnlyCore = buildBatchOnlyCore(environment, agent);
+ * core.run();
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  */
 template<class ActionC, class StateC>
@@ -239,10 +240,10 @@ BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
  * This function can be used to get a BatchCore instance from an agent and an environment,
  * reducing boilerplate code:
  * Example:
- *
- *		auto&& batchCore = buildBatchCore(environment, agent);
- *      core.run();
- *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto&& batchCore = buildBatchCore(environment, agent);
+ * core.run();
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  */
 template<class ActionC, class StateC>
 BatchCore<ActionC, StateC> buildBatchCore(
