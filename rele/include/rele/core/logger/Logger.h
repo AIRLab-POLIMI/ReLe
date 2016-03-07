@@ -35,6 +35,12 @@
 namespace ReLe
 {
 
+/*!
+ * This class implement the logger for the ReLe::Core class.
+ * this class is used to log both agent output data and environment trajectories into a dataset.
+ * The behavior of this class depends on the logger strategy selected. If no strategy is specified
+ * (or if the strategy is set to a null pointer) no logging will be performed.
+ */
 template<class ActionC, class StateC>
 class Logger
 {
@@ -42,16 +48,29 @@ class Logger
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
 public:
+    /*!
+     * Constructor.
+     */
     Logger()
     {
         strategy = nullptr;
     }
 
+    /*!
+     * Method used to log the initial state
+     * \param x the initial environment state
+     */
     void log(StateC& x)
     {
         transition.init(x);
     }
 
+    /*!
+     * Method used to log a state transition
+     * \param u the action performed by the agent
+     * \param xn the state reached after the agent's action
+     * \param r the reward achieved by the agent
+     */
     void log(ActionC& u, StateC& xn, Reward& r)
     {
         transition.update(u, xn, r);
@@ -59,6 +78,11 @@ public:
         transition.init(xn);
     }
 
+    /*!
+     * Method used to log agent output data
+     * \param data the agent output data
+     * \param step the current agent step
+     */
     void log(AgentOutputData* data, unsigned int step)
     {
         if(data)
@@ -68,6 +92,9 @@ public:
         }
     }
 
+    /*!
+     * This method performs the logger operations
+     */
     void printStatistics()
     {
         if(strategy)
@@ -77,6 +104,10 @@ public:
         }
     }
 
+    /*!
+     * Setter.
+     * \strategy the selected logger strategy to be performed
+     */
     void setStrategy(LoggerStrategy<ActionC, StateC>* strategy)
     {
         this->strategy = strategy;

@@ -56,7 +56,7 @@ public:
             maxBatchIterations = 1;
         }
 
-        //! The logger strategy to be used
+        //! The logger for agent data
         BatchAgentLogger<ActionC, StateC>* logger;
         //! The maximum number of iteration of the algorithm over the dataset
         unsigned int maxBatchIterations;
@@ -137,10 +137,15 @@ public:
             maxBatchIterations = 1;
         }
 
+        //! The logger for the dataset
         BatchDatasetLogger<ActionC, StateC>* datasetLogger;
+        //! The logger for agent data
         BatchAgentLogger<ActionC, StateC>* agentLogger;
+        //! The episode lenght
         unsigned int episodeLength;
+        //! The number of episodes to run
         unsigned int nEpisodes;
+        //! The maximum number of algorithm iterations.
         unsigned int maxBatchIterations;
     };
 

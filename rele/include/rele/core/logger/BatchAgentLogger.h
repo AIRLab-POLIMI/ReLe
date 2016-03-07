@@ -29,10 +29,19 @@
 namespace ReLe
 {
 
+/*!
+ * This class is the default interface for ReLe::BatchAgent data logger.
+ * All batch agent loggers must extend this class.
+ */
 template<class ActionC, class StateC>
 class BatchAgentLogger
 {
 public:
+	/*!
+	 * This function is called automatically from ReLe::BatchCore for logging agent data.
+	 * \param outputData the agent output data
+	 * \param step the current batch training step
+	 */
     void log(AgentOutputData* outputData, unsigned int step)
     {
         if(outputData)
@@ -42,18 +51,32 @@ public:
         }
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~BatchAgentLogger()
     {
     }
 
 protected:
+    /*!
+     * Abstract function called by the default log implementation. Should be overridden.
+     * This function implements the logging operations.
+     */
     virtual void processData(AgentOutputData* outputData) = 0;
 };
 
+
+/*!
+ * This logger prints agent information to the console, calling AgentOutputData::writeDecoratedData.
+ */
 template<class ActionC, class StateC>
 class BatchAgentPrintLogger : public BatchAgentLogger<ActionC, StateC>
 {
 protected:
+	/*!
+	 * \see BatchAgentLogger::processData
+	 */
     void processData(AgentOutputData* outputData) override
     {
         if(outputData->isFinal())

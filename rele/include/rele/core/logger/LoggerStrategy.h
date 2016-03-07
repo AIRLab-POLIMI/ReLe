@@ -31,18 +31,37 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the basic logger strategy interface.
+ * All logger strategies should implement this interface.
+ */
 template<class ActionC, class StateC>
 class LoggerStrategy
 {
 public:
+	/*!
+	 * This method describes how an episode should be processed.
+	 * Must be implemented.
+	 */
     virtual void processData(Episode<ActionC, StateC>& samples) = 0;
+
+    /*!
+     * This method describes how the agent data should be processed.
+     * Must be implemented.
+     */
     virtual void processData(std::vector<AgentOutputData*>& data) = 0;
 
+    /*!
+     * Destructor.
+     */
     virtual ~LoggerStrategy()
     {
     }
 
 protected:
+    /*!
+     * This method can be used to clean the agent data vector
+     */
     void cleanAgentOutputData(std::vector<AgentOutputData*>& data)
     {
         for(auto p : data)
@@ -51,16 +70,27 @@ protected:
 
 };
 
+/*!
+ * This strategy can be used to print information to the console
+ */
 template<class ActionC, class StateC>
 class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param logTransitions if the environment transitions should be printed on the console
+	 * \param logAgent if agent output data should be printed on the console
+	 */
     PrintStrategy(bool logTransitions = true, bool logAgent = true) :
         logTransitions(logTransitions), logAgent(logAgent)
     {
 
     }
 
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     void processData(Episode<ActionC, StateC>& samples) override
     {
         printTransitions(samples);
@@ -75,6 +105,9 @@ public:
         printStateStatistics(samples);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
         if(logAgent)
@@ -138,13 +171,22 @@ private:
 
 };
 
+/*!
+ * This strategy can be used to save logged informations to a file.
+ */
 template<class ActionC, class StateC>
 class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+	//! enum used to select wheather to log only transitions, only agent data or both.
+	enum outType {TRANS, AGENT, ALL};
 
-    enum outType {TRANS, AGENT, ALL};
-
+	/*!
+	 * Constructor
+	 * \param path the path where to log the data
+	 * \param outputType what information should be logged
+	 * \param clean if the existing files should be overwritten up or not
+	 */
     WriteStrategy(const std::string& path, outType outputType = ALL, bool clean = false) :
         transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
     {
@@ -172,13 +214,20 @@ public:
         }
     }
 
+    /*!
+     * Constructor
+     * \param transitionPath where the transitions will be logged
+     * \param agentDataPath where the agent output data will be logged
+     */
     WriteStrategy(const std::string& transitionPath, const std::string& agentDataPath) :
         transitionPath(transitionPath), agentDataPath(agentDataPath), first(true),
         writeTransitions(true), writeAgentData(true)
     {
     }
 
-
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     void processData(Episode<ActionC, StateC>& samples) override
     {
         if (writeTransitions)
@@ -203,6 +252,9 @@ public:
         }
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
         if (writeAgentData)
@@ -240,15 +292,25 @@ private:
     bool first;
 };
 
+/*!
+ * This strategy can be used to evaluate the performances of an aget w.r.t. an environment
+ */
 template<class ActionC, class StateC>
 class EvaluateStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+	/*!
+	 * Constructor
+	 * \param gamma the discount factor for this environment
+	 */
     EvaluateStrategy(double gamma)
         : gamma(gamma)
     {
     }
 
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     void processData(Episode<ActionC, StateC>& samples) override
     {
         double df = 1.0;
@@ -274,35 +336,54 @@ public:
         Jvec.push_back(J);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
         //TODO evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
+    //! A vector containing the returns of all episodes
     std::vector<arma::vec> Jvec;
+
+private:
     double gamma;
 };
 
+/*!
+ * This class simply collects the trajectories of all episodes into a ReLe::Dataset
+ */
 template<class ActionC, class StateC>
 class CollectorStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     virtual void processData(Episode<ActionC, StateC>& samples) override
     {
         data.push_back(samples);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     virtual void processData(std::vector<AgentOutputData*>& data) override
     {
         //TODO evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~CollectorStrategy()
     {
     }
 
+    //! the collected trajectories
     Dataset<ActionC, StateC> data;
 };
 
@@ -430,6 +511,9 @@ public:
 //        data.push_back(ep);
 //    }
 
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     virtual void processData(Episode<ActionC, StateC>& samples)
     {
 //        int ds = samples[0].x.n_elem;
@@ -488,6 +572,9 @@ public:
         data.push_back(ep);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     virtual void processData(std::vector<AgentOutputData*>& data)
     {
         //TODO evaluation here or abstract class...
