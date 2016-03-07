@@ -100,10 +100,10 @@ public:
             batchAgent.step();
 
             if(settings.logger)
-				if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
-				   settings.logger->log(batchAgent.getAgentOutputData(), i);
-				else
-					settings.logger->log(batchAgent.getAgentOutputDataEnd(), i);
+                if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
+                    settings.logger->log(batchAgent.getAgentOutputData(), i);
+                else
+                    settings.logger->log(batchAgent.getAgentOutputDataEnd(), i);
         }
     }
 
@@ -130,7 +130,7 @@ public:
     {
         BatchCoreSettings()
         {
-        	datasetLogger = nullptr;
+            datasetLogger = nullptr;
             agentLogger = nullptr;
             episodeLength = 100;
             nEpisodes = 100;
@@ -175,7 +175,7 @@ public:
         Dataset<ActionC, StateC>&& data = test(&policy);
 
         if(settings.datasetLogger)
-        	settings.datasetLogger->log(data);
+            settings.datasetLogger->log(data);
 
         auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
 

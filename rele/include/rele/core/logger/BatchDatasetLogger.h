@@ -33,9 +33,9 @@ template<class ActionC, class StateC>
 class BatchDatasetLogger
 {
 public:
-	virtual ~BatchDatasetLogger()
-	{
-	}
+    virtual ~BatchDatasetLogger()
+    {
+    }
 
 public:
     virtual void log(Dataset<ActionC, StateC>& data) = 0;
@@ -45,36 +45,36 @@ template<class ActionC, class StateC>
 class CollectBatchDatasetLogger : public BatchDatasetLogger<ActionC, StateC>
 {
 public:
-	Dataset<ActionC, StateC> data;
+    Dataset<ActionC, StateC> data;
 
 public:
-	void log(Dataset<ActionC, StateC>& data) override
-	{
-		this->data = data;
-	}
+    void log(Dataset<ActionC, StateC>& data) override
+    {
+        this->data = data;
+    }
 };
 
 template<class ActionC, class StateC>
 class WriteBatchDatasetLogger : public BatchDatasetLogger<ActionC, StateC>
 {
 public:
-	WriteBatchDatasetLogger(std::string fileName) :
-		fileName(fileName)
-	{
-	}
+    WriteBatchDatasetLogger(std::string fileName) :
+        fileName(fileName)
+    {
+    }
 
-	void log(Dataset<ActionC, StateC>& data) override
-	{
-		std::ofstream out(fileName, std::ios_base::out);
+    void log(Dataset<ActionC, StateC>& data) override
+    {
+        std::ofstream out(fileName, std::ios_base::out);
 
-		out << std::setprecision(OS_PRECISION);
-		if(out.is_open())
-			data.writeToStream(out);
-		out.close();
-	}
+        out << std::setprecision(OS_PRECISION);
+        if(out.is_open())
+            data.writeToStream(out);
+        out.close();
+    }
 
 protected:
-	std::string fileName;
+    std::string fileName;
 };
 
 }

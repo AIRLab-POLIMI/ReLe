@@ -38,7 +38,7 @@ public:
         if(outputData)
         {
             outputData->setStep(step);
-			processData(outputData);
+            processData(outputData);
         }
     }
 
@@ -47,14 +47,14 @@ public:
     }
 
 protected:
-	virtual void processData(AgentOutputData* outputData) = 0;
+    virtual void processData(AgentOutputData* outputData) = 0;
 };
 
 template<class ActionC, class StateC>
 class BatchAgentPrintLogger : public BatchAgentLogger<ActionC, StateC>
 {
 protected:
-	void processData(AgentOutputData* outputData) override
+    void processData(AgentOutputData* outputData) override
     {
         if(outputData->isFinal())
         {
