@@ -25,7 +25,6 @@
 #define POLICY_H_
 
 #include "rele/core/BasicsTraits.h"
-#include "rele/core/ActionMask.h"
 
 #include <string>
 #include <map>
@@ -78,11 +77,6 @@ class Policy
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
 public:
-    Policy()
-    {
-        actionMask = nullptr;
-    }
-
     /*!
      * Draw a random action from the distribution induced by
      * the policy in a state \f$s\f$: \f$a \sim \pi(s)\f$.
@@ -151,34 +145,10 @@ public:
      */
     virtual Policy<ActionC, StateC>* clone() = 0;
 
-    /*!
-     * Set a new action mask. Note that the old pointer
-     * is not deleted.
-     * \param mask the new action mask
-     */
-    void setMask(ActionMask<StateC, bool>* mask)
-    {
-        this->actionMask = mask;
-    }
-
     virtual ~Policy()
     {
 
     }
-
-protected:
-    std::vector<bool> getMask(typename state_type<StateC>::const_type_ref state, unsigned int size)
-    {
-        if(actionMask)
-            return actionMask->getMask(state);
-
-        return std::vector<bool>(size, true);
-    }
-
-protected:
-    /// Check a condition on the provided state
-    /// Can be used to check if an action is valid in a given state
-    ActionMask<StateC, bool>* actionMask; //FIXME add template parameter if needed, or enable if
 
 };
 
