@@ -45,6 +45,23 @@ Basic concepts
 .. doxygenclass:: ReLe::AgentOutputData
    :members:    
    
+.. doxygenstruct:: ReLe::action_type
+   :members:
+   
+.. doxygenstruct:: ReLe::state_type
+   :members:      
+
+Trajectories
+------------
+
+.. doxygenstruct:: ReLe::Transition
+   :members: 
+   
+.. doxygenclass:: ReLe::Episode
+   :members:       
+
+.. doxygenclass:: ReLe::Dataset
+   :members:       
 
 Basic Interfaces
 ----------------

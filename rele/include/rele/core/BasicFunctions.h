@@ -78,7 +78,7 @@ inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
  * can handle the vectorization of a full transition (not considering the reward)
  * \param state the initial state
  * \param action the action
- * \param nextState the state reached after perfoming the action
+ * \param nextState the state reached after performing the action
  * \return the vectorized transition
  */
 template<class StateC, class ActionC>
