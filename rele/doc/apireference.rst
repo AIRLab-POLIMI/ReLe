@@ -119,7 +119,7 @@ Batch loggers
    :members:
    :protected-members:
 
-.. doxygenclass:: ReLe::BatchAgentprintLogger
+.. doxygenclass:: ReLe::BatchAgentPrintLogger
    :members:
 
 .. doxygenclass:: ReLe::BatchDatasetLogger
