@@ -30,9 +30,21 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the simplex one sum constraint for optimization.
+ * Given a parameter space \f$\theta_simplex\in\mathbb{R}^{n-1}\f$ this class reconstructs
+ * the full parametrization \f$\theta\in\mathbb{R}^n\f$ by appling the one sum constraint.
+ * This class can also compute the derivative of the reduced parametrization.
+ * Also, this class support non active parameters in the parameters vector, in order to compute the simplex
+ * constraint on a subset of the original parametrization.
+ */
 class Simplex
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param size the dimension of the full parameter space
+	 */
     Simplex(unsigned int size) : size(size)
     {
         // all features are active by default
@@ -41,6 +53,11 @@ public:
         compute();
     }
 
+    /*!
+     * Given a set of parameters in the simplex, reconstruct the full parametrization
+     * \param xSimplex an armadillo vector of the simplex parameters
+     * \return a vector to the full parametrization
+     */
     inline arma::vec reconstruct(const arma::vec& xSimplex)
     {
         int dim = active_feat.n_elem;
@@ -53,7 +70,11 @@ public:
         return x;
     }
 
-
+    /*!
+     * Given a set of parameters in the simplex, reconstruct the full parametrization
+     * \param xSimplex an std::vector of the simplex parameters
+     * \return a vector to the full parametrization
+     */
     inline arma::vec reconstruct(const std::vector<double> xSimplex)
     {
         // reconstruct parameters
@@ -77,24 +98,42 @@ public:
         return x;
     }
 
+    /*
+     * returns the center of the simplex.
+     * \return a vector to the full parametrization
+     */
     inline arma::vec reconstruct()
     {
         arma::vec x(size, arma::fill::zeros);
         x.elem(active_feat).ones();
+        x /= active_feat.n_elem;
 
         return x;
     }
 
+    /*
+     * Compute the derivative of the function w.r.t. the simplex
+     * \param df the derivative w.r.t. the full parametrization
+     * \return the composite derivative matrix
+     */
     inline arma::mat diff(const arma::mat& df)
     {
         return dtheta_simplex * df;
     }
 
+    /*!
+     * Getter.
+     * \return the simplex dimension (considering only active features)
+     */
     inline unsigned int getEffectiveDim()
     {
         return active_feat.n_elem - 1;
     }
 
+    /*!
+     * Setter.
+     * \param active the active features
+     */
     inline void setActiveFeatures(arma::uvec& active)
     {
         active_feat = active;
