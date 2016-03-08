@@ -35,9 +35,9 @@ namespace ReLe
 class ContinuousMDP: public Environment<DenseAction, DenseState>
 {
 public:
-	/*!
-	 * Defualt Constructor.
-	 */
+    /*!
+     * Defualt Constructor.
+     */
     ContinuousMDP()
     {
     }

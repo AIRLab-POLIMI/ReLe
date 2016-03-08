@@ -111,11 +111,10 @@ public:
 
     virtual void solve() override
     {
-        EmptyStrategy<ActionC, StateC> strategy;
         Core<ActionC, StateC> core(this->prMdp, agent);
         core.getSettings().episodeLength = episodeLength;
         core.getSettings().episodeN = episodes;
-        core.getSettings().loggerStrategy = &strategy;
+        core.getSettings().loggerStrategy = nullptr;
 
         core.runEpisodes();
     }

@@ -185,7 +185,7 @@ public:
                     std::cout << "### " << p << "% ###" << std::endl;
                     std::cout << policy.getParameters().t();
                     core.getSettings().testEpisodeN = 1000;
-                    arma::vec J = core.runBatchTest();
+                    arma::vec J = core.runEvaluation();
                     std::cout << "mean score: " << J(0) << std::endl;
                     if (updateCount != 1)
                         every += bevery;

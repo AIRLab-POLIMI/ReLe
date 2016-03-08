@@ -59,9 +59,6 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
     int testEpisodes = 100;
     AdaptiveStep stepRule(0.01);
 
-    //Empty strategy
-    EmptyStrategy<DenseAction, DenseState> empty;
-
     int dim = mdp.getSettings().continuosStateDim;
 
     double epsilon = 0.05;
@@ -71,7 +68,7 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
     REINFORCEAlgorithm<DenseAction, DenseState> expert(policy, policyPerUpdate, stepRule);
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);
-    expertCore.getSettings().loggerStrategy = &empty;
+    expertCore.getSettings().loggerStrategy = nullptr;
     expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().episodeN = episodes;
     expertCore.getSettings().testEpisodeN = testEpisodes;
@@ -196,7 +193,7 @@ int main(int argc, char *argv[])
 
     double gamma = mdp.getSettings().gamma;
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
+    cout << "reward: " << arma::as_scalar(evaluationCore.runEvaluation()) << endl;
 
 
     stringstream ss;

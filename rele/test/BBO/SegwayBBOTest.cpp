@@ -314,7 +314,7 @@ int main(int argc, char *argv[])
                 cout << "### " << p << "% ###" << endl;
                 //                cout << dist->getParameters().t();
                 core->getSettings().testEpisodeN = 100;
-                arma::vec J = core->runBatchTest();
+                arma::vec J = core->runEvaluation();
                 cout << "mean score: " << J(0) << endl;
                 every += bevery;
             }

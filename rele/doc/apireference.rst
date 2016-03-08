@@ -61,6 +61,21 @@ Basic Interfaces
    :members:
    :protected-members:
    
+.. doxygenclass:: ReLe::Core
+   :members:
+   
+.. doxygenfunction:: ReLe::buildCore      
+   
+.. doxygenclass:: ReLe::BatchOnlyCore
+   :members:   
+   
+.. doxygenfunction:: ReLe::buildBatchOnlyCore      
+   
+.. doxygenclass:: ReLe::BatchCore
+   :members:      
+   
+.. doxygenfunction:: ReLe::buildBatchCore      
+   
 .. doxygenclass:: ReLe::Solver
    :members:   
    
@@ -75,6 +90,47 @@ Basic Environments
    
 .. doxygenclass:: ReLe::ContinuousMDP
    :members:      
+   
+Core loggers
+------------
+.. doxygenclass:: ReLe::Logger
+   :members:
+   
+.. doxygenclass:: ReLe::LoggerStrategy
+   :members:
+   :protected-members:
+   
+.. doxygenclass:: ReLe::PrintStrategy
+   :members:
+   
+.. doxygenclass:: ReLe::WriteStrategy
+   :members:
+
+.. doxygenclass:: ReLe::EvaluateStrategy
+   :members:   
+   
+.. doxygenclass:: ReLe::CollectorStrategy
+   :members:   
+   
+Batch loggers
+-------------
+
+.. doxygenclass:: ReLe::BatchAgentLogger
+   :members:
+   :protected-members:
+
+.. doxygenclass:: ReLe::BatchAgentPrintLogger
+   :members:
+
+.. doxygenclass:: ReLe::BatchDatasetLogger
+   :members:
+   
+.. doxygenclass:: ReLe::CollectBatchDatasetLogger
+   :members:
+   
+.. doxygenclass:: ReLe::WriteBatchDatasetLogger
+   :members:   
+   
 
 Basic Utilities
 ---------------
@@ -98,7 +154,7 @@ Policy Representations
    :members:
 
 Normal Policies
------------------------
+---------------
 
 .. doxygenclass:: ReLe::GenericMVNPolicy
 

@@ -28,37 +28,46 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/BatchAgent.h"
 #include "rele/utils/FileManager.h"
-#include "rele/core/logger/BatchLogger.h"
-#include "rele/core/logger/BatchLoggerStrategy.h"
+#include "rele/core/logger/BatchAgentLogger.h"
+#include "rele/core/logger/BatchDatasetLogger.h"
 
 #include <iostream>
 
 namespace ReLe
 {
 
+/*!
+ * This class can be used to run a batch agent over a dataset.
+ * This class handles batch agent termination flag and logging.
+ * The maximum number f iterations and the logging strategy can be specified in the settings.
+ */
 template<class ActionC, class StateC>
 class BatchOnlyCore
 {
 public:
+    /*!
+     * This struct contains the core settings
+     */
     struct BatchOnlyCoreSettings
     {
         BatchOnlyCoreSettings()
         {
-            loggerStrategy = nullptr;
-            envName = "env";
-            algName = "alg";
-            dataFileName = "dataset.csv";
+            logger = nullptr;
             maxBatchIterations = 1;
         }
 
-        BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
-        std::string envName;
-        std::string algName;
-        std::string dataFileName;
+        //! The logger for agent data
+        BatchAgentLogger<ActionC, StateC>* logger;
+        //! The maximum number of iteration of the algorithm over the dataset
         unsigned int maxBatchIterations;
     };
 
 public:
+    /*!
+     * Constructor.
+     * \param data the dataset used for batch learning
+     * \param batchAgent a batch learning agent
+     */
     BatchOnlyCore(Dataset<ActionC, StateC> data,
                   BatchAgent<ActionC, StateC>& batchAgent) :
         data(data),
@@ -66,20 +75,21 @@ public:
     {
     }
 
+    /*!
+     * Getter.
+     * \return the settings of the core.
+     */
     BatchOnlyCoreSettings& getSettings()
     {
         return settings;
     }
 
+    /*!
+     * Run the batch iterations over the dataset specified in the settings.
+     * \param gamma
+     */
     void run(double gamma)
     {
-        //core setup
-        BatchLogger<ActionC, StateC> logger(data);
-        logger.printDataFile(settings.envName,
-                             settings.algName,
-                             settings.dataFileName);
-        logger.setStrategy(settings.loggerStrategy);
-
         //Start episode
         batchAgent.init(data, gamma);
 
@@ -89,10 +99,11 @@ public:
         {
             batchAgent.step();
 
-            if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
-                logger.printStatistics(batchAgent.getAgentOutputData(), i);
-            else
-                logger.printStatistics(batchAgent.getAgentOutputDataEnd(), i);
+            if(settings.logger)
+                if(!batchAgent.hasConverged() && i < settings.maxBatchIterations)
+                    settings.logger->log(batchAgent.getAgentOutputData(), i);
+                else
+                    settings.logger->log(batchAgent.getAgentOutputDataEnd(), i);
         }
     }
 
@@ -102,68 +113,94 @@ protected:
     BatchOnlyCoreSettings settings;
 };
 
+
+/*!
+ * This class is an extension of BatchOnlyCore, that takes care not only to run the batch algorithm,
+ * but also to generate the dataset and test the learned policy over the environment.
+ */
 template<class ActionC, class StateC>
 class BatchCore
 {
 
 public:
+    /*!
+     * This struct contains the core settings
+     */
     struct BatchCoreSettings
     {
         BatchCoreSettings()
         {
-            loggerStrategy = nullptr;
+            datasetLogger = nullptr;
+            agentLogger = nullptr;
             episodeLength = 100;
             nEpisodes = 100;
-            envName = "env";
-            algName = "alg";
-            dataFileName = "dataset.csv";
             maxBatchIterations = 1;
         }
 
-        BatchLoggerStrategy<ActionC, StateC>* loggerStrategy;
-        std::string envName;
-        std::string algName;
-        std::string dataFileName;
+        //! The logger for the dataset
+        BatchDatasetLogger<ActionC, StateC>* datasetLogger;
+        //! The logger for agent data
+        BatchAgentLogger<ActionC, StateC>* agentLogger;
+        //! The episode lenght
         unsigned int episodeLength;
+        //! The number of episodes to run
         unsigned int nEpisodes;
+        //! The maximum number of algorithm iterations.
         unsigned int maxBatchIterations;
     };
 
 public:
-    BatchCore(Environment<ActionC, StateC>& mdp,
+    /*!
+     * Constructor.
+     * \param environment the environment used by this experiment
+     * \param batchAgent the batch learning agent
+     */
+    BatchCore(Environment<ActionC, StateC>& environment,
               BatchAgent<ActionC, StateC>& batchAgent) :
-        mdp(mdp),
+        environment(environment),
         batchAgent(batchAgent)
     {
     }
 
+    /*!
+     * Getter.
+     * \return the core settings.
+     */
     BatchCoreSettings& getSettings()
     {
         return settings;
     }
 
+    /*!
+     * This method is used to generate a dataset from the environment and
+     * run the batch learning algorithm on it.
+     */
     void run(Policy<ActionC, StateC>& policy)
     {
-        Dataset<ActionC, StateC> data = test(&policy);
+        Dataset<ActionC, StateC>&& data = test(&policy);
+
+        if(settings.datasetLogger)
+            settings.datasetLogger->log(data);
 
         auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
 
-        batchCore.getSettings().loggerStrategy = settings.loggerStrategy;
-        batchCore.getSettings().envName = settings.envName;
-        batchCore.getSettings().algName = settings.algName;
-        batchCore.getSettings().dataFileName = settings.dataFileName;
+        batchCore.getSettings().logger = settings.agentLogger;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
-        batchCore.run(mdp.getSettings().gamma);
+        batchCore.run(environment.getSettings().gamma);
     }
 
+    /*!
+     * This method generates a dataset using the agent learned policy
+     * \return the generated dataset
+     */
     Dataset<ActionC, StateC> runTest()
     {
         return test(batchAgent.getPolicy());
     }
 
 protected:
-    Environment<ActionC, StateC>& mdp;
+    Environment<ActionC, StateC>& environment;
     BatchAgent<ActionC, StateC>& batchAgent;
     BatchCoreSettings settings;
 
@@ -172,7 +209,7 @@ protected:
     {
         PolicyEvalAgent<ActionC, StateC> agent(*policy);
 
-        auto&& core = buildCore(mdp, agent);
+        auto&& core = buildCore(environment, agent);
 
         CollectorStrategy<ActionC, StateC> collection;
         core.getSettings().loggerStrategy = &collection;
@@ -186,6 +223,34 @@ protected:
     }
 };
 
+
+/*!
+ * This function can be used to get a BatchOnlyCore instance from an agent and an environment,
+ * reducing boilerplate code:
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto&& batchOnlyCore = buildBatchOnlyCore(environment, agent);
+ * core.run();
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ */
+template<class ActionC, class StateC>
+BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
+    Dataset<ActionC, StateC> data,
+    BatchAgent<ActionC, StateC>& batchAgent)
+{
+    return BatchOnlyCore<ActionC, StateC>(data, batchAgent);
+}
+
+/*!
+ * This function can be used to get a BatchCore instance from an agent and an environment,
+ * reducing boilerplate code:
+ * Example:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto&& batchCore = buildBatchCore(environment, agent);
+ * core.run();
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ */
 template<class ActionC, class StateC>
 BatchCore<ActionC, StateC> buildBatchCore(
     Environment<ActionC, StateC>& mdp,
@@ -194,13 +259,6 @@ BatchCore<ActionC, StateC> buildBatchCore(
     return BatchCore<ActionC, StateC>(mdp, batchAgent);
 }
 
-template<class ActionC, class StateC>
-BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
-    Dataset<ActionC, StateC> data,
-    BatchAgent<ActionC, StateC>& batchAgent)
-{
-    return BatchOnlyCore<ActionC, StateC>(data, batchAgent);
-}
 
 }
 

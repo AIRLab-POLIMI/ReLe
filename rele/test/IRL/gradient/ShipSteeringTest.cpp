@@ -32,7 +32,7 @@
 
 #include "rele/environments/ShipSteering.h"
 
-#include "../gradient/GradientIRLCommandLineParser.h"
+#include "GradientIRLCommandLineParser.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
 #include "rele/IRL/ParametricRewardMDP.h"
@@ -77,9 +77,6 @@ int main(int argc, char *argv[])
     int testEpisodes = 100;
     AdaptiveStep stepRule(0.01);
 
-    //Empty strategy
-    EmptyStrategy<DenseAction, DenseState> empty;
-
     // Learn Ship correct policy
     ShipSteering mdp;
 
@@ -108,7 +105,7 @@ int main(int argc, char *argv[])
     REINFORCEAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate, stepRule);
 
     Core<DenseAction, DenseState> expertCore(mdp, expert);
-    expertCore.getSettings().loggerStrategy = &empty;
+    expertCore.getSettings().loggerStrategy = nullptr;
     expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
     expertCore.getSettings().episodeN = episodes;
     expertCore.getSettings().testEpisodeN = testEpisodes;
@@ -157,8 +154,7 @@ int main(int argc, char *argv[])
 
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
     Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
-    EmptyStrategy<DenseAction, DenseState> emptyStrategy;
-    imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
+    imitatorCore.getSettings().loggerStrategy = nullptr;
     imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
     imitatorCore.getSettings().episodeN = episodes;
     imitatorCore.getSettings().testEpisodeN = nbEpisodes;
@@ -166,7 +162,7 @@ int main(int argc, char *argv[])
 
     cout << "----------------------------------------------------------" << endl;
     cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
-    cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
+    cout << arma::as_scalar(imitatorCore.runEvaluation()) << endl;
 
     //Evaluate policy against the real mdp
     Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
@@ -182,7 +178,7 @@ int main(int argc, char *argv[])
 
     double gamma = mdp.getSettings().gamma;
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
-    cout << "reward: " << arma::as_scalar(evaluationCore.runBatchTest()) << endl;
+    cout << "reward: " << arma::as_scalar(evaluationCore.runEvaluation()) << endl;
 
     ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
     data2.writeToStream(ofs2);

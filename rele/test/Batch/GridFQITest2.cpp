@@ -77,10 +77,8 @@ int main(int argc, char *argv[])
 
     auto&& core = buildBatchCore(mdp, batchAgent);
 
-    core.getSettings().envName = "gw";
-    core.getSettings().algName = "fqi";
     core.getSettings().nEpisodes = 100;
-    core.getSettings().nTransitions = 1000;
+    core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, FiniteState>();
     core.getSettings().episodeLength = 100;
     core.getSettings().maxBatchIterations = 100;
 

@@ -103,8 +103,8 @@ public:
     }
 
     virtual double operator() (
-            typename state_type<StateC>::const_type state,
-            const DenseAction& action)
+        typename state_type<StateC>::const_type state,
+        const DenseAction& action)
     {
         double prob = 1.0;
         std::vector<Range>::iterator it;
@@ -209,8 +209,8 @@ public:
     }
 
     virtual double operator() (
-            typename state_type<StateC>::const_type_ref state,
-            typename action_type<ActionC>::const_type_ref action) override
+        typename state_type<StateC>::const_type_ref state,
+        typename action_type<ActionC>::const_type_ref action) override
     {
         int idx = findAction(action);
         return distribution[idx];

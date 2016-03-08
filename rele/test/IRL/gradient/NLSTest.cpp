@@ -143,8 +143,7 @@ int main(int argc, char *argv[])
 
     ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
     Core<DenseAction, DenseState> imitatorCore(prMdp, imitator);
-    EmptyStrategy<DenseAction, DenseState> emptyStrategy;
-    imitatorCore.getSettings().loggerStrategy = &emptyStrategy;
+    imitatorCore.getSettings().loggerStrategy = nullptr;
     imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
     imitatorCore.getSettings().episodeN = episodes;
     imitatorCore.getSettings().testEpisodeN = nbEpisodes;
@@ -152,7 +151,7 @@ int main(int argc, char *argv[])
 
     cout << "----------------------------------------------------------" << endl;
     cout << "Learned Parameters: " << imitatorPolicy.getParameters().t();
-    cout << arma::as_scalar(imitatorCore.runBatchTest()) << endl;
+    cout << arma::as_scalar(imitatorCore.runEvaluation()) << endl;
 
     //Evaluate policy against the real mdp
     Core<DenseAction, DenseState> evaluationCore(mdp, imitator);

@@ -21,53 +21,62 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGERSTRATEGY_H_
-#define INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGERSTRATEGY_H_
+#ifndef INCLUDE_RELE_UTILS_LOGGER_BATCHAGENTLOGGER_H_
+#define INCLUDE_RELE_UTILS_LOGGER_BATCHAGENTLOGGER_H_
 
-#include <iostream>
+#include "rele/core/BatchCore.h"
 
 namespace ReLe
 {
 
+/*!
+ * This class is the default interface for ReLe::BatchAgent data logger.
+ * All batch agent loggers must extend this class.
+ */
 template<class ActionC, class StateC>
-class BatchLoggerStrategy
+class BatchAgentLogger
 {
 public:
-    virtual void processData(AgentOutputData* outputData) = 0;
+	/*!
+	 * This function is called automatically from ReLe::BatchCore for logging agent data.
+	 * \param outputData the agent output data
+	 * \param step the current batch training step
+	 */
+    void log(AgentOutputData* outputData, unsigned int step)
+    {
+        if(outputData)
+        {
+            outputData->setStep(step);
+            processData(outputData);
+        }
+    }
 
-    virtual ~BatchLoggerStrategy()
+    /*!
+     * Destructor.
+     */
+    virtual ~BatchAgentLogger()
     {
     }
 
 protected:
-    void cleanAgentOutputData(AgentOutputData* outputData)
-    {
-        delete outputData;
-    }
+    /*!
+     * Abstract function called by the default log implementation. Should be overridden.
+     * This function implements the logging operations.
+     */
+    virtual void processData(AgentOutputData* outputData) = 0;
 };
 
+
+/*!
+ * This logger prints agent information to the console, calling AgentOutputData::writeDecoratedData.
+ */
 template<class ActionC, class StateC>
-class BatchEmptyStrategy : public BatchLoggerStrategy<ActionC, StateC>
+class BatchAgentPrintLogger : public BatchAgentLogger<ActionC, StateC>
 {
-public:
-    BatchEmptyStrategy()
-    {
-    }
-
-    void processData(AgentOutputData* outputData) override
-    {
-        this->cleanAgentOutputData(outputData);
-    }
-};
-
-template<class ActionC, class StateC>
-class BatchPrintStrategy : public BatchLoggerStrategy<ActionC, StateC>
-{
-public:
-    BatchPrintStrategy()
-    {
-    }
-
+protected:
+	/*!
+	 * \see BatchAgentLogger::processData
+	 */
     void processData(AgentOutputData* outputData) override
     {
         if(outputData->isFinal())
@@ -82,10 +91,10 @@ public:
 
         outputData->writeDecoratedData(std::cout);
 
-        this->cleanAgentOutputData(outputData);
+        delete outputData;
     }
 };
 
 }
 
-#endif /* INCLUDE_RELE_UTILS_LOGGER_BATCHLOGGERSTRATEGY_H_ */
+#endif /* INCLUDE_RELE_UTILS_LOGGER_BATCHAGENTLOGGER_H_ */

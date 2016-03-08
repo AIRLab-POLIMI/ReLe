@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
                 cout << "### " << p << "% ###" << endl;
                 core->getSettings().testEpisodeN = 100;
-                arma::vec J = core->runBatchTest();
+                arma::vec J = core->runEvaluation();
                 cout << "mean score: " << J(0) << endl;
                 every += bevery;
             }
@@ -355,7 +355,7 @@ int main(int argc, char *argv[])
     int nbTestEpisodes = 1000;
     cout << "Final test [#episodes: " << nbTestEpisodes << " ]" << endl;
     core->getSettings().testEpisodeN = nbTestEpisodes;
-    cout << core->runBatchTest() << endl;
+    cout << core->runEvaluation() << endl;
 
     //--- collect some trajectories
     core->getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(

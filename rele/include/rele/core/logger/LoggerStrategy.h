@@ -31,18 +31,37 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the basic logger strategy interface.
+ * All logger strategies should implement this interface.
+ */
 template<class ActionC, class StateC>
 class LoggerStrategy
 {
 public:
+	/*!
+	 * This method describes how an episode should be processed.
+	 * Must be implemented.
+	 */
     virtual void processData(Episode<ActionC, StateC>& samples) = 0;
+
+    /*!
+     * This method describes how the agent data should be processed.
+     * Must be implemented.
+     */
     virtual void processData(std::vector<AgentOutputData*>& data) = 0;
 
+    /*!
+     * Destructor.
+     */
     virtual ~LoggerStrategy()
     {
     }
 
 protected:
+    /*!
+     * This method can be used to clean the agent data vector
+     */
     void cleanAgentOutputData(std::vector<AgentOutputData*>& data)
     {
         for(auto p : data)
@@ -51,34 +70,27 @@ protected:
 
 };
 
-template<class ActionC, class StateC>
-class EmptyStrategy : public LoggerStrategy<ActionC, StateC>
-{
-public:
-    virtual void processData(Episode<ActionC, StateC>& samples) override
-    {
-    }
-
-    virtual void processData(std::vector<AgentOutputData*>& outputData) override
-    {
-        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
-    }
-
-    virtual ~EmptyStrategy()
-    {
-    }
-};
-
+/*!
+ * This strategy can be used to print information to the console
+ */
 template<class ActionC, class StateC>
 class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param logTransitions if the environment transitions should be printed on the console
+	 * \param logAgent if agent output data should be printed on the console
+	 */
     PrintStrategy(bool logTransitions = true, bool logAgent = true) :
         logTransitions(logTransitions), logAgent(logAgent)
     {
 
     }
 
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     void processData(Episode<ActionC, StateC>& samples) override
     {
         printTransitions(samples);
@@ -93,6 +105,9 @@ public:
         printStateStatistics(samples);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
         if(logAgent)
@@ -156,13 +171,22 @@ private:
 
 };
 
+/*!
+ * This strategy can be used to save logged informations to a file.
+ */
 template<class ActionC, class StateC>
 class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+	//! enum used to select wheather to log only transitions, only agent data or both.
+	enum outType {TRANS, AGENT, ALL};
 
-    enum outType {TRANS, AGENT, ALL};
-
+	/*!
+	 * Constructor
+	 * \param path the path where to log the data
+	 * \param outputType what information should be logged
+	 * \param clean if the existing files should be overwritten up or not
+	 */
     WriteStrategy(const std::string& path, outType outputType = ALL, bool clean = false) :
         transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
     {
@@ -190,13 +214,20 @@ public:
         }
     }
 
+    /*!
+     * Constructor
+     * \param transitionPath where the transitions will be logged
+     * \param agentDataPath where the agent output data will be logged
+     */
     WriteStrategy(const std::string& transitionPath, const std::string& agentDataPath) :
         transitionPath(transitionPath), agentDataPath(agentDataPath), first(true),
         writeTransitions(true), writeAgentData(true)
     {
     }
 
-
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     void processData(Episode<ActionC, StateC>& samples) override
     {
         if (writeTransitions)
@@ -221,6 +252,9 @@ public:
         }
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
         if (writeAgentData)
@@ -258,19 +292,31 @@ private:
     bool first;
 };
 
+/*!
+ * This strategy can be used to evaluate the performances of an aget w.r.t. an environment
+ */
 template<class ActionC, class StateC>
 class EvaluateStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+	/*!
+	 * Constructor
+	 * \param gamma the discount factor for this environment
+	 */
     EvaluateStrategy(double gamma)
         : gamma(gamma)
     {
     }
 
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     void processData(Episode<ActionC, StateC>& samples) override
     {
         double df = 1.0;
         bool first = true;
+
+        arma::vec J(samples.getRewardSize(), arma::fill::zeros);
         for (auto sample : samples)
         {
             Reward& r = sample.r;
@@ -283,39 +329,61 @@ public:
             {
                 J[i] += df * r[i];
             }
+
             df *= gamma;
         }
+
+        Jvec.push_back(J);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
         //TODO evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
-    arma::vec J;
+    //! A vector containing the returns of all episodes
+    std::vector<arma::vec> Jvec;
+
+private:
     double gamma;
 };
 
+/*!
+ * This class simply collects the trajectories of all episodes into a ReLe::Dataset
+ */
 template<class ActionC, class StateC>
 class CollectorStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
+    /*!
+     * \see LoggerStrategy::processData(Episode<ActionC, StateC>& samples)
+     */
     virtual void processData(Episode<ActionC, StateC>& samples) override
     {
         data.push_back(samples);
     }
 
+    /*!
+     * \see LoggerStrategy::processData(std::vector<AgentOutputData*>& outputData)
+     */
     virtual void processData(std::vector<AgentOutputData*>& data) override
     {
         //TODO evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~CollectorStrategy()
     {
     }
 
+    //! the collected trajectories
     Dataset<ActionC, StateC> data;
 };
 
@@ -360,156 +428,6 @@ inline void assigneStateWorker(arma::vec& val, int idx, DenseState& state, int i
 {
     val[idx] = state[i];
 }
-
-template<class ActionC, class StateC>
-class MatlabCollectorStrategy : public LoggerStrategy<ActionC, StateC>
-{
-public:
-
-//    struct MatlabEpisode
-//    {
-//        double *states = nullptr, *actions, *nextstates, *rewards;
-//        signed char* absorb;
-//        int dx,du,dr,steps;
-//        double *Jvalue;
-//    };
-    struct MatlabEpisode
-    {
-        arma::vec states, actions, nextstates, rewards;
-        arma::ivec absorb;
-        int dx,du,dr,steps;
-        arma::vec Jvalue;
-    };
-
-
-    MatlabCollectorStrategy(double gamma)
-        : gamma(gamma)
-    {
-    }
-
-    virtual ~MatlabCollectorStrategy()
-    {
-    }
-
-//    virtual void processData(Episode<ActionC, StateC>& samples)
-//    {
-//        int ds = samples[0].x.n_elem;
-//        int da = samples[0].u.n_elem;
-//        int dr = samples[0].r.size();
-//        int nsteps = samples.size();
-//        double* states      = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
-//        double* nextstates  = static_cast<double*>(malloc(ds*nsteps*sizeof(double)));
-//        double* actions     = static_cast<double*>(malloc(da*nsteps*sizeof(double)));
-//        double* rewards     = static_cast<double*>(malloc(dr*nsteps*sizeof(double)));
-//        signed char* absorb = static_cast<signed char*>(calloc(nsteps, sizeof(signed char)));
-//        double* Jvalue      = static_cast<double*>(calloc(dr, sizeof(double)));
-//        int count = 0;
-//        double df = 1.0;
-//        for (auto sample : samples)
-//        {
-//            for (int i = 0; i < ds; ++i)
-//            {
-//                states[count*ds+i] = sample.x[i];
-//                nextstates[count*ds+i] = sample.xn[i];
-//            }
-//            for (int i = 0; i < da; ++i)
-//            {
-//                actions[count*da+i] = sample.u[i];
-//            }
-//            for (int i = 0; i < dr; ++i)
-//            {
-//                rewards[count*dr+i] = sample.r[i];
-//                Jvalue[i] += df*sample.r[i];
-//            }
-//            count++;
-//            df *= gamma;
-//        }
-//        if (samples[nsteps-1].xn.isAbsorbing())
-//        {
-//            absorb[nsteps-1] = 1;
-//        }
-
-//        MatlabEpisode ep;
-//        ep.states = states;
-//        ep.actions = actions;
-//        ep.nextstates = nextstates;
-//        ep.absorb = absorb;
-//        ep.dx = ds;
-//        ep.du = da;
-//        ep.dr = dr;
-//        ep.steps = nsteps;
-//        ep.Jvalue = Jvalue;
-
-//        data.push_back(ep);
-//    }
-
-    virtual void processData(Episode<ActionC, StateC>& samples)
-    {
-//        int ds = samples[0].x.n_elem;
-//        int da = samples[0].u.n_elem;
-//        int dr = samples[0].r.size();
-        int ds, da, dr;
-        getDimensionsWorker(samples, ds, da, dr);
-        int nsteps = samples.size();
-        arma::vec states(ds*nsteps);
-        arma::vec nextstates(ds*nsteps);
-        arma::vec actions(da*nsteps);
-        arma::vec rewards(dr*nsteps);
-        arma::ivec absorb(nsteps);
-        arma::vec Jvalue(dr, arma::fill::zeros);
-        int count = 0;
-        double df = 1.0;
-        for (auto sample : samples)
-        {
-            for (int i = 0; i < ds; ++i)
-            {
-                assigneStateWorker(states, count*ds+i, sample.x, i);
-                assigneStateWorker(nextstates, count*ds+i, sample.xn, i);
-//                states[count*ds+i] = sample.x[i];
-//                nextstates[count*ds+i] = sample.xn[i];
-            }
-            for (int i = 0; i < da; ++i)
-            {
-                assigneActionWorker(actions[count*da+i], sample.u, i);
-//                actions[count*da+i] = sample.u[i];
-            }
-            for (int i = 0; i < dr; ++i)
-            {
-                rewards[count*dr+i] = sample.r[i];
-                Jvalue[i] += df*sample.r[i];
-            }
-            count++;
-            df *= gamma;
-        }
-        if (samples[nsteps-1].xn.isAbsorbing())
-        {
-            absorb[nsteps-1] = 1;
-        }
-
-        MatlabEpisode ep;
-        ep.states = states;
-        ep.actions = actions;
-        ep.nextstates = nextstates;
-        ep.rewards = rewards;
-        ep.absorb = absorb;
-        ep.dx = ds;
-        ep.du = da;
-        ep.dr = dr;
-        ep.steps = nsteps;
-        ep.Jvalue = Jvalue;
-
-        data.push_back(ep);
-    }
-
-    virtual void processData(std::vector<AgentOutputData*>& data)
-    {
-        //TODO evaluation here or abstract class...
-        LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
-    }
-
-    std::vector<MatlabEpisode> data;
-    double gamma;
-};
 
 }
 

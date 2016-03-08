@@ -111,6 +111,12 @@ public:
         return featureExpectation;
     }
 
+    unsigned int getRewardSize()
+    {
+        auto& episode = *this;
+        return episode[0].r.size();
+    }
+
     void printHeader(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -184,7 +190,7 @@ public:
     unsigned int getRewardSize()
     {
         auto& dataset = *this;
-        return dataset[0][0].r.size();
+        return dataset[0].getRewardSize();
     }
 
     arma::mat getEpisodesReward(double gamma)
