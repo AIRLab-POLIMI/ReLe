@@ -37,12 +37,24 @@ namespace ReLe
 // NORMAL POLICY
 // ------------------------------------------------
 
-/**
- * Univariate normal policy with fixed standard deviation
+/*!
+ * Univariate normal policy with fixed standard deviation and mean linearly
+ * parametrized:
+ * \f[
+ * \pi(x,u) = \mathcal{N}(a|\mu = \phi(x)*T \theta, \sigma^2)
+ * \f]
+ * The parameters to be optimized are \f$\theta_i\f$. Note that this class
+ * assumes scalar actions.
  */
 class NormalPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
+    /*!
+     * Create a Normal policy with the given parameters. The initial
+     * weights \f$\theta\f$ are set to zero.
+     * \param initialStddev standard deviation \f$\sigma\f$
+     * \param phi vector of basis functions \f$\phi\f$
+     */
     NormalPolicy(const double initialStddev, Features& phi) :
         mInitialStddev(initialStddev), mMean(0.0),
         approximator(phi)
@@ -58,6 +70,13 @@ public:
 
 protected:
 
+    /*!
+     * Compute the mean given a state.
+     * This function is invoked by the operators operator()(state,action)
+     * and operator()(state) and by any other function that requires updated
+     * information (e.g., difflog(state,action))
+     * \param state the state to be evaluated.
+     */
     virtual void calculateMeanAndStddev(const arma::vec& state);
 
 public:
@@ -107,30 +126,33 @@ public:
 
 
 protected:
+    //mMean is used to store the mean value of a state
     double mInitialStddev, mMean;
     LinearApproximator approximator;
 };
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// NORMAL POLICY WITH STATE DEPENDANT STDDEV (STD is not a parameter to be learned)
-///////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////
+//  NORMAL POLICY WITH STATE DEPENDANT STDDEV (STD is not a parameter to be learned)
+// ////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * Univariate normal policy with state dependant standard deviation
  * \f[
- * \pi(a,s) = N(\theta^{T}\phi(s), k^{T}\phi(s)),
+ * \pi(x,u) = \mathcal{N}(u| \mu=\phi(x)^T \omega, \sigma= \eta(x)^T k),
  * \f]
  * where \f$\theta\f$ are the parameters to be learned, \f$k\f$ is fixed.
- * An equivalent formulation is
- * \f[
- * \pi(a|s) = \left(\theta + \epsilon \right)^{T} \phi(s),
- * \f]
- * where \f$\epsilon \sim N(0, k^{T}\phi(s))\f$.
+ * Note that this class assumes scalar actions.
  */
 class NormalStateDependantStddevPolicy: public NormalPolicy
 {
 
 public:
+    /*!
+     * Construct a normal policy and initialize the parameters \f$\theta\f$ to zero
+     * \param phi the basis functions \f$\phi\f$ of the mean
+     * \param stdPhi the basis functions \f$\eta\f$ of the standard deviation
+     * \param stdDevParameters the weights \f$k\f$ of the linear approximator of the standard deviation
+     */
     NormalStateDependantStddevPolicy(Features& phi,
                                      Features& stdPhi, arma::vec& stdDevParameters) :
         NormalPolicy(1, phi), stdApproximator(stdPhi)
@@ -167,6 +189,10 @@ protected:
     {
     }
 
+    /*!
+     * Compute the mean and standard deviation given a state
+     * \param state the state to be evaluated
+     */
     virtual void calculateMeanAndStddev(const arma::vec& state) override;
 
 protected:
@@ -175,18 +201,26 @@ protected:
 };
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// NORMAL POLICY WITH LEARNED STATE DEPENDANT STDDEV (parameters: mean and standard deviations)
-///////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////
+// NORMAL POLICY WITH LEARNED STATE DEPENDANT STDDEV (parameters: mean and standard deviations)
+// ////////////////////////////////////////////////////////////////////////////////////
 
-// Normal Policy with learnable stddev
-//derivata da StateDependantStddev: la dev.standard dipende dallo stato, in piu' e' imparabile
-//questione da chiarire: considerando quanto le classi antenate vincolano la specifca dei parametri del costruttore,
-//ed eventualmente le variabili di istanza, dov'e' opportuno inserirla nella gerarchia?
-//nel nostro contesto si suppone una di queste per ogni ora? se no si dovrebbero avere media e varianza come vettori...
+/**
+ * Univariate normal policy with state dependant standard deviation
+ * \f[
+ * \pi(x,u) = \mathcal{N}(u| \mu=\phi(x)^T \omega, \sigma= \eta(x)^T k),
+ * \f]
+ * where \f$\theta = [\omega, k]\f$ are the parameters to be learned.
+ * Note that this class assumes scalar actions.
+ */
 class NormalLearnableStateDependantStddevPolicy : public NormalStateDependantStddevPolicy
 {
 public:
+    /*!
+     * Construct a Normal policy and initialize the parameters \f$\theta\f$ to zero.
+     * \param phi the basis functions \f$\phi\f$ of the mean
+     * \param stdPhi the basis functions \f$\eta\f$ of the standard deviation
+     */
     NormalLearnableStateDependantStddevPolicy(Features& phi, Features& stdPhi) :
         NormalStateDependantStddevPolicy(phi,stdPhi)
     {
@@ -194,6 +228,12 @@ public:
         setParameters(w);
     }
 
+    /*!
+     * Construct a Normal policy with the provided weights.
+     * \param phi the basis functions \f$\phi\f$ of the mean
+     * \param stdPhi the basis functions \f$\eta\f$ of the standard deviation
+     * \param w the parameters \f$\theta=[\omega,k]\f$ to be set
+     */
     NormalLearnableStateDependantStddevPolicy(Features& phi, Features& stdPhi,
             arma::vec& w) :
         NormalStateDependantStddevPolicy(phi,stdPhi)
@@ -217,6 +257,10 @@ public:
 
     // ParametricPolicy interface
 public:
+    /*!
+     * Return the parameters \f$\theta\f$ as a concatenation of \f$[\omega,k\f$.
+     * \return the parameters \f$\theta\f$
+     */
     virtual inline arma::vec getParameters() const override
     {
         return vectorize(approximator.getParameters(),stdApproximator.getParameters());
@@ -225,6 +269,11 @@ public:
     {
         return approximator.getParametersSize() + stdApproximator.getParametersSize();
     }
+    /*!
+     * Set the policy parameters. \f$w\f$ must have dimension \f$|\omega| + |k|\f$.
+     * The vector \f$w\f$ is obtained as \f$[\omega,k]\f$.
+     * \param w the new parameters
+     */
     virtual inline void setParameters(const arma::vec& w) override
     {
         int n = getParametersSize();
@@ -249,29 +298,25 @@ public:
 /// MVN POLICY
 ///////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * @brief Multivariate Normal policy with fixed covariance matrix
- *
+/*!
  * This class represents a multivariate Normal policy with fixed covariance matrix
  * and linear approximation of the mean value:
- * \f[ \pi^{\theta} (a|s) = \mathcal{N}(s; \phi(s)\theta, \Sigma),\qquad
- * \forall s \in R^{n_s}, a \in R^{n_a},\f]
- * where \f$\phi(s)\f$ is an \f$(n_a \times k)\f$ matrix and
- * \f$\theta\f$ is a \f$k\f$-dimensional vector.
+ * \f[ \pi (x,u) = \mathcal{N}(a| \mu=\phi(x)^T\theta, \Sigma),\qquad
+ * \forall s \in R^{n_x}, a \in R^{n_u},\f]
+ * where \f$\phi(x)\f$ is a \f$(k \times n_x)\f$ matrix and
+ * \f$\theta\f$ is a \f$k\f$-dimensional vector. The parameters to be learned
+ * are \f$\theta\f$.
  */
 class MVNPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
 
-    /**
-     * Create an instance of the class using the given projector.
-     * Covariance matrix is initialized to the unit matrix.
-     * Note that the weights of the mean approximation are not
-     * changed, i.e., the initial weights are specified by the
-     * instance of the linear projector received as parameter.
+    /*!
+     * Create an instance of the class using the given basis functions.
+     * Covariance matrix is initialized to the identity matrix.
+     * Note that the weights of the mean approximation are set to zero.
      *
-     * @brief The constructor.
-     * @param projector The linear projector used for mean approximation
+     * \param phi the basis functions
      */
     MVNPolicy(Features& phi) :
         approximator(phi),
@@ -284,6 +329,14 @@ public:
         mDeterminant = arma::det(mCovariance);
     }
 
+    /*!
+     * Create an instance of the class using the given basis functions
+     * and covariance matrix.
+     * Note that the weights of the mean approximation are set to zero.
+     *
+     * \param phi the basis functions
+     * \param covariance the covariance matrix (\f$n_u \times n_u\f$)
+     */
     MVNPolicy(Features& phi, arma::mat& covariance) :
         approximator(phi),
         mMean(approximator.getOutputSize(), arma::fill::zeros),
@@ -294,18 +347,12 @@ public:
         mDeterminant = arma::det(mCovariance);
     }
 
-    /**
-     * Create an instance of the class using the given projector and
-     * covariance matrix.
+    /*!
+     * Create an instance of the class using the given basis functions
+     * and the covariance matrix.
      *
-     * Example use:
-     * @code
-     * LinearProjector* projector = new LinearBfsProjector(...);
-     * MVNPOlicy(projector, {1,2,...});
-     * @endcode
-     * @brief The constructor.
-     * @param projector The linear projector used for mean approximation.
-     * @param initialCov The covariance matrix (\f$n_a \times n_a\f$).
+     * \param projector the basis functions
+     * \param initialCov The covariance matrix (\f$n_u \times n_u\f$) as list
      */
     MVNPolicy(Features& phi,
               std::initializer_list<double> initialCov) :
@@ -329,6 +376,13 @@ public:
         mDeterminant = arma::det(mCovariance);
     }
 
+    /*!
+     * Create an instance of the class using the given basis functions
+     * and the covariance matrix.
+     *
+     * \param projector the basis functions
+     * \param initialCov The covariance matrix (\f$n_u \times n_u\f$) as an array
+     */
     MVNPolicy(Features& phi, double* covariance) :
         approximator(phi),
         mMean(approximator.getOutputSize(), arma::fill::zeros)
@@ -399,7 +453,7 @@ public:
 
 protected:
 
-    /**
+    /*!
      * This function is deputed to the computatio of the mean and covariance
      * values in the given state. Moreover, the function must compute all the
      * informations required for the generation of samples from the Gaussian
@@ -410,16 +464,12 @@ protected:
      * In this base version only the mean value is updated since the covariance
      * matrix is indipendent from the state value.
      *
-     * @brief Update internal state.
-     * @param state The state where the policy is evaluated.
-     * @param cholesky_dec A flag used to require the Cholesky decomposition of the
-     * covariance matrix.
+     * \param state The state where the policy is evaluated.
+     * \param cholesky_dec A flag used to require the Cholesky decomposition of the
+     * covariance matrix. By default is false.
      */
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
     {
-        //TODO: si potrebbe togliere il flag cholesky_dec e aggiungere un controllo
-        // sul puntatore dello stato. Se è uguale al ultimo non ricomputo tutto
-
         // compute mean vector
         mMean = approximator(state);
 
@@ -433,19 +483,32 @@ protected:
 };
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// MVN POLICY with state dependant covariance
-///////////////////////////////////////////////////////////////////////////////////////
-
+// ////////////////////////////////////////////////////////////////////////////////////
+// MVN POLICY with state dependant covariance
+// ////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Multivariate Normal policy with state dependant covariance matrix
+ * \f[
+ * \pi(x,u) = \mathcal{N}(u| \mu=\phi(x)^T \theta, \sigma= K \eta(x)),
+ * \f]
+ * where \f$\theta\f$ are the parameters to be learned, \f$K\f$ is fixed.
+ */
 class MVNStateDependantStddevPolicy : public MVNPolicy
 {
 public:
-    MVNStateDependantStddevPolicy(Features& phi, Features& phiStdDev, arma::mat& stdDevW)
-        : MVNPolicy(phi), phiStdDev(phiStdDev), stdDevW(stdDevW)
+    /*!
+     * Create an instance of the class using the given basis functions and
+     * the covariance parameters
+     * \param phi the basis function of the mean
+     * \param phiCov the basis function of the covariance matrix
+     * \param CovW the parameters of the covariance approximation
+     */
+    MVNStateDependantStddevPolicy(Features& phi, Features& phiCov, arma::mat& CovW)
+        : MVNPolicy(phi), phiStdDev(phiCov), stdDevW(CovW)
     {
-        assert(phiStdDev.cols() == phi.cols());
-        assert(stdDevW.n_rows == phiStdDev.cols());
-        assert(stdDevW.n_cols == phiStdDev.rows());
+        assert(phiCov.cols() == phi.cols());
+        assert(CovW.n_rows == phiCov.cols());
+        assert(CovW.n_cols == phiCov.rows());
     }
 
     virtual inline std::string getPolicyName() override
@@ -459,6 +522,10 @@ public:
     }
 
 protected:
+    /*!
+     * Update both mean and covariance
+     * \see{MVNPolicy::updateInternalState}
+     */
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false) override
     {
         mCovariance=stdDevW*phiStdDev(state);

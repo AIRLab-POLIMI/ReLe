@@ -33,7 +33,7 @@ namespace ReLe
 
 /**
  * This policy is a linear combination of linear/non linear basis functions
- * \f[ \forall s \in S,\qquad \pi(s) = \sum_{i=1}^{n} w_i \phi_i(s)\f]
+ * \f[ \forall x \in \mathcal{X},\qquad \pi(x) = \sum_{i=1}^{n} w_i \phi_i(x)\f]
  * where \f$n\f$ is the number of parameters and basis functions.
  */
 template<class StateC, bool denseFeatures = true>

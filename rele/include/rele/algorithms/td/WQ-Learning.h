@@ -29,13 +29,10 @@
 #define INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
 
 #include "rele/algorithms/td/Q-Learning.h"
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
+#include <boost/math/distributions/normal.hpp>
 
 #define STD_ZERO_VALUE 1E-5
 #define STD_INF_VALUE 1E10
-
 
 /*
  * This is a first implementation of an experimental estimator for Q-Learning.
@@ -62,7 +59,7 @@ protected:
     arma::mat sampleStdQ;
     arma::mat weightsVar;
     arma::mat Q2;
-    arma::mat n_updates;
+    arma::mat nUpdates;
 
 protected:
     virtual void init() override;
