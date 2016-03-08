@@ -31,6 +31,10 @@
 
 namespace ReLe
 {
+/*!
+ * This trait is used to get the appropriate raw types for action classes
+ * You need to specialize this traits to get the correct support for new action types
+ */
 template<class ActionC>
 struct action_type
 {
@@ -58,6 +62,10 @@ struct action_type<DenseAction>
     typedef typename std::add_lvalue_reference<const arma::vec>::type const_type_ref;
 };
 
+/*!
+ * This trait is used to get the appropriate raw types for state classes
+ * You need to specialize this traits to get the correct support for new state types
+ */
 template<class StateC>
 struct state_type
 {

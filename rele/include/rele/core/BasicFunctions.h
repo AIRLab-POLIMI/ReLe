@@ -31,7 +31,13 @@
 namespace ReLe
 {
 
-//templates needed to store action and state in a vector
+/*!
+ * This function and all it's specializations and overloads can be used to handle properly the vectorization
+ * of heterogeneus state and action types into a single armadillo vector.
+ * \param state the state
+ * \param action the action
+ * \return the vectorized state-action pair
+ */
 template<class StateC, class ActionC>
 arma::vec vectorize(const StateC& state, const ActionC& action)
 {
@@ -66,7 +72,15 @@ inline arma::vec vectorize(const FiniteState& state, const FiniteAction& action)
     return vec;
 }
 
-//templates needed to store action, state and next state in a vector
+/*!
+ * This function and all it's specializations and overloads can be used to handle properly the vectorization
+ * of heterogeneus state and action types into a single armadillo vector. This function and it's overloadings
+ * can handle the vectorization of a full transition (not considering the reward)
+ * \param state the initial state
+ * \param action the action
+ * \param nextState the state reached after perfoming the action
+ * \return the vectorized transition
+ */
 template<class StateC, class ActionC>
 arma::vec vectorize(const StateC& state, const ActionC& action, const StateC& nextState)
 {
