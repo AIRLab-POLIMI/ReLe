@@ -40,11 +40,6 @@ else()
     if(Boost_FOUND)
         include_directories(${Boost_INCLUDE_DIRS})
     endif()
-    #GSL
-    find_package(GSL QUIET)
-    if(${GSL_FOUND})
-        include_directories(${GSL_INCLUDE_DIRS})
-    endif()
 endif()
 include_directories(${ARMADILLO_INCLUDE_DIR})
 
@@ -85,10 +80,6 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 file(GLOB_RECURSE ReLe_SOURCE
     src/*.cpp)
-
-if(NOT ${GSL_FOUND})
-    list(REMOVE_ITEM ReLe_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/algorithms/td/WQ-Learning.cpp)
-endif()
 
 file(GLOB_RECURSE ReLe_INCLUDE
     include/*.h)

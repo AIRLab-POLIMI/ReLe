@@ -22,7 +22,6 @@
  */
 
 /*
- * Written by: Carlo D'Eramo
  *
  * TODO: This version only works for tabular regression.
  * 		 Fix Q estimation as done in WQ-Learning.
@@ -32,39 +31,10 @@
 #define INCLUDE_RELE_ALGORITHMS_BATCH_W_FQI_H_
 
 #include "rele/algorithms/batch/td/FQI.h"
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_cdf.h>
+#include <boost/math/distributions/normal.hpp>
 
 #define STD_ZERO_VALUE 1E-5
 #define STD_INF_VALUE 1E10
-
-
-struct pars
-{
-    unsigned int xn;
-    unsigned int u;
-    arma::mat idxs;
-    arma::mat meanQ;
-    arma::mat sampleStdQ;
-};
-
-double fun(double x, void* params)
-{
-    pars p = *(pars*) params;
-    const unsigned int xn = p.xn;
-    const unsigned int u = p.u;
-    const arma::mat& idxs = p.idxs;
-    const arma::mat& meanQ = p.meanQ;
-    const arma::mat& sampleStdQ = p.sampleStdQ;
-
-    arma::vec cdf(idxs.n_cols, arma::fill::zeros);
-    for(unsigned int i = 0; i < cdf.n_elem; i++)
-        cdf(i) = gsl_cdf_gaussian_P(x - meanQ(xn, idxs(u, i)), sampleStdQ(xn, idxs(u, i)));
-    double f = gsl_ran_gaussian_pdf(x - meanQ(xn, u), sampleStdQ(xn, u)) * arma::prod(cdf);
-
-    return f;
-}
 
 
 namespace ReLe
@@ -95,45 +65,58 @@ public:
     {
         arma::mat outputs(1, this->nSamples, arma::fill::zeros);
 
-        pars p;
-        p.meanQ = meanQ;
-        p.sampleStdQ = sampleStdQ;
-        p.idxs = idxs;
+        unsigned int nTrapz = 100;
 
-        gsl_integration_workspace* w = gsl_integration_workspace_alloc(1000);
         for(unsigned int i = 0; i < this->nSamples; i++)
         {
             FiniteState nextState = FiniteState(this->nextStates(i));
             if(this->absorbingStates.count(nextState) == 0 && !this->firstStep)
             {
                 arma::vec integrals(this->nActions, arma::fill::zeros);
-                for(unsigned int j = 0; j < integrals.n_elem - 1; j++)
+                for(unsigned int j = 0; j < integrals.n_elem; j++)
                 {
-                    gsl_function f;
-                    f.function = &fun;
-                    p.xn = nextState;
-                    p.u = j;
-                    f.params = &p;
+            		arma::vec means = meanQ.row(nextState).t();
+            		arma::vec sigma = sampleStdQ.row(nextState).t();
+                    double pdfMean = means(j);
+                    double pdfSampleStd = sigma(j);
+                    double lowerLimit = pdfMean - 5 * pdfSampleStd;
+                    double upperLimit = pdfMean + 5 * pdfSampleStd;
 
-                    double result, error;
-                    double pdfMean = meanQ(nextState, j);
-                    double pdfSampleStd = sampleStdQ(nextState, j);
-                    double lowerLimit = pdfMean - 8 * pdfSampleStd;
-                    double upperLimit = pdfMean + 8 * pdfSampleStd;
-                    gsl_integration_qag(&f, lowerLimit, upperLimit, 0, 1e-8, 1000, 6, w, &result, &error);
+            		arma::vec trapz = arma::linspace(lowerLimit, upperLimit, nTrapz + 1);
+            		double diff = trapz(1) - trapz(0);
+
+            		double result = 0;
+            		for(unsigned int t = 0; t < trapz.n_elem - 1; t++)
+            		{
+            			arma::vec cdfs(idxs.n_cols, arma::fill::zeros);
+            			for(unsigned int k = 0; k < cdfs.n_elem; k++)
+            			{
+            				boost::math::normal cdfNormal(means(idxs(j, k)), sigma(idxs(j, k)));
+            				cdfs(k) = cdf(cdfNormal, trapz(t));
+            			}
+            			boost::math::normal pdfNormal(pdfMean, pdfSampleStd);
+            			double t1 = pdf(pdfNormal, trapz(t)) * arma::prod(cdfs);
+
+            			for(unsigned int k = 0; k < cdfs.n_elem; k++)
+            			{
+            				boost::math::normal cdfNormal(means(idxs(j, k)), sigma(idxs(j, k)));
+            				cdfs(k) = cdf(cdfNormal, trapz(t + 1));
+            			}
+            			double t2 = pdf(pdfNormal, trapz(t + 1)) * arma::prod(cdfs);
+
+            			result += (t1 + t2) * diff * 0.5;
+            		}
 
                     integrals(j) = result;
                 }
-                integrals(integrals.n_elem - 1) = 1 - arma::sum(integrals(arma::span(0, integrals.n_elem - 2)));
 
-                double W = arma::dot(integrals, this->QTable.row(nextState));
+                double W = arma::dot(this->QTable.row(nextState), integrals);
 
                 outputs(i) = this->rewards(i) + this->gamma * W;
             }
             else
                 outputs(i) = this->rewards(i);
         }
-        gsl_integration_workspace_free(w);
 
         BatchDataSimple featureDataset(this->features, outputs);
         this->QRegressor.trainFeatures(featureDataset);

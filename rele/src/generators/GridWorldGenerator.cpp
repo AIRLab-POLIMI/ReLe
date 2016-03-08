@@ -37,9 +37,9 @@ GridWorldGenerator::GridWorldGenerator()
     actionN = 4;
 
     //default mdp parameters
-    p = 0.89;
+    p = 1;
     rgoal = 10.0;
-    rfall = -1.0;
+    rfall = 0.0;
     rstep = 0.0;
 }
 
