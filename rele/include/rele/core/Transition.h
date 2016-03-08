@@ -37,22 +37,40 @@
 
 namespace ReLe
 {
+/*!
+ * This struct represent a single transition the MPD (the SARSA tuple).
+ * Implements some convenience setters and serialization functions
+ */
 template<class ActionC, class StateC>
 struct Transition
 {
     static_assert(std::is_base_of<Action, ActionC>::value, "Not valid Action class as template parameter");
     static_assert(std::is_base_of<State, StateC>::value, "Not a valid State class as template parameter");
 
+    //! The initial state of the transition
     StateC x;
+    //! The performed action
     ActionC u;
+    //! The state reached after performing the action
     StateC xn;
+    //! The reward achieved in the transition
     Reward r;
 
+    /*!
+     * Setter.
+     * \param x the initial state
+     */
     void init(const StateC& x)
     {
         this->x = x;
     }
 
+    /*!
+     * Setter.
+     * \param u the action performed
+     * \param xn the state reached after the performed action
+     * \param r the reward achieved
+     */
     void update(const ActionC& u, const StateC& xn, const Reward& r)
     {
         this->u = u;
@@ -60,6 +78,10 @@ struct Transition
         this->r = r;
     }
 
+    /*!
+     * This method prints the transition header, that consist of tree numbers, that represent
+     * the number of comma separated values needed to represent the state, the action and the reward.
+     */
     void printHeader(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -69,6 +91,10 @@ struct Transition
     }
 
 
+    /*!
+     * Print the first part of the transition, with non final/non absorbing flag.
+     * This function is meaningful when multiple transitions are serialized
+     */
     void print(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -78,6 +104,10 @@ struct Transition
            << r  << std::endl;
     }
 
+    /*!
+     * Print the last part of the transition, with final flag ad appropriate absorbing flag.
+     * This function is meaningful when multiple transitions are serialized
+     */
     void printLast(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -87,12 +117,23 @@ struct Transition
     }
 };
 
+/*!
+ * This class is the collection of multiple transition of a single episode
+ * The transition stored in this class should be a meaningful sequence, i.e. the next state
+ * of the previous transition should be the initial state of the subsequent one.
+ * This class contains some utility functions to perform common operations over an episode.
+ */
 template <class ActionC, class StateC>
 class Episode : public std::vector<Transition<ActionC,StateC>>
 {
 
 public:
-    //TODO add template method...
+    /*!
+     * This method can be used to compute episode features expectation over transitions.
+     * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \param gamma the discount factor for the features expectations
+     * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
+     */
     arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
     {
         arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
@@ -111,12 +152,43 @@ public:
         return featureExpectation;
     }
 
+    /*!
+     * This method returns the episode expected reward
+     * \param gamma the discount factor to be used
+     * \return the expected reward using gamma as discount factor
+     */
+    arma::vec getEpisodeReward(double gamma)
+    {
+    	auto& episode = *this;
+    	unsigned int rewardSize = getRewardSize();
+    	arma::vec reward(rewardSize, arma::fill::zeros);
+
+    	double df = 1.0;
+    	for(auto& tr : episode)
+    	{
+    		for(unsigned int i = 0; i < rewardSize; i++)
+    	                    reward(i) += df*tr.r[i];
+    	    df *= gamma;
+    	}
+
+    	return reward;
+
+    }
+
+    /*!
+     * Getter.
+     * \return the reward size
+     */
     unsigned int getRewardSize()
     {
         auto& episode = *this;
         return episode[0].r.size();
     }
 
+    /*!
+     * Print the trasition header
+     * \see Transition::printHeader
+     */
     void printHeader(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -124,7 +196,9 @@ public:
             this->back().printHeader(os);
     }
 
-
+    /*!
+     * Print the dataset to stream
+     */
     void print(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -138,12 +212,21 @@ public:
 
 };
 
+/*!
+ * This class represents a dataset, a set of episodes.
+ * This class contains some utility functions to perform common operations over a dataset.
+ */
 template<class ActionC, class StateC>
 class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
 
 public:
-
+	/*!
+	 * Computes the mean features expectations over the episodes
+	 * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \param gamma the discount factor for the features expectations
+     * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
+	 */
     arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
     {
         size_t episodes = this->size();
@@ -159,6 +242,12 @@ public:
         return featureExpectation;
     }
 
+    /*!
+     * Computes the features expectations over the episodes
+     * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \param gamma the discount factor for the features expectations
+     * \return a matrix of features expectation, with size (phi.rows()\f$*\f$phi.cols())\f$\times\f$this->size()
+     */
     arma::mat computeEpisodeFeatureExpectation(Features& phi, double gamma = 1)
     {
         auto& dataset = *this;
@@ -176,6 +265,10 @@ public:
         return episodeFeatures;
     }
 
+    /*!
+     * Getter.
+     * \return the total number of transitions contained in this dataset
+     */
     unsigned int getTransitionsNumber()
     {
         unsigned int nSamples = 0;
@@ -187,12 +280,21 @@ public:
         return nSamples;
     }
 
+    /*!
+     * Getter.
+     * \return the reward size of this dataset
+     */
     unsigned int getRewardSize()
     {
         auto& dataset = *this;
         return dataset[0].getRewardSize();
     }
 
+    /*!
+     * Computes the episode discounted reward
+     * \param gamma the discount factor to be used
+     * \return a matrix of the discounted reward, with size this->getRewardSize()\f$\times\f$this->size()
+     */
     arma::mat getEpisodesReward(double gamma)
     {
         auto& dataset = *this;
@@ -205,26 +307,27 @@ public:
 
         for(auto& episode : dataset)
         {
-            double df = 1.0;
-            for(auto& tr : episode)
-            {
-                for(unsigned int i = 0; i < rewardSize; i++)
-                    rewards(i, idx) += df*tr.r[i];
-                df *= gamma;
-            }
-
-
+            rewards.col(idx) = episode.getEpisodeReward(gamma);
             idx++;
         }
 
         return rewards;
     }
 
+    /*!
+     * Computes the mean discounted reward.
+     * \param gamma the discount factor to be used
+     * \return a vector of the mean discounted reward, with size this->getRewardSize()
+     */
     arma::vec getMeanReward(double gamma)
     {
         return arma::mean(this->getEpisodesReward(gamma), 1);
     }
 
+    /*!
+     * Get all transitions rewards as matrix
+     * \return a matrix of the transition rewards, with size this->getRewardSize()\f$\times\f$this->getTransitionsNumber()
+     */
     arma::mat rewardAsMatrix()
     {
         auto& dataset = *this;
@@ -248,8 +351,12 @@ public:
         return rewards;
     }
 
-    template<class InputC>
-    arma::mat featuresAsMatrix(Features_<InputC>& phi)
+    /*!
+     * Get all features over transitions as matrix
+     * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \return a matrix of the transition features, with size (phi.rows()\f$*\f$phi.cols())\f$\times\f$this->getTransitionsNumber()
+     */
+    arma::mat featuresAsMatrix(Features& phi)
     {
         auto& dataset = *this;
 
@@ -263,7 +370,7 @@ public:
         {
             for(auto& tr : episode)
             {
-                features.col(idx) = phi(tr.x, tr.u);
+                features.col(idx) = phi(tr.x, tr.u, tr.xn);
                 idx++;
             }
         }
@@ -271,22 +378,38 @@ public:
         return features;
     }
 
+    /*!
+     * This method joins two datasets
+     * \param data the new dataset to join to the prevoious one.
+     */
     void addData(Dataset<ActionC, StateC>& data)
     {
         this->insert(this->data.end(), data.begin(), data.end());
     }
 
+    /*!
+     * Setter.
+     * \param data the new dataset to be set
+     */
     void setData(Dataset<ActionC, StateC>& data)
     {
         this->erase();
         addData(data);
     }
 
+    /*!
+     * Getter.
+     * \return the number of episodes in this dataset
+     */
     unsigned int getEpisodesNumber()
     {
         return this->size();
     }
 
+    /*!
+     * Getter.
+     * \return the maximum episode length
+     */
     unsigned int getEpisodeMaxLength()
     {
         unsigned int max = 0;
@@ -301,6 +424,10 @@ public:
 
 
 public:
+    /*!
+     * This method write an episode to an output stream
+     * \param os the output stream
+     */
     void writeToStream(std::ostream& os)
     {
         os << std::setprecision(OS_PRECISION);
@@ -315,6 +442,10 @@ public:
         }
     }
 
+    /*!
+     * This method read an episode from an input stream
+     * \param is the input stream
+     */
     void readFromStream(std::istream& is)
     {
         std::vector<std::string> header;
