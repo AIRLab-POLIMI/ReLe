@@ -351,7 +351,7 @@ public:
      * Create an instance of the class using the given basis functions
      * and the covariance matrix.
      *
-     * \param projector the basis functions
+     * \param phi the basis functions
      * \param initialCov The covariance matrix (\f$n_u \times n_u\f$) as list
      */
     MVNPolicy(Features& phi,
@@ -545,18 +545,42 @@ protected:
 };
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-/// MVN POLICY with Diagonal covariance (parameters of the diagonal are stddev)
-///////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////////////////
+// MVN POLICY with Diagonal covariance (parameters of the diagonal are stddev)
+// ////////////////////////////////////////////////////////////////////////////////////
+/*!
+ * Multivariate Normal policy with diagonal covariance matrix. The mean is
+ * approximated through a linear function while the covariance is represented by
+ * a vector \f$\sigma\f$ such that \f$\Sigma = diag(\sigma.^2)\f$
+ * \f[
+ * \pi(x,u) = \mathcal{N}(u| \mu=\phi(x)^T \omega, \sigma= diag(\sigma.^2)),
+ * \f]
+ * where the power is component-wise.
+ *
+ * The parameters to be learned are \f$\theta = [\omega,\sigma]\f$.
+ */
 class MVNDiagonalPolicy : public MVNPolicy
 {
 public:
+    /*!
+     * Create an instance of the class using the given basis functions
+     * of the mean. The vector of standard deviations is initialized to one.
+     *
+     * \param phi the basis functions
+     */
     MVNDiagonalPolicy(Features& phi)
         :MVNPolicy(phi), stddevParams(approximator.getOutputSize(),arma::fill::ones)
     {
         UpdateCovarianceMatrix();
     }
 
+    /*!
+     * Create an instance of the class using the given basis functions
+     * of the mean and an initial value for the vector of standard deviations
+     *
+     * \param phi the basis functions
+     * \param stddevVector values for the standard deviations
+     */
     MVNDiagonalPolicy(Features& phi,
                       arma::vec stddevVector)
         :MVNPolicy(phi), stddevParams(stddevVector)
@@ -586,6 +610,10 @@ public:
 
     // ParametricPolicy interface
 public:
+    /*!
+     * Return the parameters \f$\theta\f$ as a concatenation of \f$[\omega,\sigma\f$.
+     * \return the parameters \f$\theta\f$
+     */
     virtual inline arma::vec getParameters() const override
     {
         return arma::join_vert(approximator.getParameters(), stddevParams);
@@ -594,6 +622,11 @@ public:
     {
         return approximator.getParametersSize() + stddevParams.n_elem;
     }
+    /*!
+     * Set the policy parameters. \f$w\f$ must have dimension \f$|\omega| + |\sigma|\f$.
+     * The vector \f$w\f$ is obtained as \f$[\omega,\sigma]\f$.
+     * \param w the new parameters
+     */
     virtual void setParameters(const arma::vec& w) override;
 
     // DifferentiablePolicy interface
@@ -604,11 +637,10 @@ public:
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
 
 private:
-    /**
-     * Compute the covariance matrix from the logistic parameters and
-     * compute the Cholesky decomposition of it.
-     *
-     * @brief Update the covariance matrix
+    /*!
+     * This function is called after the update of the parameters \f$\theta\f$
+     * in order to update the internal representation of the covariance matrix,
+     * determinant and Cholesky decomposition.
      */
     void UpdateCovarianceMatrix();
 
@@ -620,25 +652,20 @@ protected:
 /// MVNLogisticPolicy
 ///////////////////////////////////////////////////////////////////////////////////////
 
-/**
+/*!
  * This class represents a Multivariate Normal policy with
  * linearly approximated mean value and diagonal covariance matrix
  * parameterized via logistic functions:
- * \f[\pi^{\theta}(a|s) = \mathcal{N}(a;\phi(s)\rho, \Sigma^{\Omega}),\qquad
- * \forall s \in R^{n_s}, a \in R^{n_a},\f]
- * where \f$\phi(s)\f$ is an \f$(n_a \times k)\f$ matrix,
+ * \f[\pi^{\theta}(x,u) = \mathcal{N}(u|\phi(x)^T \omega, \Sigma^{\sigma}),\qquad
+ * \forall x \in \mathbb{R}^{n_x}, u \in \mathbb{R}^{n_u},\f]
+ * where \f$\phi(x)\f$ is an \f$(k \times n_u)\f$ matrix,
  * \f$\rho\f$ is a \f$k\f$-dimensional vector and
- * \f$\Sigma^{\Omega}\f$ is a \f$(n_a \times n_a)\f$ diagonal matrix
- * such that \f$\Sigma_{ii} = \frac{\tau}{1+e^{-\omega}}\f$.
+ * \f$\Sigma^{\sigma}\f$ is a \f$(n_u \times n_u)\f$ diagonal matrix
+ * such that \f$\Sigma_{ii} = \frac{\tau_i}{1+e^{-\sigma_i}}\f$.
  *
  * As a consequence, the parameter vector \f$\theta\f$ is obtained by
  * concatenation of the mean and covariance parameters:
- * \f[\rho = [K, \Omega]^{T},\f]
- * where
- * \f$\rho=[\rho_1,\dots,\rho_k]\f$ and \f$\Omega = [\omega_1, \dots,\omega_{n_a}]\f$.
- *
- *
- * @brief Multivariate Normal distribution with logistic diagonal covariance matrix
+ * \f$\rho = [\omega, \sigma]\f$.
  */
 class MVNLogisticPolicy : public MVNPolicy
 {
@@ -646,16 +673,16 @@ protected:
     arma::vec mLogisticParams, mAsVariance;
 public:
 
-    /**
+    /*!
      * Create an instance of Multivariate logistic policy with the given
      * parameters. \a variance_asymptote defines the asymptotic value of the
      * logistic function used for variance approximation:
-     * \f[\lim_{w \to +\infty} \frac{\tau}{1+e^{-w}} = \tau,\f]
-     * where \f$\tau\f$ is equal to \a variance_asymptote.
+     * \f[\lim_{w_i \to +\infty} \frac{\tau_i}{1+e^{-w_i}} = \tau_i,\f]
+     * where \f$\tau_i\f$ is equal to i-th element of \a variance_asymptote.
+     * The initial parameters \f$\theta\f$ are set to zero.
      *
-     * @brief The constructor.
-     * @param projector The linear projector used for mean approximation
-     * @param variance_asymptote The asymptotic value of the logistic function.
+     * \param phi the basis functions
+     * \param variance_asymptote The asymptotic value of the logistic function \f$\tau\f$
      */
     MVNLogisticPolicy(Features& phi,
                       arma::vec variance_asymptote)
@@ -679,6 +706,19 @@ public:
         UpdateCovarianceMatrix();
     }
 
+    /*!
+     * Create an instance of Multivariate logistic policy with the given
+     * parameters. \a variance_asymptote defines the asymptotic value of the
+     * logistic function used for variance approximation:
+     * \f[\lim_{w_i \to +\infty} \frac{\tau_i}{1+e^{-w_i}} = \tau_i,\f]
+     * where \f$\tau_i\f$ is equal to i-th element of \a variance_asymptote.
+     * The initial parameters \f$\omega\f$ are set to zero while the
+     * parameters \f$\sigma\f$ are set to \a varianceparams.
+     *
+     * \param phi the basis functions
+     * \param variance_asymptote The asymptotic value of the logistic function \f$\tau\f$
+     * \param varianceparams the parameters to be used for \f$\sigma\f$
+     */
     MVNLogisticPolicy(Features& phi,
                       arma::vec variance_asymptote,
                       arma::vec varianceparams)
@@ -713,6 +753,10 @@ public:
 
     // ParametricPolicy interface
 public:
+    /*!
+     * Return the parameters \f$\theta\f$ as a concatenation of \f$[\omega,\sigma\f$.
+     * \return the parameters \f$\theta\f$
+     */
     virtual inline arma::vec getParameters() const override
     {
         return arma::join_vert(approximator.getParameters(), mLogisticParams);
@@ -721,6 +765,11 @@ public:
     {
         return approximator.getParametersSize() + mLogisticParams.n_elem;
     }
+    /*!
+     * Set the policy parameters. \f$w\f$ must have dimension \f$|\omega| + |\sigma|\f$.
+     * The vector \f$w\f$ is obtained as \f$[\omega,\sigma]\f$.
+     * \param w the new parameters
+     */
     virtual inline void setParameters(const arma::vec& w) override
     {
         assert(w.n_elem == this->getParametersSize());
@@ -745,10 +794,10 @@ public:
 private:
 
     /**
-     * @brief The logistic function
-     * @param w The exponent value
-     * @param asymptote The asymptotic value
-     * @return The value of the logistic function
+     * The logistic function: \f$\frac{\tau}{1+\exp(-w)}\f$
+     * \param w The exponent value
+     * \param asymptote The asymptotic value
+     * \return The value of the logistic function
      */
     inline double logistic(double w, double asymptote)
     {
@@ -756,15 +805,12 @@ private:
     }
 
 protected:
-
-    /**
-     * Compute the covariance matrix from the logistic parameters and
-     * compute the Cholesky decomposition of it.
-     *
-     * @brief Update the covariance matrix
+    /*!
+     * This function is called after the update of the parameters \f$\theta\f$
+     * in order to update the internal representation of the covariance matrix,
+     * determinant and Cholesky decomposition.
      */
     void UpdateCovarianceMatrix();
-
 
 };
 
