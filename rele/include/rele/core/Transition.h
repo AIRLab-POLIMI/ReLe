@@ -38,7 +38,7 @@
 namespace ReLe
 {
 /*!
- * This struct represent a single transition the MPD (the SARSA tuple).
+ * This struct represent a single transition of the environment (the SARSA tuple).
  * Implements some convenience setters and serialization functions
  */
 template<class ActionC, class StateC>
@@ -130,7 +130,7 @@ class Episode : public std::vector<Transition<ActionC,StateC>>
 public:
     /*!
      * This method can be used to compute episode features expectation over transitions.
-     * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \param phi the features \f$ \phi(x, u, x_n) \f$ to be used
      * \param gamma the discount factor for the features expectations
      * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
      */
@@ -223,7 +223,7 @@ class Dataset : public std::vector<Episode<ActionC,StateC>>
 public:
 	/*!
 	 * Computes the mean features expectations over the episodes
-	 * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+	 * \param phi the features \f$ \phi(x, u, x_n) \f$ to be used
      * \param gamma the discount factor for the features expectations
      * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
 	 */
@@ -244,7 +244,7 @@ public:
 
     /*!
      * Computes the features expectations over the episodes
-     * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \param phi the features \f$ \phi(x, u, x_n) \f$ to be used
      * \param gamma the discount factor for the features expectations
      * \return a matrix of features expectation, with size (phi.rows()\f$*\f$phi.cols())\f$\times\f$this->size()
      */
@@ -353,7 +353,7 @@ public:
 
     /*!
      * Get all features over transitions as matrix
-     * \param phi the features \f$ \phi(x, u, xn) \f$ to be used
+     * \param phi the features \f$ \phi(x, u, x_n) \f$ to be used
      * \return a matrix of the transition features, with size (phi.rows()\f$*\f$phi.cols())\f$\times\f$this->getTransitionsNumber()
      */
     arma::mat featuresAsMatrix(Features& phi)
