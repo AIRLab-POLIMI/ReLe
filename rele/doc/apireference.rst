@@ -95,6 +95,7 @@ Basic Interfaces
    
 .. doxygenclass:: ReLe::Solver
    :members:   
+   :protected-members:
    
 Basic Environments
 ------------------
