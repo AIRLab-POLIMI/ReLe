@@ -38,7 +38,7 @@ namespace ReLe
  * Each action value is selected within the given range, i.e., it is
  * drawn from an uniform bounded distribution:
  * \f[ \pi(u|x) = \mathcal{U}(\Omega)\f]
- * where \f$\Omega \subseteq R^{n}\f$.
+ * where \f$\Omega \subseteq \mathbb{R}^{n}\f$.
  */
 template<class StateC>
 class RandomPolicy : public Policy<DenseAction,StateC>

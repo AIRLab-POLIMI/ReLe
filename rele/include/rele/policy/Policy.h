@@ -62,13 +62,13 @@ inline std::ostream& operator<<(std::ostream& os, const hyperparameters_map& hyp
 
 /*!
  * A policy provides a distribution over the action space in each state.
- * Formally, it is defined as \f$\pi : S \times A \to [0,1]\f$ where
- * \f$\pi(a|s)\f$ denotes the probability of action a in state s.
+ * Formally, it is defined as \f$\pi : \mathcal{X} \times \mathcal{U} \to [0,1]\f$ where
+ * \f$\pi(u|x)\f$ denotes the probability of action u in state x.
  * It is now clear that one basic function is represented by the possibility
  * of evaluate the probability of an action is a state. The second functionality
  * allows to draw a random action from the action distribution in a specified state.
  * Particular policies are the deterministic policies where the action is deterministically
- * choosen in each state. In this case we can say that \f$a = \pi(s)\f$.
+ * choosen in each state. In this case we can say that \f$a = \pi(x)\f$.
  *
  */
 template<class ActionC, class StateC>
@@ -85,13 +85,13 @@ public:
 
     /*!
      * Draw a random action from the distribution induced by
-     * the policy in a state \f$s\f$: \f$a \sim \pi(s)\f$.
+     * the policy in a state \f$x\f$: \f$u \sim \pi(x)\f$.
      *
      * Example:
      *
-     *      DenseState s();
+     *      DenseState x();
      *      NormalPolicy policy;
-     *      DenseAction a = policy(s);
+     *      DenseAction u = policy(x);
      *
      *
      * \param state the state where the policy must be evaluated
@@ -101,12 +101,13 @@ public:
 
     /*!
      * Evaluate the density function in the provided (state,action)-pair.
-     * It computes the probability of an action in a given state: \f$p = \pi(s,a)\f$.
+     * It computes the probability of an action in a given state: \f$p = \pi(x,u)\f$.
      *
      * Example:
-     * DenseState s();
+     * DenseState x();
+     * DenseAction u();
      * NormalPolicy policy;
-     * DenseAction a = policy(s);
+     * double pr = policy(x,u);
      *
      * \param state the state where the policy must be evaluated
      * \param action the action to evaluate
@@ -195,7 +196,7 @@ class NonParametricPolicy: public Policy<ActionC, StateC>
  * Let \f$\theta \in \Theta\f$ be a parameter vector. Then a
  * parametric policy defines a parametric distribution over the
  * action space, i.e.,
- * \f[ \pi(a|s,\theta) \qquad \forall s \in S.\f]
+ * \f[ \pi(u|x,\theta) \qquad \forall x \in \mathcal{X}.\f]
  * This means that the shape of the action distribution depends
  * both on the state \f$s\f$ and on the parameter vector \f$\theta\f$.
  *
@@ -263,10 +264,10 @@ class DifferentiablePolicy: public ParametricPolicy<ActionC, StateC>
 public:
     /*!
      * Compute the first-order derivative of the policy function which is evaluated
-     * in the provided state \f$\hat{s}\f$ and action \f$\hat{a}\f$ using the current
+     * in the provided state \f$\hat{x}\f$ and action \f$\hat{u}\f$ using the current
      * parameter vector \f$\hat{\theta}\f$:
      * \f[
-     * \nabla_{\theta}\pi(\hat{a}|\hat{s},\theta)\big|_{\hat{\theta}} \in R^{d}.
+     * \nabla_{\theta}\pi(\hat{u}|\hat{x},\theta)\big|_{\hat{\theta}} \in \mathbb{R}^{d}.
      * \f]
      *
      * \param state the state
@@ -281,10 +282,10 @@ public:
     /*!
      * Compute the first-order derivative of the policy logarithm
      * which is evaluated in the provided state
-     * \f$\hat{s}\f$ and action \f$\hat{a}\f$ using the current
+     * \f$\hat{x}\f$ and action \f$\hat{u}\f$ using the current
      * parameter vector \f$\hat{\theta}\f$:
      * \f[
-     * \nabla_{\theta}\log\pi(\hat{a}|\hat{s},\theta)\big|_{\hat{\theta}} \in R^{d}.
+     * \nabla_{\theta}\log\pi(\hat{u}|\hat{x},\theta)\big|_{\hat{\theta}} \in \mathbb{R}^{d}.
      * \f]
      *
      * \param state the state
@@ -297,14 +298,14 @@ public:
 
     /*!
      * Compute the second-order derivative of the policy logarithm which is
-     * evaluated in the provided state \f$\hat{s}\f$ and action \f$\hat{a}\f$ using the current
+     * evaluated in the provided state \f$\hat{x}\f$ and action \f$\hat{u}\f$ using the current
      * parameter vector \f$\hat{\theta}\f$:
      * \f[
-     * H_{\theta}\log\pi(\hat{a}|\hat{s},\theta)\big|_{\hat{\theta}} \in R^{d \times d}.
+     * H_{\theta}\log\pi(\hat{u}|\hat{x},\theta)\big|_{\hat{\theta}} \in \mathbb{R}^{d \times d}.
      * \f]
      * Note that the Hessian matrix is given by
      * \f[
-     * H(i,j) = \frac{\partial^2}{\partial \theta_i \partial_j} \log\pi(\hat{a}|\hat{s},\theta)\big|_{\hat{\theta}},
+     * H(i,j) = \frac{\partial^2}{\partial \theta_i \partial_j} \log\pi(\hat{u}|\hat{x},\theta)\big|_{\hat{\theta}},
      * \f]
      * where i is the row and j is the column.
      *

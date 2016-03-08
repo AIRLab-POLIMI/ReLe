@@ -240,7 +240,7 @@ protected:
  * and diagonal covariance matrix:
  * \f[
  *  \pi^{\theta} (u|x) = \mathcal{N}\left(u; \mu(x,\omega), diag(\sigma^2)\right),\qquad
- * \forall s \in R^{n_x}, a \in R^{n_u},
+ * \forall x \in \mathbb{R}^{n_x}, u \in \mathbb{R}^{n_u},
  * \f]
  * where \f$\omega\f$ is a \f$k\f$-dimensional vector and \f$\sigma\f$ is
  * a \f$d\f$-dimensional vector. Note that the power operator is to be considered

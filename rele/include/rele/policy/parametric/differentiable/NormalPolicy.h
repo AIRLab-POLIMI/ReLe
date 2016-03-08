@@ -37,12 +37,23 @@ namespace ReLe
 // NORMAL POLICY
 // ------------------------------------------------
 
-/**
- * Univariate normal policy with fixed standard deviation
+/*!
+ * Univariate normal policy with fixed standard deviation and mean linearly
+ * parametrized:
+ * \f[
+ * \pi = \mathcal{N}(a|\mu = \theta^T \phi(x), \sigma^2)
+ * \f]
+ * The parameters to be optimized are \f$\theta_i\f$.
  */
 class NormalPolicy: public DifferentiablePolicy<DenseAction, DenseState>
 {
 public:
+    /*!
+     * Create a Normal policy with the given parameters. The initial
+     * weights \f$\theta\f$ are set to zero.
+     * \param initialStddev standard deviation \f$\sigma\f$
+     * \param phi vector of basis functions \f$\phi\f$
+     */
     NormalPolicy(const double initialStddev, Features& phi) :
         mInitialStddev(initialStddev), mMean(0.0),
         approximator(phi)
