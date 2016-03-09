@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     stdWeights.fill(0.1);
 
     NormalStateDependantStddevPolicy imitatorPolicy(phi, stdPhi, stdWeights);
-    AdaptiveStep stepRule(0.01);
+    AdaptiveGradientStep stepRule(0.01);
     int nparams = phi.rows();
     arma::vec mean(nparams, fill::zeros);
 

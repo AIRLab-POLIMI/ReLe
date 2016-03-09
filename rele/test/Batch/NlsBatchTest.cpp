@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
 
     // run batch training
-    AdaptiveStep stepl(0.1);
+    AdaptiveGradientStep stepl(0.1);
     IndexRT rewardF(0);
 
     OffGradType type = OffGradType::GPOMDP_BASELINE_SINGLE;

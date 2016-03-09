@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     int updates = 400;
     int episodes = episodesPerPolicy*policyPerUpdate*updates;
     int testEpisodes = 100;
-    AdaptiveStep stepRule(0.01);
+    AdaptiveGradientStep stepRule(0.01);
 
     // Learn Ship correct policy
     ShipSteering mdp;

@@ -95,11 +95,11 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
     {
         if (strcmp(argv[5+offset], "constant") == 0)
         {
-            config.steprule = new ConstantStep(step_length);
+            config.steprule = new ConstantGradientStep(step_length);
         }
         else if (strcmp(argv[5+offset], "adaptive") == 0)
         {
-            config.steprule = new AdaptiveStep(step_length);
+            config.steprule = new AdaptiveGradientStep(step_length);
         }
         else
         {
@@ -109,7 +109,7 @@ bool InputValidation(int argc, char *argv[], bboConfig& config, int offset)
     }
     else
     {
-        config.steprule = new AdaptiveStep(step_length);
+        config.steprule = new AdaptiveGradientStep(step_length);
     }
 
     // load valid arguments in the configuration
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
         config.nbRuns      = 200;
         config.nbPolicies  = 300;
         config.stepLength  = 0.11;
-        config.steprule = new AdaptiveStep(config.stepLength);
+        config.steprule = new AdaptiveGradientStep(config.stepLength);
     }
     //---
 

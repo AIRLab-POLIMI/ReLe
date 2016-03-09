@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
     ParametricGibbsPolicy<DenseState> target(actions, basis, 1);
 
-    AdaptiveStep stepl(0.1);
+    AdaptiveGradientStep stepl(0.1);
     IndexRT rewardF(0);
 
     OffGradType type = OffGradType::GPOMDP_BASELINE_SINGLE;

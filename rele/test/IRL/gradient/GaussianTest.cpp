@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     int policyPerUpdate = 100;
     int updates = 400;
     int episodes = episodesPerPolicy*policyPerUpdate*updates;
-    AdaptiveStep stepRule(0.01);
+    AdaptiveGradientStep stepRule(0.01);
 
     GPOMDPAlgorithm<DenseAction, DenseState> expert(expertPolicy, policyPerUpdate,
             mdp.getSettings().horizon, stepRule, GPOMDPAlgorithm<DenseAction, DenseState>::BaseLineType::MULTI);

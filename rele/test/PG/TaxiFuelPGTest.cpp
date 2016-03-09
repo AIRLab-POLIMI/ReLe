@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     //-- agent
     int nbepperpol = 10, nbstep = 100;
     //AdaptiveStep stepRule(0.01);
-    ConstantStep stepRule(0.01);
+    ConstantGradientStep stepRule(0.01);
     GPOMDPAlgorithm<FiniteAction, DenseState> agent(policy, nbepperpol, nbstep, stepRule,
             GPOMDPAlgorithm<FiniteAction, DenseState>::BaseLineType::MULTI);
 

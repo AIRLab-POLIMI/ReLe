@@ -99,9 +99,9 @@ public:
         config.nbEpisodes = vm["episodes"].as<int>();
         config.stepLength = vm["stepLength"].as<double>();
         if(vm["stepRule"].as<std::string>() == "constant")
-            config.stepRule = new ConstantStep(config.stepLength);
+            config.stepRule = new ConstantGradientStep(config.stepLength);
         else if(vm["stepRule"].as<std::string>() == "adaptive")
-            config.stepRule = new AdaptiveStep(config.stepLength);
+            config.stepRule = new AdaptiveGradientStep(config.stepLength);
 
         return config;
     }

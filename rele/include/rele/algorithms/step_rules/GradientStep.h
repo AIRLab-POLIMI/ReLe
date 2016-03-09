@@ -60,14 +60,14 @@ public:
     }
 };
 
-class ConstantStep : public GradientStep
+class ConstantGradientStep : public GradientStep
 {
 public:
-    ConstantStep(double val): stepDirection(1)
+    ConstantGradientStep(double val): stepDirection(1)
     {
         stepDirection(0) = val;
     }
-    ConstantStep(arma::vec val): stepDirection(val)
+    ConstantGradientStep(arma::vec val): stepDirection(val)
     {
     }
 
@@ -89,10 +89,10 @@ protected:
     arma::vec stepDirection;
 };
 
-class AdaptiveStep : public GradientStep
+class AdaptiveGradientStep : public GradientStep
 {
 public:
-    AdaptiveStep(double val): stepValue(val)
+    AdaptiveGradientStep(double val): stepValue(val)
     {
     }
 

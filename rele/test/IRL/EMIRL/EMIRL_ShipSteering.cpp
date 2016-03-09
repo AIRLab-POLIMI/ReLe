@@ -57,7 +57,7 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
     int updates = 400;
     int episodes = episodesPerPolicy*policyPerUpdate*updates;
     int testEpisodes = 100;
-    AdaptiveStep stepRule(0.01);
+    AdaptiveGradientStep stepRule(0.01);
 
     int dim = mdp.getSettings().continuosStateDim;
 
