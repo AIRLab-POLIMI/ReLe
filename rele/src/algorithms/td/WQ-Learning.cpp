@@ -126,7 +126,7 @@ void WQ_Learning::init()
     for(unsigned int i = 0; i < idxs.n_rows; i++)
         idxs.row(i) = actions(arma::find(actions != i)).t();
 
-    sampleStdQ = Q + STD_INF_VALUE;
+    sampleStdQ = Q + stdInfValue;
     Q2 = Q;
     weightsVar = Q;
     nUpdates = Q;
@@ -146,10 +146,10 @@ inline void WQ_Learning::updateMeanAndSampleStdQ(double target)
 
         double var = (Q2(x, u) - Q(x, u) * Q(x, u)) / n;
 
-        if(var >= STD_ZERO_VALUE * STD_ZERO_VALUE)
+        if(var >= stdZeroValue * stdZeroValue)
             sampleStdQ(x, u) = sqrt(var);
         else
-            sampleStdQ(x, u) = STD_ZERO_VALUE;
+            sampleStdQ(x, u) = stdZeroValue;
     }
 }
 

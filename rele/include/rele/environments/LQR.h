@@ -29,21 +29,61 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements a Linear-Quadratic Regulator.
+ * This task aims to minimize the undesired deviations
+ * from nominal values of some controller settings
+ * in control problems.
+ * For further information see: (http://www.sciencedirect.com
+ * /science/article/pii/S0005109801001741).
+ */
 class LQR: public ContinuousMDP
 {
     friend class LQRsolver;
 public:
     enum S0Type {FIXED, RANDOM};
 
+    /*!
+     * Constructor.
+     * \param MDP dimension
+     * \param reward dimension
+     * \param
+     * \param MDP discount factor
+     * \param MDP horizon
+     */
     LQR(unsigned int dimension, unsigned int reward_dimension,
         double eps = 0.1, double gamma = 0.9, unsigned int horizon = 50);
+    /*!
+     * Constructor.
+     * \param initialization matrix
+     * \param initialization matrix
+     * \param
+     * \param reward matrix
+     * \param MDP discount factor
+     * \param MDP horizon
+     */
     LQR(arma::mat& A, arma::mat& B, std::vector<arma::mat>& Q, std::vector<arma::mat>& R,
         double gamma = 0.9, unsigned int horizon = 50);
+    /*!
+     * Step function.
+     * \param action to perform
+     * \param state reached after the step
+     * \param reward obtained with the step
+     */
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward) override;
+    /*!
+     * Get the initial state.
+     * \param initial state
+     */
     virtual void getInitialState(DenseState& state) override;
 
 public:
+    /*!
+     * Setter.
+     * Set the initial state
+     * \param initial state
+     */
     void setInitialState(arma::vec& initialState)
     {
         this->initialState = initialState;

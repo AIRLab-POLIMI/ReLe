@@ -33,10 +33,6 @@
 #include "rele/algorithms/batch/td/FQI.h"
 #include <boost/math/distributions/normal.hpp>
 
-#define STD_ZERO_VALUE 1E-5
-#define STD_INF_VALUE 1E10
-
-
 namespace ReLe
 {
 
@@ -44,13 +40,17 @@ template<class StateC>
 class W_FQI: public FQI<StateC>
 {
 public:
+	static constexpr double stdZeroValue = 1e-5;
+	static constexpr double stdInfValue = 1e10;
+
+public:
     W_FQI(BatchRegressor& QRegressor,
           unsigned int nStates,
           unsigned int nActions,
           double epsilon) :
         FQI<StateC>(QRegressor, nStates, nActions, epsilon),
         meanQ(arma::mat(nStates, nActions, arma::fill::zeros)),
-        sampleStdQ(arma::mat(nStates, nActions).fill(STD_INF_VALUE)),
+        sampleStdQ(arma::mat(nStates, nActions).fill(stdInfValue)),
         sumQ(arma::mat(nStates, nActions, arma::fill::zeros)),
         sumSquareQ(arma::mat(nStates, nActions, arma::fill::zeros)),
         nUpdatesQ(0)
@@ -149,7 +149,7 @@ protected:
             meanQ = sumQ / nUpdatesQ;
             arma::mat diff = sumSquareQ - arma::square(sumQ) / nUpdatesQ;
 
-            sampleStdQ.fill(STD_ZERO_VALUE);
+            sampleStdQ.fill(stdZeroValue);
             arma::uvec indexes = arma::find(diff > 0);
             sampleStdQ(indexes) = sqrt((diff(indexes) / (nUpdatesQ - 1)) / nUpdatesQ);
         }

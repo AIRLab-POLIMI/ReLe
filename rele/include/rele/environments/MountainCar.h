@@ -29,14 +29,32 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the Mountain Car environment.
+ * In this problem a car is placed on valley between two hills
+ * and has to reach the top of one of them.
+ * Unfortunately, it is not able to do so by only accelerating and,
+ * therefore it has to accelerate in the opposite direction to use
+ * the other hill to acquire inertia that may allow it to reach the
+ * goal.
+ * For further information see: (https://books.google.it/books?id=2S64
+ * -ZZ1fREC&pg=PA479&lpg=PA479&dq=mountain+car+optimization&source=bl&
+ * ots=BA_U_Ghnn5&sig=nvBPwQFvIxrE_PEC4TpIFX0FolY&hl=it&sa=X&ved=0ahUK
+ * Ewij4oys2rTLAhUBoBQKHeQkDzcQ6AEILzAC#v=onepage&q=mountain%20car%20
+ * optimization&f=false).
+ */
 class MountainCar: public DenseMDP
 {
 public:
-    enum StateLabel
+	enum StateLabel
     {
         velocity = 0, position = 1
     };
 
+    /*!
+     * Type of configuration obtained from different experiments
+     * in respective articles.
+     */
     enum ConfigurationsLabel
     {
         Sutton, Klein, Random
@@ -44,13 +62,27 @@ public:
 
 public:
 
+    /*!
+     * Constructor.
+     * \param configuration type
+     */
     MountainCar(ConfigurationsLabel label = Sutton);
+    /*!
+     * Step function.
+     * \param action to perform
+     * \param state reached after the step
+     * \param reward obtained with the step
+     */
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward) override;
+    /*!
+     * Get the initial state.
+     * \param initial state
+     */
     virtual void getInitialState(DenseState& state) override;
 
+    //! Configuration type.
     ConfigurationsLabel s0type;
-
 };
 
 }

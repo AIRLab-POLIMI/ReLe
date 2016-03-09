@@ -31,9 +31,6 @@
 #include "rele/algorithms/td/Q-Learning.h"
 #include <boost/math/distributions/normal.hpp>
 
-#define STD_ZERO_VALUE 1E-5
-#define STD_INF_VALUE 1E10
-
 /*
  * This is a first implementation of an experimental estimator for Q-Learning.
  */
@@ -43,6 +40,10 @@ namespace ReLe
 
 class WQ_Learning: public Q_Learning
 {
+public:
+	static constexpr double stdZeroValue = 1e-5;
+	static constexpr double stdInfValue = 1e10;
+
 public:
     WQ_Learning(ActionValuePolicy<FiniteState>& policy);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;

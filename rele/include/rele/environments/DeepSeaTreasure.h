@@ -29,14 +29,41 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the deep treasure problem.
+ * This task is a grid world modeling a submarine
+ * environment with multiple treasures with different
+ * values. The aim is to minimize the time to reach
+ * the treasures and maximize the values of reached
+ * treasures.
+ * For further information see: (https://books.google.it
+ * /books?id=iIlrCQAAQBAJ&pg=PA375&lpg=PA375&dq=deep+sea+
+ * treasure+problem+ai&source=bl&ots=jB5wkUj9t_&sig=YUkqRA
+ * TglHxq5dU0PGv1u_ePJ2k&hl=it&sa=X&ved=0ahUKEwiY-bf8z7TL
+ * AhUrM5oKHdd_C5AQ6AEIHDAA#v=onepage&q=deep%20sea%20treasure
+ * %20problem%20ai&f=false)
+ */
 class DeepSeaTreasure: public DenseMDP
 {
 public:
 
+	/*!
+	 * Constructor.
+	 */
     DeepSeaTreasure();
 
+    /*!
+     * Step function.
+     * \param action to perform
+     * \param state reached after the step
+     * \param reward obtained with the step
+     */
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward) override;
+    /*!
+     * Set the initial state.
+     * \param initial state
+     */
     virtual void getInitialState(DenseState& state) override;
 
 private:

@@ -179,3 +179,21 @@ Normal Policies
 .. doxygenclass:: ReLe::GenericMVNDiagonalPolicy
 
 .. doxygenclass:: ReLe::GenericMVNStateDependantStddevPolicy
+
+Environments
+============
+
+.. doxygenclass:: ReLe::Dam
+   :members:
+   
+.. doxygenclass:: ReLe::DeepSeaTreasure
+   :members:
+
+.. doxygenclass:: ReLe::GaussianRewardMDP
+   :members:
+   
+.. doxygenclass:: ReLe::LQR
+   :members:
+   
+.. doxygenclass:: ReLe::MountainCar
+   :members:   
