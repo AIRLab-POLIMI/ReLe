@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_OFFPOLICYGRADIENTALGORITHM_H_
 #define INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_OFFPOLICYGRADIENTALGORITHM_H_
 
+#include "rele/algorithms/step_rules/GradientStep.h"
 #include "rele/core/BatchAgent.h"
 #include "rele/algorithms/batch/policy_search/gradient/OffGradientCalculatorFactory.h"
-#include "rele/algorithms/step_rules/StepRules.h"
 
 namespace ReLe
 {
@@ -38,7 +38,7 @@ public:
     OffPolicyGradientAlgorithm(OffGradType type,
                                Policy<ActionC, StateC>& behaviour,
                                DifferentiablePolicy<ActionC, StateC>& policy,
-                               StepRule& stepRule, RewardTransformation* rewardf) :
+                               GradientStep& stepRule, RewardTransformation* rewardf) :
         type(type), behaviour(behaviour), policy(policy),
         stepRule(stepRule), rewardf(rewardf)
     {
@@ -84,7 +84,7 @@ private:
     RewardTransformation* rewardf;
     Policy<ActionC, StateC>& behaviour;
     DifferentiablePolicy<ActionC, StateC>& policy;
-    StepRule& stepRule;
+    GradientStep& stepRule;
 
 
 };

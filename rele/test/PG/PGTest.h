@@ -45,7 +45,7 @@ struct gradConfig
     int nbRuns;
     int nbEpisodes;
     double stepLength;
-    StepRule* stepRule;
+    GradientStep* stepRule;
 };
 
 class CommandLineParser

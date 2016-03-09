@@ -59,7 +59,7 @@ public:
     AbstractOffPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& target_pol,
                                        Policy<ActionC, StateC>& behave_pol,
                                        unsigned int nbEpisodes, unsigned int nbSamplesForJ,
-                                       StepRule& stepL, bool baseline = true, int reward_obj = 0) :
+                                       GradientStep& stepL, bool baseline = true, int reward_obj = 0) :
         target(target_pol), behavioral(behave_pol), nbEpisodesperUpdate(nbEpisodes), runCounter(0),
         epCounter(0), df(1.0), Jep(0.0), rewardId(reward_obj),
         useBaseline(baseline), output2LogReady(false),
@@ -186,7 +186,7 @@ protected:
     unsigned int nbEpisodesperUpdate;
     unsigned int runCounter, epCounter;
     double df, Jep, Jepoff;
-    StepRule& stepRule;
+    GradientStep& stepRule;
     int rewardId;
 
     std::vector<double> history_J;

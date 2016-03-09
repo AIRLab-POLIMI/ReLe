@@ -45,7 +45,7 @@ class NaturalGPOMDPAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, St
 
 public:
     NaturalGPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                           unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                           unsigned int nbEpisodes, unsigned int nbSteps, GradientStep& stepL,
                            bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj),
         maxStepsPerEpisode(nbSteps)
@@ -54,7 +54,7 @@ public:
     }
 
     NaturalGPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                           unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                           unsigned int nbEpisodes, unsigned int nbSteps, GradientStep& stepL,
                            RewardTransformation& reward_tr,
                            bool baseline = true) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline),
@@ -232,7 +232,7 @@ class NaturalREINFORCEAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC,
 
 public:
     NaturalREINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                              unsigned int nbEpisodes, StepRule& stepL,
+                              unsigned int nbEpisodes, GradientStep& stepL,
                               bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
@@ -240,7 +240,7 @@ public:
     }
 
     NaturalREINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                              unsigned int nbEpisodes, StepRule& stepL,
+                              unsigned int nbEpisodes, GradientStep& stepL,
                               RewardTransformation& reward_tr,
                               bool baseline = true) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)

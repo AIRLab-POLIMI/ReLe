@@ -50,7 +50,7 @@ struct bboConfig
 {
     unsigned int nbRuns, nbPolicies;
     double stepLength;
-    StepRule* steprule = nullptr;
+    GradientStep* steprule = nullptr;
 
     virtual ~bboConfig()
     {

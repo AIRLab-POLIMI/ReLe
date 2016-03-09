@@ -30,7 +30,7 @@
 namespace ReLe
 {
 
-class StepRule
+class GradientStep
 {
 public:
     /**
@@ -54,13 +54,13 @@ public:
      */
     virtual void reset() = 0;
 
-    virtual ~StepRule()
+    virtual ~GradientStep()
     {
 
     }
 };
 
-class ConstantStep : public StepRule
+class ConstantStep : public GradientStep
 {
 public:
     ConstantStep(double val): stepDirection(1)
@@ -89,7 +89,7 @@ protected:
     arma::vec stepDirection;
 };
 
-class AdaptiveStep : public StepRule
+class AdaptiveStep : public GradientStep
 {
 public:
     AdaptiveStep(double val): stepValue(val)

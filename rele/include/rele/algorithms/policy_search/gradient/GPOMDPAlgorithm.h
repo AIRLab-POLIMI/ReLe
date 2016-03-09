@@ -46,7 +46,7 @@ public:
 
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                    unsigned int nbEpisodes, unsigned int nbSteps, GradientStep& stepL,
                     BaseLineType btype, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, true, reward_obj),
         maxStepsPerEpisode(nbSteps),
@@ -56,7 +56,7 @@ public:
     }
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                    unsigned int nbEpisodes, unsigned int nbSteps, GradientStep& stepL,
                     int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, false, reward_obj),
         maxStepsPerEpisode(nbSteps),
@@ -67,7 +67,7 @@ public:
 
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                    unsigned int nbEpisodes, unsigned int nbSteps, GradientStep& stepL,
                     BaseLineType btype, RewardTransformation& rewardt) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, rewardt, true),
         maxStepsPerEpisode(nbSteps),
@@ -77,7 +77,7 @@ public:
     }
 
     GPOMDPAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                    unsigned int nbEpisodes, unsigned int nbSteps, StepRule& stepL,
+                    unsigned int nbEpisodes, unsigned int nbSteps, GradientStep& stepL,
                     RewardTransformation& rewardt) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, rewardt, false),
         maxStepsPerEpisode(nbSteps),

@@ -29,10 +29,10 @@
 #include "rele/core/Basics.h"
 #include "rele/core/BasicFunctions.h"
 #include "rele/algorithms/policy_search/gradient/GradientOutputData.h"
-#include "rele/algorithms/step_rules/StepRules.h"
 #include "rele/approximators/RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
+#include "rele/algorithms/step_rules/GradientStep.h"
 
 namespace ReLe
 {
@@ -46,7 +46,7 @@ class AbstractPolicyGradientAlgorithm: public Agent<ActionC, StateC>
 
 public:
     AbstractPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                                    unsigned int nbEpisodes, StepRule& stepL,
+                                    unsigned int nbEpisodes, GradientStep& stepL,
                                     bool baseline = true, int reward_obj = 0) :
         policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
         runCount(0), epiCount(0), totstep(0), df(1.0), Jep(0.0),
@@ -57,7 +57,7 @@ public:
     }
 
     AbstractPolicyGradientAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                                    unsigned int nbEpisodes, StepRule& stepL,
+                                    unsigned int nbEpisodes, GradientStep& stepL,
                                     RewardTransformation& reward_tr,
                                     bool baseline = true) :
         policy(policy), nbEpisodesToEvalPolicy(nbEpisodes),
@@ -197,7 +197,7 @@ protected:
     unsigned int nbEpisodesToEvalPolicy;
     unsigned int runCount, epiCount, totstep; //totstep = #episodes * #steps
     double df, Jep;
-    StepRule& stepLength;
+    GradientStep& stepLength;
     RewardTransformation* rewardTr;
     bool cleanRT;
 

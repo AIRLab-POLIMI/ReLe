@@ -30,10 +30,10 @@
 #include "rele/core/Basics.h"
 #include "rele/core/BasicFunctions.h"
 #include "rele/algorithms/policy_search/BlackBoxOutputData.h"
-#include "rele/algorithms/step_rules/StepRules.h"
 #include "rele/approximators/RewardTransformation.h"
 #include <cassert>
 #include <iomanip>
+#include "rele/algorithms/step_rules/GradientStep.h"
 
 namespace ReLe
 {
@@ -218,7 +218,7 @@ public:
     GradientBlackBoxAlgorithm(DifferentiableDistribution& dist,
                               ParametricPolicy<ActionC, StateC>& policy,
                               unsigned int nbEpisodes, unsigned int nbPolicies,
-                              StepRule& step_length, bool baseline = true, int reward_obj = 0) :
+                              GradientStep& step_length, bool baseline = true, int reward_obj = 0) :
         BlackBoxAlgorithm<ActionC, StateC, AgentOutputC>(dist, policy, nbEpisodes, nbPolicies, reward_obj),
         stepLengthRule(step_length), useBaseline(baseline)
     {
@@ -227,7 +227,7 @@ public:
     GradientBlackBoxAlgorithm(DifferentiableDistribution& dist,
                               ParametricPolicy<ActionC, StateC>& policy,
                               unsigned int nbEpisodes, unsigned int nbPolicies,
-                              StepRule& step_length,
+                              GradientStep& step_length,
                               RewardTransformation& reward_tr,
                               bool baseline = true) :
         BlackBoxAlgorithm<ActionC, StateC, AgentOutputC>(
@@ -242,7 +242,7 @@ public:
 
 protected:
 
-    StepRule& stepLengthRule;
+    GradientStep& stepLengthRule;
     arma::vec diffObjFunc;
     std::vector<arma::vec> history_dlogsist;
     bool useBaseline;

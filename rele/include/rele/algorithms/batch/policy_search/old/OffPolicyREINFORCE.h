@@ -53,7 +53,7 @@ public:
     MBPGA(DifferentiablePolicy<ActionC, StateC>& target_pol,
           Policy<ActionC, StateC>& behave_pol,
           unsigned int nbEpisodes, unsigned int nbSamplesForJ,
-          StepRule& stepL, double penalization = 0.0,
+          GradientStep& stepL, double penalization = 0.0,
           bool baseline = true, int reward_obj = 0) :
         AbstractOffPolicyGradientAlgorithm<ActionC, StateC>(target_pol, behave_pol, nbEpisodes, nbSamplesForJ, stepL, baseline, reward_obj),
         penal_factor(penalization)
@@ -236,7 +236,7 @@ class OffpolicyREINFORCE : public MBPGA<ActionC, StateC>
 public:
     OffpolicyREINFORCE(DifferentiablePolicy<ActionC, StateC>& target,
                        Policy<ActionC, StateC>& behave_pol,
-                       unsigned int nbEpisodes, StepRule& stepL,
+                       unsigned int nbEpisodes, GradientStep& stepL,
                        bool baseline = true, int reward_obj = 0)
         : MBPGA<ActionC, StateC>(
             target, behave_pol, nbEpisodes, 0, stepL, 0.0,

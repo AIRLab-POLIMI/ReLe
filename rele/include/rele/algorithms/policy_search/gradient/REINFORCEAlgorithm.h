@@ -40,14 +40,14 @@ class REINFORCEAlgorithm: public AbstractPolicyGradientAlgorithm<ActionC, StateC
 
 public:
     REINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                       unsigned int nbEpisodes, StepRule& stepL,
+                       unsigned int nbEpisodes, GradientStep& stepL,
                        bool baseline = true, int reward_obj = 0) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, baseline, reward_obj)
     {
     }
 
     REINFORCEAlgorithm(DifferentiablePolicy<ActionC, StateC>& policy,
-                       unsigned int nbEpisodes, StepRule& stepL,
+                       unsigned int nbEpisodes, GradientStep& stepL,
                        RewardTransformation& reward_tr,
                        bool baseline = true) :
         AbstractPolicyGradientAlgorithm<ActionC, StateC>(policy, nbEpisodes, stepL, reward_tr, baseline)

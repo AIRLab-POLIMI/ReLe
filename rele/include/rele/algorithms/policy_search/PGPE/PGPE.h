@@ -43,7 +43,7 @@ class PGPE: public GradientBlackBoxAlgorithm<ActionC, StateC, PGPEIterationStats
     typedef GradientBlackBoxAlgorithm<ActionC, StateC, PGPEIterationStats> Base;
 public:
     PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
+         unsigned int nbEpisodes, unsigned int nbPolicies, GradientStep& step_length,
          bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, PGPEIterationStats>
         (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
@@ -52,7 +52,7 @@ public:
     }
 
     PGPE(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-         unsigned int nbEpisodes, unsigned int nbPolicies, StepRule& step_length,
+         unsigned int nbEpisodes, unsigned int nbPolicies, GradientStep& step_length,
          RewardTransformation& reward_tr,
          bool baseline = true)
         : GradientBlackBoxAlgorithm<ActionC, StateC, PGPEIterationStats>

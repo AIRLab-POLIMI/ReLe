@@ -54,7 +54,7 @@ public:
     OffPolicyGPOMDP(DifferentiablePolicy<ActionC, StateC>& target_pol,
                     Policy<ActionC, StateC>& behave_pol,
                     unsigned int nbEpisodes, unsigned int nbSamplesForJ, unsigned int nbSteps,
-                    StepRule& stepL, BaseLineType btype, int reward_obj = 0) :
+                    GradientStep& stepL, BaseLineType btype, int reward_obj = 0) :
         AbstractOffPolicyGradientAlgorithm<ActionC, StateC>(target_pol, behave_pol, nbEpisodes, nbSamplesForJ, stepL, true, reward_obj),
         maxStepsPerEpisode(nbSteps),
         bType(btype)
@@ -66,7 +66,7 @@ public:
     OffPolicyGPOMDP(DifferentiablePolicy<ActionC, StateC>& target_pol,
                     Policy<ActionC, StateC>& behave_pol,
                     unsigned int nbEpisodes, unsigned int nbSamplesForJ, unsigned int nbSteps,
-                    StepRule& stepL, int reward_obj = 0) :
+                    GradientStep& stepL, int reward_obj = 0) :
         AbstractOffPolicyGradientAlgorithm<ActionC, StateC>(target_pol, behave_pol, nbEpisodes, nbSamplesForJ, stepL, false, reward_obj),
         maxStepsPerEpisode(nbSteps),
         bType(BaseLineType::SINGLE)
