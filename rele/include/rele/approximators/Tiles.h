@@ -36,23 +36,40 @@ class out_of_bounds : public std::exception
 
 };
 
+/*!
+ * This class is a common interface for tiles.
+ * Tiles are a way to divide an input space in multiple portions.
+ * In other words, tiles implements a discretization over the input space.
+ * Formally this class implements a mapping from an input data to a
+ * positive number, which represent the corresponding tile.
+ * One or a set of Tilings can be used as a set of features for approximators.
+ */
 template<class InputC>
 class Tiles_
 {
 public:
+	/*!
+	 * Find the index of the corresponding input tile.
+	 */
     virtual unsigned int operator()(const InputC& input) = 0;
+
+    /*!
+     * Return the total number of tilings
+     */
     virtual unsigned int size() = 0;
 
+    /*!
+     * Writes the basis function to stream
+     */
     virtual void writeOnStream(std::ostream& out) = 0;
 
+    /*!
+     * Read the basis function from stream
+     */
     virtual void readFromStream(std::istream& in) = 0;
 
-    /**
-     * @brief Write the internal state to the stream.
-     * @see WriteOnStream
-     * @param out the output stream
-     * @param bf an instance of basis function
-     * @return the output stream
+    /*!
+     * Writes the basis function to stream
      */
     friend std::ostream& operator<<(std::ostream& out, Tiles_<InputC>& bf)
     {
@@ -60,12 +77,8 @@ public:
         return out;
     }
 
-    /**
-     * @brief Read the internal stream from a stream
-     * @see ReadFromStream
-     * @param in the input stream
-     * @param bf an instance of basis function
-     * @return the input stream
+    /*!
+     * Read the basis function from stream
      */
     friend std::istream& operator>>(std::istream& in, Tiles_<InputC>& bf)
     {
@@ -73,6 +86,9 @@ public:
         return in;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~Tiles_()
     {
     }

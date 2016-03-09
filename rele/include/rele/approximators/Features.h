@@ -30,6 +30,9 @@
 namespace ReLe
 {
 
+/*!
+ * Trait defined to return sparse or dense features matrices
+ */
 template<bool denseOutput>
 struct feature_traits
 {
@@ -50,6 +53,13 @@ struct feature_traits<false>
     typedef arma::sp_vec column_type;
 };
 
+/*!
+ * This interface represent a generic set of features.
+ * Features are a mapping \f$\phi(i)\leftarrow\mathbb{R}^n\times\mathbb{R}^m\f$ with \f$i\in\mathcal{D}\f$.
+ * The template definition allows for generic domains \f$\mathcal{D}\f$.
+ * Optionally, the features matrix returned can be a sparse matrix, this is done by setting to false the optional
+ * template parameter denseOutput.
+ */
 template<class InputC, bool denseOutput = true>
 class Features_
 {
@@ -57,12 +67,27 @@ class Features_
 
 public:
 
+    /*!
+     * Destructor.
+     */
     virtual ~Features_()
     {
     }
 
+    /*!
+     * Evaluate the features in input
+     * \param input the input data
+     * \return the evaluated features
+     */
     virtual return_type operator()(const InputC& input) = 0;
 
+    /*!
+     * Overloading of the evaluation method, simply vectorizes the inputs and then evaluates
+     * the feature with the default 1 input method
+     * \param input1 the first input data
+     * \param input2 the second input data
+     * \return the evaluated features
+     */
     template<class Input1, class Input2>
     return_type operator()(const Input1& input1, const Input2& input2)
     {
@@ -70,6 +95,14 @@ public:
         return self(vectorize(input1, input2));
     }
 
+    /*!
+     * Overloading of the evaluation method, simply vectorizes the inputs and then evaluates
+     * the feature with the default 1 input method
+     * \param input1 the first input data
+     * \param input2 the second input data
+     * \param input3 the third input data
+     * \return the evaluated features
+     */
     template<class Input1, class Input2, class Input3>
     return_type operator()(const Input1& input1, const Input2& input2, const Input3& input3)
     {
@@ -77,10 +110,17 @@ public:
         return self(vectorize(input1, input2, input3));
     }
 
+    /*!
+     * Getter.
+     * \return the number of rows of the output feature matrix
+     */
     virtual size_t rows() const = 0;
-    virtual size_t cols() const = 0;
 
-    void setDiagonal(BasisFunctions& basis);
+    /*!
+     * Getter.
+     * \return the number of columns of the output feature matrix
+     */
+    virtual size_t cols() const = 0;
 
 };
 
