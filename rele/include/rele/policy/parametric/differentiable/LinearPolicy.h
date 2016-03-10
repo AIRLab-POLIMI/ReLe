@@ -45,8 +45,8 @@ class DetLinearPolicy: public DifferentiablePolicy<DenseAction, StateC>
 public:
 
     /**
-     * Create an instance of the class using the given projector.
-     * Note that the weights are initialized to zero
+     * Create an instance of the class using the given features.
+     * Note that the weights are initialized
      * by the constructor of the linear approximator
      *
      * \param phi the features \f$\phi(x,u)\f$
