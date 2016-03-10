@@ -30,7 +30,7 @@ namespace ReLe
 {
 
 /*!
- * This class contains the settings of the DAM problem
+ * This class contains the settings of the Dam problem
  * and some functions to manage them.
  */
 class DamSettings : public EnvironmentSettings
@@ -38,23 +38,34 @@ class DamSettings : public EnvironmentSettings
 public:
     enum initType {RANDOM, RANDOM_DISCRETE};
 
+    /*!
+     * Constructor
+     */
     DamSettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
     static void defaultSettings(DamSettings& settings);
-    virtual ~DamSettings() {}
+
+    virtual ~DamSettings()
+    {
+    }
 
 public:
-    //! Reservoir surface
+    // Reservoir surface
     double S;
-    //! Water Demand
+    // Water Demand
     double W_IRR;
-    //! Flooding threshold
+    // Flooding threshold
     double H_FLO_U;
     double S_MIN_REL;
     double DAM_INFLOW_MEAN;
     double DAM_INFLOW_STD;
     double Q_MEF;
     double GAMMA_H2O;
-    //! Hydroelectric demand
+    // Hydroelectric demand
     double W_HYD;
     double Q_FLO_D;
     double ETA;
@@ -69,12 +80,11 @@ public:
 };
 
 /*!
- * This class implements the DAM problem environment.
+ * This class implements the Dam problem environment.
  * The aim of this optimization problem is to decide
  * the amount of water to release in order to satisfy
  * conflicting objectives.
- * For further information see: (http://www.dhigroup.
- * com/upload/publications/mike11/Pedersen_RealTime.pdf)
+ * For further information see: http://www.dhigroup.com/upload/publications/mike11/Pedersen_RealTime.pdf
  */
 class Dam: public ContinuousMDP
 {
@@ -83,9 +93,10 @@ public:
      * Constructor.
      */
     Dam();
+
     /*!
      * Constructor.
-     * \param settings of environment
+     * \param config settings of environment
      */
     Dam(DamSettings& config);
 
@@ -96,29 +107,24 @@ public:
     }
 
     /*!
-     * Step function.
-     * \param action to perform
-     * \param state reached after the step
-     * \param reward obtained with the step
+     * \see Environment::step
      */
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward) override;
+
     /*!
-     * Get the initial state.
-     * \param initial state
+     * \see Environment::getInitialState
      */
     virtual void getInitialState(DenseState& state) override;
 
     /*!
      * Set the current state.
-     * \param current state
+     * \param state current state
      */
     void setCurrentState(const DenseState& state);
 
     /*!
-     * Getter.
-     * Used to get environment setting
-     * \return a reference to environment settings
+     * \see Environment::getSettings
      */
     inline const DamSettings& getSettings() const
     {

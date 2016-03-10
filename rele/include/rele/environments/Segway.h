@@ -31,12 +31,27 @@
 namespace ReLe
 {
 
+/*!
+ * This class contains the settings of the Segway problem
+ * and some functions to manage them.
+ */
 class SegwaySettings : public EnvironmentSettings
 {
 public:
+    /*!
+     * Constructor.
+     */
     SegwaySettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
     static void defaultSettings(SegwaySettings& settings);
+
     virtual ~SegwaySettings();
+    virtual void WriteToStream(std::ostream& out) const;
+    virtual void ReadFromStream(std::istream& in);
 
 public:
     double l;
@@ -47,14 +62,13 @@ public:
     double Mr;
 
     double dt;
-
-    virtual void WriteToStream(std::ostream& out) const;
-    virtual void ReadFromStream(std::istream& in);
 };
 
+/*!
+ *
+ */
 class Segway: public ContinuousMDP
 {
-
     typedef arma::vec state_type;
 
 private:
@@ -70,7 +84,6 @@ private:
         void operator()(const state_type& x, state_type& dx,
                         const double /* t */);
 
-
     private:
         double l;
         double r;
@@ -84,8 +97,15 @@ private:
     };
 
 public:
-
+    /*!
+     * Constructor.
+     */
     Segway();
+
+    /*!
+     * Constructor.
+     * \param config the initial settings
+     */
     Segway(SegwaySettings& config);
 
     virtual ~Segway()
@@ -94,10 +114,20 @@ public:
             delete segwayConfig;
     }
 
+    /*!
+     * \see Environment::step
+     */
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     virtual void getInitialState(DenseState& state) override;
 
+    /*!
+     * \see Environment::getSettings
+     */
     inline const SegwaySettings& getSettings() const
     {
         return *segwayConfig;

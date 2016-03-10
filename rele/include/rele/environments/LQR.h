@@ -34,8 +34,7 @@ namespace ReLe
  * This task aims to minimize the undesired deviations
  * from nominal values of some controller settings
  * in control problems.
- * For further information see: (http://www.sciencedirect.com
- * /science/article/pii/S0005109801001741).
+ * For further information see: http://www.sciencedirect.com/science/article/pii/S0005109801001741
  */
 class LQR: public ContinuousMDP
 {
@@ -45,36 +44,35 @@ public:
 
     /*!
      * Constructor.
-     * \param MDP dimension
-     * \param reward dimension
-     * \param
-     * \param MDP discount factor
-     * \param MDP horizon
+     * \param dimension MDP dimension
+     * \param reward_dimension reward dimension
+     * \param eps
+     * \param gamma MDP discount factor
+     * \param horizon MDP horizon
      */
     LQR(unsigned int dimension, unsigned int reward_dimension,
         double eps = 0.1, double gamma = 0.9, unsigned int horizon = 50);
+
     /*!
      * Constructor.
-     * \param initialization matrix
-     * \param initialization matrix
-     * \param
-     * \param reward matrix
-     * \param MDP discount factor
-     * \param MDP horizon
+     * \param A initialization matrix
+     * \param B initialization matrix
+     * \param Q
+     * \param R reward matrix
+     * \param gamma MDP discount factor
+     * \param horizon MDP horizon
      */
     LQR(arma::mat& A, arma::mat& B, std::vector<arma::mat>& Q, std::vector<arma::mat>& R,
         double gamma = 0.9, unsigned int horizon = 50);
+
     /*!
-     * Step function.
-     * \param action to perform
-     * \param state reached after the step
-     * \param reward obtained with the step
+     * \see Environment::step
      */
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward) override;
+
     /*!
-     * Get the initial state.
-     * \param initial state
+     * \see Environment::getInitialState
      */
     virtual void getInitialState(DenseState& state) override;
 
@@ -82,7 +80,7 @@ public:
     /*!
      * Setter.
      * Set the initial state
-     * \param initial state
+     * \param initialState initial state
      */
     void setInitialState(arma::vec& initialState)
     {
@@ -96,11 +94,8 @@ private:
 private:
     arma::mat A, B;
     std::vector<arma::mat> Q, R;
-
     arma::vec initialState;
-
     S0Type startType;
-
 };
 
 }

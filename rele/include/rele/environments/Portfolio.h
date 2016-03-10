@@ -38,12 +38,27 @@
 namespace ReLe
 {
 
+/*!
+ * This class contains the settings of the Portfolio problem
+ * and some functions to manage them.
+ */
 class PortfolioSettings : public EnvironmentSettings
 {
 public:
+    /*!
+     * Constructor.
+     */
     PortfolioSettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
     static void defaultSettings(PortfolioSettings& settings);
-    virtual ~PortfolioSettings() {}
+
+    virtual ~PortfolioSettings()
+    {
+    }
 
 public:
     // time dependent variables
@@ -69,11 +84,24 @@ public:
     virtual void ReadFromStream(std::istream& in);
 };
 
+/*!
+ * This class implements the Portfolio problem.
+ * The aim of this problem is to maximize the expected
+ * utility of a Portfolio in a financial market.
+ * For further information see: http://www.math.kit.edu/stoch/~baeuerle/seite/markov_nb/media/br_mdpjump.pdf
+ */
 class Portfolio: public DenseMDP
 {
 public:
-
+    /*!
+     * Constructor.
+     */
     Portfolio();
+
+    /*!
+     * Constructor.
+     * \param config the initial settings
+     */
     Portfolio(PortfolioSettings& config);
 
     virtual ~Portfolio()
@@ -82,9 +110,20 @@ public:
             delete config;
     }
 
+    /*!
+     * \see Environment::step
+     */
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     virtual void getInitialState(DenseState& state) override;
+
+    /*!
+     * \see Environment::getSettings
+     */
     inline const PortfolioSettings& getSettings() const
     {
         return *config;

@@ -29,12 +29,28 @@
 namespace ReLe
 {
 
+/*!
+ * This class contains the settings of the Multi Heat problem
+ * and some functions to manage them.
+ */
 class MultiHeatSettings : public EnvironmentSettings
 {
 public:
+    /*!
+     * Constructor.
+     */
     MultiHeatSettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
     static void defaultSettings(MultiHeatSettings& settings);
+
     virtual ~MultiHeatSettings();
+
+    virtual void WriteToStream(std::ostream& out) const;
+    virtual void ReadFromStream(std::istream& in);
 
 public:
     unsigned int Nr;
@@ -47,19 +63,34 @@ public:
     arma::vec B, C;
 
     double TUB, TLB;
-
-
-    virtual void WriteToStream(std::ostream& out) const;
-    virtual void ReadFromStream(std::istream& in);
 };
 
+/*!
+ * This class implements the Multi Heat problem.
+ * The aim of this problem is to find the optimal
+ * heating policy according to environmental
+ * conditions and other criterion of optimality.
+ * For further information see: http://www.ifi.uzh.ch/ce/publications/Home_Heating_using_GPs_and_MDPs_Shann_and_Seuken_AAMAS2014.pdf
+ */
 class MultiHeat: public DenseMDP
 {
+public:
+    MultiHeatSettings* config;
+    bool cleanConfig;
+
+    arma::mat Xi;
+    arma::vec Gamma;
 
 public:
-
+    /*!
+     * Constructor.
+     */
     MultiHeat();
 
+    /*!
+     * Constructor.
+     * \param config the initial settings
+     */
     MultiHeat(MultiHeatSettings& config);
 
     virtual ~MultiHeat()
@@ -68,9 +99,20 @@ public:
             delete config;
     }
 
+    /*!
+     * \see Environment::step
+     */
     virtual void step(const FiniteAction& action, DenseState& nextState, Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     virtual void getInitialState(DenseState& state) override;
 
+    /*!
+     * Set the current state.
+     * \param state the current state
+     */
     void setCurrentState(DenseState& state) //TO REMOVE
     {
         currentState = state;
@@ -80,13 +122,6 @@ private:
     unsigned int const mode = 0;
 
     void computeTransitionMatrix();
-
-public:
-    MultiHeatSettings* config;
-    bool cleanConfig;
-
-    arma::mat Xi;
-    arma::vec Gamma;
 };
 
 }
