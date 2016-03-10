@@ -26,6 +26,7 @@
 #include "rele/algorithms/td/LinearSARSA.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/features/DenseFeatures.h"
+#include "rele/policy/q_policy/e_Greedy.h"
 
 using namespace std;
 using namespace ReLe;
@@ -39,7 +40,8 @@ int main(int argc, char *argv[])
     DenseFeatures phi(basis);
 
     e_GreedyApproximate policy;
-    LinearGradientSARSA agent(policy, phi);
+    ConstantLearningRateDense alpha(0.2);
+    LinearGradientSARSA agent(phi, policy, alpha);
 
     auto&& core = buildCore(mdp, agent);
 

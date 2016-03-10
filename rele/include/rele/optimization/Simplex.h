@@ -41,10 +41,10 @@ namespace ReLe
 class Simplex
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param size the dimension of the full parameter space
-	 */
+    /*!
+     * Constructor.
+     * \param size the dimension of the full parameter space
+     */
     Simplex(unsigned int size) : size(size)
     {
         // all features are active by default

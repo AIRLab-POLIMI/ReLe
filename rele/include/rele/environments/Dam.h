@@ -79,9 +79,9 @@ public:
 class Dam: public ContinuousMDP
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     Dam();
     /*!
      * Constructor.

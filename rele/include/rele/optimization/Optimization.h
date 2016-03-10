@@ -33,9 +33,9 @@ namespace ReLe
 class Optimization
 {
 public:
-	/*!
-	 * This function implements the one sum constraint, to be used as nonlinear constraint in nlopt
-	 */
+    /*!
+     * This function implements the one sum constraint, to be used as nonlinear constraint in nlopt
+     */
     static double oneSumConstraint(unsigned int n, const double *x,
                                    double *grad, void *data)
     {

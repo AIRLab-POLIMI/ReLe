@@ -35,8 +35,8 @@ using namespace arma;
 namespace ReLe
 {
 
-DoubleQ_Learning::DoubleQ_Learning(ActionValuePolicy<FiniteState>& policy) :
-    Q_Learning(policy)
+DoubleQ_Learning::DoubleQ_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha) :
+    Q_Learning(policy, alpha)
 {
 }
 
@@ -69,7 +69,7 @@ void DoubleQ_Learning::step(const Reward& reward, const FiniteState& nextState,
 
     double delta = reward[0] +
                    task.gamma * doubleQ(xn, FiniteAction(maxIndex(index)), 1 - selectedQ) - doubleQ(x, u, selectedQ);
-    doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha * delta;
+    doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha(x, u) * delta;
 
     // Update action and state
     updateQ();
@@ -85,7 +85,7 @@ void DoubleQ_Learning::endEpisode(const Reward& reward)
 
     // In the last update, the Q of the absorbing state is forced to be 0
     double delta = reward[0] - doubleQ(x, u, selectedQ);
-    doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha * delta;
+    doubleQ(x, u, selectedQ) = doubleQ(x, u, selectedQ) + alpha(x, u) * delta;
 
     updateQ();
 }

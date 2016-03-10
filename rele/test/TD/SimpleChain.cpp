@@ -45,10 +45,11 @@ int main(int argc, char *argv[])
 
     FiniteMDP mdp = generator.getMDP(0.9);
     e_Greedy policy;
+    ConstantLearningRate alpha(0.2);
     //Boltzmann policy;
 
     //SARSA agent(policy);
-    Q_Learning agent(policy);
+    Q_Learning agent(policy, alpha);
 
     Core<FiniteAction, FiniteState> core(mdp, agent);
 

@@ -48,9 +48,9 @@ template<class InputC>
 class Tiles_
 {
 public:
-	/*!
-	 * Find the index of the corresponding input tile.
-	 */
+    /*!
+     * Find the index of the corresponding input tile.
+     */
     virtual unsigned int operator()(const InputC& input) = 0;
 
     /*!

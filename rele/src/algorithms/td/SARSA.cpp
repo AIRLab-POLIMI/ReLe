@@ -29,8 +29,8 @@ using namespace arma;
 namespace ReLe
 {
 
-SARSA::SARSA(ActionValuePolicy<FiniteState>& policy) :
-    FiniteTD(policy)
+SARSA::SARSA(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha) :
+    FiniteTD(policy, alpha)
 {
 }
 
@@ -55,7 +55,7 @@ void SARSA::step(const Reward& reward, const FiniteState& nextState,
     double r = reward[0];
 
     double delta = r + task.gamma * Q(xn, un) - Q(x, u);
-    Q(x, u) = Q(x, u) + alpha * delta;
+    Q(x, u) = Q(x, u) + alpha(x, u) * delta;
 
     //update action and state
     x = xn;
@@ -70,7 +70,7 @@ void SARSA::endEpisode(const Reward& reward)
     //Last update
     double r = reward[0];
     double delta = r - Q(x, u);
-    Q(x, u) = Q(x, u) + alpha * delta;
+    Q(x, u) = Q(x, u) + alpha(x, u) * delta;
 }
 
 SARSA::~SARSA()
@@ -79,8 +79,9 @@ SARSA::~SARSA()
 }
 
 SARSA_lambda::SARSA_lambda(ActionValuePolicy<FiniteState>& policy,
+                           LearningRate& alpha,
                            bool accumulating) :
-    FiniteTD(policy), accumulating(accumulating)
+    FiniteTD(policy, alpha), accumulating(accumulating)
 {
     lambda = 1;
 }
@@ -114,7 +115,7 @@ void SARSA_lambda::step(const Reward& reward, const FiniteState& nextState,
         Z(x, u) = 1;
 
     //update action value function and eligibility trace
-    Q = Q + alpha * delta * Z;
+    Q = Q + alpha(x, u)* delta * Z;
     Z = task.gamma * lambda * Z;
 
     //update action and state
@@ -138,7 +139,7 @@ void SARSA_lambda::endEpisode(const Reward& reward)
         Z(x, u) = 1;
 
     //update action value function
-    Q = Q + alpha * delta * Z;
+    Q = Q + alpha(x, u) * delta * Z;
 
 }
 

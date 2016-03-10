@@ -26,6 +26,8 @@
 
 #include "rele/core/Basics.h"
 
+#include <sstream>
+
 namespace ReLe
 {
 
@@ -33,84 +35,102 @@ template<class ActionC, class StateC>
 class LearningRate_
 {
 public:
-	virtual double getLearningRate(StateC x, ActionC u) = 0;
-	virtual void resetLearningRate(StateC x, ActionC u) = 0;
+    virtual double operator()(StateC x, ActionC u) = 0;
+    virtual void reset() = 0;
+    virtual std::string print() = 0;
 
-	virtual ~LearningRate_()
-	{
+    virtual ~LearningRate_()
+    {
 
-	}
+    }
 };
+
+typedef LearningRate_<FiniteAction, FiniteState> LearningRate;
+typedef LearningRate_<FiniteAction, DenseState> LearningRateDense;
 
 template<class ActionC, class StateC>
 class ConstantLearningRate_ : public LearningRate_<ActionC, StateC>
 {
 public:
-	ConstantLearningRate_(double alpha) : alpha(alpha)
-	{
+    ConstantLearningRate_(double alpha) : alpha(alpha)
+    {
 
-	}
+    }
 
-	virtual double getLearningRate(StateC x, ActionC u) override
-	{
-		return alpha;
-	}
+    virtual double operator()(StateC x, ActionC u) override
+    {
+        return alpha;
+    }
 
-	virtual void resetLearningRate(StateC x, ActionC u) override
-	{
+    virtual void reset() override
+    {
 
-	}
+    }
 
-	virtual ~ConstantLearningRate_()
-	{
+    virtual std::string print() override
+    {
+        return std::to_string(alpha);
+    }
 
-	}
+    virtual ~ConstantLearningRate_()
+    {
+
+    }
 
 private:
-	double alpha;
+    double alpha;
 
 };
 
-typedef ConstantLearningRate_<FiniteAction, FiniteState> ConstantLearningRateStep;
-typedef ConstantLearningRate_<FiniteAction, DenseState> ConstantLearningRateStepDense;
+typedef ConstantLearningRate_<FiniteAction, FiniteState> ConstantLearningRate;
+typedef ConstantLearningRate_<FiniteAction, DenseState> ConstantLearningRateDense;
 
 template<class ActionC, class StateC>
 class DecayingLearningRate_ : public LearningRate_<ActionC, StateC>
 {
 public:
-	DecayingLearningRate_(double initialAlpha, double omega = 1.0, double minAlpha = 0.0)
-		: initialAlpha(initialAlpha), omega(omega), minAlpha(minAlpha)
-	{
-		t = 0;
-	}
+    DecayingLearningRate_(double initialAlpha, double omega = 1.0, double minAlpha = 0.0)
+        : initialAlpha(initialAlpha), omega(omega), minAlpha(minAlpha)
+    {
+        t = 0;
+    }
 
-	virtual double getLearningRate(StateC x, ActionC u) override
-	{
-		t++;
-		return initialAlpha/std::pow(static_cast<double>(t), omega);
-	}
+    virtual double operator()(StateC x, ActionC u) override
+    {
+        t++;
+        double alpha = initialAlpha/std::pow(static_cast<double>(t), omega);
+        return std::max(minAlpha, alpha);
+    }
 
-	virtual void resetLearningRate(StateC x, ActionC u) override
-	{
-		t = 0;
-	}
+    virtual void reset() override
+    {
+        t = 0;
+    }
 
-	virtual ~DecayingLearningRate_()
-	{
+    virtual std::string print() override
+    {
+        std::stringstream ss;
+        ss << "Decaying rate -- t:" << t << " alpha0: " << initialAlpha
+           << " alphaInf: " << minAlpha << " omega: " << omega;
+        return ss.str();
+    }
 
-	}
+    virtual ~DecayingLearningRate_()
+    {
+
+    }
 
 private:
-	double initialAlpha;
-	double minAlpha;
-	double omega;
+    double initialAlpha;
+    double minAlpha;
+    double omega;
 
-	unsigned int t;
+    unsigned int t;
 
 };
 
-typedef DecayingLearningRate_<FiniteAction, FiniteState> DecayingLearningRateStep;
-typedef DecayingLearningRate_<FiniteAction, DenseState> DecayingLearningRateStepDense;
+typedef DecayingLearningRate_<FiniteAction, FiniteState> DecayingLearningRate;
+typedef DecayingLearningRate_<FiniteAction, DenseState> DecayingLearningRateDense;
 
 
 }

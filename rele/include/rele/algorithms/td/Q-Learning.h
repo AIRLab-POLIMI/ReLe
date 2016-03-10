@@ -35,7 +35,7 @@ namespace ReLe
 class Q_Learning: public FiniteTD
 {
 public:
-    Q_Learning(ActionValuePolicy<FiniteState>& policy);
+    Q_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,

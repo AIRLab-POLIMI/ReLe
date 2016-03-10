@@ -41,11 +41,11 @@ namespace ReLe
 class WQ_Learning: public Q_Learning
 {
 public:
-	static constexpr double stdZeroValue = 1e-5;
-	static constexpr double stdInfValue = 1e10;
+    static constexpr double stdZeroValue = 1e-5;
+    static constexpr double stdInfValue = 1e10;
 
 public:
-    WQ_Learning(ActionValuePolicy<FiniteState>& policy);
+    WQ_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,

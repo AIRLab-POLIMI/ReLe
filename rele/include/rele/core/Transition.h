@@ -159,19 +159,19 @@ public:
      */
     arma::vec getEpisodeReward(double gamma)
     {
-    	auto& episode = *this;
-    	unsigned int rewardSize = getRewardSize();
-    	arma::vec reward(rewardSize, arma::fill::zeros);
+        auto& episode = *this;
+        unsigned int rewardSize = getRewardSize();
+        arma::vec reward(rewardSize, arma::fill::zeros);
 
-    	double df = 1.0;
-    	for(auto& tr : episode)
-    	{
-    		for(unsigned int i = 0; i < rewardSize; i++)
-    	                    reward(i) += df*tr.r[i];
-    	    df *= gamma;
-    	}
+        double df = 1.0;
+        for(auto& tr : episode)
+        {
+            for(unsigned int i = 0; i < rewardSize; i++)
+                reward(i) += df*tr.r[i];
+            df *= gamma;
+        }
 
-    	return reward;
+        return reward;
 
     }
 
@@ -221,12 +221,12 @@ class Dataset : public std::vector<Episode<ActionC,StateC>>
 {
 
 public:
-	/*!
-	 * Computes the mean features expectations over the episodes
-	 * \param phi the features \f$ \phi(x, u, x_n) \f$ to be used
+    /*!
+     * Computes the mean features expectations over the episodes
+     * \param phi the features \f$ \phi(x, u, x_n) \f$ to be used
      * \param gamma the discount factor for the features expectations
      * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
-	 */
+     */
     arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
     {
         size_t episodes = this->size();

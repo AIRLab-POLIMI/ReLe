@@ -6,8 +6,9 @@ using namespace arma;
 namespace ReLe
 {
 
-LinearGradientSARSA::LinearGradientSARSA(ActionValuePolicy<DenseState>& policy, Features& phi)
-    : LinearTD(policy, phi), lambda(0.0), eligibility(Q.getParametersSize(), fill::zeros),
+LinearGradientSARSA::LinearGradientSARSA(Features& phi, ActionValuePolicy<DenseState>& policy,
+        LearningRateDense& alpha)
+    : LinearTD(phi, policy, alpha), lambda(0.0), eligibility(Q.getParametersSize(), fill::zeros),
       useReplacingTraces(false)
 {
 }
@@ -76,7 +77,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
         this->eligibility = task.gamma * this->lambda * this->eligibility + dQxu;
     }
 
-    vec deltaWeights = this->alpha * delta * this->eligibility;
+    vec deltaWeights = alpha(x, u) * delta * this->eligibility;
 
     //TODO update
     vec regWeights = Q.getParameters();
@@ -114,7 +115,7 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
     double delta = r - Qxu[0];
     this->eligibility = task.gamma * this->lambda * this->eligibility + dQxu;
 
-    vec deltaWeights = this->alpha * delta * this->eligibility;
+    vec deltaWeights = alpha(x, u) * delta * this->eligibility;
 
     //update regressor weights
     vec regWeights = Q.getParameters();

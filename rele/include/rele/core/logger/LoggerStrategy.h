@@ -39,10 +39,10 @@ template<class ActionC, class StateC>
 class LoggerStrategy
 {
 public:
-	/*!
-	 * This method describes how an episode should be processed.
-	 * Must be implemented.
-	 */
+    /*!
+     * This method describes how an episode should be processed.
+     * Must be implemented.
+     */
     virtual void processData(Episode<ActionC, StateC>& samples) = 0;
 
     /*!
@@ -77,11 +77,11 @@ template<class ActionC, class StateC>
 class PrintStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param logTransitions if the environment transitions should be printed on the console
-	 * \param logAgent if agent output data should be printed on the console
-	 */
+    /*!
+     * Constructor.
+     * \param logTransitions if the environment transitions should be printed on the console
+     * \param logAgent if agent output data should be printed on the console
+     */
     PrintStrategy(bool logTransitions = true, bool logAgent = true) :
         logTransitions(logTransitions), logAgent(logAgent)
     {
@@ -178,15 +178,15 @@ template<class ActionC, class StateC>
 class WriteStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-	//! enum used to select wheather to log only transitions, only agent data or both.
-	enum outType {TRANS, AGENT, ALL};
+    //! enum used to select wheather to log only transitions, only agent data or both.
+    enum outType {TRANS, AGENT, ALL};
 
-	/*!
-	 * Constructor
-	 * \param path the path where to log the data
-	 * \param outputType what information should be logged
-	 * \param clean if the existing files should be overwritten up or not
-	 */
+    /*!
+     * Constructor
+     * \param path the path where to log the data
+     * \param outputType what information should be logged
+     * \param clean if the existing files should be overwritten up or not
+     */
     WriteStrategy(const std::string& path, outType outputType = ALL, bool clean = false) :
         transitionPath(path), agentDataPath(addAgentOutputSuffix(path)), first(true)
     {
@@ -299,10 +299,10 @@ template<class ActionC, class StateC>
 class EvaluateStrategy : public LoggerStrategy<ActionC, StateC>
 {
 public:
-	/*!
-	 * Constructor
-	 * \param gamma the discount factor for this environment
-	 */
+    /*!
+     * Constructor
+     * \param gamma the discount factor for this environment
+     */
     EvaluateStrategy(double gamma)
         : gamma(gamma)
     {

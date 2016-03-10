@@ -38,11 +38,11 @@ template<class InputC>
 class BasisFunction_
 {
 public:
-	/*!
-	 * Evaluate the basis function in input
-	 * \param input the input data
-	 * \return the value of the basis function at the input
-	 */
+    /*!
+     * Evaluate the basis function in input
+     * \param input the input data
+     * \return the value of the basis function at the input
+     */
     virtual double operator()(const InputC& input) = 0;
 
     /*!

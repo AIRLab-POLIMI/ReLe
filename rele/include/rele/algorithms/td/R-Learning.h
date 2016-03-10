@@ -32,8 +32,8 @@ namespace ReLe
 class R_LearningOutput : public FiniteTDOutput
 {
 public:
-    R_LearningOutput(double alpha,
-                     double beta,
+    R_LearningOutput(const std::string& alpha,
+                     const std::string& beta,
                      const std::string& policyName,
                      const hyperparameters_map& policyHPar,
                      const arma::mat& Q,
@@ -43,14 +43,14 @@ public:
     virtual void writeDecoratedData(std::ostream& os) override;
 
 private:
-    double beta;
+    std::string beta;
     double ro;
 };
 
 class R_Learning: public FiniteTD
 {
 public:
-    R_Learning(ActionValuePolicy<FiniteState>& policy);
+    R_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha, LearningRate& beta);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
     virtual void step(const Reward& reward, const FiniteState& nextState,
@@ -59,7 +59,7 @@ public:
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        return new R_LearningOutput(alpha, beta, policy.getPolicyName(),
+        return new R_LearningOutput(alpha.print(), beta.print(), policy.getPolicyName(),
                                     policy.getPolicyHyperparameters(), Q, ro);
     }
 
@@ -68,7 +68,7 @@ public:
 
 
 private:
-    double beta;
+    LearningRate& beta;
 
     double ro;
 

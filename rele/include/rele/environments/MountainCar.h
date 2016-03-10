@@ -46,7 +46,7 @@ namespace ReLe
 class MountainCar: public DenseMDP
 {
 public:
-	enum StateLabel
+    enum StateLabel
     {
         velocity = 0, position = 1
     };

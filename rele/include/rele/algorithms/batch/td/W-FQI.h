@@ -40,8 +40,8 @@ template<class StateC>
 class W_FQI: public FQI<StateC>
 {
 public:
-	static constexpr double stdZeroValue = 1e-5;
-	static constexpr double stdInfValue = 1e10;
+    static constexpr double stdZeroValue = 1e-5;
+    static constexpr double stdInfValue = 1e10;
 
 public:
     W_FQI(BatchRegressor& QRegressor,
@@ -75,37 +75,37 @@ public:
                 arma::vec integrals(this->nActions, arma::fill::zeros);
                 for(unsigned int j = 0; j < integrals.n_elem; j++)
                 {
-            		arma::vec means = meanQ.row(nextState).t();
-            		arma::vec sigma = sampleStdQ.row(nextState).t();
+                    arma::vec means = meanQ.row(nextState).t();
+                    arma::vec sigma = sampleStdQ.row(nextState).t();
                     double pdfMean = means(j);
                     double pdfSampleStd = sigma(j);
                     double lowerLimit = pdfMean - 5 * pdfSampleStd;
                     double upperLimit = pdfMean + 5 * pdfSampleStd;
 
-            		arma::vec trapz = arma::linspace(lowerLimit, upperLimit, nTrapz + 1);
-            		double diff = trapz(1) - trapz(0);
+                    arma::vec trapz = arma::linspace(lowerLimit, upperLimit, nTrapz + 1);
+                    double diff = trapz(1) - trapz(0);
 
-            		double result = 0;
-            		for(unsigned int t = 0; t < trapz.n_elem - 1; t++)
-            		{
-            			arma::vec cdfs(idxs.n_cols, arma::fill::zeros);
-            			for(unsigned int k = 0; k < cdfs.n_elem; k++)
-            			{
-            				boost::math::normal cdfNormal(means(idxs(j, k)), sigma(idxs(j, k)));
-            				cdfs(k) = cdf(cdfNormal, trapz(t));
-            			}
-            			boost::math::normal pdfNormal(pdfMean, pdfSampleStd);
-            			double t1 = pdf(pdfNormal, trapz(t)) * arma::prod(cdfs);
+                    double result = 0;
+                    for(unsigned int t = 0; t < trapz.n_elem - 1; t++)
+                    {
+                        arma::vec cdfs(idxs.n_cols, arma::fill::zeros);
+                        for(unsigned int k = 0; k < cdfs.n_elem; k++)
+                        {
+                            boost::math::normal cdfNormal(means(idxs(j, k)), sigma(idxs(j, k)));
+                            cdfs(k) = cdf(cdfNormal, trapz(t));
+                        }
+                        boost::math::normal pdfNormal(pdfMean, pdfSampleStd);
+                        double t1 = pdf(pdfNormal, trapz(t)) * arma::prod(cdfs);
 
-            			for(unsigned int k = 0; k < cdfs.n_elem; k++)
-            			{
-            				boost::math::normal cdfNormal(means(idxs(j, k)), sigma(idxs(j, k)));
-            				cdfs(k) = cdf(cdfNormal, trapz(t + 1));
-            			}
-            			double t2 = pdf(pdfNormal, trapz(t + 1)) * arma::prod(cdfs);
+                        for(unsigned int k = 0; k < cdfs.n_elem; k++)
+                        {
+                            boost::math::normal cdfNormal(means(idxs(j, k)), sigma(idxs(j, k)));
+                            cdfs(k) = cdf(cdfNormal, trapz(t + 1));
+                        }
+                        double t2 = pdf(pdfNormal, trapz(t + 1)) * arma::prod(cdfs);
 
-            			result += (t1 + t2) * diff * 0.5;
-            		}
+                        result += (t1 + t2) * diff * 0.5;
+                    }
 
                     integrals(j) = result;
                 }

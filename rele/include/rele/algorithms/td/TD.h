@@ -25,9 +25,9 @@
 #define INCLUDE_ALGORITHMS_TD_TD_H_
 
 #include "rele/core/Agent.h"
-#include <armadillo>
 #include "rele/approximators/regressors/others/LinearApproximator.h"
-#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/policy/q_policy/ActionValuePolicy.h"
+#include "rele/algorithms/step_rules/LearningRate.h"
 
 namespace ReLe
 {
@@ -36,7 +36,7 @@ class FiniteTDOutput : virtual public AgentOutputData
 {
 public:
     FiniteTDOutput(double gamma,
-                   double alpha,
+                   const std::string& alpha,
                    const std::string& policyName,
                    const hyperparameters_map& policyHPar,
                    const arma::mat& Q);
@@ -46,7 +46,7 @@ public:
 
 protected:
     double gamma;
-    double alpha;
+    std::string alpha;
     std::string policyName;
     hyperparameters_map policyHPar;
     arma::mat Q;
@@ -56,7 +56,7 @@ class LinearTDOutput : virtual public AgentOutputData
 {
 public:
     LinearTDOutput(double gamma,
-                   double alpha,
+                   const std::string& alpha,
                    const std::string& policyName,
                    const hyperparameters_map& policyHPar,
                    const arma::vec Qw);
@@ -66,7 +66,7 @@ public:
 
 protected:
     double gamma;
-    double alpha;
+    std::string alpha;
     std::string policyName;
     hyperparameters_map policyHPar;
     arma::vec Qw;
@@ -76,19 +76,19 @@ protected:
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
-    FiniteTD(ActionValuePolicy<FiniteState>& policy);
+    FiniteTD(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha);
 
     virtual void endEpisode() override;
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        return new FiniteTDOutput(task.gamma, alpha, policy.getPolicyName(),
+        return new FiniteTDOutput(task.gamma, alpha.print(), policy.getPolicyName(),
                                   policy.getPolicyHyperparameters(), Q);
     }
 
-    inline void setAlpha(double alpha)
+    inline void resetLearningRate()
     {
-        this->alpha = alpha;
+        alpha.reset();
     }
 
 protected:
@@ -103,7 +103,7 @@ protected:
     unsigned int u;
 
     //algorithm parameters
-    double alpha;
+    LearningRate& alpha;
     ActionValuePolicy<FiniteState>& policy;
 
 };
@@ -111,19 +111,19 @@ protected:
 class LinearTD : public Agent<FiniteAction, DenseState>
 {
 public:
-    LinearTD(ActionValuePolicy<DenseState>& policy, Features& phi);
+    LinearTD(Features& phi, ActionValuePolicy<DenseState>& policy, LearningRateDense& alpha);
 
     virtual void endEpisode() override;
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        return new LinearTDOutput(task.gamma, alpha, policy.getPolicyName(),
+        return new LinearTDOutput(task.gamma, alpha.print(), policy.getPolicyName(),
                                   policy.getPolicyHyperparameters(), Q.getParameters());
     }
 
-    inline void setAlpha(double alpha)
+    inline void resetLearningRate()
     {
-        this->alpha = alpha;
+        alpha.reset();
     }
 
 protected:
@@ -138,7 +138,7 @@ protected:
     unsigned int u;
 
     //algorithm parameters
-    double alpha;
+    LearningRateDense& alpha;
     ActionValuePolicy<DenseState>& policy;
 };
 

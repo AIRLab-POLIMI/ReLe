@@ -108,7 +108,8 @@ int main(int argc, char *argv[])
 
     //Create an agent to solve the mdp direct problem
     e_Greedy policy;
-    SARSA agent(policy);
+    ConstantLearningRate alpha(0.2);
+    SARSA agent(policy, alpha);
 
     //Setup the solver
     IRLAgentSolver<FiniteAction, FiniteState> solver(agent, mdp, policy, rewardPhi, rewardRegressor);

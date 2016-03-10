@@ -32,30 +32,30 @@ namespace ReLe
 class GaussianRewardMDP: public ContinuousMDP
 {
 
-/*!
- * This class implements a MPD with a Gaussian
- * reward at each step.
- */
+    /*!
+     * This class implements a MPD with a Gaussian
+     * reward at each step.
+     */
 public:
-	/*!
-	 * Constructor.
-	 * \param MDP dimension
-	 * \param mean of the reward Gaussian distribution
-	 * \param standard deviation of the reward Gaussian distribution
-	 * \param MDP discount factor
-	 * \param MDP horizon
-	 */
+    /*!
+     * Constructor.
+     * \param MDP dimension
+     * \param mean of the reward Gaussian distribution
+     * \param standard deviation of the reward Gaussian distribution
+     * \param MDP discount factor
+     * \param MDP horizon
+     */
     GaussianRewardMDP(unsigned int dimension, double mu = 0.0, double sigma = 1.0,
                       double gamma = 0.9, unsigned int horizon = 50);
-	/*!
-	 * Constructor.
-	 * \param initialization matrix
-	 * \param initialization matrix
-	 * \param mean of the reward Gaussian distribution
-	 * \param standard deviation of the reward Gaussian distribution
-	 * \param MDP discount factor
-	 * \param MDP horizon
-	 */
+    /*!
+     * Constructor.
+     * \param initialization matrix
+     * \param initialization matrix
+     * \param mean of the reward Gaussian distribution
+     * \param standard deviation of the reward Gaussian distribution
+     * \param MDP discount factor
+     * \param MDP horizon
+     */
     GaussianRewardMDP(arma::mat& A, arma::mat& B, arma::vec& mu, arma::mat& sigma,
                       double gamma = 0.9, unsigned int horizon = 50);
 

@@ -23,9 +23,10 @@
 
 
 #include "rele/core/FiniteMDP.h"
-#include "rele/algorithms/td/WQ-Learning.h"
 #include "rele/core/Core.h"
+#include "rele/algorithms/td/WQ-Learning.h"
 #include "rele/generators/GridWorldGenerator.h"
+#include "rele/policy/q_policy/e_Greedy.h"
 
 #include <iostream>
 
@@ -46,7 +47,8 @@ int main(int argc, char *argv[])
         FiniteMDP&& mdp = generator.getMDP(0.9);
 
         e_Greedy policy;
-        WQ_Learning agent(policy);
+        ConstantLearningRate alpha(0.2);
+        WQ_Learning agent(policy, alpha);
 
         auto&& core = buildCore(mdp, agent);
 

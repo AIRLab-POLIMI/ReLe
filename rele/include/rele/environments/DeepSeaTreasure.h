@@ -47,9 +47,9 @@ class DeepSeaTreasure: public DenseMDP
 {
 public:
 
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     DeepSeaTreasure();
 
     /*!

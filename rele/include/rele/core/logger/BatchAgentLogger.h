@@ -37,11 +37,11 @@ template<class ActionC, class StateC>
 class BatchAgentLogger
 {
 public:
-	/*!
-	 * This function is called automatically from ReLe::BatchCore for logging agent data.
-	 * \param outputData the agent output data
-	 * \param step the current batch training step
-	 */
+    /*!
+     * This function is called automatically from ReLe::BatchCore for logging agent data.
+     * \param outputData the agent output data
+     * \param step the current batch training step
+     */
     void log(AgentOutputData* outputData, unsigned int step)
     {
         if(outputData)
@@ -74,9 +74,9 @@ template<class ActionC, class StateC>
 class BatchAgentPrintLogger : public BatchAgentLogger<ActionC, StateC>
 {
 protected:
-	/*!
-	 * \see BatchAgentLogger::processData
-	 */
+    /*!
+     * \see BatchAgentLogger::processData
+     */
     void processData(AgentOutputData* outputData) override
     {
         if(outputData->isFinal())

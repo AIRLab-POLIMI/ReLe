@@ -32,10 +32,9 @@ using namespace arma;
 namespace ReLe
 {
 
-R_Learning::R_Learning(ActionValuePolicy<FiniteState>& policy) :
-    FiniteTD(policy)
+R_Learning::R_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha, LearningRate& beta) :
+    FiniteTD(policy, alpha), beta(beta)
 {
-    beta = 0.1;
     ro = 0;
 }
 
@@ -64,7 +63,7 @@ void R_Learning::step(const Reward& reward, const FiniteState& nextState,
 
     //Update value function
     double delta = r - ro  + maxQxn - Q(x, u);
-    Q(x, u) = Q(x, u) + alpha * delta;
+    Q(x, u) = Q(x, u) + alpha(x, u) * delta;
 
     const rowvec& Qx = Q.row(x);
     maxQx = Qx.max();
@@ -73,7 +72,7 @@ void R_Learning::step(const Reward& reward, const FiniteState& nextState,
     if(Q(x, u) == maxQx)
     {
         double deltaRo = r - ro + maxQxn - maxQx;
-        ro = ro + beta * deltaRo;
+        ro = ro + beta(x, u) * deltaRo;
     }
 
     //update action and state
@@ -89,7 +88,7 @@ void R_Learning::endEpisode(const Reward& reward)
     //Last update
     double r = reward[0];
     double delta = r - Q(x, u);
-    Q(x, u) = Q(x, u) + alpha * delta;
+    Q(x, u) = Q(x, u) + alpha(x, u) * delta;
 
 
     double maxQx;
@@ -99,7 +98,7 @@ void R_Learning::endEpisode(const Reward& reward)
     if(Q(x, u) == maxQx)
     {
         double deltaRo = r - ro - maxQx;
-        ro = ro + beta * deltaRo;
+        ro = ro + beta(x, u) * deltaRo;
     }
 }
 
@@ -109,8 +108,8 @@ R_Learning::~R_Learning()
 }
 
 
-R_LearningOutput::R_LearningOutput(double alpha,
-                                   double beta,
+R_LearningOutput::R_LearningOutput(const std::string& alpha,
+                                   const std::string& beta,
                                    const std::string& policyName,
                                    const hyperparameters_map& policyHPar,
                                    const arma::mat& Q,

@@ -39,9 +39,11 @@ int main(int argc, char *argv[])
     SimpleChainGenerator generator;
     generator.generate(5, 2);
 
-    FiniteMDP mdp = generator.getMDP(0.9);
+    FiniteMDP mdp = generator.getMDP(1.0);
     e_Greedy policy;
-    R_Learning agent(policy);
+    ConstantLearningRate alpha(0.2);
+    ConstantLearningRate beta(0.1);
+    R_Learning agent(policy, alpha, beta);
     Core<FiniteAction, FiniteState> core(mdp, agent);
 
     core.getSettings().episodeLength = 10000;

@@ -44,11 +44,11 @@ class Regressor_
 
 public:
 
-	/*!
-	 * Constructor.
-	 * \param phi the features used by the approximator
-	 * \param output the dimensionality of the output vector
-	 */
+    /*!
+     * Constructor.
+     * \param phi the features used by the approximator
+     * \param output the dimensionality of the output vector
+     */
     Regressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
         phi(phi), outputDimension(output)
     {
@@ -130,11 +130,11 @@ template<class InputC, bool denseOutput = true>
 class ParametricRegressor_: public Regressor_<InputC, arma::vec, denseOutput>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param phi the features used by the approximator
-	 * \param output the dimensionality of the output vector
-	 */
+    /*!
+     * Constructor.
+     * \param phi the features used by the approximator
+     * \param output the dimensionality of the output vector
+     */
     ParametricRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
         Regressor_<InputC, arma::vec, denseOutput>(phi, output)
     {
@@ -214,11 +214,11 @@ class BatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
     typedef typename input_traits<denseOutput>::type FeaturesCollection;
     typedef typename output_traits<OutputC>::type OutputCollection;
 public:
-	/*!
-	 * Constructor.
-	 * \param phi the features used by the approximator
-	 * \param output the dimensionality of the output vector
-	 */
+    /*!
+     * Constructor.
+     * \param phi the features used by the approximator
+     * \param output the dimensionality of the output vector
+     */
     BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
         Regressor_<InputC, OutputC, denseOutput>(phi, output)
     {
@@ -309,11 +309,11 @@ class UnsupervisedBatchRegressor_ : public Regressor_<InputC, OutputC, denseOutp
 {
     typedef typename input_traits<denseOutput>::type FeaturesCollection;
 public:
-	/*!
-	 * Constructor.
-	 * \param phi the features used by the approximator
-	 * \param output the dimensionality of the output vector
-	 */
+    /*!
+     * Constructor.
+     * \param phi the features used by the approximator
+     * \param output the dimensionality of the output vector
+     */
     UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1)
         : Regressor_<InputC, OutputC, denseOutput>(phi, output)
     {

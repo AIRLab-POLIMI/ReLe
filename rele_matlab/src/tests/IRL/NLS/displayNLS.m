@@ -78,7 +78,7 @@ for i = 1:lastindex
     % Plot recovered reward Function
     w = load(['/tmp/ReLe/nls/', alg{i}, '/Weights.txt'] , '-ascii');
     
-    [X,Y] = meshgrid(-2:0.1:2);
+    [X,Y] = meshgrid(-3:0.1:3);
     
     Z = zeros(size(X));
     

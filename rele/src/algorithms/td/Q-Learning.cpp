@@ -30,8 +30,8 @@ using namespace arma;
 namespace ReLe
 {
 
-Q_Learning::Q_Learning(ActionValuePolicy<FiniteState>& policy) :
-    FiniteTD(policy)
+Q_Learning::Q_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha) :
+    FiniteTD(policy, alpha)
 {
 }
 
@@ -59,7 +59,7 @@ void Q_Learning::step(const Reward& reward, const FiniteState& nextState,
     maxQxn = Qxn.max();
 
     double delta = r + task.gamma * maxQxn - Q(x, u);
-    Q(x, u) = Q(x, u) + alpha * delta;
+    Q(x, u) = Q(x, u) + alpha(x, u) * delta;
 
     //update action and state
     x = xn;
@@ -74,7 +74,7 @@ void Q_Learning::endEpisode(const Reward& reward)
     //Last update
     double r = reward[0];
     double delta = r - Q(x, u);
-    Q(x, u) = Q(x, u) + alpha * delta;
+    Q(x, u) = Q(x, u) + alpha(x, u) * delta;
 }
 
 Q_Learning::~Q_Learning()

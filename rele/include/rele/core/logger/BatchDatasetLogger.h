@@ -37,19 +37,19 @@ template<class ActionC, class StateC>
 class BatchDatasetLogger
 {
 public:
-	/*!
-	 * Destructor.
-	 */
+    /*!
+     * Destructor.
+     */
     virtual ~BatchDatasetLogger()
     {
     }
 
 public:
-	/*!
-	 * This function is called automatically from ReLe::BatchCore for logging the dataset.
-	 * Should be overridden.
-	 * \param data the dataset to be logged.
-	 */
+    /*!
+     * This function is called automatically from ReLe::BatchCore for logging the dataset.
+     * Should be overridden.
+     * \param data the dataset to be logged.
+     */
     virtual void log(Dataset<ActionC, StateC>& data) = 0;
 };
 
@@ -60,7 +60,7 @@ template<class ActionC, class StateC>
 class CollectBatchDatasetLogger : public BatchDatasetLogger<ActionC, StateC>
 {
 public:
-	//! the logged dataset
+    //! the logged dataset
     Dataset<ActionC, StateC> data;
 
 public:
@@ -81,10 +81,10 @@ template<class ActionC, class StateC>
 class WriteBatchDatasetLogger : public BatchDatasetLogger<ActionC, StateC>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param fileName the absolute path where the dataset will be stored
-	 */
+    /*!
+     * Constructor.
+     * \param fileName the absolute path where the dataset will be stored
+     */
     WriteBatchDatasetLogger(std::string fileName) :
         fileName(fileName)
     {

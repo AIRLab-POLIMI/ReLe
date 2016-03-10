@@ -30,14 +30,11 @@ using namespace arma;
 namespace ReLe
 {
 
-FiniteTD::FiniteTD(ActionValuePolicy<FiniteState>& policy) :
-    policy(policy)
+FiniteTD::FiniteTD(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha) :
+    policy(policy), alpha(alpha)
 {
     x = 0;
     u = 0;
-
-    //Default algorithm parameters
-    alpha = 0.2;
 }
 
 void FiniteTD::endEpisode()
@@ -54,7 +51,7 @@ void FiniteTD::init()
 
 
 FiniteTDOutput::FiniteTDOutput(double gamma,
-                               double alpha,
+                               const std::string& alpha,
                                const std::string& policyName,
                                const hyperparameters_map& policyHPar,
                                const mat& Q) :
@@ -101,14 +98,12 @@ void FiniteTDOutput::writeDecoratedData(ostream& os)
     }
 }
 
-LinearTD::LinearTD(ActionValuePolicy<DenseState>& policy,
-                   Features& phi) :
-    Q(phi), policy(policy)
+LinearTD::LinearTD(Features& phi,
+                   ActionValuePolicy<DenseState>& policy,
+                   LearningRateDense& alpha) :
+    Q(phi), policy(policy), alpha(alpha)
 {
     u = 0;
-
-    //Default parameters
-    alpha = 0.2;
 }
 
 void LinearTD::endEpisode()
@@ -124,7 +119,7 @@ void LinearTD::init()
 }
 
 LinearTDOutput::LinearTDOutput(double gamma,
-                               double alpha,
+                               const std::string& alpha,
                                const std::string& policyName,
                                const hyperparameters_map& policyHPar,
                                const arma::vec Qw) :
