@@ -53,15 +53,18 @@ int main(int argc, char *argv[])
 
     if(argc != 4)
     {
-        std::cout << "Error, you must give the number of episodes and index and baseline type" << std::endl;
+        std::cout << "Error, you must give the baseline, the number of episodes, and index type" << std::endl;
         return -1;
     }
 
-    unsigned int nbEpisodes = std::stoul(argv[1]);
-    std::string baseline(argv[3]);
+    std::string baseline(argv[1]);
+    std::string episodes(argv[2]);
+    std::string testN(argv[3]);
 
-    FileManager fm("lqrPrint/" + std::string(argv[1]) + "/" + std::string(argv[2]));
+    FileManager fm("lqrPrint/" + baseline + "/" + episodes  + "/" + testN);
     fm.createDir();
+
+    unsigned int nbEpisodes = std::stoul(episodes);
 
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
     IrlHess htype;
