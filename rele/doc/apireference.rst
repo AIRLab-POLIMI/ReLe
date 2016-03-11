@@ -236,6 +236,7 @@ Generators
 
 .. doxygenclass:: ReLe::FiniteGenerator
    :members:
+   :protected-members:
    
 .. doxygenclass:: ReLe::SimpleChainGenerator
    :members:
