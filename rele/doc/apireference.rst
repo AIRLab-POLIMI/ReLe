@@ -183,9 +183,6 @@ Normal Policies
 Environments
 ============
 
-Environments
-------------
-
 .. doxygenclass:: ReLe::Dam
    :members:
    
