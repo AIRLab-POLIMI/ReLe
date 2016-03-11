@@ -27,6 +27,7 @@
 #include "rele/algorithms/batch/policy_search/gradient/OffGradType.h"
 #include "rele/algorithms/batch/policy_search/gradient/ReinforceOffGradientCalculator.h"
 #include "rele/algorithms/batch/policy_search/gradient/GPOMDPOffGradientCalculator.h"
+#include "rele/algorithms/batch/policy_search/gradient/SecondMomentOffGradientCalculator.h"
 
 namespace ReLe
 {
@@ -60,6 +61,9 @@ public:
 
         case OffGradType::GPOMDP_BASELINE_MULTY:
             return new GPOMDPMultyBaseOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
+
+        case OffGradType::SECOND_MOMENT:
+            return new SecondMomentOffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma);
 
         default:
             return nullptr;

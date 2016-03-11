@@ -21,70 +21,19 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_REINFORCEOFFGRADIENTCALCULATOR_H_
-#define INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_REINFORCEOFFGRADIENTCALCULATOR_H_
-
-#include "rele/algorithms/batch/policy_search/gradient/OffGradientCalculator.h"
+#ifndef INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_SECONDMOMENTOFFGRADIENTCALCULATOR_H_
+#define INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_SECONDMOMENTOFFGRADIENTCALCULATOR_H_
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class ReinforceOffGradientCalculator : public OffGradientCalculator<ActionC, StateC>
+class SecondMomentOffGradientCalculator : public OffGradientCalculator<ActionC, StateC>
 {
 public:
-    ReinforceOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
-                                   Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
-                                   double gamma)
-        : OffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
-
-    {
-
-    }
-
-    virtual arma::vec computeGradient() override
-    {
-        unsigned int episodeN = this->data.size();
-        unsigned int parametersN = this->policy.getParametersSize();
-
-        double importanceWeightsSum = 0;
-
-        arma::vec gradient(parametersN, arma::fill::zeros);
-
-        //iterate episodes
-        for (int i = 0; i < episodeN; ++i)
-        {
-            double Rew;
-            double iw;
-            arma::vec sumGradLog(parametersN);
-            this->computeEpisodeStatistics(this->data[i], Rew, iw, sumGradLog);
-
-            gradient += sumGradLog * Rew * iw;
-
-            importanceWeightsSum += iw;
-        }
-
-        // Compute mean values
-        gradient /= importanceWeightsSum;
-
-        return gradient;
-
-    }
-
-    virtual ~ReinforceOffGradientCalculator()
-    {
-
-    }
-
-};
-
-template<class ActionC, class StateC>
-class ReinforceBaseOffGradientCalculator : public OffGradientCalculator<ActionC, StateC>
-{
-public:
-    ReinforceBaseOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
-                                       Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
-                                       double gamma)
+    SecondMomentOffGradientCalculator(RewardTransformation& rewardf, Dataset<ActionC,StateC>& data,
+                                      Policy<ActionC,StateC>& behaviour, DifferentiablePolicy<ActionC,StateC>& policy,
+                                      double gamma)
         : OffGradientCalculator<ActionC, StateC>(rewardf, data, behaviour, policy, gamma)
 
     {
@@ -124,7 +73,7 @@ public:
             // compute baseline num and den
             arma::vec sumGradLog2 = sumGradLog % sumGradLog;
             baseline_den += sumGradLog2 * iw * iw;
-            baseline_num += sumGradLog2 * Rew * iw * iw;
+            baseline_num += sumGradLog2 * Rew * Rew * iw * iw * iw;
         }
 
         // compute the gradients
@@ -133,27 +82,27 @@ public:
 
         for (int ep = 0; ep < episodeN; ep++)
         {
-            gradient += (Rew_ep(ep) - baseline) % sumGradLog_ep.col(ep) * iw_ep(ep);
+            gradient += (Rew_ep(ep) - baseline/iw_ep(ep)) % sumGradLog_ep.col(ep) * iw_ep(ep) * iw_ep(ep);
         }
 
         // compute mean values
-        gradient /= arma::sum(iw_ep);
+        gradient *= 2.0/arma::sum(iw_ep);
 
         return gradient;
 
     }
 
-    virtual ~ReinforceBaseOffGradientCalculator()
+    virtual ~SecondMomentOffGradientCalculator()
     {
 
     }
+
+
+
 
 };
 
 
 }
 
-
-
-
-#endif /* INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_REINFORCEOFFGRADIENTCALCULATOR_H_ */
+#endif /* INCLUDE_RELE_ALGORITHMS_BATCH_POLICY_SEARCH_GRADIENT_SECONDMOMENTOFFGRADIENTCALCULATOR_H_ */
