@@ -32,30 +32,46 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the Pursuer problem.
+ * The aim of this problem is to find the optimal
+ * policy to let multiple robots detect a mobile
+ * evader in an indoor environment.
+ */
 class Pursuer : public ContinuousMDP
 {
 public:
+    /*!
+     * Constructor
+     */
     Pursuer();
+
+    /*!
+     * \see Environment::step
+     */
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     virtual void getInitialState(DenseState& state) override;
 
     enum StateComponents
     {
-        //chased state
+        // chased state
         x = 0,
         y,
         theta,
-        //pursuer state
+        // pursuer state
         xp,
         yp,
         thetap,
-        //state size
+        // state size
         STATESIZE
     };
 
 private:
-
     bool feasibleState();
     bool captured();
 
@@ -99,6 +115,5 @@ private:
 };
 
 }
-
 
 #endif /* INCLUDE_RELE_ENVIRONMENTS_PURSUER_H_ */

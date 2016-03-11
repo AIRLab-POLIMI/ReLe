@@ -196,4 +196,16 @@ Environments
    :members:
    
 .. doxygenclass:: ReLe::MountainCar
-   :members:   
+   :members:
+   
+.. doxygenclass:: ReLe::MultiHeat
+   :members:
+   
+.. doxygenclass:: ReLe::NLS
+   :members:
+   
+.. doxygenclass:: ReLe::Portfolio
+   :members:
+
+.. doxygenclass:: ReLe::Pursuer
+   :members:

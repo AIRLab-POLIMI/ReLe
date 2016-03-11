@@ -106,6 +106,30 @@ public:
         return compute(lambda, theta);
     }
 
+    /**
+     * @brief Numerical gradient computation for policies
+     */
+    template<class StateC>
+    static inline arma::mat compute(DifferentiablePolicy<FiniteAction, StateC>& policy,
+                                    arma::vec theta,
+                                    typename state_type<StateC>::const_type_ref input,
+                                    const FiniteAction& output)
+    {
+        arma::vec p = policy.getParameters();
+
+        auto lambda = [&](const arma::vec& par)
+        {
+            arma::vec value(1);
+            policy.setParameters(par);
+            value(0) = policy(input, output);
+            policy.setParameters(p);
+
+            return value;
+        };
+
+        return compute(lambda, theta);
+    }
+
 };
 
 }

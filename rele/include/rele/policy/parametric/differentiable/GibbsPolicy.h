@@ -33,7 +33,7 @@ public:
 
     /*!
      * Constructor with parameters.
-     * Note that the weights are initialized to zero
+     * Note that the weights are initialized
      * by the constructor of the linear approximator
      * \param actions the vector of finite actions
      * \param phi the features \f$\phi(x,u)\f$
