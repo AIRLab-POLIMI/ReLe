@@ -35,9 +35,9 @@ namespace ReLe
 class GridWorldGenerator: public FiniteGenerator
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     GridWorldGenerator();
 
     /*!

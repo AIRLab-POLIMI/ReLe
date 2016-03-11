@@ -40,6 +40,8 @@
 
 #include "../RewardBasisLQR.h"
 
+#include <chrono>
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
@@ -49,15 +51,38 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    FileManager fm("lqrPrint");
+    if(argc != 4)
+    {
+        std::cout << "Error, you must give the number of episodes and index and baseline type" << std::endl;
+        return -1;
+    }
+
+    unsigned int nbEpisodes = std::stoul(argv[1]);
+    std::string baseline(argv[3]);
+
+    FileManager fm("lqrPrint/" + std::string(argv[1]) + "/" + std::string(argv[2]));
     fm.createDir();
 
     IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-    IrlHess htype = IrlHess::REINFORCE_BASELINE_TRACE;
+    IrlHess htype;
+
+    if(baseline == "normal")
+        htype = IrlHess::REINFORCE_BASELINE;
+    else if(baseline == "trace")
+        htype = IrlHess::REINFORCE_BASELINE_TRACE;
+    else if(baseline == "diag")
+        htype = IrlHess::REINFORCE_BASELINE_TRACE_DIAG;
+    else
+    {
+        std::cout << "Wrong baseline specified" << std::endl;
+        return -1;
+    }
+
     vec eReward =
     { 0.3, 0.7 };
-    int nbEpisodes = 10000;
     int dim = eReward.n_elem;
+
+
 
     // create policy basis functions
     BasisFunctions basis = IdentityBasis::generate(dim);
@@ -195,8 +220,8 @@ int main(int argc, char *argv[])
     valuesFs.save(fm.addPath("Fs.txt"), arma::raw_ascii);
     valuesE.save(fm.addPath("E.txt"), arma::raw_ascii);
 
-    std::ofstream ofs(fm.addPath("Trajectories.txt"));
-    data.writeToStream(ofs);
+    /*std::ofstream ofs(fm.addPath("Trajectories.txt"));
+    data.writeToStream(ofs);*/
 
     std::cout << "Work complete" << std::endl;
 

@@ -63,7 +63,7 @@ public:
 
     virtual void step() override
     {
-    	//Compute gradients
+        //Compute gradients
         arma::vec gradientJ = gCalculator->computeGradient();
         arma::vec gradientM2 = gM2Calculator->computeGradient();
 

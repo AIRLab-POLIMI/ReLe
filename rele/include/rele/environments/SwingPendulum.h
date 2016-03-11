@@ -37,9 +37,9 @@ namespace ReLe
 class SwingUpSettings : public EnvironmentSettings
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     SwingUpSettings();
 
     /*!
@@ -74,9 +74,9 @@ public:
 class DiscreteActionSwingUp: public DenseMDP
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     DiscreteActionSwingUp();
 
     /*!

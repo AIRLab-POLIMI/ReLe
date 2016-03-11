@@ -43,9 +43,9 @@ class TaxiFuel: public DenseMDP
 {
 
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     TaxiFuel();
 
     /*!

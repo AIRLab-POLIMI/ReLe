@@ -32,7 +32,7 @@ public:
      * \param temperature the temperature value
      */
     GenericParametricGibbsPolicyAllPref(std::vector<FiniteAction> actions,
-                                 ParametricRegressor& energy, double temperature) :
+                                        ParametricRegressor& energy, double temperature) :
         mActions(actions), distribution(actions.size(),0),
         approximator(energy), tau(temperature)
     {

@@ -35,9 +35,9 @@ namespace ReLe
 class SimpleChainGenerator: public FiniteGenerator
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     SimpleChainGenerator();
 
     /*!

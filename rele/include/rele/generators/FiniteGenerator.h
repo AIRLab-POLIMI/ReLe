@@ -37,10 +37,10 @@ namespace ReLe
 class FiniteGenerator
 {
 public:
-	/*!
-	 * Return the finite MDP with transition probabilities, reward and
-	 * reward variance matrices.
-	 */
+    /*!
+     * Return the finite MDP with transition probabilities, reward and
+     * reward variance matrices.
+     */
     inline FiniteMDP getMDP(double gamma)
     {
         return FiniteMDP(P, R, Rsigma, false, gamma);

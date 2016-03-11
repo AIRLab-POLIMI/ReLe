@@ -39,9 +39,9 @@ namespace ReLe
 class UnicyclePolarSettings : public EnvironmentSettings
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     UnicyclePolarSettings();
 
     /*!

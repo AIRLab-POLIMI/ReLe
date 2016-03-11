@@ -39,9 +39,9 @@ namespace ReLe
 class UWVSettings : public EnvironmentSettings
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     UWVSettings();
 
     /*!

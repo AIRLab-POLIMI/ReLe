@@ -40,10 +40,10 @@ namespace ReLe
 class ShipSteering : public ContinuousMDP
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param small field size
-	 */
+    /*!
+     * Constructor.
+     * \param small field size
+     */
     ShipSteering(bool small = true);
 
     /*!
