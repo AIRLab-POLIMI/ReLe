@@ -65,7 +65,9 @@ public:
 };
 
 /*!
- *
+ * This class implements a continuous MDP problem where
+ * a segway has to be controlled in order to balance it.
+ * For further information see <a href="http://repository.tudelft.nl/assets/uuid:6e9714e4-2057-444c-a184-9401242cf1a8/Thesis_Xueli_Jia.pdf">here</a>.
  */
 class Segway: public ContinuousMDP
 {

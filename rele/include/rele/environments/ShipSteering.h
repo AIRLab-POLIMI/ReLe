@@ -30,27 +30,41 @@
 namespace ReLe
 {
 
-/**
- * http://people.cs.umass.edu/~mahadeva/papers/icml03-1.pdf
+/*!
+ * This class implements the Ship Steering problem.
+ * The aim of this problem is to let a ship pass through
+ * a gate when starting from a random position and moving
+ * at constant speed.
+ * For further information see <a href="http://people.cs.umass.edu/~mahadeva/papers/icml03-1.pdf">here</a>.
  */
-
 class ShipSteering : public ContinuousMDP
 {
-
 public:
+	/*!
+	 * Constructor.
+	 * \param small field size
+	 */
     ShipSteering(bool small = true);
+
+    /*!
+     * \see Environment::step
+     */
     virtual void step(const DenseAction& action, DenseState& nextState,
                       Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     virtual void getInitialState(DenseState& state) override;
 
     enum StateComponents
     {
-        //ship state
+        // ship state
         x = 0,
         y,
         theta,
         omega,
-        //state size
+        // state size
         STATESIZE
     };
 

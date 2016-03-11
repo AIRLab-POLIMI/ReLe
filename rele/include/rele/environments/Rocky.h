@@ -33,7 +33,9 @@ namespace ReLe
 {
 
 /*!
- *
+ * This class implements an environment similar to the Pursuer problem.
+ * In this task, Rocky has to reach the chicken moving in a
+ * continuous MDP.
  */
 class Rocky : public ContinuousMDP
 {

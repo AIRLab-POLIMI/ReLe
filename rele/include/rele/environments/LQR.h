@@ -34,7 +34,7 @@ namespace ReLe
  * This task aims to minimize the undesired deviations
  * from nominal values of some controller settings
  * in control problems.
- * For further information see: http://www.sciencedirect.com/science/article/pii/S0005109801001741
+ * For further information see <a href="http://www.sciencedirect.com/science/article/pii/S0005109801001741">here</a>.
  */
 class LQR: public ContinuousMDP
 {

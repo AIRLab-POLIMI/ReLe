@@ -183,6 +183,9 @@ Normal Policies
 Environments
 ============
 
+Environments
+------------
+
 .. doxygenclass:: ReLe::Dam
    :members:
    
@@ -208,4 +211,37 @@ Environments
    :members:
 
 .. doxygenclass:: ReLe::Pursuer
+   :members:
+   
+.. doxygenclass:: ReLe::Rocky
+   :members:
+   
+.. doxygenclass:: ReLe::Segway
+   :members:
+   
+.. doxygenclass:: ReLe::ShipSteering
+   :members:
+   
+.. doxygenclass:: ReLe::SwingPendulum
+   :members:
+
+.. doxygenclass:: ReLe::TaxiFuel
+   :members:
+   
+.. doxygenclass:: ReLe::UnderwaterVehicle
+   :members:
+   
+.. doxygenclass:: ReLe::Unicycle
+   :members:
+   
+Generators
+----------
+
+.. doxygenclass:: ReLe::FiniteGenerator
+   :members:
+   
+.. doxygenclass:: ReLe::SimpleChainGenerator
+   :members:
+
+.. doxygenclass:: ReLe::GridWorldGenerator
    :members:

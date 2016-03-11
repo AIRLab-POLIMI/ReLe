@@ -73,13 +73,7 @@ public:
 
     bool penalize;
 
-    /*!
-     * \see EnvironmentSettings::WriteToStream
-     */
     virtual void WriteToStream(std::ostream& out) const;
-    /*!
-     * \see EnvironmentSettings::ReadToStream
-     */
     virtual void ReadFromStream(std::istream& in);
 
     initType initial_state_type;
@@ -102,7 +96,7 @@ public:
 
     /*!
      * Constructor.
-     * \param config settings of environment
+     * \param config settings of the environment
      */
     Dam(DamSettings& config);
 
