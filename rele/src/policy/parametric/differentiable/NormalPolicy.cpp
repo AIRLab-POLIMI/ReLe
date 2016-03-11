@@ -178,21 +178,10 @@ arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
 {
     updateInternalState(state);
 
-    arma::vec smdiff(mCovariance.n_rows);
-    //        std::cout << "Action: ";
-    for (unsigned i = 0; i < mCovariance.n_rows; ++i)
-    {
-        smdiff(i) = action[i] - mMean(i);
-        //            std::cout << action[i] << " ";
-    }
-    //        std::cout << "\n";
+    arma::vec smdiff = action - mMean;
 
     Features& basis = approximator.getFeatures();
     arma::mat features = basis(state);
-
-    //        MY_PRINT(features);
-    //        MY_PRINT(smdiff);
-    //        MY_PRINT(mCinv);
 
     // compute gradient
     return 0.5 * features * (mCinv + mCinv.t()) * smdiff;
