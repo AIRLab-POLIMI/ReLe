@@ -73,7 +73,13 @@ public:
 
     bool penalize;
 
+    /*!
+     * \see EnvironmentSettings::WriteToStream
+     */
     virtual void WriteToStream(std::ostream& out) const;
+    /*!
+     * \see EnvironmentSettings::ReadToStream
+     */
     virtual void ReadFromStream(std::istream& in);
 
     initType initial_state_type;
@@ -84,7 +90,7 @@ public:
  * The aim of this optimization problem is to decide
  * the amount of water to release in order to satisfy
  * conflicting objectives.
- * For further information see: http://www.dhigroup.com/upload/publications/mike11/Pedersen_RealTime.pdf
+ * For further information see <a href="http://www.dhigroup.com/upload/publications/mike11/Pedersen_RealTime.pdf">here</a>.
  */
 class Dam: public ContinuousMDP
 {
