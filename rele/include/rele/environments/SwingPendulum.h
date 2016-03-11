@@ -27,23 +27,27 @@
 #include "rele/core/DenseMDP.h"
 #include "rele/utils/Range.h"
 
-/**
- * Environment designed according to
- *
- * Doya, Kenji. "Reinforcement learning in continuous time and space." Neural computation 12.1 (2000): 219-245.
- * https://homes.cs.washington.edu/~todorov/courses/amath579/reading/Continuous.pdf
- *
- * Here a descrete time dynamic is used.
- */
-
 namespace ReLe
 {
 
+/*!
+ * This class contains the settings of the pendulum problem
+ * and some functions to manage them.
+ */
 class SwingUpSettings : public EnvironmentSettings
 {
 public:
+    /*!
+     * Constructor.
+     */
     SwingUpSettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
     static void defaultSettings(SwingUpSettings& settings);
+
     virtual ~SwingUpSettings();
 
 public:
@@ -60,11 +64,25 @@ public:
     virtual void ReadFromStream(std::istream& in);
 };
 
+/*!
+ * This class implements a task where a pendulum
+ * has to be swinged controlling its rotation
+ * and trying to reach the maximum height without
+ * letting it fall.
+ * For further information see <a href="https://homes.cs.washington.edu/~todorov/courses/amath579/reading/Continuous.pdf">here</a>.
+ */
 class DiscreteActionSwingUp: public DenseMDP
 {
 public:
-
+    /*!
+     * Constructor.
+     */
     DiscreteActionSwingUp();
+
+    /*!
+     * Constructor.
+     * \param config the initial settings
+     */
     DiscreteActionSwingUp(SwingUpSettings& config);
 
     virtual ~DiscreteActionSwingUp()
@@ -73,9 +91,19 @@ public:
             delete config;
     }
 
+    /*!
+     * \see Environment::step
+     */
     void step(const FiniteAction& action, DenseState& nextState, Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     void getInitialState(DenseState& state) override;
 
+    /*!
+     * \see Environment::getSettings
+     */
     inline const SwingUpSettings& getSettings() const
     {
         return *config;

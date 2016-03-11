@@ -29,25 +29,27 @@
 #include "rele/utils/Range.h"
 #include "rele/utils/ArmadilloOdeint.h"
 
-
-/**
- * Environment designed according to the paper
- *
- * Roland Hafner, Martin Riedmiller
- * Reinforcement learning in feedback control
- * Challenges and benchmarks from technical process control
- * Mach Learn (2011) 84:137–169
- * DOI 10.1007/s10994-011-5235-x
- */
-
 namespace ReLe
 {
 
+/*!
+ * This class contains the settings of the Underwater Vehicle problem
+ * and some functions to manage them.
+ */
 class UWVSettings : public EnvironmentSettings
 {
 public:
+    /*!
+     * Constructor.
+     */
     UWVSettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
     static void defaultSettings(UWVSettings& settings);
+
     virtual ~UWVSettings();
 
 public:
@@ -64,6 +66,13 @@ public:
     virtual void ReadFromStream(std::istream& in);
 };
 
+/*!
+ * This class implements the Underwater Vehicle problem.
+ * The task of this problem is to control the speed an
+ * underwater vehicle in a submarine environment modeling
+ * the complex dynamics of objects moving in fluids.
+ * For further information see <a href="http://link.springer.com/article/10.1007%2Fs10994-011-5235-x">here</a>.
+ */
 class UnderwaterVehicle: public DenseMDP
 {
     typedef arma::vec state_type;
@@ -91,8 +100,15 @@ private:
     };
 
 public:
-
+    /*!
+     * Constructor.
+     */
     UnderwaterVehicle();
+
+    /*!
+     * Constructor.
+     * \param config the initial settings
+     */
     UnderwaterVehicle(UWVSettings& config);
 
     virtual ~UnderwaterVehicle()
@@ -101,10 +117,20 @@ public:
             delete config;
     }
 
+    /*!
+     * \see Environment::step
+     */
     virtual void step(const FiniteAction& action, DenseState& nextState,
                       Reward& reward) override;
+
+    /*!
+     * \see Environment::getInitialState
+     */
     virtual void getInitialState(DenseState& state) override;
 
+    /*!
+     * \see Environment::getSettings
+     */
     inline const UWVSettings& getSettings() const
     {
         return *config;

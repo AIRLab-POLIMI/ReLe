@@ -28,17 +28,40 @@
 
 namespace ReLe
 {
+
+/*!
+ * This class contains function to generate a simple Markov chain.
+ */
 class SimpleChainGenerator: public FiniteGenerator
 {
 public:
+    /*!
+     * Constructor.
+     */
     SimpleChainGenerator();
+
+    /*!
+     * Initialize the Markov chain.
+     * \param size the size of the Markov chain
+     * \param goalState goal state index
+     */
     void generate(std::size_t size, std::size_t goalState);
 
+    /*!
+     * Setter.
+     * Set probability of success of actions.
+     * \param p probability of success of actions
+     */
     inline void setP(double p)
     {
         this->p = p;
     }
 
+    /*!
+     * Setter.
+     * Set reward in case of reaching goal state.
+     * \param rgoal reward when reaching goal state
+     */
     inline void setRgoal(double rgoal)
     {
         this->rgoal = rgoal;

@@ -36,12 +36,11 @@ namespace ReLe
  * values. The aim is to minimize the time to reach
  * the treasures and maximize the values of reached
  * treasures.
- * For further information see: https://books.google.it/books?id=iIlrCQAAQBAJ&pg=PA375&lpg=PA375&dq=deep+sea+treasure+problem+ai&source=bl&ots=jB5wkUj9t_&sig=YUkqRATglHxq5dU0PGv1u_ePJ2k&hl=it&sa=X&ved=0ahUKEwiY-bf8z7TLAhUrM5oKHdd_C5AQ6AEIHDAA#v=onepage&q=deep%20sea%20treasure%20problem%20ai&f=false
+ * For further information see <a href="https://books.google.it/books?id=iIlrCQAAQBAJ&pg=PA375&lpg=PA375&dq=deep+sea+treasure+problem+ai&source=bl&ots=jB5wkUj9t_&sig=YUkqRATglHxq5dU0PGv1u_ePJ2k&hl=it&sa=X&ved=0ahUKEwiY-bf8z7TLAhUrM5oKHdd_C5AQ6AEIHDAA#v=onepage&q=deep%20sea%20treasure%20problem%20ai&f=false">here</a>.
  */
 class DeepSeaTreasure: public DenseMDP
 {
 public:
-
     /*!
      * Constructor.
      */

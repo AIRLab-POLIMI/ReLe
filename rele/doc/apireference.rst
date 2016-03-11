@@ -209,3 +209,37 @@ Environments
 
 .. doxygenclass:: ReLe::Pursuer
    :members:
+   
+.. doxygenclass:: ReLe::Rocky
+   :members:
+   
+.. doxygenclass:: ReLe::Segway
+   :members:
+   
+.. doxygenclass:: ReLe::ShipSteering
+   :members:
+   
+.. doxygenclass:: ReLe::SwingPendulum
+   :members:
+
+.. doxygenclass:: ReLe::TaxiFuel
+   :members:
+   
+.. doxygenclass:: ReLe::UnderwaterVehicle
+   :members:
+   
+.. doxygenclass:: ReLe::Unicycle
+   :members:
+   
+Generators
+----------
+
+.. doxygenclass:: ReLe::FiniteGenerator
+   :members:
+   :protected-members:
+   
+.. doxygenclass:: ReLe::SimpleChainGenerator
+   :members:
+
+.. doxygenclass:: ReLe::GridWorldGenerator
+   :members:

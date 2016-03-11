@@ -31,14 +31,24 @@
 namespace ReLe
 {
 
+/*!
+ * This class contains function to generate finite MDP.
+ */
 class FiniteGenerator
 {
 public:
+    /*!
+     * Return the finite MDP with transition probabilities, reward and
+     * reward variance matrices.
+     */
     inline FiniteMDP getMDP(double gamma)
     {
         return FiniteMDP(P, R, Rsigma, false, gamma);
     }
 
+    /*!
+     * Print transition probabilities, reward and reward variance matrices.
+     */
     inline void printMatrices()
     {
         std::cout << "### P matrix ###" << std::endl;
@@ -66,13 +76,15 @@ public:
         }
     }
 protected:
-    //output of the algorithm
+    //! Transition probability matrix
     arma::cube P;
+    //! Reward matrix
     arma::cube R;
+    //! Reward variance matrix
     arma::cube Rsigma;
-
-    //generator data
+    //! Number of states
     size_t stateN;
+    //! Number of actions
     unsigned int actionN;
 };
 

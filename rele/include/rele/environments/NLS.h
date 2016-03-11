@@ -65,7 +65,7 @@ public:
  * This problem is a two-dimensional MDP
  * where the aim is to let a robot reach
  * a goal state.
- * For further information see: http://www.robolab.tuc.gr/ASSETS/PAPERS_PDF/PAPERS_2009/LEARNING_MODEL__EM_ALGOTITHM.pdf
+ * For further information see <a href="http://www.robolab.tuc.gr/ASSETS/PAPERS_PDF/PAPERS_2009/LEARNING_MODEL__EM_ALGOTITHM.pdf">here</a>.
  */
 class NLS: public ContinuousMDP
 {

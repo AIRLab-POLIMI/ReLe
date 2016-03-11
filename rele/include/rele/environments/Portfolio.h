@@ -88,7 +88,7 @@ public:
  * This class implements the Portfolio problem.
  * The aim of this problem is to maximize the expected
  * utility of a Portfolio in a financial market.
- * For further information see: http://www.math.kit.edu/stoch/~baeuerle/seite/markov_nb/media/br_mdpjump.pdf
+ * For further information see <a href="http://www.math.kit.edu/stoch/~baeuerle/seite/markov_nb/media/br_mdpjump.pdf">here</a>.
  */
 class Portfolio: public DenseMDP
 {

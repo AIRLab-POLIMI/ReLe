@@ -70,7 +70,7 @@ public:
  * The aim of this problem is to find the optimal
  * heating policy according to environmental
  * conditions and other criterion of optimality.
- * For further information see: http://www.ifi.uzh.ch/ce/publications/Home_Heating_using_GPs_and_MDPs_Shann_and_Seuken_AAMAS2014.pdf
+ * For further information see <a href="http://www.ifi.uzh.ch/ce/publications/Home_Heating_using_GPs_and_MDPs_Shann_and_Seuken_AAMAS2014.pdf">here</a>.
  */
 class MultiHeat: public DenseMDP
 {

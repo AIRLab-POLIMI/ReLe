@@ -29,27 +29,58 @@
 namespace ReLe
 {
 
+/*!
+ * This class contains function to generate a grid world.
+ */
 class GridWorldGenerator: public FiniteGenerator
 {
 public:
+    /*!
+     * Constructor.
+     */
     GridWorldGenerator();
+
+    /*!
+     * Load a grid world from a text file.
+     * \param path path of the text file
+     */
     void load(const std::string& path);
 
+    /*!
+     * Setter.
+     * Set probability of success of actions.
+     * \param p probability of success of actions
+     */
     inline void setP(double p)
     {
         this->p = p;
     }
 
+    /*!
+     * Setter.
+     * Set reward in case of falling out from the grid world.
+     * \param rfall reward in case of falling
+     */
     inline void setRfall(double rfall)
     {
         this->rfall = rfall;
     }
 
+    /*!
+     * Setter.
+     * Set reward in case of reaching goal state.
+     * \param rgoal reward when reaching goal state
+     */
     inline void setRgoal(double rgoal)
     {
         this->rgoal = rgoal;
     }
 
+    /*!
+     * Setter.
+     * Set the reward obtained at each step.
+     * \param rstep reward at each step
+     */
     inline void setRstep(double rstep)
     {
         this->rstep = rstep;
