@@ -146,18 +146,23 @@ public:
 
 
         arma::vec&& distribution = computeDistribution(nactions, tuple, statesize);
-        Features& phi = approximator.getFeatures();
-        arma::mat features(phi.rows(), nactions);
-
-        for (unsigned int k = 0; k < nactions; k++)
-        {
-            tuple[statesize] = mActions[k].getActionN();
-            features.col(k) = phi(tuple) / tau;
-        }
-
         unsigned int index = findActionIndex(action);
 
-        return features.col(index) - features*distribution;
+        arma::vec gradient;
+        if (index != nactions-1)
+        {
+            tuple[statesize] = mActions[index].getActionN();
+            gradient = approximator.diff(tuple);
+        } else {
+            gradient.zeros(approximator.getParametersSize());
+        }
+        for (unsigned int k = 0; k < nactions - 1; k++)
+        {
+            tuple[statesize] = mActions[k].getActionN();
+            gradient -= approximator.diff(tuple)*distribution(k);
+        }
+
+        return gradient / tau;
     }
 
     virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
