@@ -219,7 +219,7 @@ Environments
 .. doxygenclass:: ReLe::ShipSteering
    :members:
    
-.. doxygenclass:: ReLe::SwingPendulum
+.. doxygenclass:: ReLe::DiscreteActionSwingUp
    :members:
 
 .. doxygenclass:: ReLe::TaxiFuel
@@ -228,7 +228,7 @@ Environments
 .. doxygenclass:: ReLe::UnderwaterVehicle
    :members:
    
-.. doxygenclass:: ReLe::Unicycle
+.. doxygenclass:: ReLe::UnicyclePolar
    :members:
    
 Generators
