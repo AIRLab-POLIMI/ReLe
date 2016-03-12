@@ -39,18 +39,22 @@ public:
           DifferentiablePolicy<ActionC, StateC>& policy,
           GradientStep& stepRule,
           RewardTransformation* rewardf,
-          double penalization) :
-        type(type), behaviour(behaviour), policy(policy),
-        stepRule(stepRule), rewardf(rewardf), penalization(penalization)
+          double penalization, double fraction = 0.5) :
+        	  behaviour(behaviour), policy(policy),
+        stepRule(stepRule), rewardf(rewardf), penalization(penalization), fraction(fraction)
     {
         gCalculator = nullptr;
         gM2Calculator = nullptr;
+        Jmean = 0;
     }
 
     virtual void init(Dataset<ActionC, StateC>& data, double gamma) override
     {
-        if(calculator)
-            delete calculator;
+        if(gCalculator)
+            delete gCalculator;
+
+        if(gM2Calculator)
+                    delete gM2Calculator;
 
         this->gamma = gamma;
         gCalculator = OffGradientCalculatorFactory<ActionC, StateC>::build(OffGradType::REINFORCE_BASELINE,
@@ -58,23 +62,27 @@ public:
         gM2Calculator = OffGradientCalculatorFactory<ActionC, StateC>::build(OffGradType::SECOND_MOMENT,
                         *rewardf, data, policy, behaviour, this->gamma);
 
-        //TODO compute Jmean here
+
+        //Select indexes
+        arma::uvec indexes = arma::linspace<arma::uvec>(0, data.size() - 1, data.size());
+        arma::shuffle(indexes);
+
+        unsigned int breakPoint = data.size()*fraction;
+
+        gradientIndexes = indexes.rows(0, breakPoint - 1);
+        arma::uvec meanIndexes = indexes.rows(breakPoint, data.size() - 1);
+
+        computeJmean(meanIndexes, data, gamma);
     }
 
     virtual void step() override
     {
         //Compute gradients
-        arma::vec gradientJ = gCalculator->computeGradient();
-        arma::vec gradientM2 = gM2Calculator->computeGradient();
-
-        //compute mean
-        //TODO implement
-        arma::vec Jmean;
-        unsigned int nbEpisodesperUpdate = 0;
-        unsigned int nbIndipendentSamples = 0;
+        arma::vec gradientJ = gCalculator->computeGradient(gradientIndexes);
+        arma::vec gradientM2 = gM2Calculator->computeGradient(gradientIndexes);
 
         //Compute risk averse gradient
-        arma::vec gradient = gradientJ - penalization * (gradientM2 - 2 * Jmean * gradientJ) / (nbEpisodesperUpdate-nbIndipendentSamples);
+        arma::vec gradient = gradientJ - penalization * (gradientM2 - 2 * Jmean * gradientJ) / gradientIndexes.n_elem;
 
         // compute step size
         unsigned int dp = gradient.n_elem;
@@ -95,14 +103,45 @@ public:
 
     }
 
+
+private:
+    void computeJmean(const arma::uvec& indexes, const Dataset<ActionC, StateC>& data, double gamma)
+    {
+        Jmean = 0;
+
+        for(auto indx : indexes)
+        {
+            auto& episode = data[indx];
+
+            double Jep = 0;
+            double df = 1.0;
+            for(auto& tr : episode)
+            {
+                auto& rf = *rewardf;
+                Jep += df*rf(tr.r);
+                df *= gamma;
+            }
+
+            Jmean += Jep;
+
+        }
+
+        Jmean /= indexes.n_elem;
+    }
+
 private:
     OffGradientCalculator<ActionC, StateC>* gCalculator;
     OffGradientCalculator<ActionC, StateC>* gM2Calculator;
     RewardTransformation* rewardf;
     Policy<ActionC, StateC>& behaviour;
     DifferentiablePolicy<ActionC, StateC>& policy;
+
+    arma::uvec gradientIndexes;
+    double Jmean;
+
     GradientStep& stepRule;
     double penalization;
+    double fraction;
 
 
 };

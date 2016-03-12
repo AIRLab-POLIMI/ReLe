@@ -42,7 +42,7 @@ public:
 
     }
 
-    virtual arma::vec computeGradient() override
+    virtual arma::vec computeGradient(const arma::uvec& indexes = arma::uvec()) override
     {
         int parametersN = this->policy.getParametersSize();
 
@@ -50,11 +50,12 @@ public:
 
         double importanceWeightsAverage = 0;
 
-        int episodeN = this->data.size();
+        int episodeN = this->getEpisodesNumber(indexes);
         for (int i = 0; i < episodeN; ++i)
         {
             //core setup
-            int stepN = this->data[i].size();
+            unsigned int ep = this->getEpisodeIndex(indexes, i);
+            int stepN = this->data[ep].size();
             arma::vec sumGradLog(parametersN, arma::fill::zeros);
 
             //iterate the episode
@@ -65,7 +66,7 @@ public:
 
             for (int t = 0; t < stepN; ++t)
             {
-                Transition<ActionC, StateC>& tr = this->data[i][t];
+                Transition<ActionC, StateC>& tr = this->data[ep][t];
 
                 // compute the reward gradients
                 double Rew = df * this->rewardf(tr.r);
@@ -110,12 +111,12 @@ public:
 
     }
 
-    virtual arma::vec computeGradient() override
+    virtual arma::vec computeGradient(const arma::uvec& indexes = arma::uvec()) override
     {
         int parametersN = this->policy.getParametersSize();
         unsigned int maxSteps = this->data.getEpisodeMaxLength();
 
-        int episodeN = this->data.size();
+        int episodeN = this->getEpisodesNumber(indexes);
 
         // Reset computed results
         arma::vec gradient(parametersN, arma::fill::zeros);
@@ -133,9 +134,10 @@ public:
 
         double importanceWeightsAverage = 0;
 
-        for (int ep = 0; ep < episodeN; ++ep)
+        for (unsigned int i = 0; i < episodeN; ++i)
         {
             //core setup
+            unsigned int ep = this->getEpisodeIndex(indexes, i);
             int stepN = this->data[ep].size();
 
             arma::vec sumGradLog(parametersN, arma::fill::zeros);
@@ -159,9 +161,9 @@ public:
                 importanceWeightsSum += iw;
 
                 // store the basic elements used to compute the gradients
-                Rew_epStep(ep, t) = Rew;
-                iw_epStep(ep, t) = iw;
-                sumGradLog_epStep.tube(ep, t) = sumGradLog;
+                Rew_epStep(i, t) = Rew;
+                iw_epStep(i, t) = iw;
+                sumGradLog_epStep.tube(i, t) = sumGradLog;
 
                 // compute the baselines
                 baseline_num1 += sumGradLog * Rew * iw;
@@ -171,13 +173,13 @@ public:
             }
 
             // store the actual length of the current episode (<= maxsteps)
-            maxsteps_Ep(ep) = stepN;
+            maxsteps_Ep(i) = stepN;
             importanceWeightsAverage += importanceWeightsSum / stepN;
 
         }
 
         // compute the gradients
-        for (int ep = 0; ep < episodeN; ++ep)
+        for (unsigned int ep = 0; ep < episodeN; ++ep)
         {
             // compute the gradients
             arma::vec baseline_num = baseline_num1 % baseline_num2;
@@ -185,7 +187,7 @@ public:
             arma::vec baseline = baseline_num / baseline_den;
             baseline(arma::find_nonfinite(baseline)).zeros();
 
-            for (int t = 0; t < maxsteps_Ep(ep); ++t)
+            for (unsigned int t = 0; t < maxsteps_Ep(ep); ++t)
             {
                 arma::vec sumGradLog_ep_t = sumGradLog_epStep.tube(ep,t);
                 gradient += sumGradLog_ep_t % (Rew_epStep(ep, t) - baseline) * iw_epStep(ep,t);
@@ -220,12 +222,12 @@ public:
 
     }
 
-    virtual arma::vec computeGradient() override
+    virtual arma::vec computeGradient(const arma::uvec& indexes = arma::uvec()) override
     {
         int parametersN = this->policy.getParametersSize();
         unsigned int maxSteps = this->data.getEpisodeMaxLength();
 
-        int episodeN = this->data.size();
+        int episodeN =  this->getEpisodesNumber(indexes);
 
         // Reset computed results
         arma::vec gradient(parametersN, arma::fill::zeros);
@@ -243,9 +245,10 @@ public:
 
         double importanceWeightsAverage = 0;
 
-        for (int ep = 0; ep < episodeN; ++ep)
+        for (unsigned int i = 0; i < episodeN; ++i)
         {
             //core setup
+            unsigned int ep = this->getEpisodeIndex(indexes, i);
             int stepN = this->data[ep].size();
 
             arma::vec sumGradLog(parametersN, arma::fill::zeros);
@@ -256,7 +259,7 @@ public:
             double behavoiourIW = 1.0;
             double importanceWeightsSum = 0;
 
-            for (int t = 0; t < stepN; ++t)
+            for (unsigned int t = 0; t < stepN; ++t)
             {
                 Transition<ActionC, StateC>& tr = this->data[ep][t];
 
@@ -269,9 +272,9 @@ public:
                 importanceWeightsSum += iw;
 
                 // store the basic elements used to compute the gradients
-                Rew_epStep(ep, t) = Rew;
-                iw_epStep(ep, t) = iw;
-                sumGradLog_epStep.tube(ep, t) = sumGradLog;
+                Rew_epStep(i, t) = Rew;
+                iw_epStep(i, t) = iw;
+                sumGradLog_epStep.tube(i, t) = sumGradLog;
 
                 // compute the baselines
                 arma::vec sumGradLog2 = sumGradLog % sumGradLog;
@@ -282,15 +285,15 @@ public:
             }
 
             // store the actual length of the current episode (<= maxsteps)
-            maxsteps_Ep(ep) = stepN;
+            maxsteps_Ep(i) = stepN;
             importanceWeightsAverage += importanceWeightsSum / stepN;
 
         }
 
         // compute the gradients
-        for (int ep = 0; ep < episodeN; ++ep)
+        for (unsigned int ep = 0; ep < episodeN; ++ep)
         {
-            for (int t = 0; t < maxsteps_Ep(ep); ++t)
+            for (unsigned int t = 0; t < maxsteps_Ep(ep); ++t)
             {
                 // compute the gradients
                 arma::vec baseline_t = baseline_num.col(t) / baseline_den.col(t);

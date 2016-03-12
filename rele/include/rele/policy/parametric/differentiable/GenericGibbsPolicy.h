@@ -152,7 +152,9 @@ public:
         {
             tuple[statesize] = mActions[index].getActionN();
             gradient = approximator.diff(tuple);
-        } else {
+        }
+        else
+        {
             gradient.zeros(approximator.getParametersSize());
         }
         for (unsigned int k = 0; k < nactions - 1; k++)

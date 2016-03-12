@@ -21,7 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/statistics/DifferentiableNormals.h"
 #include "rele/core/BatchCore.h"
 #include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/algorithms/batch/policy_search/gradient/OffPolicyGradientAlgorithm.h"
@@ -29,16 +28,8 @@
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"
 #include "rele/approximators/features/DenseFeatures.h"
-#include "rele/utils/RandomGenerator.h"
 #include "rele/utils/FileManager.h"
 #include "rele/environments/DeepSeaTreasure.h"
-
-#include <iostream>
-#include <iomanip>
-#include <string>
-#include <map>
-#include <random>
-#include <cmath>
 
 using namespace std;
 using namespace ReLe;
@@ -119,7 +110,7 @@ int main(int argc, char *argv[])
     OffGradType type = OffGradType::GPOMDP_BASELINE_SINGLE;
 
     OffPolicyGradientAlgorithm<FiniteAction, DenseState> offagent(type, target, behavioral, stepl, &rewardF);
-    BatchCore<FiniteAction, DenseState> batchcore(mdp, offagent);
+    auto&& batchcore = buildBatchCore(mdp, offagent);
     batchcore.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
     batchcore.getSettings().episodeLength = mdp.getSettings().horizon;
     batchcore.getSettings().nEpisodes = 1000;

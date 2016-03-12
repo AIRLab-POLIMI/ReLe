@@ -40,10 +40,10 @@ public:
 
     }
 
-    virtual arma::vec computeGradient() override
+    virtual arma::vec computeGradient(const arma::uvec& indexes = arma::uvec()) override
     {
         int parametersN = this->policy.getParametersSize();
-        int episodeN = this->data.size();
+        int episodeN = this->getEpisodesNumber(indexes);
 
         // Reset computed results
         arma::vec gradient(parametersN, arma::fill::zeros);
@@ -57,13 +57,14 @@ public:
         arma::vec baseline_den(parametersN, arma::fill::zeros);
         arma::vec baseline_num(parametersN, arma::fill::zeros);
 
-        for (int i = 0; i < episodeN; ++i)
+        for (unsigned int i = 0; i < episodeN; ++i)
         {
             // compute basic elements
             double Rew;
             double iw;
             arma::vec sumGradLog(parametersN);
-            this->computeEpisodeStatistics(this->data[i], Rew, iw, sumGradLog);
+            unsigned int ep = this->getEpisodeIndex(indexes, i);
+            this->computeEpisodeStatistics(this->data[ep], Rew, iw, sumGradLog);
 
             // store them
             Rew_ep(i) = Rew;
@@ -80,7 +81,7 @@ public:
         arma::vec baseline = baseline_num / baseline_den;
         baseline(arma::find_nonfinite(baseline)).zeros();
 
-        for (int ep = 0; ep < episodeN; ep++)
+        for (unsigned int ep = 0; ep < episodeN; ep++)
         {
             gradient += (Rew_ep(ep) - baseline/iw_ep(ep)) % sumGradLog_ep.col(ep) * iw_ep(ep) * iw_ep(ep);
         }
