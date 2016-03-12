@@ -66,6 +66,10 @@ public:
  * where the aim is to let a robot reach
  * a goal state.
  * For further information see <a href="http://www.robolab.tuc.gr/ASSETS/PAPERS_PDF/PAPERS_2009/LEARNING_MODEL__EM_ALGOTITHM.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * Vlassis, Toussaint, Kontes, Piperidis. Learning Model-free Robot Control by a Monte Carlo EM Algorithm
  */
 class NLS: public ContinuousMDP
 {

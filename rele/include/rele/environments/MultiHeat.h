@@ -31,7 +31,7 @@ namespace ReLe
 
 /*!
  * This class contains the settings of the Multi Heat problem
- * and some functions to manage them.
+ * and some functions to manage it.
  */
 class MultiHeatSettings : public EnvironmentSettings
 {
@@ -70,7 +70,7 @@ public:
  * The aim of this problem is to find the optimal
  * heating policy according to environmental
  * conditions and other criterion of optimality.
- * For further information see <a href="http://www.ifi.uzh.ch/ce/publications/Home_Heating_using_GPs_and_MDPs_Shann_and_Seuken_AAMAS2014.pdf">here</a>.
+ * For further information see <a href="http://www.nt.ntnu.no/users/skoge/prost/proceedings/ifac2014/media/files/1987.pdf">here</a>.
  */
 class MultiHeat: public DenseMDP
 {
