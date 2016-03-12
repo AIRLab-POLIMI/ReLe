@@ -150,25 +150,5 @@ Batch loggers
    :members:   
    
 
-Basic Utilities
----------------
-
-.. doxygenclass:: ReLe::PolicyEvalAgent
-   :members:
-   
-.. doxygenclass:: ReLe::PolicyEvalDistribution
-   :members:   
-
-Policy Representations
-======================
-
-.. doxygenclass:: ReLe::Policy
-   :members:
-
-.. doxygenclass:: ReLe::ParametricPolicy
-   :members:
-
-.. doxygenclass:: ReLe::DifferentiablePolicy
-   :members:
 
 
