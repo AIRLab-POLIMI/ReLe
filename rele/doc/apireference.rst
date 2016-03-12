@@ -51,16 +51,4 @@ Basic concepts
 .. doxygenstruct:: ReLe::state_type
    :members:      
 
-Trajectories
-------------
-
-.. doxygenstruct:: ReLe::Transition
-   :members: 
-   
-.. doxygenclass:: ReLe::Episode
-   :members:       
-
-.. doxygenclass:: ReLe::Dataset
-   :members:       
-
 
