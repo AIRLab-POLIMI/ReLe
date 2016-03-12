@@ -35,21 +35,21 @@ template<class ActionC, class StateC>
 class MBPGA: public BatchAgent<ActionC, StateC>
 {
 public:
-	MBPGA(Policy<ActionC, StateC>& behaviour,
-	      DifferentiablePolicy<ActionC, StateC>& policy,
-	      GradientStep& stepRule,
-	      double penalization, double fraction = 0.5, unsigned int rewardIndex = 0)
-		: MBPGA(behaviour, policy, stepRule, new IndexRT(rewardIndex), penalization, fraction)
-	{
-		deleteReward = true;
-	}
+    MBPGA(Policy<ActionC, StateC>& behaviour,
+          DifferentiablePolicy<ActionC, StateC>& policy,
+          GradientStep& stepRule,
+          double penalization, double fraction = 0.5, unsigned int rewardIndex = 0)
+        : MBPGA(behaviour, policy, stepRule, new IndexRT(rewardIndex), penalization, fraction)
+    {
+        deleteReward = true;
+    }
 
     MBPGA(Policy<ActionC, StateC>& behaviour,
           DifferentiablePolicy<ActionC, StateC>& policy,
           GradientStep& stepRule,
           RewardTransformation* rewardf,
           double penalization, double fraction = 0.5) :
-        	  behaviour(behaviour), policy(policy),
+        behaviour(behaviour), policy(policy),
         stepRule(stepRule), rewardf(rewardf), penalization(penalization), fraction(fraction), deleteReward(false)
     {
         gCalculator = nullptr;
@@ -63,7 +63,7 @@ public:
             delete gCalculator;
 
         if(gM2Calculator)
-                    delete gM2Calculator;
+            delete gM2Calculator;
 
         this->gamma = gamma;
         gCalculator = OffGradientCalculatorFactory<ActionC, StateC>::build(OffGradType::REINFORCE_BASELINE,
@@ -109,8 +109,8 @@ public:
 
     virtual ~MBPGA()
     {
-    	if(deleteReward)
-    		delete rewardf;
+        if(deleteReward)
+            delete rewardf;
     }
 
 

@@ -1,3 +1,3 @@
 # Features Selection tests
-add_executable(pfa_test PFATest.cpp)
-target_link_libraries(pfa_test rele)
+add_executable(featureSelection_test FeatureSelectionTest.cpp)
+target_link_libraries(featureSelection_test rele)

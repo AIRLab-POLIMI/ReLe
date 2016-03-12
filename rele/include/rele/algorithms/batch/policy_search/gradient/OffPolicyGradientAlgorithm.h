@@ -35,14 +35,14 @@ template<class ActionC, class StateC>
 class OffPolicyGradientAlgorithm: public BatchAgent<ActionC, StateC>
 {
 public:
-	OffPolicyGradientAlgorithm(OffGradType type,
-            Policy<ActionC, StateC>& behaviour,
-            DifferentiablePolicy<ActionC, StateC>& policy,
-            GradientStep& stepRule, unsigned int rewardIndex = 0)
-			: OffPolicyGradientAlgorithm(type, behaviour, policy, stepRule, new IndexRT(rewardIndex))
-	{
-			deleteReward = true;
-	}
+    OffPolicyGradientAlgorithm(OffGradType type,
+                               Policy<ActionC, StateC>& behaviour,
+                               DifferentiablePolicy<ActionC, StateC>& policy,
+                               GradientStep& stepRule, unsigned int rewardIndex = 0)
+        : OffPolicyGradientAlgorithm(type, behaviour, policy, stepRule, new IndexRT(rewardIndex))
+    {
+        deleteReward = true;
+    }
 
     OffPolicyGradientAlgorithm(OffGradType type,
                                Policy<ActionC, StateC>& behaviour,
@@ -84,8 +84,8 @@ public:
 
     virtual ~OffPolicyGradientAlgorithm()
     {
-    	if(deleteReward)
-    		delete rewardf;
+        if(deleteReward)
+            delete rewardf;
     }
 
 private:

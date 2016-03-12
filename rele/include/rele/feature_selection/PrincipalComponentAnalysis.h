@@ -21,44 +21,32 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
-#define INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
-
+#ifndef INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALCOMPONENTANALYSIS_H_
+#define INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALCOMPONENTANALYSIS_H_
 
 #include "rele/feature_selection/FeatureSelectionAlgorithm.h"
 
 namespace ReLe
 {
 
-class PrincipalFeatureAnalysis : public FeatureSelectionAlgorithm
+class PrincipalComponentAnalysis : public FeatureSelectionAlgorithm
 {
 public:
-    PrincipalFeatureAnalysis(double varMin, bool useCorrelation = true);
+
+    PrincipalComponentAnalysis(unsigned int k, bool useCorrelation = true);
     virtual void createFeatures(const arma::mat& features) override;
     virtual arma::mat getTransformation() override;
     virtual arma::mat getNewFeatures() override;
 
-    inline arma::uvec getIndexes()
-    {
-    	return indexes;
-    }
-
 private:
-    unsigned int computeDimensions(arma::vec& s, double varMin);
-    void cluster(arma::mat& data, arma::mat& means, arma::uvec& clustersIndexes, unsigned int k);
-    unsigned int findNearest(const arma::mat& elements, const arma::vec mean);
-
-private:
-    unsigned int initialSize;
-    arma::uvec indexes;
     arma::mat newFeatures;
+    arma::mat T;
 
-    double varMin;
+    unsigned int k;
     bool useCorrelation;
 
 };
 
 }
 
-
-#endif /* INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_ */
+#endif /* INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALCOMPONENTANALYSIS_H_ */
