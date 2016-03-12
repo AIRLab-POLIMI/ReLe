@@ -89,6 +89,10 @@ public:
  * The aim of this problem is to maximize the expected
  * utility of a Portfolio in a financial market.
  * For further information see <a href="http://www.math.kit.edu/stoch/~baeuerle/seite/markov_nb/media/br_mdpjump.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Di Castro, Tamar, Mannor. Policy gradients with variance related risk criteria. ICML 2012](http://machinelearning.wustl.edu/mlpapers/paper_files/ICML2012Di_489.pdf)
  */
 class Portfolio: public DenseMDP
 {

@@ -36,6 +36,10 @@ namespace ReLe
  * a gate when starting from a random position and moving
  * at constant speed.
  * For further information see <a href="http://people.cs.umass.edu/~mahadeva/papers/icml03-1.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Ghavamzadeh, Mahadevan. Hierarchical Policy Gradient Algorithms. ICML 2013](http://people.cs.umass.edu/~mahadeva/papers/icml03-1.pdf)
  */
 class ShipSteering : public ContinuousMDP
 {

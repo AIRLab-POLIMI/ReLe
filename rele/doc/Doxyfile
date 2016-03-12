@@ -13,7 +13,6 @@ EXCLUDE_PATTERNS  += *include/rele/environments/Ship*
 EXCLUDE_PATTERNS  += *include/rele/environments/Swing*
 EXCLUDE_PATTERNS  += *include/rele/environments/Taxi*
 EXCLUDE_PATTERNS  += *include/rele/environments/Underw*
-EXCLUDE_PATTERNS  += *include/rele/environments/Unic*
 RECURSIVE         = YES
 QUIET             = YES
 JAVADOC_AUTOBRIEF = NO
