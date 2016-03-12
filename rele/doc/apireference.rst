@@ -109,26 +109,4 @@ Basic Environments
 .. doxygenclass:: ReLe::ContinuousMDP
    :members:      
    
-Core loggers
-------------
-.. doxygenclass:: ReLe::Logger
-   :members:
-   
-.. doxygenclass:: ReLe::LoggerStrategy
-   :members:
-   :protected-members:
-   
-.. doxygenclass:: ReLe::PrintStrategy
-   :members:
-   
-.. doxygenclass:: ReLe::WriteStrategy
-   :members:
-
-.. doxygenclass:: ReLe::EvaluateStrategy
-   :members:   
-   
-.. doxygenclass:: ReLe::CollectorStrategy
-   :members:   
-
-
 
