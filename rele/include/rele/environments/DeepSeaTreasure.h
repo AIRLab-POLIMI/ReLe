@@ -36,7 +36,10 @@ namespace ReLe
  * values. The aim is to minimize the time to reach
  * the treasures and maximize the values of reached
  * treasures.
- * For further information see <a href="http://www.jmlr.org/papers/volume15/vanmoffaert14a/vanmoffaert14a.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Van Moffaert, Nowe. Multi-Objective Reinforcement Learning using Sets of Pareto Dominating Policies](http://www.jmlr.org/papers/volume15/vanmoffaert14a/vanmoffaert14a.pdf)
  */
 class DeepSeaTreasure: public DenseMDP
 {

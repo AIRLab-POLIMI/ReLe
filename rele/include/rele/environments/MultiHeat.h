@@ -70,7 +70,11 @@ public:
  * The aim of this problem is to find the optimal
  * heating policy according to environmental
  * conditions and other criterion of optimality.
- * For further information see <a href="http://www.nt.ntnu.no/users/skoge/prost/proceedings/ifac2014/media/files/1987.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Pirotta, Manganini, Piroddi, Prandini, Restelli. A particle-based policy for the optimal
+control of Markov decision processes. CDC, 2014.](http://www.nt.ntnu.no/users/skoge/prost/proceedings/ifac2014/media/files/1987.pdf)
  */
 class MultiHeat: public DenseMDP
 {
