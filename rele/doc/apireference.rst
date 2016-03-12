@@ -63,38 +63,4 @@ Trajectories
 .. doxygenclass:: ReLe::Dataset
    :members:       
 
-Basic Interfaces
-----------------
-
-.. doxygenclass:: ReLe::Environment
-   :members:
-   :protected-members: 
-
-.. doxygenclass:: ReLe::Agent
-   :members:
-   :protected-members:
-
-.. doxygenclass:: ReLe::BatchAgent
-   :members:
-   :protected-members:
-   
-.. doxygenclass:: ReLe::Core
-   :members:
-   
-.. doxygenfunction:: ReLe::buildCore      
-   
-.. doxygenclass:: ReLe::BatchOnlyCore
-   :members:   
-   
-.. doxygenfunction:: ReLe::buildBatchOnlyCore      
-   
-.. doxygenclass:: ReLe::BatchCore
-   :members:      
-   
-.. doxygenfunction:: ReLe::buildBatchCore      
-   
-.. doxygenclass:: ReLe::Solver
-   :members:   
-   :protected-members:
-   
 
