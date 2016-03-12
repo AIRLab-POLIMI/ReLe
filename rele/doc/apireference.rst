@@ -129,26 +129,6 @@ Core loggers
    
 .. doxygenclass:: ReLe::CollectorStrategy
    :members:   
-   
-Batch loggers
--------------
-
-.. doxygenclass:: ReLe::BatchAgentLogger
-   :members:
-   :protected-members:
-
-.. doxygenclass:: ReLe::BatchAgentPrintLogger
-   :members:
-
-.. doxygenclass:: ReLe::BatchDatasetLogger
-   :members:
-   
-.. doxygenclass:: ReLe::CollectBatchDatasetLogger
-   :members:
-   
-.. doxygenclass:: ReLe::WriteBatchDatasetLogger
-   :members:   
-   
 
 
 
