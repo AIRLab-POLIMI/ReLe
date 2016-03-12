@@ -22,7 +22,7 @@
  */
 
 #include "rele/core/Core.h"
-#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/approximators/BasisFunctions.h"
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
 #include "rele/approximators/basis/PolynomialFunction.h"

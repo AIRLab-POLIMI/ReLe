@@ -23,7 +23,7 @@
 
 #include "rele/statistics/DifferentiableNormals.h"
 #include "rele/core/BatchCore.h"
-#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/algorithms/batch/policy_search/gradient/OffPolicyGradientAlgorithm.h"
 #include "rele/approximators/BasisFunctions.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
@@ -107,10 +107,11 @@ int main(int argc, char *argv[])
     }
 
     DenseFeatures basis(bfs);
+    LinearApproximator reg(basis);
 
-    ParametricGibbsPolicy<DenseState> behavioral(actions, basis, 1);
+    GenericParametricGibbsPolicy<DenseState> behavioral(actions, reg, 1);
 
-    ParametricGibbsPolicy<DenseState> target(actions, basis, 1);
+    GenericParametricGibbsPolicy<DenseState> target(actions, reg, 1);
 
     AdaptiveGradientStep stepl(0.1);
     IndexRT rewardF(0);

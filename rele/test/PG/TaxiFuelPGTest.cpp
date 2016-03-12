@@ -27,7 +27,7 @@
 
 #include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
 
-#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
@@ -73,9 +73,10 @@ int main(int argc, char *argv[])
     BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
+    LinearApproximator reg(phi);
 
     double temperature = 100;
-    ParametricGibbsPolicy<DenseState> policy(actions, phi, temperature);
+    GenericParametricGibbsPolicy<DenseState> policy(actions, reg, temperature);
 
     //-- agent
     int nbepperpol = 10, nbstep = 100;
