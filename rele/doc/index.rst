@@ -16,3 +16,16 @@ source distribution for details.
 
 .. _`GPLV3 license`: https://opensource.org/licenses/GPL-3.0
 
+Contents
+--------
+
+.. toctree::
+   :maxdepth: 2
+
+   apireference
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`search`
