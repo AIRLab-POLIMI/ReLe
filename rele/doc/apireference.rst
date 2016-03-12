@@ -15,3 +15,6 @@ API Reference
 All functions and classes provided by the C++ Format library reside
 in namespace ``ReLe``.
 
+.. doxygenstruct:: ReLe::EnvironmentSettings
+   :members:  
+   
