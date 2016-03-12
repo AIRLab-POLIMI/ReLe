@@ -180,15 +180,3 @@ Normal Policies
 
 .. doxygenclass:: ReLe::GenericMVNStateDependantStddevPolicy
 
-Generators
-----------
-
-.. doxygenclass:: ReLe::FiniteGenerator
-   :members:
-   :protected-members:
-   
-.. doxygenclass:: ReLe::SimpleChainGenerator
-   :members:
-
-.. doxygenclass:: ReLe::GridWorldGenerator
-   :members:
