@@ -84,7 +84,7 @@ public:
  * The aim of this optimization problem is to decide
  * the amount of water to release in order to satisfy
  * conflicting objectives.
- * For further information see <a href="http://www.dhigroup.com/upload/publications/mike11/Pedersen_RealTime.pdf">here</a>.
+ * For further information see <a href="http://onlinelibrary.wiley.com/doi/10.1002/wrcr.20295/abstract">here</a>.
  */
 class Dam: public ContinuousMDP
 {
