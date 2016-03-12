@@ -35,13 +35,22 @@ template<class ActionC, class StateC>
 class MBPGA: public BatchAgent<ActionC, StateC>
 {
 public:
+	MBPGA(Policy<ActionC, StateC>& behaviour,
+	      DifferentiablePolicy<ActionC, StateC>& policy,
+	      GradientStep& stepRule,
+	      double penalization, double fraction = 0.5, unsigned int rewardIndex = 0)
+		: MBPGA(behaviour, policy, stepRule, new IndexRT(rewardIndex), penalization, fraction)
+	{
+		deleteReward = true;
+	}
+
     MBPGA(Policy<ActionC, StateC>& behaviour,
           DifferentiablePolicy<ActionC, StateC>& policy,
           GradientStep& stepRule,
           RewardTransformation* rewardf,
           double penalization, double fraction = 0.5) :
         	  behaviour(behaviour), policy(policy),
-        stepRule(stepRule), rewardf(rewardf), penalization(penalization), fraction(fraction)
+        stepRule(stepRule), rewardf(rewardf), penalization(penalization), fraction(fraction), deleteReward(false)
     {
         gCalculator = nullptr;
         gM2Calculator = nullptr;
@@ -100,7 +109,8 @@ public:
 
     virtual ~MBPGA()
     {
-
+    	if(deleteReward)
+    		delete rewardf;
     }
 
 
@@ -142,6 +152,8 @@ private:
     GradientStep& stepRule;
     double penalization;
     double fraction;
+
+    bool deleteReward;
 
 
 };

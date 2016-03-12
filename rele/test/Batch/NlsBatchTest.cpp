@@ -75,12 +75,12 @@ int main(int argc, char *argv[])
     NormalStateDependantStddevPolicy target(phi, stdPhi, stdWeights);
 
 
+
     // run batch training
     AdaptiveGradientStep stepl(0.1);
-    IndexRT rewardF(0);
 
     OffGradType type = OffGradType::GPOMDP_BASELINE_SINGLE;
-    OffPolicyGradientAlgorithm<DenseAction, DenseState> offagent(type, target, behavioral, stepl, &rewardF);
+    OffPolicyGradientAlgorithm<DenseAction, DenseState> offagent(type, target, behavioral, stepl);
     auto&& batchcore = buildBatchCore(mdp, offagent);
 
     batchcore.getSettings().nEpisodes = 10000;
