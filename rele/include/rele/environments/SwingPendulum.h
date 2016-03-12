@@ -69,7 +69,10 @@ public:
  * has to be swinged controlling its rotation
  * and trying to reach the maximum height without
  * letting it fall.
- * For further information see <a href="https://homes.cs.washington.edu/~todorov/courses/amath579/reading/Continuous.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Doya. Reinforcement Learning In Continuous Time and Space. Neural computation 12.1 (2000): 219-245.](https://homes.cs.washington.edu/~todorov/courses/amath579/reading/Continuous.pdf)
  */
 class DiscreteActionSwingUp: public DenseMDP
 {

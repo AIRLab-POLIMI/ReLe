@@ -71,7 +71,10 @@ public:
  * The task of this problem is to control the speed an
  * underwater vehicle in a submarine environment modeling
  * the complex dynamics of objects moving in fluids.
- * For further information see <a href="http://link.springer.com/article/10.1007%2Fs10994-011-5235-x">here</a>.
+ *
+ * References
+ * ==========
+ * [Hafner, Riedmiller. Reinforcement learning in feedback control. Challenges and benchmarks from technical process control. Machine Learning](http://link.springer.com/article/10.1007%2Fs10994-011-5235-x)
  */
 class UnderwaterVehicle: public DenseMDP
 {

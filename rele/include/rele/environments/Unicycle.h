@@ -64,7 +64,40 @@ public:
  * This class implements the Unicycle problem.
  * The aim of this problem is to control a unicycle
  * in order to let it stay balanced.
- * For further information see <a href="http://www.diva-portal.se/smash/get/diva2:662268/FULLTEXT01.pdf">here</a>.
+ *
+ * \f[
+ * \hat{e}(t) = [x(t) - x_g; y(t) - y_g; \theta(t) - \theta_g]^{T}
+ * \f]
+ * \f[
+ * e(t) = \begin{bmatrix} e_x(t)\\e_y(t)\\ e_\theta(t)\end{bmatrix}
+ *      = \begin{bmatrix}  cos\theta_g & sin\theta_g & 0\\
+ *                        -sin\theta_g & cos\theta_g & 0\\
+ *                         0 & 0 & 1
+ *        \end{bmatrix} \hat{e}(t)
+ * \f]
+ * \f[
+ * \rho   = \sqrt(e_x^2+e_y^2)
+ * \f]
+ * \f[
+ * \gamma = atan2(e_y,e_x) - e_\theta + \pi
+ * \f]
+ * \f[
+ * \delta = \gamma + e_\theta
+ * \f]
+ *
+ * Optimal control law:
+ * \f[
+ * v = k_1 \rho cos\gamma
+ * \f]
+ * \f[
+ * w = k_2 \gamma + k_1 \sin\gamma \cos\gamma (\gamma + k_3 \delta) / \gamma
+ * \f]
+ *
+ * References
+ * ==========
+ * [Master Thesis](http://www.diva-portal.se/smash/get/diva2:662268/FULLTEXT01.pdf)
+ *
+ * [Stabilized Feedback Control of Unicycle Mobile Robots](http://cdn.intechopen.com/pdfs-wm/44029.pdf)
  */
 class UnicyclePolar: public ContinuousMDP
 {
