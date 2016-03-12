@@ -97,16 +97,4 @@ Basic Interfaces
    :members:   
    :protected-members:
    
-Basic Environments
-------------------
-
-.. doxygenclass:: ReLe::FiniteMDP
-   :members:   
-
-.. doxygenclass:: ReLe::DenseMDP
-   :members:   
-   
-.. doxygenclass:: ReLe::ContinuousMDP
-   :members:      
-   
 
