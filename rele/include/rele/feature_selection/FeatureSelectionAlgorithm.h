@@ -34,7 +34,7 @@ namespace ReLe
  * This class is the basic interface for features selection algorithm.
  * Features selection is the task of computing, from a set of features \f$\phi\f$
  * a new set of features \f$\bar{\phi}\f$, such that:
- * \f$\exist T: \bar{\phi}=T(\phi)\f$
+ * \f$\exists T: \bar{\phi}=T(\phi)\f$
  */
 class FeatureSelectionAlgorithm
 {
