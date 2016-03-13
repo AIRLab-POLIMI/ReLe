@@ -60,7 +60,7 @@ public:
 /*!
  * This class is the basic interface for linear features selection algorithms,
  * i.e. a set of algorithms where the features selection functon is a linear function:
- * \f$\exist T: \bar{\phi}=T\phi\f$
+ * \f$\bar{\phi}=T\phi\f$
  */
 class LinearFeatureSelectionAlgorithm : public FeatureSelectionAlgorithm
 {
