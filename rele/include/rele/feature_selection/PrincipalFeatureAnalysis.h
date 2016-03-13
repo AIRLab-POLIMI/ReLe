@@ -31,7 +31,7 @@ namespace ReLe
 {
 
 /*!
- * This class implements the Principal Feature Analysis (PFA)
+ * This class implements the Principal Feature Analysis (PFA).
  * This method search the most promising features index to reduce dimensionality,
  * thus maintaining the initial features, instead of creating new ones.
  */
