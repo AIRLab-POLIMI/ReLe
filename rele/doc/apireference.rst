@@ -243,3 +243,19 @@ Generators
 
 .. doxygenclass:: ReLe::GridWorldGenerator
    :members:
+
+   
+Feature Selection
+=================
+
+.. doxygenclass:: ReLe::FeatureSelectionAlgorithm
+   :members:
+   
+.. doxygenclass:: ReLe::LinearFeatureSelectionAlgorithm
+   :members:
+
+.. doxygenclass:: ReLe::PrincipalComponentAnalysis
+   :members:
+   
+.. doxygenclass:: ReLe::PrincipalFeatureAnalysis
+   :members:
