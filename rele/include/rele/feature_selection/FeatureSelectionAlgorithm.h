@@ -30,14 +30,49 @@
 namespace ReLe
 {
 
+/*!
+ * This class is the basic interface for features selection algorithm.
+ * Features selection is the task of computing, from a set of features \f$\phi\f$
+ * a new set of features \f$\bar{\phi}\f$, such that:
+ * \f$\exist T: \bar{\phi}=T(\phi)\f$
+ */
 class FeatureSelectionAlgorithm
 {
 public:
+	/*!
+	 * This method computes the new features from the initial ones
+	 * \param features the initial features
+	 */
     virtual void createFeatures(const arma::mat& features) = 0;
-    virtual arma::mat getTransformation() = 0;
-    virtual arma::mat getNewFeatures() = 0;
 
+    /*!
+     * Getter.
+     * \return the new features, computed by the algorithm.
+     */
+    virtual arma::mat getNewFeatures() = 0;
+    
     virtual ~FeatureSelectionAlgorithm()
+    {
+
+    }
+};
+
+/*!
+ * This class is the basic interface for linear features selection algorithms,
+ * i.e. a set of algorithms where the features selection functon is a linear function:
+ * \f$\exist T: \bar{\phi}=T\phi\f$
+ */
+class LinearFeatureSelectionAlgorithm : public FeatureSelectionAlgorithm
+{
+public:
+	/*!
+	 * Getter.
+	 * \return the linear features transformation.
+	 */
+    virtual arma::mat getTransformation() = 0;
+
+
+    virtual ~LinearFeatureSelectionAlgorithm()
     {
 
     }

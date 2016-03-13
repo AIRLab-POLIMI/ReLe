@@ -30,14 +30,28 @@
 namespace ReLe
 {
 
-class PrincipalFeatureAnalysis : public FeatureSelectionAlgorithm
+/*!
+ * This class implements the Principal Feature Analysis (PFA)
+ * This method search the most promising features index to reduce dimensionality,
+ * thus maintaining the initial features, instead of creating new ones.
+ */
+class PrincipalFeatureAnalysis : public LinearFeatureSelectionAlgorithm
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param varMin the minimum variability to retain from data
+	 * \param useCorrelation if to use correlation or covariance matrix as selection criterion
+	 */
     PrincipalFeatureAnalysis(double varMin, bool useCorrelation = true);
     virtual void createFeatures(const arma::mat& features) override;
     virtual arma::mat getTransformation() override;
     virtual arma::mat getNewFeatures() override;
 
+    /*!
+     * Getter.
+     * \return the indexes of the most promising features
+     */
     inline arma::uvec getIndexes()
     {
     	return indexes;
