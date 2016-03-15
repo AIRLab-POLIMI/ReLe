@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/UnderwaterVehicle.h"
+#include "rele/environments/UnderwaterVehicle.h"
 
 #include "rele/utils/RandomGenerator.h"
 #include <cassert>

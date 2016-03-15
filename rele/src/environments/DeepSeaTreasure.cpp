@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/rele/environments/DeepSeaTreasure.h"
+#include "rele/environments/DeepSeaTreasure.h"
 
 #include "rele/utils/RandomGenerator.h"
 #include <cassert>
