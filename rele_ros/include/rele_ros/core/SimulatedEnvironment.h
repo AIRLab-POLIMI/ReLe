@@ -31,82 +31,98 @@
 namespace ReLe_ROS
 {
 
+/*!
+ * This class implements the basic Gazebo interface.
+ * It implements the basic code for starting/stopping simulations, and
+ * also print out some informations about the system.
+ */
 template<class ActionC, class StateC>
 class SimulatedEnvironment: public RosEnvironment<ActionC, StateC>
 {
+
+public:
+	/*!
+	 * Constructor
+	 * \param controlFrequency the frequency of the control publishing
+	 */
+    SimulatedEnvironment(double controlFrequency) :
+        RosEnvironment<ActionC, StateC>(controlFrequency)
+    {
+        simulationRunning = true;
+
+        ROS_INFO("Waiting for Gazebo");
+
+        //wait for gazebo services
+        ros::service::waitForService(reset);
+        ros::service::waitForService(resetWorld);
+        ros::service::waitForService(pause);
+        ros::service::waitForService(resume);
+
+        ROS_INFO("Gazebo simulator is up, stopping simulation");
+
+        //stop simulation
+        stop();
+    }
+
+    /*!
+     * Destructor.
+     * Stop simulation before exiting, if needed. If ros is shut down while the simulation
+     * is still running, brings up the ros system again temporarily, stops the simulation,
+     * and shut down the ROS system again.
+     */
+    virtual ~SimulatedEnvironment()
+    {
+        if(simulationRunning)
+        {
+            if(ros::ok())
+            {
+                ROS_INFO("Simulation is still running, stopping...");
+                stop();
+            }
+            else
+            {
+                ros::start();
+                stop();
+                ros::shutdown();
+            }
+        }
+    }
+
 protected:
-    using RosEnvironment<ActionC, StateC>::n;
+    /*!
+     * Implementation of the start method.
+     * Stops the simulation (if still running) and the starts it again.
+     */
+    virtual void start() override
+    {
+        if(simulationRunning)
+            stop();
 
-     SimulatedEnvironment(double controlFrequency) :
-          RosEnvironment<ActionC, StateC>(controlFrequency)
-      {
-       	 simulationRunning = true;
+        ros::service::call(resume, emptyService);
 
-       	ROS_INFO("Waiting for Gazebo");
+        simulationRunning = true;
+    }
 
-    	 //wait for gazebo services
-    	 ros::service::waitForService(reset);
-    	 ros::service::waitForService(resetWorld);
-    	 ros::service::waitForService(pause);
-    	 ros::service::waitForService(resume);
-
-    	 ROS_INFO("Gazebo simulator is up, stopping simulation");
-
-    	 //stop simulation
-    	 stop();
-      }
-
-      virtual ~SimulatedEnvironment()
-      {
-    	  if(simulationRunning)
-    	  {
-    		  if(ros::ok())
-    		  {
-    			 ROS_INFO("Simulation is still running, stopping...");
-    			 stop();
-    		  }
-    		  else
-    		  {
-    			  ros::start();
-    			  ROS_INFO("Simulation is still running, stopping...");
-    			  stop();
-    			  ros::shutdown();
-    		  }
-    	  }
-      }
-
-protected:
-      virtual void start() override
-      {
-    	  if(simulationRunning)
-    		  stop();
-
-    	  ros::service::call(resume, emptyService);
-
-    	  simulationRunning = true;
-      }
-
-      virtual void stop() override
-      {
-    	  ros::service::call(pause, emptyService);
-    	  ros::service::call(reset, emptyService);
-    	  simulationRunning = false;
-      }
-
-      virtual void publishAction(const ActionC& action) = 0;
-      virtual void setState(StateC& state) = 0;
-      virtual void setReward(const ActionC& action, const StateC& state,
-                             ReLe::Reward& reward) = 0;
+    /*!
+     * Implementation of the stop method.
+     * Stops the simulation resetting both time and environment to the original conditions.
+     */
+    virtual void stop() override
+    {
+        ros::service::call(pause, emptyService);
+        ros::service::call(reset, emptyService);
+        simulationRunning = false;
+    }
 
 private:
-      static constexpr auto reset = "/gazebo/reset_simulation";
-      static constexpr auto resetWorld = "/gazebo/reset_world";
-      static constexpr auto pause = "/gazebo/pause_physics";
-      static constexpr auto resume = "/gazebo/unpause_physics";
+    static constexpr auto reset = "/gazebo/reset_simulation";
+    static constexpr auto resetWorld = "/gazebo/reset_world";
+    static constexpr auto pause = "/gazebo/pause_physics";
+    static constexpr auto resume = "/gazebo/unpause_physics";
 
-  private:
-      bool simulationRunning;
-      std_srvs::Empty emptyService;
+private:
+    bool simulationRunning;
+    std_srvs::Empty emptyService;
 
 
 };

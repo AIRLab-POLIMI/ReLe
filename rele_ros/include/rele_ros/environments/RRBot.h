@@ -33,7 +33,7 @@ class RRBot : public SimulatedEnvironment<ReLe::DenseAction,
     ReLe::DenseState>
 {
 public:
-	RRBot(double controlFrequency);
+    RRBot(double controlFrequency);
     virtual ~RRBot();
 
 protected:

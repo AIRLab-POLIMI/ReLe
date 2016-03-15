@@ -64,15 +64,16 @@ int main(int argc, char* argv[])
     FakeAgent agent;
     auto&& core = buildCore(rrbot, agent);
 
-    core.getSettings().episodeLength = 30;
+    core.getSettings().episodeLength = 5;
+    core.getSettings().episodeN = 3;
 
     try
     {
-        core.runEpisode();
+        core.runEpisodes();
     }
     catch (RosExitException& e)
     {
-        std::cout << "Node terminated" << std::endl;
+        std::cout << std::endl << "Node terminated by the user" << std::endl;
     }
 
 
