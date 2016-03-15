@@ -76,7 +76,7 @@ public:
      * 	    ...
      *
      * 	    nlopt::opt optimizator(optAlg, effective_dim);
-     *   	optimizator.set_min_objective(Optimization::objFunctionWrapper<Example, true> , this);
+     * 	    optimizator.set_min_objective(Optimization::objFunctionWrapper<Example, true> , this);
      *
      * 		...
      * }

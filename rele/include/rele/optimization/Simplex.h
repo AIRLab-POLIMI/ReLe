@@ -32,7 +32,7 @@ namespace ReLe
 
 /*!
  * This class implements the simplex one sum constraint for optimization.
- * Given a parameter space \f$\theta_simplex\in\mathbb{R}^{n-1}\f$ this class reconstructs
+ * Given a parameter space \f$\theta_{simplex}\in\mathbb{R}^{n-1}\f$ this class reconstructs
  * the full parametrization \f$\theta\in\mathbb{R}^n\f$ by appling the one sum constraint.
  * This class can also compute the derivative of the reduced parametrization.
  * Also, this class support non active parameters in the parameters vector, in order to compute the simplex
@@ -98,7 +98,7 @@ public:
         return x;
     }
 
-    /*
+    /*!
      * returns the center of the simplex.
      * \return a vector to the full parametrization
      */
@@ -111,7 +111,7 @@ public:
         return x;
     }
 
-    /*
+    /*!
      * Compute the derivative of the function w.r.t. the simplex
      * \param df the derivative w.r.t. the full parametrization
      * \return the composite derivative matrix
