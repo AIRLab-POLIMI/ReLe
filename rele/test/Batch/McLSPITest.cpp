@@ -25,7 +25,7 @@
 #include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
 
-#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/features/SparseFeatures.h"
 #include "rele/statistics/DifferentiableNormals.h"

@@ -21,9 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
-#define INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_
-
+#ifndef INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALCOMPONENTANALYSIS_H_
+#define INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALCOMPONENTANALYSIS_H_
 
 #include "rele/feature_selection/FeatureSelectionAlgorithm.h"
 
@@ -31,48 +30,31 @@ namespace ReLe
 {
 
 /*!
- * This class implements the Principal Feature Analysis (PFA).
- * This method search the most promising features index to reduce dimensionality,
- * thus maintaining the initial features, instead of creating new ones.
+ * This class implements Principal Component Analysis (PCA).
+ * PCA computes a linear combination of a set of features to reduce data dimensionality.
  */
-class PrincipalFeatureAnalysis : public LinearFeatureSelectionAlgorithm
+class PrincipalComponentAnalysis : public LinearFeatureSelectionAlgorithm
 {
 public:
 	/*!
 	 * Constructor.
-	 * \param varMin the minimum variability to retain from data
+	 * \param k the final number of features to be used
 	 * \param useCorrelation if to use correlation or covariance matrix as selection criterion
 	 */
-    PrincipalFeatureAnalysis(double varMin, bool useCorrelation = true);
+    PrincipalComponentAnalysis(unsigned int k, bool useCorrelation = true);
     virtual void createFeatures(const arma::mat& features) override;
     virtual arma::mat getTransformation() override;
     virtual arma::mat getNewFeatures() override;
 
-    /*!
-     * Getter.
-     * \return the indexes of the most promising features
-     */
-    inline arma::uvec getIndexes()
-    {
-    	return indexes;
-    }
-
 private:
-    unsigned int computeDimensions(arma::vec& s, double varMin);
-    void cluster(arma::mat& data, arma::mat& means, arma::uvec& clustersIndexes, unsigned int k);
-    unsigned int findNearest(const arma::mat& elements, const arma::vec mean);
-
-private:
-    unsigned int initialSize;
-    arma::uvec indexes;
     arma::mat newFeatures;
+    arma::mat T;
 
-    double varMin;
+    unsigned int k;
     bool useCorrelation;
 
 };
 
 }
 
-
-#endif /* INCLUDE_RELE_FEATURE_SELECTION_PRINCIPALFEATUREANALYSIS_H_ */
+#endif /* INCLUDE_RELE_IRL_FEATURE_SELECTION_PRINCIPALCOMPONENTANALYSIS_H_ */

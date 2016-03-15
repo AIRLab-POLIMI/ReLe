@@ -22,12 +22,5 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   gettingstarted
-   tutorial
    apireference
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

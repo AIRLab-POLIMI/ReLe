@@ -34,7 +34,10 @@ namespace ReLe
  * This task aims to minimize the undesired deviations
  * from nominal values of some controller settings
  * in control problems.
- * For further information see <a href="http://www.sciencedirect.com/science/article/pii/S0005109801001741">here</a>.
+ *
+ * References
+ * ==========
+ * [Parisi, Pirotta, Smacchia, Bascetta, Restelli. Policy gradient approaches for multi-objective sequential decision making. IJCNN 2014](http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6889738)
  */
 class LQR: public ContinuousMDP
 {

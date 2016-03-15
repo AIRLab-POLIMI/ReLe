@@ -36,7 +36,10 @@ namespace ReLe
  * policy for a taxi cab in order to let it be able
  * to transport passengers in the desired locations
  * without running out of fuel.
- * For further information see <a href="https://www.jair.org/media/639/live-639-1834-jair.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Dietterich. Hierarchical Reinforcement Learning with the MAXQ Value Function Decomposition. JAIR](https://www.jair.org/media/639/live-639-1834-jair.pdf)
  */
 //TODO not really a dense MDP...
 class TaxiFuel: public DenseMDP

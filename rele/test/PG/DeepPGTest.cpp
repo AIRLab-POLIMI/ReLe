@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/approximators/BasisFunctions.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"
@@ -98,8 +98,9 @@ int main(int argc, char *argv[])
     }
 
     DenseFeatures phi(bfs);
+    LinearApproximator reg(phi);
 
-    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1);
+    GenericParametricGibbsPolicy<DenseState> policy(actions, reg, 1);
 
     PGTest<FiniteAction, DenseState> pgTest(config, mdp, policy);
     pgTest.run();

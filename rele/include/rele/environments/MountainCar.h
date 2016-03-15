@@ -37,7 +37,10 @@ namespace ReLe
  * therefore, it has to accelerate in the opposite direction to use
  * the slope of the other hill to acquire inertia that may allow it
  * to reach the goal.
- * For further information see <a href="https://books.google.it/books?id=2S64-ZZ1fREC&pg=PA479&lpg=PA479&dq=mountain+car+optimization&source=bl&ots=BA_U_Ghnn5&sig=nvBPwQFvIxrE_PEC4TpIFX0FolY&hl=it&sa=X&ved=0ahUKEwij4oys2rTLAhUBoBQKHeQkDzcQ6AEILzAC#v=onepage&q=mountain%20car%20optimization&f=false">here</a>.
+ *
+ * References
+ * ==========
+ * [Sutton, Barto. Reinforcement Learning an introduction](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node89.html)
  */
 class MountainCar: public DenseMDP
 {

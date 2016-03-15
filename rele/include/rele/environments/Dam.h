@@ -84,7 +84,10 @@ public:
  * The aim of this optimization problem is to decide
  * the amount of water to release in order to satisfy
  * conflicting objectives.
- * For further information see <a href="http://www.dhigroup.com/upload/publications/mike11/Pedersen_RealTime.pdf">here</a>.
+ *
+ * References
+ * ==========
+ * [Castelletti, Pianosi, Restelli. A multiobjective reinforcement learning approach to water resources systems operation: Pareto frontier approximation in a single run. Water Resources Journal](http://onlinelibrary.wiley.com/doi/10.1002/wrcr.20295/abstract)
  */
 class Dam: public ContinuousMDP
 {

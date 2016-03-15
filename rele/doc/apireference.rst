@@ -219,7 +219,7 @@ Environments
 .. doxygenclass:: ReLe::ShipSteering
    :members:
    
-.. doxygenclass:: ReLe::SwingPendulum
+.. doxygenclass:: ReLe::DiscreteActionSwingUp
    :members:
 
 .. doxygenclass:: ReLe::TaxiFuel
@@ -228,7 +228,7 @@ Environments
 .. doxygenclass:: ReLe::UnderwaterVehicle
    :members:
    
-.. doxygenclass:: ReLe::Unicycle
+.. doxygenclass:: ReLe::UnicyclePolar
    :members:
    
 Generators
@@ -242,4 +242,27 @@ Generators
    :members:
 
 .. doxygenclass:: ReLe::GridWorldGenerator
+   :members:
+
+Optimization
+============
+.. doxygenclass:: ReLe::Optimization
+   :members:
+
+.. doxygenclass:: ReLe::Simplex
+   :members:
+   
+Feature Selection
+=================
+
+.. doxygenclass:: ReLe::FeatureSelectionAlgorithm
+   :members:
+   
+.. doxygenclass:: ReLe::LinearFeatureSelectionAlgorithm
+   :members:
+
+.. doxygenclass:: ReLe::PrincipalComponentAnalysis
+   :members:
+   
+.. doxygenclass:: ReLe::PrincipalFeatureAnalysis
    :members:

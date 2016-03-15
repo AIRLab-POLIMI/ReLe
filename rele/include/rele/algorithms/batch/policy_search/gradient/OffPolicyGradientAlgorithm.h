@@ -38,9 +38,18 @@ public:
     OffPolicyGradientAlgorithm(OffGradType type,
                                Policy<ActionC, StateC>& behaviour,
                                DifferentiablePolicy<ActionC, StateC>& policy,
+                               GradientStep& stepRule, unsigned int rewardIndex = 0)
+        : OffPolicyGradientAlgorithm(type, behaviour, policy, stepRule, new IndexRT(rewardIndex))
+    {
+        deleteReward = true;
+    }
+
+    OffPolicyGradientAlgorithm(OffGradType type,
+                               Policy<ActionC, StateC>& behaviour,
+                               DifferentiablePolicy<ActionC, StateC>& policy,
                                GradientStep& stepRule, RewardTransformation* rewardf) :
         type(type), behaviour(behaviour), policy(policy),
-        stepRule(stepRule), rewardf(rewardf)
+        stepRule(stepRule), rewardf(rewardf), deleteReward(false)
     {
         calculator = nullptr;
     }
@@ -75,7 +84,8 @@ public:
 
     virtual ~OffPolicyGradientAlgorithm()
     {
-
+        if(deleteReward)
+            delete rewardf;
     }
 
 private:
@@ -85,6 +95,8 @@ private:
     Policy<ActionC, StateC>& behaviour;
     DifferentiablePolicy<ActionC, StateC>& policy;
     GradientStep& stepRule;
+
+    bool deleteReward;
 
 
 };

@@ -42,9 +42,9 @@ public:
 
     }
 
-    virtual arma::vec computeGradient() override
+    virtual arma::vec computeGradient(const arma::uvec& indexes = arma::uvec()) override
     {
-        unsigned int episodeN = this->data.size();
+        unsigned int episodeN = this->getEpisodesNumber(indexes);
         unsigned int parametersN = this->policy.getParametersSize();
 
         double importanceWeightsSum = 0;
@@ -57,7 +57,9 @@ public:
             double Rew;
             double iw;
             arma::vec sumGradLog(parametersN);
-            this->computeEpisodeStatistics(this->data[i], Rew, iw, sumGradLog);
+
+            unsigned int ep = this->getEpisodeIndex(indexes, i);
+            this->computeEpisodeStatistics(this->data[ep], Rew, iw, sumGradLog);
 
             gradient += sumGradLog * Rew * iw;
 
@@ -91,10 +93,10 @@ public:
 
     }
 
-    virtual arma::vec computeGradient() override
+    virtual arma::vec computeGradient(const arma::uvec& indexes = arma::uvec()) override
     {
         int parametersN = this->policy.getParametersSize();
-        int episodeN = this->data.size();
+        int episodeN = this->getEpisodesNumber(indexes);
 
         // Reset computed results
         arma::vec gradient(parametersN, arma::fill::zeros);
@@ -114,7 +116,8 @@ public:
             double Rew;
             double iw;
             arma::vec sumGradLog(parametersN);
-            this->computeEpisodeStatistics(this->data[i], Rew, iw, sumGradLog);
+            unsigned int ep = this->getEpisodeIndex(indexes, i);
+            this->computeEpisodeStatistics(this->data[ep], Rew, iw, sumGradLog);
 
             // store them
             Rew_ep(i) = Rew;

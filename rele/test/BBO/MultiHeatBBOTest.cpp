@@ -25,7 +25,7 @@
 #include "rele/algorithms/policy_search/REPS/REPS.h"
 #include "rele/statistics/DifferentiableNormals.h"
 #include "rele/core/Core.h"
-#include "rele/policy/parametric/differentiable/GibbsPolicy.h"
+#include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 #include "rele/approximators/BasisFunctions.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"
@@ -219,6 +219,7 @@ int main(int argc, char *argv[])
     BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().continuosStateDim,actions.size()-1);
     // create feature vector
     DenseFeatures phi(bfs);
+    LinearApproximator reg(phi);
 
 //    // testare basis
 //    vec inputtest = {0, 14, 21, 1};
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
 
 //    return 0;
 
-    ParametricGibbsPolicy<DenseState> policy(actions, phi, 1.0/1e8);
+    GenericParametricGibbsPolicy<DenseState> policy(actions, reg, 1.0/1e8);
     //---
 
     //--- distribution setup

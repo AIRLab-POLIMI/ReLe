@@ -31,9 +31,10 @@ namespace ReLe
 
 MountainCar::MountainCar(ConfigurationsLabel label) :
     //Sutton's article
-    //    DenseMDP(2, 3, 1, false, true)
+    DenseMDP(2, 3, 1, false, true),
     //Klein's articles
-    DenseMDP(2, 3, 1, false, true, 0.9, 100), s0type(label)
+    //DenseMDP(2, 3, 1, false, true, 0.9, 100),
+    s0type(label)
 {
 }
 
@@ -65,19 +66,19 @@ void MountainCar::step(const FiniteAction& action,
     currentState[position] = min(max(computedPosition, -1.2), 0.6);
 
     //Sutton's article
-    //    if (currentState[position] <= -1.2)
-    //    {
-    //        currentState[velocity] = 0;
-    //    }
-    //    if (currentState[position] >= 0.6)
-    //    {
-    //        reward[0] = 0;
-    //        currentState.setAbsorbing();
-    //    }
-    //    else
-    //    {
-    //        reward[0] = -1;
-    //    }
+    if (currentState[position] <= -1.2)
+    {
+        currentState[velocity] = 0;
+    }
+    if (currentState[position] >= 0.6)
+    {
+        reward[0] = 0;
+        currentState.setAbsorbing();
+    }
+    else
+    {
+        reward[0] = -1;
+    }
 
     //Klein's article
 //    if (currentState[position] > 0.5)
