@@ -244,6 +244,13 @@ Generators
 .. doxygenclass:: ReLe::GridWorldGenerator
    :members:
 
+Optimization
+============
+.. doxygenclass:: ReLe::Optimization
+   :members:
+
+.. doxygenclass:: ReLe::Simplex
+   :members:
    
 Feature Selection
 =================
