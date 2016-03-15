@@ -2,7 +2,7 @@
  * rele_ros,
  *
  *
- * Copyright (C) 2015 Davide Tateo
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele_ros.
@@ -21,45 +21,28 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_environmentS_ROOMENVIRONMENT_H_
-#define INCLUDE_RELE_ROS_environmentS_ROOMENVIRONMENT_H_
+#ifndef INCLUDE_RELE_ROS_ENVIRONMENTS_RRBOT_H_
+#define INCLUDE_RELE_ROS_ENVIRONMENTS_RRBOT_H_
 
 #include "rele_ros/core/SimulatedEnvironment.h"
 
 namespace ReLe_ROS
 {
 
-class SimulatedRoomEnvironment : public SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>
+class RRBot : public SimulatedEnvironment<ReLe::DenseAction,
+    ReLe::DenseState>
 {
-
 public:
-    SimulatedRoomEnvironment(double controlFrequency);
-    virtual ~SimulatedRoomEnvironment();
+	RRBot(double controlFrequency);
+    virtual ~RRBot();
 
 protected:
-    virtual void publishAction(const ReLe::DenseAction& action);
-    virtual void setState(ReLe::DenseState& state);
+    virtual void publishAction(const ReLe::DenseAction& action) override;
+    virtual void setState(ReLe::DenseState& state) override;
     virtual void setReward(const ReLe::DenseAction& action,
-                           const ReLe::DenseState& state, ReLe::Reward& reward);
-
-private:
-    void writeSettings();
-
-private:
-    int leftMotorHandle;
-    int rightMotorHandle;
-
-    int positionHandle;
-
-    int objectiveHandle;
-
-    ros::Publisher motorSpeedPub;
-
-
-    arma::vec objective;
-
+                           const ReLe::DenseState& state, ReLe::Reward& reward) override;
 };
 
 }
 
-#endif /* INCLUDE_RELE_ROS_environmentS_ROOMENVIRONMENT_H_ */
+#endif /* INCLUDE_RELE_ROS_ENVIRONMENTS_RRBOT_H_ */

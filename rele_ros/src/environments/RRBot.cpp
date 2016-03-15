@@ -2,7 +2,7 @@
  * rele_ros,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele_ros.
@@ -21,37 +21,38 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele_ros/environments/BasketBot.h"
-
+#include "rele_ros/environments/RRBot.h"
 
 namespace ReLe_ROS
 {
 
-SimulatedBasketBot::SimulatedBasketBot(double controlFrequency) : SimulatedEnvironment("basketbot", controlFrequency)
+RRBot::RRBot(double controlFrequency)
+	: SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>(controlFrequency)
 {
-    stateReady = true; //FIXME LEVARE!!!
+	//TODO levare
+	this->stateReady = true;
 }
 
-SimulatedBasketBot::~SimulatedBasketBot()
-{
-
-}
-
-void SimulatedBasketBot::publishAction(const ReLe::FiniteAction& action)
+RRBot::~RRBot()
 {
 
 }
 
-void SimulatedBasketBot::setState(ReLe::FiniteState& state)
+void RRBot::publishAction(const ReLe::DenseAction& action)
 {
-
+	//TODO implement
 }
 
-void SimulatedBasketBot::setReward(const ReLe::FiniteAction& action,
-                                   const ReLe::FiniteState& state, ReLe::Reward& reward)
+void RRBot::setState(ReLe::DenseState& state)
 {
-
+	//TODO Implement
 }
 
+void RRBot::setReward(const ReLe::DenseAction& action,
+                       const ReLe::DenseState& state, ReLe::Reward& reward)
+{
+	//TODO implement
 }
 
+
+}

@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 find_package(catkin REQUIRED COMPONENTS rele
                                         roscpp
-                                        vrep_common)
+                                        std_srvs)
 project(rele_ros)
 
 catkin_package(INCLUDE_DIRS include
@@ -46,33 +46,19 @@ add_library(releROS ${ReLeROS_SOURCE})
 target_link_libraries(releROS ${catkin_LIBRARIES})
 add_dependencies(releROS ${catkin_EXPORTED_TARGETS})
 
+#releROS test
 
-#simulator handlers
-add_executable(basketbot_sim src/simulator_handlers/basketbot_sim.cpp)
-target_link_libraries(basketbot_sim ${catkin_LIBRARIES})
-add_dependencies(basketbot_sim ${catkin_EXPORTED_TARGETS})
-
-#Test nodes
-add_executable(basketbot src/test/BasketBotTest.cpp)
-target_link_libraries(basketbot releROS ${catkin_LIBRARIES})
-add_dependencies(basketbot ${catkin_EXPORTED_TARGETS})
-
-add_executable(room_environment src/test/RoomEnvironmentTest.cpp)
-target_link_libraries(room_environment releROS ${catkin_LIBRARIES})
-add_dependencies(room_environment ${catkin_EXPORTED_TARGETS})
-
-add_executable(snake src/test/SnakeTest.cpp)
-target_link_libraries(snake releROS ${catkin_LIBRARIES})
-add_dependencies(snake ${catkin_EXPORTED_TARGETS})
+add_executable(rrbot_test test/RRBotTest.cpp)
+target_link_libraries(rrbot_test releROS ${catkin_LIBRARIES})
 
 
 # ------------------------ INSTALLATION ------------------------
 
 ## Mark executables and/or libraries for installation
-#install(TARGETS rele_ros
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+install(TARGETS releROS
+   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 # --------------------------------------------------------------

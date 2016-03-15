@@ -23,33 +23,35 @@
 
 #include <rele/core/Core.h>
 #include <rele/core/Agent.h>
-#include "rele_ros/environments/BasketBot.h"
+
+#include "rele_ros/environments/RRBot.h"
 
 using namespace ReLe;
 
-class FakeAgent: public Agent<FiniteAction, FiniteState>
+class FakeAgent: public Agent<DenseAction, DenseState>
 {
-    virtual void initEpisode(const FiniteState& state, FiniteAction& action)
+    virtual void initEpisode(const DenseState& state, DenseAction& action) override
     {
 
     }
 
-    virtual void sampleAction(const FiniteState& state, FiniteAction& action)
-    {
-
-    }
-    virtual void step(const Reward& reward, const FiniteState& nextState,
-                      FiniteAction& action)
+    virtual void sampleAction(const DenseState& state, DenseAction& action) override
     {
 
     }
 
-    virtual void endEpisode(const Reward& reward)
+    virtual void step(const Reward& reward, const DenseState& nextState,
+    			DenseAction& action) override
     {
 
     }
 
-    virtual void endEpisode()
+    virtual void endEpisode(const Reward& reward) override
+    {
+
+    }
+
+    virtual void endEpisode() override
     {
 
     }
@@ -57,24 +59,21 @@ class FakeAgent: public Agent<FiniteAction, FiniteState>
 
 int main(int argc, char* argv[])
 {
-    ros::init(argc, argv, "basketbot_test");
-    ReLe_ROS::SimulatedBasketBot basketBot(1.0);
+    ros::init(argc, argv, "rrbot_test");
+    ReLe_ROS::RRBot rrbot(1.0);
     FakeAgent agent;
-    ReLe::Core<ReLe::FiniteAction, ReLe::FiniteState> core(basketBot, agent);
+    auto&& core = buildCore(rrbot, agent);
 
     core.getSettings().episodeLength = 30;
 
     try
     {
         core.runEpisode();
-        basketBot.stopSimulation();
     }
     catch (RosExitException& e)
     {
-        ros::start();
-        basketBot.stopSimulation();
-        ros::shutdown();
         std::cout << "Node terminated" << std::endl;
     }
+
 
 }

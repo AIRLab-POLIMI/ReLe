@@ -30,10 +30,20 @@
 namespace ReLe
 {
 
+/*!
+ * A tile coder can be used to transform tiles into a set of features.
+ * A tile coder evaluate each tile set provided and transform it in a coherent set of
+ * binary features sparse vectors.
+ */
 template<class InputC>
 class TilesCoder_: public Features_<InputC, false>
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param tiles a set of tiles to be used
+	 * \param outputs the number of output features vectors
+	 */
     TilesCoder_(Tiles_<InputC>* tiles, unsigned int outputs = 1) :
         outputs(outputs)
     {
@@ -41,6 +51,11 @@ public:
         rowsN = tiles->size() * outputs;
     }
 
+    /*!
+     * Constructor.
+     * \param tilesVector a vector of multiple tilings to be used
+     * \param outputs the number of output features vectors
+     */
     TilesCoder_(TilesVector_<InputC>& tilesVector, unsigned int outputs = 1) :
         tilesVector(tilesVector), outputs(outputs), rowsN(0)
     {

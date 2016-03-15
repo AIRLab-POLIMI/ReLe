@@ -2,7 +2,7 @@
  * rele_ros,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele_ros.
@@ -21,238 +21,97 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_SIMULATEDenvironment_H_
-#define INCLUDE_RELE_ROS_SIMULATEDenvironment_H_
+#ifndef INCLUDE_RELE_ROS_CORE_SIMULATEDENVIRONMENT_H_
+#define INCLUDE_RELE_ROS_CORE_SIMULATEDENVIRONMENT_H_
 
-#include <stdexcept>
-
-#include "v_repConst.h"
-#include <vrep_common/simRosStartSimulation.h>
-#include <vrep_common/simRosStopSimulation.h>
-#include <vrep_common/simRosGetObjectHandle.h>
-#include <vrep_common/simRosEnablePublisher.h>
-#include <vrep_common/simRosEnableSubscriber.h>
-#include <vrep_common/simRosGetObjectPose.h>
-#include <vrep_common/simRosSynchronous.h>
-#include <vrep_common/simRosSynchronousTrigger.h>
-#include <vrep_common/simRosSetFloatingParameter.h>
-
-#include <vrep_common/VrepInfo.h>
 #include "RosEnvironment.h"
+
+#include <std_srvs/Empty.h>
 
 namespace ReLe_ROS
 {
 
-enum JointMode
-{
-    position = 0, targetPosition = 1, targetSpeed = 2, force_torque = 3
-};
-
 template<class ActionC, class StateC>
-class SimulatedEnvironment: public Rosenvironment<ActionC, StateC>
+class SimulatedEnvironment: public RosEnvironment<ActionC, StateC>
 {
 protected:
-    using Rosenvironment<ActionC, StateC>::n;
+    using RosEnvironment<ActionC, StateC>::n;
 
-public:
-    SimulatedEnvironment(const std::string& name, double controlFrequency) :
-        Rosenvironment<ActionC, StateC>(controlFrequency), name(name)
-    {
-        infoSubscriber = n.subscribe("/vrep/info", 1,
-                                     &SimulatedEnvironment::infoCallback, this);
-        simulationRunning = false;
+     SimulatedEnvironment(double controlFrequency) :
+          RosEnvironment<ActionC, StateC>(controlFrequency)
+      {
+       	 simulationRunning = true;
 
+       	ROS_INFO("Waiting for Gazebo");
 
-        ros::service::waitForService("/vrep/simRosSynchronous");
-        ros::service::waitForService("/vrep/simRosSetFloatingParameter");
+    	 //wait for gazebo services
+    	 ros::service::waitForService(reset);
+    	 ros::service::waitForService(resetWorld);
+    	 ros::service::waitForService(pause);
+    	 ros::service::waitForService(resume);
 
+    	 ROS_INFO("Gazebo simulator is up, stopping simulation");
 
-        //Use syncronous mode
-        setSynchronousMode(true);
+    	 //stop simulation
+    	 stop();
+      }
 
-        //set dt
-        vrep_common::simRosSetFloatingParameter srv;
-        srv.request.parameter = sim_floatparam_simulation_time_step;
-        srv.request.parameterValue = 1.0/controlFrequency;
-        ros::service::call("/vrep/simRosSetFloatingParameter", srv);
-
-
-    }
-
-    void infoCallback(const vrep_common::VrepInfo::ConstPtr& info)
-    {
-        /* simulationTime=info->simulationTime.data;
-         simulationRunning=(info->simulatorState.data&1)!=0;
-         if(!simulationRunning)
-         ros::shutdown();*/
-        //TODO implement this stuff
-    }
-
-    void stopSimulation()
-    {
-        if (simulationRunning)
-        {
-            stop();
-        }
-    }
-
-    virtual ~SimulatedEnvironment()
-    {
-    }
+      virtual ~SimulatedEnvironment()
+      {
+    	  if(simulationRunning)
+    	  {
+    		  if(ros::ok())
+    		  {
+    			 ROS_INFO("Simulation is still running, stopping...");
+    			 stop();
+    		  }
+    		  else
+    		  {
+    			  ros::start();
+    			  ROS_INFO("Simulation is still running, stopping...");
+    			  stop();
+    			  ros::shutdown();
+    		  }
+    	  }
+      }
 
 protected:
-    virtual void start()
-    {
-        if (simulationRunning)
-        {
-            stop();
-        }
+      virtual void start() override
+      {
+    	  if(simulationRunning)
+    		  stop();
 
-        ros::service::waitForService("/vrep/simRosStartSimulation");
+    	  ros::service::call(resume, emptyService);
 
+    	  simulationRunning = true;
+      }
 
-        vrep_common::simRosStartSimulation srv;
-        do
-        {
-            ros::service::call("/vrep/simRosStartSimulation", srv);
+      virtual void stop() override
+      {
+    	  ros::service::call(pause, emptyService);
+    	  ros::service::call(reset, emptyService);
+    	  simulationRunning = false;
+      }
 
-            std::cout << "Start simulation code: " << srv.response.result << std::endl;
-
-            if (srv.response.result == -1)
-            {
-                throw std::runtime_error("Simulation could not be started");
-            }
-
-            if(srv.response.result != 1)
-            {
-                triggerSimulation();
-            }
-
-        }
-        while(ros::ok() && srv.response.result != 1);
-
-        simulationRunning = true;
-
-        setupPublishSubscribe();
-
-    }
-
-    virtual void stop()
-    {
-        std::cout << "Stopping simulation" << std::endl;
-        ros::service::waitForService("/vrep/simRosStopSimulation");
-
-        vrep_common::simRosStopSimulation srv;
-        ros::service::call("/vrep/simRosStopSimulation", srv);
-
-        if (srv.response.result == -1)
-        {
-            throw std::runtime_error("Simulation could not be stopped");
-        }
-
-        //disable syncronous mode
-		setSynchronousMode(false);
-        simulationRunning = false;
-
-        std::cout << "Simulation Stopped" << std::endl;
-    }
-
-    virtual void setupPublishSubscribe()
-    {
-        vrep_common::simRosEnableSubscriber srv;
-
-        srv.request.topicName = "/" + name + "/wheels"; // the topic name
-        srv.request.queueSize = 1; // the subscriber queue size (on V-REP side)
-        srv.request.streamCmd = simros_strmcmd_set_joint_state; // the subscriber type
-
-        ros::service::call("/vrep/simRosEnableSubscriber", srv);
-
-        if (srv.response.subscriberID == -1)
-        {
-            throw std::runtime_error(
-                "Unable to subscribe to joint state callback");
-        }
-    }
-
-    void getHandle(const std::string& name, int& handle)
-    {
-        vrep_common::simRosGetObjectHandle robot_handle;
-        robot_handle.request.objectName = name;
-
-        if (!ros::service::call("/vrep/simRosGetObjectHandle", robot_handle))
-        {
-            throw std::runtime_error("error in service call");
-        }
-
-        if (robot_handle.response.handle < 0)
-        {
-            throw std::runtime_error(
-                "error, unable to get the handle of the vrep object "
-                + name);
-        }
-
-        handle = robot_handle.response.handle;
-    }
-
-    bool getObjectPose(arma::vec& pose, int handle, int relative = -1)
-    {
-        vrep_common::simRosGetObjectPose object_pose;
-        object_pose.request.handle = handle;
-        object_pose.request.relativeToObjectHandle = relative;
-
-        if(ros::service::call("/vrep/simRosGetObjectPose", object_pose))
-        {
-            auto& poseMsg = object_pose.response.pose.pose;
-
-            pose[0] = poseMsg.position.x;
-            pose[1] = poseMsg.position.y;
-            pose[2] = poseMsg.position.z;
-
-            pose[3] = poseMsg.orientation.x;
-            pose[4] = poseMsg.orientation.y;
-            pose[5] = poseMsg.orientation.z;
-            pose[6] = poseMsg.orientation.w;
-
-
-            return true;
-        }
-        else
-            return false;
-
-
-    }
-
-    //Call this method inside publish action
-    void triggerSimulation()
-    {
-        vrep_common::simRosSynchronousTrigger srv;
-        do
-        {
-            ros::service::call("/vrep/simRosSynchronousTrigger", srv);
-        }
-        while(srv.response.result == -1);
-    }
+      virtual void publishAction(const ActionC& action) = 0;
+      virtual void setState(StateC& state) = 0;
+      virtual void setReward(const ActionC& action, const StateC& state,
+                             ReLe::Reward& reward) = 0;
 
 private:
-	void setSynchronousMode(bool on)
-	{
-		//disable syncronous mode
-		vrep_common::simRosSynchronous srv;
-		srv.request.enable = on ? 1 : 0;
-		ros::service::call("/vrep/simRosSynchronous", srv);
-		if (srv.response.result == -1)
-		{
-			throw std::runtime_error("Synchronous mode cannot be enabled");
-		}
-	}
+      static constexpr auto reset = "/gazebo/reset_simulation";
+      static constexpr auto resetWorld = "/gazebo/reset_world";
+      static constexpr auto pause = "/gazebo/pause_physics";
+      static constexpr auto resume = "/gazebo/unpause_physics";
 
-private:
-    std::string name;
-    ros::Subscriber infoSubscriber;
-    bool simulationRunning;
+  private:
+      bool simulationRunning;
+      std_srvs::Empty emptyService;
 
 
 };
 
 }
-#endif /* INCLUDE_RELE_ROS_SIMULATEDenvironment_H_ */
+
+
+#endif /* INCLUDE_RELE_ROS_CORE_SIMULATEDENVIRONMENT_H_ */

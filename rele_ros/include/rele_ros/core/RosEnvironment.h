@@ -39,10 +39,10 @@ namespace ReLe_ROS
 {
 
 template<class ActionC, class StateC>
-class Rosenvironment: public ReLe::Environment<ActionC, StateC>
+class RosEnvironment: public ReLe::Environment<ActionC, StateC>
 {
 public:
-    Rosenvironment(double controlFrequency) :
+    RosEnvironment(double controlFrequency) :
         r(controlFrequency)
     {
         stateReady = false;
@@ -56,7 +56,6 @@ public:
             publishAction(action);
             ros::spinOnce();
             r.sleep();
-            //std::cout << "waiting for next state" << std::endl;
             checkTermination();
         }
         while (!stateReady && ros::ok());
@@ -77,7 +76,6 @@ public:
         do
         {
             ros::spinOnce();
-            //std::cout << "waiting for initial state" << std::endl;
             checkTermination();
         }
         while (!stateReady && ros::ok());
@@ -88,7 +86,7 @@ public:
         r.reset();
     }
 
-    virtual ~Rosenvironment()
+    virtual ~RosEnvironment()
     {
 
     }
