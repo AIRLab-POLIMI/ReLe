@@ -30,7 +30,7 @@ namespace ReLe
 {
 /*!
  * This interface represent a basis function.
- * A basis function can be see as a mapping \f$\psi(i)\leftarrow\mathbb{R}\f$ with \f$i\in\mathcal{D}\f$.
+ * A basis function can be see as a mapping \f$\psi(i)\rightarrow\mathbb{R}\f$ with \f$i\in\mathcal{D}\f$.
  * The template definition allows for generic domains \f$\mathcal{D}\f$.
  * A set of basis function can be used as a set of features, that can be used for function approximation.
  */
