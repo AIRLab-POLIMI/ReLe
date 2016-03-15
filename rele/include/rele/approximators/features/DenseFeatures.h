@@ -30,16 +30,32 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements a dense features matrix.
+ * A dense features matrix is a feature matrix where all the elements
+ * are specified as a set of basis functions.
+ * The evaluation of this features class returns a dense matrix.
+ */
 template<class InputC>
 class DenseFeatures_: public Features_<InputC>
 {
 
 public:
+	/*!
+	 * Constructor.
+	 * Construct a single feature matrix (a scalar).
+	 * \param basisFunction the basis function rappresenting this feature.
+	 */
     DenseFeatures_(BasisFunction_<InputC>* basisFunction) : basis(1)
     {
         basis[0] = basisFunction;
     }
 
+    /*!
+     * Constructor.
+     * Construct a feature vector.
+     * \param basisVector the set of basis functions to use
+     */
     DenseFeatures_(BasisFunctions_<InputC>& basisVector) :  basis(basisVector.size())
     {
 
@@ -49,6 +65,13 @@ public:
         }
     }
 
+    /*!
+     * Constructor.
+     * Construct a feature matrix.
+     * \param basisVector the set of basis functions to use
+     * \param rows the number of rows of the feature matrix
+     * \param cols the number of cols of the feature matrix
+     */
     DenseFeatures_(BasisFunctions_<InputC>& basisVector, unsigned int rows, unsigned int cols)
         : basis(rows, cols)
     {
@@ -60,6 +83,10 @@ public:
         }
     }
 
+    /*!
+     * Destructor.
+     * Destroys also all the given basis.
+     */
     virtual ~DenseFeatures_()
     {
         for(auto bf : basis)

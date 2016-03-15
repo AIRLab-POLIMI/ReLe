@@ -158,6 +158,46 @@ Basic Utilities
    
 .. doxygenclass:: ReLe::PolicyEvalDistribution
    :members:   
+   
+Function Approximators
+======================
+
+Basic interfaces
+----------------
+
+.. doxygenclass::BasisFunction_
+   :members:
+
+.. doxygenclass::Tiles_
+   :members:
+    
+.. doxygenclass::Features_
+   :members:
+
+.. doxygenclass:: ReLe::Regressor_
+   :members:
+   
+.. doxygenclass:: ReLe::ParametricRegressor_
+   :members:
+   
+.. doxygenclass:: ReLe::BatchRegressor_
+   :members:
+   
+.. doxygenclass:: ReLe::UnsupervisedBatchRegressor_
+   :members:
+
+Features types
+--------------
+
+.. doxygenclass::DenseFeatures_
+   :members:
+   
+.. doxygenclass::SparseFeatures_
+   :members:
+   
+.. doxygenclass::TilesCoder_
+   :members:
+
 
 Policy Representations
 ======================

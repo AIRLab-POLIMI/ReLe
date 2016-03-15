@@ -29,24 +29,42 @@
 namespace ReLe
 {
 
+/*!
+ * This class implement a sparse features matrix.
+ * A sparse feature matrix is a matrix where some basis function
+ * are by default zero valued matrix.
+ * Despite the name, the evaluation of this features class returns a dense matrix.
+ */
 template<class InputC>
 class SparseFeatures_: public Features_<InputC>
 {
 
 public:
+	/*!
+	 * Constructor.
+	 * Construct an empty set of sparse feature.
+	 */
     SparseFeatures_(): n_rows(0), n_cols(0)
     {
     }
 
+    /*!
+     * Constructor.
+     * Constructs a set of sparse features from the given basis functions.
+     * \param basis the basis functions to use
+     * \param replicationN the number of times the features should be replicated
+     * \param indipendent if the features replicated should be padded by zeros,
+     *  to avoid common parameters.
+     */
     SparseFeatures_(BasisFunctions_<InputC>& basis,
-                    unsigned int nbReplication = 1,
+                    unsigned int replicationN = 1,
                     bool indipendent = true)
-        : n_rows(basis.size()*(indipendent?nbReplication:1)), n_cols(nbReplication), valuesToDelete(basis)
+        : n_rows(basis.size()*(indipendent?replicationN:1)), n_cols(replicationN), valuesToDelete(basis)
     {
         unsigned int i, k;
         unsigned int offset = 0;
         unsigned int nBasis = basis.size();
-        for (k = 0; k < nbReplication; ++k)
+        for (k = 0; k < replicationN; ++k)
         {
             for (i = 0; i < nBasis; ++i)
             {
@@ -63,7 +81,7 @@ public:
         }
     }
 
-    arma::mat operator ()(const InputC& input) override
+    virtual arma::mat operator ()(const InputC& input) override
     {
         unsigned int c, r, i, nelem = rowsIdxs.size();
         double val;
@@ -82,16 +100,22 @@ public:
         return F;
     }
 
-    inline size_t rows() const override
+    virtual inline size_t rows() const override
     {
         return n_rows;
     }
 
-    size_t cols() const override
+    virtual inline size_t cols() const override
     {
         return n_cols;
     }
 
+    /*!
+     * Adds a single basis function
+     * \param row the row where to add the basis function
+     * \param col the column where to add the basis function
+     * \param bfs the basis function to add
+     */
     void addBasis(unsigned int row, unsigned int col, BasisFunction_<InputC>* bfs)
     {
         unsigned int c, r, i, nelem = rowsIdxs.size();
@@ -121,6 +145,10 @@ public:
 
     }
 
+    /*!
+     * Adds a set of basis function as diagonal features
+     * \param basis the vector of basis functions
+     */
     void setDiagonal(BasisFunctions_<InputC>& basis)
     {
         rowsIdxs.clear();
@@ -140,7 +168,11 @@ public:
         }
     }
 
-    ~SparseFeatures_()
+    /*!
+     * Destructor.
+     * Destroys also all the given basis.
+     */
+    virtual ~SparseFeatures_()
     {
         clearBasis();
     }
@@ -158,13 +190,11 @@ private:
     }
 
 private:
-    //an element of the matrix is given by (rowsIdxs[i], colsIdxs[i], values[i])
     std::vector<unsigned int> rowsIdxs, colsIdxs;
     BasisFunctions_<InputC> values;
     BasisFunctions_<InputC> valuesToDelete;
     unsigned int n_rows, n_cols;
 };
-
 
 typedef SparseFeatures_<arma::vec> SparseFeatures;
 
