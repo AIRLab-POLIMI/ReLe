@@ -30,7 +30,7 @@ namespace ReLe
 {
 
 /*!
- * This class implements Principal Component Analysis (PCA)
+ * This class implements Principal Component Analysis (PCA).
  * PCA computes a linear combination of a set of features to reduce data dimensionality.
  */
 class PrincipalComponentAnalysis : public LinearFeatureSelectionAlgorithm

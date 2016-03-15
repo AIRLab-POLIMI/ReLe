@@ -50,7 +50,6 @@ ParametricNormal::ParametricNormal(unsigned int support_dim)
 ParametricNormal::ParametricNormal(const vec& params, const mat& covariance)
     : ParametricNormal(params.n_elem)
 {
-    //    std::cout << "...." << params << std::endl;
     mean       = params;
     Cov        = covariance;
     invCov     = inv(Cov);

@@ -42,7 +42,7 @@ class out_of_bounds : public std::exception
  * In other words, tiles implements a discretization over the input space.
  * Formally this class implements a mapping from an input data to a
  * positive number, which represent the corresponding tile.
- * One or a set of Tilings can be used as a set of features for approximators.
+ * One or a set of tilings can be used as a set of features for approximators.
  */
 template<class InputC>
 class Tiles_
@@ -54,7 +54,8 @@ public:
     virtual unsigned int operator()(const InputC& input) = 0;
 
     /*!
-     * Return the total number of tilings
+     * Getter.
+     * \return the total number of tiles
      */
     virtual unsigned int size() = 0;
 

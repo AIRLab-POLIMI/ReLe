@@ -30,15 +30,33 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the most simple type of tiling: a uniform grid tiling
+ * over the whole state space.
+ * As only a finite number of tiles is supported, the state space must be range limited.
+ */
 class BasicTiles : public Tiles
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param range the range of the first state variable
+	 * \param tilesN the number of tiles to use for the first state variable
+	 */
     BasicTiles(Range& range, unsigned int tilesN);
+
+    /*!
+     * Constructor.
+     * \param ranges the range of the (first n) state variables
+     * \param tilesN the number of tiles to use for each (of the first n) state variable
+     */
     BasicTiles(std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
+
     inline virtual unsigned int size() override
     {
         return tilesSize;
     }
+
     virtual unsigned int operator()(const arma::vec& input) override;
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
@@ -57,11 +75,22 @@ protected:
     unsigned int tilesSize;
 };
 
+/*!
+ * This class extends the BasicTiles class, allowing to choose over which state component
+ * tiling should be applied.
+ */
 class SelectiveTiles : public BasicTiles
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param stateComponents the index of the state variables to use
+	 * \param ranges the range to use for each state variable
+	 * \param tilesN the number of tiles to use for each state variable
+	 */
     SelectiveTiles(std::vector<unsigned int> stateComponents,
                    std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
+
     virtual unsigned int operator()(const arma::vec& input) override;
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;

@@ -38,25 +38,35 @@ class RosExitException : public std::exception
 namespace ReLe_ROS
 {
 
+/*!
+ * Basic Interface for ROS environments
+ * It implements the basic ros spin lop in the environments methods,
+ * while offering a easy to use interface for state reading, action publishing, reward assignment.
+ * This interface must be extended to implement both the low level topic publishing/subscribing
+ * and the environment logic (end states, reward).
+ */
 template<class ActionC, class StateC>
-class Rosenvironment: public ReLe::Environment<ActionC, StateC>
+class RosEnvironment: public ReLe::Environment<ActionC, StateC>
 {
 public:
-    Rosenvironment(double controlFrequency) :
+    /*!
+     * Constructor
+     * \param controlFrequency the frequency of the control publishing
+     */
+    RosEnvironment(double controlFrequency) :
         r(controlFrequency)
     {
         stateReady = false;
     }
 
     virtual void step(const ActionC& action, StateC& nextState,
-                      ReLe::Reward& reward)
+                      ReLe::Reward& reward) override
     {
         do
         {
             publishAction(action);
             ros::spinOnce();
             r.sleep();
-            //std::cout << "waiting for next state" << std::endl;
             checkTermination();
         }
         while (!stateReady && ros::ok());
@@ -70,14 +80,13 @@ public:
         }
     }
 
-    virtual void getInitialState(StateC& state)
+    virtual void getInitialState(StateC& state) override
     {
         start();
 
         do
         {
             ros::spinOnce();
-            //std::cout << "waiting for initial state" << std::endl;
             checkTermination();
         }
         while (!stateReady && ros::ok());
@@ -88,16 +97,40 @@ public:
         r.reset();
     }
 
-    virtual ~Rosenvironment()
+    virtual ~RosEnvironment()
     {
 
     }
 
 protected:
+    /*!
+     * This method contains the logic needed to start the specific environment.
+     * Must be implemented.
+     */
     virtual void start() = 0;
+
+    /*!
+     * This method contains the logic needed to stop the specific environment.
+     * Must be implemented.
+     */
     virtual void stop() = 0;
+
+    /*!
+     * This method contains the logic used to publish actions to the system.
+     * Must be implemented.
+     */
     virtual void publishAction(const ActionC& action) = 0;
+
+    /*!
+     * This method contains the logic to set the current state.
+     * Must be implemented.
+     */
     virtual void setState(StateC& state) = 0;
+
+    /*!
+     * This method contains the reward function implementation.
+     * Must be implemented.
+     */
     virtual void setReward(const ActionC& action, const StateC& state,
                            ReLe::Reward& reward) = 0;
 
@@ -109,8 +142,13 @@ private:
     }
 
 protected:
+    //! The node handle
     ros::NodeHandle n;
+
+    //! The rate of the controller
     ros::Rate r;
+
+    //! Flag to signal to if the state is ready or not, set by subclass
     bool stateReady;
 
 };

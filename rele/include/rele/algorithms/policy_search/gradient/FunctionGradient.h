@@ -24,9 +24,9 @@
 #ifndef FUNCTIONGRADIENT_H_
 #define FUNCTIONGRADIENT_H_
 
+#include "rele/core/RewardTransformation.h"
 #include "rele/core/Transition.h"
 #include "rele/algorithms/policy_search/gradient/PolicyGradientAlgorithm.h"
-#include "rele/approximators/RewardTransformation.h"
 
 namespace ReLe
 {

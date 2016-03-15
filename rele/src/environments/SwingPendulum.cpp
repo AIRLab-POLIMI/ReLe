@@ -1,4 +1,4 @@
-#include "../../include/rele/environments/SwingPendulum.h"
+#include "rele/environments/SwingPendulum.h"
 
 #include "rele/utils/RandomGenerator.h"
 #include <cassert>

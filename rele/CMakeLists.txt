@@ -66,7 +66,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     endif()
 
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "5.0")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -Wsuggest-override")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wsuggest-override")
     endif()
 endif()
 add_definitions( -DARMA_DONT_PRINT_ERRORS )

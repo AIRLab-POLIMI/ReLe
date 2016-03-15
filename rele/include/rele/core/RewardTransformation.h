@@ -30,16 +30,33 @@
 namespace ReLe
 {
 
+/*!
+ * Basic interface for reward function scalarization.
+ */
 class RewardTransformation
 {
 public:
+	/*!
+	 * Evaluation method
+	 * \param r the reward vector
+	 * \return the scalarization of the reward vector
+	 */
     virtual double operator()(const Reward& r) = 0;
     virtual ~RewardTransformation() {}
 };
 
+
+/*!
+ * This class implement the single objective scalarization, i.e. the
+ * scalarization is done by selecting a single value of the reward function.
+ */
 class IndexRT : public RewardTransformation
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param idx the index of the reward element to choose
+	 */
     IndexRT(unsigned int idx)
         : index(idx)
     {
@@ -54,6 +71,11 @@ protected:
     unsigned int index;
 };
 
+/*!
+ * This class implement the weighted sum scalarization, i.e. the
+ * scalarization is a weighted sum of all elements in the reward
+ * vector.
+ */
 class WeightedSumRT : public RewardTransformation
 {
 public:

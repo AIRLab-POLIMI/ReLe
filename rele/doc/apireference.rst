@@ -149,6 +149,18 @@ Batch loggers
 .. doxygenclass:: ReLe::WriteBatchDatasetLogger
    :members:   
    
+Reward Transformation
+---------------------
+
+.. doxygenclass:: ReLe::RewardTransformation
+   :members:
+   
+.. doxygenclass:: ReLe::IndexRT
+   :members:
+   
+.. doxygenclass:: ReLe::WeightedSumRT
+   :members:  
+   
 
 Basic Utilities
 ---------------
@@ -158,6 +170,46 @@ Basic Utilities
    
 .. doxygenclass:: ReLe::PolicyEvalDistribution
    :members:   
+   
+Function Approximators
+======================
+
+Basic interfaces
+----------------
+
+.. doxygenclass:: ReLe::BasisFunction_
+   :members:
+
+.. doxygenclass:: ReLe::Tiles_
+   :members:
+    
+.. doxygenclass:: ReLe::Features_
+   :members:
+
+.. doxygenclass:: ReLe::Regressor_
+   :members:
+   
+.. doxygenclass:: ReLe::ParametricRegressor_
+   :members:
+   
+.. doxygenclass:: ReLe::BatchRegressor_
+   :members:
+   
+.. doxygenclass:: ReLe::UnsupervisedBatchRegressor_
+   :members:
+
+Features types
+--------------
+
+.. doxygenclass:: ReLe::DenseFeatures_
+   :members:
+   
+.. doxygenclass:: ReLe::SparseFeatures_
+   :members:
+   
+.. doxygenclass:: ReLe::TilesCoder_
+   :members:
+
 
 Policy Representations
 ======================
@@ -244,6 +296,13 @@ Generators
 .. doxygenclass:: ReLe::GridWorldGenerator
    :members:
 
+Optimization
+============
+.. doxygenclass:: ReLe::Optimization
+   :members:
+
+.. doxygenclass:: ReLe::Simplex
+   :members:
    
 Feature Selection
 =================

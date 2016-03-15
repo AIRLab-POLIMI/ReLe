@@ -7,12 +7,15 @@ addpath(genpath('../..'));
 
 %% load data
 pathBase = '/tmp/ReLe/lqrPrint/';
+outPath = './out/';
+
+[~,~,~] = mkdir(outPath);
 
 baseline{1} = 'normal';
 baseline{2} = 'trace'; 
 baseline{3} = 'diag'; 
 
-numEpisodes = [100, 1000, 10000, 100000];
+numEpisodes = [100, 1000, 10000, 100000, 1000000];
 
 numTests = 2;
 
@@ -142,6 +145,8 @@ for i = 1:length(baseline)
         
         
        suptitle(strcat(baseline{i}, ' - ', num2str(numEpisodes(j))))
+       
+       savefig([outPath, num2str(figN),'.fig']);
     end
 end
 
