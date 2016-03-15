@@ -177,13 +177,13 @@ Function Approximators
 Basic interfaces
 ----------------
 
-.. doxygenclass::ReLe::BasisFunction_
+.. doxygenclass:: ReLe::BasisFunction_
    :members:
 
-.. doxygenclass::ReLe::Tiles_
+.. doxygenclass:: ReLe::Tiles_
    :members:
     
-.. doxygenclass::ReLe::Features_
+.. doxygenclass:: ReLe::Features_
    :members:
 
 .. doxygenclass:: ReLe::Regressor_
@@ -201,13 +201,13 @@ Basic interfaces
 Features types
 --------------
 
-.. doxygenclass::ReLe::DenseFeatures_
+.. doxygenclass:: ReLe::DenseFeatures_
    :members:
    
-.. doxygenclass::ReLe::SparseFeatures_
+.. doxygenclass:: ReLe::SparseFeatures_
    :members:
    
-.. doxygenclass::ReLe::TilesCoder_
+.. doxygenclass:: ReLe::TilesCoder_
    :members:
 
 
