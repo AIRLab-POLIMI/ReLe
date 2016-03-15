@@ -149,6 +149,18 @@ Batch loggers
 .. doxygenclass:: ReLe::WriteBatchDatasetLogger
    :members:   
    
+Reward Transformation
+---------------------
+
+.. doxygenclass:: ReLe::RewardTransformation
+   :members:
+   
+.. doxygenclass:: ReLe::IndexRT
+   :members:
+   
+.. doxygenclass:: ReLe::WeightedSumRT
+   :members:  
+   
 
 Basic Utilities
 ---------------
@@ -165,13 +177,13 @@ Function Approximators
 Basic interfaces
 ----------------
 
-.. doxygenclass::BasisFunction_
+.. doxygenclass::ReLe::BasisFunction_
    :members:
 
-.. doxygenclass::Tiles_
+.. doxygenclass::ReLe::Tiles_
    :members:
     
-.. doxygenclass::Features_
+.. doxygenclass::ReLe::Features_
    :members:
 
 .. doxygenclass:: ReLe::Regressor_
@@ -189,13 +201,13 @@ Basic interfaces
 Features types
 --------------
 
-.. doxygenclass::DenseFeatures_
+.. doxygenclass::ReLe::DenseFeatures_
    :members:
    
-.. doxygenclass::SparseFeatures_
+.. doxygenclass::ReLe::SparseFeatures_
    :members:
    
-.. doxygenclass::TilesCoder_
+.. doxygenclass::ReLe::TilesCoder_
    :members:
 
 
