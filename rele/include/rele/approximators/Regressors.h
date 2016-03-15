@@ -35,7 +35,7 @@ namespace ReLe
  * This is the default interface for function approximators.
  * We suppose that function approximation works applying an arbitrary function over
  * a set of features of the input data.
- * Formally a regressor is a function \f$f(i)\rightarrow\mathbb{D_output}^n\f$ with \f$i\in\mathcal{D_input}\f$
+ * Formally a regressor is a function \f$f(i)\rightarrow\mathbb{D}_{output}^n\f$ with \f$i\in\mathcal{D}_{input}\f$
  * Function approximation can work with any type of input data and features over data (dense, sparse).
  */
 template<class InputC, class OutputC, bool denseOutput = true>
