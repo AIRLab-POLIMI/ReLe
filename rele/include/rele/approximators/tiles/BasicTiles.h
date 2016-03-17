@@ -38,11 +38,11 @@ namespace ReLe
 class BasicTiles : public Tiles
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param range the range of the first state variable
-	 * \param tilesN the number of tiles to use for the first state variable
-	 */
+    /*!
+     * Constructor.
+     * \param range the range of the first state variable
+     * \param tilesN the number of tiles to use for the first state variable
+     */
     BasicTiles(Range& range, unsigned int tilesN);
 
     /*!
@@ -82,12 +82,12 @@ protected:
 class SelectiveTiles : public BasicTiles
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param stateComponents the index of the state variables to use
-	 * \param ranges the range to use for each state variable
-	 * \param tilesN the number of tiles to use for each state variable
-	 */
+    /*!
+     * Constructor.
+     * \param stateComponents the index of the state variables to use
+     * \param ranges the range to use for each state variable
+     * \param tilesN the number of tiles to use for each state variable
+     */
     SelectiveTiles(std::vector<unsigned int> stateComponents,
                    std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
 

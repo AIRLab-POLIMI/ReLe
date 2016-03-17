@@ -36,11 +36,11 @@ namespace ReLe
 class RewardTransformation
 {
 public:
-	/*!
-	 * Evaluation method
-	 * \param r the reward vector
-	 * \return the scalarization of the reward vector
-	 */
+    /*!
+     * Evaluation method
+     * \param r the reward vector
+     * \return the scalarization of the reward vector
+     */
     virtual double operator()(const Reward& r) = 0;
     virtual ~RewardTransformation() {}
 };
@@ -53,10 +53,10 @@ public:
 class IndexRT : public RewardTransformation
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param idx the index of the reward element to choose
-	 */
+    /*!
+     * Constructor.
+     * \param idx the index of the reward element to choose
+     */
     IndexRT(unsigned int idx)
         : index(idx)
     {

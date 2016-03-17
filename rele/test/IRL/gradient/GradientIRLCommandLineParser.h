@@ -57,10 +57,10 @@ struct irlConfig
     }
 };
 
-class LinearIRLCommandLineParser
+class StepBasedLinearIRLCommandLineParser
 {
 public:
-    LinearIRLCommandLineParser()
+    StepBasedLinearIRLCommandLineParser()
     {
         std::string gradientDesc = "set the gradient " + IrlGradUtils::getOptions();
         std::string hessianDesc = "set the hessian " + IrlHessUtils::getOptions();

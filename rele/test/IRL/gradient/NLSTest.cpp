@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
-    LinearIRLCommandLineParser parser;
+    StepBasedLinearIRLCommandLineParser parser;
 
     auto irlConfig = parser.getConfig(argc, argv);
 

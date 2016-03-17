@@ -39,10 +39,10 @@ namespace ReLe
 class FeatureSelectionAlgorithm
 {
 public:
-	/*!
-	 * This method computes the new features from the initial ones
-	 * \param features the initial features
-	 */
+    /*!
+     * This method computes the new features from the initial ones
+     * \param features the initial features
+     */
     virtual void createFeatures(const arma::mat& features) = 0;
 
     /*!
@@ -50,7 +50,7 @@ public:
      * \return the new features, computed by the algorithm.
      */
     virtual arma::mat getNewFeatures() = 0;
-    
+
     virtual ~FeatureSelectionAlgorithm()
     {
 
@@ -65,10 +65,10 @@ public:
 class LinearFeatureSelectionAlgorithm : public FeatureSelectionAlgorithm
 {
 public:
-	/*!
-	 * Getter.
-	 * \return the linear features transformation.
-	 */
+    /*!
+     * Getter.
+     * \return the linear features transformation.
+     */
     virtual arma::mat getTransformation() = 0;
 
 

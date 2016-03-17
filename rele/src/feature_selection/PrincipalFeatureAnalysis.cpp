@@ -39,7 +39,7 @@ PrincipalFeatureAnalysis::PrincipalFeatureAnalysis(double varMin, bool useCorrel
 
 void PrincipalFeatureAnalysis::createFeatures(const arma::mat& features)
 {
-	initialSize = features.n_rows;
+    initialSize = features.n_rows;
 
     arma::mat Sigma;
 

@@ -39,11 +39,11 @@ template<class InputC>
 class TilesCoder_: public Features_<InputC, false>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param tiles a set of tiles to be used
-	 * \param outputs the number of output features vectors
-	 */
+    /*!
+     * Constructor.
+     * \param tiles a set of tiles to be used
+     * \param outputs the number of output features vectors
+     */
     TilesCoder_(Tiles_<InputC>* tiles, unsigned int outputs = 1) :
         outputs(outputs)
     {

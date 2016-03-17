@@ -32,13 +32,13 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class ExpectedDeltaIRL: public LinearIRLAlgorithm<ActionC, StateC>
+class ExpectedDeltaIRL: public StepBasedLinearIRLAlgorithm<ActionC, StateC>
 {
 public:
     ExpectedDeltaIRL(Dataset<ActionC, StateC>& data,
                      DifferentiablePolicy<ActionC, StateC>& policy,
                      LinearApproximator& rewardf, double gamma, IrlGrad type, IrlHess htype) :
-        LinearIRLAlgorithm<ActionC, StateC>(data, policy, rewardf, gamma)
+             StepBasedLinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
     {
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);

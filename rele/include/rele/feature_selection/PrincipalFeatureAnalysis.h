@@ -38,11 +38,11 @@ namespace ReLe
 class PrincipalFeatureAnalysis : public LinearFeatureSelectionAlgorithm
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param varMin the minimum variability to retain from data
-	 * \param useCorrelation if to use correlation or covariance matrix as selection criterion
-	 */
+    /*!
+     * Constructor.
+     * \param varMin the minimum variability to retain from data
+     * \param useCorrelation if to use correlation or covariance matrix as selection criterion
+     */
     PrincipalFeatureAnalysis(double varMin, bool useCorrelation = true);
     virtual void createFeatures(const arma::mat& features) override;
     virtual arma::mat getTransformation() override;
@@ -54,7 +54,7 @@ public:
      */
     inline arma::uvec getIndexes()
     {
-    	return indexes;
+        return indexes;
     }
 
 private:

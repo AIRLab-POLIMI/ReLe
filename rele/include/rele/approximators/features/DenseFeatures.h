@@ -41,11 +41,11 @@ class DenseFeatures_: public Features_<InputC>
 {
 
 public:
-	/*!
-	 * Constructor.
-	 * Construct a single feature matrix (a scalar).
-	 * \param basisFunction the basis function rappresenting this feature.
-	 */
+    /*!
+     * Constructor.
+     * Construct a single feature matrix (a scalar).
+     * \param basisFunction the basis function rappresenting this feature.
+     */
     DenseFeatures_(BasisFunction_<InputC>* basisFunction) : basis(1)
     {
         basis[0] = basisFunction;

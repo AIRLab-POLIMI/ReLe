@@ -36,11 +36,11 @@ namespace ReLe
 class PrincipalComponentAnalysis : public LinearFeatureSelectionAlgorithm
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param k the final number of features to be used
-	 * \param useCorrelation if to use correlation or covariance matrix as selection criterion
-	 */
+    /*!
+     * Constructor.
+     * \param k the final number of features to be used
+     * \param useCorrelation if to use correlation or covariance matrix as selection criterion
+     */
     PrincipalComponentAnalysis(unsigned int k, bool useCorrelation = true);
     virtual void createFeatures(const arma::mat& features) override;
     virtual arma::mat getTransformation() override;

@@ -40,10 +40,10 @@ class SparseFeatures_: public Features_<InputC>
 {
 
 public:
-	/*!
-	 * Constructor.
-	 * Construct an empty set of sparse feature.
-	 */
+    /*!
+     * Constructor.
+     * Construct an empty set of sparse feature.
+     */
     SparseFeatures_(): n_rows(0), n_cols(0)
     {
     }
