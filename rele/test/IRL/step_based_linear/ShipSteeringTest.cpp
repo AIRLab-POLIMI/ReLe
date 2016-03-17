@@ -32,7 +32,6 @@
 
 #include "rele/environments/ShipSteering.h"
 
-#include "GradientIRLCommandLineParser.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
 #include "rele/IRL/ParametricRewardMDP.h"
@@ -42,6 +41,7 @@
 
 #include "rele/utils/FileManager.h"
 
+#include "CommandLineParser.h"
 
 using namespace std;
 using namespace arma;
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
-    StepBasedLinearIRLCommandLineParser parser;
+    CommandLineParser parser;
 
     auto irlConfig = parser.getConfig(argc, argv);
 

@@ -35,21 +35,11 @@ class EpisodicLinearIRLAlgorithm : public LinearIRLAlgorithm<ActionC, StateC>
 public:
     EpisodicLinearIRLAlgorithm(Dataset<ActionC, StateC>& data, const arma::mat& theta,
                                LinearApproximator& rewardf, double gamma)
-        : data(data), theta(theta), rewardf(rewardf), gamma(gamma), simplex(rewardf.getParametersSize())
+        : LinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma), theta(theta)
     {
-        Features& phi = rewardFunction.getFeatures();
+        Features& phi = rewardf.getFeatures();
         phiBar = data.computeEpisodeFeatureExpectation(phi, gamma);
-
-        preprocess();
-
-        omega = arma::vec(phi.rows(), arma::fill::zeros);
-
-        // optimization initialization
-        optAlg = nlopt::algorithm::LD_SLSQP;
-        nbFunEvals = 0;
     }
-
-    virtual double objFunction(const arma::vec& xSimplex, arma::vec& df) = 0;
 
     virtual ~EpisodicLinearIRLAlgorithm()
     {
@@ -60,7 +50,7 @@ protected:
     //======================================================================
     // PREPROCESSING
     //----------------------------------------------------------------------
-    virtual void preprocess() override
+    virtual void preprocessing() override
     {
         // performs preprocessing in order to remove the features
         // that are constant and the one that are almost never
@@ -102,7 +92,7 @@ protected:
         if (active_feat.n_elem < dpr)
         {
             std::cout << std::endl << "Reduced dim: " << active_feat.n_elem << std::endl;
-            simplex.setActiveFeatures(active_feat);
+            this->simplex.setActiveFeatures(active_feat);
         }
         else
             std::cout << "NO feature reduction!" << std::endl;

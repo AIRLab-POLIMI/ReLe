@@ -36,7 +36,7 @@
 #include "rele/utils/FileManager.h"
 
 #include "../RewardBasisLQR.h"
-#include "../step_based_linear/GradientIRLCommandLineParser.h"
+#include "CommandLineParser.h"
 
 using namespace std;
 using namespace arma;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
-    StepBasedLinearIRLCommandLineParser parser;
+    CommandLineParser parser;
 
     auto irlConfig = parser.getConfig(argc, argv);
 

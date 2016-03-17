@@ -21,9 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEST_IRL_IRLCOMMANDLINEPARSER_H_
-#define TEST_IRL_IRLCOMMANDLINEPARSER_H_
-
+#ifndef TEST_IRL_EPISODE_BASED_LINEAR_COMMANDLINEPARSER_H_
+#define TEST_IRL_EPISODE_BASED_LINEAR_COMMANDLINEPARSER_H_
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -44,37 +43,29 @@ namespace ReLe
 struct irlConfig
 {
     std::string algorithm;
-    IrlGrad gradient;
-    IrlHess hessian;
     int episodes;
 
     friend std::ostream& operator<< (std::ostream& stream, const irlConfig& config)
     {
         stream << "algorithm: " << config.algorithm << std::endl;
-        stream << "gradient: " << IrlGradUtils::toString(config.gradient) << std::endl;
-        stream << "hessian: " << IrlHessUtils::toString(config.hessian) << std::endl;
         stream << "episodes: " << config.episodes << std::endl;
     }
 };
 
-class StepBasedLinearIRLCommandLineParser
+class CommandLineParser
 {
 public:
-    StepBasedLinearIRLCommandLineParser()
+	CommandLineParser()
     {
         std::string gradientDesc = "set the gradient " + IrlGradUtils::getOptions();
         std::string hessianDesc = "set the hessian " + IrlHessUtils::getOptions();
 
         desc.add_options() //
         ("help,h", "produce help message") //
-        ("algorithm,a", boost::program_options::value<std::string>()->default_value("GIRL"),
-         "set the algorithm (GIRL | PGIRL | ExpectedDeltaIRL)") //
+        ("algorithm,a", boost::program_options::value<std::string>()->default_value("EMIRL"),
+         "set the algorithm (EMIRL | EGIRL)") //
         ("episodes,e", boost::program_options::value<int>()->default_value(1000),
-         "set the number of episodes") //
-        ("gradient,g", boost::program_options::value<std::string>()->default_value("REINFORCE"),
-         gradientDesc.c_str()) //
-        ("hessian,H", boost::program_options::value<std::string>()->default_value("REINFORCE"),
-         hessianDesc.c_str());
+         "set the number of episodes");
     }
 
     inline irlConfig getConfig(int argc, char **argv)
@@ -103,8 +94,6 @@ public:
         }
 
         config.algorithm = vm["algorithm"].as<std::string>();
-        config.gradient = IrlGradUtils::fromString(vm["gradient"].as<std::string>());
-        config.hessian = IrlHessUtils::fromString(vm["hessian"].as<std::string>());
         config.episodes = vm["episodes"].as<int>();
 
         std::cout << config << std::endl;
@@ -119,15 +108,7 @@ private:
             return false;
 
         std::string algorithm = vm["algorithm"].as<std::string>();
-        if(algorithm != "GIRL" && algorithm != "PGIRL" && algorithm != "ExpectedDeltaIRL")
-            return false;
-
-        std::string gradientType = vm["gradient"].as<std::string>();
-        if(!IrlGradUtils::isValid(gradientType))
-            return false;
-
-        std::string hessianType = vm["hessian"].as<std::string>();
-        if(!IrlHessUtils::isValid(hessianType))
+        if(algorithm != "EGIRL" && algorithm != "EMIRL")
             return false;
 
         return true;
@@ -144,16 +125,12 @@ IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
         DifferentiablePolicy<ActionC, StateC>& policy,
         LinearApproximator& rewardf, double gamma, irlConfig conf)
 {
-    if(conf.algorithm == "GIRL")
-        return new GIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                                                gamma, conf.gradient);
-    else if(conf.algorithm == "PGIRL")
-        return new PlaneGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                gamma, conf.gradient);
-
-    else if(conf.algorithm == "ExpectedDeltaIRL")
-        return new ExpectedDeltaIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                gamma, conf.gradient, conf.hessian);
+    if(conf.algorithm == "EGIRL")
+        return new EGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
+                                                gamma);
+    else if(conf.algorithm == "EMIRL")
+        return new EMIRL<DenseAction,DenseState>(dataset, policy, rewardf,
+                gamma);
 
 
 
@@ -162,4 +139,5 @@ IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
 }
 
 
-#endif /* TEST_IRL_IRLCOMMANDLINEPARSER_H_ */
+
+#endif /* TEST_IRL_EPISODE_BASED_LINEAR_COMMANDLINEPARSER_H_ */
