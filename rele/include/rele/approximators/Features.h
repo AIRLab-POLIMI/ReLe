@@ -55,7 +55,7 @@ struct feature_traits<false>
 
 /*!
  * This interface represent a generic set of features.
- * Features are a mapping \f$\phi(i)\leftarrow\mathbb{R}^n\times\mathbb{R}^m\f$ with \f$i\in\mathcal{D}\f$.
+ * Features are a mapping \f$\phi(i)\rightarrow\mathbb{R}^n\times\mathbb{R}^m\f$ with \f$i\in\mathcal{D}\f$.
  * The template definition allows for generic domains \f$\mathcal{D}\f$.
  * Optionally, the features matrix returned can be a sparse matrix, this is done by setting to false the optional
  * template parameter denseOutput.
