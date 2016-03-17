@@ -35,9 +35,8 @@
 
 #include "rele/utils/FileManager.h"
 
-#include "GradientIRLCommandLineParser.h"
-
 #include "../RewardBasisLQR.h"
+#include "../step_based_linear/GradientIRLCommandLineParser.h"
 
 using namespace std;
 using namespace arma;
