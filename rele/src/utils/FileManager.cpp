@@ -59,4 +59,9 @@ string FileManager::addPath(const string& fileName)
     return outputDir + fileName;
 }
 
+string FileManager::addPath(const string& prefix, const string& fileName)
+{
+    return outputDir + prefix + "_" + fileName ;
+}
+
 }

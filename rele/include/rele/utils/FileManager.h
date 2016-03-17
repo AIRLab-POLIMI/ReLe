@@ -37,6 +37,7 @@ public:
     void createDir();
     void cleanDir();
     std::string addPath(const std::string& fileName);
+    std::string addPath(const std::string& prefix, const std::string& fileName);
 
 private:
     std::string outputDir;
