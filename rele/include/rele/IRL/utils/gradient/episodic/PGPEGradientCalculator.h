@@ -54,23 +54,29 @@ protected:
     virtual arma::mat computeGradientDiff() override
     {
         unsigned int N = theta.n_cols;
-        arma::mat gradLog(theta.n_rows, theta.n_cols);
-
-        for(unsigned int i = 0; i < N; i++)
-        {
-            gradLog.col(i) = dist.difflog(theta.col(i));
-        }
-
+        arma::mat gradLog = computeGradLog();
         arma::mat gradientDiff = gradLog*phi.t();
         gradientDiff /= N;
 
         return gradientDiff;
     }
 
+    arma::mat computeGradLog()
+    {
+        arma::mat gradLog(theta.n_rows, theta.n_cols);
+
+        for(unsigned int i = 0; i < theta.n_cols; i++)
+        {
+            gradLog.col(i) = dist.difflog(theta.col(i));
+        }
+
+        return gradLog;
+    }
+
 };
 
 template<class ActionC, class StateC>
-class PGPEBaseGradientCalculator : public EpisodicGradientCalculator<ActionC, StateC>
+class PGPEBaseGradientCalculator : public PGPEGradientCalculator<ActionC, StateC>
 {
 protected:
     USING_EPISODIC_CALCULATORS_MEMBERS(ActionC, StateC)
@@ -80,7 +86,7 @@ public:
                                const arma::mat& phi,
                                DifferentiableDistribution& dist,
                                double gamma)
-        : EpisodicGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma)
+        : PGPEGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma)
     {
 
     }
@@ -93,9 +99,25 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() override
     {
+        unsigned int N = theta.n_cols;
+        arma::mat gradLog = this->computeGradLog();
+        arma::mat gradLog2 = gradLog % gradLog;
 
-        return arma::mat();
+        arma::mat baseline_num = (gradLog2)*phi.t();
+        arma::vec baseline_den = arma::sum(gradLog2, 1);
 
+        arma::mat baseline = baseline_num.each_col() / baseline_den;
+        baseline(arma::find_nonfinite(baseline)).zeros();
+
+
+        /*for(unsigned int i = 0; i < phi.n_rows; i++)
+        {
+        	gradientDiff.col(i)
+        }*/
+        arma::mat gradientDiff = gradLog*phi.t();
+        gradientDiff /= N;
+
+        return gradientDiff;
     }
 
 
