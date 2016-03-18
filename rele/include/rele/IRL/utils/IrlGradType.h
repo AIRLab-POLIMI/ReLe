@@ -41,7 +41,7 @@ enum class IrlGrad
 
 enum class IrlEpGrad
 {
-	PGPE, PGPE_BASELINE
+    PGPE, PGPE_BASELINE
 };
 
 enum class IrlHess
@@ -53,7 +53,7 @@ enum class IrlHess
 
 enum class IrlEpHess
 {
-	PGPE, PGPE_BASELINE
+    PGPE, PGPE_BASELINE
 };
 
 class IrlGradUtils

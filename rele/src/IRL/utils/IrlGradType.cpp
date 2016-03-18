@@ -228,8 +228,7 @@ std::string IrlEpGradUtils::toString(IrlEpGrad type)
     case IrlEpGrad::PGPE:
         return "PGPE";
     case IrlEpGrad::PGPE_BASELINE:
-            return "PGPE";
-        return "NATURAL_GPOMDP_BASELINE";
+        return "PGPE";
     default:
         throw std::runtime_error("Unknown type");
     }
@@ -307,8 +306,8 @@ std::map<std::string, IrlEpHess> IrlEpHessUtils::initHessians()
 {
     std::map<std::string, IrlEpHess> map;
 
-    map["REINFORCE"] = IrlEpHess::PGPE;
-    map["REINFORCE_BASELINE"] = IrlEpHess::PGPE_BASELINE;
+    map["PGPE"] = IrlEpHess::PGPE;
+    map["PGPE_BASELINE"] = IrlEpHess::PGPE_BASELINE;
 
     return map;
 }

@@ -58,7 +58,7 @@ protected:
 
         for(unsigned int i = 0; i < N; i++)
         {
-        	gradLog.col(i) = dist.difflog(theta.col(i));
+            gradLog.col(i) = dist.difflog(theta.col(i));
         }
 
         arma::mat gradientDiff = gradLog*phi.t();

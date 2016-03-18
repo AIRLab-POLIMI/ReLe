@@ -39,12 +39,14 @@
 namespace ReLe
 {
 
-struct irlConfig
+struct irlEpConfig
 {
     std::string algorithm;
+    IrlEpGrad gradient;
+    IrlEpHess hessian;
     int episodes;
 
-    friend std::ostream& operator<< (std::ostream& stream, const irlConfig& config)
+    friend std::ostream& operator<< (std::ostream& stream, const irlEpConfig& config)
     {
         stream << "algorithm: " << config.algorithm << std::endl;
         stream << "episodes: " << config.episodes << std::endl;
@@ -56,18 +58,22 @@ class CommandLineParser
 public:
     CommandLineParser()
     {
-        std::string gradientDesc = "set the gradient " + IrlGradUtils::getOptions();
-        std::string hessianDesc = "set the hessian " + IrlHessUtils::getOptions();
+        std::string gradientDesc = "set the gradient " + IrlEpGradUtils::getOptions();
+        std::string hessianDesc = "set the hessian " + IrlEpHessUtils::getOptions();
 
         desc.add_options() //
         ("help,h", "produce help message") //
         ("algorithm,a", boost::program_options::value<std::string>()->default_value("EMIRL"),
          "set the algorithm (EMIRL | EGIRL)") //
         ("episodes,e", boost::program_options::value<int>()->default_value(1000),
-         "set the number of episodes");
+         "set the number of episodes") //
+        ("gradient,g", boost::program_options::value<std::string>()->default_value("PGPE_BASELINE"),
+         gradientDesc.c_str()) //
+        ("hessian,H", boost::program_options::value<std::string>()->default_value("PGPE_BASELINE"),
+         hessianDesc.c_str());
     }
 
-    inline irlConfig getConfig(int argc, char **argv)
+    inline irlEpConfig getConfig(int argc, char **argv)
     {
         try
         {
@@ -93,7 +99,10 @@ public:
         }
 
         config.algorithm = vm["algorithm"].as<std::string>();
+        config.gradient = IrlEpGradUtils::fromString(vm["gradient"].as<std::string>());
+        config.hessian = IrlEpHessUtils::fromString(vm["hessian"].as<std::string>());
         config.episodes = vm["episodes"].as<int>();
+
 
         std::cout << config << std::endl;
 
@@ -110,20 +119,28 @@ private:
         if(algorithm != "EGIRL" && algorithm != "EMIRL")
             return false;
 
+        std::string gradientType = vm["gradient"].as<std::string>();
+        if(!IrlEpGradUtils::isValid(gradientType))
+            return false;
+
+        std::string hessianType = vm["hessian"].as<std::string>();
+        if(!IrlEpHessUtils::isValid(hessianType))
+            return false;
+
         return true;
     }
 
 private:
     boost::program_options::options_description desc;
     boost::program_options::variables_map vm;
-    irlConfig config;
+    irlEpConfig config;
 };
 
 template<class ActionC, class StateC>
 IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dataset,
         const arma::mat& theta,
         ParametricNormal& dist,
-        LinearApproximator& rewardf, double gamma, irlConfig conf)
+        LinearApproximator& rewardf, double gamma, irlEpConfig conf)
 {
     if(conf.algorithm == "EGIRL")
         return new EGIRL<DenseAction,DenseState>(dataset, theta, dist, rewardf, gamma);
