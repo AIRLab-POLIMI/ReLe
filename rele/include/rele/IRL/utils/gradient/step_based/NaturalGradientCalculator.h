@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENT_NATURALGRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENT_NATURALGRADIENTCALCULATOR_H_
 
-#include "rele/IRL/utils/gradient/GradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/StepBasedGradientCalculator.h"
 #include "rele/IRL/utils/FisherMatrixCalculator.h"
 
 namespace ReLe
@@ -34,7 +34,7 @@ namespace ReLe
 template<class ActionC, class StateC, class Calculator>
 class NaturalGradientCalculator : public Calculator
 {
-    static_assert(std::is_base_of<GradientCalculator<ActionC, StateC>, Calculator>::value,
+    static_assert(std::is_base_of<StepBasedGradientCalculator<ActionC, StateC>, Calculator>::value,
                   "Not valid Calculator class as template parameter");
 public:
     NaturalGradientCalculator(Features& phi,

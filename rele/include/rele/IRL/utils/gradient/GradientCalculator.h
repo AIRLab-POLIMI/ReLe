@@ -24,11 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_
 
-#include <cassert>
-
-#include "rele/policy/Policy.h"
-#include "rele/core/Transition.h"
-#include "rele/approximators/Features.h"
+#include <armadillo>
 
 namespace ReLe
 {
@@ -37,14 +33,9 @@ template<class ActionC, class StateC>
 class GradientCalculator
 {
 public:
-    GradientCalculator(Features& phi,
-                       Dataset<ActionC,StateC>& data,
-                       DifferentiablePolicy<ActionC,StateC>& policy,
-                       double gamma):
-        phi(phi), data(data), policy(policy), gamma(gamma),
-        gradientDiff(policy.getParametersSize(), phi.rows(), arma::fill::zeros)
+    GradientCalculator(unsigned int dp, unsigned int dr, double gamma)
+        : gamma(gamma), gradientDiff(dp, dr, arma::fill::zeros)
     {
-        assert(phi.cols() == 1);
         computed = false;
     }
 
@@ -71,22 +62,6 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() = 0;
 
-    arma::vec computeSumGradLog(Episode<ActionC, StateC>& episode)
-    {
-        int dp  = policy.getParametersSize();
-        int nbSteps = episode.size();
-        arma::vec sumGradLog(dp, arma::fill::zeros);
-
-        //iterate the episode
-        for (int t = 0; t < nbSteps; ++t)
-        {
-            Transition<ActionC, StateC>& tr = episode[t];
-            sumGradLog += policy.difflog(tr.x, tr.u);
-        }
-
-        return sumGradLog;
-    }
-
 private:
     void compute()
     {
@@ -101,9 +76,6 @@ private:
 
 
 protected:
-    Features& phi;
-    Dataset<ActionC,StateC>& data;
-    DifferentiablePolicy<ActionC,StateC>& policy;
     double gamma;
 
 private:
@@ -114,13 +86,6 @@ private:
 
 
 }
-
-#define USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC) \
-			typedef GradientCalculator<ActionC,StateC> Base; \
-			using Base::phi; \
-			using Base::data; \
-			using Base::policy; \
-			using Base::gamma;
 
 
 #endif /* INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATOR_H_ */

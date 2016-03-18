@@ -24,23 +24,26 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENT_GPOMDPGRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENT_GPOMDPGRADIENTCALCULATOR_H_
 
-#include "rele/IRL/utils/gradient/GradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/StepBasedGradientCalculator.h"
 
 namespace ReLe
 {
 
 
 template<class ActionC, class StateC>
-class GPOMDPGradientCalculator : public GradientCalculator<ActionC, StateC>
+class GPOMDPGradientCalculator : public StepBasedGradientCalculator<ActionC, StateC>
 {
+
 protected:
-    USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_CALCULATORS_MEMBERS(ActionC, StateC)
+
+
 public:
     GPOMDPGradientCalculator(Features& phi,
                              Dataset<ActionC,StateC>& data,
                              DifferentiablePolicy<ActionC,StateC>& policy,
                              double gamma):
-        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
+        StepBasedGradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -87,16 +90,17 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class GPOMDPBaseGradientCalculator : public GradientCalculator<ActionC, StateC>
+class GPOMDPBaseGradientCalculator : public StepBasedGradientCalculator<ActionC, StateC>
 {
 protected:
-    USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_CALCULATORS_MEMBERS(ActionC, StateC)
+
 public:
     GPOMDPBaseGradientCalculator(Features& phi,
                                  Dataset<ActionC,StateC>& data,
                                  DifferentiablePolicy<ActionC,StateC>& policy,
                                  double gamma):
-        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
+        StepBasedGradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }

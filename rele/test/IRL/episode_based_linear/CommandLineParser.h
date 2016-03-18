@@ -55,7 +55,7 @@ struct irlConfig
 class CommandLineParser
 {
 public:
-	CommandLineParser()
+    CommandLineParser()
     {
         std::string gradientDesc = "set the gradient " + IrlGradUtils::getOptions();
         std::string hessianDesc = "set the hessian " + IrlHessUtils::getOptions();
@@ -127,7 +127,7 @@ IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
 {
     if(conf.algorithm == "EGIRL")
         return new EGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                                                gamma);
+                gamma);
     else if(conf.algorithm == "EMIRL")
         return new EMIRL<DenseAction,DenseState>(dataset, policy, rewardf,
                 gamma);

@@ -24,22 +24,23 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENT_REINFORCEGRADIENTCALCULATOR_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENT_REINFORCEGRADIENTCALCULATOR_H_
 
-#include "rele/IRL/utils/gradient/GradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/StepBasedGradientCalculator.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class ReinforceGradientCalculator : public GradientCalculator<ActionC, StateC>
+class ReinforceGradientCalculator : public StepBasedGradientCalculator<ActionC, StateC>
 {
 protected:
-    USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_CALCULATORS_MEMBERS(ActionC, StateC)
+
 public:
     ReinforceGradientCalculator(Features& phi,
                                 Dataset<ActionC,StateC>& data,
                                 DifferentiablePolicy<ActionC,StateC>& policy,
                                 double gamma):
-        GradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
+        StepBasedGradientCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -73,9 +74,9 @@ protected:
 template<class ActionC, class StateC>
 class ReinforceBaseGradientCalculator : public ReinforceGradientCalculator<ActionC, StateC>
 {
-
 protected:
-    USE_GRADIENT_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_CALCULATORS_MEMBERS(ActionC, StateC)
+
 public:
     ReinforceBaseGradientCalculator(Features& phi,
                                     Dataset<ActionC,StateC>& data,

@@ -32,14 +32,14 @@ namespace ReLe
 template<class ActionC, class StateC>
 class EMIRL: public EpisodicLinearIRLAlgorithm<ActionC, StateC>
 {
-	using EpisodicLinearIRLAlgorithm<ActionC, StateC>::theta;
-	using EpisodicLinearIRLAlgorithm<ActionC, StateC>::phiBar;
+    using EpisodicLinearIRLAlgorithm<ActionC, StateC>::theta;
+    using EpisodicLinearIRLAlgorithm<ActionC, StateC>::phiBar;
 
 public:
     EMIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, const arma::vec& wBar, const arma::mat& sigma,
           LinearApproximator& rewardFunction, double gamma)
         : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardFunction, gamma),
-		  wBar(wBar), sigmaInv(arma::inv(sigma))
+          wBar(wBar), sigmaInv(arma::inv(sigma))
     {
 
     }

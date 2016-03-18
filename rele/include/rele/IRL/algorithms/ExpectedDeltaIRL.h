@@ -38,7 +38,7 @@ public:
     ExpectedDeltaIRL(Dataset<ActionC, StateC>& data,
                      DifferentiablePolicy<ActionC, StateC>& policy,
                      LinearApproximator& rewardf, double gamma, IrlGrad type, IrlHess htype) :
-             StepBasedLinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
+        StepBasedLinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
     {
         gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);

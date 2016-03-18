@@ -24,10 +24,10 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_
 #define INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_
 
-#include "rele/IRL/utils/gradient/ReinforceGradientCalculator.h"
-#include "rele/IRL/utils/gradient/GPOMDPGradientCalculator.h"
-#include "rele/IRL/utils/gradient/ENACGradientCalculator.h"
-#include "rele/IRL/utils/gradient/NaturalGradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/ReinforceGradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/GPOMDPGradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/ENACGradientCalculator.h"
+#include "rele/IRL/utils/gradient/step_based/NaturalGradientCalculator.h"
 #include "rele/IRL/utils/IrlGradType.h"
 
 namespace ReLe
