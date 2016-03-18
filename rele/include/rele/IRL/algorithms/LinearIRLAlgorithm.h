@@ -89,6 +89,7 @@ public:
         optimizator = nlopt::opt(optAlg, effective_dim);
         optimizator.set_min_objective(
             Optimization::objFunctionWrapper<LinearIRLAlgorithm<ActionC, StateC>, true> , this);
+        optimizator.add_inequality_constraint(Optimization::oneSumConstraint, nullptr, 0);
 
         std::vector<double> lowerBounds(effective_dim, 0.0);
         std::vector<double> upperBounds(effective_dim, 1.0);

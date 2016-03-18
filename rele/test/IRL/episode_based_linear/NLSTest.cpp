@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     p(1) = -2.5994;
 
     DetLinearPolicy<DenseState> expertPolicy(phi);
-    ParametricFullNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
+    ParametricNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
 
     std::cout << "| Params: " << expertDist.getParameters().t() << std::endl;
 
@@ -99,8 +99,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     arma::mat theta = expert.getParams();
-    EMIRL<DenseAction,DenseState> irlAlg(data, theta, p, arma::eye(p.n_elem, p.n_elem),
-                                         rewardRegressor, mdp.getSettings().gamma);
+    EMIRL<DenseAction,DenseState> irlAlg(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();

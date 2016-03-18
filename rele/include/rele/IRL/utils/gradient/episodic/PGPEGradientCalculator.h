@@ -40,7 +40,7 @@ public:
                            const arma::mat& phi,
                            DifferentiableDistribution& dist,
                            double gamma)
-        : EpisodicGradientCalculator(theta, phi, dist, gamma)
+        : EpisodicGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma)
     {
 
     }
@@ -53,9 +53,18 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() override
     {
-    	unsigned int N = theta.n_cols;
-    	arma::mat sumGradLog = theta.each_col([&](const vec& b){ return dist.difflog(theta); });
-    	return sumGradLog*phi.t()/N;
+        unsigned int N = theta.n_cols;
+        arma::mat gradLog(theta.n_rows, theta.n_cols);
+
+        for(unsigned int i = 0; i < N; i++)
+        {
+        	gradLog.col(i) = dist.difflog(theta.col(i));
+        }
+
+        arma::mat gradientDiff = gradLog*phi.t();
+        gradientDiff /= N;
+
+        return gradientDiff;
     }
 
 };
@@ -71,7 +80,7 @@ public:
                                const arma::mat& phi,
                                DifferentiableDistribution& dist,
                                double gamma)
-        : EpisodicGradientCalculator(theta, phi, dist, gamma)
+        : EpisodicGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma)
     {
 
     }
@@ -85,7 +94,7 @@ protected:
     virtual arma::mat computeGradientDiff() override
     {
 
-
+        return arma::mat();
 
     }
 

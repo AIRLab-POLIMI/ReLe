@@ -33,13 +33,13 @@ target_link_libraries(hessianIRL_test rele)
 
 # episode based linear
 add_executable(lqr_eblirl episode_based_linear/LQRTest.cpp)
-target_link_libraries(lqr_eblirl rele)
+target_link_libraries(lqr_eblirl rele ${Boost_LIBRARIES})
 
 add_executable(nls_eblirl episode_based_linear/NLSTest.cpp)
-target_link_libraries(nls_eblirl rele)
+target_link_libraries(nls_eblirl rele ${Boost_LIBRARIES})
 
 add_executable(ship_eblirl episode_based_linear/ShipSteeringTest.cpp)
-target_link_libraries(ship_eblirl rele)
+target_link_libraries(ship_eblirl rele ${Boost_LIBRARIES})
 
 # non linear
 add_executable(gaussian_NoGIRL GaussianTestNoGIRL.cpp)

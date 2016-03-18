@@ -33,9 +33,8 @@
 #include "rele/IRL/utils/IrlGradType.h"
 
 
-#include "rele/IRL/algorithms/GIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
-#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
+#include "rele/IRL/algorithms/EGIRL.h"
+#include "rele/IRL/algorithms/EMIRL.h"
 
 namespace ReLe
 {
@@ -121,18 +120,16 @@ private:
 };
 
 template<class ActionC, class StateC>
-IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
-        DifferentiablePolicy<ActionC, StateC>& policy,
+IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dataset,
+        const arma::mat& theta,
+        ParametricNormal& dist,
         LinearApproximator& rewardf, double gamma, irlConfig conf)
 {
     if(conf.algorithm == "EGIRL")
-        return new EGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                gamma);
+        return new EGIRL<DenseAction,DenseState>(dataset, theta, dist, rewardf, gamma);
+
     else if(conf.algorithm == "EMIRL")
-        return new EMIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                gamma);
-
-
+        return new EMIRL<DenseAction,DenseState>(dataset, theta, dist, rewardf, gamma);
 
 }
 

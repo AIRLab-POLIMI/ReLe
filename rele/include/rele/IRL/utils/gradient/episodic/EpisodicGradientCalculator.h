@@ -58,7 +58,7 @@ protected:
 };
 
 #define USING_EPISODIC_CALCULATORS_MEMBERS(ActionC, StateC) \
-	typedef StepBasedGradientCalculator<ActionC, StateC> Base; \
+	typedef EpisodicGradientCalculator<ActionC, StateC> Base; \
 	using Base::gamma; \
 	using Base::theta; \
 	using Base::phi; \

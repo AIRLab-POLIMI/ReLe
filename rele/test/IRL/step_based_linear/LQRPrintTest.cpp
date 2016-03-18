@@ -33,7 +33,6 @@
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
 
-#include "rele/IRL/utils/GradientCalculatorFactory.h"
 #include "rele/IRL/utils/HessianCalculatorFactory.h"
 
 #include "rele/utils/FileManager.h"
@@ -41,6 +40,7 @@
 #include "../RewardBasisLQR.h"
 
 #include <chrono>
+#include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 
 using namespace std;
 using namespace arma;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
 
     // init calculators methods
-    auto gradientCalculator = GradientCalculatorFactory<DenseAction, DenseState>::build(atype,
+    auto gradientCalculator = StepBasedGradientCalculatorFactory<DenseAction, DenseState>::build(atype,
                               phiReward, data, expertPolicy,
                               mdp.getSettings().gamma);
 

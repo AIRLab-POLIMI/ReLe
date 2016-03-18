@@ -24,6 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_EGIRL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_EGIRL_H_
 
+#include "rele/IRL/utils/EpisodicGradientCalculatorFactory.h"
 #include "EpisodicLinearIRLAlgorithm.h"
 
 namespace ReLe
@@ -35,14 +36,43 @@ class EGIRL: public EpisodicLinearIRLAlgorithm<ActionC, StateC>
 public:
     EGIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta,
           DifferentiableDistribution& dist, LinearApproximator& rewardf, double gamma)
-        : EpisodicLinearIRLAlgorithm<Actionc, StateC>(data, theta, rewardf, gamma)
+        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma)
     {
+        type = IrlGrad::REINFORCE; //TODO FIXME!!!
 
+        Features& features = rewardf.getFeatures();
+        phi = data.computeEpisodeFeatureExpectation(features, gamma);
+        std::cout << phi;
+        gradientCalculator = EpisodicGradientCalculatorFactory<ActionC, StateC>::build(type, theta, phi, dist, gamma);
     }
 
-    virtual double objFunction(const arma::vec& xSimplex, arma::vec& df)
+    virtual double objFunction(const arma::vec& xSimplex, arma::vec& df) override
     {
+        ++this->nbFunEvals;
 
+        // reconstruct parameters
+        arma::vec&& x = this->simplex.reconstruct(xSimplex);
+
+        // dispatch the right call
+        arma::vec gradient = gradientCalculator->computeGradient(x);
+        arma::mat dGradient = gradientCalculator->getGradientDiff();
+
+        // compute objective function and derivative
+        double f = arma::as_scalar(gradient.t() * gradient);
+        arma::vec df_full = 2.0 * dGradient.t() * gradient;
+
+        //compute the derivative wrt active features and simplex
+        df = this->simplex.diff(df_full);
+
+        std::cout << "g" << gradient.t() << std::endl;
+        std::cout << "g2: " << f << std::endl;
+        std::cout << "df_full: " << df_full.t();
+        std::cout << "df: " << df.t();
+        std::cout << "xSimplex:  " << xSimplex.t();
+        std::cout << "x:  " << x.t();
+        std::cout << "-----------------------------------------" << std::endl;
+
+        return f;
     }
 
 
@@ -50,6 +80,11 @@ public:
     {
 
     }
+
+protected:
+    IrlGrad type;
+    arma::mat phi;
+    GradientCalculator<ActionC, StateC>* gradientCalculator;
 };
 
 

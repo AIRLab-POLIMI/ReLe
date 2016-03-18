@@ -24,9 +24,9 @@
 #ifndef GIRL_H_
 #define GIRL_H_
 
+#include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 #include "rele/IRL/algorithms/StepBasedLinearIRLAlgorithm.h"
 
-#include "rele/IRL/utils/GradientCalculatorFactory.h"
 
 namespace ReLe
 {
@@ -42,7 +42,7 @@ public:
         StepBasedLinearIRLAlgorithm<ActionC, StateC>(dataset, rewardf, gamma), policy(policy), aType(aType)
     {
         // build gradient calculator
-        gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(aType, rewardf.getFeatures(),
+        gradientCalculator = StepBasedGradientCalculatorFactory<ActionC, StateC>::build(aType, rewardf.getFeatures(),
                              dataset, policy, gamma);
     }
 

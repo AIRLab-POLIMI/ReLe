@@ -31,7 +31,8 @@
 
 #include <nlopt.hpp>
 #include <cassert>
-#include "rele/IRL/utils/GradientCalculatorFactory.h"
+
+#include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 
 namespace ReLe
 {
@@ -50,7 +51,7 @@ public:
     {
         nbFunEvals = 0;
 
-        calculator = GradientCalculatorFactory<ActionC, StateC>::build(type, rewardFunction.getFeatures(), dataset, policy, gamma);
+        calculator = StepBasedGradientCalculatorFactory<ActionC, StateC>::build(type, rewardFunction.getFeatures(), dataset, policy, gamma);
     }
 
     virtual ~PlaneGIRL()

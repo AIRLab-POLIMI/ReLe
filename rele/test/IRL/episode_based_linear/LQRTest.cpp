@@ -38,6 +38,7 @@
 #include "rele/IRL/algorithms/EMIRL.h"
 
 #include "../RewardBasisLQR.h"
+#include "CommandLineParser.h"
 
 using namespace std;
 using namespace arma;
@@ -45,27 +46,27 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-//  RandomGenerator::seed(45423424);
-//  RandomGenerator::seed(8763575);
+    //  RandomGenerator::seed(45423424);
+    //  RandomGenerator::seed(8763575);
+    CommandLineParser parser;
 
-    vec eReward = {0.2, 0.7, 0.1};
+    auto irlConfig = parser.getConfig(argc, argv);
 
-    int nbEpisodes = 5000;
+    int nbEpisodes = irlConfig.episodes;
 
-    FileManager fm("lqr", "EMIRL");
+    FileManager fm("lqr", irlConfig.algorithm);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    /* Learn lqr correct policy */
+    //Set reward policy
+    vec eReward = {0.2, 0.7, 0.1};
+
+    // Build policy
     int dim = eReward.n_elem;
     LQR mdp(dim, dim);
 
-    BasisFunctions basis;
-    for (int i = 0; i < dim; ++i)
-    {
-        basis.push_back(new IdentityBasis(i));
-    }
+    BasisFunctions basis = IdentityBasis::generate(dim);
 
     SparseFeatures phi;
     phi.setDiagonal(basis);
@@ -77,7 +78,9 @@ int main(int argc, char *argv[])
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
-    ParametricFullNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
+    arma::mat Sigma = arma::eye(dim, dim);
+    Sigma *= 0.001;
+    ParametricNormal expertDist(p, Sigma);
 
     std::cout << "Rewards: ";
     for (int i = 0; i < eReward.n_elem; ++i)
@@ -109,13 +112,12 @@ int main(int argc, char *argv[])
     LinearApproximator rewardRegressor(phiReward);
 
     arma::mat theta = expert.getParams();
-    EMIRL<DenseAction,DenseState> irlAlg(data, theta, p, arma::eye(p.n_elem, p.n_elem),
-                                         rewardRegressor, mdp.getSettings().gamma);
+    auto* irlAlg = buildEpisodicIRLalg(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, irlConfig);
 
 
 
     //Run GIRL
-    irlAlg.run();
+    irlAlg->run();
     arma::vec omega = rewardRegressor.getParameters();
 
     //Print results

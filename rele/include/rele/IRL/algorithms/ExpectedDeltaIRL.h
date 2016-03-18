@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
 
+#include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 #include "rele/IRL/algorithms/LinearIRLAlgorithm.h"
 #include "rele/IRL/utils/HessianCalculatorFactory.h"
-#include "rele/IRL/utils/GradientCalculatorFactory.h"
 
 namespace ReLe
 {
@@ -40,7 +40,7 @@ public:
                      LinearApproximator& rewardf, double gamma, IrlGrad type, IrlHess htype) :
         StepBasedLinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
     {
-        gradientCalculator = GradientCalculatorFactory<ActionC, StateC>::build(
+        gradientCalculator = StepBasedGradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);
         hessianCalculator = HessianCalculatorFactory<ActionC, StateC>::build(
                                 htype, rewardf.getFeatures(), data, policy, gamma);

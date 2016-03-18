@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_
-#define INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_
+#ifndef INCLUDE_RELE_IRL_UTILS_STEPBASEDGRADIENTCALCULATORFACTORY_H_
+#define INCLUDE_RELE_IRL_UTILS_STEPBASEDGRADIENTCALCULATORFACTORY_H_
 
 #include "rele/IRL/utils/gradient/step_based/ReinforceGradientCalculator.h"
 #include "rele/IRL/utils/gradient/step_based/GPOMDPGradientCalculator.h"
@@ -34,7 +34,7 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class GradientCalculatorFactory
+class StepBasedGradientCalculatorFactory
 {
 
 public:
@@ -104,4 +104,4 @@ private:
 
 
 
-#endif /* INCLUDE_RELE_IRL_UTILS_GRADIENTCALCULATORFACTORY_H_ */
+#endif /* INCLUDE_RELE_IRL_UTILS_STEPBASEDGRADIENTCALCULATORFACTORY_H_ */

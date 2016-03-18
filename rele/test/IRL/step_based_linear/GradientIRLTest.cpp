@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/IRL/utils/GradientCalculatorFactory.h"
+#include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 #include "rele/IRL/utils/NonlinearGradientFactory.h"
 
 #include "rele/approximators/features/SparseFeatures.h"
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 
 
     /* Create the gradients calculators */
-    auto linearGradient = GradientCalculatorFactory<DenseAction, DenseState>::build(type, phiReward, data,
+    auto linearGradient = StepBasedGradientCalculatorFactory<DenseAction, DenseState>::build(type, phiReward, data,
                           expertPolicy, mdp.getSettings().gamma);
     auto nonlinearGradient = NonlinearGradientFactory<DenseAction, DenseState>::build(type, rewardRegressor, data,
                              expertPolicy, mdp.getSettings().gamma);
