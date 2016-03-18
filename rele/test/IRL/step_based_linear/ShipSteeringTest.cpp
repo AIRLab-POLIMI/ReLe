@@ -27,21 +27,22 @@
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/IRL/ParametricRewardMDP.h"
 
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
 
 #include "rele/environments/ShipSteering.h"
 
+
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
-#include "rele/IRL/ParametricRewardMDP.h"
-#include "rele/IRL/algorithms/GIRL.h"
 
 #include "rele/algorithms/policy_search/gradient/REINFORCEAlgorithm.h"
 
 #include "rele/utils/FileManager.h"
 
-#include "CommandLineParser.h"
+#include "StepBasedCommandLineParser.h"
+
 
 using namespace std;
 using namespace arma;

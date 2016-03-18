@@ -38,7 +38,7 @@
 #include "rele/IRL/algorithms/EMIRL.h"
 
 #include "../RewardBasisLQR.h"
-#include "CommandLineParser.h"
+#include "EpisodicCommandLineParser.h"
 
 using namespace std;
 using namespace arma;
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     arma::vec omega = rewardRegressor.getParameters();
 
     //Print results
-    cout << "Weights (EM): " << omega.t();
+    cout << "Weights: " << omega.t();
 
     //save stuff
     std::ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));

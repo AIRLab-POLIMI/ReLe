@@ -36,7 +36,7 @@
 #include "rele/utils/FileManager.h"
 
 #include "../RewardBasisLQR.h"
-#include "CommandLineParser.h"
+#include "StepBasedCommandLineParser.h"
 
 using namespace std;
 using namespace arma;

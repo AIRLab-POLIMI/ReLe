@@ -28,6 +28,11 @@
 namespace ReLe
 {
 
+////////////////
+// Step Based //
+////////////////
+
+
 bool IrlGradUtils::isValid(const std::string& type)
 {
     return gradients.count(type) != 0;
@@ -196,6 +201,145 @@ std::string IrlHessUtils::getOptions()
 }
 
 std::map<std::string, IrlHess> IrlHessUtils::hessians = IrlHessUtils::initHessians();
+
+//////////////
+// Episodic //
+//////////////
+
+bool IrlEpGradUtils::isValid(const std::string& type)
+{
+    return gradients.count(type) != 0;
+}
+
+IrlEpGrad IrlEpGradUtils::fromString(const std::string& type)
+{
+    if(gradients.count(type))
+    {
+        return gradients[type];
+    }
+    else
+        throw std::runtime_error("Unknown type");
+}
+
+std::string IrlEpGradUtils::toString(IrlEpGrad type)
+{
+    switch(type)
+    {
+    case IrlEpGrad::PGPE:
+        return "PGPE";
+    case IrlEpGrad::PGPE_BASELINE:
+            return "PGPE";
+        return "NATURAL_GPOMDP_BASELINE";
+    default:
+        throw std::runtime_error("Unknown type");
+    }
+}
+
+
+std::map<std::string, IrlEpGrad> IrlEpGradUtils::initGradients()
+{
+    std::map<std::string, IrlEpGrad> map;
+
+    map["PGPE"] = IrlEpGrad::PGPE;
+    map["PGPE_BASELINE"] = IrlEpGrad::PGPE_BASELINE;
+
+    return map;
+}
+
+std::string IrlEpGradUtils::getOptions()
+{
+    std::stringstream ss;
+
+    bool first = true;
+
+
+    ss << "(";
+
+    for(auto& pair : gradients)
+    {
+        if(first)
+            first = false;
+        else
+            ss << " | ";
+
+        ss << pair.first;
+    }
+
+    ss << ")";
+
+    return ss.str();
+}
+
+std::map<std::string, IrlEpGrad> IrlEpGradUtils::gradients = IrlEpGradUtils::initGradients();
+
+
+
+bool IrlEpHessUtils::isValid(const std::string& type)
+{
+    return hessians.count(type) != 0;
+}
+
+IrlEpHess IrlEpHessUtils::fromString(const std::string& type)
+{
+    if(hessians.count(type))
+    {
+        return hessians[type];
+    }
+    else
+        throw std::runtime_error("Unknown type");
+}
+
+std::string IrlEpHessUtils::toString(IrlEpHess type)
+{
+    switch(type)
+    {
+    case IrlEpHess::PGPE:
+        return "PGPE";
+    case IrlEpHess::PGPE_BASELINE:
+        return "PGPE_BASELINE";
+    default:
+        throw std::runtime_error("Unknown type");
+    }
+}
+
+
+std::map<std::string, IrlEpHess> IrlEpHessUtils::initHessians()
+{
+    std::map<std::string, IrlEpHess> map;
+
+    map["REINFORCE"] = IrlEpHess::PGPE;
+    map["REINFORCE_BASELINE"] = IrlEpHess::PGPE_BASELINE;
+
+    return map;
+}
+
+std::string IrlEpHessUtils::getOptions()
+{
+    std::stringstream ss;
+
+    bool first = true;
+
+
+    ss << "(";
+
+    for(auto& pair : hessians)
+    {
+        if(first)
+            first = false;
+        else
+            ss << " | ";
+
+        ss << pair.first;
+
+    }
+
+    ss << ")";
+
+    return ss.str();
+}
+
+std::map<std::string, IrlEpHess> IrlEpHessUtils::hessians = IrlEpHessUtils::initHessians();
+
 
 }
 

@@ -4,11 +4,17 @@ clear all
 
 addpath(genpath('../../..'));
 
-fraction = 0.1;
+fraction = 1;
 step = floor(1/fraction);
 
 %% plot trajectories of expert
-csv = csvread('/tmp/ReLe/lqr/EMIRL/TrajectoriesExpert.txt');
+%algorithm = 'EMIRL'
+algorithm = 'EGIRL';
+
+path = ['/tmp/ReLe/lqr/', algorithm, '/'];
+
+
+csv = csvread([path, '/TrajectoriesExpert.txt']);
 traj = readDataset(csv);
 
 figure(2)
@@ -27,7 +33,7 @@ axis([0, 20, 0, 20])
 zlim([0 20])
 
 %% plot Parameters of expert
-theta = load('/tmp/ReLe/lqr/EMIRL/Theta.txt' , '-ascii');
+theta = load([path,'Theta.txt'] , '-ascii');
 figure(3)
 hold on;
 plot3(theta(1, ~any(theta > 0, 1)), theta(2, ~any(theta > 0, 1)), theta(3, ~any(theta > 0, 1)), 'ob');
@@ -53,7 +59,7 @@ disp('----------------')
 disp(theta(:, all(theta > 0, 1)))
 
 %% Plot features vectors
-phi = load('/tmp/ReLe/lqr/EMIRL/Phi.txt' , '-ascii');
+phi = load([path,'Phi.txt'] , '-ascii');
 figure(4)
 hold on;
 inliers = all(phi > -1000);

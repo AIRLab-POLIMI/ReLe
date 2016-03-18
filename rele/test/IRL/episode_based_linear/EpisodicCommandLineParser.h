@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEST_IRL_EPISODE_BASED_LINEAR_COMMANDLINEPARSER_H_
-#define TEST_IRL_EPISODE_BASED_LINEAR_COMMANDLINEPARSER_H_
+#ifndef TEST_IRL_EPISODE_BASED_LINEAR_EPISODICCOMMANDLINEPARSER_H_
+#define TEST_IRL_EPISODE_BASED_LINEAR_EPISODICCOMMANDLINEPARSER_H_
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -137,4 +137,4 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
 
 
 
-#endif /* TEST_IRL_EPISODE_BASED_LINEAR_COMMANDLINEPARSER_H_ */
+#endif /* TEST_IRL_EPISODE_BASED_LINEAR_EPISODICCOMMANDLINEPARSER_H_ */

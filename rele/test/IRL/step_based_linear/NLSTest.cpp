@@ -35,13 +35,10 @@
 #include "rele/IRL/ParametricRewardMDP.h"
 #include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
 
-#include "rele/IRL/algorithms/GIRL.h"
-#include "rele/IRL/algorithms/PGIRL.h"
-#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
-
 #include "rele/utils/FileManager.h"
 
-#include "CommandLineParser.h"
+#include "StepBasedCommandLineParser.h"
+
 
 using namespace std;
 using namespace arma;
