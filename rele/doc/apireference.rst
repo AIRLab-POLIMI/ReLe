@@ -318,3 +318,52 @@ Feature Selection
    
 .. doxygenclass:: ReLe::PrincipalFeatureAnalysis
    :members:
+   
+Utils
+=====
+.. doxygenfunction:: ReLe::null
+
+.. doxygenfunction:: ReLe::rref
+
+.. doxygenfunction:: ReLe::wrapTo2Pi
+
+.. doxygenfunction:: ReLe::wrapToPi
+
+.. doxygenfunction:: ReLe::meshgrid
+
+.. doxygenfunction:: ReLe::blockdiagonal
+
+.. doxygenfunction:: ReLe::range
+
+.. doxygenfunction:: ReLe::vecToTriangular
+
+.. doxygenfunction:: ReLe::triangularToVec
+
+.. doxygenfunction:: ReLe::safeChol
+
+.. doxygenclass:: ReLe::ConsoleManager
+   :members:
+   
+.. doxygenclass:: ReLe::CSVutils
+   :members:
+   
+.. doxygenclass:: ReLe::FileManager
+   :members:
+   
+.. doxygenclass:: ReLe::RngGenerators
+   :members:
+   
+.. doxygenclass:: ReLe::RandomGenerator
+   :members:
+   
+.. doxygenclass:: ReLe::Range
+   :members:
+   
+.. doxygenclass:: ReLe::ModularRange
+   :members:
+   
+.. doxygenclass:: ReLe::Range2Pi
+   :members:
+
+.. doxygenclass:: ReLe::RangePi
+   :members:
