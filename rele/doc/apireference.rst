@@ -6,9 +6,9 @@
     internals is currently incomplete. Please refer to the previous sections
     and the ReLe header files for the nitty gritty details.
 
-
+=============
 API Reference
-######################
+=============
 
 .. highlight:: c++
 

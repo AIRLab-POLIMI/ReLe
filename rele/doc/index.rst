@@ -1,5 +1,6 @@
+==================
 ReLe documentation
-================================
+==================
 
 This is the documentation for ReLe |release|, last updated |today|.
 
@@ -23,4 +24,5 @@ Contents
    :maxdepth: 2
 
    apireference
+   tutorials
 
