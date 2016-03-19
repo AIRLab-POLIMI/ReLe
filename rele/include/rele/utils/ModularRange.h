@@ -28,35 +28,84 @@
 
 namespace ReLe
 {
-
-
+/*!
+ * In some cases (e.g. angle values), ranges repeats
+ * over and over and one may want to convert a number into the corresponding
+ * number within the given range. This class is useful to do so.
+ * For instance, given a range of [-180°, 180°] and an angle of 186°,
+ * the corresponding number within the range would be -174°.
+ */
 class ModularRange : public Range
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param lo the lower bound of the range
+	 * \param hi the upper bound of the range
+	 */
     ModularRange(const double lo, const double hi);
 
+    /*!
+     * Determine if a point has a regular value (i.e. different from infinity or NaN).
+     * \param d the point to check
+     * \return true if the point has a regular value
+     */
     virtual bool contains(const double d) const override;
+
+    /*!
+     * Given a number, it returns the corresponding number within the range.
+     * \param value the number to be converted
+     * \return the converted number
+     */
     virtual double bound(const double& value) const override;
 
     virtual ~ModularRange();
 };
 
+/*!
+ * This class extends \see ModularRange to manage fixed
+ * angle ranges from 0 to 2 * pi radians (0° to 360° in degrees).
+ */
 class Range2Pi : public ModularRange
 {
 public:
+	/*!
+	 * Constructor.
+	 * Create the range between 0 and 2 * pi radians.
+	 */
     Range2Pi();
-    static double wrap(double value);
 
+    /*!
+     * Given a number, it returns the corresponding number within the range.
+     * \param value the number to be converted
+     * \return the converted number
+     */
+    static double wrap(double value);
 
 private:
     static const ReLe::Range2Pi range;
 };
 
+/*!
+ * This class extends \see ModularRange to manage fixed
+ * angle range from 0 to pi radians (0° to 180° in degrees).
+ */
 class RangePi : public ModularRange
 {
 public:
+	/*!
+	 * Constructor.
+	 * Create the range between 0 and pi radians.
+	 */
     RangePi();
+
+    /*!
+     * Given a number, it returns the corresponding number within the range.
+     * \param value the number to be converted
+     * \return the converted number
+     */
     static double wrap(double value);
+
 private:
     static const ReLe::RangePi range;
 };

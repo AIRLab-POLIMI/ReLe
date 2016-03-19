@@ -28,15 +28,50 @@
 
 namespace ReLe
 {
-
+/*!
+ * This class has some useful functions to manage I/O of data files.
+ */
 class FileManager
 {
 public:
+	/*!
+	 * Constructor.
+	 * It creates the path where the file will be saved or loaded.
+	 * \param environment name of the environment in which the algorithm is executed
+	 * \param algorithm name of the algorithm to be performed
+	 */
     FileManager(const std::string& environment, const std::string& algorithm);
+
+    /*!
+     * Constructor.
+     * It creates the path where the file will be saved or loaded.
+     * \param testName name of the test to be performed
+     */
     FileManager(const std::string& testName);
+
+    /*!
+     * Creates the directory at the path given by the constructor.
+     */
     void createDir();
+
+    /*!
+     * Cleans the directory at the path given by the constructor parameters
+     */
     void cleanDir();
+
+    /*!
+     * Add the name of the file to the path created in the constructor.
+     * \param fileName name of the file
+     * \return the path string
+     */
     std::string addPath(const std::string& fileName);
+
+    /*!
+     * Add the name of the file to the path created in the constructor.
+     * \param prefix the prefix before the name of the file which is separated by '_'
+     * \param fileName name of the file
+     * \return the path string
+     */
     std::string addPath(const std::string& prefix, const std::string& fileName);
 
 private:

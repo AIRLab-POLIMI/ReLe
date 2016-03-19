@@ -28,171 +28,201 @@
 namespace ReLe
 {
 
-/**
- * Simple real-valued range.  It contains an upper and lower bound.
+/*!
+ * Simple real-valued range. It contains an upper and lower bound.
  */
 class Range
 {
 private:
-    double lowerbound; /// The lower bound.
-    double upperBound; /// The upper bound.
+    double lowerbound;
+    double upperBound;
 
 public:
-    /** Initialize to an empty set (where lo > hi). */
+    /*!
+     * Constructor.
+     * Initialize to an empty set (where lo > hi).
+     */
     Range();
 
-    /***
-    * Initialize a range to enclose only the given point (lo = point, hi =
-    * point).
-    *
-    * @param point Point that this range will enclose.
+    /*!
+    * Constructor.
+    * Initialize a range to enclose only the given point (lo = point, hi = point).
+    * \param point point that this range will enclose
     */
     Range(const double point);
 
-    /**
-    * Initializes to specified range.
-    *
-    * @param lo Lower bound of the range.
-    * @param hi Upper bound of the range.
+    /*!
+    * Initialize to specified range.
+    * \param lo the lower bound of the range
+    * \param hi the upper bound of the range
     */
     Range(const double lo, const double hi);
 
-    //! Get the lower bound.
+    /*!
+     * Get the lower bound.
+     * \return the lower bound value
+     */
     double lo() const
     {
         return lowerbound;
     }
-    //! Modify the lower bound.
+
+    /*!
+     * Get a reference to the lower bound.
+     * \return a reference to the lower bound
+     */
     double& lo()
     {
         return lowerbound;
     }
 
-    //! Get the upper bound.
+    /*!
+     * Get the upper bound.
+     * \return the upper bound value
+     */
     double hi() const
     {
         return upperBound;
     }
-    //! Modify the upper bound.
+
+    /*!
+     * Get a reference to the upper bound.
+     * \return a reference to the upper bound
+     */
     double& hi()
     {
         return upperBound;
     }
 
-    /**
-    * Gets the span of the range (hi - lo).
+    /*!
+    * Get the span of the range (hi - lo).
+    * \return the width of the range
     */
     double width() const;
 
-    /**
-    * Gets the midpoint of this range.
+    /*!
+    * Get the midpoint of this range.
+    * \return the mid point value
     */
     double mid() const;
 
+    /*!
+     * Check whether a value is inside the range.
+     * \param value the value to check
+     * \return the lower bound in case the value is lower than it,
+     * 		   the upper bound in case the value is greater than it,
+     * 		   the value in case the value is inside the range
+     */
     virtual double bound(const double& value) const;
 
-    /**
-    * Expands this range to include another range.
-    *
-    * @param rhs Range to include.
+    /*!
+    * Expand this range to include another range.
+    * \param rhs range to include
+    * \return a reference to the expanded range
     */
     Range& operator|=(const Range& rhs);
 
-    /**
-    * Expands this range to include another range.
-    *
-    * @param rhs Range to include.
+    /*!
+    * Expand this range to include another range.
+    * \param rhs range to include
+    * \return the expanded range
     */
     Range operator|(const Range& rhs) const;
 
-    /**
-    * Shrinks this range to be the overlap with another range; this makes an
-    * empty set if there is no overlap.
-    *
-    * @param rhs Other range.
+    /*!
+    * Shrink this range to make it overlap to another range; this makes an
+    * empty set if there is no overlapping.
+    * \param rhs other range
+    * \return a reference to the overlapped range
     */
     Range& operator&=(const Range& rhs);
 
-    /**
-    * Shrinks this range to be the overlap with another range; this makes an
-    * empty set if there is no overlap.
-    *
-    * @param rhs Other range.
+    /*!
+    * Shrink this range to make it overlap to another range; this makes an
+    * empty set if there is no overlapping.
+    * \param rhs other range
+    * \return the overlapped range
     */
     Range operator&(const Range& rhs) const;
 
-    /**
+    /*!
     * Scale the bounds by the given double.
-    *
-    * @param d Scaling factor.
+    * \param d scaling factor
+    * \return a reference to the scaled range
     */
     Range& operator*=(const double d);
 
-    /**
+    /*!
     * Scale the bounds by the given double.
-    *
-    * @param d Scaling factor.
+    * \param d scaling factor
+    * \return the scaled range
     */
     Range operator*(const double d) const;
 
-    /**
-    * Scale the bounds by the given double.
-    *
-    * @param d Scaling factor.
+    /*!
+    * Scale the bounds of another range by a given double and creates a new range from them.
+    * \param d scaling factor
+    * \param r range whose bound values are to be scaled
+    * \return a new scaled range
     */
-    friend Range operator*(const double d, const Range& r); // Symmetric.
+    friend Range operator*(const double d, const Range& r);
 
-    /**
+    /*!
     * Compare with another range for strict equality.
-    *
-    * @param rhs Other range.
+    * \param rhs other range
+    * \return true if the ranges are equal
     */
     bool operator==(const Range& rhs) const;
 
-    /**
-    * Compare with another range for strict equality.
-    *
-    * @param rhs Other range.
+    /*!
+    * Compare with another range for strict inequality.
+    * param rhs other range
+    * \return true if the ranges are not equal
     */
     bool operator!=(const Range& rhs) const;
 
-    /**
-    * Compare with another range.  For Range objects x and y, x < y means that x
+    /*!
+    * Compare with another range. For Range objects x and y, x < y means that x
     * is strictly less than y and does not overlap at all.
-    *
-    * @param rhs Other range.
+    * \param rhs other range
+    * \return true if the range is strictly less than the other
     */
     bool operator<(const Range& rhs) const;
 
-    /**
-    * Compare with another range.  For Range objects x and y, x < y means that x
-    * is strictly less than y and does not overlap at all.
-    *
-    * @param rhs Other range.
+    /*!
+    * Compare with another range. For Range objects x and y, x > y means that x
+    * is strictly greater than y and does not overlap at all.
+    * \param rhs other range
+    * \return true if the range is strictly greater than the other
     */
     bool operator>(const Range& rhs) const;
 
-    /**
-    * Determines if a point is contained within the range.
-    *
-    * @param d Point to check.
+    /*!
+    * Determine if a point is contained within the range.
+    * \param d the point to check.
+    * \return true if the point is within the range
     */
     virtual bool contains(const double d) const;
 
-    /**
-    * Determines if another range overlaps with this one.
-    *
-    * @param r Other range.
-    *
-    * @return true if ranges overlap at all.
+    /*!
+    * Determine if another range overlaps completely with this one.
+    * \param r other range
+    * \return true if ranges overlap completely
     */
     bool contains(const Range& r) const;
 
-    /**
-    * Returns a string representation of an object.
+    /*!
+    * Return a string representation of an object.
+    * \return the string indicating lower and upper bound of the range
     */
     std::string toString() const;
 
+    /*!
+     * Print a string representation of an object to an upstream variable.
+     * \param out the output where to print the string
+     * \param range the range to be printed
+     * \return the output object
+     */
     friend inline std::ostream& operator<<(std::ostream& out, const Range& range)
     {
         out << range.toString();

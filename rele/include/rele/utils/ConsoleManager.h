@@ -29,11 +29,31 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements some basics functions to manage the progress status of a running
+ * algorithm.
+ */
 class ConsoleManager
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param max max value of the progress
+	 * \param step step size of the progress
+	 * \param percentage indicates whether to show the progress in percentage values or not
+	 */
     ConsoleManager(unsigned int max, unsigned int step, bool percentage = false);
+
+    /*!
+     * Print progress.
+     * \param progress the current progress value
+     */
     void printProgress(unsigned int progress);
+
+    /*!
+     * Print info.
+     * \param info the info to be printed
+     */
     void printInfo(const std::string& info);
 
 private:

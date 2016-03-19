@@ -30,25 +30,61 @@
 namespace ReLe
 {
 
+/*!
+ * This class offers some helpful functions to manage CSV files.
+ */
 class CSVutils
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param delimiter the delimiter of the CSV file
+	 */
+	CSVutils(std::string delimiter = ',') : delimiter(delimiter)
+	{
+	}
+
+	/*!
+	 * Read a line from a CSV file.
+	 * \param is the CSV file to read
+	 * \param tokens vector of elements contained in the CSV file
+	 * \return a bool value indicating whether the read has been successful or not
+	 */
     static bool readCSVLine(std::istream& is, std::vector<std::string>& tokens);
+
+    /*!
+     * Print a CSV file from an armadillo matrix.
+     * \param M matrix to print in the file
+     * \param os the file where the matrix is printed
+     */
     static void matrixToCSV(const arma::mat& M, std::ostream& os);
+
+    /*!
+     * Print a CSV file from an armadillo vector.
+     * \param v vector to print in the file
+     * \param os the file where the vector is printed
+     */
     static void vectorToCSV(const arma::vec& v, std::ostream& os);
 
+    /*!
+     * Template function to print a CSV file from an armadillo matrix.
+     * \param v vector to print in the file
+     * \param os the file where the vector is printed
+     */
     template<class T>
     static void vectorToCSV(const std::vector<T>& v, std::ostream& os)
     {
         int i, ie = v.size() - 1;
         for(i = 0; i < ie; i++)
         {
-            os << v[i] << ",";
+            os << v[i] << delimiter;
         }
 
         os << v[i] << std::endl;
     }
 
+private:
+    std::string delimiter;
 };
 
 }
