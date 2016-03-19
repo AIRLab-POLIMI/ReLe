@@ -37,14 +37,6 @@ class CSVutils
 {
 public:
 	/*!
-	 * Constructor.
-	 * \param delimiter the delimiter of the CSV file
-	 */
-	CSVutils(std::string delimiter = ',') : delimiter(delimiter)
-	{
-	}
-
-	/*!
 	 * Read a line from a CSV file.
 	 * \param is the CSV file to read
 	 * \param tokens vector of elements contained in the CSV file
@@ -77,14 +69,11 @@ public:
         int i, ie = v.size() - 1;
         for(i = 0; i < ie; i++)
         {
-            os << v[i] << delimiter;
+            os << v[i] << ",";
         }
 
         os << v[i] << std::endl;
     }
-
-private:
-    std::string delimiter;
 };
 
 }
