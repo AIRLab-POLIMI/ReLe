@@ -63,7 +63,7 @@ public:
 };
 
 /*!
- * This class extends \see ModularRange to manage fixed
+ * This class is used to manage fixed
  * angle ranges from 0 to 2 * pi radians (0° to 360° in degrees).
  */
 class Range2Pi : public ModularRange
@@ -87,7 +87,7 @@ private:
 };
 
 /*!
- * This class extends \see ModularRange to manage fixed
+ * This class is used to manage fixed
  * angle range from 0 to pi radians (0° to 180° in degrees).
  */
 class RangePi : public ModularRange
