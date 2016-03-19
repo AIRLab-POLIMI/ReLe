@@ -31,9 +31,7 @@ After running the code you shuold see on the console two section:
 -- Policy
 
 
-The output shoudl be similar to this:
-
-(TODO format)
+The output shoudl be similar to this::
 
 	starting episode
 
@@ -75,5 +73,9 @@ The output shoudl be similar to this:
 	policy(4) = 1
 
 
-Please, note that this mdp has two optimal policies, as in the goal state (state n 2), the two action has the same expected return.
+Please, note that this mdp has two optimal policies, as in the goal state (state n 2), the two action has the same expected return; and Q-Learning can find two different optimal policies.
+
+The complete code is the following:
+
+TODO code
 
