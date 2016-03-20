@@ -41,6 +41,7 @@ public:
     MLE(DifferentiablePolicy<ActionC,StateC>& policy, Dataset<ActionC,StateC>& ds)
         : policy(policy), data(ds)
     {
+    	nbFunEvals = 0;
     }
 
     virtual arma::vec solve(arma::vec starting = arma::vec(),
@@ -79,8 +80,7 @@ public:
         nbFunEvals = 0;
         if (optimizator.optimize(parameters, minf) < 0)
         {
-            printf("nlopt failed!\n");
-            abort();
+            throw std::runtime_error("nlopt failed!\n");
         }
         else
         {
@@ -158,6 +158,11 @@ public:
         return nbFunEvals;
     }
 
+    virtual ~MLE()
+    {
+
+    }
+
 protected:
     DifferentiablePolicy<ActionC,StateC>& policy;
     Dataset<ActionC,StateC>& data;
@@ -219,8 +224,7 @@ public:
         nbFunEvals = 0;
         if (optimizator.optimize(parameters, minf) < 0)
         {
-            printf("nlopt failed!\n");
-            abort();
+        	throw std::runtime_error("nlopt failed!\n");
         }
         else
         {
@@ -294,6 +298,11 @@ public:
                           void* o)
     {
         return reinterpret_cast<RidgeRegularizedMLE<ActionC,StateC>*>(o)->objFunction(n, x, grad);
+    }
+
+    virtual ~RidgeRegularizedMLE()
+    {
+
     }
 
 protected:
