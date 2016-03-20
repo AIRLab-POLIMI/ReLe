@@ -31,14 +31,32 @@
 namespace ReLe
 {
 
+/*!
+ * This class implement a learning rate, with eventually decay rules
+ * The learning rate can be action and state dependent
+ */
 template<class ActionC, class StateC>
 class LearningRate_
 {
 public:
+    /*!
+     * Computes the learning rate
+     */
     virtual double operator()(StateC x, ActionC u) = 0;
+
+    /*!
+     * Resets the learning rate to it's original value
+     */
     virtual void reset() = 0;
+
+    /*!
+     * Writes the learning rate as a string
+     */
     virtual std::string print() = 0;
 
+    /*!
+     * Destructor.
+     */
     virtual ~LearningRate_()
     {
 
@@ -48,10 +66,18 @@ public:
 typedef LearningRate_<FiniteAction, FiniteState> LearningRate;
 typedef LearningRate_<FiniteAction, DenseState> LearningRateDense;
 
+
+/*!
+ * Implementation of a constant learning rate
+ */
 template<class ActionC, class StateC>
 class ConstantLearningRate_ : public LearningRate_<ActionC, StateC>
 {
 public:
+    /*!
+     * Constructor.
+     * \param alpha the value for the learning rate
+     */
     ConstantLearningRate_(double alpha) : alpha(alpha)
     {
 
@@ -85,10 +111,22 @@ private:
 typedef ConstantLearningRate_<FiniteAction, FiniteState> ConstantLearningRate;
 typedef ConstantLearningRate_<FiniteAction, DenseState> ConstantLearningRateDense;
 
+
+/*!
+ * Implementation of a simple decaying learning rate.
+ * The learning rate follows the rule:
+ * \f[ $\alpha(t)=\min\left(\alpha_{min},\dfrac{\alpha(t_{0})}{t^{\omega}}\right)$ \f]
+ *
+ */
 template<class ActionC, class StateC>
 class DecayingLearningRate_ : public LearningRate_<ActionC, StateC>
 {
 public:
+    /*!
+     * Constructor.
+     * \param initialAlpha the initial value for the learning rate
+     * \param omega the exponent used to weight the time decay. \f$\omega\in\left(0,1\right]\f$
+     */
     DecayingLearningRate_(double initialAlpha, double omega = 1.0, double minAlpha = 0.0)
         : initialAlpha(initialAlpha), omega(omega), minAlpha(minAlpha)
     {

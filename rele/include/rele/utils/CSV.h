@@ -36,12 +36,12 @@ namespace ReLe
 class CSVutils
 {
 public:
-	/*!
-	 * Read a line from a CSV file.
-	 * \param is the CSV file to read
-	 * \param tokens vector of elements contained in the CSV file
-	 * \return a bool value indicating whether the read has been successful or not
-	 */
+    /*!
+     * Read a line from a CSV file.
+     * \param is the CSV file to read
+     * \param tokens vector of elements contained in the CSV file
+     * \return a bool value indicating whether the read has been successful or not
+     */
     static bool readCSVLine(std::istream& is, std::vector<std::string>& tokens);
 
     /*!

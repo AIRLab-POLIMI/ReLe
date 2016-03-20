@@ -35,12 +35,12 @@ namespace ReLe
 class RngGenerators
 {
 public:
-	/*!
-	 * Constructor.
-	 * This function initializes the Random Number Generator of std and armadillo
-	 * libraries and the Random Number Generator of the class attribute with the provided seed.
-	 * \param seed the seed to be set
-	 */
+    /*!
+     * Constructor.
+     * This function initializes the Random Number Generator of std and armadillo
+     * libraries and the Random Number Generator of the class attribute with the provided seed.
+     * \param seed the seed to be set
+     */
     RngGenerators(unsigned int seed) : gen(seed)
     {
         srand(seed);
@@ -48,8 +48,8 @@ public:
     }
 
     /*!
-	 * Modifies the Random Number Generator of std and armadillo
-	 * libraries and the Random Number Generator of the class attribute with the provided seed.
+     * Modifies the Random Number Generator of std and armadillo
+     * libraries and the Random Number Generator of the class attribute with the provided seed.
      * \param seed the seed to be set
      */
     void seed(unsigned int seed)
@@ -70,10 +70,10 @@ public:
 class RandomGenerator
 {
 public:
-	/*!
-	 * Generate a random unsigned integer number of 32 bits.
-	 * \return the random unsigned integer number
-	 */
+    /*!
+     * Generate a random unsigned integer number of 32 bits.
+     * \return the random unsigned integer number
+     */
     inline static uint32_t randu32()
     {
         return gen.gen();

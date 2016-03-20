@@ -36,12 +36,12 @@ namespace ReLe
 class ConsoleManager
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param max max value of the progress
-	 * \param step step size of the progress
-	 * \param percentage indicates whether to show the progress in percentage values or not
-	 */
+    /*!
+     * Constructor.
+     * \param max max value of the progress
+     * \param step step size of the progress
+     * \param percentage indicates whether to show the progress in percentage values or not
+     */
     ConsoleManager(unsigned int max, unsigned int step, bool percentage = false);
 
     /*!

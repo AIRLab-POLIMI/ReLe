@@ -38,11 +38,11 @@ namespace ReLe
 class ModularRange : public Range
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param lo the lower bound of the range
-	 * \param hi the upper bound of the range
-	 */
+    /*!
+     * Constructor.
+     * \param lo the lower bound of the range
+     * \param hi the upper bound of the range
+     */
     ModularRange(const double lo, const double hi);
 
     /*!
@@ -69,10 +69,10 @@ public:
 class Range2Pi : public ModularRange
 {
 public:
-	/*!
-	 * Constructor.
-	 * Create the range between 0 and 2 * pi radians.
-	 */
+    /*!
+     * Constructor.
+     * Create the range between 0 and 2 * pi radians.
+     */
     Range2Pi();
 
     /*!
@@ -93,10 +93,10 @@ private:
 class RangePi : public ModularRange
 {
 public:
-	/*!
-	 * Constructor.
-	 * Create the range between 0 and pi radians.
-	 */
+    /*!
+     * Constructor.
+     * Create the range between 0 and pi radians.
+     */
     RangePi();
 
     /*!

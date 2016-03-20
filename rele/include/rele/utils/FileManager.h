@@ -34,12 +34,12 @@ namespace ReLe
 class FileManager
 {
 public:
-	/*!
-	 * Constructor.
-	 * It creates the path where the file will be saved or loaded.
-	 * \param environment name of the environment in which the algorithm is executed
-	 * \param algorithm name of the algorithm to be performed
-	 */
+    /*!
+     * Constructor.
+     * It creates the path where the file will be saved or loaded.
+     * \param environment name of the environment in which the algorithm is executed
+     * \param algorithm name of the algorithm to be performed
+     */
     FileManager(const std::string& environment, const std::string& algorithm);
 
     /*!
