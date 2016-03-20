@@ -325,7 +325,9 @@ Utils
 
 .. doxygenfunction:: ReLe::rref
 
-.. doxygenfunction:: ReLe::wrapTo2Pi
+.. doxygenfunction:: ReLe::wrapTo2Pi(double lambda)
+
+.. doxygenfunction:: ReLe::wrapTo2Pi(const arma::vec& lambda)
 
 .. doxygenfunction:: ReLe::wrapToPi
 
