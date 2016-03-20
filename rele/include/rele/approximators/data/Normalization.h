@@ -33,22 +33,59 @@
 namespace ReLe
 {
 
+/*!
+ * This interface is used to implement a normalization algorithm over a dataset.
+ * \see ReLe::normalizeDataset
+ * \see ReLe::normalizeDatasetFull
+ */
 template<bool dense = true>
 class Normalization
 {
     FEATURES_TRAITS(dense)
 public:
+    /*!
+     * Normalization operator.
+     * \param features the features vector to be normalized
+     * \return the normalized features vector
+     * \see normalize
+     */
     inline features_type operator()(const features_type& features)
     {
         return normalize(features);
     }
 
+    /*!
+     *	Compute normalization of a single input feature.
+     *	\param features the features vector to be normalized
+     *  \return the normalized features vector
+     */
     virtual features_type normalize(const features_type& features) const = 0;
+
+    /*!
+     * Inverse normalization operation over an input feature.
+     * \param features the features vector to be restored
+     * \return the restored features vector
+     */
     virtual features_type restore(const features_type& features) const = 0;
+
+
+    /*!
+     * This method is similar to restore, but, differently from Normalization::restore, it does not
+     * add the dataset mean, only the relative elements scales.
+     * \return the rescaled features vector
+     */
     virtual features_type rescale(const features_type& features) const = 0;
+
+    /*!
+     * Read the whole dataset in order to compute the parameters for the normalization algorithm.
+     * \param dataset the dataset over which the normalization should be performed
+     */
     virtual void readData(const collection_type& dataset) = 0;
 
 
+    /*!
+     * Destructor.
+     */
     virtual ~Normalization()
     {
     }
@@ -56,7 +93,10 @@ public:
 };
 
 
-
+/*!
+ * This class implements a fake normaliztion algorithm.
+ * This algorithm doesn't perform any normalization.
+ */
 template<bool dense = true>
 class NoNormalization : public Normalization<dense>
 {
@@ -82,17 +122,29 @@ public:
 
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~NoNormalization()
     {
     }
 
 };
 
+/*!
+ * This class implements the normalization over an interval.
+ * Simply rescales the input features into a new range.
+ */
 template<bool dense = true>
 class MinMaxNormalization : public Normalization<dense>
 {
     FEATURES_TRAITS(dense)
 public:
+    /*!
+     * Constructor.
+     * \param minValue the new minimum value of the dataset
+     * \param maxValue the new maximum value for the dataset
+     */
     MinMaxNormalization(double minValue = 0.0, double maxValue = 1.0)
         : minValue(minValue), maxValue(maxValue)
     {
@@ -128,6 +180,9 @@ public:
         deltaFactor = newDelta/delta;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~MinMaxNormalization()
     {
 
@@ -143,13 +198,17 @@ private:
 
 };
 
-
+/*!
+ * This class implements the z-score normalization.
+ * This type of normalization consisty of subtracting the dataset mean and
+ * dividing each element of the features vector by it's standard deviation.
+ */
 template<bool dense = true>
-class ZscoreNormalization_ : public Normalization<dense>
+class ZscoreNormalization : public Normalization<dense>
 {
     FEATURES_TRAITS(dense)
 public:
-    ZscoreNormalization_()
+    ZscoreNormalization()
     {
 
     }
@@ -177,7 +236,7 @@ public:
 
 
 
-    virtual ~ZscoreNormalization_()
+    virtual ~ZscoreNormalization()
     {
 
     }

@@ -209,6 +209,32 @@ Features types
    
 .. doxygenclass:: ReLe::TilesCoder_
    :members:
+   
+Batch Dataset Utils
+-------------------
+.. doxygenclass:: ReLe::BatchDataRaw_
+   :members:
+.. doxygenclass:: ReLe::BatchData_
+   :members:
+.. doxygenclass:: ReLe::MiniBatchData_
+   :members:
+.. doxygenclass:: ReLe::BatchDataSimple_
+   :members:
+
+.. doxygenclass:: ReLe::Normalization
+   :members:
+.. doxygenclass:: ReLe::NoNormalization
+   :members:
+.. doxygenclass:: ReLe::MinMaxNormalization
+   :members:
+.. doxygenclass:: ReLe::ZscoreNormalization
+   :members:
+
+
+.. doxygenfunction:: ReLe::normalizeDataset
+.. doxygenfunction:: ReLe::normalizeDatasetFull
+
+
 
 
 Policy Representations

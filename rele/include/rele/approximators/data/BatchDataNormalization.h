@@ -30,6 +30,15 @@
 namespace ReLe
 {
 
+/*!
+ * This function can be used to create a normalized version of the dataset.
+ * Only input features are normalized.
+ * \param dataset the dataset to be normalized.
+ * \param normalization the normalization object to be used
+ * \param computeNormalization if the normalization object should be initialized
+ * by computing the normalization parameters
+ * \return the normalized dataset.
+ */
 template<class OutputC, bool dense>
 BatchDataSimple_<OutputC, dense> normalizeDataset(
     const BatchData_<OutputC, dense>& dataset,
@@ -49,6 +58,16 @@ BatchDataSimple_<OutputC, dense> normalizeDataset(
     return BatchDataSimple_<OutputC, dense>(features, dataset.getOutputs());
 }
 
+/*!
+ * This function can be used to create a normalized version of the dataset.
+ * Both input features and output are normalized.
+ * \param dataset the dataset to be normalized.
+ * \param featuresNormalization the normalization object to be used for input features
+ * \param outputNormalization the normalization object to be used for outputs
+ * \param computeNormalization if the normalization object should be initialized
+ * by computing the normalization parameters
+ * \return the normalized dataset.
+ */
 template<bool dense>
 BatchDataSimple_<arma::vec, dense> normalizeDatasetFull(
     const BatchData_<arma::vec, dense>& dataset,

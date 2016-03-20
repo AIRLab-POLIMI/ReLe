@@ -38,22 +38,37 @@
 
 namespace ReLe
 {
-
+/*!
+ * This class represents a dataset of raw input/output data, that can be used to
+ * train a ReLe::BatchRegressor
+ */
 template<class InputC, class OutputC>
 class BatchDataRaw_
 {
 public:
+	/*!
+	 * Constructor.
+	 */
     BatchDataRaw_()
     {
 
     }
 
+    /*!
+     * Constructor.
+     * \param inputs the vector of input data
+     * \param outputs the vector of output data, corresponding to the inputs
+     */
     BatchDataRaw_(std::vector<InputC> inputs, std::vector<OutputC> outputs) :
         inputs(inputs), outputs(outputs)
     {
         assert(inputs.size() == outputs.size());
     }
 
+    /*!
+     * Create a copy of this object, containing an exact copy of the dataset.
+     * \return a pointer to the copy
+     */
     virtual BatchDataRaw_<InputC, OutputC>* clone() const
     {
         BatchDataRaw_<InputC, OutputC>* newDataset = new BatchDataRaw_<InputC,
@@ -67,27 +82,49 @@ public:
         return newDataset;
     }
 
+    /*!
+     * Add a sample to the dataset.
+     * \param input the input to be added
+     * \param output the corresponding output
+     */
     void addSample(const InputC& input, const OutputC& output)
     {
         inputs.push_back(input);
         outputs.push_back(output);
     }
 
+    /*!
+     * Getter.
+     * \param index the index of the input in the dataset
+     * \return the corresponding input
+     */
     virtual InputC getInput(unsigned int index) const
     {
         return inputs[index];
     }
 
+    /*!
+     * Getter.
+     * \param index the index of the output in the dataset
+     * \return the corresponding output
+     */
     virtual OutputC getOutput(unsigned int index) const
     {
         return outputs[index];
     }
 
+    /*!
+     * Getter.
+     * \return the number of input output couples in the dataset.
+     */
     virtual size_t size() const
     {
         return inputs.size();
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~BatchDataRaw_()
     {
 
@@ -102,33 +139,88 @@ private:
 template<class OutputC, bool dense>
 class MiniBatchData_;
 
+
+/*!
+ * This interface represents a dataset of input/output data, where the input is a set of
+ * precomputed features from the input dataset.
+ * An implementation of this interface can be used to train a ReLe::BatchRegressor using
+ * the low level method BatchRegressor::trainFeatures
+ */
 template<class OutputC, bool dense = true>
 class BatchData_
 {
 
 public:
+	//! the type of the input features
     typedef typename input_traits<dense>::column_type features_type;
+    //! the type of the set of input features
     typedef typename input_traits<dense>::type FeaturesCollection;
+    //! the type of the set of the outputs
     typedef typename output_traits<OutputC>::type OutputCollection;
 
 public:
+    /*!
+     * Constructor.
+     */
     BatchData_()
     {
         computed = false;
     }
 
+    /*!
+     * Getter.
+     * \param index the index of the input feature vector in the dataset
+     * \return the corresponding input feature vector
+     */
     virtual features_type getInput(unsigned int index) const = 0;
+
+    /*!
+     * Getter.
+     * \param index the index of the output in the dataset
+     * \return the corresponding output
+     */
     virtual OutputC getOutput(unsigned int index) const = 0;
+    /*!
+     * Getter.
+     * \return the number of input output couples in the dataset.
+     */
     virtual size_t size() const = 0;
 
+    /*!
+     * Getter.
+     * \return the dimensionality of the features vectors
+     */
     virtual size_t featuresSize() const = 0;
+
+    /*!
+     * Getter.
+     * \return the output collection
+     */
     virtual OutputCollection getOutputs() const = 0;
+
+    /*!
+     * Getter.
+     * \return the input features.
+     */
     virtual FeaturesCollection getFeatures() const = 0;
 
-
+    /*!
+     * Create a copy of this object, containing an exact copy of the dataset.
+     * \return a pointer to the copy
+     */
     virtual BatchData_* clone() const = 0;
+
+    /*!
+     * Create a copy of a subste of the dataset.
+     * \param indexes the set of input features/outputs to be copied
+     * \return a pointer to the copy of the subset of the dataset
+     */
     virtual BatchData_* cloneSubset(const arma::uvec& indexes) const = 0;
 
+    /*!
+     * Creates a shuffled copy of the dataset.
+     * \return a ReLe::MiniBatchData_ object with shuffled indexes (by default)
+     */
     virtual const BatchData_* shuffle() const
     {
         arma::uvec indexes = arma::linspace<arma::uvec>(0, size() - 1, size());
@@ -137,27 +229,41 @@ public:
         return new MiniBatchData_<OutputC, dense>(this, indexes);
     }
 
-    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int mSize) const
+    /*!
+     * Split the dataset in minibatches of constant size.
+     * \param size the size of all minibatches (except last)
+     * \return a vector containing a set of pointers to the minibatches
+     */
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int size) const
     {
-        assert(mSize > 0);
+        assert(size > 0);
 
         // Number of minibatches of the same size
-        unsigned int nMiniBatches = size() / mSize;
+        unsigned int nMiniBatches = size() / size;
 
-        return miniBatchesVector(nMiniBatches, mSize);
+        return miniBatchesVector(nMiniBatches, size);
     }
 
+    /*!
+     * Split the dataset in a set of N minibatches of equal length.
+     * The last one might have a different size.
+     * \param nMiniBatches the number of minibatches to use
+     * \return a vector containing a set of pointers to the minibatches
+     */
     virtual const std::vector<MiniBatchData_<OutputC, dense>*> getNMiniBatches(unsigned int nMiniBatches) const
     {
         assert(nMiniBatches > 0);
 
-        // Size for each miniBatch (sometimes the last one has a different size)
         unsigned int mSize = size() / nMiniBatches;
         nMiniBatches--;
 
         return miniBatchesVector(nMiniBatches, mSize);
     }
 
+    /*!
+     * Getter.
+     * \return the mean output value of the dataset.
+     */
     OutputC getMean() const
     {
         if (!computed)
@@ -169,6 +275,10 @@ public:
         return mean;
     }
 
+    /*!
+     * Getter.
+     * \return the output variance of the dataset.
+     */
     arma::mat getVariance() const
     {
         if (!computed)
@@ -248,12 +358,21 @@ private:
 
 typedef BatchData_<arma::vec> BatchData;
 
+
+/*!
+ * Implementation of a minibatch of a dataset.
+ */
 template<class OutputC, bool dense = true>
 class MiniBatchData_: public BatchData_<OutputC, dense>
 {
     BATCH_DATA_TYPES(OutputC, dense)
 
 public:
+    /*!
+     * Construtcor.
+     * \param data the original dataset.
+     * \param indexes the set of elements of the original dataset.
+     */
     MiniBatchData_(const BatchData_<OutputC, dense>* data,
                    const arma::uvec& indexes) :
         data(*data), indexes(indexes)
@@ -261,6 +380,11 @@ public:
 
     }
 
+    /*!
+     * Construtcor.
+     * \param data the original dataset.
+     * \param indexes the set of elements of the original dataset.
+     */
     MiniBatchData_(const BatchData_<OutputC, dense>& data,
                    const arma::uvec& indexes) :
         data(data), indexes(indexes)
@@ -329,23 +453,38 @@ public:
         return data.getFeatures().cols(indexes);
     }
 
+    /*!
+     * Getter.
+     * \return the indexes of the elements of the original dataset used by the minibatch
+     */
     const arma::uvec getIndexes() const
     {
         return indexes;
     }
 
+    /*!
+     * Setter.
+     * \param indexes the indexes of the element of the original dataset to be used
+     */
     void setIndexes(const arma::uvec& indexes)
     {
         this->computed = false;
         this->indexes = indexes;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~MiniBatchData_()
     {
 
     }
 
 public:
+    /*!
+     * Method used to cleanup a vector of pointers to minibatches
+     * \param miniBatches the vector of pointers to clean
+     */
     static void cleanMiniBatches(std::vector<MiniBatchData_<OutputC, dense>*> miniBatches)
     {
         for(auto* mb : miniBatches)
@@ -359,18 +498,32 @@ private:
 
 typedef MiniBatchData_<arma::vec> MiniBatchData;
 
+/*!
+ * Simple implementation of the ReLe::BatchData_ interface.
+ * Stores all input data in the memory.
+ */
 template<class OutputC, bool dense = true>
 class BatchDataSimple_: public BatchData_<OutputC, dense>
 {
     BATCH_DATA_TYPES(OutputC, dense)
 
 public:
+    /*!
+     * Constructor.
+     * \param features the collection of input features
+     * \param outputs the collection of the corresponding outputs
+     */
     BatchDataSimple_(const FeaturesCollection& features, const OutputCollection& outputs) :
         features(features), outputs(outputs)
     {
         assert(features.n_cols == outputs.n_cols);
     }
 
+    /*!
+     * Constructor.
+     * \param features the collection of input features
+     * \param outputs the collection of the corresponding outputs
+     */
     BatchDataSimple_(FeaturesCollection&& features, OutputCollection&& outputs) :
         features(features), outputs(outputs)
     {
@@ -418,6 +571,9 @@ public:
         return features;
     }
 
+    /*!
+     * Destructor.
+     */
     virtual ~BatchDataSimple_()
     {
 
