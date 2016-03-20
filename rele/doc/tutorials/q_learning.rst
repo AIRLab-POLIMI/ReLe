@@ -11,7 +11,7 @@ First of all we will create a Finite MDP using a generator:
 TODO CODE
 
 Now we have to create a Q-Learning agent. The Q-Learning agent needs a policy specification, and the learning rate.
-For this simple environment we can use an \f$\epsilon\f$-greedy policy and a costant learning rate
+For this simple environment we can use an :math:`\epsilon`-greedy policy and a costant learning rate
 
 TODO CODE
 
@@ -26,9 +26,9 @@ After running the code you shuold see on the console two section:
 
 - statistics, in wich is described the initial state and the state frequencies
 - Agent data at episode end, in wich is printed agent data:
--- Parameters: discount factor, learning rate, \f$\epsilon\f$ of the epsilon greedy
--- Action Value function
--- Policy
+	- Parameters: discount factor, learning rate, :math:`\epsilon` of the :math:`\epsilon` greedy policy
+	- Action Value function
+	- Policy
 
 
 The output shoudl be similar to this::
