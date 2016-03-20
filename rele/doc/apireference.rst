@@ -329,11 +329,15 @@ Utils
 
 .. doxygenfunction:: ReLe::wrapTo2Pi(const arma::vec&)
 
-.. doxygenfunction:: ReLe::wrapToPi
+.. doxygenfunction:: ReLe::wrapToPi(double)
+
+.. doxygenfunction:: ReLe::wrapToPi(const arma::vec&)
 
 .. doxygenfunction:: ReLe::meshgrid
 
-.. doxygenfunction:: ReLe::blockdiagonal
+.. doxygenfunction:: ReLe::blockdiagonal(const std::vector<arma::mat>&)
+
+.. doxygenfunction:: ReLe::blockdiagonal(const std::vector<arma::mat>&, int, int)
 
 .. doxygenfunction:: ReLe::range
 
