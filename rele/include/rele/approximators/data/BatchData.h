@@ -231,17 +231,17 @@ public:
 
     /*!
      * Split the dataset in minibatches of constant size.
-     * \param size the size of all minibatches (except last)
+     * \param minibatchSize the size of all minibatches (except last)
      * \return a vector containing a set of pointers to the minibatches
      */
-    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int size) const
+    virtual const std::vector<MiniBatchData_<OutputC, dense>*> getMiniBatches(unsigned int minibatchSize) const
     {
-        assert(size > 0);
+        assert(minibatchSize > 0);
 
         // Number of minibatches of the same size
-        unsigned int nMiniBatches = size() / size;
+        unsigned int nMiniBatches = size() / minibatchSize;
 
-        return miniBatchesVector(nMiniBatches, size);
+        return miniBatchesVector(nMiniBatches, minibatchSize);
     }
 
     /*!
