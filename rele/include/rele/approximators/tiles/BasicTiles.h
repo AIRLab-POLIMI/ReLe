@@ -61,8 +61,6 @@ public:
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
-    //TilesVector generate(unsigned int inputSize, const Range& range);
-
 protected:
     unsigned int computeComponentIndex(unsigned int i,double value);
 

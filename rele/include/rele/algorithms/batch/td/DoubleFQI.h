@@ -29,7 +29,7 @@
 #define INCLUDE_RELE_ALGORITHMS_BATCH_DOUBLEFQI_H_
 
 #include "rele/algorithms/batch/td/FQI.h"
-#include "rele/approximators/Ensemble.h"
+#include "rele/approximators/regressors/Ensemble.h"
 
 
 namespace ReLe

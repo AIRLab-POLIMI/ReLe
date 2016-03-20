@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_ENSEMBLE_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_ENSEMBLE_H_
 
-#include "Regressors.h"
+#include "rele/approximators/Regressors.h"
 
 
 namespace ReLe
