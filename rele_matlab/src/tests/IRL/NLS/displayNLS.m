@@ -16,11 +16,12 @@ zc = 0.1*zc;
 
 %% list algorithms
 
-%Girl
 alg{1} = 'GIRL';
 alg{2} = 'ExpectedDeltaIRL';
+alg{3} = 'EGIRL';
+alg{4} = 'EMIRL';
 
-lastindex = 2;
+lastindex = length(alg);
 
 
 %% Plot stuff

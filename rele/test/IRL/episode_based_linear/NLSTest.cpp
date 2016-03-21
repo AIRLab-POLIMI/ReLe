@@ -42,6 +42,8 @@
 
 #include "rele/utils/FileManager.h"
 
+#include "EpisodicCommandLineParser.h"
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
@@ -54,10 +56,13 @@ int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
+    CommandLineParser parser;
 
-    int nbEpisodes = 3000;
+    auto irlConfig = parser.getConfig(argc, argv);
 
-    FileManager fm("nls", "EMIRL");
+    unsigned int nbEpisodes = irlConfig.episodes;
+
+    FileManager fm("nls", irlConfig.algorithm);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -82,7 +87,7 @@ int main(int argc, char *argv[])
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 
-    /* Generate LQR expert dataset */
+    /* Generate expert dataset */
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
@@ -93,13 +98,13 @@ int main(int argc, char *argv[])
 
 
     // Create parametric reward
-    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-10, 10, -10, 10});
+    BasisFunctions basisReward = GaussianRbf::generate({5, 5}, {-2, 2, -2, 2});
 
     DenseFeatures phiReward(basisReward);
 
     LinearApproximator rewardRegressor(phiReward);
     arma::mat theta = expert.getParams();
-    EMIRL<DenseAction,DenseState> irlAlg(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma);
+    auto* irlAlg = buildEpisodicIRLalg(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, irlConfig);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -111,7 +116,7 @@ int main(int argc, char *argv[])
 
 
     //Run
-    irlAlg.run();
+    irlAlg->run();
     arma::vec weights = rewardRegressor.getParameters();
 
     //Try to recover the initial policy

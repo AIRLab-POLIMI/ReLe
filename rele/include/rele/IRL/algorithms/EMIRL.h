@@ -44,11 +44,10 @@ public:
 
     }
 
-    virtual double objFunction(const arma::vec& x, arma::vec& df) override
+    virtual double objFunction(const arma::vec& xSimplex, arma::vec& df) override
     {
         //Compute expectation-maximization update
-        arma::vec xlast = {1.0 - arma::sum(x)};
-        arma::vec omega = arma::join_vert(x, xlast);
+        arma::vec&& omega = this->simplex.reconstruct(xSimplex);
         arma::vec Jep = this->phiBar.t()*omega;
         double maxJep = arma::max(Jep);
         Jep = Jep - maxJep; //Numerical trick
@@ -65,9 +64,7 @@ public:
         arma::mat dwhat = theta*(arma::diagmat(a) - a*a.t())*phiBar.t();
         arma::vec dKL = 2*dwhat.t()*sigmaInv*delta;
 
-        arma::mat dSimplex = arma::join_horiz(arma::eye(x.n_elem, x.n_elem), -arma::ones(x.n_elem));
-
-        df = dSimplex * dKL;
+        df = this->simplex.diff(dKL);
 
         std::cout << "-------------------------------------" << std::endl;
         std::cout << "Jep Max" << std::endl << maxJep << std::endl;
