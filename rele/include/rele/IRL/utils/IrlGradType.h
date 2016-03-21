@@ -128,6 +128,32 @@ private:
 };
 
 
+inline std::ostream& operator<< (std::ostream& stream, IrlGrad grad)
+{
+	stream << IrlGradUtils::toString(grad);
+	return stream;
+}
+
+inline std::ostream& operator<< (std::ostream& stream, IrlEpGrad grad)
+{
+	stream << IrlEpGradUtils::toString(grad);
+	return stream;
+}
+
+
+inline std::ostream& operator<< (std::ostream& stream, IrlHess hess)
+{
+	stream << IrlHessUtils::toString(hess);
+	return stream;
+}
+
+inline std::ostream& operator<< (std::ostream& stream, IrlEpHess hess)
+{
+	stream << IrlEpHessUtils::toString(hess);
+	return stream;
+}
+
+
 }
 
 

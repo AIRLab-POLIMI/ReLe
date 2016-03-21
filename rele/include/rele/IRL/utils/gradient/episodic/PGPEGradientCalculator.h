@@ -99,22 +99,26 @@ public:
 protected:
     virtual arma::mat computeGradientDiff() override
     {
+        //Compute gradient essentials
         unsigned int N = theta.n_cols;
         arma::mat gradLog = this->computeGradLog();
         arma::mat gradLog2 = gradLog % gradLog;
 
+        //compute baseline
         arma::mat baseline_num = (gradLog2)*phi.t();
         arma::vec baseline_den = arma::sum(gradLog2, 1);
 
         arma::mat baseline = baseline_num.each_col() / baseline_den;
         baseline(arma::find_nonfinite(baseline)).zeros();
 
-
-        /*for(unsigned int i = 0; i < phi.n_rows; i++)
+        //compute gradient
+        arma::mat gradientDiff(theta.n_rows, phi.n_rows, arma::fill::zeros);
+        for (int ep = 0; ep < N; ep++)
         {
-        	gradientDiff.col(i)
-        }*/
-        arma::mat gradientDiff = gradLog*phi.t();
+            for(int r = 0; r < phi.n_rows; r++)
+                gradientDiff.col(r) += (phi(r, ep) - baseline.col(r)) % gradLog.col(ep);
+        }
+
         gradientDiff /= N;
 
         return gradientDiff;

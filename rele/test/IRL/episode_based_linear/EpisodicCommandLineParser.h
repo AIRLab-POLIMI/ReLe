@@ -49,6 +49,8 @@ struct irlEpConfig
     friend std::ostream& operator<< (std::ostream& stream, const irlEpConfig& config)
     {
         stream << "algorithm: " << config.algorithm << std::endl;
+        stream << "gradient: " << config.gradient << std::endl;
+        stream << "hessian: " << config.hessian << std::endl;
         stream << "episodes: " << config.episodes << std::endl;
     }
 };
@@ -143,7 +145,7 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
         LinearApproximator& rewardf, double gamma, irlEpConfig conf)
 {
     if(conf.algorithm == "EGIRL")
-        return new EGIRL<DenseAction,DenseState>(dataset, theta, dist, rewardf, gamma);
+        return new EGIRL<DenseAction,DenseState>(conf.gradient, dataset, theta, dist, rewardf, gamma);
 
     else if(conf.algorithm == "EMIRL")
         return new EMIRL<DenseAction,DenseState>(dataset, theta, dist, rewardf, gamma);

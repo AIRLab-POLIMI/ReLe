@@ -46,9 +46,9 @@ template<class InputC, class OutputC>
 class BatchDataRaw_
 {
 public:
-	/*!
-	 * Constructor.
-	 */
+    /*!
+     * Constructor.
+     */
     BatchDataRaw_()
     {
 
@@ -151,7 +151,7 @@ class BatchData_
 {
 
 public:
-	//! the type of the input features
+    //! the type of the input features
     typedef typename input_traits<dense>::column_type features_type;
     //! the type of the set of input features
     typedef typename input_traits<dense>::type FeaturesCollection;

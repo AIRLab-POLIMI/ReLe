@@ -35,7 +35,7 @@ class EpisodicGradientCalculatorFactory
 {
 
 public:
-    static GradientCalculator<ActionC, StateC>* build(IrlGrad type,
+    static GradientCalculator<ActionC, StateC>* build(IrlEpGrad type,
             const arma::mat& theta,
             const arma::mat& phi,
             DifferentiableDistribution& dist,
@@ -44,8 +44,10 @@ public:
 
         switch(type)
         {
-        default:
+        case IrlEpGrad::PGPE:
             return new PGPEGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma);
+        case IrlEpGrad::PGPE_BASELINE:
+            return new PGPEBaseGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma);
         }
     }
 

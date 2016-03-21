@@ -51,8 +51,8 @@ struct irlConfig
     friend std::ostream& operator<< (std::ostream& stream, const irlConfig& config)
     {
         stream << "algorithm: " << config.algorithm << std::endl;
-        stream << "gradient: " << IrlGradUtils::toString(config.gradient) << std::endl;
-        stream << "hessian: " << IrlHessUtils::toString(config.hessian) << std::endl;
+        stream << "gradient: " << config.gradient << std::endl;
+        stream << "hessian: " << config.hessian << std::endl;
         stream << "episodes: " << config.episodes << std::endl;
     }
 };

@@ -34,12 +34,10 @@ template<class ActionC, class StateC>
 class EGIRL: public EpisodicLinearIRLAlgorithm<ActionC, StateC>
 {
 public:
-    EGIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta,
+    EGIRL(IrlEpGrad type, Dataset<ActionC, StateC>& data, const arma::mat& theta,
           DifferentiableDistribution& dist, LinearApproximator& rewardf, double gamma)
-        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma)
+        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma), type(type)
     {
-        type = IrlGrad::REINFORCE; //TODO FIXME!!!
-
         Features& features = rewardf.getFeatures();
         phi = data.computeEpisodeFeatureExpectation(features, gamma);
         std::cout << phi;
@@ -82,7 +80,7 @@ public:
     }
 
 protected:
-    IrlGrad type;
+    IrlEpGrad type;
     arma::mat phi;
     GradientCalculator<ActionC, StateC>* gradientCalculator;
 };
