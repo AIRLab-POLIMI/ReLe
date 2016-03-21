@@ -11,6 +11,7 @@ step = floor(1/fraction);
 %algorithm = 'EMIRL'
 algorithm = 'EGIRL';
 
+
 path = ['/tmp/ReLe/lqr/', algorithm, '/'];
 
 

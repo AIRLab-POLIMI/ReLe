@@ -24,21 +24,21 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_HESSIAN_HESSIANGPOMDP_H_
 #define INCLUDE_RELE_IRL_UTILS_HESSIAN_HESSIANGPOMDP_H_
 
-#include "rele/IRL/utils/hessian/HessianCalculator.h"
+#include "rele/IRL/utils/hessian/step_based/StepBasedHessianCalculator.h"
 
 namespace ReLe
 {
 template<class ActionC, class StateC>
-class HessianGPOMDP : public HessianCalculator<ActionC, StateC>
+class HessianGPOMDP : public StepBasedHessianCalculator<ActionC, StateC>
 {
 protected:
-    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_H_CALCULATORS_MEMBERS(ActionC, StateC)
 
 public:
     HessianGPOMDP(Features& phi,
                   Dataset<ActionC,StateC>& data,
                   DifferentiablePolicy<ActionC,StateC>& policy,
-                  double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+                  double gamma) : StepBasedHessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -91,16 +91,16 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class HessianGPOMDPBase : public HessianCalculator<ActionC, StateC>
+class HessianGPOMDPBase : public StepBasedHessianCalculator<ActionC, StateC>
 {
 protected:
-    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_H_CALCULATORS_MEMBERS(ActionC, StateC)
 
 public:
     HessianGPOMDPBase(Features& phi,
                       Dataset<ActionC,StateC>& data,
                       DifferentiablePolicy<ActionC,StateC>& policy,
-                      double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+                      double gamma) : StepBasedHessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }

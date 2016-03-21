@@ -33,13 +33,13 @@
 #include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
 
-#include "rele/IRL/utils/HessianCalculatorFactory.h"
-
 #include "rele/utils/FileManager.h"
 
 #include "../RewardBasisLQR.h"
 
 #include <chrono>
+
+#include "../../../include/rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
 #include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 
 using namespace std;
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
                               phiReward, data, expertPolicy,
                               mdp.getSettings().gamma);
 
-    auto hessianCalculator = HessianCalculatorFactory<DenseAction, DenseState>::build(htype,
+    auto hessianCalculator = StepBasedHessianCalculatorFactory<DenseAction, DenseState>::build(htype,
                              phiReward, data, expertPolicy,
                              mdp.getSettings().gamma);
 

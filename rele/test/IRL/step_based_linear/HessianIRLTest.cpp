@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/IRL/utils/HessianCalculatorFactory.h"
+#include "../../../include/rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
 #include "rele/IRL/utils/NonlinearHessianFactory.h"
 
 #include "rele/approximators/features/SparseFeatures.h"
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
 
     /* Create the gradients calculators */
-    auto linearHessian = HessianCalculatorFactory<DenseAction, DenseState>::build(type, phiReward, data,
+    auto linearHessian = StepBasedHessianCalculatorFactory<DenseAction, DenseState>::build(type, phiReward, data,
                          expertPolicy, mdp.getSettings().gamma);
     auto nonlinearHessian = NonlinearHessianFactory<DenseAction, DenseState>::build(type, rewardRegressor, data,
                             expertPolicy, mdp.getSettings().gamma);

@@ -24,21 +24,21 @@
 #ifndef INCLUDE_RELE_IRL_UTILS_HESSIAN_HESSIANREINFORCE_H_
 #define INCLUDE_RELE_IRL_UTILS_HESSIAN_HESSIANREINFORCE_H_
 
-#include "rele/IRL/utils/hessian/HessianCalculator.h"
+#include "rele/IRL/utils/hessian/step_based/StepBasedHessianCalculator.h"
 
 namespace ReLe
 {
 template<class ActionC, class StateC>
-class HessianReinforce : public HessianCalculator<ActionC, StateC>
+class HessianReinforce : public StepBasedHessianCalculator<ActionC, StateC>
 {
 protected:
-    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_H_CALCULATORS_MEMBERS(ActionC, StateC)
 
 public:
     HessianReinforce(Features& phi,
                      Dataset<ActionC,StateC>& data,
                      DifferentiablePolicy<ActionC,StateC>& policy,
-                     double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+                     double gamma) : StepBasedHessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -77,16 +77,16 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class HessianReinforceBase : public HessianCalculator<ActionC, StateC>
+class HessianReinforceBase : public StepBasedHessianCalculator<ActionC, StateC>
 {
 protected:
-    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_H_CALCULATORS_MEMBERS(ActionC, StateC)
 
 public:
     HessianReinforceBase(Features& phi,
                          Dataset<ActionC,StateC>& data,
                          DifferentiablePolicy<ActionC,StateC>& policy,
-                         double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+                         double gamma) : StepBasedHessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -143,16 +143,16 @@ protected:
 
 
 template<class ActionC, class StateC>
-class HessianReinforceTraceBaseSingle : public HessianCalculator<ActionC, StateC>
+class HessianReinforceTraceBaseSingle : public StepBasedHessianCalculator<ActionC, StateC>
 {
 protected:
-    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_H_CALCULATORS_MEMBERS(ActionC, StateC)
 
 public:
     HessianReinforceTraceBaseSingle(Features& phi,
                                     Dataset<ActionC,StateC>& data,
                                     DifferentiablePolicy<ActionC,StateC>& policy,
-                                    double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+                                    double gamma) : StepBasedHessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }
@@ -210,16 +210,16 @@ protected:
 };
 
 template<class ActionC, class StateC>
-class HessianReinforceTraceBaseDiag : public HessianCalculator<ActionC, StateC>
+class HessianReinforceTraceBaseDiag : public StepBasedHessianCalculator<ActionC, StateC>
 {
 protected:
-    USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC)
+    USING_STEP_BASED_H_CALCULATORS_MEMBERS(ActionC, StateC)
 
 public:
     HessianReinforceTraceBaseDiag(Features& phi,
                                   Dataset<ActionC,StateC>& data,
                                   DifferentiablePolicy<ActionC,StateC>& policy,
-                                  double gamma) : HessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
+                                  double gamma) : StepBasedHessianCalculator<ActionC, StateC>(phi, data, policy, gamma)
     {
 
     }

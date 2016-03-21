@@ -24,9 +24,9 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
 
+#include "../utils/StepBasedHessianCalculatorFactory.h"
 #include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 #include "rele/IRL/algorithms/LinearIRLAlgorithm.h"
-#include "rele/IRL/utils/HessianCalculatorFactory.h"
 
 namespace ReLe
 {
@@ -42,7 +42,7 @@ public:
     {
         gradientCalculator = StepBasedGradientCalculatorFactory<ActionC, StateC>::build(
                                  type, rewardf.getFeatures(), data, policy, gamma);
-        hessianCalculator = HessianCalculatorFactory<ActionC, StateC>::build(
+        hessianCalculator = StepBasedHessianCalculatorFactory<ActionC, StateC>::build(
                                 htype, rewardf.getFeatures(), data, policy, gamma);
 
         this->optAlg = nlopt::algorithm::LN_COBYLA;

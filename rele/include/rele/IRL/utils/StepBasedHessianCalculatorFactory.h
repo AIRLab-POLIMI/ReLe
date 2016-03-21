@@ -21,18 +21,18 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATORFACTORY_H_
-#define INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATORFACTORY_H_
+#ifndef INCLUDE_RELE_IRL_UTILS_STEPBASEDHESSIANCALCULATORFACTORY_H_
+#define INCLUDE_RELE_IRL_UTILS_STEPBASEDHESSIANCALCULATORFACTORY_H_
 
-#include "rele/IRL/utils/hessian/HessianReinforce.h"
-#include "rele/IRL/utils/hessian/HessianGPOMDP.h"
+#include "rele/IRL/utils/hessian/step_based/HessianReinforce.h"
+#include "rele/IRL/utils/hessian/step_based/HessianGPOMDP.h"
 #include "rele/IRL/utils/IrlGradType.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class HessianCalculatorFactory
+class StepBasedHessianCalculatorFactory
 {
 public:
     static HessianCalculator<ActionC, StateC>* build(IrlHess type,
@@ -72,4 +72,4 @@ public:
 }
 
 
-#endif /* INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATORFACTORY_H_ */
+#endif /* INCLUDE_RELE_IRL_UTILS_STEPBASEDHESSIANCALCULATORFACTORY_H_ */

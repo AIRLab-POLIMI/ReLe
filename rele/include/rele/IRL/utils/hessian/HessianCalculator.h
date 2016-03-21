@@ -35,10 +35,8 @@ template<class ActionC, class StateC>
 class HessianCalculator
 {
 public:
-    HessianCalculator(Features& phi,
-                      Dataset<ActionC,StateC>& data,
-                      DifferentiablePolicy<ActionC,StateC>& policy,
-                      double gamma) : phi(phi), data(data), policy(policy), gamma(gamma)
+    HessianCalculator(unsigned int dp, unsigned int dr, double gamma)
+        : gamma(gamma), Hdiff(dp, dp, dr, arma::fill::zeros)
     {
         computed = false;
     }
@@ -72,24 +70,6 @@ public:
 protected:
     virtual arma::cube computeHessianDiff() = 0;
 
-    arma::mat computeG(Episode<ActionC,StateC>& episode)
-    {
-        int dp  = policy.getParametersSize();
-        int nbSteps = episode.size();
-        arma::vec logDiff(dp, arma::fill::zeros);
-        arma::mat logDiff2(dp, dp, arma::fill::zeros);
-
-        //iterate the episode
-        for (int t = 0; t < nbSteps; ++t)
-        {
-            Transition<ActionC, StateC>& tr = episode[t];
-            logDiff += policy.difflog(tr.x, tr.u);
-            logDiff2 += policy.diff2log(tr.x, tr.u);
-        }
-
-        return logDiff*logDiff.t()+logDiff2;
-    }
-
 private:
     void compute()
     {
@@ -101,9 +81,6 @@ private:
     }
 
 protected:
-    Features& phi;
-    Dataset<ActionC,StateC>& data;
-    DifferentiablePolicy<ActionC,StateC>& policy;
     double gamma;
 
 private:
@@ -112,13 +89,6 @@ private:
 };
 
 }
-
-#define USE_HESSIAN_CALCULATOR_MEMBERS(ActionC, StateC) \
-			typedef HessianCalculator<ActionC,StateC> Base; \
-			using Base::phi; \
-			using Base::data; \
-			using Base::policy; \
-			using Base::gamma;
 
 
 #endif /* INCLUDE_RELE_IRL_UTILS_HESSIANCALCULATOR_H_ */

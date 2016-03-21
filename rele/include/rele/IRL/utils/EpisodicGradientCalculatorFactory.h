@@ -49,7 +49,7 @@ public:
         case IrlEpGrad::PGPE_BASELINE:
             return new PGPEBaseGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma);
         default:
-        	return nullptr;
+            return nullptr;
         }
     }
 

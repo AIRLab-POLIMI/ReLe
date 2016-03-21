@@ -21,30 +21,31 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_UTILS_EPISODIC_GRADIENT_EPISODICGRADIENTCALCULATOR_H_
-#define INCLUDE_RELE_IRL_UTILS_EPISODIC_GRADIENT_EPISODICGRADIENTCALCULATOR_H_
+#ifndef INCLUDE_RELE_IRL_UTILS_HESSIAN_EPISODIC_EPISODICHESSIANCALCULATOR_H_
+#define INCLUDE_RELE_IRL_UTILS_HESSIAN_EPISODIC_EPISODICHESSIANCALCULATOR_H_
 
-#include "rele/IRL/utils/gradient/GradientCalculator.h"
+#include "rele/IRL/utils/hessian/HessianCalculator.h"
+
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class EpisodicGradientCalculator : public GradientCalculator<ActionC, StateC>
+class EpisodicHessianCalculator : public HessianCalculator<ActionC, StateC>
 {
 public:
-    EpisodicGradientCalculator(const arma::mat& theta,
-                               const arma::mat& phi,
-                               DifferentiableDistribution& dist,
-                               double gamma):
-        GradientCalculator<ActionC, StateC>(theta.n_rows, phi.n_rows, gamma),
+    EpisodicHessianCalculator(const arma::mat& theta,
+                              const arma::mat& phi,
+                              DifferentiableDistribution& dist,
+                              double gamma):
+        HessianCalculator<ActionC, StateC>(theta.n_rows, phi.n_rows, gamma),
         theta(theta), phi(phi), dist(dist)
     {
 
     }
 
 
-    virtual ~EpisodicGradientCalculator()
+    virtual ~EpisodicHessianCalculator()
     {
 
     }
@@ -59,11 +60,11 @@ protected:
 
 }
 
-#define USING_EPISODIC_CALCULATORS_MEMBERS(ActionC, StateC) \
-	typedef EpisodicGradientCalculator<ActionC, StateC> Base; \
+#define USING_EPISODIC_H_CALCULATORS_MEMBERS(ActionC, StateC) \
+	typedef EpisodicHessianCalculator<ActionC, StateC> Base; \
 	using Base::gamma; \
 	using Base::theta; \
 	using Base::phi; \
 	using Base::dist;
 
-#endif /* INCLUDE_RELE_IRL_UTILS_EPISODIC_GRADIENT_EPISODICGRADIENTCALCULATOR_H_ */
+#endif /* INCLUDE_RELE_IRL_UTILS_HESSIAN_EPISODIC_EPISODICHESSIANCALCULATOR_H_ */
