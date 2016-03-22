@@ -7,6 +7,9 @@ addpath(genpath('../../..'));
 fraction = 0.1;
 step = floor(1/fraction);
 
+outPath = '/tmp/ReLe/matlab_out/nls/';
+[~,~,~] = mkdir(outPath);
+
 %% create cylinder
 [yc, zc, xc] = cylinder();
 
@@ -95,6 +98,7 @@ for i = 1:lastindex
     mesh(X, Y, Z)
     title('weights');
     
+    %% set title and save figure
     suptitle(alg{i})
-    
+    savefig([outPath, alg{i},'.fig']);
 end

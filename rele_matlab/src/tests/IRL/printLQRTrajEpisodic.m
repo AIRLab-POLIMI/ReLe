@@ -8,6 +8,9 @@ addpath(genpath('../../..'));
 fraction = 1;
 step = floor(1/fraction);
 
+outPath = '/tmp/ReLe/matlab_out/lqr/';
+[~,~,~] = mkdir(outPath);
+
 %% list algorithms
 
 alg = {
@@ -79,17 +82,26 @@ for i = 1:lastindex
     disp('outliers features:')
     disp(length(phi)-sum(inliers))
     
-    %% Print weights
-    omega = load([path,'Weights.txt'], '-ascii');
-    figure(100)
-    hold on;
-    plot3(omega(1), omega(2), omega(3), '.b')
-    text(omega(1), omega(2), omega(3), alg{i})
-    
+    %% set title and save figure
+    suptitle(alg{i})
+    savefig([outPath, alg{i},'.fig']);   
 end
 
-%% print real reward parameters
-figure(100)
+ %% Print weights
+ figure(100)
+ hold on;
+ 
+ for i = 1:lastindex
+    path = ['/tmp/ReLe/lqr/', alg{i}, '/'];
+    omega = load([path,'Weights.txt'], '-ascii');  
+    plot3(omega(1), omega(2), omega(3), '.b')
+    text(omega(1), omega(2), omega(3), alg{i})
+ end
+
+% print real reward parameters
 omega = [0.2 0.7 0.1];
 plot3(omega(1), omega(2), omega(3), '.r');
 text(omega(1), omega(2), omega(3), 'Expert');
+
+title('Recovered Weights')
+savefig([outPath, 'Weights','.fig']);
