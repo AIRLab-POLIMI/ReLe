@@ -86,13 +86,13 @@ public:
         arma::vec e = arma::eig_sym(H);
 
         // print stuff
-        std::cout << "f: " << f << std::endl;
+        /*std::cout << "f: " << f << std::endl;
         std::cout << "g: " << g.t() << std::endl;
         std::cout << "e: " << e.t() << std::endl;
         std::cout << "f_linear: " << f_linear << std::endl;
         std::cout << "f_quadratic: " << f_quadratic << std::endl;
         std::cout << "f_trace: " << f_trace << std::endl;
-        std::cout << "-----------------------------------------" << std::endl;
+        std::cout << "-----------------------------------------" << std::endl;*/
 
         return f;
 

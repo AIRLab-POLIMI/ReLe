@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
     arma::vec p = learnShipSteering(mdp, phi, nbEpisodes);
 
     DetLinearPolicy<DenseState> expertPolicy(phi);
-    ParametricFullNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
+    ParametricNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
 
     std::cout << "Params: " << expertDist.getParameters().t() << std::endl;
 
@@ -149,8 +149,8 @@ int main(int argc, char *argv[])
     std::cout << " | Params: " << expertPolicy.getParameters().t() << std::endl;
     std::cout << "Features Expectation " << data.computefeatureExpectation(phiReward, mdp.getSettings().gamma).t();
 
-    ofstream ofs2(fm.addPath("TrajectoriesExpert.txt"));
-    data.writeToStream(ofs2);
+    ofstream ofs1(fm.addPath("TrajectoriesExpert.txt"));
+    data.writeToStream(ofs1);
 
 
     /* RUN */
@@ -199,11 +199,8 @@ int main(int argc, char *argv[])
     cout << "Features Expectation ratio: " << (data2.computefeatureExpectation(phiReward, gamma)/data.computefeatureExpectation(phiReward, gamma)).t();
     cout << "reward: " << arma::as_scalar(evaluationCore.runEvaluation()) << endl;
 
-
-    stringstream ss;
-    ss << "TrajectoriesImitator.txt";
-    ofstream ofs3(fm.addPath(ss.str()));
-    data2.writeToStream(ofs3);
+    ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
+    data2.writeToStream(ofs2);
 
     return 0;
 }

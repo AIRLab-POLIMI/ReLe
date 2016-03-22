@@ -91,5 +91,5 @@ end
 %% print real reward parameters
 figure(100)
 omega = [0.2 0.7 0.1];
-plot3(omega(1), omega(2), omega(3));
+plot3(omega(1), omega(2), omega(3), '.r');
 text(omega(1), omega(2), omega(3), 'Expert');

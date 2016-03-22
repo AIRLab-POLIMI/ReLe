@@ -66,7 +66,7 @@ public:
 
         df = this->simplex.diff(dKL);
 
-        std::cout << "-------------------------------------" << std::endl;
+        /*std::cout << "-------------------------------------" << std::endl;
         std::cout << "Jep Max" << std::endl << maxJep << std::endl;
         std::cout << "Jep Min" << std::endl << std::endl << arma::min(Jep) << std::endl;
         std::cout << "a Min" << std::endl << a.min() << std::endl;
@@ -78,7 +78,7 @@ public:
         std::cout << "delta" << std::endl << delta.t() << std::endl;
         std::cout << "what" << std::endl << what.t() << std::endl;
         std::cout << "dKL" << std::endl << dKL.t() << std::endl;
-        std::cout << "df" << std::endl << df.t() << std::endl;
+        std::cout << "df" << std::endl << df.t() << std::endl;*/
 
         return KL;
 
