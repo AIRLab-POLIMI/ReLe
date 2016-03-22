@@ -42,6 +42,8 @@
 
 #include "rele/utils/FileManager.h"
 
+#include "EpisodicCommandLineParser.h"
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
@@ -81,10 +83,13 @@ int main(int argc, char *argv[])
 {
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
+    CommandLineParser parser;
 
-    int nbEpisodes = 3000;
+    auto irlConfig = parser.getConfig(argc, argv);
 
-    FileManager fm("ship", "EMIRL");
+    int nbEpisodes = irlConfig.episodes;
+
+    FileManager fm("ship", irlConfig.algorithm);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -137,7 +142,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     arma::mat theta = expert.getParams();
-    EMIRL<DenseAction,DenseState> irlAlg(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma);
+    auto* irlAlg = buildEpisodicIRLalg(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, irlConfig);
 
     //Info print
     std::cout << "Basis size: " << phiReward.rows();
@@ -149,7 +154,7 @@ int main(int argc, char *argv[])
 
 
     /* RUN */
-    irlAlg.run();
+    irlAlg->run();
     arma::vec weights = rewardRegressor.getParameters();
 
 

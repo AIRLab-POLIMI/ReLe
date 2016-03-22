@@ -15,9 +15,6 @@ yc = 0.1*yc;
 zc = 0.1*zc;
 
 %% list algorithms
-
-%alg{1} = 'GIRL';
-%alg{2} = 'ExpectedDeltaIRL';
 alg = {
     %'GIRL', ...
     %'ExpectedDeltaIRL',  ...
