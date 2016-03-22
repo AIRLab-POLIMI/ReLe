@@ -16,10 +16,14 @@ zc = 0.1*zc;
 
 %% list algorithms
 
-alg{1} = 'GIRL';
-alg{2} = 'ExpectedDeltaIRL';
-alg{3} = 'EGIRL';
-alg{4} = 'EMIRL';
+%alg{1} = 'GIRL';
+%alg{2} = 'ExpectedDeltaIRL';
+alg = {
+    %'GIRL', ...
+    %'ExpectedDeltaIRL',  ...
+    'EGIRL', ...
+    'EMIRL', ...
+    'EpisodicExpectedDeltaIRL'};
 
 lastindex = length(alg);
 
@@ -32,7 +36,7 @@ for i = 1:lastindex
     
     figure(i)
     subplot(3, 1, 1);
-    title(['Trajectories - ', alg{i}])
+    title('Imitator')
     xlabel('t')
     ylabel('x1')
     zlabel('x2')
@@ -57,7 +61,7 @@ for i = 1:lastindex
     traj = readDataset(csv);
     
     subplot(3, 1,2);
-    title(['Expert - ', alg{i}])
+    title('Expert')
     xlabel('t')
     ylabel('x1')
     zlabel('x2')
@@ -92,6 +96,8 @@ for i = 1:lastindex
     
     subplot(3, 1,3);
     mesh(X, Y, Z)
-    title(['weights - ', alg{i}]);
+    title('weights');
+    
+    suptitle(alg{i})
     
 end
