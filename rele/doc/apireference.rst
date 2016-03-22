@@ -325,6 +325,27 @@ Generators
 Algorithms
 ==========
 
+Step Rules
+----------
+
+Learning Rate
+^^^^^^^^^^^^^
+
+.. doxygenclass:: ReLe::LearningRate_
+   :members:
+   
+.. doxygenclass:: ReLe::ConstantLearningRate_
+   :members:
+   
+.. doxygenclass:: ReLe::DecayingLearningRate_
+   :members:      
+   
+   
+Gradient Step
+^^^^^^^^^^^^^
+
+   
+
 Temporal Difference
 -------------------
 
