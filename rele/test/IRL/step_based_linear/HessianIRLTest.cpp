@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../../include/rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
+#include "rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
 #include "rele/IRL/utils/NonlinearHessianFactory.h"
 
 #include "rele/approximators/features/SparseFeatures.h"

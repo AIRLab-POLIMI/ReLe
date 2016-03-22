@@ -35,6 +35,7 @@
 
 #include "rele/IRL/algorithms/EGIRL.h"
 #include "rele/IRL/algorithms/EMIRL.h"
+#include "rele/IRL/algorithms/EpisodicExpectedDeltaIRL.h"
 
 namespace ReLe
 {
@@ -118,7 +119,7 @@ private:
             return false;
 
         std::string algorithm = vm["algorithm"].as<std::string>();
-        if(algorithm != "EGIRL" && algorithm != "EMIRL")
+        if(algorithm != "EGIRL" && algorithm != "EMIRL" && algorithm != "EpisodicExpectedDeltaIRL")
             return false;
 
         std::string gradientType = vm["gradient"].as<std::string>();
@@ -145,10 +146,16 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
         LinearApproximator& rewardf, double gamma, irlEpConfig conf)
 {
     if(conf.algorithm == "EGIRL")
-        return new EGIRL<DenseAction,DenseState>(conf.gradient, dataset, theta, dist, rewardf, gamma);
+        return new EGIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma, conf.gradient);
 
     else if(conf.algorithm == "EMIRL")
-        return new EMIRL<DenseAction,DenseState>(dataset, theta, dist, rewardf, gamma);
+        return new EMIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma);
+
+    else if(conf.algorithm == "EpisodicExpectedDeltaIRL")
+    	return new EpisodicExpectedDeltaIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
+    				conf.gradient, conf.hessian);
+
+    return nullptr;
 
 }
 

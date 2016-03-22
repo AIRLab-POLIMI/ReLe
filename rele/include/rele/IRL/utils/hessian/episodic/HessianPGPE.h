@@ -68,7 +68,7 @@ protected:
         return hessianDiff;
     }
 
-    virtual arma::cube computeG() override
+    arma::cube computeG()
     {
         unsigned int N = theta.n_cols;
         arma::mat gradLog;
@@ -110,7 +110,7 @@ public:
                               const arma::mat& phi,
                               DifferentiableDistribution& dist,
                               double gamma)
-        : PGPEGradientCalculator<ActionC, StateC>(theta, phi, dist, gamma)
+        : PGPEHessianCalculator<ActionC, StateC>(theta, phi, dist, gamma)
     {
 
     }
@@ -121,11 +121,11 @@ public:
     }
 
 protected:
-    virtual arma::mat computeGradientDiff() override
+    virtual arma::cube computeHessianDiff() override
     {
         //Compute hessian essentials
         unsigned int N = theta.n_cols;
-        arma::cube G = computeG();
+        arma::cube G = this->computeG();
         arma::cube G2 = G % G;
 
         //compute baseline
@@ -134,10 +134,10 @@ protected:
 
         for (int ep = 0; ep < N; ep++)
         {
-        	baseline_den += G2.slice(ep);
+            baseline_den += G2.slice(ep);
 
             for(int r = 0; r < phi.n_rows; r++)
-            	baseline_num.slice(r) += phi(r, ep) * G2;
+                baseline_num.slice(r) += phi(r, ep) * G2.slice(ep);
         }
 
         arma::cube baseline = baseline_num.each_slice() / baseline_den;

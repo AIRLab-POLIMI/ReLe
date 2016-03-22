@@ -21,34 +21,34 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
-#define INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_
+#ifndef INCLUDE_RELE_IRL_ALGORITHMS_EPISODICEXPECTEDDELTAIRL_H_
+#define INCLUDE_RELE_IRL_ALGORITHMS_EPISODICEXPECTEDDELTAIRL_H_
 
-#include "rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
-#include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
-#include "rele/IRL/algorithms/LinearIRLAlgorithm.h"
+#include "rele/IRL/utils/EpisodicHessianCalculatorFactory.h"
+#include "rele/IRL/utils/EpisodicGradientCalculatorFactory.h"
+#include "rele/IRL/algorithms/EpisodicLinearIRLAlgorithm.h"
 
 namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class ExpectedDeltaIRL: public StepBasedLinearIRLAlgorithm<ActionC, StateC>
+class EpisodicExpectedDeltaIRL: public EpisodicLinearIRLAlgorithm<ActionC, StateC>
 {
 public:
-    ExpectedDeltaIRL(Dataset<ActionC, StateC>& data,
-                     DifferentiablePolicy<ActionC, StateC>& policy,
-                     LinearApproximator& rewardf, double gamma, IrlGrad type, IrlHess htype) :
-        StepBasedLinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
+    EpisodicExpectedDeltaIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, DifferentiableDistribution& dist,
+                             LinearApproximator& rewardf, double gamma, IrlEpGrad type, IrlEpHess htype) :
+        EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma)
     {
-        gradientCalculator = StepBasedGradientCalculatorFactory<ActionC, StateC>::build(
-                                 type, rewardf.getFeatures(), data, policy, gamma);
-        hessianCalculator = StepBasedHessianCalculatorFactory<ActionC, StateC>::build(
-                                htype, rewardf.getFeatures(), data, policy, gamma);
+    	Features& features = rewardf.getFeatures();
+    	phi = data.computeEpisodeFeatureExpectation(features, gamma);
+
+        gradientCalculator = EpisodicGradientCalculatorFactory<ActionC, StateC>::build(type, theta, phi, dist, gamma);
+        hessianCalculator = EpisodicHessianCalculatorFactory<ActionC, StateC>::build(htype, theta, phi, dist, gamma);
 
         this->optAlg = nlopt::algorithm::LN_COBYLA;
     }
 
-    virtual ~ExpectedDeltaIRL()
+    virtual ~EpisodicExpectedDeltaIRL()
     {
 
     }
@@ -99,10 +99,14 @@ public:
     }
 
 private:
+    arma::mat phi;
+
     GradientCalculator<ActionC, StateC>* gradientCalculator;
     HessianCalculator<ActionC, StateC>* hessianCalculator;
 };
 
 }
 
-#endif /* INCLUDE_RELE_IRL_ALGORITHMS_EXPECTEDDELTAIRL_H_ */
+
+
+#endif /* INCLUDE_RELE_IRL_ALGORITHMS_EPISODICEXPECTEDDELTAIRL_H_ */

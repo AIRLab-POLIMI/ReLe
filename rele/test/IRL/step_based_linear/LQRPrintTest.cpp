@@ -39,7 +39,7 @@
 
 #include <chrono>
 
-#include "../../../include/rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
+#include "rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
 #include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 
 using namespace std;
