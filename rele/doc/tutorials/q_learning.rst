@@ -4,7 +4,12 @@ Learn a simple MDP
 
 In this tutorial we will use ReLe to run the Q-Learning algorithm on a simple MDP.
 
-We will use as environment a simple chain. (TODO describe environment)
+We will use as environment a simple chain below:
+
+.. image:: images/SimpleChain.svg
+            :width: 100
+            
+The action success probability is p=0.8, if an action fails the agent stays in the same state.                      
 
 First of all we will create a Finite MDP using a generator:
 
