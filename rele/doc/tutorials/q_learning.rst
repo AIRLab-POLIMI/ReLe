@@ -7,7 +7,6 @@ In this tutorial we will use ReLe to run the Q-Learning algorithm on a simple MD
 We will use as environment a simple chain below:
 
 .. image:: images/SimpleChain.svg
-            :width: 100
             
 The action success probability is p=0.8, if an action fails the agent stays in the same state.                      
 
