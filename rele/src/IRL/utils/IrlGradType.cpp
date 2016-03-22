@@ -228,7 +228,7 @@ std::string IrlEpGradUtils::toString(IrlEpGrad type)
     case IrlEpGrad::PGPE:
         return "PGPE";
     case IrlEpGrad::PGPE_BASELINE:
-        return "PGPE";
+        return "PGPE_BASELINE";
     default:
         throw std::runtime_error("Unknown type");
     }
