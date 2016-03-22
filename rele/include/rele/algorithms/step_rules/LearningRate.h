@@ -115,7 +115,7 @@ typedef ConstantLearningRate_<FiniteAction, DenseState> ConstantLearningRateDens
 /*!
  * Implementation of a simple decaying learning rate.
  * The learning rate follows the rule:
- * \f[ $\alpha(t)=\min\left(\alpha_{min},\dfrac{\alpha(t_{0})}{t^{\omega}}\right)$ \f]
+ * \f[ \alpha(t)=\min\left(\alpha_{min},\dfrac{\alpha(t_{0})}{t^{\omega}}\right) \f]
  *
  */
 template<class ActionC, class StateC>
