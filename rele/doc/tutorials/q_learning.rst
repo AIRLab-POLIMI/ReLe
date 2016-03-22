@@ -26,7 +26,7 @@ We will use a PrintStrategy (TODO LINK) to print the results on the console.
 TODO CODE
 
 
-After running the code you shuold see on the console two section:
+After running the code you should see on the console two section:
 
 - statistics, in wich is described the initial state and the state frequencies
 - Agent data at episode end, in wich is printed agent data:
