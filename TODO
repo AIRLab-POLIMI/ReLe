@@ -15,11 +15,10 @@ CARLO:
 2) Test case policy Gradient
 
 VARIE:
-1) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
-2) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
-3) interfaccia ROS (supportare Gazeebo)
+1) Fixare gradienti distribuzioni! Manca implementazione per ParametricFullNormal.
+2) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
+3) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
 4) CPIRL 
-5) interfaccia ALE (http://www.arcadelearningenvironment.org/) 
-6) Modificare la LoggerStrategy per gestire più esperimenti di test (rimuovere runBatchTest in Core.h)
-7) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
+5) interfaccia ALE (http://www.arcadelearningenvironment.org/)
+6) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
 
