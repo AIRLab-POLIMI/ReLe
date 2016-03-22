@@ -321,6 +321,36 @@ Generators
 
 .. doxygenclass:: ReLe::GridWorldGenerator
    :members:
+   
+Algorithms
+==========
+
+Temporal Difference
+-------------------
+
+.. doxygenclass:: ReLe::FiniteTD
+   :members:
+   :protected-members:
+
+.. doxygenclass:: ReLe::LinearTD
+   :members:
+   :protected-members:
+
+Output Data
+^^^^^^^^^^^
+
+.. doxygenclass:: ReLe::FiniteTDOutput
+   :members:
+
+.. doxygenclass:: ReLe::LinearTDOutput
+   :members:   
+
+
+Batch
+-----
+
+Policy Search
+-------------   
 
 Optimization
 ============

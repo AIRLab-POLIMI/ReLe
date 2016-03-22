@@ -152,8 +152,8 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
         return new EMIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma);
 
     else if(conf.algorithm == "EpisodicExpectedDeltaIRL")
-    	return new EpisodicExpectedDeltaIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
-    				conf.gradient, conf.hessian);
+        return new EpisodicExpectedDeltaIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
+                conf.gradient, conf.hessian);
 
     return nullptr;
 

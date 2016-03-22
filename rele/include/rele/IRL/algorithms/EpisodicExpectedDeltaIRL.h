@@ -39,8 +39,8 @@ public:
                              LinearApproximator& rewardf, double gamma, IrlEpGrad type, IrlEpHess htype) :
         EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma)
     {
-    	Features& features = rewardf.getFeatures();
-    	phi = data.computeEpisodeFeatureExpectation(features, gamma);
+        Features& features = rewardf.getFeatures();
+        phi = data.computeEpisodeFeatureExpectation(features, gamma);
 
         gradientCalculator = EpisodicGradientCalculatorFactory<ActionC, StateC>::build(type, theta, phi, dist, gamma);
         hessianCalculator = EpisodicHessianCalculatorFactory<ActionC, StateC>::build(htype, theta, phi, dist, gamma);
