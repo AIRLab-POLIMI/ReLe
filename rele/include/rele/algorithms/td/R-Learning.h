@@ -30,7 +30,7 @@ namespace ReLe
 {
 
 /*!
- * This class implements the output data for the R-Learning algorithm.
+ * This class implements the output data for the ReLe::R_Learning algorithm.
  */
 class R_LearningOutput : public FiniteTDOutput
 {
@@ -74,6 +74,12 @@ private:
 class R_Learning: public FiniteTD
 {
 public:
+    /*!
+     * Constructor.
+     * \param policy the policy to be used by the algorithm
+     * \param alpha the Q-function learning rate to be used by the algorithm
+     * \param beta the average expected reward learning rate to be used by the algorithm
+     */
     R_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha, LearningRate& beta);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;

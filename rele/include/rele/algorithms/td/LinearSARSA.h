@@ -43,6 +43,12 @@ namespace ReLe
 class LinearGradientSARSA: public LinearTD
 {
 public:
+    /*!
+     * Constructor.
+     * \param phi the features to be used for linear approximation of the state space
+     * \param policy the policy to be used by the algorithm
+     * \param alpha the learning rate to be used by the algorithm
+     */
     LinearGradientSARSA(Features& phi, ActionValuePolicy<DenseState>& policy, LearningRateDense& alpha);
     virtual void initEpisode(const DenseState& state, FiniteAction& action) override;
     virtual void sampleAction(const DenseState& state, FiniteAction& action) override;

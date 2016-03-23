@@ -356,6 +356,21 @@ Temporal Difference
 .. doxygenclass:: ReLe::LinearTD
    :members:
    :protected-members:
+   
+.. doxygenclass:: ReLe::SARSA
+   :members:
+   
+.. doxygenclass:: ReLe::SARSA_lambda
+   :members:
+   
+.. doxygenclass:: ReLe::Q_Learning
+   :members:
+   
+.. doxygenclass:: ReLe::R_Learning
+   :members:
+   
+.. doxygenclass:: ReLe::LinearGradientSARSA
+   :members:   
 
 Output Data
 ^^^^^^^^^^^
@@ -364,6 +379,9 @@ Output Data
    :members:
 
 .. doxygenclass:: ReLe::LinearTDOutput
+   :members:   
+
+.. doxygenclass:: ReLe::R_LearningOutput
    :members:   
 
 

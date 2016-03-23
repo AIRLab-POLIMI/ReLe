@@ -45,6 +45,11 @@ namespace ReLe
 class SARSA: public FiniteTD
 {
 public:
+    /*!
+     * Constructor.
+     * \param policy the policy to be used by the algorithm
+     * \param alpha the learning rate to be used by the algorithm
+     */
     SARSA(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
@@ -75,6 +80,12 @@ public:
 class SARSA_lambda: public FiniteTD
 {
 public:
+    /*!
+     * Constructor.
+     * \param policy the policy to be used by the algorithm
+     * \param alpha the learning rate to be used by the algorithm
+     * \param accumulating whether to use accumulating trace or replacing ones.
+     */
     SARSA_lambda(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha, bool accumulating);
     virtual void initEpisode(const FiniteState& state, FiniteAction& action) override;
     virtual void sampleAction(const FiniteState& state, FiniteAction& action) override;
