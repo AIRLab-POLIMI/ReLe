@@ -431,7 +431,7 @@ public:
 
     /*!
      * Setter.
-     * \param whether to set this state as an absorbing state or not.
+     * \param absorbing whether to set this state as an absorbing state or not.
      */
     inline void setAbsorbing(bool absorbing = true)
     {
@@ -516,7 +516,7 @@ public:
 
     /*!
      * Setter.
-     * \param actionN the action number to be set
+     * \param stateN the action number to be set
      */
     inline void setStateN(std::size_t stateN)
     {
