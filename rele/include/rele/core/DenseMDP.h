@@ -37,7 +37,7 @@ class DenseMDP: public Environment<FiniteAction, DenseState>
 public:
     /*!
      * Constructor.
-     * \params settings the pointer to the environment settings
+     * \param settings the pointer to the environment settings
      */
     DenseMDP(EnvironmentSettings* settings);
 

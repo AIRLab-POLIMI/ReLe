@@ -73,8 +73,8 @@ public:
     /*!
      * Set the episodes number and the episode maximum length
      * \see Solver::test()
-     * \params testEpisodes the number of test episodes to run
-     * \params testEpisodeLength the maximum length for each test episode
+     * \param testEpisodes the number of test episodes to run
+     * \param testEpisodeLength the maximum length for each test episode
      */
     inline void setTestParams(unsigned int testEpisodes,
                               unsigned int testEpisodeLength)

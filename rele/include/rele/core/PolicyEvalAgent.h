@@ -43,7 +43,7 @@ class PolicyEvalAgent: public Agent<ActionC, StateC>
 public:
     /*!
      * Constructor
-     * \params policy the policy to be used in evaluation
+     * \param policy the policy to be used in evaluation
      */
     PolicyEvalAgent(Policy<ActionC, StateC>& policy): policy(policy)
     {
@@ -141,7 +141,7 @@ public:
 
     /*!
      * This method can be used to return the parameters used during the test runs
-     * \return a matrix paramsN \times episodeN
+     * \return a matrix  paramsN \f$\times\f$ episodeN
      */
     arma::mat getParams()
     {

@@ -69,6 +69,7 @@ private:
  * =========
  *
  * [Schwartz. A reinforcement learning method for maximizing undiscounted rewards](http://sulinux.stanford.edu/cs/robotics/pub/schwartz/ml93.ps.gz)
+ *
  * [Sutton, Barto. Reinforcement Learning: An Introduction (chapter 6.7)](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node67.html)
  */
 class R_Learning: public FiniteTD

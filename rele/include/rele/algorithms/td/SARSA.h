@@ -39,6 +39,7 @@ namespace ReLe
  * =========
  *
  * [Rummery, Niranjan. On-line Q-learning using connectionist systems](http://mi.eng.cam.ac.uk/reports/svr-ftp/auto-pdf/rummery_tr166.pdf)
+ *
  * [Sutton, Barto. Reinforcement Learning: An Introduction (chapter 6.4)](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node64.html)
  *
  */
@@ -74,6 +75,7 @@ public:
  * =========
  *
  * [Rummery, Niranjan. On-line Q-learning using connectionist systems](http://mi.eng.cam.ac.uk/reports/svr-ftp/auto-pdf/rummery_tr166.pdf)
+ *
  * [Sutton, Barto. Reinforcement Learning: An Introduction (chapter 7.5)](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node77.html)
  *
  */

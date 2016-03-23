@@ -106,7 +106,7 @@ public:
 
     /*!
      * Setter.
-     * \strategy the selected logger strategy to be performed
+     * \param strategy the selected logger strategy to be performed
      */
     void setStrategy(LoggerStrategy<ActionC, StateC>* strategy)
     {

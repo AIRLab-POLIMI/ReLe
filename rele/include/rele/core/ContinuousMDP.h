@@ -44,7 +44,7 @@ public:
 
     /*!
      * Constructor.
-     * \params settings the pointer to the environment settings
+     * \param settings the pointer to the environment settings
      */
     ContinuousMDP(EnvironmentSettings* settings);
 

@@ -322,7 +322,7 @@ public:
 
     /*!
      * Constructor.
-     * \params size the action dimensionality
+     * \param size the action dimensionality
      */
     DenseAction(std::size_t size) :
         arma::vec(size)
@@ -573,7 +573,7 @@ public:
 
     /*!
      * Constructor.
-     * \params size the state dimensionality
+     * \param size the state dimensionality
      */
     DenseState(std::size_t size) :
         arma::vec(size)
