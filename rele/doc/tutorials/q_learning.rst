@@ -12,18 +12,27 @@ The action success probability is p=0.8, if an action fails the agent stays in t
 
 First of all we will create a Finite MDP using a generator:
 
-TODO CODE
+.. literalinclude:: code/q_learning.cpp
+   :language: c++
+   :linenos:
+   :lines: 20-23
 
 Now we have to create a Q-Learning agent. The Q-Learning agent needs a policy specification, and the learning rate.
 For this simple environment we can use an :math:`\epsilon`-greedy policy and a costant learning rate
 
-TODO CODE
+.. literalinclude:: code/q_learning.cpp
+   :language: c++
+   :linenos:
+   :lines: 25-28
 
 Finally we create a core to run our agent on the mdp.
 In this simple example we can just run a single episode.
 We will use a PrintStrategy (TODO LINK) to print the results on the console.
 
-TODO CODE
+.. literalinclude:: code/q_learning.cpp
+   :language: c++
+   :linenos:
+   :lines: 30-41
 
 
 After running the code you should see on the console two section:
@@ -81,5 +90,7 @@ Please, note that this mdp has two optimal policies, as in the goal state (state
 
 The complete code is the following:
 
-TODO code
+.. literalinclude:: code/q_learning.cpp
+   :language: c++
+   :linenos:
 
