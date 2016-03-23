@@ -29,9 +29,21 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the output data for the R-Learning algorithm.
+ */
 class R_LearningOutput : public FiniteTDOutput
 {
 public:
+    /*!
+     * Constructor.
+     * \param alpha the Q-function learning rate
+     * \param beta the average expected reward learning rate
+     * \param policyName the name of the policy used
+     * \param policyHPar the map of the hyperparameters of the policy
+     * \param Q the Q-table
+     * \param ro the average expected reward
+     */
     R_LearningOutput(const std::string& alpha,
                      const std::string& beta,
                      const std::string& policyName,
@@ -47,6 +59,18 @@ private:
     double ro;
 };
 
+/*!
+ * This class implements the tabular R-learning algorithm.
+ * This algorithm is an off-policy temporal difference algorithm.
+ * Differently from Q-Learning, can learn properly the Q-function in the average reward case.
+ * Can only work on finite MDP, i.e. with both finite action and state space.
+ *
+ * References
+ * =========
+ *
+ * [Schwartz. A reinforcement learning method for maximizing undiscounted rewards](http://sulinux.stanford.edu/cs/robotics/pub/schwartz/ml93.ps.gz)
+ * [Sutton, Barto. Reinforcement Learning: An Introduction (chapter 6.7)](https://webdocs.cs.ualberta.ca/~sutton/book/ebook/node67.html)
+ */
 class R_Learning: public FiniteTD
 {
 public:

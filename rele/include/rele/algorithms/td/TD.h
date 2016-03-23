@@ -104,11 +104,11 @@ protected:
 class FiniteTD: public Agent<FiniteAction, FiniteState>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param policy the policy to be used by the algorithm
-	 * \param alpha the learning rate to be used by the algorithm
-	 */
+    /*!
+     * Constructor.
+     * \param policy the policy to be used by the algorithm
+     * \param alpha the learning rate to be used by the algorithm
+     */
     FiniteTD(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha);
 
     virtual void endEpisode() override;
@@ -151,12 +151,12 @@ protected:
 class LinearTD : public Agent<FiniteAction, DenseState>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param phi the features to be used for linear approximation of the state space
-	 * \param policy the policy to be used by the algorithm
-	 * \param alpha the learning rate to be used by the algorithm
-	 */
+    /*!
+     * Constructor.
+     * \param phi the features to be used for linear approximation of the state space
+     * \param policy the policy to be used by the algorithm
+     * \param alpha the learning rate to be used by the algorithm
+     */
     LinearTD(Features& phi, ActionValuePolicy<DenseState>& policy, LearningRateDense& alpha);
 
     virtual void endEpisode() override;

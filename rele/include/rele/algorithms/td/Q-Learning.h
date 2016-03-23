@@ -29,8 +29,15 @@
 namespace ReLe
 {
 
-/**
- * http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node65.html
+/*!
+ * This class implements the tabular Q-learning algorithm.
+ * This algorithm is an off-policy temporal difference algorithm.
+ * Can only work on finite MDP, i.e. with both finite action and state space.
+ *
+ * References
+ * =========
+ *
+ * [Watkins, Dayan. Q-learning](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.466.7149&rep=rep1&type=pdf)
  */
 class Q_Learning: public FiniteTD
 {

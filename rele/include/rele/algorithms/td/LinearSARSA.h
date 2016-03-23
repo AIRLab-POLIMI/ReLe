@@ -30,8 +30,15 @@
 namespace ReLe
 {
 
-/**
- * http://jmlr.org/proceedings/papers/v32/seijen14.pdf
+/*!
+ * This class implements the linear SARSA algorithm.
+ * This algorithm is an on-policy temporal difference algorithm.
+ * Can only work on Dense MDP, i.e. with finite action and dense state space.
+ *
+ * References
+ * =========
+ *
+ * [Seijen, Sutton](http://jmlr.org/proceedings/papers/v32/seijen14.pdf)
  */
 class LinearGradientSARSA: public LinearTD
 {

@@ -30,6 +30,18 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the SARSA algorithm.
+ * This algorithm is an on-policy temporal difference algorithm.
+ * Can only work on Finite MDP, i.e. with finite action and state space.
+ *
+ * References
+ * =========
+ *
+ * [Rummery, Niranjan. On-line Q-learning using connectionist systems](http://mi.eng.cam.ac.uk/reports/svr-ftp/auto-pdf/rummery_tr166.pdf)
+ * [Sutton, Barto. Reinforcement Learning: An Introduction (chapter 6.4)](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node64.html)
+ *
+ */
 class SARSA: public FiniteTD
 {
 public:
@@ -45,6 +57,21 @@ public:
 
 };
 
+/*!
+ * This class implements the SARSA(\f$\lambda\f$) algorithm.
+ * Differently from the SARSA algorithm, this can use eligibility trace.
+ * With \f$\lambda=0\f$, this algorithm is equivalent to plain SARSA, but is
+ * less efficient, as it stores the eligibility vector.
+ * This algorithm is an on-policy temporal difference algorithm.
+ * Can only work on Finite MDP, i.e. with finite action and state space.
+ *
+ * References
+ * =========
+ *
+ * [Rummery, Niranjan. On-line Q-learning using connectionist systems](http://mi.eng.cam.ac.uk/reports/svr-ftp/auto-pdf/rummery_tr166.pdf)
+ * [Sutton, Barto. Reinforcement Learning: An Introduction (chapter 7.5)](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node77.html)
+ *
+ */
 class SARSA_lambda: public FiniteTD
 {
 public:
