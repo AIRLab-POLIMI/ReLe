@@ -27,7 +27,7 @@ For this simple environment we can use an :math:`\epsilon`-greedy policy and a c
 
 Finally we create a core to run our agent on the mdp.
 In this simple example we can just run a single episode.
-We will use a :cpp:class: `ReLe::PrintStrategy` to print the results on the console.
+We will use a :cpp:class:`ReLe::PrintStrategy` to print the results on the console.
 
 .. literalinclude:: code/q_learning.cpp
    :language: c++
