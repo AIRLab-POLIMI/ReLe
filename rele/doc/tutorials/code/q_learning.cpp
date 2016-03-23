@@ -17,7 +17,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	//Create the MDP
+    //Create the MDP
     SimpleChainGenerator generator;
     generator.generate(5, 2);
     FiniteMDP mdp = generator.getMDP(0.9);
@@ -33,7 +33,8 @@ int main(int argc, char *argv[])
     bool logTransition = false;
     bool logAgent = true;
     core.getSettings().loggerStrategy =
-    			new PrintStrategy<FiniteAction, FiniteState>(logTransition, logAgent);
+                new PrintStrategy<FiniteAction, FiniteState>(logTransition,
+                                                             logAgent);
 
     //Run the learning
     cout << "starting episode" << endl;
