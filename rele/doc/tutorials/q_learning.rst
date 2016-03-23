@@ -39,6 +39,7 @@ After running the code you should see on the console two section:
 
 - Statistics, in which is described the initial state and the state frequencies
 - Agent data at episode end, in which is printed agent data
+
   - Parameters: discount factor, learning rate, :math:`\epsilon` of the :math:`\epsilon` greedy policy
   - Action Value function
   - Policy
