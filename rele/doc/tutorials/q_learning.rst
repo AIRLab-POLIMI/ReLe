@@ -27,7 +27,7 @@ For this simple environment we can use an :math:`\epsilon`-greedy policy and a c
 
 Finally we create a core to run our agent on the mdp.
 In this simple example we can just run a single episode.
-We will use a PrintStrategy (TODO LINK) to print the results on the console.
+We will use a :cpp:class: `ReLe::PrintStrategy` to print the results on the console.
 
 .. literalinclude:: code/q_learning.cpp
    :language: c++
@@ -37,8 +37,8 @@ We will use a PrintStrategy (TODO LINK) to print the results on the console.
 
 After running the code you should see on the console two section:
 
-- statistics, in wich is described the initial state and the state frequencies
-- Agent data at episode end, in wich is printed agent data:
+- statistics, in which is described the initial state and the state frequencies
+- Agent data at episode end, in which is printed agent data:
 	- Parameters: discount factor, learning rate, :math:`\epsilon` of the :math:`\epsilon` greedy policy
 	- Action Value function
 	- Policy
