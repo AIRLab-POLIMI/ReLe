@@ -37,11 +37,11 @@ We will use a :cpp:class:`ReLe::PrintStrategy` to print the results on the conso
 
 After running the code you should see on the console two section:
 
-- statistics, in which is described the initial state and the state frequencies
-- Agent data at episode end, in which is printed agent data:
-	- Parameters: discount factor, learning rate, :math:`\epsilon` of the :math:`\epsilon` greedy policy
-	- Action Value function
-	- Policy
+- Statistics, in which is described the initial state and the state frequencies
+- Agent data at episode end, in which is printed agent data
+  - Parameters: discount factor, learning rate, :math:`\epsilon` of the :math:`\epsilon` greedy policy
+  - Action Value function
+  - Policy
 
 
 The output shoudl be similar to this::
