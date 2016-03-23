@@ -357,7 +357,7 @@ Temporal Difference
    :members:
    :protected-members:
    
-.. doxygenclass:: ReLe::SARSA
+<!-- .. doxygenclass:: ReLe::SARSA
    :members:
    
 .. doxygenclass:: ReLe::SARSA_lambda
@@ -370,7 +370,7 @@ Temporal Difference
    :members:
    
 .. doxygenclass:: ReLe::LinearGradientSARSA
-   :members:   
+   :members: -->   
 
 Output Data
 ^^^^^^^^^^^
