@@ -38,7 +38,7 @@ namespace ReLe
  * References
  * =========
  *
- * [Seijen, Sutton. True Online TD(\f$lambda\f$)](http://jmlr.org/proceedings/papers/v32/seijen14.pdf)
+ * [Seijen, Sutton. True Online TD(lambda)](http://jmlr.org/proceedings/papers/v32/seijen14.pdf)
  */
 class LinearGradientSARSA: public LinearTD
 {
