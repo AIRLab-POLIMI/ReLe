@@ -37,7 +37,7 @@ namespace ReLe
  * References
  * =========
  *
- * [Watkins, Dayan. Q-learning](http://www.google.it)
+ * [Watkins, Dayan. Q-learning](http://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf)
  */
 class Q_Learning: public FiniteTD
 {
