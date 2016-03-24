@@ -22,8 +22,8 @@
  */
 
 
-#ifndef INCLUDE_RELE_UTILS_NUMERICALGRANDIENTS_H_
-#define INCLUDE_RELE_UTILS_NUMERICALGRANDIENTS_H_
+#ifndef INCLUDE_RELE_UTILS_NUMERICALGRADIENTS_H_
+#define INCLUDE_RELE_UTILS_NUMERICALGRADIENTS_H_
 
 #include <armadillo>
 #include "rele/approximators/Regressors.h"
@@ -32,12 +32,22 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements functions to compute the numerical gradient
+ * of functions. The real gradient is approximated with the
+ * well-known incremental formula (with a small value of \f$eps$\f), i.e.,
+ * \f[\dfrac{\partial J}{\partial \theta} \approx \dfrac{J((\theta + eps) - J(\theta - eps)) / (2 * eps).\f]
+ */
 class NumericalGradient
 {
 
 public:
-    /**
-     * @brief Numerical gradient computation for generic functor
+    /*!
+     * Numerical gradient computation for generic functor.
+     * \param J the function to be derived
+     * \param theta parameters vector
+     * \param size the dimensionality of the output
+     * \return the numerical gradient
      */
     template<class F>
     static inline arma::mat compute(F J, arma::vec theta, unsigned int size = 1)
@@ -63,8 +73,12 @@ public:
 
     }
 
-    /**
-     * @brief Numerical gradient computation for regressor
+    /*!
+     * Numerical gradient computation for regressor.
+     * \param regressor regression function to be derived
+     * \param theta parameters vector
+     * \param input input vector of the regressor
+     * \return the numerical gradient
      */
     static inline arma::mat compute(ParametricRegressor& regressor,
                                     arma::vec theta, arma::vec& input)
@@ -82,14 +96,19 @@ public:
         return compute(lambda, theta, regressor.getOutputSize());
     }
 
-    /**
-     * @brief Numerical gradient computation for policies
+    /*!
+     * Numerical gradient computation for policies with finite actions.
+     * \param policy policy function to be derived
+     * \param theta parameters vector
+     * \param state vector of states
+     * \param action vector of actions
+     * \return the numerical gradient
      */
-    template<class StateC>
-    static inline arma::mat compute(DifferentiablePolicy<DenseAction, StateC>& policy,
+    template<class ActionC, class StateC>
+    static inline arma::mat compute(DifferentiablePolicy<ActionC, StateC>& policy,
                                     arma::vec theta,
-                                    typename state_type<StateC>::const_type_ref input,
-                                    const arma::vec& output)
+                                    typename state_type<StateC>::const_type_ref state,
+                                    typename action_type<ActionC>::const_type_ref action)
     {
         arma::vec p = policy.getParameters();
 
@@ -97,31 +116,7 @@ public:
         {
             arma::vec value(1);
             policy.setParameters(par);
-            value(0) = policy(input, output);
-            policy.setParameters(p);
-
-            return value;
-        };
-
-        return compute(lambda, theta);
-    }
-
-    /**
-     * @brief Numerical gradient computation for policies
-     */
-    template<class StateC>
-    static inline arma::mat compute(DifferentiablePolicy<FiniteAction, StateC>& policy,
-                                    arma::vec theta,
-                                    typename state_type<StateC>::const_type_ref input,
-                                    const FiniteAction& output)
-    {
-        arma::vec p = policy.getParameters();
-
-        auto lambda = [&](const arma::vec& par)
-        {
-            arma::vec value(1);
-            policy.setParameters(par);
-            value(0) = policy(input, output);
+            value(0) = policy(state, action);
             policy.setParameters(p);
 
             return value;
@@ -135,4 +130,4 @@ public:
 }
 
 
-#endif /* INCLUDE_RELE_UTILS_NUMERICALGRANDIENTS_H_ */
+#endif /* INCLUDE_RELE_UTILS_NUMERICALGRADIENTS_H_ */
