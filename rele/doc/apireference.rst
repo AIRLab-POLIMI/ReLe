@@ -463,6 +463,9 @@ Utils
 .. doxygenclass:: ReLe::ModularRange
    :members:
    
+.. doxygenclass:: ReLe::NumericalGradient
+   :members:
+   
 .. doxygenclass:: ReLe::Range2Pi
    :members:
 
