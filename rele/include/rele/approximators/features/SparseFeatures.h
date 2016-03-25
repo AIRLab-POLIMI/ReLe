@@ -196,6 +196,7 @@ private:
     unsigned int n_rows, n_cols;
 };
 
+//! Template alias.
 typedef SparseFeatures_<arma::vec> SparseFeatures;
 
 }

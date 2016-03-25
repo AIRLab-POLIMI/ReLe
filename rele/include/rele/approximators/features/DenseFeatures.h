@@ -123,6 +123,7 @@ private:
 
 };
 
+//! Template alias.
 typedef DenseFeatures_<arma::vec> DenseFeatures;
 
 

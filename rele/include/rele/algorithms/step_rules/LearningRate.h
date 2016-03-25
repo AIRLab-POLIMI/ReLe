@@ -63,7 +63,10 @@ public:
     }
 };
 
+//! Template alias.
 typedef LearningRate_<FiniteAction, FiniteState> LearningRate;
+
+//! Template alias.
 typedef LearningRate_<FiniteAction, DenseState> LearningRateDense;
 
 
@@ -108,7 +111,10 @@ private:
 
 };
 
+//! Template alias.
 typedef ConstantLearningRate_<FiniteAction, FiniteState> ConstantLearningRate;
+
+//! Template alias.
 typedef ConstantLearningRate_<FiniteAction, DenseState> ConstantLearningRateDense;
 
 
@@ -167,7 +173,10 @@ private:
 
 };
 
+//! Template alias.
 typedef DecayingLearningRate_<FiniteAction, FiniteState> DecayingLearningRate;
+
+//! Template alias.
 typedef DecayingLearningRate_<FiniteAction, DenseState> DecayingLearningRateDense;
 
 

@@ -82,8 +82,13 @@ public:
 
 };
 
+//! Template alias.
 typedef BasisFunction_<arma::vec> BasisFunction;
+
+//! Template alias.
 typedef std::vector<BasisFunction*> BasisFunctions;
+
+//! Alias for generic basis function vector.
 template<class InputC> using BasisFunctions_ = std::vector<BasisFunction_<InputC>*>;
 
 } //end namespace

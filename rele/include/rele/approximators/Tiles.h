@@ -96,9 +96,13 @@ public:
 
 };
 
-
+//! Template alias.
 typedef Tiles_<arma::vec> Tiles;
+
+//! Template alias.
 typedef std::vector<Tiles*> TilesVector;
+
+//! Alias for generic tiles vector.
 template<class InputC> using TilesVector_ = std::vector<Tiles_<InputC>*>;
 
 }

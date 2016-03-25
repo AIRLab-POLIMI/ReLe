@@ -124,7 +124,7 @@ public:
 
 };
 
-
+//! Template alias.
 typedef Features_<arma::vec> Features;
 
 }

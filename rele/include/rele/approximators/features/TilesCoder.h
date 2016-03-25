@@ -133,6 +133,7 @@ private:
     size_t rowsN;
 };
 
+//! Template alias.
 typedef TilesCoder_<arma::vec> TilesCoder;
 
 }

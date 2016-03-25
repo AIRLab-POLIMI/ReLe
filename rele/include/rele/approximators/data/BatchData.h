@@ -356,6 +356,7 @@ private:
     mutable OutputC mean;
 };
 
+//! Template alias.
 typedef BatchData_<arma::vec> BatchData;
 
 
@@ -496,6 +497,7 @@ private:
     arma::uvec indexes;
 };
 
+//! Template alias.
 typedef MiniBatchData_<arma::vec> MiniBatchData;
 
 /*!
@@ -585,6 +587,7 @@ private:
 
 };
 
+//! Template alias.
 typedef BatchDataSimple_<arma::vec> BatchDataSimple;
 
 }
