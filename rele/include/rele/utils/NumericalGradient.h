@@ -35,8 +35,8 @@ namespace ReLe
 /*!
  * This class implements functions to compute the numerical gradient
  * of functions. The real gradient is approximated with the
- * well-known incremental formula (with a small value of \f$eps$\f), i.e.,
- * \f[\dfrac{\partial J}{\partial \theta} \approx \dfrac{J((\theta + eps) - J(\theta - eps)) / (2 * eps).\f]
+ * well-known incremental formula (with a small value of \f$\epsilon\f$), i.e.,
+ * \f[\frac{\partial J}{\partial \theta} \approx \frac{J(\theta + \epsilon) - J(\theta - \epsilon)}{2\epsilon}.\f]
  */
 class NumericalGradient
 {
@@ -74,7 +74,7 @@ public:
     }
 
     /*!
-     * Numerical gradient computation for regressor.
+     * Numerical gradient computation for regression functions.
      * \param regressor regression function to be derived
      * \param theta parameters vector
      * \param input input vector of the regressor
@@ -97,7 +97,7 @@ public:
     }
 
     /*!
-     * Numerical gradient computation for policies with finite actions.
+     * Numerical gradient computation for policy functions.
      * \param policy policy function to be derived
      * \param theta parameters vector
      * \param state vector of states

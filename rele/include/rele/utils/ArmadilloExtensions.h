@@ -48,9 +48,9 @@ arma::mat null(const arma::mat& A, double tol = -1);
  * \param A reduced row echelon form
  * \param tol tolerance used in the rank test. If tol < 0, a default tolerance of (max(size(A)) * eps * norm(A, inf)) tests for negligible column elements.
  * \return a vector idxs such that:
- * 1) r = length(idxs) is this algorithm's idea of the rank of X.
- * 2) A(:, idxs) is a basis for the range of X.
- * 3) A(1:r, idxs) is the r-by-r identity matrix.
+ * 1. r = length(idxs) is this algorithm's idea of the rank of X.
+ * 2. A(:, idxs) is a basis for the range of X.
+ * 3. A(1:r, idxs) is the r-by-r identity matrix.
  * In addition the reduced row echelon form of X using Gauss-Jordan elimination with partial pivoting is returned through A.
  */
 arma::uvec rref(const arma::mat& X, arma::mat& A, double tol = -1);
