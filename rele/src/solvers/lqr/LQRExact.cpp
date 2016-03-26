@@ -109,6 +109,8 @@ mat LQRExact::computeJacobian(const mat& K, const mat& Sigma)
 
 mat LQRExact::computeHesian(const mat& K, const mat& Sigma, unsigned int r)
 {
+	assert(r < n_rewards);
+
     arma::mat HJ = zeros(n_dim, n_dim);
 
     auto&& M = computeM(K);
