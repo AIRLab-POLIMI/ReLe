@@ -41,6 +41,11 @@ public:
     virtual Policy<FiniteAction, FiniteState>& getPolicy() override;
     virtual Dataset<FiniteAction, FiniteState> test() override;
 
+    inline arma::vec getValueFunction()
+    {
+    	return V;
+    }
+
 protected:
     FiniteMDP& mdp;
     size_t stateN;
