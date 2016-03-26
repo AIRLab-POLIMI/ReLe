@@ -57,6 +57,16 @@ private:
     arma::mat compute_dL(const arma::mat& K, unsigned int r, unsigned int i);
     arma::mat computeHL(unsigned int r, unsigned int i, unsigned int j);
 
+    inline arma::vec to_vec(const arma::mat& m)
+    {
+        return reshape(m, n_dim*n_dim, 1);
+    }
+
+    inline arma::mat to_mat(const arma::vec& m)
+    {
+        return reshape(m, n_dim, n_dim);
+    }
+
 private:
     unsigned int n_rewards;
     unsigned int n_dim;

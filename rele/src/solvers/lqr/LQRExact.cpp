@@ -23,77 +23,198 @@
 
 #include "rele/solvers/lqr/LQRExact.h"
 
+#include <cassert>
+
+using namespace arma;
+
 namespace ReLe
 {
 
-LQRExact::LQRExact(double gamma, arma::mat A,
-                   arma::mat B,
-                   std::vector<arma::mat> Q,
-                   std::vector<arma::mat> R,
-                   arma::vec x0) : gamma(gamma), B(B), Q(Q), R(R), x0(x0)
+LQRExact::LQRExact(double gamma, mat A,
+                   mat B,
+                   std::vector<mat> Q,
+                   std::vector<mat> R,
+                   vec x0) : gamma(gamma), B(B), Q(Q), R(R), x0(x0)
 {
-	n_rewards = Q.size();
-	n_dim = A.n_rows;
+    n_rewards = Q.size();
+    n_dim = A.n_rows;
 }
 
-arma::mat LQRExact::computeP(const arma::mat& K, unsigned int r)
+mat LQRExact::computeP(const mat& K, unsigned int r)
 {
+    assert(r < n_rewards);
 
+    auto&& L = computeL(K, r);
+    auto&& M = computeM(K);
+
+    auto&& vecL = to_vec(L);
+
+    auto&& vecP = solve(M, L);
+
+    return to_mat(vecP);
 }
 
-arma::mat LQRExact::riccatiRHS(const arma::vec& k, const arma::mat& P, unsigned int r)
+mat LQRExact::riccatiRHS(const vec& k, const mat& P, unsigned int r)
 {
-
+    mat K = diagmat(k);
+    return Q[r] + gamma*(A.t()*P*A-K*B.t()*P*A-A.t()*P*B*K.t()+K*B.t()*P*B*K.t())+K*R[r]*K.t();
 }
 
-arma::mat LQRExact::computeJ(const arma::mat& K, const arma::mat& Sigma)
+mat LQRExact::computeJ(const mat& K, const mat& Sigma)
 {
+    arma::vec J = zeros(n_rewards);
 
+    for (unsigned int r = 0; r < n_rewards; r++)
+    {
+        arma::mat P = computeP(K, r);
+        J(r) = -as_scalar(x0.t()*P*x0 + trace(Sigma*(R[r] + gamma*B.t()*P*B))/(1.0-gamma));
+    }
+
+    return J;
 }
 
-arma::mat LQRExact::computeGradient(const arma::mat& K, const arma::mat& Sigma, unsigned int r)
+mat LQRExact::computeGradient(const mat& K, const mat& Sigma, unsigned int r)
 {
+    assert(r < n_rewards);
 
+    auto&& M = computeM(K);
+    auto&& L = computeL(K, r);
+    auto&& Minv = inv(M);
+
+    arma::vec dJ = zeros(n_dim);
+    for (unsigned int i = 0; i < n_dim; i++)
+    {
+        auto&& dMi = compute_dM(K, i);
+        auto&& dLi = compute_dL(K, r, i);
+
+        auto&&  vec_dPi = -Minv*dMi*Minv*to_vec(L)+solve(M, to_vec(dLi));
+
+        auto&& dPi = to_mat(vec_dPi);
+
+        dJ(i) = -as_scalar(x0.t()*dPi*x0+gamma*trace(Sigma*B.t()*dPi*B)/(1.0-gamma));
+    }
+
+    return dJ;
 }
 
-arma::mat LQRExact::computeJacobian(const arma::mat& K, const arma::mat& Sigma)
+mat LQRExact::computeJacobian(const mat& K, const mat& Sigma)
 {
+    arma::mat dJ = zeros(n_dim, n_rewards);
 
+    for (unsigned int r=0; r < n_rewards; r++)
+        dJ.row(r) = computeGradient(K, Sigma, r);
+
+    return dJ;
 }
 
-arma::mat LQRExact::computeHesian(const arma::mat& K, const arma::mat& Sigma, unsigned int r)
+mat LQRExact::computeHesian(const mat& K, const mat& Sigma, unsigned int r)
 {
+    arma::mat HJ = zeros(n_dim, n_dim);
 
+    auto&& M = computeM(K);
+    auto&& L = computeL(K, r);
+
+    auto&& vecL = to_vec(L);
+
+    auto&& Minv = inv(M);
+
+    for (unsigned int i = 1; i < n_dim; i++)
+    {
+        auto&& dMi = compute_dM(K, i);
+        auto&& dLi = compute_dL(K, r, i);
+        auto&& vec_dLi = to_vec(dLi);
+
+        for(unsigned int j = 0; j < n_dim; j++)
+        {
+            auto&& dMj = compute_dM(K, j);
+
+            auto&& HMij = computeHM(i, j);
+            auto&& HLij = computeHL(r, i, j);
+
+            auto&& dLj = compute_dL(K, r, j);
+            auto&& vec_dLj =to_vec(dLj);
+
+
+            auto&& dMjinv = -Minv*dMj*Minv;
+
+            auto&& vecHP = -dMjinv*dMi*Minv*vecL - Minv*dMi*dMjinv*vecL
+                           -Minv*HMij*Minv*vecL  - Minv*dMi*Minv*vec_dLj
+                           +dMjinv*vec_dLi       + Minv*to_vec(HLij);
+            auto&& HP = to_mat(vecHP);
+
+            HJ(i,j) = -as_scalar(x0.t()*HP*x0+gamma*trace(Sigma*B.t()*HP*B))/(1.0-gamma);
+        }
+    }
+
+    return HJ;
 }
 
-arma::mat LQRExact::computeM(const arma::mat& K)
+mat LQRExact::computeM(const mat& K)
 {
+    auto&& kb = K*B.t();
+    unsigned int size = n_dim*n_dim;
 
+    return eye(size, size) - gamma*(kron(A.t(), A.t()) - kron(A.t(), kb) - kron(kb, A.t()) + kron(kb, kb));
 }
 
-arma::mat LQRExact::compute_dM(const arma::mat& K, unsigned int i)
+mat LQRExact::compute_dM(const mat& K, unsigned int i)
 {
+    assert(i < n_dim);
 
+    arma::mat dKi = zeros(n_dim, n_dim);
+    dKi(i, i) = 1;
+
+    auto&& kb = K*B.t();
+    auto&& dkb = dKi*B.t();
+
+    return gamma*(kron(A.t(), dkb) + kron(dkb, A.t()) - kron(dkb, kb) - kron(kb, dkb));
 }
 
-arma::mat LQRExact::computeHM(unsigned int i, unsigned int j)
+mat LQRExact::computeHM(unsigned int i, unsigned int j)
 {
+    assert(i < n_dim);
+    assert(j < n_dim);
 
+    arma::mat dKi = zeros(n_dim, n_dim);
+    dKi(i, i) = 1;
+
+    arma::mat dKj = zeros(n_dim, n_dim);
+    dKj(j, j) = 1;
+
+    return -gamma*(kron(dKi*B.t(), dKj*B.t()) + kron(dKj*B.t(), dKi*B.t()));
 }
 
-arma::mat LQRExact::computeL(const arma::mat& K, unsigned int r)
+mat LQRExact::computeL(const mat& K, unsigned int r)
 {
+    assert(r < n_rewards);
 
+    return Q[r] + K*R[r]*K.t();
 }
 
-arma::mat LQRExact::compute_dL(const arma::mat& K, unsigned int r, unsigned int i)
+mat LQRExact::compute_dL(const mat& K, unsigned int r, unsigned int i)
 {
+    assert(r < n_rewards);
+    assert(i < n_dim);
 
+    arma::mat dKi = zeros(n_dim, n_dim);
+    dKi(i, i) = 1;
+
+    return dKi*R[r]*K.t() + K*R[r]*dKi.t();
 }
 
-arma::mat LQRExact::computeHL(unsigned int r, unsigned int i, unsigned int j)
+mat LQRExact::computeHL(unsigned int r, unsigned int i, unsigned int j)
 {
+    assert(r < n_rewards);
+    assert(i < n_dim);
+    assert(j < n_dim);
 
+    arma::mat dKi = zeros(n_dim, n_dim);
+    dKi(i, i) = 1;
+
+    arma::mat dKj = zeros(n_dim, n_dim);
+    dKj(j, j) = 1;
+
+    return dKi*R[r]*dKj.t() + dKj*R[r]*dKi.t();
 }
 
 }
