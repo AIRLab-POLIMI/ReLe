@@ -43,7 +43,7 @@ public:
 
     inline arma::vec getValueFunction()
     {
-    	return V;
+        return V;
     }
 
 protected:

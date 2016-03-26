@@ -30,7 +30,7 @@
 #include "rele/approximators/basis/PolynomialFunction.h"
 
 #include "rele/environments/LQR.h"
-#include "rele/solvers/LQRsolver.h"
+#include "rele/solvers/lqr/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/algorithms/policy_search/PGPE/PGPE.h"
 #include "rele/IRL/ParametricRewardMDP.h"

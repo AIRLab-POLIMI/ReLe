@@ -29,7 +29,7 @@
 #include "rele/approximators/features/DenseFeatures.h"
 
 #include "rele/environments/LQR.h"
-#include "rele/solvers/LQRsolver.h"
+#include "rele/solvers/lqr/LQRsolver.h"
 #include "rele/IRL/solvers/IrlLQRSolver.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/IRL/algorithms/MWAL.h"

@@ -33,7 +33,6 @@
 #include "rele/approximators/basis/PolynomialFunction.h"
 
 #include "rele/environments/LQR.h"
-#include "rele/solvers/LQRsolver.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/IRL/algorithms/GIRL.h"
 #include "rele/algorithms/policy_search/PGPE/PGPE.h"

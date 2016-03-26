@@ -24,7 +24,7 @@
 #ifndef INCLUDE_RELE_IRL_SOLVERS_IRLLQRSOLVER_H_
 #define INCLUDE_RELE_IRL_SOLVERS_IRLLQRSOLVER_H_
 
-#include "rele/solvers/LQRsolver.h"
+#include "rele/solvers/lqr/LQRsolver.h"
 #include "rele/IRL/IRLSolver.h"
 
 namespace ReLe

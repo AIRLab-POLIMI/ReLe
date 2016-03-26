@@ -21,7 +21,7 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/solvers/LQRsolver.h"
+#include "rele/solvers/lqr/LQRsolver.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/features/SparseFeatures.h"
 

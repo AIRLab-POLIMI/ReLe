@@ -30,7 +30,7 @@
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
 
 #include "rele/environments/GaussianRewardMDP.h"
-#include "rele/solvers/LQRsolver.h"
+#include "rele/core/Core.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/IRL/algorithms/GIRL.h"
 #include "rele/IRL/algorithms/NoGIRL.h"
