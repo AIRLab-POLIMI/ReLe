@@ -45,18 +45,10 @@ LQRExact::LQRExact(LQR& lqr) :
 {
 }
 
-mat LQRExact::computeP(const mat& K, unsigned int r)
+mat LQRExact::solveRiccati(const vec& k, unsigned int r)
 {
-    assert(r < n_rewards);
-
-    auto&& L = computeL(K, r);
-    auto&& M = computeM(K);
-
-    vec vecP = solve(M, to_vec(L));
-
-    mat P = to_mat(vecP);
-
-    return P;
+	mat K = diagmat(k);
+	return computeP(K, r);
 }
 
 mat LQRExact::riccatiRHS(const vec& k, const mat& P, unsigned int r)
@@ -160,6 +152,20 @@ mat LQRExact::computeHesian(const vec& k, const mat& Sigma, unsigned int r)
     }
 
     return HJ;
+}
+
+mat LQRExact::computeP(const mat& K, unsigned int r)
+{
+    assert(r < n_rewards);
+
+    auto&& L = computeL(K, r);
+    auto&& M = computeM(K);
+
+    vec vecP = solve(M, to_vec(L));
+
+    mat P = to_mat(vecP);
+
+    return P;
 }
 
 mat LQRExact::computeM(const mat& K)

@@ -30,28 +30,93 @@
 namespace ReLe
 {
 
+/*!
+ * This class is not strictly a solver, but it can be used to calculate the exact expected return,
+ * the exact gradient, and the exact hessian of any LQR problem, and thus can be used by any optimization
+ * algorithm to find the optimal value for this kind of problem, even in the multidimensional reward setting.
+ *
+ * Take care that the parameters must be positive, differently from the parameters of a normal policy used
+ * for solving the LQR problem, that are negative.
+ */
 class LQRExact
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param gamma the discout factor
+	 * \param A the state dynamics matrix
+	 * \param B the action dynamics matrix
+	 * \param Q a vector of weights matrixes for the state
+	 * \param R a vector of weights matrixes for the action
+	 * \param x0 the initial state for the LQR problem
+	 */
     LQRExact(double gamma, arma::mat A,
              arma::mat B,
              std::vector<arma::mat> Q,
              std::vector<arma::mat> R,
              arma::vec x0);
 
+    /*!
+     * Constructor.
+     * \param lqr the LQR environment to be considered
+     */
     LQRExact(LQR& lqr);
 
-    arma::mat computeP(const arma::mat& K, unsigned int r = 0);
 
-    arma::mat riccatiRHS(const arma::vec& k, const arma::mat& P, unsigned int r);
+    /*!
+     * Solves the Riccati equation for a given parameters vector.
+     * \param k the weights vector
+     * \param r the reward index
+     * \return the solution to the Riccati equation
+     */
+    arma::mat solveRiccati(const arma::vec& k, unsigned int r = 0);
 
+    /*!
+     * Compute the right hand side of the Riccati equation for a given parameters vector.
+     * \param k the weights vector
+     * \param r the reward index
+     * \return the value of the right hand side of the Riccati equation
+     */
+    arma::mat riccatiRHS(const arma::vec& k, const arma::mat& P, unsigned int r = 0);
+
+    /*!
+     * Compute the expected return under a normal policy.
+     * \param k the weights vector
+     * \param Sigma the covariance matrix
+     * \return the expected return vector
+     */
     arma::mat computeJ(const arma::vec& k, const arma::mat& Sigma);
+
+    /*!
+     * Compute the gradient of the expected return under a normal policy, w.r.t the parameters k.
+     * \param k the weights vector
+     * \param Sigma the covariance matrix
+     * \param r the reward index
+     * \return the gradient of the r component of the expected reward
+     */
     arma::mat computeGradient(const arma::vec& k, const arma::mat& Sigma, unsigned int r = 0);
+
+    /*!
+     * Compute the jacobian of the expected return under a normal policy, w.r.t the parameters k.
+     * \param k the weights vector
+     * \param Sigma the covariance matrix
+     * \return the jacobian of the expected reward
+     */
     arma::mat computeJacobian(const arma::vec& k, const arma::mat& Sigma);
+
+    /*!
+     * Compute the hessian of the expected return under a normal policy, w.r.t the parameters k.
+     * \param k the weights vector
+     * \param Sigma the covariance matrix
+     * \param r the reward index
+     * \return the hessian of the expected return
+     */
     arma::mat computeHesian(const arma::vec& k, const arma::mat& Sigma, unsigned int r = 0);
 
 
 private:
+    arma::mat computeP(const arma::mat& K, unsigned int r);
+
     arma::mat computeM(const arma::mat& K);
     arma::mat compute_dM(const arma::mat& K, unsigned int i);
     arma::mat computeHM(unsigned int i, unsigned int j);
