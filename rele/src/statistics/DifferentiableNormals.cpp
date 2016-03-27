@@ -22,7 +22,7 @@
  */
 
 #include "rele/statistics/DifferentiableNormals.h"
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 #include "rele/utils/ArmadilloExtensions.h"
 #include <cassert>
 

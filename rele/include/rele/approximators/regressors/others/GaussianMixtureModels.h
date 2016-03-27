@@ -25,7 +25,7 @@
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_GAUSSIANMIXTUREMODELS_H_
 
 #include "rele/approximators/Regressors.h"
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 #include "rele/utils/ArmadilloExtensions.h"
 
 namespace ReLe

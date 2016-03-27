@@ -24,7 +24,7 @@
 #include "rele/environments/GaussianRewardMDP.h"
 
 #include "rele/utils/RandomGenerator.h"
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 
 namespace ReLe
 {

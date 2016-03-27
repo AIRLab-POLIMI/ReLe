@@ -30,7 +30,7 @@
 
 #include "rele/utils/NumericalGradient.h"
 
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 
 using namespace ReLe;
 

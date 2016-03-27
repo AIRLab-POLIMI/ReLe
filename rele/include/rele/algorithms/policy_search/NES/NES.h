@@ -27,7 +27,7 @@
 #include "rele/algorithms/policy_search/PGPE/PGPE.h"
 #include "rele/algorithms/policy_search/NES/NESOutputData.h"
 #include "rele/statistics/DifferentiableNormals.h"
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 
 namespace ReLe
 {

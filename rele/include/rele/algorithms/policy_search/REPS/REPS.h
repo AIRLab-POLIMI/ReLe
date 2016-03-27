@@ -25,7 +25,7 @@
 #define REPS_H_
 
 #include "rele/statistics/DifferentiableNormals.h"
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 #include "REPSOutputData.h"
 #include "rele/algorithms/policy_search/BlackBoxAlgorithm.h"
 

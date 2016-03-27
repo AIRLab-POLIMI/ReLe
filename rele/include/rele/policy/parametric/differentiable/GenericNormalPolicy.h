@@ -26,7 +26,7 @@
 
 #include "rele/policy/Policy.h"
 #include "rele/approximators/Regressors.h"
-#include "rele/statistics/ArmadilloPDFs.h"
+#include "rele/utils/ArmadilloPDFs.h"
 
 #include <cassert>
 
