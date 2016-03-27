@@ -42,6 +42,7 @@ namespace ReLe
 class LQR: public ContinuousMDP
 {
     friend class LQRsolver;
+    friend class LQRExact;
 public:
     enum S0Type {FIXED, RANDOM};
 

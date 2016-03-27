@@ -34,10 +34,15 @@ LQRExact::LQRExact(double gamma, mat A,
                    mat B,
                    std::vector<mat> Q,
                    std::vector<mat> R,
-                   vec x0) : gamma(gamma), B(B), Q(Q), R(R), x0(x0)
+                   vec x0) : gamma(gamma), A(A), B(B), Q(Q), R(R), x0(x0)
 {
     n_rewards = Q.size();
     n_dim = A.n_rows;
+}
+
+LQRExact::LQRExact(LQR& lqr) :
+		LQRExact(lqr.getSettings().gamma, lqr.A, lqr.B, lqr.Q, lqr.R, lqr.initialState)
+{
 }
 
 mat LQRExact::computeP(const mat& K, unsigned int r)
@@ -47,11 +52,11 @@ mat LQRExact::computeP(const mat& K, unsigned int r)
     auto&& L = computeL(K, r);
     auto&& M = computeM(K);
 
-    auto&& vecL = to_vec(L);
+    vec vecP = solve(M, to_vec(L));
 
-    auto&& vecP = solve(M, L);
+    mat P = to_mat(vecP);
 
-    return to_mat(vecP);
+    return P;
 }
 
 mat LQRExact::riccatiRHS(const vec& k, const mat& P, unsigned int r)
@@ -60,22 +65,26 @@ mat LQRExact::riccatiRHS(const vec& k, const mat& P, unsigned int r)
     return Q[r] + gamma*(A.t()*P*A-K*B.t()*P*A-A.t()*P*B*K.t()+K*B.t()*P*B*K.t())+K*R[r]*K.t();
 }
 
-mat LQRExact::computeJ(const mat& K, const mat& Sigma)
+mat LQRExact::computeJ(const vec& k, const mat& Sigma)
 {
     arma::vec J = zeros(n_rewards);
 
+    mat K = diagmat(k);
+
     for (unsigned int r = 0; r < n_rewards; r++)
     {
-        arma::mat P = computeP(K, r);
+        mat P = computeP(K, r);
         J(r) = -as_scalar(x0.t()*P*x0 + trace(Sigma*(R[r] + gamma*B.t()*P*B))/(1.0-gamma));
     }
 
     return J;
 }
 
-mat LQRExact::computeGradient(const mat& K, const mat& Sigma, unsigned int r)
+mat LQRExact::computeGradient(const vec& k, const mat& Sigma, unsigned int r)
 {
     assert(r < n_rewards);
+
+    mat K = diagmat(k);
 
     auto&& M = computeM(K);
     auto&& L = computeL(K, r);
@@ -97,19 +106,21 @@ mat LQRExact::computeGradient(const mat& K, const mat& Sigma, unsigned int r)
     return dJ;
 }
 
-mat LQRExact::computeJacobian(const mat& K, const mat& Sigma)
+mat LQRExact::computeJacobian(const vec& k, const mat& Sigma)
 {
     arma::mat dJ = zeros(n_dim, n_rewards);
 
     for (unsigned int r=0; r < n_rewards; r++)
-        dJ.row(r) = computeGradient(K, Sigma, r);
+        dJ.row(r) = computeGradient(k, Sigma, r);
 
     return dJ;
 }
 
-mat LQRExact::computeHesian(const mat& K, const mat& Sigma, unsigned int r)
+mat LQRExact::computeHesian(const vec& k, const mat& Sigma, unsigned int r)
 {
 	assert(r < n_rewards);
+
+	mat K = diagmat(k);
 
     arma::mat HJ = zeros(n_dim, n_dim);
 

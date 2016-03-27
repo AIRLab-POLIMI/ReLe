@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_SOLVERS_LQR_LQREXACT_H_
 
 #include <armadillo>
+#include "rele/environments/LQR.h"
 
 namespace ReLe
 {
@@ -38,14 +39,16 @@ public:
              std::vector<arma::mat> R,
              arma::vec x0);
 
+    LQRExact(LQR& lqr);
+
     arma::mat computeP(const arma::mat& K, unsigned int r = 0);
 
     arma::mat riccatiRHS(const arma::vec& k, const arma::mat& P, unsigned int r);
 
-    arma::mat computeJ(const arma::mat& K, const arma::mat& Sigma);
-    arma::mat computeGradient(const arma::mat& K, const arma::mat& Sigma, unsigned int r = 0);
-    arma::mat computeJacobian(const arma::mat& K, const arma::mat& Sigma);
-    arma::mat computeHesian(const arma::mat& K, const arma::mat& Sigma, unsigned int r = 0);
+    arma::mat computeJ(const arma::vec& k, const arma::mat& Sigma);
+    arma::mat computeGradient(const arma::vec& k, const arma::mat& Sigma, unsigned int r = 0);
+    arma::mat computeJacobian(const arma::vec& k, const arma::mat& Sigma);
+    arma::mat computeHesian(const arma::vec& k, const arma::mat& Sigma, unsigned int r = 0);
 
 
 private:
@@ -59,12 +62,14 @@ private:
 
     inline arma::vec to_vec(const arma::mat& m)
     {
-        return reshape(m, n_dim*n_dim, 1);
+    	arma::vec v = reshape(m, n_dim*n_dim, 1);
+        return v;
     }
 
-    inline arma::mat to_mat(const arma::vec& m)
+    inline arma::mat to_mat(const arma::vec& v)
     {
-        return reshape(m, n_dim, n_dim);
+    	arma::mat M = reshape(v, n_dim, n_dim);
+        return M;
     }
 
 private:
