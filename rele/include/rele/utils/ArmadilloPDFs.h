@@ -11,27 +11,13 @@
 namespace ReLe
 {
 
-inline double normpdf(const double x, const double mean, const double var)
-{
-    return exp(-1.0 * ((x - mean) * (x - mean) / (2.0 * var)))
-           / sqrt(2.0 * M_PI * var);
-}
-
-/**
+/*!
  * Calculates the multivariate Gaussian probability density function.
  *
- * Example use:
- * @code
- * extern arma::vec x, mean;
- * extern arma::mat cov;
- * ....
- * double f = phi(x, mean, cov);
- * @endcode
- *
- * @param x Observation.
- * @param mean Mean of multivariate Gaussian.
- * @param cov Covariance of multivariate Gaussian.
- * @return Probability of x being observed from the given multivariate Gaussian.
+ * \param x Observation
+ * \param mean Mean of multivariate Gaussian
+ * \param cov Covariance of multivariate Gaussian
+ * \return Probability density of x given the distribution
  */
 inline double mvnpdf(const arma::vec& x,
                      const arma::vec& mean,
@@ -46,6 +32,18 @@ inline double mvnpdf(const arma::vec& x,
     return pow(2 * M_PI, x.n_elem / -2.0) * exp(exponent) / sqrt(arma::det(cov));
 }
 
+/*!
+ * Calculates the multivariate Gaussian probability density function.
+ *
+ * Differently from ReLe::mvnpdf, needs the determinant and the inverse matrix for fast
+ * pdf computation.
+ *
+ * \param x Observation
+ * \param mean Mean of multivariate Gaussian
+ * \param inverse_cov Inverse of the covariance of multivariate Gaussian
+ * \param det The determinant of the covariance matrix
+ * \return Probability density of x given the distribution
+ */
 inline double mvnpdfFast(const arma::vec& x,
                          const arma::vec& mean,
                          const arma::mat& inverse_cov,
@@ -58,17 +56,15 @@ inline double mvnpdfFast(const arma::vec& x,
     return pow(2 * M_PI, x.n_elem / -2.0) * exp(exponent) / sqrt(det);
 }
 
-/**
+/*!
  * Calculates the multivariate Gaussian probability density function and also
  * the gradients of the mean w.r.t. the input value x.
  *
- * Example use:
- * @code
- * extern arma::vec x, mean, g_mean, g_cov;
- * std::vector<arma::mat> d_cov; // the dSigma
- * ....
- * double f = phi(x, mean, cov, d_cov, &g_mean, &g_cov);
- * @endcode
+ * \param x Observation
+ * \param mean Mean of multivariate Gaussian
+ * \param cov Covariance of multivariate Gaussian
+ * \param g_mean the gradient w.r.t. the mean vector
+ * \return Probability density of x given the distribution
  */
 inline double mvnpdf(const arma::vec& x,
                      const arma::vec& mean,
@@ -94,17 +90,16 @@ inline double mvnpdf(const arma::vec& x,
     return f;
 }
 
-/**
+/*!
  * Calculates the multivariate Gaussian probability density function and also
- * the gradients of the mean and  cholesky decomposition of covariance w.r.t. the input value x.
+ * the gradients of the mean and cholesky decomposition of covariance w.r.t. the input value x.
  *
- * Example use:
- * @code
- * extern arma::vec x, mean, g_mean, g_cov;
- * std::vector<arma::mat> d_cov; // the dSigma
- * ....
- * double f = phi(x, mean, cov, d_cov, &g_mean, &g_cov);
- * @endcode
+ * \param x Observation
+ * \param mean Mean of multivariate Gaussian
+ * \param cholCov Cholesky decomposition of covariance of multivariate Gaussian.
+ * \param g_mean the gradient w.r.t. the mean vector
+ * \param g_cholSigma the gradient w.r.t the cholesky decomposition of covariance matrix
+ * \return Probability density of x given the distribution
  */
 inline double mvnpdf(const arma::vec& x,
                      const arma::vec& mean,
@@ -134,17 +129,20 @@ inline double mvnpdf(const arma::vec& x,
     return f;
 }
 
-/**
+/*!
  * Calculates the multivariate Gaussian probability density function and also
  * the gradients of the mean and variance w.r.t. the input value x.
  *
- * Example use:
- * @code
- * extern arma::vec x, mean, g_mean, g_cov;
- * std::vector<arma::mat> d_cov; // the dSigma
- * ....
- * double f = phi(x, mean, cov, d_cov, &g_mean, &g_cov);
- * @endcode
+ * Differently from ReLe::mvnpdf, needs the determinant and the inverse matrix for fast
+ * pdf computation.
+ *
+ * \param x Observation
+ * \param mean Mean of multivariate Gaussian
+ * \param inverse_cov the inverse of the covariance matrix
+ * \param det the determinant of the covariance matrix
+ * \param g_mean the gradient w.r.t. the mean vector
+ * \param g_cov the gradient w.r.t. the covariance matrix
+ * \return Probability density of x given the distribution
  */
 inline double mvnpdfFast(const arma::vec& x,
                          const arma::vec& mean,
@@ -173,15 +171,15 @@ inline double mvnpdfFast(const arma::vec& x,
     return f;
 }
 
-/**
+/*!
  * Calculates the multivariate Gaussian probability density function for each
  * data point (column) in the given matrix, with respect to the given mean and
  * variance.
  *
- * @param x List of observations.
- * @param mean Mean of multivariate Gaussian.
- * @param cov Covariance of multivariate Gaussian.
- * @param probabilities Output probabilities for each input observation.
+ * \param x List of observations.
+ * \param mean Mean of multivariate Gaussian.
+ * \param cov Covariance of multivariate Gaussian.
+ * \param probabilities Output probabilities for each input observation.
  */
 inline void mvnpdf(const arma::mat& x,
                    const arma::vec& mean,
@@ -204,6 +202,14 @@ inline void mvnpdf(const arma::mat& x,
                     pow(det(cov), -0.5) * exponents;
 }
 
+/*!
+ * Samples n points from a gaussian multivariate distribution.
+ *
+ * \param n number of points to sample
+ * \param mu mean of the multivariate gaussian
+ * \param sigma covariance matrix of the multivariate gaussian
+ * \return a matrix with n columns, representing the sampled points
+ */
 inline arma::mat mvnrand(int n, const arma::vec& mu, const arma::mat& sigma)
 {
     int ncols = sigma.n_cols;
@@ -211,6 +217,13 @@ inline arma::mat mvnrand(int n, const arma::vec& mu, const arma::mat& sigma)
     return arma::repmat(mu, 1, n).t() + Y * arma::chol(sigma);
 }
 
+/*!
+ * Samples a points from a gaussian multivariate distribution.
+ *
+ * \param mu mean of the multivariate gaussian
+ * \param sigma covariance matrix of the multivariate gaussian
+ * \return the sampled point
+ */
 inline arma::vec mvnrand(const arma::vec& mu, const arma::mat& sigma)
 {
     int ncols = sigma.n_cols;
@@ -219,6 +232,16 @@ inline arma::vec mvnrand(const arma::vec& mu, const arma::mat& sigma)
     return mu + temp.t();
 }
 
+/*!
+ * Samples a points from a gaussian multivariate distribution.
+ *
+ * Differently from ReLe::mvnrand, needs the cholesky decomposition of the covariance matrix
+ * for fast sampling.
+ *
+ * \param mu mean of the multivariate gaussian
+ * \param CholSigma covariance matrix of the multivariate gaussian
+ * \return the sampled point
+ */
 inline arma::vec mvnrandFast(const arma::vec& mu, const arma::mat& CholSigma)
 {
     int ncols = mu.n_rows;

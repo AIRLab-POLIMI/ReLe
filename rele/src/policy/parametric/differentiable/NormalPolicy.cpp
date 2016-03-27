@@ -50,7 +50,7 @@ double NormalPolicy::operator()(const arma::vec& state, const arma::vec& action)
     double scalara = action[0];
 
     // compute probability
-    return ReLe::normpdf(scalara, mMean, mInitialStddev*mInitialStddev);
+    return normpdf(scalara, mMean, mInitialStddev*mInitialStddev);
 }
 
 arma::vec NormalPolicy::operator() (const arma::vec& state)

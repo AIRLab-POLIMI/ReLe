@@ -416,6 +416,13 @@ Feature Selection
    
 Utils
 =====
+
+Armadillo Extensions
+--------------------
+
+Linear Algebra
+^^^^^^^^^^^^^^
+
 .. doxygenfunction:: ReLe::null
 
 .. doxygenfunction:: ReLe::rref
@@ -441,6 +448,31 @@ Utils
 .. doxygenfunction:: ReLe::triangularToVec
 
 .. doxygenfunction:: ReLe::safeChol
+
+Distributions
+^^^^^^^^^^^^^
+
+.. doxygenfunction:: ReLe::mvnpdf(const arma::vec&, const arma::vec&, const arma::mat&)
+
+.. doxygenfunction:: ReLe::mvnpdfFast(const arma::vec&, const arma::vec&, const arma::mat&, const double&)
+
+.. doxygenfunction:: ReLe::mvnpdf(const arma::vec&, const arma::vec&, const arma::mat&, arma::vec&)
+
+.. doxygenfunction:: ReLe::mvnpdf(const arma::vec&, const arma::vec&, const arma::mat&, arma::vec&, arma::mat&)
+
+.. doxygenfunction:: ReLe::mvnpdfFast(const arma::vec&, const arma::vec&, const arma::mat&, const double&, arma::vec&, arma::vec&)
+
+.. doxygenfunction:: ReLe::mvnpdf(const arma::mat&, const arma::vec&, const arma::mat&, arma::vec&)
+
+.. doxygenfunction:: ReLe::mvnrand(int, const arma::vec&, const arma::mat&)
+
+.. doxygenfunction:: ReLe::mvnrand(const arma::vec&, const arma::mat&)
+
+.. doxygenfunction:: ReLe::mvnrandFast(const arma::vec&, const arma::mat&)
+
+
+Other Utils
+-----------
 
 .. doxygenclass:: ReLe::ConsoleManager
    :members:

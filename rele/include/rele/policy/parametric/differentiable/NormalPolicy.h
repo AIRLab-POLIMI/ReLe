@@ -123,7 +123,12 @@ public:
 
     virtual arma::mat diff2log(const arma::vec& state, const arma::vec& action) override;
 
-
+private:
+    inline double normpdf(const double x, const double mean, const double var)
+    {
+        return std::exp(-1.0 * ((x - mean) * (x - mean) / (2.0 * var)))
+               / std::sqrt(2.0 * M_PI * var);
+    }
 
 protected:
     //mMean is used to store the mean value of a state
