@@ -45,7 +45,7 @@
 
 #include <boost/timer/timer.hpp>
 
-#include "rele/statistics/MLE.h"
+#include "rele/policy/utils/MLE.h"
 
 using namespace boost::timer;
 using namespace std;

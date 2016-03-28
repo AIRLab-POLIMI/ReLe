@@ -37,7 +37,7 @@
 #include "rele/utils/RandomGenerator.h"
 #include "rele/utils/FileManager.h"
 
-#include "rele/statistics/MLE.h"
+#include "rele/policy/utils/MLE.h"
 
 using namespace std;
 using namespace ReLe;
