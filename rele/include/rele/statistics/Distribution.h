@@ -103,7 +103,7 @@ protected:
 
 /*!
  * This class represents a generic parametrized distribution \f$x \sim D(\cdot|\rho)\f$
- * where \f$\rho \in R^{d}\f$ is the parameter vector and \f$ X \subseteq \mathbb{R}^n \f$ is
+ * where \f$\rho \in \mathbb{R}^{d}\f$ is the parameter vector and \f$ X \subseteq \mathbb{R}^n \f$ is
  * the support space.
  *
  */
@@ -148,7 +148,7 @@ public:
 
 
     /*!
-     * Compute the hessian (\f[d (d \log D)^{T}\f]) of the logarithm of the
+     * Compute the hessian (\f$d(d\log D)^{T}\f$) of the logarithm of the
      * distribution in the given point.
      * \param point the point where the hessian is evaluated
      * \return the hessian matrix (out)
