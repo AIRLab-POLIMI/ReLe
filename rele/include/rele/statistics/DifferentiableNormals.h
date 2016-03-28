@@ -32,6 +32,12 @@ namespace ReLe
 
 /*!
  * This class implements the Parametric Normal distribution.
+ * \f[ x\in\mathbb{R}^n, x\sim\mathcal(N)(\mu, \Sigma) \f]
+ *
+ * This is the basic class of all normal distributions, by default only
+ * the mean is parametrized. This mean that the covariance matrix \f$\Sigma\f$
+ * is fixed.
+ *
  */
 class ParametricNormal : public DifferentiableDistribution
 {
@@ -211,17 +217,41 @@ class ParametricLogisticNormal : public ParametricNormal
 
 
 public:
+	/*!
+	 * Constructor.
+	 * \param point_dim the number of variables of the distribution
+	 * \param variance_asymptote the asymptotic value for the variance of each variable
+	 */
     ParametricLogisticNormal(unsigned int point_dim,
                              double variance_asymptote);
 
+    /*!
+     * Constructor.
+     * \param mean the initial mean value
+     * \param logWeights the initial weights for the logistic function
+     * \param variance_asymptote the asymptotic value for the variance of each variable
+     */
     ParametricLogisticNormal(const arma::vec& mean, const arma::vec& logWeights,
                              double variance_asymptote);
 
+    /*!
+     * Constructor.
+     * \param variance_asymptote a vector of the asymptotic values for the variance of each variable
+     */
     ParametricLogisticNormal(const arma::vec& variance_asymptote);
 
+    /*!
+     * Constructor.
+     * \param mean the initial mean value
+     * \param logWeights the initial weights for the logistic function
+     * \param variance_asymptote a vector of the asymptotic values for the variance of each variable
+     */
     ParametricLogisticNormal(const arma::vec& mean, const arma::vec& logWeights,
                              const arma::vec& variance_asymptote);
 
+    /*!
+     * Destructor.
+     */
     virtual ~ParametricLogisticNormal()
     {}
 
@@ -255,12 +285,6 @@ protected:
 
 private:
 
-    /**
-     * @brief The logistic function
-     * @param w The exponent value
-     * @param asymptote The asymptotic value
-     * @return The value of the logistic function
-     */
     inline double logistic(double w, double asymptote)
     {
         return asymptote / (1.0 + exp(-w));
@@ -273,13 +297,36 @@ protected:
 
 };
 
+/*!
+ * This class represents a parametric Gaussian distribution with parameters \f$\rho\f$:
+ * \f[x \sim \mathcal{N}(\cdot|\rho).\f]
+ * The parameter vector \f$\rho\f$ is then defined as follows:
+ * \f[\rho = [M, \Omega]^{T}\f]
+ * where \f$M=[\mu_1,\dots,\mu_n]\f$, \f$\Omega = [\omega_1, \dots,\omega_n]\f$ and
+ * \f$ n \f$ is the support dimension. As a consequence, the parameter
+ * dimension is \f$2\cdot n\f$.
+ *
+ * Given a parametrization \f$\rho\f$, the distribution is defined by the mean
+ * vector \f$M\f$ and a covariance matrix \f$\Sigma\f$.
+ * In order to reduce the number of parameters and prevent the matrix become not positive definite,
+ * we parametrize the covariance matrix with the cholesky decomposition of the Covariance matrix, such that:
+ * \f[\Sigma=triangular(\Omega)^{T}triangular(\omega)\f]
+ */
 class ParametricCholeskyNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
+	/*!
+	 * Constructor.
+	 * \param initial_mean the initial mean parameters
+	 * \param initial_cholA the initial cholesky decomposition of the covariance matrix
+	 */
     ParametricCholeskyNormal(const arma::vec& initial_mean,
                              const arma::mat& initial_cholA);
 
+    /*!
+     * Destructor.
+     */
     virtual ~ParametricCholeskyNormal()
     {}
 
@@ -327,13 +374,32 @@ protected:
 
 };
 
+/*!
+ * This class represents a parametric Gaussian distribution.
+ *
+ * Differently from ReLe::ParametricCholeskyNormal, it uses a full parametrization of the
+ * covariance matrix, so the algorithm itself needs to maintain the positive definiteness
+ * of the parametrization.
+ *
+ * Usually this class is used when the algorithm provide a full estimation of the
+ * covariance matrix or for weighted maximum likelihood.
+ *
+ */
 class ParametricFullNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
+	/*!
+	 * Constructor.
+	 * \param initial_mean the initial mean parameters
+	 * \param initial_cov the initial covariance matrix
+	 */
     ParametricFullNormal(const arma::vec& initial_mean,
                          const arma::mat& initial_cov);
 
+    /*!
+     * Destructor.
+     */
     virtual ~ParametricFullNormal()
     {}
 

@@ -274,7 +274,17 @@ Distributions
 Normal Distributions
 --------------------
 
-
+.. doxygenclass:: ReLe::ParametricNormal
+   :members:
+   
+.. doxygenclass:: ReLe::ParametricLogisticNormal
+   :members:
+   
+.. doxygenclass:: ReLe::ParametricCholeskyNormal
+   :members:
+   
+.. doxygenclass:: ReLe::ParametricFullNormal
+   :members:
 
 Environments
 ============
