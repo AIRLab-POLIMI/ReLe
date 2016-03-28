@@ -1,3 +1,26 @@
+/*
+ * rele,
+ *
+ *
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Versione 1.0
+ *
+ * This file is part of rele.
+ *
+ * rele is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * rele is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #ifndef DIFFERENTIABLENORMALS_H_
 #define DIFFERENTIABLENORMALS_H_
 
@@ -7,18 +30,29 @@ namespace ReLe
 {
 
 
-/**
- * @brief Parametric Normal distribution
+/*!
+ * This class implements the Parametric Normal distribution.
  */
 class ParametricNormal : public DifferentiableDistribution
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param dim the number of variables of the distribution
+	 */
+    ParametricNormal(unsigned int dim);
 
-    ParametricNormal(unsigned int support_dim);
-
+    /*!
+     * Constructor.
+     * \param params the parameters of the distribution
+     * \param covariance the covariance matrix
+     */
     ParametricNormal(const arma::vec& params,
                      const arma::mat& covariance);
 
+    /*!
+     * Destructor.
+     */
     virtual ~ParametricNormal()
     { }
 
@@ -57,25 +91,34 @@ public:
     virtual arma::mat diff2log(const arma::vec &point) override;
 
 public:
+    //TODO check implementation.
     virtual void writeOnStream(std::ostream &out);
     virtual void readFromStream(std::istream &in);
 
 
-    // Specific Normal policy interface //TODO check this!!!
+    // Specific Normal policy interface
 public:
+    /*!
+     * Getter.
+     * \return the mean of the distribution
+     */
     inline arma::vec getMean() const
     {
         return mean;
     }
 
+    /*!
+     * Getter.
+     * \return the covariance of the distribution
+     */
     inline arma::mat getCovariance() const
     {
         return Cov;
     }
 
 protected:
-    /**
-     * Compute mean, covariance, inverce covariance and determinat values
+    /*!
+     * Compute mean, covariance, inverse covariance and determinant values
      * according to current parameterization.
      *
      * @brief Update internal state
@@ -89,15 +132,23 @@ protected:
 
 };
 
-/**
+/*!
  * Gaussian with mean and diagonal covariance.
  * Both mean and variance are learned.
  */
 class ParametricDiagonalNormal : public ParametricNormal, public FisherInterface
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param mean the initial value for the mean
+	 * \param covariance the initial covariance
+	 */
     ParametricDiagonalNormal(const arma::vec& mean, const arma::vec& covariance);
 
+    /*!
+     * Destructor.
+     */
     virtual ~ParametricDiagonalNormal()
     {}
 
@@ -137,9 +188,7 @@ private:
 };
 
 
-/**
- * @brief Parametric normal distribution with logistic diagonal variance
- *
+/*!
  * This class represents a parametric Gaussian distribution with parameters \f$\rho\f$:
  * \f[x \sim \mathcal{N}(\cdot|\rho).\f]
  * The parameter vector \f$\rho\f$ is then defined as follows:

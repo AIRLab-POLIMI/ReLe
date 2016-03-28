@@ -29,118 +29,156 @@
 namespace ReLe
 {
 
+/*!
+ * This is an interface for a generic distribution.
+ * A distribution is a multivariate statistical distribution that can change over time.
+ * This interface implements the operators to get the pdf of the distribution at a certain point,
+ * and to sample data according to the current state of the distribution.
+ *
+ * Distribution can be used for describing high level policies, i.e. a distribution of parametric policies.
+ *
+ */
 class Distribution
 {
 public:
 
+	/*!
+	 * Constructor.
+	 * \param dim the number of variables of the distribution
+	 */
     Distribution(unsigned int dim) : pointSize(dim)
     { }
 
+    /*!
+     * Destructor.
+     */
     virtual ~Distribution()
     { }
 
-    /**
+    /*!
      * Draw a point from the support of the distribution
      * according to the probability defined by the distribution
      *
-     * @brief Distribution sampling
-     * @param output a randomly generated point
+     * \return a randomly generated point
      */
     virtual arma::vec operator() () = 0;
 
-    /**
+    /*!
      * Return the probability of a point to be generated
      * from the distribution.
-     * @brief Distribution probability
-     * @param point a point to be evaluated
-     * @return the probability of the point
+     * \param point a point to be evaluated
+     * \return the probability of the point
      */
     virtual double operator() (arma::vec& point) = 0;
 
-    /**
-     * @brief Support dimension
-     * @return The size of the support
+    /*!
+     * Getter.
+     * \return The size of the support
      */
     inline unsigned int getPointSize()
     {
         return pointSize;
     }
 
+    /*!
+     * Getter.
+     * \return the name of the distribution
+     */
     virtual std::string getDistributionName() = 0;
 
+    /*!
+     * This method implements the weighted maximum likelihood estimate of
+     * the distribution, given a set of weighted samples.
+     *
+     * \param weights the weights for each sample.
+     * \param samples the set of samples from the distribution
+     */
     virtual void wmle(const arma::vec& weights, const arma::mat& samples) = 0;
 
 protected:
+    //! the number of variables of the distribution
     unsigned int pointSize;
 
 };
 
-/**
+/*!
  * This class represents a generic parametrized distribution \f$x \sim D(\cdot|\rho)\f$
- * where \f$\rho \in R^{d}\f$ is the parameter vector and \f$ X \subseteq R^n \f$ is
+ * where \f$\rho \in R^{d}\f$ is the parameter vector and \f$ X \subseteq \mathbb{R}^n \f$ is
  * the support space.
  *
- * @brief A parametric statistic distribution
  */
 class DifferentiableDistribution : public Distribution
 {
 
 public:
-
-    DifferentiableDistribution(unsigned int support_size)
-        : Distribution(support_size)
+	/*!
+	 * Constructor.
+	 * \param dim the number of variables of the distribution
+	 */
+    DifferentiableDistribution(unsigned int dim)
+        : Distribution(dim)
     { }
 
     virtual ~DifferentiableDistribution()
     { }
 
-    /**
-     * @brief Parameters size
-     * @return The size of the parameters
+    /*!
+     * Getter.
+     * \return The size of the parameters
      */
     virtual unsigned int getParametersSize() = 0;
 
     virtual arma::vec getParameters() = 0;
 
-    /**
+    /*!
      * Update the internal parameters according to the
      * given increment vector.
      *
-     * @brief Update the parameters
-     * @param increment a vector of increment value for each component
+     * \param increment a vector of increment value for each component
      */
     virtual void update(arma::vec& increment) = 0;
 
-    /**
+    /*!
      * Compute the gradient of the logarithm of the distribution
      * in the given point
-     * @brief Log-gradient computation
-     * @param point the point where the gradient is evaluated
-     * @param gradient The gradient vector (out)
+     * \param point the point where the gradient is evaluated
+     * \return the gradient vector
      */
     virtual arma::vec difflog(const arma::vec& point) = 0;
 
 
-    /**
+    /*!
      * Compute the hessian (\f[d (d \log D)^{T}\f]) of the logarithm of the
      * distribution in the given point.
-     * @brief Log-hessian computation
-     * @param point the point where the gradient is evaluated
-     * @param hessian The hessian matrix (out)
+     * \param point the point where the hessian is evaluated
+     * \return the hessian matrix (out)
      */
     virtual arma::mat diff2log(const arma::vec& point) = 0;
 
 };
 
-
+/*!
+ * This interface can be implemented from a distribution that has a closed form fisher
+ * information matrix computation.
+ */
 class FisherInterface
 {
 public:
+	/*!
+	 * Destructor
+	 */
     virtual ~FisherInterface()
     {
     }
 
+    /*!
+     * Computes the fisher information matrix of the distribution.
+     */
     virtual arma::sp_mat FIM() = 0;
+
+    /*!
+     * Computes the inverse of the fisher information matrix.
+     */
     virtual arma::sp_mat inverseFIM() = 0;
 };
 

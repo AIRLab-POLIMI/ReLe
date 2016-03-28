@@ -258,6 +258,24 @@ Normal Policies
 
 .. doxygenclass:: ReLe::GenericMVNStateDependantStddevPolicy
 
+Distributions
+=============
+
+.. doxygenclass:: ReLe::Distribution
+   :members:
+   :protected-members:
+
+.. doxygenclass:: ReLe::DifferentiableDistribution
+   :members:
+   
+.. doxygenclass::  ReLe::FisherInterface
+   :members:
+   
+Normal Distributions
+--------------------
+
+
+
 Environments
 ============
 
