@@ -139,8 +139,16 @@ protected:
 };
 
 /*!
- * Gaussian with mean and diagonal covariance.
- * Both mean and variance are learned.
+ * This class represents a parametric Gaussian distribution with parameters \f$\rho\f$:
+ * \f[x \sim \mathcal{N}(\cdot|\rho).\f]
+ * The parameter vector \f$\rho\f$ is then defined as follows:
+ * \f[\rho = [M, \Sigma]^{T}\f]
+ * where \f$M=[\mu_1,\dots,\mu_n]\f$, \f$\Sigma = diag(\sigma_1, \dots,\sigma_n)\f$ and
+ * \f$ n \f$ is the support dimension. As a consequence, the parameter
+ * dimension is \f$2\cdot n\f$.
+ *
+ * Given a parametrization \f$\rho\f$, the distribution is defined by the mean
+ * vector \f$M\f$ and a diagonal covariance matrix \f$\Sigma\f$.
  */
 class ParametricDiagonalNormal : public ParametricNormal, public FisherInterface
 {

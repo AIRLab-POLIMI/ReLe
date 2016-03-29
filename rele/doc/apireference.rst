@@ -277,6 +277,9 @@ Normal Distributions
 .. doxygenclass:: ReLe::ParametricNormal
    :members:
    
+.. doxygenclass:: ReLe::ParametricDiagonalNormal
+   :members:   
+   
 .. doxygenclass:: ReLe::ParametricLogisticNormal
    :members:
    
