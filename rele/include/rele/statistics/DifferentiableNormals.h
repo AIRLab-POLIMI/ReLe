@@ -32,7 +32,7 @@ namespace ReLe
 
 /*!
  * This class implements the Parametric Normal distribution.
- * \f[ x\in\mathbb{R}^n, x\sim\mathcal(N)(\mu, \Sigma) \f]
+ * \f[ x\in\mathbb{R}^n, x\sim\mathcal{N}(\mu, \Sigma) \f]
  *
  * This is the basic class of all normal distributions, by default only
  * the mean is parametrized. This mean that the covariance matrix \f$\Sigma\f$
@@ -310,7 +310,7 @@ protected:
  * vector \f$M\f$ and a covariance matrix \f$\Sigma\f$.
  * In order to reduce the number of parameters and prevent the matrix become not positive definite,
  * we parametrize the covariance matrix with the cholesky decomposition of the Covariance matrix, such that:
- * \f[\Sigma=triangular(\Omega)^{T}triangular(\omega)\f]
+ * \f[\Sigma=triangular(\Omega)^{T}triangular(\Omega)\f]
  */
 class ParametricCholeskyNormal : public ParametricNormal, public FisherInterface
 {
