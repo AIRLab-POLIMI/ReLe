@@ -103,7 +103,7 @@ mat LQRExact::computeJacobian(const vec& k, const mat& Sigma)
     arma::mat dJ = zeros(n_dim, n_rewards);
 
     for (unsigned int r=0; r < n_rewards; r++)
-        dJ.row(r) = computeGradient(k, Sigma, r);
+        dJ.row(r) = computeGradient(k, Sigma, r).t();
 
     return dJ;
 }
@@ -114,16 +114,16 @@ mat LQRExact::computeHesian(const vec& k, const mat& Sigma, unsigned int r)
 
 	mat K = diagmat(k);
 
-    arma::mat HJ = zeros(n_dim, n_dim);
+    mat HJ = zeros(n_dim, n_dim);
 
     auto&& M = computeM(K);
     auto&& L = computeL(K, r);
 
     auto&& vecL = to_vec(L);
 
-    auto&& Minv = inv(M);
+    mat Minv = inv(M);
 
-    for (unsigned int i = 1; i < n_dim; i++)
+    for (unsigned int i = 0; i < n_dim; i++)
     {
         auto&& dMi = compute_dM(K, i);
         auto&& dLi = compute_dL(K, r, i);
@@ -137,17 +137,18 @@ mat LQRExact::computeHesian(const vec& k, const mat& Sigma, unsigned int r)
             auto&& HLij = computeHL(r, i, j);
 
             auto&& dLj = compute_dL(K, r, j);
-            auto&& vec_dLj =to_vec(dLj);
+            auto&& vec_dLj = to_vec(dLj);
 
 
             auto&& dMjinv = -Minv*dMj*Minv;
 
-            auto&& vecHP = -dMjinv*dMi*Minv*vecL - Minv*dMi*dMjinv*vecL
+            vec vecHP = -dMjinv*dMi*Minv*vecL - Minv*dMi*dMjinv*vecL
                            -Minv*HMij*Minv*vecL  - Minv*dMi*Minv*vec_dLj
                            +dMjinv*vec_dLi       + Minv*to_vec(HLij);
+
             auto&& HP = to_mat(vecHP);
 
-            HJ(i,j) = -as_scalar(x0.t()*HP*x0+gamma*trace(Sigma*B.t()*HP*B))/(1.0-gamma);
+            HJ(i,j) = -as_scalar(x0.t()*HP*x0+gamma*trace(Sigma*B.t()*HP*B)/(1.0-gamma));
         }
     }
 

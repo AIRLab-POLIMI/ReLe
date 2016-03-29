@@ -28,6 +28,8 @@
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/features/SparseFeatures.h"
 
+#include "rele/utils/NumericalGradient.h"
+
 using namespace ReLe;
 using namespace std;
 
@@ -63,6 +65,38 @@ int main(int argc, char *argv[])
     std::cout << "Sampled J" << std::endl << Jsampled.t() << std::endl;
     std::cout << "Exact J" << std::endl << J.t() << std::endl;
 
+    // Test gradient
+    arma::mat dJ = exactLqr.computeJacobian(k, Sigma);
+
+    auto lambda = [&](const arma::vec& par)
+    {
+        return exactLqr.computeJ(par, Sigma);
+    };
+
+    arma::mat dJnum = NumericalGradient::compute(lambda, k, dim);
+
+    std::cout << "Numerical dJ" << std::endl << dJnum << std::endl;
+    std::cout << "Exact dJ" << std::endl << dJ << std::endl;
+
+
+    // Test Hessian
+    arma::cube HJ(dim, dim, dim);
+    arma::cube HJnum(dim, dim, dim);
+
+    for(unsigned int r = 0; r< dim; r++)
+    {
+        HJ.slice(r) = exactLqr.computeHesian(k, Sigma, r);
+
+        auto lambda = [&](const arma::vec& par)
+        {
+            return exactLqr.computeGradient(par, Sigma, r);
+        };
+
+        HJnum.slice(r) = NumericalGradient::compute(lambda, k, dim);
+    }
+
+    std::cout << "Numerical HJ" << std::endl << HJnum << std::endl;
+    std::cout << "Exact HJ" << std::endl << HJ << std::endl;
 
 }
 
