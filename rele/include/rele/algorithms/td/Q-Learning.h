@@ -35,7 +35,7 @@ namespace ReLe
  * Can only work on finite MDP, i.e. with both finite action and state space.
  *
  * References
- * =========
+ * ==========
  *
  * [Watkins, Dayan. Q-learning](http://www.gatsby.ucl.ac.uk/~dayan/papers/cjch.pdf)
  */

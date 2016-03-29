@@ -136,8 +136,6 @@ protected:
 
         //--- Compute learning step
 
-        arma::vec step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, fisherMtx);
-
         arma::mat tmp;
         arma::vec nat_grad;
         int rnk = arma::rank(fisherMtx);
@@ -153,28 +151,18 @@ protected:
             nat_grad = H * Base::diffObjFunc;
         }
 
-
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
         Base::currentItStats->fisherMtx = fisherMtx;
-        Base::currentItStats->stepLength   = step_size;
         //---------
 
         //update meta distribution
-        arma::vec newvalues = nat_grad * step_size;
-        Base::dist.update(newvalues);
+        arma::vec delta = Base::stepLengthRule(Base::diffObjFunc, nat_grad);
+        Base::dist.update(delta);
 
+        b_num.zeros();
+        b_den.zeros();
 
-        // std::cout << "nat_grad: " << nat_grad.t();
-        // std::cout << "Parameters:\n" << std::endl;
-        // std::cout << Base::dist.getParameters() << std::endl;
-
-        for (int i = 0, ie = Base::diffObjFunc.n_elem; i < ie; ++i)
-        {
-            //diffObjFunc[i] = 0.0;
-            b_num[i] = 0.0;
-            b_den[i] = 0.0;
-        }
     }
 
 protected:
@@ -281,7 +269,7 @@ protected:
 
         //--- Compute learning step
 
-        arma::vec step_size;
+        arma::vec delta;
         arma::vec nat_grad;
         arma::sp_mat invFisherMtx = distFI.inverseFIM();
         if (invFisherMtx.n_elem == 0)
@@ -299,17 +287,17 @@ protected:
                 arma::mat H = arma::pinv(fisherMtx);
                 nat_grad = H * Base::diffObjFunc;
             }
-            step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, fisherMtx);
+
+            delta = Base::stepLengthRule(Base::diffObjFunc, nat_grad);
         }
         else
         {
             nat_grad = invFisherMtx*Base::diffObjFunc;
-            arma::mat ffull(invFisherMtx);
-            step_size = Base::stepLengthRule.stepLength(Base::diffObjFunc, ffull, true);
+            delta = Base::stepLengthRule(Base::diffObjFunc, nat_grad);
         }
 
         //        std::cout << nat_grad.t();
-        if (std::isnan(nat_grad(0)) || std::isnan(step_size(0)))
+        if (std::isnan(nat_grad(0)) || std::isnan(delta(0)))
         {
             std::cerr << "Something has gone wrong in eNES" << std::endl;
             abort();
@@ -318,25 +306,13 @@ protected:
         //--------- save value of distgrad
         Base::currentItStats->metaGradient = nat_grad;
         Base::currentItStats->fisherMtx    = invFisherMtx;
-        Base::currentItStats->stepLength   = step_size;
         //---------
 
         //update meta distribution
-        arma::vec newvalues = nat_grad * step_size;
-        Base::dist.update(newvalues);
+        Base::dist.update(delta);
 
-
-        // std::cout << "nat_grad: " << nat_grad.t();
-        // std::cout << "Parameters:\n" << std::endl;
-        // std::cout << Base::dist.getParameters() << std::endl;
-
-
-        for (int i = 0, ie = Base::diffObjFunc.n_elem; i < ie; ++i)
-        {
-            //diffObjFunc[i] = 0.0;
-            b_num[i] = 0.0;
-            b_den[i] = 0.0;
-        }
+        b_num.zeros();
+        b_den.zeros();
     }
 
 protected:

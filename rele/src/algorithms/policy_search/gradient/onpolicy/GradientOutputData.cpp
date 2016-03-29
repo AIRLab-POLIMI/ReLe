@@ -49,7 +49,6 @@ void GradientIndividual::writeData(ostream &os)
     }
     CSVutils::vectorToCSV(policy_parameters, os);
     CSVutils::vectorToCSV(estimated_gradient, os);
-    CSVutils::vectorToCSV(stepLength, os);
 }
 
 void GradientIndividual::writeDecoratedData(ostream &os)

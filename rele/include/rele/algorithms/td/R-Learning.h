@@ -66,7 +66,7 @@ private:
  * Can only work on finite MDP, i.e. with both finite action and state space.
  *
  * References
- * =========
+ * ==========
  *
  * [Schwartz. A reinforcement learning method for maximizing undiscounted rewards](http://sulinux.stanford.edu/cs/robotics/pub/schwartz/ml93.ps.gz)
  *

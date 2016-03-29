@@ -93,12 +93,8 @@ public:
         //Compute risk averse gradient
         arma::vec gradient = gradientJ - penalization * (gradientM2 - 2 * Jmean * gradientJ) / gradientIndexes.n_elem;
 
-        // compute step size
-        unsigned int dp = gradient.n_elem;
-        arma::vec step_size = stepRule.stepLength(gradient);
-
         // Update policy
-        arma::vec newvalues = policy.getParameters() + gradient * step_size;
+        arma::vec newvalues = policy.getParameters() + stepRule(gradient);
         policy.setParameters(newvalues);
     }
 

@@ -36,7 +36,7 @@ namespace ReLe
  * Can only work on Finite MDP, i.e. with finite action and state space.
  *
  * References
- * =========
+ * ==========
  *
  * [Rummery, Niranjan. On-line Q-learning using connectionist systems](http://mi.eng.cam.ac.uk/reports/svr-ftp/auto-pdf/rummery_tr166.pdf)
  *
@@ -72,7 +72,7 @@ public:
  * Can only work on Finite MDP, i.e. with finite action and state space.
  *
  * References
- * =========
+ * ==========
  *
  * [Rummery, Niranjan. On-line Q-learning using connectionist systems](http://mi.eng.cam.ac.uk/reports/svr-ftp/auto-pdf/rummery_tr166.pdf)
  *

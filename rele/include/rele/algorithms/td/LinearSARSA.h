@@ -36,7 +36,7 @@ namespace ReLe
  * Can only work on Dense MDP, i.e. with finite action and dense state space.
  *
  * References
- * =========
+ * ==========
  *
  * [Seijen, Sutton. True Online TD(lambda)](http://jmlr.org/proceedings/papers/v32/seijen14.pdf)
  */

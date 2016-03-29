@@ -133,56 +133,52 @@ protected:
 
         //--- Compute learning step
 
-        arma::vec step_size;
+        arma::vec gradient;
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
         if (rnk == fisher.n_rows)
         {
-            arma::vec grad;
             if (useBaseline == true)
             {
                 arma::mat tmp = arma::solve(nbEpisodesToEvalPolicy * fisher - eligibility * eligibility.t(), eligibility);
                 arma::mat Q = (1 + eligibility.t() * tmp) / nbEpisodesToEvalPolicy;
                 arma::mat b = Q * (Jpol - eligibility.t() * arma::solve(fisher, g));
-                grad = g - eligibility * b;
-                nat_grad = arma::solve(fisher, grad);
+                gradient = g - eligibility * b;
+                nat_grad = arma::solve(fisher, gradient);
             }
             else
             {
-                grad = g;
-                nat_grad = arma::solve(fisher, grad);
+                gradient = g;
+                nat_grad = arma::solve(fisher, gradient);
             }
-
-            step_size = stepLength.stepLength(grad, fisher);
         }
         else
         {
             std::cerr << "WARNING: Fisher Matrix is lower rank (rank = " << rnk << ")!!! Should be " << fisher.n_rows << std::endl;
 
             arma::mat H = arma::pinv(fisher);
-            arma::vec grad;
+
             if (useBaseline == true)
             {
                 arma::mat b = (1 + eligibility.t() * arma::pinv(nbEpisodesToEvalPolicy * fisher - eligibility * eligibility.t()) * eligibility)
                               * (Jpol - eligibility.t() * H * g)/ nbEpisodesToEvalPolicy;
-                grad = g - eligibility * b;
-                nat_grad = H * (grad);
+                gradient = g - eligibility * b;
+                nat_grad = H * (gradient);
             }
             else
             {
-                grad = g;
-                nat_grad = H * grad;
+                gradient = g;
+                nat_grad = H * gradient;
             }
-            step_size = stepLength.stepLength(grad, fisher);
         }
 
         //--- save actual policy performance
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad.rows(0,dp-1);
-        currentItStats->stepLength = step_size;
 
-        arma::vec newvalues = policy.getParameters() + nat_grad.rows(0,dp-1) * step_size;
+        arma::vec delta = stepLength(gradient, nat_grad);
+        arma::vec newvalues = policy.getParameters() + delta.rows(0,dp-1);
         policy.setParameters(newvalues);
 
         eligibility.zeros();

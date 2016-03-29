@@ -51,7 +51,6 @@ public:
 
 public:
     arma::vec metaGradient;
-    arma::vec stepLength;
 
 };
 

@@ -162,12 +162,9 @@ protected:
         fisher /= nbEpisodesToEvalPolicy;
 
         //--- Compute learning step
-
-        arma::vec step_size = stepLength.stepLength(gradient, fisher);
-
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
-        //        std::cout << rnk << " " << fisher << std::endl;
+
         if (rnk == fisher.n_rows)
         {
             arma::mat H = arma::solve(fisher, gradient);
@@ -185,25 +182,14 @@ protected:
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad;
-        currentItStats->stepLength = step_size;
         //---
 
-        //        std::cout << step_length << std::endl;
-        //        std::cout << nat_grad.t();
-        //        std::cerr <<"---" << policy.getParameters().t();
-
-        arma::vec newvalues = policy.getParameters() + nat_grad * step_size;
+        arma::vec newvalues = policy.getParameters() + stepLength(gradient, nat_grad);
         policy.setParameters(newvalues);
-        //        std::cout << "new_params: "  << newvalues.t();
 
-        for (int p = 0; p < nbParams; ++p)
-        {
-            for (int t = 0; t < maxStepsPerEpisode; ++t)
-            {
-                baseline_den(p,t) = 0;
-                baseline_num(p,t) = 0;
-            }
-        }
+        baseline_den.zeros();
+        baseline_num.zeros();
+
         fisher.zeros();
     }
 
@@ -320,8 +306,6 @@ protected:
 
         //--- Compute learning step
 
-        arma::vec step_size = stepLength.stepLength(gradient, fisher);
-
         arma::vec nat_grad;
         int rnk = arma::rank(fisher);
         //        std::cout << rnk << " " << fisher << std::endl;
@@ -342,21 +326,13 @@ protected:
         currentItStats->history_J = history_J;
         currentItStats->history_gradients = history_sumdlogpi;
         currentItStats->estimated_gradient = nat_grad;
-        currentItStats->stepLength = step_size;
         //---
 
-        //        std::cout << step_length << std::endl;
-        //        std::cout << nat_grad.t();
-
-        arma::vec newvalues = policy.getParameters() + nat_grad * step_size;
+        arma::vec newvalues = policy.getParameters() + stepLength(gradient, nat_grad);
         policy.setParameters(newvalues);
-        //        std::cout << "new_params: "  << newvalues.t();
 
-        for (int i = 0; i < nbParams; ++i)
-        {
-            baseline_den[i] = 0;
-            baseline_num[i] = 0;
-        }
+        baseline_den.zeros();
+        baseline_num.zeros();
         fisher.zeros();
     }
 

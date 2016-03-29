@@ -38,8 +38,6 @@ void PGPEIterationStats::writeData(ostream &os)
         os << individual;
     }
     CSVutils::vectorToCSV(metaGradient, os);
-    os << stepLength.n_elem << endl;
-    CSVutils::vectorToCSV(stepLength, os);
 }
 
 }

@@ -67,13 +67,8 @@ public:
     {
         arma::vec gradient = calculator->computeGradient();
 
-        // compute step size
-        unsigned int dp = gradient.n_elem;
-        arma::mat eMetric = arma::eye(dp,dp);
-        arma::vec step_size = stepRule.stepLength(gradient, eMetric);
-
         // Update policy
-        arma::vec newvalues = policy.getParameters() + gradient * step_size;
+        arma::vec newvalues = policy.getParameters() + stepRule(gradient);
         policy.setParameters(newvalues);
     }
 
