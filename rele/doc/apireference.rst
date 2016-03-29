@@ -375,6 +375,18 @@ Learning Rate
 Gradient Step
 ^^^^^^^^^^^^^
 
+.. doxygenclass:: ReLe::GradientStep
+   :members:
+   :protected-members:
+   
+.. doxygenclass:: ReLe::ConstantGradientStep
+   :members:
+   
+.. doxygenclass:: ReLe::VectorialGradientStep
+   :members:
+   
+.. doxygenclass:: ReLe::AdaptiveGradientStep
+   :members:
    
 
 Temporal Difference
