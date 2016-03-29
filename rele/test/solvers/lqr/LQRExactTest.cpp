@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
         LQRExact exactLqr(lqr);
 
         //Setup policy parameters
-        arma::mat Sigma = 0.001*arma::eye(dim, dim);
+        arma::mat Sigma = 0.1*arma::eye(dim, dim);
         arma::vec k = controllers[p];
 
         // Create policy eval agent
