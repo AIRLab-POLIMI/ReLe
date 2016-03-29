@@ -35,68 +35,124 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	//Create LQR
-	unsigned int dim = 2;
-    LQR lqr(dim, dim);
+	unsigned int problemsN = 3;
+	std::vector<LQR*> problems;
+	arma::umat dimensions(problemsN, 2);
+	std::vector<arma::vec> controllers;
 
-    //Create LQR Exact
-    LQRExact exactLqr(lqr);
+    //Create LQR problems
 
-    //Setup policy parameters
-    arma::mat Sigma = arma::eye(dim, dim);
-    arma::vec k = {1.0, 1.0};
+	//0
+	unsigned int dim0 = 2;
+	unsigned int rewardDim0 = 2;
+	arma::vec k0 = {1.0, 1.0};
+    LQR* lqr0 = new LQR(dim0, rewardDim0);
 
-    // Create policy eval agent
-    BasisFunctions basis = IdentityBasis::generate(dim);
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
-    MVNPolicy policy(phi, Sigma);
-    policy.setParameters(-k);
-    PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+	dimensions(0, 0) = dim0;
+	dimensions(0, 1) = rewardDim0;
+    problems.push_back(lqr0);
+    controllers.push_back(k0);
 
-    // Test J
-    auto&& core = buildCore(lqr, agent);
-    core.getSettings().testEpisodeN = 10000;
-    core.getSettings().episodeLength = lqr.getSettings().horizon;
-    arma::vec Jsampled = core.runEvaluation();
 
-    arma::vec J = exactLqr.computeJ(k, Sigma);
+    //1
+    unsigned int dim1 = 2;
+    unsigned int rewardDim1 = 3;
+    arma::vec k1 = {0.5, 0.36};
+    LQR* lqr1 = new LQR(dim1, rewardDim1);
 
-    std::cout << "Sampled J" << std::endl << Jsampled.t() << std::endl;
-    std::cout << "Exact J" << std::endl << J.t() << std::endl;
+    dimensions(1, 0) = dim1;
+    dimensions(1, 1) = rewardDim1;
+    problems.push_back(lqr1);
+    controllers.push_back(k1);
 
-    // Test gradient
-    arma::mat dJ = exactLqr.computeJacobian(k, Sigma);
+    //2
+    unsigned int dim2 = 2;
+    unsigned int rewardDim2 = 2;
+    arma::mat A2 = {  {0.1, 0.9}, {0.3, 0.7}};
+    arma::mat B2 = {  {0.9, 0.4}, {0.2, 0.5}};
+    arma::mat Q2_0(dim2, dim2, arma::fill::randu);
+    arma::mat Q2_1(dim2, dim2, arma::fill::randu);
+    std::vector<arma::mat> Q2 = {Q2_0, Q2_1};
+    arma::mat R2_0(dim2, dim2, arma::fill::randu);
+    arma::mat R2_1(dim2, dim2, arma::fill::randu);
+    std::vector<arma::mat> R2 = {R2_0, R2_1};
+    arma::vec k2 = {0.1, 0.1};
+    LQR* lqr2 = new LQR(A2, B2, Q2, R2);
 
-    auto lambda = [&](const arma::vec& par)
+    dimensions(2, 0) = dim2;
+    dimensions(2, 1) = rewardDim2;
+    problems.push_back(lqr2);
+    controllers.push_back(k2);
+
+    for(unsigned int p = 0; p < problems.size(); p++)
     {
-        return exactLqr.computeJ(par, Sigma);
-    };
+        std::cout << "-----------------------------" << std::endl;
+        std::cout << "problem " << p << std::endl;
 
-    arma::mat dJnum = NumericalGradient::compute(lambda, k, dim);
+        //get the problem
+        LQR& lqr = *problems[p];
+        unsigned int dim = dimensions(p, 0);
+        unsigned int rewardDim = dimensions(p, 1);
 
-    std::cout << "Numerical dJ" << std::endl << dJnum << std::endl;
-    std::cout << "Exact dJ" << std::endl << dJ << std::endl;
+        //Create LQR Exact
+        LQRExact exactLqr(lqr);
 
+        //Setup policy parameters
+        arma::mat Sigma = 0.001*arma::eye(dim, dim);
+        arma::vec k = controllers[p];
 
-    // Test Hessian
-    arma::cube HJ(dim, dim, dim);
-    arma::cube HJnum(dim, dim, dim);
+        // Create policy eval agent
+        BasisFunctions basis = IdentityBasis::generate(dim);
+        SparseFeatures phi;
+        phi.setDiagonal(basis);
+        MVNPolicy policy(phi, Sigma);
+        policy.setParameters(-k);
+        PolicyEvalAgent<DenseAction, DenseState> agent(policy);
 
-    for(unsigned int r = 0; r< dim; r++)
-    {
-        HJ.slice(r) = exactLqr.computeHesian(k, Sigma, r);
+        // Test J
+        auto&& core = buildCore(lqr, agent);
+        core.getSettings().testEpisodeN = 10000;
+        core.getSettings().episodeLength = lqr.getSettings().horizon;
+        arma::vec Jsampled = core.runEvaluation();
+
+        arma::vec J = exactLqr.computeJ(k, Sigma);
+
+        std::cout << "Sampled J" << std::endl << Jsampled.t() << std::endl;
+        std::cout << "Exact J" << std::endl << J.t() << std::endl;
+
+        // Test gradient
+        arma::mat dJ = exactLqr.computeJacobian(k, Sigma);
 
         auto lambda = [&](const arma::vec& par)
         {
-            return exactLqr.computeGradient(par, Sigma, r);
+            return exactLqr.computeJ(par, Sigma);
         };
 
-        HJnum.slice(r) = NumericalGradient::compute(lambda, k, dim);
-    }
+        arma::mat dJnum = NumericalGradient::compute(lambda, k, rewardDim);
 
-    std::cout << "Numerical HJ" << std::endl << HJnum << std::endl;
-    std::cout << "Exact HJ" << std::endl << HJ << std::endl;
+        std::cout << "Numerical dJ" << std::endl << dJnum.t() << std::endl;
+        std::cout << "Exact dJ" << std::endl << dJ << std::endl;
+
+
+        // Test Hessian
+        arma::cube HJ(dim, dim, rewardDim);
+        arma::cube HJnum(dim, dim, rewardDim);
+
+        for(unsigned int r = 0; r< rewardDim; r++)
+        {
+            HJ.slice(r) = exactLqr.computeHesian(k, Sigma, r);
+
+            auto lambda = [&](const arma::vec& par)
+            {
+                return exactLqr.computeGradient(par, Sigma, r);
+            };
+
+            HJnum.slice(r) = NumericalGradient::compute(lambda, k, dim);
+        }
+
+        std::cout << "Numerical HJ" << std::endl << HJnum << std::endl;
+        std::cout << "Exact HJ" << std::endl << HJ << std::endl;
+    }
 
 }
 

@@ -41,15 +41,15 @@ namespace ReLe
 class LQRExact
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param gamma the discout factor
-	 * \param A the state dynamics matrix
-	 * \param B the action dynamics matrix
-	 * \param Q a vector of weights matrixes for the state
-	 * \param R a vector of weights matrixes for the action
-	 * \param x0 the initial state for the LQR problem
-	 */
+    /*!
+     * Constructor.
+     * \param gamma the discout factor
+     * \param A the state dynamics matrix
+     * \param B the action dynamics matrix
+     * \param Q a vector of weights matrixes for the state
+     * \param R a vector of weights matrixes for the action
+     * \param x0 the initial state for the LQR problem
+     */
     LQRExact(double gamma, arma::mat A,
              arma::mat B,
              std::vector<arma::mat> Q,
@@ -127,13 +127,13 @@ private:
 
     inline arma::vec to_vec(const arma::mat& m)
     {
-    	arma::vec v = reshape(m, n_dim*n_dim, 1);
+        arma::vec v = reshape(m, n_dim*n_dim, 1);
         return v;
     }
 
     inline arma::mat to_mat(const arma::vec& v)
     {
-    	arma::mat M = reshape(v, n_dim, n_dim);
+        arma::mat M = reshape(v, n_dim, n_dim);
         return M;
     }
 

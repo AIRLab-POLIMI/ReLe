@@ -42,10 +42,10 @@ class Distribution
 {
 public:
 
-	/*!
-	 * Constructor.
-	 * \param dim the number of variables of the distribution
-	 */
+    /*!
+     * Constructor.
+     * \param dim the number of variables of the distribution
+     */
     Distribution(unsigned int dim) : pointSize(dim)
     { }
 
@@ -111,10 +111,10 @@ class DifferentiableDistribution : public Distribution
 {
 
 public:
-	/*!
-	 * Constructor.
-	 * \param dim the number of variables of the distribution
-	 */
+    /*!
+     * Constructor.
+     * \param dim the number of variables of the distribution
+     */
     DifferentiableDistribution(unsigned int dim)
         : Distribution(dim)
     { }
@@ -164,9 +164,9 @@ public:
 class FisherInterface
 {
 public:
-	/*!
-	 * Destructor
-	 */
+    /*!
+     * Destructor
+     */
     virtual ~FisherInterface()
     {
     }

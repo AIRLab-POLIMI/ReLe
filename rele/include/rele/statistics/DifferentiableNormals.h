@@ -42,10 +42,10 @@ namespace ReLe
 class ParametricNormal : public DifferentiableDistribution
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param dim the number of variables of the distribution
-	 */
+    /*!
+     * Constructor.
+     * \param dim the number of variables of the distribution
+     */
     ParametricNormal(unsigned int dim);
 
     /*!
@@ -153,11 +153,11 @@ protected:
 class ParametricDiagonalNormal : public ParametricNormal, public FisherInterface
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param mean the initial value for the mean
-	 * \param covariance the initial covariance
-	 */
+    /*!
+     * Constructor.
+     * \param mean the initial value for the mean
+     * \param covariance the initial covariance
+     */
     ParametricDiagonalNormal(const arma::vec& mean, const arma::vec& covariance);
 
     /*!
@@ -225,11 +225,11 @@ class ParametricLogisticNormal : public ParametricNormal
 
 
 public:
-	/*!
-	 * Constructor.
-	 * \param point_dim the number of variables of the distribution
-	 * \param variance_asymptote the asymptotic value for the variance of each variable
-	 */
+    /*!
+     * Constructor.
+     * \param point_dim the number of variables of the distribution
+     * \param variance_asymptote the asymptotic value for the variance of each variable
+     */
     ParametricLogisticNormal(unsigned int point_dim,
                              double variance_asymptote);
 
@@ -324,11 +324,11 @@ class ParametricCholeskyNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
-	/*!
-	 * Constructor.
-	 * \param initial_mean the initial mean parameters
-	 * \param initial_cholA the initial cholesky decomposition of the covariance matrix
-	 */
+    /*!
+     * Constructor.
+     * \param initial_mean the initial mean parameters
+     * \param initial_cholA the initial cholesky decomposition of the covariance matrix
+     */
     ParametricCholeskyNormal(const arma::vec& initial_mean,
                              const arma::mat& initial_cholA);
 
@@ -397,11 +397,11 @@ class ParametricFullNormal : public ParametricNormal, public FisherInterface
 {
 
 public:
-	/*!
-	 * Constructor.
-	 * \param initial_mean the initial mean parameters
-	 * \param initial_cov the initial covariance matrix
-	 */
+    /*!
+     * Constructor.
+     * \param initial_mean the initial mean parameters
+     * \param initial_cov the initial covariance matrix
+     */
     ParametricFullNormal(const arma::vec& initial_mean,
                          const arma::mat& initial_cov);
 
