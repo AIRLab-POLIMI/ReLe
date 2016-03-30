@@ -24,7 +24,6 @@
 #ifndef STEPRULES_H_
 #define STEPRULES_H_
 
-#include <iostream>
 #include <armadillo>
 
 namespace ReLe
@@ -90,23 +89,7 @@ protected:
      * \return the product \f$ \ M^{-1}\nabla_{\theta}J \f$
      *
      */
-    arma::vec computeGradientInMetric(const arma::vec& gradient, const arma::mat& metric, bool inverse)
-    {
-        arma::vec g;
-        if(inverse)
-        {
-            g = metric*gradient;
-        }
-        else
-        {
-        	if(arma::rank(metric) == metric.n_rows)
-        		g = arma::solve(metric, gradient);
-        	else
-        		g = arma::pinv(metric)*gradient;
-        }
-
-        return g;
-    }
+    arma::vec computeGradientInMetric(const arma::vec& gradient, const arma::mat& metric, bool inverse);
 
 };
 
@@ -122,36 +105,17 @@ public:
      * Constructor.
      * \param alpha the constant factor to multiply to the gradient.
      */
-    ConstantGradientStep(double alpha): alpha(alpha)
-    {
-
-    }
-
-    virtual arma::vec operator()(const arma::vec& gradient) override
-    {
-        return alpha*gradient;
-    }
+    ConstantGradientStep(double alpha);
+    virtual arma::vec operator()(const arma::vec& gradient) override;
 
     virtual arma::vec operator()(const arma::vec& gradient,
-                                 const arma::vec& nat_gradient) override
-    {
-        auto& self = *this;
-        return self(nat_gradient);
-    }
+                                 const arma::vec& nat_gradient) override;
 
     virtual arma::vec operator()(const arma::vec& gradient,
                                  const arma::mat& metric,
-                                 bool inverse)  override
-    {
-        auto& self = *this;
-        return self(computeGradientInMetric(gradient, metric, inverse));
-    }
+                                 bool inverse)  override;
 
-
-
-    void reset() override
-    {
-    }
+    void reset() override;
 
 protected:
     double alpha;
@@ -172,36 +136,18 @@ public:
      * \param alpha the vector of factors to multiply to
      * each component of the gradient.
      */
-    VectorialGradientStep(const arma::vec& alpha): alpha(alpha)
-    {
+    VectorialGradientStep(const arma::vec& alpha);
 
-    }
-
-    virtual arma::vec operator()(const arma::vec& gradient) override
-    {
-        return alpha%gradient;
-    }
+    virtual arma::vec operator()(const arma::vec& gradient) override;
 
     virtual arma::vec operator()(const arma::vec& gradient,
-                                 const arma::vec& nat_gradient) override
-    {
-        auto& self = *this;
-        return self(nat_gradient);
-    }
+                                 const arma::vec& nat_gradient) override;
 
     virtual arma::vec operator()(const arma::vec& gradient,
                                  const arma::mat& metric,
-                                 bool inverse)  override
-    {
-        auto& self = *this;
-        return self(computeGradientInMetric(gradient, metric, inverse));
-    }
+                                 bool inverse)  override;
 
-
-
-    void reset() override
-    {
-    }
+    void reset() override;
 
 protected:
     arma::vec alpha;
@@ -234,40 +180,18 @@ public:
      * Constructor.
      * \param eps the maximum allowed size for the step.
      */
-    AdaptiveGradientStep(double eps): stepValue(eps)
-    {
-    }
+    AdaptiveGradientStep(double eps);
 
-    virtual arma::vec operator()(const arma::vec& gradient) override
-    {
-        auto& self = *this;
-        return self(gradient, gradient);
-    }
+    virtual arma::vec operator()(const arma::vec& gradient) override;
 
     virtual arma::vec operator()(const arma::vec& gradient,
-                                 const arma::vec& nat_gradient) override
-    {
-        double tmp = arma::as_scalar(gradient.t() * nat_gradient);
-        double lambda = sqrt(tmp / (4 * stepValue));
-        lambda = std::max(lambda, 1e-8); // to avoid numerical problems
-        double step_length = 1.0 / (2.0 * lambda);
-
-        return step_length*nat_gradient;
-    }
+                                 const arma::vec& nat_gradient) override;
 
     virtual arma::vec operator()(const arma::vec& gradient,
                                  const arma::mat& metric,
-                                 bool inverse)  override
-    {
-        auto& self = *this;
-        arma::mat nat_grad = computeGradientInMetric(gradient, metric, inverse);
-        return self(gradient, nat_grad);
-    }
+                                 bool inverse)  override;
 
-
-    void reset() override
-    {
-    }
+    void reset() override;
 
 protected:
     double stepValue;

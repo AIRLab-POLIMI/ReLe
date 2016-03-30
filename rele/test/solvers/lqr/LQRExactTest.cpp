@@ -35,21 +35,21 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	unsigned int problemsN = 3;
-	std::vector<LQR*> problems;
-	arma::umat dimensions(problemsN, 2);
-	std::vector<arma::vec> controllers;
+    unsigned int problemsN = 3;
+    std::vector<LQR*> problems;
+    arma::umat dimensions(problemsN, 2);
+    std::vector<arma::vec> controllers;
 
     //Create LQR problems
 
-	//0
-	unsigned int dim0 = 2;
-	unsigned int rewardDim0 = 2;
-	arma::vec k0 = {1.0, 1.0};
+    //0
+    unsigned int dim0 = 2;
+    unsigned int rewardDim0 = 2;
+    arma::vec k0 = {1.0, 1.0};
     LQR* lqr0 = new LQR(dim0, rewardDim0);
 
-	dimensions(0, 0) = dim0;
-	dimensions(0, 1) = rewardDim0;
+    dimensions(0, 0) = dim0;
+    dimensions(0, 1) = rewardDim0;
     problems.push_back(lqr0);
     controllers.push_back(k0);
 
