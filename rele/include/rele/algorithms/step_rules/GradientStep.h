@@ -81,8 +81,8 @@ protected:
      * Default function for computing the product:
      * \f[ \ M^{-1}\nabla_{\theta}J \f]
      *
-     * when $M=\mathcal{F}$, the Fisher Information Matrix,
-     * this function computes the gradient
+     * when \f$M=\mathcal{F}\f$, the Fisher Information Matrix,
+     * this function computes the natural gradient
      *
      * \param gradient the vanilla gradient
      * \param metric a predefined space metric
@@ -216,6 +216,9 @@ protected:
  * The step rule is:
  * \f[
  * \Delta\theta=\underset{\Delta\vartheta}{argmax}\Delta\vartheta^{t}\nabla_{\theta}J
+ * \f]
+ *
+ * \f[
  * s.t.:\Delta\vartheta^{T}M\Delta\vartheta\leq\varepsilon
  * \f]
  *
