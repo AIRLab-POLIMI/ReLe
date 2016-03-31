@@ -7,7 +7,7 @@ addpath(genpath('../..'));
 
 %% load data
 pathBase = '/tmp/ReLe/lqrPrint/';
-outPath = './out/';
+outPath = '/tmp/ReLe/matlab_out/lqrPrint/';
 
 [~,~,~] = mkdir(outPath);
 
@@ -150,6 +150,7 @@ for i = 1:length(baseline)
         subplot(2,3,5)
         hold on
         shadedErrorBar(1:length(T), T, 2*sqrt(covT),{'LineWidth', 2'}, 1);
+        plot(exact.T);
         title('Trace of hessian')
         axis tight
         
