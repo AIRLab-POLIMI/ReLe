@@ -85,7 +85,7 @@ public:
      * \param Sigma the covariance matrix
      * \return the expected return vector
      */
-    arma::mat computeJ(const arma::vec& k, const arma::mat& Sigma);
+    arma::vec computeJ(const arma::vec& k, const arma::mat& Sigma);
 
     /*!
      * Compute the gradient of the expected return under a normal policy, w.r.t the parameters k.

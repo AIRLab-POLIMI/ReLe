@@ -57,7 +57,7 @@ mat LQRExact::riccatiRHS(const vec& k, const mat& P, unsigned int r)
     return Q[r] + gamma*(A.t()*P*A-K*B.t()*P*A-A.t()*P*B*K.t()+K*B.t()*P*B*K.t())+K*R[r]*K.t();
 }
 
-mat LQRExact::computeJ(const vec& k, const mat& Sigma)
+vec LQRExact::computeJ(const vec& k, const mat& Sigma)
 {
     arma::vec J = zeros(n_rewards);
 

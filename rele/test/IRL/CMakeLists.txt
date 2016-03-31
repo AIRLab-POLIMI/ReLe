@@ -25,6 +25,9 @@ target_link_libraries(ship_sblirl rele ${Boost_LIBRARIES})
 add_executable(lqr_print step_based_linear/LQRPrintTest.cpp)
 target_link_libraries(lqr_print rele)
 
+add_executable(lqr_exact_print step_based_linear/LQRExactPrint.cpp)
+target_link_libraries(lqr_exact_print rele)
+
 add_executable(gradientIRL_test step_based_linear/GradientIRLTest.cpp)
 target_link_libraries(gradientIRL_test rele)
 

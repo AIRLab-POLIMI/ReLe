@@ -17,7 +17,7 @@ baseline{3} = 'diag';
 
 numEpisodes = [100, 1000, 10000, 100000, 1000000];
 
-numTests = 2;
+numTests = 100;
 
 
 indx1 = 1;
@@ -75,6 +75,17 @@ for b = baseline
 end
 
 
+%% Load exact data         
+path = [pathBase, '/exact/'];
+exact.F  = load([path, 'F.txt'] ,'ascii');
+exact.Fs = load([path, 'Fs.txt'] ,'ascii');
+exact.G  = load([path, 'G.txt'] ,'ascii');
+exact.T  = load([path, 'T.txt'] ,'ascii');
+exact.J  = load([path, 'J.txt'] ,'ascii');
+Eexact = load([path, 'E.txt'] ,'ascii');
+exact.E1  = Eexact(:, 1);
+exact.E2  = Eexact(:, 2);
+
 %% plot data
 for i = 1:length(baseline)
     for j = 1:length(numEpisodes)
@@ -108,6 +119,7 @@ for i = 1:length(baseline)
         subplot(2,3,1)
         hold on
         shadedErrorBar(1:length(F), F, 2*sqrt(covF), {'LineWidth', 2'}, 1);
+        plot(exact.F);
         plot(indF, minF, 'dm')
         title('ExpectedDelta')
         axis tight
@@ -115,6 +127,7 @@ for i = 1:length(baseline)
         subplot(2,3,2)
         hold on
         shadedErrorBar(1:length(Fs), Fs,2*sqrt(covFs), {'LineWidth', 2'}, 1);
+        plot(exact.Fs);
         plot(indFs, minFs, 'dm')
         title('SignedExpectedDelta')
         axis tight
@@ -122,16 +135,20 @@ for i = 1:length(baseline)
         subplot(2,3,3)
         hold on
         shadedErrorBar(1:length(G), G, 2*sqrt(covG), {'LineWidth', 2'}, 1);
+        plot(exact.G);
         plot(indG, minG, 'dm')
         title('GradientNorm')
         axis tight
         
         subplot(2,3,4)
+        hold on
         shadedErrorBar(1:length(J), J, 2*sqrt(covJ),{'LineWidth', 2'}, 1);
+        plot(exact.J);
         title('Objective Function')
         axis tight
         
         subplot(2,3,5)
+        hold on
         shadedErrorBar(1:length(T), T, 2*sqrt(covT),{'LineWidth', 2'}, 1);
         title('Trace of hessian')
         axis tight
@@ -140,6 +157,8 @@ for i = 1:length(baseline)
         hold on
         shadedErrorBar(1:length(E1), E1, 2*sqrt(covE1),{'LineWidth', 2'}, 1);
         shadedErrorBar(1:length(E2), E2, 2*sqrt(covE2),{'LineWidth', 2'}, 1);
+        plot(exact.E1);
+        plot(exact.E2);
         title('EigenValues')
         axis tight
         

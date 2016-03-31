@@ -31,6 +31,7 @@
 
 #include "rele/environments/LQR.h"
 #include "rele/solvers/lqr/LQRsolver.h"
+#include "rele/solvers/lqr/LQRExact.h"
 #include "rele/core/PolicyEvalAgent.h"
 
 #include "rele/utils/FileManager.h"
@@ -48,76 +49,17 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-//  RandomGenerator::seed(45423424);
-//  RandomGenerator::seed(8763575);
-
-    if(argc != 4)
-    {
-        std::cout << "Error, you must give the policy, the baseline, the number of episodes, and index" << std::endl;
-        return -1;
-    }
-
-    std::string policyName(argv[1]);
-    std::string baseline(argv[2]);
-    std::string episodes(argv[3]);
-    std::string testN(argv[4]);
-
-    FileManager fm("lqrPrint/" + baseline + "/" + episodes  + "/" + testN);
+    FileManager fm("lqrPrint/exact/");
     fm.createDir();
-
-    unsigned int nbEpisodes = std::stoul(episodes);
-
-    IrlGrad atype = IrlGrad::REINFORCE_BASELINE;
-    IrlHess htype;
-    bool isStateDependant = false;
-
-    if(policyName == "normal")
-    	isStateDependant = false;
-    else if(policyName == "stateDep")
-    	isStateDependant = true;
-
-
-    if(baseline == "normal")
-        htype = IrlHess::REINFORCE_BASELINE;
-    else if(baseline == "trace")
-        htype = IrlHess::REINFORCE_BASELINE_TRACE;
-    else if(baseline == "diag")
-        htype = IrlHess::REINFORCE_BASELINE_TRACE_DIAG;
-    else
-    {
-        std::cout << "Wrong baseline specified" << std::endl;
-        return -1;
-    }
 
     vec eReward =
     { 0.3, 0.7 };
     int dim = eReward.n_elem;
 
-
-
     // create policy basis functions
     BasisFunctions basis = IdentityBasis::generate(dim);
     SparseFeatures phi;
     phi.setDiagonal(basis);
-
-    BasisFunctions basisStdDev = PolynomialFunction::generate(1, dim);
-    SparseFeatures phiStdDev(basisStdDev, dim);
-    arma::mat stdDevW(dim, phiStdDev.rows(), fill::zeros);
-
-    for(int i = 0; i < stdDevW.n_rows; i++)
-    {
-        int first = i*basisStdDev.size();
-        stdDevW(i, first) = 0.1;
-        for(int j =  first + 1; j < (i+1)*basisStdDev.size(); j++)
-        {
-            stdDevW(i, j) = 0.1;
-        }
-    }
-
-    std::cout << basisStdDev.size() << std::endl;
-    std::cout << phiStdDev.rows() << ", " << phiStdDev.cols() << std::endl;
-    std::cout << stdDevW << std::endl;
-
 
     // solve the problem in exact way
     LQR mdp(dim, dim);
@@ -125,60 +67,17 @@ int main(int argc, char *argv[])
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
+    arma::mat SigmaExpert(dim, dim, arma::fill::eye);
+    SigmaExpert *= 0.1;
 
-    // Create expert policy
-    DifferentiablePolicy<DenseAction, DenseState>* pol;
+    std::cout << "optimal K: " << std::endl;
+    std::cout << K << std::endl;
 
-    if(isStateDependant)
-    {
-    	pol = new MVNStateDependantStddevPolicy(phi, phiStdDev, stdDevW);
-    }
-    else
-	{
-    	arma::mat SigmaExpert(dim, dim, arma::fill::eye);
-    	SigmaExpert *= 0.1;
-    	pol = new MVNPolicy(phi, SigmaExpert);
-	}
+    std::cout << "optimal p: " << std::endl;
+    std::cout << p << std::endl;
 
-    DifferentiablePolicy<DenseAction, DenseState>& expertPolicy = *pol;
-    expertPolicy.setParameters(p);
-
-    std::cout << "Rewards: ";
-    for (int i = 0; i < eReward.n_elem; ++i)
-    {
-        std::cout << eReward(i) << " ";
-    }
-    std::cout << "| Params: " << expertPolicy.getParameters().t() << std::endl;
-
-    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
-
-    // Generate LQR expert dataset
-    Core<DenseAction, DenseState> expertCore(mdp, expert);
-    CollectorStrategy<DenseAction, DenseState> collection;
-    expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
-    expertCore.getSettings().testEpisodeN = nbEpisodes;
-    expertCore.runTestEpisodes();
-    Dataset<DenseAction, DenseState>& data = collection.data;
-
-    // Create parametric reward
-    BasisFunctions basisReward;
-    for (unsigned int i = 0; i < eReward.n_elem; i++)
-        basisReward.push_back(new LQR_RewardBasis(i, dim));
-    DenseFeatures phiReward(basisReward);
-
-
-    // init calculators methods
-    auto gradientCalculator = StepBasedGradientCalculatorFactory<DenseAction, DenseState>::build(atype,
-                              phiReward, data, expertPolicy,
-                              mdp.getSettings().gamma);
-
-    auto hessianCalculator = StepBasedHessianCalculatorFactory<DenseAction, DenseState>::build(htype,
-                             phiReward, data, expertPolicy,
-                             mdp.getSettings().gamma);
-
-    arma::vec rvec = data.computefeatureExpectation(phiReward, mdp.getSettings().gamma);
-
+    // create exact gradient object
+    LQRExact lqrExact(mdp);
 
     unsigned int samplesParams = 101;
     arma::vec valuesJ(samplesParams, arma::fill::zeros);
@@ -196,8 +95,10 @@ int main(int argc, char *argv[])
         arma::vec w = { w1, 1.0 - w1 };
 
         // compute gradient and hessian
-        arma::vec g = gradientCalculator->computeGradient(w);
-        arma::mat H = hessianCalculator->computeHessian(w);
+        arma::vec g = lqrExact.computeJacobian(-p, SigmaExpert)*w;
+        arma::mat H(dim, dim, arma::fill::zeros);
+        for(unsigned int r = 0; r < dim; r++)
+        	H += lqrExact.computeHesian(-p, SigmaExpert, r)*w(r);
 
         // compute signed hessian
         arma::mat V;
@@ -212,7 +113,7 @@ int main(int argc, char *argv[])
 
 
         // compute J
-        valuesJ.row(i) = rvec.t()*w;
+        valuesJ.row(i) = lqrExact.computeJ(-p, SigmaExpert).t()*w;
 
         // compute gradient norm
         valuesG.row(i) = g.t()*g;
@@ -242,8 +143,6 @@ int main(int argc, char *argv[])
     valuesE.save(fm.addPath("E.txt"), arma::raw_ascii);
 
     std::cout << "Work complete" << std::endl;
-
-    delete pol;
 
 
     return 0;
