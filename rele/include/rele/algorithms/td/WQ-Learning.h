@@ -21,9 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Written by: Carlo D'Eramo
- */
 
 #ifndef INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
 #define INCLUDE_RELE_ALGORITHMS_TD_WQ_LEARNING_H_
@@ -31,13 +28,27 @@
 #include "rele/algorithms/td/Q-Learning.h"
 #include <boost/math/distributions/normal.hpp>
 
-/*
- * This is a first implementation of an experimental estimator for Q-Learning.
- */
 
 namespace ReLe
 {
 
+/*!
+ * This class implements the Weighted Q-Learning algorithm.
+ * This algorithm is an off-policy temporal difference algorithm that,
+ * as Double Q-Learning, tries to solve the well-known overestimation problem suffered
+ * by Q-Learning. This algorithm computes an estimate of the maximum action-value
+ * approximating it as weighted sum of action-values where the weights are the probabilities
+ * of the respective action-value to be the maximum.
+ * While Q-Learning gives the best results when there is a single action-value that is
+ * clearly the maximum and Double Q-Learning gives the best results when all action-values
+ * have almost the same value, Weighted Q-Learning has been proved to work well in intermediate
+ * cases giving, in general, better approximation than the other two approaches.
+ *
+ * References
+ * =========
+ *
+ * ...
+ */
 class WQ_Learning: public Q_Learning
 {
 public:

@@ -30,16 +30,28 @@
 namespace ReLe
 {
 
-/**
- * Least-Squares Policy Iteration
- * Michail G. Lagoudakis and Ronald Parr
- * Journal of Machine Learning Research, 4, 2003, pp. 1107-1149.
- * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
+/*!
+ * This class implements the Least-Squares Policy Iteration (LSPI) algorithm.
+ * This algorithm is an off-policy batch algorithm that exploits
+ * the action-values approximation done by the LSTDQ algorithm
+ * to form an approximate policy-iteration algorithm.
+ *
+ * References
+ * =========
+ *
+ * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
  */
 template<class ActionC>
 class LSPI : public BatchAgent<ActionC, DenseState>
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param data the dataset
+	 * \param policy the policy
+	 * \param phi the features to be used for approximation
+	 * \param epsilon coefficient used to check whether to stop the training
+	 */
     LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
          Features_<arma::vec>& phi, double epsilon) :
         data(data),
@@ -88,6 +100,10 @@ public:
         std::cout << "********************************************************* " << std::endl;*/
     }
 
+    /*!
+     * Check whether the stop condition is satisfied.
+     * \param QWeights the current weights
+     */
     virtual void checkCond(const arma::vec& QWeights)
     {
         //Compute the distance between the current and the previous policy
