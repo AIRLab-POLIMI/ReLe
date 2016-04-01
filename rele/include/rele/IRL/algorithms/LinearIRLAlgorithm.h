@@ -117,7 +117,7 @@ public:
         for (int i = 0; i < effective_dim; ++i)
             parameters[i] = starting[i];
 
-        //optimize dual function
+        //optimize function
         double minf;
         if (optimizator.optimize(parameters, minf) < 0)
         {

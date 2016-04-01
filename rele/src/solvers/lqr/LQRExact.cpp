@@ -47,13 +47,13 @@ LQRExact::LQRExact(LQR& lqr) :
 
 mat LQRExact::solveRiccati(const vec& k, unsigned int r)
 {
-    mat K = diagmat(k);
+    mat K = -diagmat(k);
     return computeP(K, r);
 }
 
 mat LQRExact::riccatiRHS(const vec& k, const mat& P, unsigned int r)
 {
-    mat K = diagmat(k);
+    mat K = -diagmat(k);
     return Q[r] + gamma*(A.t()*P*A-K*B.t()*P*A-A.t()*P*B*K.t()+K*B.t()*P*B*K.t())+K*R[r]*K.t();
 }
 
@@ -61,7 +61,7 @@ vec LQRExact::computeJ(const vec& k, const mat& Sigma)
 {
     arma::vec J = zeros(n_rewards);
 
-    mat K = diagmat(k);
+    mat K = -diagmat(k);
 
     for (unsigned int r = 0; r < n_rewards; r++)
     {
@@ -76,7 +76,7 @@ mat LQRExact::computeGradient(const vec& k, const mat& Sigma, unsigned int r)
 {
     assert(r < n_rewards);
 
-    mat K = diagmat(k);
+    mat K = -diagmat(k);
 
     auto&& M = computeM(K);
     auto&& L = computeL(K, r);
@@ -95,7 +95,7 @@ mat LQRExact::computeGradient(const vec& k, const mat& Sigma, unsigned int r)
         dJ(i) = -as_scalar(x0.t()*dPi*x0+gamma*trace(Sigma*B.t()*dPi*B)/(1.0-gamma));
     }
 
-    return dJ;
+    return -dJ;
 }
 
 mat LQRExact::computeJacobian(const vec& k, const mat& Sigma)
@@ -112,7 +112,7 @@ mat LQRExact::computeHesian(const vec& k, const mat& Sigma, unsigned int r)
 {
     assert(r < n_rewards);
 
-    mat K = diagmat(k);
+    mat K = -diagmat(k);
 
     mat HJ = zeros(n_dim, n_dim);
 

@@ -56,15 +56,15 @@ vec ConstantGradientStep::operator()(const vec& gradient)
 }
 
 vec ConstantGradientStep::operator()(const vec& gradient,
-        const vec& nat_gradient)
+                                     const vec& nat_gradient)
 {
     auto& self = *this;
     return self(nat_gradient);
 }
 
 vec ConstantGradientStep::operator()(const vec& gradient,
-        const mat& metric,
-        bool inverse)
+                                     const mat& metric,
+                                     bool inverse)
 {
     auto& self = *this;
     return self(computeGradientInMetric(gradient, metric, inverse));
@@ -88,15 +88,15 @@ vec VectorialGradientStep::operator()(const vec& gradient)
 }
 
 vec VectorialGradientStep::operator()(const vec& gradient,
-        const vec& nat_gradient)
+                                      const vec& nat_gradient)
 {
     auto& self = *this;
     return self(nat_gradient);
 }
 
 vec VectorialGradientStep::operator()(const vec& gradient,
-        const mat& metric,
-        bool inverse)
+                                      const mat& metric,
+                                      bool inverse)
 {
     auto& self = *this;
     return self(computeGradientInMetric(gradient, metric, inverse));
@@ -119,7 +119,7 @@ vec AdaptiveGradientStep::operator()(const vec& gradient)
 }
 
 vec AdaptiveGradientStep::operator()(const vec& gradient,
-        const vec& nat_gradient)
+                                     const vec& nat_gradient)
 {
     double tmp = as_scalar(gradient.t() * nat_gradient);
     double lambda = sqrt(tmp / (4 * stepValue));
@@ -130,8 +130,8 @@ vec AdaptiveGradientStep::operator()(const vec& gradient,
 }
 
 vec AdaptiveGradientStep::operator()(const vec& gradient,
-        const mat& metric,
-        bool inverse)
+                                     const mat& metric,
+                                     bool inverse)
 {
     auto& self = *this;
     mat nat_grad = computeGradientInMetric(gradient, metric, inverse);

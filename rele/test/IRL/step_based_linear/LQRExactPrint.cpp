@@ -87,6 +87,25 @@ int main(int argc, char *argv[])
     arma::vec valuesFs(samplesParams, arma::fill::zeros);
     arma::mat valuesE(samplesParams, 2, arma::fill::zeros);
 
+    // Test the solver
+    arma::vec gOpt = lqrExact.computeJacobian(-p, SigmaExpert)*eReward;
+    arma::vec rOpt = lqrExact.computeJ(-p, SigmaExpert);
+    double rewOpt = arma::as_scalar(rOpt.t()*eReward);
+
+    arma::vec p2 = -(p-0.0001*gOpt);
+    arma::vec gOpt2 = lqrExact.computeJacobian(p2, SigmaExpert)*eReward;
+    arma::vec rOpt2 = lqrExact.computeJ(p2, SigmaExpert);
+    double rewOpt2 = arma::as_scalar(rOpt2.t()*eReward);
+
+    std::cout << "gOpt = " << gOpt.t() << std::endl;
+    std::cout << "rOpt = " << rOpt.t() << std::endl;
+    std::cout << "rewOpt = " << rewOpt << std::endl;
+
+    std::cout << "p2 = " << p2.t() << std::endl;
+    std::cout << "gOpt2 = " << gOpt2.t() << std::endl;
+    std::cout << "rOpt2 = " << rOpt2.t() << std::endl;
+    std::cout << "rewOpt2 = " << rewOpt2 << std::endl;
+
 
     // sample functions
     for (int i = 0; i < samplesParams; i++)
@@ -95,10 +114,11 @@ int main(int argc, char *argv[])
         arma::vec w = { w1, 1.0 - w1 };
 
         // compute gradient and hessian
-        arma::vec g = lqrExact.computeJacobian(-p, SigmaExpert)*w;
+        arma::mat dJ = lqrExact.computeJacobian(-p, SigmaExpert);
+        arma::vec g = dJ*w;
         arma::mat H(dim, dim, arma::fill::zeros);
         for(unsigned int r = 0; r < dim; r++)
-        	H += lqrExact.computeHesian(-p, SigmaExpert, r)*w(r);
+            H += lqrExact.computeHesian(-p, SigmaExpert, r)*w(r);
 
         // compute signed hessian
         arma::mat V;

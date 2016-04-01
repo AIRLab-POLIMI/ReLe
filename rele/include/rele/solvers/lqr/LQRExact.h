@@ -34,9 +34,6 @@ namespace ReLe
  * This class is not strictly a solver, but it can be used to calculate the exact expected return,
  * the exact gradient, and the exact hessian of any LQR problem, and thus can be used by any optimization
  * algorithm to find the optimal value for this kind of problem, even in the multidimensional reward setting.
- *
- * Take care that the parameters must be positive, differently from the parameters of a normal policy used
- * for solving the LQR problem, that are negative.
  */
 class LQRExact
 {

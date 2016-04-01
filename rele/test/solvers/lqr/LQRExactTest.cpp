@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     //0
     unsigned int dim0 = 2;
     unsigned int rewardDim0 = 2;
-    arma::vec k0 = {1.0, 1.0};
+    arma::vec k0 = {-1.0, -1.0};
     LQR* lqr0 = new LQR(dim0, rewardDim0);
 
     dimensions(0, 0) = dim0;
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     //1
     unsigned int dim1 = 2;
     unsigned int rewardDim1 = 3;
-    arma::vec k1 = {0.5, 0.36};
+    arma::vec k1 = {-0.5, -0.36};
     LQR* lqr1 = new LQR(dim1, rewardDim1);
 
     dimensions(1, 0) = dim1;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     arma::mat R2_0(dim2, dim2, arma::fill::randu);
     arma::mat R2_1(dim2, dim2, arma::fill::randu);
     std::vector<arma::mat> R2 = {R2_0, R2_1};
-    arma::vec k2 = {0.1, 0.1};
+    arma::vec k2 = -arma::vec(dim2, arma::fill::randu);
     LQR* lqr2 = new LQR(A2, B2, Q2, R2);
 
     dimensions(2, 0) = dim2;
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
         SparseFeatures phi;
         phi.setDiagonal(basis);
         MVNPolicy policy(phi, Sigma);
-        policy.setParameters(-k);
+        policy.setParameters(k);
         PolicyEvalAgent<DenseAction, DenseState> agent(policy);
 
         // Test J

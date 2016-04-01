@@ -46,8 +46,10 @@ int main(int argc, char *argv[])
 
     DetLinearPolicy<DenseState>& policy = static_cast<DetLinearPolicy<DenseState>&>(solver.getPolicy());
 
+    arma::vec k = policy.getParameters();
+
     cout << "Optimal Policy:" << endl;
-    cout << policy.getParameters() << endl;
+    cout << k << endl;
 
 
     auto&& data = solver.test();

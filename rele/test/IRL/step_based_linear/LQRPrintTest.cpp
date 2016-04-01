@@ -72,9 +72,9 @@ int main(int argc, char *argv[])
     bool isStateDependant = false;
 
     if(policyName == "normal")
-    	isStateDependant = false;
+        isStateDependant = false;
     else if(policyName == "stateDep")
-    	isStateDependant = true;
+        isStateDependant = true;
 
 
     if(baseline == "normal")
@@ -131,14 +131,14 @@ int main(int argc, char *argv[])
 
     if(isStateDependant)
     {
-    	pol = new MVNStateDependantStddevPolicy(phi, phiStdDev, stdDevW);
+        pol = new MVNStateDependantStddevPolicy(phi, phiStdDev, stdDevW);
     }
     else
-	{
-    	arma::mat SigmaExpert(dim, dim, arma::fill::eye);
-    	SigmaExpert *= 0.1;
-    	pol = new MVNPolicy(phi, SigmaExpert);
-	}
+    {
+        arma::mat SigmaExpert(dim, dim, arma::fill::eye);
+        SigmaExpert *= 0.1;
+        pol = new MVNPolicy(phi, SigmaExpert);
+    }
 
     DifferentiablePolicy<DenseAction, DenseState>& expertPolicy = *pol;
     expertPolicy.setParameters(p);
