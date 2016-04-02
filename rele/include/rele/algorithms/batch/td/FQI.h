@@ -35,12 +35,12 @@ namespace ReLe
 class FQIOutput : virtual public AgentOutputData
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param isFinal whether the data logged comes from the end of a run of the algorithm
-	 * \param gamma the discount factor
-	 * \param Q the Q-table
-	 */
+    /*!
+     * Constructor.
+     * \param isFinal whether the data logged comes from the end of a run of the algorithm
+     * \param gamma the discount factor
+     * \param Q the Q-table
+     */
     FQIOutput(bool isFinal, double gamma, const arma::mat& Q) :
         AgentOutputData(isFinal),
         gamma(gamma),
@@ -104,13 +104,13 @@ template<class StateC>
 class FQI : public BatchAgent<FiniteAction, StateC>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param QRegressor the regressor
-	 * \param nStates the number of states
-	 * \param nActions the number of actions
-	 * \param epsilon coefficient used to check whether to stop the training
-	 */
+    /*!
+     * Constructor.
+     * \param QRegressor the regressor
+     * \param nStates the number of states
+     * \param nActions the number of actions
+     * \param epsilon coefficient used to check whether to stop the training
+     */
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
         double epsilon) :
         QRegressor(QRegressor),

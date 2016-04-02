@@ -45,13 +45,13 @@ template<class ActionC>
 class LSPI : public BatchAgent<ActionC, DenseState>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param data the dataset
-	 * \param policy the policy
-	 * \param phi the features to be used for approximation
-	 * \param epsilon coefficient used to check whether to stop the training
-	 */
+    /*!
+     * Constructor.
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param epsilon coefficient used to check whether to stop the training
+     */
     LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
          Features_<arma::vec>& phi, double epsilon) :
         data(data),

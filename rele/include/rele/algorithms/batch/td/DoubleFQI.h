@@ -39,11 +39,11 @@ namespace ReLe
 class DoubleFQIEnsemble : public Ensemble
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param QRegressorA the first regressor of the ensemble
-	 * \param QRegressorB the second regressor of the ensemble
-	 */
+    /*!
+     * Constructor.
+     * \param QRegressorA the first regressor of the ensemble
+     * \param QRegressorB the second regressor of the ensemble
+     */
     DoubleFQIEnsemble(BatchRegressor& QRegressorA,
                       BatchRegressor& QRegressorB) :
         Ensemble(QRegressorA.getFeatures())
@@ -79,16 +79,16 @@ template<class StateC>
 class DoubleFQI: public FQI<StateC>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param QRegressorA the first regressor
-	 * \param QRegressorB the second regressor
-	 * \param nStates the number of states
-	 * \param nActions the number of actions
-	 * \param epsilon coefficient used to check whether to stop the training
-	 * \param shuffle if true, each regressor take a different half of the dataset
-	 *        at each iteration
-	 */
+    /*!
+     * Constructor.
+     * \param QRegressorA the first regressor
+     * \param QRegressorB the second regressor
+     * \param nStates the number of states
+     * \param nActions the number of actions
+     * \param epsilon coefficient used to check whether to stop the training
+     * \param shuffle if true, each regressor take a different half of the dataset
+     *        at each iteration
+     */
     DoubleFQI(BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
               unsigned int nStates,

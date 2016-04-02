@@ -51,13 +51,13 @@ template<class ActionC>
 class LSTDQ_
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param data the dataset
-	 * \param policy the policy
-	 * \param phi the features to be used for approximation
-	 * \param gamma the discount factor
-	 */
+    /*!
+     * Constructor.
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param gamma the discount factor
+     */
     LSTDQ_(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
            Features_<arma::vec>& phi, double gamma) :
         data(data), Q(phi), policy(policy), gamma(gamma)
@@ -236,11 +236,11 @@ class LSTDQ : public LSTDQ_<ActionC>
 public:
     /*!
      * Constructor.
-	 * \param data the dataset
-	 * \param policy the policy
-	 * \param phi the features to be used for approximation
-	 * \param gamma the discount factor
-	 */
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param gamma the discount factor
+     */
     LSTDQ(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
           Features_<arma::vec>& phi, double gamma)
         : LSTDQ_<ActionC>(data, policy, phi, gamma)
@@ -348,11 +348,11 @@ class LSTDQBe : public LSTDQ_<ActionC>
 public:
     /*!
      * Constructor.
-	 * \param data the dataset
-	 * \param policy the policy
-	 * \param phi the features to be used for approximation
-	 * \param gamma the discount factor
-	 */
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param gamma the discount factor
+     */
     LSTDQBe(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
             Features_<arma::vec>& phi, double gamma)
         : LSTDQ_<ActionC>(data, policy, phi, gamma)
