@@ -29,7 +29,7 @@
 namespace ReLe
 {
 /*!
- * This interface represent a basis function.
+ * This interface represents a basis function.
  * A basis function can be see as a mapping \f$\psi(i)\rightarrow\mathbb{R}\f$ with \f$i\in\mathcal{D}\f$.
  * The template definition allows for generic domains \f$\mathcal{D}\f$.
  * A set of basis function can be used as a set of features, that can be used for function approximation.
@@ -39,24 +39,24 @@ class BasisFunction_
 {
 public:
     /*!
-     * Evaluate the basis function in input
+     * Evaluates the basis function in input.
      * \param input the input data
      * \return the value of the basis function at the input
      */
     virtual double operator()(const InputC& input) = 0;
 
     /*!
-     * Writes the basis function to stream
+     * Writes the basis function to stream.
      */
     virtual void writeOnStream(std::ostream& out) = 0;
 
     /*!
-     * Read the basis function from stream
+     * Reads the basis function from stream.
      */
     virtual void readFromStream(std::istream& in) = 0;
 
-    /**
-     * Writes the basis function to stream
+    /*!
+     * Writes the basis function to stream.
      */
     friend std::ostream& operator<<(std::ostream& out, BasisFunction_<InputC>& bf)
     {
@@ -64,8 +64,8 @@ public:
         return out;
     }
 
-    /**
-     * Read the basis function from stream
+    /*!
+     * Reads the basis function from stream.
      */
     friend std::istream& operator>>(std::istream& in, BasisFunction_<InputC>& bf)
     {

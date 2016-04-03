@@ -200,6 +200,30 @@ Basic interfaces
    
 .. doxygenclass:: ReLe::UnsupervisedBatchRegressor_
    :members:
+   
+Basis functions
+---------------
+
+.. doxygenclass:: ReLe::AffineFunction
+   :members:
+
+.. doxygenclass:: ReLe::GaussianRbf
+   :members:
+   
+.. doxygenclass:: ReLe::IdentityBasis_
+   :members:
+   
+.. doxygenclass:: ReLe::IdentityBasis
+   :members:
+   
+.. doxygenclass:: ReLe::FiniteIdentityBasis
+   :members:
+   
+.. doxygenclass:: ReLe::VectorFiniteIdentityBasis
+   :members:
+
+.. doxygenclass:: ReLe::InverseBasis_
+   :members:
 
 Features types
 --------------
