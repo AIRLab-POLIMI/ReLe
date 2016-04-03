@@ -144,6 +144,9 @@ int main(int argc, char *argv[])
     policy.setParameters(kOpt);
     arma::mat rvecOptSampled = core.runEvaluation();
 
+    std::cout << "Estimated parameters " << k.t();
+    std::cout << "Optimal parameters " << kOpt.t();
+
     std::cout << "rvec(k) <sampled>" << rvecSampled.t();
     std::cout << "rvec(kOpt) <sampled>" << rvecOptSampled.t();
     std::cout << "J(k) <sampled>" << arma::as_scalar(rvecSampled.t()*eReward) << std::endl;
@@ -162,7 +165,7 @@ int main(int argc, char *argv[])
 
    std::cout << "Numerical dJ" << std::endl << dJnum.t() << std::endl;
    std::cout << "Exact dJ" << std::endl << dJ << std::endl;
-
+   std::cout << "Error " << std::endl << arma::abs(dJnum.t() - dJ) << std::endl;
 
 
 }
