@@ -106,22 +106,21 @@ int main(int argc, char *argv[])
     arma::mat testInputs(1, nTestPoints, arma::fill::zeros);
     testInputs.row(0) = arma::linspace(-8, 8, nTestPoints).t();
 
-    arma::mat testOutputs(3, nTestPoints, arma::fill::zeros);
+    arma::mat testOutputs(2, nTestPoints, arma::fill::zeros);
 
 	for(unsigned int i = 0; i < testInputs.n_cols; i++)
 	{
-		arma::vec results(3, arma::fill::zeros);
+		arma::vec results(2, arma::fill::zeros);
 		results.row(0) = gp(testInputs.col(i));
 		results.row(1) = gp.computeVariance(testInputs.col(i));
-		results.row(2) = gp.computeMarginalLikelihood();
 
 		cout << endl << "Input: " << testInputs(i) << endl;
 		cout << "mean: " << results(0) << endl;
 		cout << "variance: " << results(1) << endl;
-		cout << "marginal likelihood: " << results(2) << endl;
 
 		testOutputs.col(i) = results;
 	}
+	cout << endl << "marginal likelihood: " << gp.computeMarginalLikelihood() << endl;
 
 	arma::mat trainDataset(inputs.n_elem, 2, arma::fill::zeros);
 	trainDataset.col(0) = inputs;
@@ -131,9 +130,8 @@ int main(int argc, char *argv[])
 	testDataset.col(0) = testInputs.t();
 	testDataset.col(1) = testOutputs.row(0).t();
 	testDataset.col(2) = testOutputs.row(1).t();
-	testDataset.col(3) = testOutputs.row(2).t();
 
-	cout << endl << gp.computeJ(dataset) << endl;
+	cout << "J: " << gp.computeJ(dataset) << endl;
 
 	//trainDataset.save("/home/shirokuma/train.mat", arma::raw_ascii);
 	//testDataset.save("/home/shirokuma/test.mat", arma::raw_ascii);
