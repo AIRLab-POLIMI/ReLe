@@ -48,13 +48,13 @@ class GaussianProcess_ : public BatchRegressor_<InputC, arma::vec, denseOutput>
 public:
     struct HyperParameters
     {
-        HyperParameters() : lengthScale(1),
+        HyperParameters() : lengthScale({1}),
             signalVariance(1),
             noiseVariance(0.1)
         {
         }
 
-        double lengthScale;
+        arma::vec lengthScale;
         double signalVariance;
         double noiseVariance;
     };
@@ -279,7 +279,8 @@ protected:
     double computeKernel(arma::vec x_p, arma::vec x_q, bool sameIndex = false)
     {
         double k = 0;
-        arma::mat M = arma::eye(x_p.n_elem, x_p.n_elem) / (hParams.lengthScale * hParams.lengthScale);
+        arma::mat M(x_p.n_elem, x_p.n_elem, arma::fill::zeros);
+        M.diag() = 1 / (hParams.lengthScale * hParams.lengthScale);
 
         if(covFunction == rbf)
         {

@@ -92,11 +92,11 @@ int main(int argc, char *argv[])
         dataset.addSample(input, output);
     }
 
-    //gp.getHyperParameters().lengthScale = 0.3;
+    //gp.getHyperParameters().lengthScale = {0.3};
     //gp.getHyperParameters().signalVariance = 1.08;
     //gp.getHyperParameters().noiseVariance = 0.00005;
 
-    //gp.getHyperParameters().lengthScale = 3.0;
+    //gp.getHyperParameters().lengthScale = {3.0};
     //gp.getHyperParameters().signalVariance = 1.16;
     //gp.getHyperParameters().noiseVariance = 0.89;
 
