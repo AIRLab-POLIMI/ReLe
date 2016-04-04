@@ -38,8 +38,6 @@
 
 #include "../RewardBasisLQR.h"
 
-#include <chrono>
-
 #include "rele/IRL/utils/StepBasedHessianCalculatorFactory.h"
 #include "rele/IRL/utils/StepBasedGradientCalculatorFactory.h"
 
@@ -115,7 +113,7 @@ int main(int argc, char *argv[])
 
         // compute gradient and hessian
         arma::mat dJ = lqrExact.computeJacobian(-p, SigmaExpert);
-        arma::vec g = dJ*w;
+        arma::vec g = dJ.t()*w;
         arma::mat H(dim, dim, arma::fill::zeros);
         for(unsigned int r = 0; r < dim; r++)
             H += lqrExact.computeHesian(-p, SigmaExpert, r)*w(r);
