@@ -24,6 +24,7 @@
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/regressors/others/GaussianProcess.h"
+#include "rele/utils/FileManager.h"
 
 using namespace std;
 using namespace ReLe;
@@ -133,6 +134,9 @@ int main(int argc, char *argv[])
 
     cout << "J: " << gp.computeJ(dataset) << endl;
 
-    //trainDataset.save("/home/shirokuma/train.mat", arma::raw_ascii);
-    //testDataset.save("/home/shirokuma/test.mat", arma::raw_ascii);
+    FileManager fm("GaussianProcess");
+    fm.createDir();
+
+    trainDataset.save(fm.addPath("train.mat"), arma::raw_ascii);
+    testDataset.save(fm.addPath("test.mat"), arma::raw_ascii);
 }
