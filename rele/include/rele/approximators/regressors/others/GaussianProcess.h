@@ -49,8 +49,8 @@ public:
     struct HyperParameters
     {
         HyperParameters() : lengthScale({1}),
-            signalVariance(1),
-            noiseVariance(0.1)
+                        signalVariance(1),
+                        noiseVariance(0.1)
         {
         }
 
