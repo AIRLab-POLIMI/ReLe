@@ -26,6 +26,9 @@ target_link_libraries(trees_test rele)
 add_executable(gaussian_test GaussianMixtureModelsTest.cpp)
 target_link_libraries(gaussian_test rele)
 
+add_executable(gp_test GaussianProcessTest.cpp)
+target_link_libraries(gp_test rele)
+
 add_executable(em_test ExpectationMaximizationTest.cpp)
 target_link_libraries(em_test rele)
 
