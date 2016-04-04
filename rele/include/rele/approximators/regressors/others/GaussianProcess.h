@@ -38,7 +38,8 @@ namespace ReLe
  * of these random variables has a multivariate normal distribution.
  * Gaussian Processes can be used for regression starting from a prior distribution
  * and computing a posterior distribution w.r.t. training examples in a dataset.
- * Cosa torna la funzione approssimata?
+ * The approximated function returns the mean value of the Gaussian Process w.r.t.
+ * the given input.
  */
 
 template<class InputC, bool denseOutput = true>
