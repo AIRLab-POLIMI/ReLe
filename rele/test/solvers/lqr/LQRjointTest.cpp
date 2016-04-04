@@ -156,16 +156,16 @@ int main(int argc, char *argv[])
     // Test gradient
     arma::mat dJ = lqrExact.computeJacobian(k, Sigma);
 
-   auto lambda = [&](const arma::vec& par)
-   {
-       return lqrExact.computeJ(par, Sigma);
-   };
+    auto lambda = [&](const arma::vec& par)
+    {
+        return lqrExact.computeJ(par, Sigma);
+    };
 
-   arma::mat dJnum = NumericalGradient::compute(lambda, k, rewardDim);
+    arma::mat dJnum = NumericalGradient::compute(lambda, k, rewardDim);
 
-   std::cout << "Numerical dJ" << std::endl << dJnum.t() << std::endl;
-   std::cout << "Exact dJ" << std::endl << dJ << std::endl;
-   std::cout << "Error " << std::endl << arma::abs(dJnum.t() - dJ) << std::endl;
+    std::cout << "Numerical dJ" << std::endl << dJnum.t() << std::endl;
+    std::cout << "Exact dJ" << std::endl << dJ << std::endl;
+    std::cout << "Error " << std::endl << arma::abs(dJnum.t() - dJ) << std::endl;
 
 
 }

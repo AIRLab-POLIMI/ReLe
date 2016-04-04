@@ -36,10 +36,10 @@ template<class InputC>
 class IdentityBasis_ : public BasisFunction_<InputC>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index the index of the element in the input
-	 */
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     */
     IdentityBasis_(unsigned int index) : index(index)
     {
 
@@ -55,10 +55,10 @@ protected:
 class IdentityBasis : public IdentityBasis_<arma::vec>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index the index of the element in the input
-	 */
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     */
     IdentityBasis(unsigned int index);
 
     /*!
@@ -85,10 +85,10 @@ public:
 class FiniteIdentityBasis : public IdentityBasis_<size_t>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index the index of the element in the input
-	 */
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     */
     FiniteIdentityBasis(unsigned int index);
 
     /*!
@@ -115,11 +115,11 @@ public:
 class VectorFiniteIdentityBasis : public IdentityBasis_<arma::vec>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index the index of the element in the input
-	 * \param value the value to associate at the input element in the given index
-	 */
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     * \param value the value to associate at the input element in the given index
+     */
     VectorFiniteIdentityBasis(unsigned int index, double value);
 
     /*!
@@ -158,10 +158,10 @@ template<class InputC>
 class InverseBasis_ : public BasisFunction_<InputC>
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param basis basis function
-	 */
+    /*!
+     * Constructor.
+     * \param basis basis function
+     */
     InverseBasis_(BasisFunction_<InputC>* basis) : basis(basis)
     {
 

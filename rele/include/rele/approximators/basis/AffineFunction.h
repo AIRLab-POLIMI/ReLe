@@ -36,11 +36,11 @@ namespace ReLe
 class AffineFunction: public BasisFunction
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param bfs basis function
-	 * \param A the matrix for the affine transformation
-	 */
+    /*!
+     * Constructor.
+     * \param bfs basis function
+     * \param A the matrix for the affine transformation
+     */
     AffineFunction(BasisFunction* bfs, arma::mat A);
 
     double operator()(const arma::vec& input) override;

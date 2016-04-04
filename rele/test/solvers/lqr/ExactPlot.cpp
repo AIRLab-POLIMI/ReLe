@@ -29,47 +29,47 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	//create folder
-	FileManager fm("lqrExact/");
-	fm.createDir();
+    //create folder
+    FileManager fm("lqrExact/");
+    fm.createDir();
 
-	//Create LQR problem
-	unsigned int dim = 2;
-	unsigned int rewardDim = 2;
+    //Create LQR problem
+    unsigned int dim = 2;
+    unsigned int rewardDim = 2;
 
-	LQR lqr(dim, rewardDim);
+    LQR lqr(dim, rewardDim);
 
-	//Create lqr Exact
-	LQRExact lqrExact(lqr);
+    //Create lqr Exact
+    LQRExact lqrExact(lqr);
 
-	//Compute the points
-	unsigned int steps = 100;
+    //Compute the points
+    unsigned int steps = 100;
 
-	unsigned totalSteps = std::pow(steps+1, 2);
-	arma::mat J(rewardDim, totalSteps);
-	arma::cube dJ(rewardDim, rewardDim, totalSteps);
+    unsigned totalSteps = std::pow(steps+1, 2);
+    arma::mat J(rewardDim, totalSteps);
+    arma::cube dJ(rewardDim, rewardDim, totalSteps);
 
-	unsigned int index = 0;
-	for(unsigned int i = 0; i <= steps; i++)
-	{
-		for(unsigned int j = 0; j <= steps; j++)
-		{
-			double k1 = -static_cast<double>(i)/static_cast<double>(steps);
-			double k2 = -static_cast<double>(j)/static_cast<double>(steps);
-			arma::vec k = {k1, k2};
-			arma::mat Sigma = arma::eye(dim, dim)*0.1;
+    unsigned int index = 0;
+    for(unsigned int i = 0; i <= steps; i++)
+    {
+        for(unsigned int j = 0; j <= steps; j++)
+        {
+            double k1 = -static_cast<double>(i)/static_cast<double>(steps);
+            double k2 = -static_cast<double>(j)/static_cast<double>(steps);
+            arma::vec k = {k1, k2};
+            arma::mat Sigma = arma::eye(dim, dim)*0.1;
 
-			J.col(index) = lqrExact.computeJ(k, Sigma);
-			dJ.slice(index) = lqrExact.computeJacobian(k, Sigma);
+            J.col(index) = lqrExact.computeJ(k, Sigma);
+            dJ.slice(index) = lqrExact.computeJacobian(k, Sigma);
 
-			index++;
-		}
-	}
+            index++;
+        }
+    }
 
-	std::cout << "Saving results" << std::endl;
+    std::cout << "Saving results" << std::endl;
 
-	J.save(fm.addPath("J.txt"), arma::raw_ascii);
-	dJ.save(fm.addPath("dJ.txt"), arma::raw_ascii);
+    J.save(fm.addPath("J.txt"), arma::raw_ascii);
+    dJ.save(fm.addPath("dJ.txt"), arma::raw_ascii);
 
-	std::cout << "Done" << std::endl;
+    std::cout << "Done" << std::endl;
 }

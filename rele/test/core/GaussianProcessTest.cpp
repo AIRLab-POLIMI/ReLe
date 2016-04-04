@@ -41,64 +41,64 @@ int main(int argc, char *argv[])
     BatchDataRaw_<arma::vec, arma::vec> dataset;
 
     arma::vec inputs = {-7.32558,
-    				   -6.34884,
-					   -6.34884,
-					   -5.90698,
-					   -4.76744,
-					   -4.09302,
-					   -3.74419,
-					   -2.79070,
-					   -2.16279,
-					   -0.95349,
-					   0.488372,
-					   0.744186,
-					   1.000000,
-					   2.395349,
-					   2.465116,
-					   4.232558,
-					   4.348837,
-					   4.906977,
-					   5.813953,
-					   6.162791
-    				  };
+                        -6.34884,
+                        -6.34884,
+                        -5.90698,
+                        -4.76744,
+                        -4.09302,
+                        -3.74419,
+                        -2.79070,
+                        -2.16279,
+                        -0.95349,
+                        0.488372,
+                        0.744186,
+                        1.000000,
+                        2.395349,
+                        2.465116,
+                        4.232558,
+                        4.348837,
+                        4.906977,
+                        5.813953,
+                        6.162791
+                       };
 
-	arma::vec outputs = {-1.753247,
-					    -0.038961,
-						0.0129870,
-						0.2597402,
-						-0.818189,
-						-1.207792,
-						-1.168831,
-						0.4025974,
-						1.4285714,
-						1.7012987,
-						-0.142857,
-						-0.740260,
-						-1.000000,
-						-2.688312,
-						-2.220779,
-						-1.272727,
-						-1.077922,
-						-1.558441,
-						-1.051948,
-						-0.844156
-					   };
+    arma::vec outputs = {-1.753247,
+                         -0.038961,
+                         0.0129870,
+                         0.2597402,
+                         -0.818189,
+                         -1.207792,
+                         -1.168831,
+                         0.4025974,
+                         1.4285714,
+                         1.7012987,
+                         -0.142857,
+                         -0.740260,
+                         -1.000000,
+                         -2.688312,
+                         -2.220779,
+                         -1.272727,
+                         -1.077922,
+                         -1.558441,
+                         -1.051948,
+                         -0.844156
+                        };
 
-	for(unsigned int i = 0; i < inputs.n_elem; i++)
-	{
-		arma::vec input = {inputs(i)};
-		arma::vec output = {outputs(i)};
+    for(unsigned int i = 0; i < inputs.n_elem; i++)
+    {
+        arma::vec input = {inputs(i)};
+        arma::vec output = {outputs(i)};
 
-		dataset.addSample(input, output);
-	}
+        dataset.addSample(input, output);
+    }
 
     //gp.getHyperParameters().lengthScale = 0.3;
     //gp.getHyperParameters().signalVariance = 1.08;
     //gp.getHyperParameters().noiseVariance = 0.00005;
 
-    gp.getHyperParameters().lengthScale = 3.0;
-    gp.getHyperParameters().signalVariance = 1.16;
-    gp.getHyperParameters().noiseVariance = 0.89;
+    //gp.getHyperParameters().lengthScale = 3.0;
+    //gp.getHyperParameters().signalVariance = 1.16;
+    //gp.getHyperParameters().noiseVariance = 0.89;
 
     gp.train(dataset);
 
@@ -108,31 +108,31 @@ int main(int argc, char *argv[])
 
     arma::mat testOutputs(2, nTestPoints, arma::fill::zeros);
 
-	for(unsigned int i = 0; i < testInputs.n_cols; i++)
-	{
-		arma::vec results(2, arma::fill::zeros);
-		results.row(0) = gp(testInputs.col(i));
-		results.row(1) = gp.computeVariance(testInputs.col(i));
+    for(unsigned int i = 0; i < testInputs.n_cols; i++)
+    {
+        arma::vec results(2, arma::fill::zeros);
+        results.row(0) = gp(testInputs.col(i));
+        results.row(1) = gp.computeVariance(testInputs.col(i));
 
-		cout << endl << "Input: " << testInputs(i) << endl;
-		cout << "mean: " << results(0) << endl;
-		cout << "variance: " << results(1) << endl;
+        cout << endl << "Input: " << testInputs(i) << endl;
+        cout << "mean: " << results(0) << endl;
+        cout << "variance: " << results(1) << endl;
 
-		testOutputs.col(i) = results;
-	}
-	cout << endl << "marginal likelihood: " << gp.computeMarginalLikelihood() << endl;
+        testOutputs.col(i) = results;
+    }
+    cout << endl << "marginal likelihood: " << gp.computeMarginalLikelihood() << endl;
 
-	arma::mat trainDataset(inputs.n_elem, 2, arma::fill::zeros);
-	trainDataset.col(0) = inputs;
-	trainDataset.col(1) = outputs;
+    arma::mat trainDataset(inputs.n_elem, 2, arma::fill::zeros);
+    trainDataset.col(0) = inputs;
+    trainDataset.col(1) = outputs;
 
-	arma::mat testDataset(nTestPoints, 4, arma::fill::zeros);
-	testDataset.col(0) = testInputs.t();
-	testDataset.col(1) = testOutputs.row(0).t();
-	testDataset.col(2) = testOutputs.row(1).t();
+    arma::mat testDataset(nTestPoints, 4, arma::fill::zeros);
+    testDataset.col(0) = testInputs.t();
+    testDataset.col(1) = testOutputs.row(0).t();
+    testDataset.col(2) = testOutputs.row(1).t();
 
-	cout << "J: " << gp.computeJ(dataset) << endl;
+    cout << "J: " << gp.computeJ(dataset) << endl;
 
-	//trainDataset.save("/home/shirokuma/train.mat", arma::raw_ascii);
-	//testDataset.save("/home/shirokuma/test.mat", arma::raw_ascii);
+    trainDataset.save("/home/shirokuma/train.mat", arma::raw_ascii);
+    testDataset.save("/home/shirokuma/test.mat", arma::raw_ascii);
 }

@@ -14,36 +14,36 @@ class GaussianRbf : public BasisFunction
 {
 
 public:
-	/*!
-	 * Constructor.
-	 * \param center the center of the Gaussian radial function
-	 * \param width the width of the Gaussian radial function
-	 * \param useSquareRoot specify whether to use square root of the exponential term
-	 * of the Gaussian radial function
-	 */
+    /*!
+     * Constructor.
+     * \param center the center of the Gaussian radial function
+     * \param width the width of the Gaussian radial function
+     * \param useSquareRoot specify whether to use square root of the exponential term
+     * of the Gaussian radial function
+     */
     GaussianRbf(double center, double width, bool useSquareRoot = false);
 
-	/*!
-	 * Constructor.
-	 * \param center vector of centers of the Gaussian radial function
-	 * \param width the width of the Gaussian radial function
-	 * \param useSquareRoot specify whether to use square root of the exponential term
-	 * of the Gaussian radial function
-	 */
+    /*!
+     * Constructor.
+     * \param center vector of centers of the Gaussian radial function
+     * \param width the width of the Gaussian radial function
+     * \param useSquareRoot specify whether to use square root of the exponential term
+     * of the Gaussian radial function
+     */
     GaussianRbf(arma::vec center, double width, bool useSquareRoot = false);
 
-	/*!
-	 * Constructor.
-	 * \param center vector of centers of the Gaussian radial function
-	 * \param width vector of widths of the Gaussian radial function
-	 * \param useSquareRoot specify whether to use square root of the exponential term
-	 * of the Gaussian radial function
-	 */
+    /*!
+     * Constructor.
+     * \param center vector of centers of the Gaussian radial function
+     * \param width vector of widths of the Gaussian radial function
+     * \param useSquareRoot specify whether to use square root of the exponential term
+     * of the Gaussian radial function
+     */
     GaussianRbf(arma::vec center, arma::vec width, bool useSquareRoot = false);
 
-	/*!
-	 * Destructor.
-	 */
+    /*!
+     * Destructor.
+     */
     virtual ~GaussianRbf();
 
     double operator() (const arma::vec& input) override;
