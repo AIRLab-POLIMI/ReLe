@@ -133,6 +133,6 @@ int main(int argc, char *argv[])
 
     cout << "J: " << gp.computeJ(dataset) << endl;
 
-    trainDataset.save("/home/shirokuma/train.mat", arma::raw_ascii);
-    testDataset.save("/home/shirokuma/test.mat", arma::raw_ascii);
+    //trainDataset.save("/home/shirokuma/train.mat", arma::raw_ascii);
+    //testDataset.save("/home/shirokuma/test.mat", arma::raw_ascii);
 }
