@@ -30,7 +30,7 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 	//create folder
-	FileManager fm("lqrExact/");
+	FileManager fm("lqrExact");
 	fm.createDir();
 
 	//Create LQR problem
