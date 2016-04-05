@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
     trainDataset.col(0) = inputs;
     trainDataset.col(1) = outputs;
 
-    arma::mat testDataset(nTestPoints, 4, arma::fill::zeros);
+    arma::mat testDataset(nTestPoints, 3, arma::fill::zeros);
     testDataset.col(0) = testInputs.t();
     testDataset.col(1) = testOutputs.row(0).t();
     testDataset.col(2) = testOutputs.row(1).t();
