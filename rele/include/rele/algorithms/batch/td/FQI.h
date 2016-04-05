@@ -28,17 +28,19 @@
 
 namespace ReLe
 {
-/*
- * Fitted Q-Iteration (FQI)
- *
- * "Tree-Based Batch Mode Reinforcement Learning"
- * Damien Ernst, Pierre Geurts, Louis Wehenkel
- * Journal of Machine Learning Research, 6, 2006, pp. 503-556.
+/*!
+ * This class implements the output data for all Fitted Q-Iteration algorithms.
+ * All version of Fitted Q-Iteration algorithms should use, or extend this class
  */
-
 class FQIOutput : virtual public AgentOutputData
 {
 public:
+    /*!
+     * Constructor.
+     * \param isFinal whether the data logged comes from the end of a run of the algorithm
+     * \param gamma the discount factor
+     * \param Q the Q-table
+     */
     FQIOutput(bool isFinal, double gamma, const arma::mat& Q) :
         AgentOutputData(isFinal),
         gamma(gamma),
@@ -86,11 +88,29 @@ protected:
     arma::mat Q;
 };
 
+/*!
+ * This class implements the Fitted Q-Iteration algorithm.
+ * This algorithm is an off-policy batch algorithm that works with finite
+ * action spaces.
+ * It exploits the Bellman operator to build a dataset of Q-values from which
+ * a regressor is trained.
+ *
+ * References
+ * =========
+ *
+ * [Ernst, Geurts, Wehenkel. Tree-Based Batch Mode Reinforcement Learning](http://www.jmlr.org/papers/volume6/ernst05a/ernst05a.pdf)
+ */
 template<class StateC>
 class FQI : public BatchAgent<FiniteAction, StateC>
 {
 public:
-
+    /*!
+     * Constructor.
+     * \param QRegressor the regressor
+     * \param nStates the number of states
+     * \param nActions the number of actions
+     * \param epsilon coefficient used to check whether to stop the training
+     */
     FQI(BatchRegressor& QRegressor, unsigned int nStates, unsigned int nActions,
         double epsilon) :
         QRegressor(QRegressor),
@@ -153,6 +173,9 @@ public:
         checkCond();
     }
 
+    /*!
+     * Check whether the stop condition is satisfied.
+     */
     virtual void checkCond()
     {
         arma::vec prevQHat = QHat;
@@ -163,12 +186,18 @@ public:
             this->converged = true;
     }
 
+    /*!
+     * Compute the Q-values approximation for each element in the dataset.
+     */
     virtual void computeQHat()
     {
         for(unsigned int i = 0; i < states.n_elem; i++)
             QHat(i) = arma::as_scalar(QRegressor(FiniteState(states(i)), FiniteAction(actions(i))));
     }
 
+    /*!
+     * Compute the approximated Q-values in the Q-table when spaces are finite.
+     */
     virtual void computeQTable()
     {
         for(unsigned int i = 0; i < nStates; i++)
@@ -188,6 +217,10 @@ public:
         return new FQIOutput(true, this->gamma, QTable);
     }
 
+    /*!
+     * Getter.
+     * \return the updated Q-table
+     */
     arma::mat& getQ()
     {
         computeQTable();

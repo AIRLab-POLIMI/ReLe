@@ -29,10 +29,17 @@
 namespace ReLe
 {
 
+/*!
+ * This template class implements functions to build basis functions that replicates the input.
+ */
 template<class InputC>
 class IdentityBasis_ : public BasisFunction_<InputC>
 {
 public:
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     */
     IdentityBasis_(unsigned int index) : index(index)
     {
 
@@ -42,64 +49,127 @@ protected:
     unsigned int index;
 };
 
+/*!
+ * This class implements functions to build basis functions that replicates the input vector.
+ */
 class IdentityBasis : public IdentityBasis_<arma::vec>
 {
 public:
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     */
     IdentityBasis(unsigned int index);
+
+    /*!
+     * Destructor.
+     */
     virtual ~IdentityBasis();
+
     double operator() (const arma::vec& input) override;
-
-
     virtual void writeOnStream (std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
+    /*!
+     * Return the input in the form of a Basis Functions.
+     * \param input_size the size of the input vector
+     * \return the generated basis functions
+     */
     static BasisFunctions generate(unsigned int input_size);
-
-
 };
 
+/*!
+ * This class implements functions to build basis functions that replicates the input vector with
+ * finite values.
+ */
 class FiniteIdentityBasis : public IdentityBasis_<size_t>
 {
 public:
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     */
     FiniteIdentityBasis(unsigned int index);
+
+    /*!
+     * Destructor.
+     */
     virtual ~FiniteIdentityBasis();
+
     double operator() (const size_t& input) override;
-
-
     virtual void writeOnStream (std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
+    /*!
+     * Return the value associated to the given input.
+     * \param stateN the input value
+     * \return the generated basis functions
+     */
     static BasisFunctions_<size_t> generate(unsigned int stateN);
 };
 
+/*!
+ * This class implements functions to build basis functions that associate a value to each finite
+ * value in the input vector.
+ */
 class VectorFiniteIdentityBasis : public IdentityBasis_<arma::vec>
 {
 public:
+    /*!
+     * Constructor.
+     * \param index the index of the element in the input
+     * \param value the value to associate at the input element in the given index
+     */
     VectorFiniteIdentityBasis(unsigned int index, double value);
+
+    /*!
+     * Destructor.
+     */
     virtual ~VectorFiniteIdentityBasis();
+
     double operator() (const arma::vec& input) override;
-
-
     virtual void writeOnStream (std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
+    /*!
+     * Return the values associated to each input.
+     * \param values the vector of values
+     * \return the generated basis functions
+     */
     static BasisFunctions generate(std::vector<unsigned int> values);
+
+    /*!
+     * Return the value associated to the given input.
+     * \param stateN the input value
+     * \param values the vector of values
+     * \return the generated basis functions
+     */
     static BasisFunctions generate(unsigned int stateN, unsigned int values);
 
 private:
     double value;
 };
 
-
+/*!
+ * This class implements functions to build basis functions that, given an input value, return
+ * its inverse value.
+ */
 template<class InputC>
 class InverseBasis_ : public BasisFunction_<InputC>
 {
 public:
+    /*!
+     * Constructor.
+     * \param basis basis function
+     */
     InverseBasis_(BasisFunction_<InputC>* basis) : basis(basis)
     {
 
     }
 
+    /*!
+     * Destructor.
+     */
     ~InverseBasis_()
     {
         delete basis;
@@ -122,6 +192,11 @@ public:
         //TODO implement
     }
 
+    /*!
+     * Return the inverse value associated to the given input.
+     * \param basis the basis function whose output value is inverted
+     * \return the generated basis functions
+     */
     static BasisFunctions_<InputC> generate(BasisFunctions_<InputC> basis)
     {
         BasisFunctions_<InputC> newBasis;

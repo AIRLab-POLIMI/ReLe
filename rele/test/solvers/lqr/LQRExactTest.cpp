@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     //0
     unsigned int dim0 = 2;
     unsigned int rewardDim0 = 2;
-    arma::vec k0 = {-1.0, -1.0};
+    arma::vec k0 = {-0.4, -0.7};
     LQR* lqr0 = new LQR(dim0, rewardDim0);
 
     dimensions(0, 0) = dim0;
@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
 
         std::cout << "Sampled J" << std::endl << Jsampled.t() << std::endl;
         std::cout << "Exact J" << std::endl << J.t() << std::endl;
+        std::cout << "Error " << std::endl << arma::abs(Jsampled - J).t() << std::endl;
 
         // Test gradient
         arma::mat dJ = exactLqr.computeJacobian(k, Sigma);
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
 
         std::cout << "Numerical dJ" << std::endl << dJnum.t() << std::endl;
         std::cout << "Exact dJ" << std::endl << dJ << std::endl;
+        std::cout << "Error " << std::endl << arma::abs(dJnum.t() - dJ) << std::endl;
 
 
         // Test Hessian
@@ -152,6 +154,7 @@ int main(int argc, char *argv[])
 
         std::cout << "Numerical HJ" << std::endl << HJnum << std::endl;
         std::cout << "Exact HJ" << std::endl << HJ << std::endl;
+        std::cout << "Error " << std::endl << arma::abs(HJnum - HJ) << std::endl;
     }
 
 }

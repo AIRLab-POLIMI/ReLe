@@ -189,6 +189,9 @@ Basic interfaces
 .. doxygenclass:: ReLe::Regressor_
    :members:
    
+.. doxygenclass:: ReLe::Ensemble_
+   :members:
+   
 .. doxygenclass:: ReLe::ParametricRegressor_
    :members:
    
@@ -196,6 +199,30 @@ Basic interfaces
    :members:
    
 .. doxygenclass:: ReLe::UnsupervisedBatchRegressor_
+   :members:
+   
+Basis functions
+---------------
+
+.. doxygenclass:: ReLe::AffineFunction
+   :members:
+
+.. doxygenclass:: ReLe::GaussianRbf
+   :members:
+   
+.. doxygenclass:: ReLe::IdentityBasis_
+   :members:
+   
+.. doxygenclass:: ReLe::IdentityBasis
+   :members:
+   
+.. doxygenclass:: ReLe::FiniteIdentityBasis
+   :members:
+   
+.. doxygenclass:: ReLe::VectorFiniteIdentityBasis
+   :members:
+
+.. doxygenclass:: ReLe::InverseBasis_
    :members:
 
 Features types
@@ -388,6 +415,23 @@ Gradient Step
 .. doxygenclass:: ReLe::AdaptiveGradientStep
    :members:
    
+Batch
+-----
+
+.. doxygenclass:: ReLe::FQI
+   :members:
+   
+.. doxygenclass:: ReLe::DoubleFQI
+   :members:
+   
+.. doxygenclass:: ReLe::DoubleFQIEnsemble
+   :members:
+
+.. doxygenclass:: ReLe::W_FQI
+   :members:
+   
+.. doxygenclass:: ReLe::LSPI
+   :members:
 
 Temporal Difference
 -------------------
@@ -409,6 +453,12 @@ Temporal Difference
 .. doxygenclass:: ReLe::Q_Learning
    :members:
    
+.. doxygenclass:: ReLe::DoubleQ_Learning
+   :members:
+   
+.. doxygenclass:: ReLe::WQ_Learning
+   :members:
+   
 .. doxygenclass:: ReLe::R_Learning
    :members:
    
@@ -425,8 +475,10 @@ Output Data
    :members:   
 
 .. doxygenclass:: ReLe::R_LearningOutput
-   :members:   
+   :members:
 
+.. doxygenclass:: ReLe::FQIOutput
+   :members:   
 
 Batch
 -----

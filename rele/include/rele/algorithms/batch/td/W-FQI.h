@@ -36,6 +36,15 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements a version of Fitted Q-iteration (FQI) that
+ * exploits the Weighted Estimator, as done in Weighted Q-Learning.
+ * This algorithm computes an estimate of the maximum action-value
+ * approximating it as weighted sum of action-values approximated by the regressor
+ * where the weights are the probabilities of the respective action-value to be the maximum.
+ * Being a modified version of Fitted Q-Iteration, this algorithms
+ * deals only with finite action spaces.
+ */
 template<class StateC>
 class W_FQI: public FQI<StateC>
 {

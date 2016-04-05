@@ -37,11 +37,27 @@ namespace ReLe
 
 //#define REMOVE_LAST
 
+/*!
+ * This abstract class implements the Least-Squares Temporal Difference Q (LSTDQ) algorithm.
+ * This algorithm is a slightly modified version of LSTD to approximate the action-value
+ * function of a fixed policy. It is used by LSPI in the policy evaluation phase.
+ *
+ * References
+ * =========
+ *
+ * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
+ */
 template<class ActionC>
 class LSTDQ_
 {
 public:
-
+    /*!
+     * Constructor.
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param gamma the discount factor
+     */
     LSTDQ_(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
            Features_<arma::vec>& phi, double gamma) :
         data(data), Q(phi), policy(policy), gamma(gamma)
@@ -53,11 +69,19 @@ public:
         //        std::cout << std::endl;
     }
 
+    /*!
+     * Getter.
+     * \return the approximation Q function
+     */
     LinearApproximator& getQ()
     {
         return Q;
     }
 
+    /*!
+     * Run the LSTDQ algorithm.
+     * \param firstTime if true, it states the the algorithm is at its first step
+     */
     arma::vec run(bool firstTime)
     {
         /*** Initialize variables ***/
@@ -153,14 +177,27 @@ public:
         return w;
     }
 
+    /*!
+     *
+     */
     virtual arma::vec run_slow() = 0;
 
+    /*!
+     * Compute the A matrix and B vector.
+     * \param PiPhihat matrix probabilities multiplied by features vector
+     * \param A matrix A
+     * \param B vector B
+     */
     virtual void computeAandB(const arma::mat& PiPhihat, arma::mat& A, arma::vec& b) = 0;
 
     virtual ~LSTDQ_()
     {
     }
 
+    /*!
+     * Getter.
+     * \return the approximated policy
+     */
     e_GreedyApproximate& getPolicy()
     {
         return policy;
@@ -175,11 +212,15 @@ protected:
     arma::vec Rhat;
 };
 
-/**
- * Least-Squares Policy Iteration
- * Michail G. Lagoudakis and Ronald Parr
- * Journal of Machine Learning Research, 4, 2003, pp. 1107-1149.
- * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
+/*!
+ * This class implements the Least-Squares Temporal Difference Q (LSTDQ) algorithm.
+ * This algorithm is a slightly modified version of LSTD to approximate the action-value
+ * function of a fixed policy.
+ *
+ * References
+ * =========
+ *
+ * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
  */
 template<class ActionC>
 class LSTDQ : public LSTDQ_<ActionC>
@@ -193,6 +234,13 @@ class LSTDQ : public LSTDQ_<ActionC>
     using Base::Rhat;
 
 public:
+    /*!
+     * Constructor.
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param gamma the discount factor
+     */
     LSTDQ(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
           Features_<arma::vec>& phi, double gamma)
         : LSTDQ_<ActionC>(data, policy, phi, gamma)
@@ -209,7 +257,6 @@ public:
     {
 
     }
-
 
     arma::vec run_slow() override
     {
@@ -277,11 +324,15 @@ public:
 
 };
 
-/**
- * Least-Squares Policy Iteration
- * Michail G. Lagoudakis and Ronald Parr
- * Journal of Machine Learning Research, 4, 2003, pp. 1107-1149.
- * Source code: https://www.cs.duke.edu/research/AI/LSPI/lspi.tar.gz
+/*!
+ * This class implements the Least-Squares Temporal Difference Q (LSTDQ) algorithm.
+ * This algorithm is a slightly modified version of LSTD to approximate the action-value
+ * function of a fixed policy.
+ *
+ * References
+ * =========
+ *
+ * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
  */
 template<class ActionC>
 class LSTDQBe : public LSTDQ_<ActionC>
@@ -295,13 +346,19 @@ class LSTDQBe : public LSTDQ_<ActionC>
     using Base::Rhat;
 
 public:
+    /*!
+     * Constructor.
+     * \param data the dataset
+     * \param policy the policy
+     * \param phi the features to be used for approximation
+     * \param gamma the discount factor
+     */
     LSTDQBe(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
             Features_<arma::vec>& phi, double gamma)
         : LSTDQ_<ActionC>(data, policy, phi, gamma)
     {
     }
 
-    // LSTDQ_ interface
     void computeAandB(const arma::mat& PiPhihat, arma::mat &A, arma::vec &b)
     {
         /*** Compute the matrices A and b ***/

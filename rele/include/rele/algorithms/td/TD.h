@@ -148,6 +148,12 @@ protected:
 
 };
 
+/*!
+ * This interface is the basic interface for all linear TD algorithms.
+ * A linear TD algorithm is an algorithm using finite action spaces
+ * and dense state spaces where the approximation of the action-values
+ * is performed with linear approximation.
+ */
 class LinearTD : public Agent<FiniteAction, DenseState>
 {
 public:

@@ -144,10 +144,29 @@ int main(int argc, char *argv[])
     policy.setParameters(kOpt);
     arma::mat rvecOptSampled = core.runEvaluation();
 
+    std::cout << "Estimated parameters " << k.t();
+    std::cout << "Optimal parameters " << kOpt.t();
+
     std::cout << "rvec(k) <sampled>" << rvecSampled.t();
     std::cout << "rvec(kOpt) <sampled>" << rvecOptSampled.t();
     std::cout << "J(k) <sampled>" << arma::as_scalar(rvecSampled.t()*eReward) << std::endl;
     std::cout << "J(kOpt) <sampled>" << arma::as_scalar(rvecOptSampled.t()*eReward) << std::endl;
+
+
+    // Test gradient
+    arma::mat dJ = lqrExact.computeJacobian(k, Sigma);
+
+    auto lambda = [&](const arma::vec& par)
+    {
+        return lqrExact.computeJ(par, Sigma);
+    };
+
+    arma::mat dJnum = NumericalGradient::compute(lambda, k, rewardDim);
+
+    std::cout << "Numerical dJ" << std::endl << dJnum.t() << std::endl;
+    std::cout << "Exact dJ" << std::endl << dJ << std::endl;
+    std::cout << "Error " << std::endl << arma::abs(dJnum.t() - dJ) << std::endl;
+
 
 }
 

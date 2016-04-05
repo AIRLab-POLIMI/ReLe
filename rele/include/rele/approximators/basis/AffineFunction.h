@@ -29,18 +29,30 @@
 namespace ReLe
 {
 
-/**
- * @brief A*x
+/*!
+ * This class implements affine transformation functions for an input
+ * vector.
  */
 class AffineFunction: public BasisFunction
 {
 public:
+    /*!
+     * Constructor.
+     * \param bfs basis function
+     * \param A the matrix for the affine transformation
+     */
     AffineFunction(BasisFunction* bfs, arma::mat A);
 
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
     void readFromStream(std::istream& in) override;
 
+    /*!
+     * Return the basis functions for the affine transformation.
+     * \param basis basis function
+     * \param A the matrix for the affine transformation
+     * \return the generated basis functions
+     */
     static BasisFunctions generate(BasisFunctions& basis, arma::mat& A);
 
 private:

@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 //  RandomGenerator::seed(45423424);
 //  RandomGenerator::seed(8763575);
 
-    if(argc != 4)
+    if(argc != 5)
     {
         std::cout << "Error, you must give the policy, the baseline, the number of episodes, and index" << std::endl;
         return -1;

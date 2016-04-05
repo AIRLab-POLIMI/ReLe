@@ -21,10 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Written by: Alessandro Nuara, Carlo D'Eramo
- */
-
 #ifndef INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
 #define INCLUDE_RELE_ALGORITHMS_TD_DOUBLEQ_LEARNING_H_
 
@@ -32,13 +28,24 @@
 
 namespace ReLe
 {
-/*
- * Double Q-Learning
- *
- * "Double Q-Learning"
- * Hado Van Hasselt
- */
 
+/*!
+ * This class implements the Double Q-Learning algorithm.
+ * This algorithm is an off-policy temporal difference algorithm that
+ * tries to solve the well-known overestimation problem suffered
+ * by Q-Learning.
+ * More precisely, this algorithm stores two Q-tables and uses one of them
+ * to select the action that maximizes the Q-value, but uses the value of that
+ * action stored in the other Q-Table. This technique has been proved to have
+ * negative bias (as opposed to Q-Learning that has a positive bias) which can
+ * help to avoid incremental approximation error caused by overestimations.
+ * It can only work on finite MDP, i.e. with both finite action and state space.
+ *
+ * References
+ * =========
+ *
+ * [Van Hasselt. Double Q-Learning](https://papers.nips.cc/paper/3964-double-q-learning.pdf)
+ */
 class DoubleQ_Learning: public Q_Learning
 {
 public:
