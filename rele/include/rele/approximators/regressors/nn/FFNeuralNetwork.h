@@ -58,7 +58,7 @@ public:
         OptimizationParameters() : lambda(0), freePointers(true)
         {
             optimizator = nullptr;
-            Omega = nullptr;
+            Omega = &defaultRegularization;
             normalizationF = &defaultNormalization;
             normalizationO = &defaultNormalization;
         }
@@ -70,7 +70,7 @@ public:
                 if(optimizator)
                     delete optimizator;
 
-                if(Omega)
+                if(Omega && Omega != &defaultRegularization)
                     delete Omega;
 
                 if(normalizationF && normalizationF != &defaultNormalization)
@@ -99,6 +99,7 @@ public:
 
     private:
         NoNormalization<denseOutput> defaultNormalization;
+        NoRegularization defaultRegularization;
     };
 
 public:

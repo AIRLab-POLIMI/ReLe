@@ -63,8 +63,9 @@ int main(int argc, char *argv[])
     vec eReward = {0.2, 0.7, 0.1};
 
     // Build policy
-    int dim = eReward.n_elem;
-    LQR mdp(dim, dim);
+    int rewardDim = eReward.n_elem;
+    int dim = 3;
+    LQR mdp(dim, rewardDim);
 
     BasisFunctions basis = IdentityBasis::generate(dim);
 
