@@ -53,8 +53,6 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
     size_t xn = nextState.getStateN();
     double r = reward[0];
 
-    unsigned int nTrapz = 100;
-
     arma::vec integrals(task.finiteActionDim, arma::fill::zeros);
     for(unsigned int i = 0; i < integrals.n_elem; i++)
     {
@@ -62,8 +60,8 @@ void WQ_Learning::step(const Reward& reward, const FiniteState& nextState,
         arma::vec sigma = sampleStdQ.row(xn).t();
         double pdfMean = means(i);
         double pdfSampleStd = sigma(i);
-        double lowerLimit = pdfMean - 5 * pdfSampleStd;
-        double upperLimit = pdfMean + 5 * pdfSampleStd;
+        double lowerLimit = pdfMean - sigmaBound * pdfSampleStd;
+        double upperLimit = pdfMean + sigmaBound * pdfSampleStd;
 
         arma::vec trapz = arma::linspace(lowerLimit, upperLimit, nTrapz + 1);
         double diff = trapz(1) - trapz(0);

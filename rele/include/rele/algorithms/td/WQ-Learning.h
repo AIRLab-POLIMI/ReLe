@@ -54,6 +54,8 @@ class WQ_Learning: public Q_Learning
 public:
     static constexpr double stdZeroValue = 1e-5;
     static constexpr double stdInfValue = 1e10;
+    static constexpr double nTrapz = 100;
+    static constexpr double sigmaBound = 5;
 
 public:
     WQ_Learning(ActionValuePolicy<FiniteState>& policy, LearningRate& alpha);
