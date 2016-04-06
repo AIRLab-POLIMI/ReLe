@@ -78,7 +78,11 @@ void FiniteMDP::step(const FiniteAction& action, FiniteState& nextState,
 
 void FiniteMDP::getInitialState(FiniteState& state)
 {
-    size_t x = RandomGenerator::sampleUniformInt(0, P.n_cols - 1);
+	size_t x;
+	do
+	{
+		x = RandomGenerator::sampleUniformInt(0, P.n_cols - 1);
+	} while(absorbingStates.count(x) != 0);
 
     currentState.setStateN(x);
     state.setStateN(x);
