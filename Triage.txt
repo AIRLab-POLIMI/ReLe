@@ -1,0 +1,18 @@
+# Rules for TODO/FIXME
+
+1) TODO for missing stuff
+2) FIXME for runtime/compilation bugs
+3) every todo/fixme must have at least a tag
+
+# Tags
+
+[IMPORTANT]  -----> Must be fixed for relase 1
+[SERIALIZATION] --> Is part of the misisng serialization interface
+[OPTIMIZATION] ---> Just a matter of a faster way of doing an algorithm
+[CLEANUP] --------> Ugly code cleanup
+[MACRO] ----------> Macro to be killed
+[INTERFACE] ------> Probably an issue about interface implementation
+
+# Example
+
+//TODO [IMPORTANT][MACRO] kill this ugly macro!
