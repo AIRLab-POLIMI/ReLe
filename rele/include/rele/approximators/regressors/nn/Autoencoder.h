@@ -40,9 +40,8 @@ public	:
     Autoencoder_(Features_<InputC, denseOutput>& phi, unsigned int outputs)
         : FFNeuralNetwork_<InputC, denseOutput>(phi, outputs, phi.rows()), UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
     {
-        //FIXME fix the issue with not ready normalization
-        this->getHyperParameters().normalizationF = new MinMaxNormalization<denseOutput>();
-        this->getHyperParameters().normalizationO = new MinMaxNormalization<denseOutput>();
+        normalizationF = new MinMaxNormalization<denseOutput>();
+        normalizationO = new MinMaxNormalization<denseOutput>();
     }
 
     virtual arma::vec operator()(const InputC& input) override
@@ -59,12 +58,17 @@ public	:
 
     virtual void trainFeatures(const FeaturesCollection& features) override
     {
+        //Set normalization
+        this->getHyperParameters().normalizationF = normalizationF;
+        this->getHyperParameters().normalizationO = normalizationO;
+
         BatchDataSimple dataset(features, features);
         FFNeuralNetwork_<InputC, denseOutput>::trainFeatures(dataset);
     }
 
     double computeJFeatures(const arma::mat& features)
     {
+        //Run training
         BatchDataSimple data(features, features);
         return FFNeuralNetwork_<InputC, denseOutput>::computeJFeatures(data);
     }
@@ -73,6 +77,10 @@ public	:
     {
 
     }
+
+private:
+    Normalization<denseOutput>* normalizationF;
+    Normalization<denseOutput>* normalizationO;
 };
 
 typedef Autoencoder_<arma::vec> Autoencoder;

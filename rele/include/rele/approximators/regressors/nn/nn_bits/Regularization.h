@@ -38,6 +38,20 @@ public:
     }
 };
 
+class NoRegularization : public Regularization
+{
+public:
+    inline virtual double cost(const arma::vec& w) override
+    {
+        return 0;
+    }
+
+    inline virtual arma::vec diff(const arma::vec& w) override
+    {
+        return arma::vec(w.n_elem, arma::fill::zeros);
+    }
+};
+
 class L2_Regularization : public Regularization
 {
 public:

@@ -58,7 +58,7 @@ public:
         OptimizationParameters() : lambda(0), freePointers(true)
         {
             optimizator = nullptr;
-            Omega = nullptr;
+            Omega = &defaultRegularization;
             normalizationF = &defaultNormalization;
             normalizationO = &defaultNormalization;
         }
@@ -70,7 +70,7 @@ public:
                 if(optimizator)
                     delete optimizator;
 
-                if(Omega)
+                if(Omega && Omega != &defaultRegularization)
                     delete Omega;
 
                 if(normalizationF && normalizationF != &defaultNormalization)
@@ -99,6 +99,7 @@ public:
 
     private:
         NoNormalization<denseOutput> defaultNormalization;
+        NoRegularization defaultRegularization;
     };
 
 public:
@@ -168,16 +169,7 @@ public:
     void trainFeatures(const BatchData& featureDataset) override
     {
 
-        //Setup default parameters
-        if(!params.normalizationF)
-            params.normalizationF = new MinMaxNormalization<denseOutput>();
-
-        if(!params.normalizationO)
-            params.normalizationO = new NoNormalization<denseOutput>();
-
-        if(!params.Omega)
-            params.Omega = new L2_Regularization();
-
+        //Setup default optimizator
         if(!params.optimizator)
             params.optimizator = new GradientDescend<InputC, denseOutput>(10000, 0.1);
 
