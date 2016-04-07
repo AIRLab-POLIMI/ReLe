@@ -208,7 +208,7 @@ protected:
     arma::vec history_J;
     RewardTransformation* rewardTr;
     bool cleanRT;
-    bool output2LogReady; //TODO levare baseline
+    bool output2LogReady;
     AgentOutputC* currentItStats;
 };
 

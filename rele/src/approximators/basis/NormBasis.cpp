@@ -47,7 +47,7 @@ void NormBasis::writeOnStream (ostream& out)
 
 void NormBasis::readFromStream(istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 InfiniteNorm::InfiniteNorm(bool max)
@@ -73,7 +73,7 @@ void InfiniteNorm::writeOnStream (std::ostream& out)
 
 void InfiniteNorm::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 

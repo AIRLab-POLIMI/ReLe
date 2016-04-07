@@ -57,12 +57,12 @@ public:
 
     virtual void writeOnStream(std::ofstream& out)
     {
-        // TODO: Implement
+        //TODO [SERIALIZATION] implement
     }
 
     virtual void readFromStream(std::ifstream& in)
     {
-        // TODO: Implement
+        //TODO [SERIALIZATION] implement
     }
 
     virtual ~FFNeuralNetworkEnsemble_()

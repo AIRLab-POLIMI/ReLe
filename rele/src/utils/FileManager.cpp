@@ -42,14 +42,12 @@ FileManager::FileManager(const string& testName)
 
 void FileManager::createDir()
 {
-    //TODO windows command also
     string createCommand = "mkdir -p " + outputDir;
     system(createCommand.c_str());
 }
 
 void FileManager::cleanDir()
 {
-    //TODO windows command also
     string cleanOldCommand = "rm -f " + outputDir + "*.log";
     system(cleanOldCommand.c_str());
 }

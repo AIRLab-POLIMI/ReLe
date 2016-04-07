@@ -30,7 +30,7 @@
 #include <stdexcept>
 
 
-//FIXME LEVARE STO SCHIFO DI MACRO!!!!
+//TODO [MACRO] remove, use subclass/strategy
 // #define FEATURE_PROPAGATION
 
 #define SPLIT_UNIFORM
@@ -83,12 +83,12 @@ public:
 
     virtual void writeOnStream(std::ofstream& out)
     {
-        //TODO implement
+        //TODO [SERIALIZATION] implement
     }
 
     virtual void readFromStream(std::ifstream& in)
     {
-        //TODO implement
+        //TODO [SERIALIZATION] implement
     }
 
     std::vector<double> evaluateFeatures()
@@ -258,7 +258,7 @@ private:
             if (computeFeaturerelevance)
             {
                 double variance_reduction = varianceReduction(ds, *leftDs, *rightDs);
-                variance_reduction *= ds.size() * arma::det(ds.getVariance()); //TODO check
+                variance_reduction *= ds.size() * arma::det(ds.getVariance());
 #ifdef FEATURE_PROPAGATION
                 mSplittedAttributes.insert(bestAttribute);
                 mSplittedAttributesCount.insert(bestAttribute);
@@ -380,7 +380,7 @@ private:
             arma::mat varDSL = corr_fact_dsl * dsl.size() * dsl.getVariance();
             arma::mat varDSR = corr_fact_dsr * dsr.size() * dsr.getVariance();
             arma::mat I = arma::eye(varDS.n_rows, varDS.n_cols);
-            return arma::det(I - (varDSL + varDSR) * arma::inv(varDS)); //TODO check
+            return arma::det(I - (varDSL + varDSR) * arma::inv(varDS));
         }
     }
 
@@ -392,7 +392,7 @@ private:
             return 0.0;
 
         double score = 0.0;
-        //TODO implement
+        //TODO [MINOR] implement
 //        // T-STUDENT
 //        double mean_diff = fabs(dsl->Mean() - dsr->Mean());
 //        //   if (dsl->size() == 0 || dsr->size() == 0)
@@ -471,8 +471,9 @@ private:
     std::vector<double> featureRelevance; //array of relevance values of input feature
     bool computeFeaturerelevance;
     double scoreThreshold;
-    //multiset<int> mSplittedAttributesCount; FIXME
-    //set<int> mSplittedAttributes; FIXME
+    //TODO [MINOR] implement features selection
+    //multiset<int> mSplittedAttributesCount;
+    //set<int> mSplittedAttributes;
 };
 
 }

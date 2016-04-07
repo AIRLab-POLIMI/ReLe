@@ -32,7 +32,7 @@
 
 class RosExitException : public std::exception
 {
-    //TODO... qualcosa?
+    //TODO [INTERFACE] qualcosa dentro l'eccezione?
 };
 
 namespace ReLe_ROS

@@ -86,7 +86,7 @@ void REPSOutputData::writeData(ostream& os)
 
 void REPSOutputData::writeDecoratedData(ostream& os)
 {
-    //TODO implement
+    //TODO [MINOR] implement
     writeData(os);
 }
 

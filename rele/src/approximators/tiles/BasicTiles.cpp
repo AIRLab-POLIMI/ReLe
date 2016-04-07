@@ -92,7 +92,7 @@ void BasicTiles::writeOnStream(std::ostream& out)
 
 void BasicTiles::readFromStream(std::istream& in)
 {
-    //TODO readfromstream
+    //TODO [SERIALIZATION] implement
 }
 
 //////////////////////////////
@@ -134,7 +134,7 @@ void SelectiveTiles::writeOnStream(std::ostream& out)
 
 void SelectiveTiles::readFromStream(std::istream& in)
 {
-    //TODO readfromstream
+    //TODO [SERIALIZATION] implement
 }
 
 

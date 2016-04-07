@@ -242,7 +242,7 @@ protected:
         baseline_num2_single.zeros();
         baseline_den.zeros();
         baseline_num.zeros();
-        episodeStepReward.zeros(); //TODO levami
+        episodeStepReward.zeros();
 
     }
 

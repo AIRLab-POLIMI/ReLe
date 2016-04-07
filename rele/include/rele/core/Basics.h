@@ -67,7 +67,7 @@ struct EnvironmentSettings
     unsigned int rewardDim;
 
     //! vector of maximum value of each dimension of the reward function
-    arma::vec max_obj; //TODO: possiamo mettere un range? (usato per normalizzazione in matlab, default 1)
+    arma::vec max_obj; //TODO [IMPORTANT][INTERFACE] possiamo mettere un range? (usato per normalizzazione in matlab, default 1). oppure togliere?
 
     /*!
      * Writes the struct to stream

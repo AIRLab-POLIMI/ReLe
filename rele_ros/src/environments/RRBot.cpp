@@ -29,7 +29,7 @@ namespace ReLe_ROS
 RRBot::RRBot(double controlFrequency)
     : SimulatedEnvironment<ReLe::DenseAction, ReLe::DenseState>(controlFrequency)
 {
-    //TODO levare
+    //TODO [MINOR] implement environment & levare
     this->stateReady = true;
 }
 
@@ -40,18 +40,18 @@ RRBot::~RRBot()
 
 void RRBot::publishAction(const ReLe::DenseAction& action)
 {
-    //TODO implement
+    //TODO [MINOR] implement environment
 }
 
 void RRBot::setState(ReLe::DenseState& state)
 {
-    //TODO Implement
+	//TODO [MINOR] implement environment
 }
 
 void RRBot::setReward(const ReLe::DenseAction& action,
                       const ReLe::DenseState& state, ReLe::Reward& reward)
 {
-    //TODO implement
+	//TODO [MINOR] implement environment
 }
 
 

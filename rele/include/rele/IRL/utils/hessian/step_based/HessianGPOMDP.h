@@ -113,7 +113,7 @@ public:
 protected:
     virtual arma::cube computeHessianDiff() override
     {
-        //TODO implement
+        //TODO [IMPORTANT] implement or remove class
         return arma::cube();
     }
 };

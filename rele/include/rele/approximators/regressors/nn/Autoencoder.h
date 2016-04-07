@@ -52,7 +52,7 @@ public	:
 
     virtual arma::vec diff(const InputC& input) override
     {
-        //FIXME implement
+        //TODO [IMPORTANT][INTERFACE] implement. vectorial diff?
         return arma::vec();
     }
 

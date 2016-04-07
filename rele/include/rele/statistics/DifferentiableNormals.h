@@ -97,7 +97,7 @@ public:
     virtual arma::mat diff2log(const arma::vec &point) override;
 
 public:
-    //TODO check implementation.
+    //TODO [SERIALIZATION] check implementation.
     virtual void writeOnStream(std::ostream &out);
     virtual void readFromStream(std::istream &in);
 

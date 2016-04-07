@@ -185,7 +185,7 @@ arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
 
 arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point)
 {
-    //TODO controllare implementazione
+    //TODO [IMPORTANT] controllare implementazione
     int paramSize = this->getParametersSize();
     mat hessian(paramSize,paramSize,fill::zeros);
 
@@ -215,7 +215,7 @@ arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point)
 
 sp_mat ParametricDiagonalNormal::FIM()
 {
-    //TODO: make in a more efficient way
+    //TODO [OPTIMIZATION] make in a more efficient way
     int rows = invCov.n_rows;
     int cols = invCov.n_cols;
     vector<mat> diag_blocks;
@@ -260,7 +260,7 @@ sp_mat ParametricDiagonalNormal::FIM()
 
 sp_mat ParametricDiagonalNormal::inverseFIM()
 {
-    //TODO: make in a more efficient way
+    //TODO [OPTIMIZATION] make in a more efficient way
     int rows = Cov.n_rows;
     int cols = Cov.n_cols;
     vector<mat> diag_blocks;
@@ -435,7 +435,7 @@ ParametricLogisticNormal::ParametricLogisticNormal(const arma::vec& mean, const 
 
 void ParametricLogisticNormal::wmle(const arma::vec& weights, const arma::mat& samples)
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
 }
 
 vec ParametricLogisticNormal::difflog(const vec& point)
@@ -640,7 +640,7 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
             else
                 dlogpdt_sigma(i,j) = R(i,j);
 
-//    //TODO fare meglio
+//    //TODO [OPTIMIZATION] fare meglio
 //    mat idxs = trimatu(ones(pointSize, pointSize));
 //    vec vals = dlogpdt_sigma.elem( find(idxs == 1) );
 //    //---
@@ -670,13 +670,13 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
 
 mat ParametricCholeskyNormal::diff2log(const vec &point)
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
     return mat();
 }
 
 sp_mat ParametricCholeskyNormal::FIM()
 {
-    //TODO: make in a more efficient way
+    //TODO [OPTIMIZATION] make in a more efficient way
     int rows = invCov.n_rows;
     int cols = invCov.n_cols;
     vector<mat> diag_blocks;
@@ -696,7 +696,7 @@ sp_mat ParametricCholeskyNormal::FIM()
 
 sp_mat ParametricCholeskyNormal::inverseFIM()
 {
-    //TODO: make in a more efficient way
+    //TODO [OPTIMIZATION] make in a more efficient way
     int rows = Cov.n_rows;
     int cols = Cov.n_cols;
     vector<mat> diag_blocks;
@@ -729,7 +729,6 @@ void ParametricCholeskyNormal::writeOnStream(ostream &out)
         out << mean(i) << "\t";
     }
 
-    //TODO fare meglio [RISCRIVERE]
     for (unsigned i = 0, ie = cholCov.n_elem; i < ie; ++i)
     {
         out << cholCov(i) << "\t";
@@ -836,7 +835,7 @@ void ParametricCholeskyNormal::update(arma::vec &increment)
 void ParametricCholeskyNormal::updateInternalState()
 {
     Cov = cholCov.t() * cholCov;
-    //TODO: questo si potrebbe fare meglio
+    //TODO [OPTIMIZATION] questo si potrebbe fare meglio
     invCov = inv(Cov);
     detValue = det(Cov);
 }
@@ -855,25 +854,25 @@ ParametricFullNormal::ParametricFullNormal(const arma::vec& initial_mean,
 
 arma::vec ParametricFullNormal::difflog(const arma::vec& point)
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
     return mat();
 }
 
 arma::mat ParametricFullNormal::diff2log(const arma::vec& point)
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
     return mat();
 }
 
 arma::sp_mat ParametricFullNormal::FIM()
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
     return sp_mat();
 }
 
 arma::sp_mat ParametricFullNormal::inverseFIM()
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
     return sp_mat();
 }
 
@@ -894,12 +893,12 @@ void ParametricFullNormal::wmle(const arma::vec& weights, const arma::mat& sampl
 
 void ParametricFullNormal::writeOnStream(std::ostream &out)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 void ParametricFullNormal::readFromStream(std::istream &in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 unsigned int ParametricFullNormal::getParametersSize()

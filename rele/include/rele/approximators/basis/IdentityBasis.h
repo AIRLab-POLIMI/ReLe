@@ -189,7 +189,7 @@ public:
 
     void readFromStream(std::istream& in) override
     {
-        //TODO implement
+        //TODO [SERIALIZATION] implement
     }
 
     /*!

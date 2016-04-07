@@ -115,22 +115,22 @@ public:
 
     // DifferentiablePolicy interface
 public:
-    //TODO is this semantically correct? is not the diff of a probability.... it's a different one
+    //TODO [IMPORTANT][INTERFACE] is this semantically correct? is not the diff of a probability.... it's a different one
     arma::vec diff(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
-        //TODO this only works when considering a scalar
+        //FIXME [IMPORTANT] this only works when considering a scalar
         return approximator.diff(state);
     }
 
     arma::vec difflog(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
-        //TODO this only works when considering a scalar
+        //FIXME [IMPORTANT] this only works when considering a scalar
         return approximator.diff(state) / approximator(state);
     }
 
     arma::mat diff2log(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
-        //TODO this only works when considering a scalar
+        //TODO [IMPORTANT] this only works when considering a scalar
         arma::mat phi = approximator.diff(state);
         double value = arma::as_scalar(approximator(state));
         return phi*phi.t()/(value*value);

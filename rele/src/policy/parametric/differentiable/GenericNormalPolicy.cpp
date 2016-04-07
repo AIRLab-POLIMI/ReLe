@@ -64,7 +64,7 @@ arma::vec GenericMVNPolicy::difflog(const arma::vec &state, const arma::vec &act
 
 arma::mat GenericMVNPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
-    //TODO IMPLEMENT!
+    //TODO [IMPORTANT] IMPLEMENT!
     return arma::mat();
 }
 
@@ -101,7 +101,7 @@ arma::vec GenericMVNDiagonalPolicy::difflog(const arma::vec& state, const arma::
 
 arma::mat GenericMVNDiagonalPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
-    //TODO IMPLEMENT!
+    //TODO [IMPORTANT] IMPLEMENT!
     return arma::mat();
 }
 
@@ -147,7 +147,7 @@ arma::vec GenericMVNStateDependantStddevPolicy::difflog(const arma::vec& state, 
 
 arma::mat GenericMVNStateDependantStddevPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
-    //TODO IMPLEMENT!
+    //TODO [IMPORTANT] IMPLEMENT!
     return arma::mat();
 }
 

@@ -54,7 +54,7 @@ void EMOutputData::writeData(std::ostream& os)
 
 void EMOutputData::writeDecoratedData(std::ostream& os)
 {
-    //TODO implement
+    //TODO [MINOR] implement
     writeData(os);
 }
 

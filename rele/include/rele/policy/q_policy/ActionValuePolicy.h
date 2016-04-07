@@ -81,10 +81,10 @@ public:
     }
 
 private:
-    //TODO forse non è il meglio che si può fare, ma non voglio scrivere migliaia di classi. forse con un tratto?
+    //TODO [CLEANUP] forse non è il meglio che si può fare, ma non voglio scrivere migliaia di classi. forse con un tratto?
     std::string printPolicyWorker(FiniteState*)
     {
-        //TODO decidere come formattare l'output...
+        //TODO [MINOR] decidere come formattare l'output...
         std::stringstream ss;
         ss << "- Policy" << std::endl;
         for (unsigned int i = 0; i < Q->n_rows; i++)

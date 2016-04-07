@@ -82,7 +82,7 @@ public:
 
     virtual void readFromStream(std::ifstream& in) override
     {
-        //TODO implement
+        //TODO [SERIALIZATION] implement
     }
 
 protected:
@@ -113,7 +113,7 @@ private:
 template<class OutputC, bool denseOutput>
 class LinearLeafTreeNode : public LeafTreeNode<OutputC, denseOutput>
 {
-
+    //TODO [MINOR] implement linear node
 };
 
 }

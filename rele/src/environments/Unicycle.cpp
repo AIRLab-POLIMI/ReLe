@@ -66,12 +66,12 @@ UnicyclePolarSettings::~UnicyclePolarSettings()
 
 void UnicyclePolarSettings::WriteToStream(std::ostream& out) const
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 void UnicyclePolarSettings::ReadFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_type& dx,

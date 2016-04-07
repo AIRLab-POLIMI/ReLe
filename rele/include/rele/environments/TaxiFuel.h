@@ -41,7 +41,7 @@ namespace ReLe
  * ==========
  * [Dietterich. Hierarchical Reinforcement Learning with the MAXQ Value Function Decomposition. JAIR](https://www.jair.org/media/639/live-639-1834-jair.pdf)
  */
-//TODO not really a dense MDP...
+//TODO [INTERFACE] not really a dense MDP...
 class TaxiFuel: public DenseMDP
 {
 

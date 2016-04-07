@@ -42,7 +42,7 @@
 namespace ReLe
 {
 
-//FIXME fix NN with sparse features
+//TODO [OPTIMIZATION] fix NN with sparse features
 template<class InputC, bool denseOutput = true>
 class FFNeuralNetwork_: public ParametricRegressor_<InputC, denseOutput>,
     public BatchRegressor_<InputC, arma::vec, denseOutput>

@@ -43,7 +43,7 @@ double DeterministicPolicy::operator()(const size_t& state, const unsigned int& 
 
 std::string DeterministicPolicy::printPolicy()
 {
-    //TODO choose policy format
+    //TODO [MINOR] choose policy format
     std::stringstream ss;
     ss << "- Policy" << std::endl;
     for (unsigned int i = 0; i < pi.n_elem; i++)

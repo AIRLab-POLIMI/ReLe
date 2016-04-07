@@ -91,7 +91,7 @@ public:
      */
     virtual void readFromStream(std::ifstream& in)
     {
-        //TODO implement
+        //TODO [SERIALIZATION] implement
     }
 
 private:

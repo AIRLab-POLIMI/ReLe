@@ -48,7 +48,6 @@ double ModularRange::bound(const double& value) const
     }
     else
     {
-        //TODO throw exception?
         return value;
     }
 }

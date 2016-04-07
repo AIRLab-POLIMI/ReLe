@@ -66,12 +66,12 @@ public:
 
     virtual void writeOnStream(std::ofstream& out) override
     {
-        // TODO: Implement
+        //TODO [SERIALIZATION] implement
     }
 
     virtual void readFromStream(std::ifstream& in) override
     {
-        // TODO: Implement
+        //TODO [SERIALIZATION] implement
     }
 
     virtual ~ExtraTreeEnsemble_()

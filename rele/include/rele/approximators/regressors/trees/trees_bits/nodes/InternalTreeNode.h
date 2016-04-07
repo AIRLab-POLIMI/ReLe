@@ -136,7 +136,7 @@ public:
 
     virtual void readFromStream(std::ifstream& in) override
     {
-        //TODO implement
+        //TODO [SERIALIZATION] implement
     }
 
 private:

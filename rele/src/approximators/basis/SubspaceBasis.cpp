@@ -79,7 +79,7 @@ void SubspaceBasis::writeOnStream (std::ostream& out)
 
 void SubspaceBasis::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 BasisFunctions SubspaceBasis::generate(BasisFunctions& basisVector, std::vector<arma::span>& spanVector)

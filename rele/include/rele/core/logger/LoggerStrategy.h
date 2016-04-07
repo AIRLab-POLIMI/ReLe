@@ -341,7 +341,7 @@ public:
      */
     void processData(std::vector<AgentOutputData*>& outputData) override
     {
-        //TODO evaluation here or abstract class...
+        //TODO [MINOR][INTERFACE] evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(outputData);
     }
 
@@ -372,7 +372,7 @@ public:
      */
     virtual void processData(std::vector<AgentOutputData*>& data) override
     {
-        //TODO evaluation here or abstract class...
+        //TODO [MINOR][INTERFACE] evaluation here or abstract class...
         LoggerStrategy<ActionC, StateC>::cleanAgentOutputData(data);
     }
 

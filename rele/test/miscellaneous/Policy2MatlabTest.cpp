@@ -46,6 +46,8 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
+//TODO [CLEANUP] implement or remove test
+
 void help(char* argv[])
 {
     cout << "### Policy Test ###" << endl;
@@ -933,25 +935,21 @@ int main(int argc, char *argv[])
     else if (strcmp(argv[1], "linear") == 0)
     {
         //----- DetLinearPolicy
-        //TODO!!
         abort();
     }
     else if (strcmp(argv[1], "random") == 0)
     {
         //----- RandomPolicy
-        //TODO!!
         abort();
     }
     else if (strcmp(argv[1], "randomdiscrete") == 0)
     {
         //----- StochasticDiscretePolicy
-        //TODO!!
         abort();
     }
     else if (strcmp(argv[1], "randomdiscretebias") == 0)
     {
         //----- RandomDiscreteBiasPolicy
-        //TODO!!
         abort();
     }
     else

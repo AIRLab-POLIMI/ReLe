@@ -121,7 +121,7 @@ public:
 
     virtual Policy<ActionC, DenseState>* getPolicy() override
     {
-        // FIXME
+        //TODO [INTERFACE] fix interface implementation for batch methods...
         return nullptr;
     }
 

@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     encoder.getHyperParameters().lambda = 0;
 
 
-    std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl; //FIXME
+    std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl;
     encoder.trainFeatures(features);
     std::cout << "J  = " << encoder.computeJFeatures(features) << std::endl;
 

@@ -58,7 +58,7 @@ void IdentityBasis::writeOnStream(std::ostream &out)
 
 void IdentityBasis::readFromStream(std::istream &in)
 {
-    //TODO Implement
+    //TODO [SERIALIZATION] implement
 }
 
 BasisFunctions IdentityBasis::generate(unsigned int input_size)
@@ -101,7 +101,7 @@ void FiniteIdentityBasis::writeOnStream (std::ostream& out)
 
 void FiniteIdentityBasis::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 BasisFunctions_<size_t> FiniteIdentityBasis::generate(unsigned int stateN)
@@ -141,7 +141,7 @@ void VectorFiniteIdentityBasis::writeOnStream(std::ostream& out)
 
 void VectorFiniteIdentityBasis::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 BasisFunctions VectorFiniteIdentityBasis::generate(std::vector<unsigned int> valuesVector)

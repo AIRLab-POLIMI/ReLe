@@ -7,6 +7,7 @@
 # Tags
 
 [IMPORTANT]  -----> Must be fixed for relase 1
+[MINOR] ----------> minor feature to implement
 [SERIALIZATION] --> Is part of the misisng serialization interface
 [OPTIMIZATION] ---> Just a matter of a faster way of doing an algorithm
 [CLEANUP] --------> Ugly code cleanup

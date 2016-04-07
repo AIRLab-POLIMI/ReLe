@@ -59,8 +59,7 @@ unsigned int SequentialPolicy::operator()(const size_t& state)
 
 double SequentialPolicy::operator()(const size_t& state, const unsigned int& action)
 {
-    // TODO
-    return 0;
+    return action == currentAction;
 }
 
 inline std::string SequentialPolicy::getPolicyName()

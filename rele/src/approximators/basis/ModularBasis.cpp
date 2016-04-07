@@ -51,7 +51,7 @@ void ModularSum::writeOnStream(std::ostream& out)
 
 void ModularSum::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 
@@ -73,7 +73,7 @@ void ModularDifference::writeOnStream(std::ostream& out)
 
 void ModularDifference::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 
@@ -95,7 +95,7 @@ void ModularProduct::writeOnStream(std::ostream& out)
 
 void ModularProduct::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 
@@ -117,7 +117,7 @@ void ModularDivision::writeOnStream(std::ostream& out)
 
 void ModularDivision::readFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 }

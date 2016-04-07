@@ -152,7 +152,7 @@ unsigned int e_GreedyApproximate::operator()(const arma::vec& state)
 
 double e_GreedyApproximate::operator()(const arma::vec& state, const unsigned int& action)
 {
-    //TODO implement
+    //TODO [IMPORTANT] implement
     assert(false);
     return 0.0;
 }

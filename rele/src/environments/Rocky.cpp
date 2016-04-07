@@ -38,7 +38,7 @@ Rocky::Rocky() :
     limitX(-10, 10), limitY(-10, 10),
     maxEnergy(0, 100), predictor(dt, limitX, limitY)
 {
-    //TODO parameter in the constructor
+    //TODO [MINOR] add parameter in the constructor
     vec2 spot;
     spot[0] = 5;
     spot[1] = 0;

@@ -76,12 +76,12 @@ MultiHeatSettings::~MultiHeatSettings()
 
 void MultiHeatSettings::WriteToStream(std::ostream& out) const
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 void MultiHeatSettings::ReadFromStream(std::istream& in)
 {
-    //TODO implement
+    //TODO [SERIALIZATION] implement
 }
 
 //=================================================================

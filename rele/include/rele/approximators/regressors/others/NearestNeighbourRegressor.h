@@ -203,7 +203,7 @@ private:
         return wcss;
     }
 
-    //TODO support sparse vectors properly
+    //TODO [MINOR] support sparse vectors properly
     void runKMeansIteration(const FeaturesCollection& features)
     {
         arma::mat&& centroids = initRandom(features);

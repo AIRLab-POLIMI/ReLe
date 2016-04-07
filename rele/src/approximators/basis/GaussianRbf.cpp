@@ -58,7 +58,7 @@ double GaussianRbf::operator()(const vec& input)
 
     if (squareRoot)
     {
-        //TODO REMOVE usato per la diga
+        //TODO [IMPORTANT] REMOVE usato per la diga
         for (unsigned i = 0; i < dim; ++i)
         {
             retv += (input[i] - mean[i]) * (input[i] - mean[i]) / (scale(i)*scale(i));

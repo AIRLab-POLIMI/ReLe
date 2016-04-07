@@ -147,7 +147,7 @@ arma::vec NormalLearnableStateDependantStddevPolicy::difflog(const arma::vec &st
 
 arma::mat NormalLearnableStateDependantStddevPolicy::diff2log(const arma::vec& state, const arma::vec& action)
 {
-    //TODO Implement
+    //TODO [IMPORTANT] Implement
     return arma::mat();
 }
 
@@ -359,7 +359,7 @@ arma::mat MVNLogisticPolicy::diff2log(const arma::vec& state, const arma::vec& a
 {
     updateInternalState(state);
 
-    //TODO controllare implementazione
+    //TODO [IMPORTANT] controllare implementazione
     int paramSize = this->getParametersSize();
     arma::mat hessian(paramSize,paramSize,arma::fill::zeros);
     int dm = approximator.getParametersSize();

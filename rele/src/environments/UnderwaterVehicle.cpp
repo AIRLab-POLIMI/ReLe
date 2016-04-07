@@ -72,12 +72,12 @@ UWVSettings::~UWVSettings()
 
 void UWVSettings::WriteToStream(ostream& out) const
 {
-    //TODO
+    //TODO [SERIALIZATION] implement
 }
 
 void UWVSettings::ReadFromStream(istream& in)
 {
-    //TODO
+    //TODO [SERIALIZATION] implement
 }
 
 

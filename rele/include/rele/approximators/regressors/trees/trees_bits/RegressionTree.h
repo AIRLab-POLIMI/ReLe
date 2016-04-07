@@ -144,7 +144,7 @@ protected:
         case Constant:
             return new LeafTreeNode<OutputC, denseOutput>(ds);
         case Linear:
-            return nullptr; //TODO implement
+            return nullptr; //TODO [MINOR] implement
         case Samples:
             return new SampleLeafTreeNode<OutputC, denseOutput>(ds.clone());
         default:

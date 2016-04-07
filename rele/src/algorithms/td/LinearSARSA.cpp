@@ -79,7 +79,6 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
 
     vec deltaWeights = alpha(x, u) * delta * this->eligibility;
 
-    //TODO update
     vec regWeights = Q.getParameters();
     regWeights += deltaWeights;
     Q.setParameters(regWeights);
