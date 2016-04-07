@@ -169,16 +169,7 @@ public:
     void trainFeatures(const BatchData& featureDataset) override
     {
 
-        //Setup default parameters
-        if(!params.normalizationF)
-            params.normalizationF = new MinMaxNormalization<denseOutput>();
-
-        if(!params.normalizationO)
-            params.normalizationO = new NoNormalization<denseOutput>();
-
-        if(!params.Omega)
-            params.Omega = new L2_Regularization();
-
+        //Setup default optimizator
         if(!params.optimizator)
             params.optimizator = new GradientDescend<InputC, denseOutput>(10000, 0.1);
 
