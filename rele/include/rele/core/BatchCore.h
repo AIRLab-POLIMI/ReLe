@@ -86,12 +86,12 @@ public:
 
     /*!
      * Run the batch iterations over the dataset specified in the settings.
-     * \param gamma
+     * \param envSettings settings of the environment
      */
-    void run(double gamma)
+    void run(EnvironmentSettings envSettings)
     {
         //Start episode
-        batchAgent.init(data, gamma);
+        batchAgent.init(data, envSettings);
 
         for(unsigned int i = 0;
                 i < settings.maxBatchIterations
@@ -187,7 +187,7 @@ public:
         batchCore.getSettings().logger = settings.agentLogger;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
-        batchCore.run(environment.getSettings().gamma);
+        batchCore.run(environment.getSettings());
     }
 
     /*!

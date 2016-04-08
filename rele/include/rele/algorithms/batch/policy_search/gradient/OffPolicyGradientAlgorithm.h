@@ -54,12 +54,12 @@ public:
         calculator = nullptr;
     }
 
-    virtual void init(Dataset<ActionC, StateC>& data, double gamma) override
+    virtual void init(Dataset<ActionC, StateC>& data, EnvironmentSettings& envSettings) override
     {
         if(calculator)
             delete calculator;
 
-        this->gamma = gamma;
+        this->gamma = envSettings.gamma;
         calculator = OffGradientCalculatorFactory<ActionC, StateC>::build(type, *rewardf, data, policy, behaviour, this->gamma);
     }
 

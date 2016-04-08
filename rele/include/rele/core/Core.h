@@ -117,7 +117,7 @@ public:
         agent.initEpisode(xn, u);
         logger.log(xn);
 
-        Reward r(environment.getSettings().rewardDim);
+        Reward r(environment.getSettings().rewardDimensionality);
 
         for (unsigned int i = 0;
                 i < settings.episodeLength
@@ -172,7 +172,7 @@ public:
         environment.getInitialState(xn);
         logger.log(xn);
 
-        Reward r(environment.getSettings().rewardDim);
+        Reward r(environment.getSettings().rewardDimensionality);
 
         for (unsigned int i = 0;
                 i < settings.episodeLength && !xn.isAbsorbing(); i++)
@@ -208,7 +208,7 @@ public:
 
 
 
-        Reward r(environment.getSettings().rewardDim);
+        Reward r(environment.getSettings().rewardDimensionality);
         arma::vec J_mean(r.size(), arma::fill::zeros);
 
         //Save old logger

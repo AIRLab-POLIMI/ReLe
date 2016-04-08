@@ -44,13 +44,13 @@ public:
         environment(environment), regressor(regressor)
     {
         this->getWritableSettings() = environment.getSettings();
-        this->getWritableSettings().rewardDim = regressor.getOutputSize();
+        this->getWritableSettings().rewardDimensionality = regressor.getOutputSize();
     }
 
     virtual void step(const ActionC& action, StateC& nextState,
                       Reward& reward) override
     {
-        Reward trashReward(environment.getSettings().rewardDim);
+        Reward trashReward(environment.getSettings().rewardDimensionality);
         environment.step(action, nextState, trashReward);
 
         arma::vec&& r = computeReward(state, action, nextState);
