@@ -175,54 +175,6 @@ public:
     }
 
     /*!
-     * Train hyperparameters to maximize the marginal likelihood.
-     */
-    void trainHyperParameters()
-    {
-        // TODO
-    }
-
-    /*!
-     * Sample point(s) from the prior Gaussian Process at the given input point(s).
-     * We follow the common way to sample point(s) from a prior Gaussian Process setting
-     * the mean vector of the multivariate Gaussian distribution to a zero vector.
-     * \param testInputs vector of inputs
-     * \return the vector of points sampled from the model at each input point
-     */
-    arma::vec sampleFromPrior(const InputC& testInputs)
-    {
-        arma::mat testFeatures = this->phi(testInputs);
-        arma::vec samples(testFeatures.n_cols, arma::fill::zeros);
-
-        // TODO
-
-        return samples;
-    }
-
-    /*!
-     * Sample point(s) from the posterior Gaussian Process at the given input point(s).
-     * This can be done only once that the model has been trained.
-     * \param testInputs vector of inputs
-     * \return the vector of points sampled from the model at each input point
-     */
-    arma::vec sampleFromPosterior(const InputC& testInputs)
-    {
-        arma::mat testFeatures = this->phi(testInputs);
-        arma::vec samples(testFeatures.n_cols, arma::fill::zeros);
-
-        // TODO
-        /*if(isTrained)
-        {
-
-        }
-        else
-        	std::cout << "It is not possible to sample from the posterior distribution "
-        		"before training the model!" << std::endl;*/
-
-        return samples;
-    }
-
-    /*!
      * Getter.
      * \return the hyperparameters of the model
      */
