@@ -17,11 +17,11 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
 {
     //Environment Parameters
     settings.gamma = 0.999;
-    settings.continuosStateDim = 2;
-    settings.continuosActionDim = -1;
-    settings.rewardDim = 1;
-    settings.finiteStateDim = -1;
-    settings.finiteActionDim = 3;
+    settings.stateDimensionality = 2;
+    settings.actionDimensionality = -1;
+    settings.rewardDimensionality = 1;
+    settings.statesNumber = -1;
+    settings.actionsNumber = 3;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = false;
@@ -47,7 +47,7 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
         settings.actionRange.lo(), 0.0,
         settings.actionRange.hi()
     };
-    assert(settings.finiteActionDim == settings.actionList.size());
+    assert(settings.actionsNumber == settings.actionList.size());
 }
 
 SwingUpSettings::~SwingUpSettings()
@@ -98,7 +98,7 @@ void SwingUpSettings::ReadFromStream(istream &in)
         actionList.push_back(lo);
     }
 
-    assert(finiteActionDim == actionList.size());
+    assert(actionsNumber == actionList.size());
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +108,7 @@ void SwingUpSettings::ReadFromStream(istream &in)
 DiscreteActionSwingUp::DiscreteActionSwingUp() :
     DenseMDP(new SwingUpSettings()),  cleanConfig(true), config(static_cast<SwingUpSettings*>(settings))
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 
     //variable initialization
     previousTheta = cumulatedRotation = overRotatedTime = 0;
@@ -119,7 +119,7 @@ DiscreteActionSwingUp::DiscreteActionSwingUp() :
 DiscreteActionSwingUp::DiscreteActionSwingUp(SwingUpSettings& config) :
     DenseMDP(&config), cleanConfig(false), config(&config)
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 
     //variable initialization
     previousTheta = cumulatedRotation = overRotatedTime = 0;

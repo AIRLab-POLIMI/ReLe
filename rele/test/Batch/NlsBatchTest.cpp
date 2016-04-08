@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     //-2.9000    7.7000    8.5230
     //-3.1000    9.1000    8.5243
     //-2.8000    7.3000    8.5247
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     // define policy
     BasisFunctions basis = IdentityBasis::generate(dim);

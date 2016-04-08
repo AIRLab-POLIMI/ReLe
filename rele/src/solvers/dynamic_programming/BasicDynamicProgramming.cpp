@@ -34,8 +34,8 @@ namespace ReLe
 DynamicProgrammingAlgorithm::DynamicProgrammingAlgorithm(FiniteMDP& mdp) : mdp(mdp), P(mdp.P), R(mdp.R)
 {
     const EnvironmentSettings& settings = mdp.getSettings();
-    stateN = settings.finiteStateDim;
-    actionN = settings.finiteActionDim;
+    stateN = settings.statesNumber;
+    actionN = settings.actionsNumber;
     gamma = settings.gamma;
     pi.init(stateN);
 }

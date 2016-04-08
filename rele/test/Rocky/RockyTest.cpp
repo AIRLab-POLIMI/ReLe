@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
     Rocky rocky;
 
     //-- Low level policy
-    int dim = rocky.getSettings().continuosStateDim;
-    int actionDim = rocky.getSettings().continuosActionDim;
+    int dim = rocky.getSettings().stateDimensionality;
+    int actionDim = rocky.getSettings().actionDimensionality;
 
     RockyPolicy policy(0.01);
     //--

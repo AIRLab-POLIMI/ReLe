@@ -58,11 +58,11 @@ void MultiHeatSettings::defaultSettings(MultiHeatSettings& settings)
 
     //Environment Parameters
     settings.gamma = 0.95;
-    settings.continuosStateDim = settings.Nr+1;
-    settings.continuosActionDim = 0;
-    settings.rewardDim = 1;
-    settings.finiteStateDim = 0;
-    settings.finiteActionDim = settings.Nr+1;
+    settings.stateDimensionality = settings.Nr+1;
+    settings.actionDimensionality = 0;
+    settings.rewardDimensionality = 1;
+    settings.statesNumber = 0;
+    settings.actionsNumber = settings.Nr+1;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = false;
@@ -92,7 +92,7 @@ MultiHeat::MultiHeat() :
     DenseMDP(new MultiHeatSettings()), cleanConfig(true)
 {
     config = static_cast<MultiHeatSettings*>(settings);
-    currentState.set_size(config->continuosStateDim);
+    currentState.set_size(config->stateDimensionality);
 
     //initialize transition matrix
     computeTransitionMatrix();
@@ -101,7 +101,7 @@ MultiHeat::MultiHeat() :
 MultiHeat::MultiHeat(MultiHeatSettings& config)
     : DenseMDP(&config), cleanConfig(false), config(&config)
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 
     //initialize transition matrix
     computeTransitionMatrix();

@@ -53,10 +53,10 @@ Forex::Forex(const arma::mat& rawDataset, arma::uvec whichIndicators, unsigned i
     task.gamma = 1;
     //task.isAverageReward = false;
     task.isEpisodic = true;
-    task.finiteStateDim = nStates;
-    task.finiteActionDim = 3;
-    task.continuosStateDim = 0;
-    task.rewardDim = 1;
+    task.statesNumber = nStates;
+    task.actionsNumber = 3;
+    task.stateDimensionality = 0;
+    task.rewardDimensionality = 1;
 }
 
 void Forex::getInitialState(FiniteState& state)

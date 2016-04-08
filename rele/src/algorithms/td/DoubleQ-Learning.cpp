@@ -93,7 +93,7 @@ void DoubleQ_Learning::endEpisode(const Reward& reward)
 void DoubleQ_Learning::init()
 {
     FiniteTD::init();
-    doubleQ.zeros(task.finiteStateDim, task.finiteActionDim, 2);
+    doubleQ.zeros(task.statesNumber, task.actionsNumber, 2);
 }
 
 inline void DoubleQ_Learning::updateQ()

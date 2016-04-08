@@ -46,11 +46,11 @@ void NLSSettings::defaultSettings(NLSSettings& settings)
 {
     //Environment Parameters
     settings.gamma = 0.95;
-    settings.continuosStateDim = 2;
-    settings.continuosActionDim = 1;
-    settings.rewardDim = 1;
-    settings.finiteStateDim = -1;
-    settings.finiteActionDim = -1;
+    settings.stateDimensionality = 2;
+    settings.actionDimensionality = 1;
+    settings.rewardDimensionality = 1;
+    settings.statesNumber = -1;
+    settings.actionsNumber = -1;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = false;
@@ -97,13 +97,13 @@ NLSSettings::~NLSSettings()
 NLS::NLS()
     : ContinuousMDP(new NLSSettings()), cleanConfig(true), config(static_cast<NLSSettings*>(settings))
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 NLS::NLS(NLSSettings& config)
     : ContinuousMDP(&config), cleanConfig(true), config(&config)
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void NLS::step(const DenseAction& action, DenseState& nextState, Reward& reward)

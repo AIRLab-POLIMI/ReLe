@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
 
     MultiHeat mdp;
 
-    DenseState cstate(mdp.getSettings().continuosStateDim);
-    DenseState nextstate(mdp.getSettings().continuosStateDim);
+    DenseState cstate(mdp.getSettings().stateDimensionality);
+    DenseState nextstate(mdp.getSettings().stateDimensionality);
     FiniteAction action;
-    Reward reward(mdp.getSettings().rewardDim);
+    Reward reward(mdp.getSettings().rewardDimensionality);
 
     cstate(0) = 0;
     cstate(1) = 19.75;

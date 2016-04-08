@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     // Learn Ship correct policy
     ShipSteering mdp;
 
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     BasisFunctions basis = GaussianRbf::generate(
     {

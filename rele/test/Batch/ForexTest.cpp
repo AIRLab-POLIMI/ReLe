@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     unsigned int priceCol = 7;
     unsigned int nStates = arma::prod(testSet.row(0));
 
-    FQI<FiniteState> fqi(QRegressorA, nStates, 3, 1e-8);
+    FQI<FiniteState> fqi(QRegressorA, 3, 1e-8);
     //DoubleFQI<FiniteState> fqi(data, QRegressorA, QRegressorB, nStates, 3, 1, 1e-8);
     //W_FQI<FiniteState> fqi(data, QRegressorA, nStates, 3, 1, 1e-8);
 
@@ -86,12 +86,15 @@ int main(int argc, char *argv[])
 
     core.getSettings().maxBatchIterations = 3;
 
-    core.run(1.0);
+    double gamma = 1.0;
+    EnvironmentSettings envSettings;
+    envSettings.gamma = gamma;
+    core.run(envSettings);
 
     // Policy Evaluation
     e_Greedy fqiPolicy;
     fqiPolicy.setEpsilon(0);
-    fqiPolicy.setQ(&fqi.getQ());
+    //fqiPolicy.setQ(&fqi.getQ());
     PolicyEvalAgent<FiniteAction, FiniteState> evalAgent(fqiPolicy);
 
     unsigned int nExperiments = 10;

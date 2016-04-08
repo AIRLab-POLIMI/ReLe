@@ -29,7 +29,7 @@ void LinearGradientSARSA::sampleAction(const DenseState& state, FiniteAction& ac
 
 void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState, FiniteAction& action)
 {
-    unsigned int nstates = task.continuosStateDim;
+    unsigned int nstates = task.stateDimensionality;
     unsigned int un = policy(nextState);
 
 
@@ -94,7 +94,7 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
 void LinearGradientSARSA::endEpisode(const Reward& reward)
 {
     //Last update
-    unsigned int nstates = task.continuosStateDim;
+    unsigned int nstates = task.stateDimensionality;
 
     //Prepare input for the regressor
     vec regInput(nstates + 1);

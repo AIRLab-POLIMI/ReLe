@@ -31,8 +31,8 @@ namespace ReLe
 DenseMDP::DenseMDP(EnvironmentSettings *settings)
     : Environment(settings)
 {
-    settings->finiteStateDim = 0;
-    settings->continuosActionDim = 0;
+    settings->statesNumber = 0;
+    settings->actionDimensionality = 0;
 }
 
 DenseMDP::DenseMDP(size_t stateSize, unsigned int actionN, size_t rewardSize, bool isFiniteHorizon,
@@ -53,11 +53,11 @@ void DenseMDP::setupenvironment(size_t stateSize, unsigned int actionN, size_t r
     task.gamma = gamma;
     task.isAverageReward = false;
     task.isEpisodic = isEpisodic;
-    task.finiteStateDim = 0;
-    task.finiteActionDim = actionN;
-    task.continuosStateDim = stateSize;
-    task.continuosActionDim = 0;
-    task.rewardDim = rewardSize;
+    task.statesNumber = 0;
+    task.actionsNumber = actionN;
+    task.stateDimensionality = stateSize;
+    task.actionDimensionality = 0;
+    task.rewardDimensionality = rewardSize;
     task.max_obj = arma::ones(rewardSize);
 }
 

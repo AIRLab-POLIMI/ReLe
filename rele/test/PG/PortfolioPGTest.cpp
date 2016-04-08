@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
     Portfolio mdp;
 
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     //--- define policy (low level)
     BasisFunctions basis = IdentityBasis::generate(dim);

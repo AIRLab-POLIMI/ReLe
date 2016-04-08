@@ -61,7 +61,7 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
     int testEpisodes = 100;
     AdaptiveGradientStep stepRule(0.01);
 
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     double epsilon = 0.05;
     NormalPolicy policy(epsilon, phi);
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     ShipSteering mdp;
 
     //Setup expert policy
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     BasisFunctions basis = GaussianRbf::generate(
     {

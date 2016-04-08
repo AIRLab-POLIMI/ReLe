@@ -39,7 +39,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    if (argc > 1)
+    if(argc > 1)
     {
         GridWorldGenerator generator;
         generator.load(argv[1]);

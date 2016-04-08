@@ -39,7 +39,7 @@ int main()
 {
     Portfolio mdp;
 
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);

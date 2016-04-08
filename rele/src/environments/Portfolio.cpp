@@ -40,11 +40,11 @@ void PortfolioSettings::defaultSettings(PortfolioSettings& settings)
 {
     //Environment Parameters
     settings.gamma = 1.0;
-    settings.continuosStateDim = N_STEPS + 2;
-    settings.continuosActionDim = -1;
-    settings.rewardDim = 1;
-    settings.finiteStateDim = -1;
-    settings.finiteActionDim = 2;
+    settings.stateDimensionality = N_STEPS + 2;
+    settings.actionDimensionality = -1;
+    settings.rewardDimensionality = 1;
+    settings.statesNumber = -1;
+    settings.actionsNumber = 2;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = false;
@@ -92,13 +92,13 @@ void PortfolioSettings::ReadFromStream(istream &in)
 Portfolio::Portfolio() :
     DenseMDP(new PortfolioSettings()), cleanConfig(true), config(static_cast<PortfolioSettings*>(settings))
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 Portfolio::Portfolio(PortfolioSettings& config):
     DenseMDP(&config), cleanConfig(false), config(&config)
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void Portfolio::step(const FiniteAction& action, DenseState& nextState, Reward& reward)

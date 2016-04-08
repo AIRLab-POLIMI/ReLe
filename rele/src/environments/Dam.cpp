@@ -40,11 +40,11 @@ void DamSettings::defaultSettings(DamSettings& settings)
 {
     //Environment Parameters
     settings.gamma = 1.0;
-    settings.continuosStateDim = 1;
-    settings.continuosActionDim = 1;
-    settings.rewardDim = 4;
-    settings.finiteStateDim = -1;
-    settings.finiteActionDim = -1;
+    settings.stateDimensionality = 1;
+    settings.actionDimensionality = 1;
+    settings.rewardDimensionality = 4;
+    settings.statesNumber = -1;
+    settings.actionsNumber = -1;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = true;
     settings.isEpisodic = false;
@@ -124,13 +124,13 @@ void DamSettings::ReadFromStream(istream &in)
 Dam::Dam()
     : ContinuousMDP(new DamSettings()), cleanConfig(true), config(static_cast<DamSettings*>(settings)), nbSteps(0)
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 Dam::Dam(DamSettings& config)
     : ContinuousMDP(&config), cleanConfig(false), config(&config), nbSteps(0)
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
@@ -165,7 +165,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
     // cost due to the excess level w.r.t. a flooding threshold (upstream)
     reward[0] = -std::max(nextState[0]/damConfig.S - damConfig.H_FLO_U, 0.0) + penalty;
 
-    if (damConfig.rewardDim >= 2)
+    if (damConfig.rewardDimensionality >= 2)
     {
         // deficit in the water supply w.r.t. the water demand
         reward[1] = -std::max(damConfig.W_IRR - curr_action, 0.0) + penalty;
@@ -186,13 +186,13 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
     //    std::cout << "nextstate " << nextstate[0] << "\n";
     //    std::cout << "p_hyd: " << p_hyd << std::endl;
 
-    if (damConfig.rewardDim >= 3)
+    if (damConfig.rewardDimensionality >= 3)
     {
         // deficit in the hydroelectric supply w.r.t to hydroelectric demand
         reward[2] = -std::max(damConfig.W_HYD - p_hyd, 0.0) + penalty;
     }
 
-    if (damConfig.rewardDim >= 4)
+    if (damConfig.rewardDimensionality >= 4)
     {
         // cost due to the excess level w.r.t. a flooding threshold (downstream)
         reward[3] = -std::max(curr_action - damConfig.Q_FLO_D, 0.0) + penalty;
@@ -200,7 +200,7 @@ void Dam::step(const DenseAction& action, DenseState& nextState, Reward& reward)
 
     nextState.setAbsorbing(false);
 
-    for (unsigned int i = 0, ie = damConfig.rewardDim; i < ie; ++i)
+    for (unsigned int i = 0, ie = damConfig.rewardDimensionality; i < ie; ++i)
     {
         reward[i] /= damConfig.max_obj[i];
         if (damConfig.isAverageReward)

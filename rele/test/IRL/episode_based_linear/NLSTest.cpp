@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     NLS mdp;
 
     //Setup expert policy
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);

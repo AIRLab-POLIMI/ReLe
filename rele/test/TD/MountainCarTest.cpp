@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     int episodes = 40;
     MountainCar mdp;
 
-    BasisFunctions basis = PolynomialFunction::generate(1, mdp.getSettings().continuosStateDim + 1);
+    BasisFunctions basis = PolynomialFunction::generate(1, mdp.getSettings().stateDimensionality + 1);
     DenseFeatures phi(basis);
 
     e_GreedyApproximate policy;

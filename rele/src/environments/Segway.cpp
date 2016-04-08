@@ -38,11 +38,11 @@ void SegwaySettings::defaultSettings(SegwaySettings& settings)
 {
     //Environment Parameters
     settings.gamma = 0.99;
-    settings.continuosStateDim = 3;
-    settings.continuosActionDim = 1;
-    settings.rewardDim = 1;
-    settings.finiteStateDim = 0;
-    settings.finiteActionDim = 0;
+    settings.stateDimensionality = 3;
+    settings.actionDimensionality = 1;
+    settings.rewardDimensionality = 1;
+    settings.statesNumber = 0;
+    settings.actionsNumber = 0;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
     settings.isEpisodic = true;
@@ -119,14 +119,14 @@ Segway::Segway()
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
     segwayConfig = static_cast<SegwaySettings*>(settings);
-    currentState.set_size(segwayConfig->continuosStateDim);
+    currentState.set_size(segwayConfig->stateDimensionality);
 }
 
 Segway::Segway(SegwaySettings& config)
     : ContinuousMDP(&config), cleanConfig(false), segwayConfig(&config), segwayode(*segwayConfig),
       controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
 {
-    currentState.set_size(this->getSettings().continuosStateDim);
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void Segway::step(const DenseAction& action, DenseState& nextState, Reward& reward)

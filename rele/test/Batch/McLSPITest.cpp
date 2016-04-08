@@ -177,8 +177,10 @@ int main(int argc, char *argv[])
     core.getSettings().maxBatchIterations = 100;
 
     double gamma = 0.9;
+    EnvironmentSettings envSettings;
+    envSettings.gamma = gamma;
 
-    core.run(gamma);
+    core.run(envSettings);
 
 //    cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 

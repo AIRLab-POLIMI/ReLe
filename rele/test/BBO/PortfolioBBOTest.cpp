@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     //e.g.
     //10, 10, 10, 10, .... (guardare documenti)
 
-    int dim = mdp.getSettings().continuosStateDim;
+    int dim = mdp.getSettings().stateDimensionality;
 
     //--- define policy (low level)
     BasisFunctions basis = IdentityBasis::generate(dim);

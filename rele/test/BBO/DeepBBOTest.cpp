@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 
     DeepSeaTreasure mdp;
     vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
+    for (int i = 0; i < mdp.getSettings().actionsNumber; ++i)
         actions.push_back(FiniteAction(i));
 
     //--- policy setup

@@ -21,10 +21,6 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/*
- * Written by: Carlo D'Eramo
- */
-
 #include "rele/core/Core.h"
 #include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
@@ -57,8 +53,8 @@ int main(int argc, char *argv[])
     double gamma = 0.9;
     FiniteMDP&& mdp = generator.getMDP(gamma);
 
-    unsigned int nActions = mdp.getSettings().finiteActionDim;
-    unsigned int nStates = mdp.getSettings().finiteStateDim;
+    unsigned int nActions = mdp.getSettings().actionsNumber;
+    unsigned int nStates = mdp.getSettings().statesNumber;
 
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(2);
@@ -73,7 +69,7 @@ int main(int argc, char *argv[])
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     KDTree<arma::vec, arma::vec> QRegressor(phi, defaultNode, 1, 1);
 
-    W_FQI<FiniteState> batchAgent(QRegressor, nStates, nActions, 1e-8);
+    FiniteW_FQI batchAgent(QRegressor, nStates, nActions, 1e-8);
 
     auto&& core = buildBatchCore(mdp, batchAgent);
 

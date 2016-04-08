@@ -151,7 +151,7 @@ SARSA_lambda::~SARSA_lambda()
 void SARSA_lambda::init()
 {
     FiniteTD::init();
-    Z.zeros(task.finiteStateDim, task.finiteActionDim);
+    Z.zeros(task.statesNumber, task.actionsNumber);
 }
 
 

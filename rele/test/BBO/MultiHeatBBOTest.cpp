@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 
     MultiHeat mdp;
     vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().finiteActionDim; ++i)
+    for (int i = 0; i < mdp.getSettings().actionsNumber; ++i)
         actions.push_back(FiniteAction(i));
 
     //--- policy setup
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
     // transformate input for the replicated basis
     BasisFunctions abasis = AffineFunction::generate(basis, affineMtx);
     // replicate basis for each action
-    BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().continuosStateDim,actions.size()-1);
+    BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().stateDimensionality,actions.size()-1);
     // create feature vector
     DenseFeatures phi(bfs);
     LinearApproximator reg(phi);

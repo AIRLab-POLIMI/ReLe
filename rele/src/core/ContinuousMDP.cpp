@@ -31,8 +31,8 @@ namespace ReLe
 ContinuousMDP::ContinuousMDP(EnvironmentSettings *settings)
     : Environment(settings)
 {
-    settings->finiteStateDim = 0;
-    settings->finiteActionDim = 0;
+    settings->statesNumber = 0;
+    settings->actionsNumber = 0;
 }
 
 ContinuousMDP::ContinuousMDP(size_t stateSize, size_t actionSize, size_t rewardSize, bool isFiniteHorizon,
@@ -53,11 +53,11 @@ void ContinuousMDP::setupEnvironment(size_t stateSize, size_t actionSize, size_t
     task.gamma = gamma;
     task.isAverageReward = false;
     task.isEpisodic = isEpisodic;
-    task.finiteStateDim = 0;
-    task.finiteActionDim = 0;
-    task.continuosStateDim = stateSize;
-    task.continuosActionDim = actionSize;
-    task.rewardDim = rewardSize;
+    task.statesNumber = 0;
+    task.actionsNumber = 0;
+    task.stateDimensionality = stateSize;
+    task.actionDimensionality = actionSize;
+    task.rewardDimensionality = rewardSize;
     task.max_obj = arma::ones(rewardSize);
 }
 

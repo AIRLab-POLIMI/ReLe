@@ -31,7 +31,7 @@ namespace ReLe
 {
 
 LQRsolver::LQRsolver(LQR& lqr, Features& phi, Type type) :
-    lqr(lqr), pi(phi), weightsRew(lqr.getSettings().rewardDim, arma::fill::zeros),
+    lqr(lqr), pi(phi), weightsRew(lqr.getSettings().rewardDimensionality, arma::fill::zeros),
     solution_type(type)
 {
     weightsRew(0) = 1;

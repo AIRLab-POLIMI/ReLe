@@ -44,9 +44,9 @@ void FiniteTD::endEpisode()
 
 void FiniteTD::init()
 {
-    Q.zeros(task.finiteStateDim, task.finiteActionDim);
+    Q.zeros(task.statesNumber, task.actionsNumber);
     policy.setQ(&Q);
-    policy.setNactions(task.finiteActionDim);
+    policy.setNactions(task.actionsNumber);
 }
 
 
@@ -113,9 +113,9 @@ void LinearTD::endEpisode()
 
 void LinearTD::init()
 {
-    x.zeros(task.continuosStateDim);
+    x.zeros(task.stateDimensionality);
     policy.setQ(&Q);
-    policy.setNactions(task.finiteActionDim);
+    policy.setNactions(task.actionsNumber);
 }
 
 LinearTDOutput::LinearTDOutput(double gamma,
