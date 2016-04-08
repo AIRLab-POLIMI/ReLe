@@ -86,16 +86,15 @@ public:
      * \param nStates the number of states
      * \param nActions the number of actions
      * \param epsilon coefficient used to check whether to stop the training
-     * \param shuffle if true, each regressor take a different half of the dataset
+     * \param shuffle if true, each regressor takes a different half of the dataset
      *        at each iteration
      */
     DoubleFQI(BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
-              unsigned int nStates,
               unsigned int nActions,
               double epsilon,
               bool shuffle = false) :
-        FQI<StateC>(QRegressorEnsemble, nStates, nActions, epsilon),
+        FQI<StateC>(QRegressorEnsemble, nActions, epsilon),
         QRegressorEnsemble(QRegressorA, QRegressorB),
         shuffle(shuffle)
     {
@@ -114,19 +113,18 @@ public:
         {
             arma::mat features = this->features.cols(indexes[i]);
             arma::vec rewards = this->rewards(indexes[i]);
-            arma::vec nextStates = this->nextStates(indexes[i]);
+            arma::mat nextStates = this->nextStates.cols(indexes[i]);
             arma::mat outputs(1, indexes[i].n_elem, arma::fill::zeros);
 
             for(unsigned int j = 0; j < indexes[i].n_elem; j++)
             {
-                FiniteState nextState = FiniteState(nextStates(j));
-                if(this->absorbingStates.count(nextState) == 0 && !this->firstStep)
+                if(this->absorbingStates.count(indexes[i][j]) == 0 && !this->firstStep)
                 {
                     arma::vec Q_xn(this->nActions, arma::fill::zeros);
                     for(unsigned int u = 0; u < this->nActions; u++)
                         Q_xn(u) = arma::as_scalar(
                                       QRegressorEnsemble.getRegressor(i)(
-                                          nextState, FiniteAction(u)));
+                                          nextStates.col(j), FiniteAction(u)));
 
                     double qmax = Q_xn.max();
                     arma::uvec maxIndex = find(Q_xn == qmax);
@@ -135,7 +133,7 @@ public:
 
                     outputs(j) = rewards(j) + this->gamma * arma::as_scalar(
                                      QRegressorEnsemble.getRegressor(1 - i)(
-                                         nextState, FiniteAction(maxIndex(index))));
+                                         nextStates.col(j), FiniteAction(maxIndex(index))));
                 }
                 else
                     outputs(j) = rewards(j);
