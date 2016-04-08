@@ -130,7 +130,7 @@ public:
 
     virtual void step() override
     {
-    	arma::vec outputs(nSamples, arma::fill::zeros);
+        arma::vec outputs(nSamples, arma::fill::zeros);
 
         for(unsigned int i = 0; i < nSamples; i++)
         {
