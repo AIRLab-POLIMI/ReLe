@@ -213,8 +213,8 @@ inline void mvnpdf(const arma::mat& x,
 inline arma::mat mvnrand(int n, const arma::vec& mu, const arma::mat& sigma)
 {
     int ncols = sigma.n_cols;
-    arma::mat Y = arma::randn(n, ncols);
-    return arma::repmat(mu, 1, n).t() + Y * arma::chol(sigma);
+    arma::mat Y = arma::randn(ncols, n);
+    return arma::repmat(mu, 1, n) + arma::chol(sigma).t() * Y;
 }
 
 /*!

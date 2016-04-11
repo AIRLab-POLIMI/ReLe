@@ -15,9 +15,9 @@ baseline{1} = 'normal';
 baseline{2} = 'trace'; 
 baseline{3} = 'diag'; 
 
-numEpisodes = [100, 1000, 10000, 100000, 1000000];
+numEpisodes = [100, 1000, 10000, 100000];
 
-numTests = 100;
+numTests = 10000;
 
 
 indx1 = 1;

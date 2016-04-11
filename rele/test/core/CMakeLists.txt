@@ -32,5 +32,8 @@ target_link_libraries(gp_test rele)
 add_executable(em_test ExpectationMaximizationTest.cpp)
 target_link_libraries(em_test rele)
 
+add_executable(bi_test BayesianInferenceTest.cpp)
+target_link_libraries(bi_test rele)
+
 add_executable(nene_test NearestNeighbourTest.cpp)
 target_link_libraries(nene_test rele)
