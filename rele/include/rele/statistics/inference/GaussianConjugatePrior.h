@@ -29,9 +29,24 @@
 namespace ReLe
 {
 
+/*!
+ * This class contains some methods to compute the posterior of
+ * a multivariate gaussian distribution:
+ *
+ * \f[
+ * p(\omega|\mathcal(D))\sim p(\mathcal(D)|\omega)*p(\omega)
+ * \f]
+ *
+ * Every function implements a different type of problem, depending on which parameters
+ * are known (mean, variance, nothing).
+ *
+ */
 class GaussianConjugatePrior
 {
 public:
+    /*!
+     * Computes the distribution posterior when the variance is known.
+     */
     static ParametricNormal compute(const arma::mat& Sigma,
                                     const ParametricNormal& prior,
                                     const arma::mat& samples);

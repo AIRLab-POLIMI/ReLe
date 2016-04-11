@@ -57,7 +57,7 @@ ParametricNormal::ParametricNormal(const vec& params, const mat& covariance)
     cholCov    = chol(Cov);
 }
 
-vec ParametricNormal::operator() ()
+vec ParametricNormal::operator() () const
 {
     //cerr << "Mean: " << mean;
     //cerr << "---------" << endl;
@@ -65,7 +65,7 @@ vec ParametricNormal::operator() ()
     return mvnrandFast(mean, cholCov);
 }
 
-double ParametricNormal::operator() (vec& point)
+double ParametricNormal::operator() (vec& point) const
 {
     return mvnpdfFast(point, mean, invCov, detValue);
 }
@@ -82,14 +82,19 @@ void ParametricNormal::update(vec &increment)
     this->updateInternalState();
 }
 
-vec ParametricNormal::difflog(const vec& point)
+vec ParametricNormal::difflog(const vec& point) const
 {
     return invCov * (point - mean);
 }
 
-mat ParametricNormal::diff2log(const vec&point)
+mat ParametricNormal::diff2log(const vec&point) const
 {
     return -invCov;
+}
+
+vec ParametricNormal::pointDifflog(const vec& point) const
+{
+	return invCov * (point - mean);
 }
 
 void ParametricNormal::writeOnStream(ostream& out)
@@ -165,7 +170,7 @@ void ParametricDiagonalNormal::wmle(const arma::vec& weights, const arma::mat& s
 
 }
 
-arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
+arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point) const
 {
     vec gradient(pointSize*2);
 
@@ -183,7 +188,7 @@ arma::vec ParametricDiagonalNormal::difflog(const arma::vec& point)
     return gradient;
 }
 
-arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point)
+arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point) const
 {
     //TODO [IMPORTANT] controllare implementazione
     int paramSize = this->getParametersSize();
@@ -213,7 +218,7 @@ arma::mat ParametricDiagonalNormal::diff2log(const arma::vec& point)
     return hessian;
 }
 
-sp_mat ParametricDiagonalNormal::FIM()
+sp_mat ParametricDiagonalNormal::FIM() const
 {
     //TODO [OPTIMIZATION] make in a more efficient way
     int rows = invCov.n_rows;
@@ -258,7 +263,7 @@ sp_mat ParametricDiagonalNormal::FIM()
     return final;
 }
 
-sp_mat ParametricDiagonalNormal::inverseFIM()
+sp_mat ParametricDiagonalNormal::inverseFIM() const
 {
     //TODO [OPTIMIZATION] make in a more efficient way
     int rows = Cov.n_rows;
@@ -345,12 +350,12 @@ void ParametricDiagonalNormal::readFromStream(istream& in)
     updateInternalState();
 }
 
-unsigned int ParametricDiagonalNormal::getParametersSize()
+unsigned int ParametricDiagonalNormal::getParametersSize() const
 {
     return 2*mean.n_elem;
 }
 
-arma::vec ParametricDiagonalNormal::getParameters()
+arma::vec ParametricDiagonalNormal::getParameters() const
 {
     return arma::join_vert(mean, diagStdDev);
 }
@@ -438,7 +443,7 @@ void ParametricLogisticNormal::wmle(const arma::vec& weights, const arma::mat& s
     //TODO [IMPORTANT] implement
 }
 
-vec ParametricLogisticNormal::difflog(const vec& point)
+vec ParametricLogisticNormal::difflog(const vec& point) const
 {
     vec diff = point - mean;
     vec mean_grad = invCov * diff;
@@ -455,7 +460,7 @@ vec ParametricLogisticNormal::difflog(const vec& point)
     return gradient;
 }
 
-mat ParametricLogisticNormal::diff2log(const vec& point)
+mat ParametricLogisticNormal::diff2log(const vec& point) const
 {
     int paramSize = this->getParametersSize();
     mat hessian(paramSize,paramSize,fill::zeros);
@@ -540,12 +545,12 @@ void ParametricLogisticNormal::readFromStream(istream &in)
     updateInternalState();
 }
 
-unsigned int ParametricLogisticNormal::getParametersSize()
+unsigned int ParametricLogisticNormal::getParametersSize() const
 {
     return 2*mean.n_elem;
 }
 
-arma::vec ParametricLogisticNormal::getParameters()
+arma::vec ParametricLogisticNormal::getParameters() const
 {
     return arma::join_vert(mean, logisticWeights);
 }
@@ -619,7 +624,7 @@ void ParametricCholeskyNormal::wmle(const arma::vec& weights, const arma::mat& s
     updateInternalState();
 }
 
-vec ParametricCholeskyNormal::difflog(const vec& point)
+vec ParametricCholeskyNormal::difflog(const vec& point) const
 {
     int paramSize = this->getParametersSize();
     vec gradient(paramSize);
@@ -668,13 +673,13 @@ vec ParametricCholeskyNormal::difflog(const vec& point)
     return gradient;
 }
 
-mat ParametricCholeskyNormal::diff2log(const vec &point)
+mat ParametricCholeskyNormal::diff2log(const vec &point) const
 {
     //TODO [IMPORTANT] implement
     return mat();
 }
 
-sp_mat ParametricCholeskyNormal::FIM()
+sp_mat ParametricCholeskyNormal::FIM() const
 {
     //TODO [OPTIMIZATION] make in a more efficient way
     int rows = invCov.n_rows;
@@ -694,7 +699,7 @@ sp_mat ParametricCholeskyNormal::FIM()
     //=========================
 }
 
-sp_mat ParametricCholeskyNormal::inverseFIM()
+sp_mat ParametricCholeskyNormal::inverseFIM() const
 {
     //TODO [OPTIMIZATION] make in a more efficient way
     int rows = Cov.n_rows;
@@ -763,12 +768,12 @@ void ParametricCholeskyNormal::readFromStream(istream &in)
     this->updateInternalState();
 }
 
-unsigned int ParametricCholeskyNormal::getParametersSize()
+unsigned int ParametricCholeskyNormal::getParametersSize() const
 {
     return 2*pointSize + (pointSize * pointSize - pointSize) / 2;
 }
 
-arma::vec ParametricCholeskyNormal::getParameters()
+arma::vec ParametricCholeskyNormal::getParameters() const
 {
     int dim = getParametersSize();
     vec params(dim);
@@ -852,25 +857,25 @@ ParametricFullNormal::ParametricFullNormal(const arma::vec& initial_mean,
     updateInternalState();
 }
 
-arma::vec ParametricFullNormal::difflog(const arma::vec& point)
+arma::vec ParametricFullNormal::difflog(const arma::vec& point) const
 {
     //TODO [IMPORTANT] implement
     return mat();
 }
 
-arma::mat ParametricFullNormal::diff2log(const arma::vec& point)
+arma::mat ParametricFullNormal::diff2log(const arma::vec& point) const
 {
     //TODO [IMPORTANT] implement
     return mat();
 }
 
-arma::sp_mat ParametricFullNormal::FIM()
+arma::sp_mat ParametricFullNormal::FIM() const
 {
     //TODO [IMPORTANT] implement
     return sp_mat();
 }
 
-arma::sp_mat ParametricFullNormal::inverseFIM()
+arma::sp_mat ParametricFullNormal::inverseFIM() const
 {
     //TODO [IMPORTANT] implement
     return sp_mat();
@@ -901,12 +906,12 @@ void ParametricFullNormal::readFromStream(std::istream &in)
     //TODO [SERIALIZATION] implement
 }
 
-unsigned int ParametricFullNormal::getParametersSize()
+unsigned int ParametricFullNormal::getParametersSize() const
 {
     return mean.n_elem + Cov.n_elem;
 }
 
-arma::vec ParametricFullNormal::getParameters()
+arma::vec ParametricFullNormal::getParameters() const
 {
     arma::vec w(getParametersSize());
     w.rows(0, mean.n_elem - 1) = mean;

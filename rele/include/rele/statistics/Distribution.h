@@ -61,7 +61,7 @@ public:
      *
      * \return a randomly generated point
      */
-    virtual arma::vec operator() () = 0;
+    virtual arma::vec operator() () const = 0;
 
     /*!
      * Return the probability of a point to be generated
@@ -69,13 +69,13 @@ public:
      * \param point a point to be evaluated
      * \return the probability of the point
      */
-    virtual double operator() (arma::vec& point) = 0;
+    virtual double operator() (arma::vec& point) const = 0;
 
     /*!
      * Getter.
      * \return The size of the support
      */
-    inline unsigned int getPointSize()
+    inline unsigned int getPointSize() const
     {
         return pointSize;
     }
@@ -84,7 +84,7 @@ public:
      * Getter.
      * \return the name of the distribution
      */
-    virtual std::string getDistributionName() = 0;
+    virtual std::string getDistributionName() const = 0;
 
     /*!
      * This method implements the weighted maximum likelihood estimate of
@@ -126,9 +126,9 @@ public:
      * Getter.
      * \return The size of the parameters
      */
-    virtual unsigned int getParametersSize() = 0;
+    virtual unsigned int getParametersSize() const = 0;
 
-    virtual arma::vec getParameters() = 0;
+    virtual arma::vec getParameters() const = 0;
 
     /*!
      * Update the internal parameters according to the
@@ -144,8 +144,7 @@ public:
      * \param point the point where the gradient is evaluated
      * \return the gradient vector
      */
-    virtual arma::vec difflog(const arma::vec& point) = 0;
-
+    virtual arma::vec difflog(const arma::vec& point) const = 0;
 
     /*!
      * Compute the hessian (\f$d(d\log D)^{T}\f$) of the logarithm of the
@@ -153,7 +152,19 @@ public:
      * \param point the point where the hessian is evaluated
      * \return the hessian matrix (out)
      */
-    virtual arma::mat diff2log(const arma::vec& point) = 0;
+    virtual arma::mat diff2log(const arma::vec& point) const = 0;
+
+    /*!
+     * Compute the gradient of the logarithm of the distribution
+     * in the current params w.r.t. the given point.
+     * differently from difflog, the computed gradient is not the parameter's
+     * gradient, but the input gradient, i.e. how much the probability changes
+     * if the input changes.
+     * \param point the point where the gradient is evaluated
+     * \return the gradient vector
+     */
+    virtual arma::vec pointDifflog(const arma::vec& point) const = 0;
+
 
 };
 
@@ -174,12 +185,12 @@ public:
     /*!
      * Computes the fisher information matrix of the distribution.
      */
-    virtual arma::sp_mat FIM() = 0;
+    virtual arma::sp_mat FIM() const = 0;
 
     /*!
      * Computes the inverse of the fisher information matrix.
      */
-    virtual arma::sp_mat inverseFIM() = 0;
+    virtual arma::sp_mat inverseFIM() const = 0;
 };
 
 } //end namespace
