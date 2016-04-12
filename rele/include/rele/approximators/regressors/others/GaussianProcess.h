@@ -86,12 +86,12 @@ public:
         arma::mat testFeatures = this->phi(testInputs);
         arma::vec outputs(2, arma::fill::zeros);
 
-		arma::vec k = generateCovVector(features, testFeatures.col(0));
-		outputs(0) = arma::dot(k.t(), alpha);
+        arma::vec k = generateCovVector(features, testFeatures.col(0));
+        outputs(0) = arma::dot(k.t(), alpha);
 
-		arma::vec v = arma::solve(L, k);
-		outputs(1) = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
-					   arma::dot(v.t(), v);
+        arma::vec v = arma::solve(L, k);
+        outputs(1) = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
+                     arma::dot(v.t(), v);
 
         return outputs;
     }

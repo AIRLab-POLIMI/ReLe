@@ -44,7 +44,7 @@ void MountainCar::step(const FiniteAction& action,
     int motorAction = action.getActionN() - 1;
 
     double updatedVelocity = currentState[velocity] + motorAction * 0.001
-                              - 0.0025 * cos(3 * currentState[position]);
+                             - 0.0025 * cos(3 * currentState[position]);
     double updatedPosition = currentState[position] + updatedVelocity;
 
     reward[0] = -1;
@@ -52,19 +52,19 @@ void MountainCar::step(const FiniteAction& action,
     // Sutton article
     if(updatedPosition <= -1.2)
     {
-    	currentState[position] = -1.2;
-    	currentState[velocity] = 0;
+        currentState[position] = -1.2;
+        currentState[velocity] = 0;
     }
     else if(updatedPosition > 0.5)
     {
-    	currentState[position] = 0.5;
-    	currentState[velocity] = 0;
-    	currentState.setAbsorbing();
+        currentState[position] = 0.5;
+        currentState[velocity] = 0;
+        currentState.setAbsorbing();
     }
     else
     {
-    	currentState[position] = updatedPosition;
-    	currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
+        currentState[position] = updatedPosition;
+        currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
     }
 
     //Klein's article
