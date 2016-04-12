@@ -48,3 +48,8 @@ target_link_libraries(ship_eblirl rele ${Boost_LIBRARIES})
 add_executable(gaussian_NoGIRL GaussianTestNoGIRL.cpp)
 target_link_libraries(gaussian_NoGIRL rele)
 
+# bayesian
+add_executable(lqr_bayesian bayesian/LQRBayesianTest.cpp)
+target_link_libraries(lqr_bayesian rele)
+
+

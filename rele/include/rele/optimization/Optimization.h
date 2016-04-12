@@ -88,7 +88,7 @@ public:
     static double objFunctionWrapper(unsigned int n, const double* x, double* grad,
                                      void* o)
     {
-        arma::vec df;
+        arma::vec df(n, arma::fill::zeros);
         arma::vec parV(const_cast<double*>(x), n, true);
         double value = static_cast<Class*>(o)->objFunction(parV, df);
 

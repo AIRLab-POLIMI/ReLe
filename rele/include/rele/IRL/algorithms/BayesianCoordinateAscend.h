@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_IRL_ALGORITHMS_BAYESIANCOORDINATEDESCENT_H_
-#define INCLUDE_RELE_IRL_ALGORITHMS_BAYESIANCOORDINATEDESCENT_H_
+#ifndef INCLUDE_RELE_IRL_ALGORITHMS_BAYESIANCOORDINATEASCEND_H_
+#define INCLUDE_RELE_IRL_ALGORITHMS_BAYESIANCOORDINATEASCEND_H_
 
 #include "rele/core/Transition.h"
 #include "rele/statistics/inference/GaussianConjugatePrior.h"
@@ -32,13 +32,13 @@ namespace ReLe
 {
 
 template<class ActionC, class StateC>
-class BayesianCoordinateDescend
+class BayesianCoordinateAscend
 {
 public:
-    BayesianCoordinateDescend(const arma::mat& Sigma,
-    						  const ParametricNormal& prior,
-                              const DifferentiablePolicy<ActionC, StateC>& policy)
-        : Sigma(Sigma), prior(prior), policy(policy)
+    BayesianCoordinateAscend(const arma::mat& Sigma,
+                             const ParametricNormal& prior,
+                             DifferentiablePolicy<ActionC, StateC>& policy)
+        : Sigma(Sigma), prior(prior), policy(policy), posterior(policy.getParametersSize())
     {
 
     }
@@ -56,15 +56,18 @@ public:
 
         do
         {
-        	//Reset posterior probability
+            //Reset posterior probability
             oldPosteriorP = posteriorP;
             posteriorP = 0;
 
             //Compute policy MAP for each element
             for(unsigned int ep = 0; ep < data.size(); ep++)
             {
+            	Dataset<ActionC,StateC> epDataset;
+            	epDataset.push_back(data[ep]);
+            	MAP<ActionC, StateC> mapCalculator(policy, prior, epDataset);
                 arma::vec theta_ep = params.col(ep);
-                posteriorP += MAP<ActionC, StateC> mapCalculator(policy, prior, data[ep]);
+                posteriorP += mapCalculator.compute(theta_ep);
                 params.col(ep) = policy.getParameters();
             }
 
@@ -81,13 +84,13 @@ public:
 
     ParametricNormal getPosterior()
     {
-    	return posterior;
+        return posterior;
     }
 
 private:
     const arma::mat& Sigma;
     const ParametricNormal& prior;
-    DifferentiablePolicy<ActionC, StateC> policy;
+    DifferentiablePolicy<ActionC, StateC>& policy;
     ParametricNormal posterior;
 
 };
@@ -96,4 +99,4 @@ private:
 }
 
 
-#endif /* INCLUDE_RELE_IRL_ALGORITHMS_BAYESIANCOORDINATEDESCENT_H_ */
+#endif /* INCLUDE_RELE_IRL_ALGORITHMS_BAYESIANCOORDINATEASCEND_H_ */

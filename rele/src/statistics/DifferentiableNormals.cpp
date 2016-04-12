@@ -65,7 +65,7 @@ vec ParametricNormal::operator() () const
     return mvnrandFast(mean, cholCov);
 }
 
-double ParametricNormal::operator() (vec& point) const
+double ParametricNormal::operator() (const vec& point) const
 {
     return mvnpdfFast(point, mean, invCov, detValue);
 }
@@ -76,7 +76,7 @@ void ParametricNormal::wmle(const arma::vec& weights, const arma::mat& samples)
     updateInternalState();
 }
 
-void ParametricNormal::update(vec &increment)
+void ParametricNormal::update(const vec &increment)
 {
     mean += increment;
     this->updateInternalState();
@@ -94,7 +94,7 @@ mat ParametricNormal::diff2log(const vec&point) const
 
 vec ParametricNormal::pointDifflog(const vec& point) const
 {
-	return invCov * (point - mean);
+    return invCov * (point - mean);
 }
 
 void ParametricNormal::writeOnStream(ostream& out)
@@ -375,7 +375,7 @@ void ParametricDiagonalNormal::setParameters(arma::vec& newval)
     updateInternalState();
 }
 
-void ParametricDiagonalNormal::update(arma::vec& increment)
+void ParametricDiagonalNormal::update(const arma::vec& increment)
 {
     assert(increment.n_elem == 2*mean.n_elem);
     int i, nb = mean.n_elem;
@@ -570,7 +570,7 @@ void ParametricLogisticNormal::setParameters(arma::vec& newval)
     updateInternalState();
 }
 
-void ParametricLogisticNormal::update(arma::vec& increment)
+void ParametricLogisticNormal::update(const arma::vec& increment)
 {
     assert(increment.n_elem == 2*mean.n_elem);
     int i, nb = mean.n_elem;
@@ -816,7 +816,7 @@ void ParametricCholeskyNormal::setParameters(arma::vec& newval)
     updateInternalState();
 }
 
-void ParametricCholeskyNormal::update(arma::vec &increment)
+void ParametricCholeskyNormal::update(const arma::vec &increment)
 {
     int dim = getParametersSize();
     for (int i = 0; i < pointSize; ++i)
@@ -932,7 +932,7 @@ void ParametricFullNormal::setParameters(arma::vec& newval)
     updateInternalState();
 }
 
-void ParametricFullNormal::update(arma::vec &increment)
+void ParametricFullNormal::update(const arma::vec &increment)
 {
     mean += increment.rows(0, mean.n_elem - 1);
 

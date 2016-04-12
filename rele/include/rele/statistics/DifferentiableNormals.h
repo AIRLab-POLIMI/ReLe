@@ -65,7 +65,7 @@ public:
     // Distribution interface
 public:
     virtual arma::vec operator() () const override;
-    virtual double operator() (arma::vec& point) const override;
+    virtual double operator() (const arma::vec& point) const override;
 
     virtual inline std::string getDistributionName() const override
     {
@@ -92,7 +92,7 @@ public:
         mean = newval;
     }
 
-    virtual void update(arma::vec &increment) override;
+    virtual void update(const arma::vec &increment) override;
     virtual arma::vec difflog(const arma::vec& point) const override;
     virtual arma::mat diff2log(const arma::vec& point) const override;
     virtual arma::vec pointDifflog(const arma::vec& point) const override;
@@ -191,7 +191,7 @@ public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
     virtual void setParameters(arma::vec& newval) override;
-    virtual void update(arma::vec &increment) override;
+    virtual void update(const arma::vec &increment) override;
 
 
     // ParametricNormal interface
@@ -285,7 +285,7 @@ public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
     virtual void setParameters(arma::vec& newval) override;
-    virtual void update(arma::vec &increment) override;
+    virtual void update(const arma::vec &increment) override;
 
 
     // ParametricNormal interface
@@ -374,7 +374,7 @@ public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
     virtual void setParameters(arma::vec& newval) override;
-    virtual void update(arma::vec &increment) override;
+    virtual void update(const arma::vec &increment) override;
 
 
     // ParametricNormal interface
@@ -436,7 +436,7 @@ public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
     virtual void setParameters(arma::vec& newval) override;
-    virtual void update(arma::vec &increment) override;
+    virtual void update(const arma::vec &increment) override;
 
 
     // ParametricNormal interface

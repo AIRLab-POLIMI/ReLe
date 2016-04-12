@@ -45,23 +45,15 @@ class MAP
 {
 public:
     MAP(DifferentiablePolicy<ActionC,StateC>& policy,
-    	const DifferentiableDistribution& prior,
+        const DifferentiableDistribution& prior,
         const Dataset<ActionC,StateC>& ds)
         : policy(policy), prior(prior), data(ds)
     {
 
     }
 
-    MAP(DifferentiablePolicy<ActionC,StateC>& policy,
-    	const DifferentiableDistribution& prior,
-    	const Episode<ActionC,StateC>& ep)
-    	: policy(policy), prior(prior), data(Dataset<ActionC, StateC>())
-    {
-    	data.push_back(ep);
-    }
-
     virtual double compute(arma::vec starting = arma::vec(),
-                              unsigned int maxFunEvals = 0)
+                           unsigned int maxFunEvals = 0)
     {
         int dp = policy.getParametersSize();
         assert(dp > 0);
@@ -117,14 +109,12 @@ public:
         unsigned int dp = policy.getParametersSize();
         double logLikelihood = 0.0;
 
-
-        arma::vec gradient(dp, arma::fill::zeros);
         for (int ep = 0; ep < episodeN; ++ep)
         {
             int nbSteps = data[ep].size();
             for (int t = 0; t < nbSteps; ++t)
             {
-                Transition<ActionC, StateC>& tr = data[ep][t];
+                auto& tr = data[ep][t];
 
                 // compute likelihood
                 double likelihood = policy(tr.x,tr.u);
@@ -132,18 +122,18 @@ public:
                 logLikelihood += log(likelihood);
 
                 // compute gradient
-                gradient += policy.difflog(tr.x, tr.u);
+                dx += policy.difflog(tr.x, tr.u);
             }
         }
 
         // compute average value
         logLikelihood /= episodeN;
-        gradient /= episodeN;
+        dx /= episodeN;
 
         //compute prior
         double priorP = prior(x);
         double logPrior = std::log(priorP);
-        gradient += prior.pointDifflog(x);
+        dx += prior.pointDifflog(x);
 
         return logLikelihood + logPrior;
     }
@@ -156,7 +146,7 @@ public:
 protected:
     DifferentiablePolicy<ActionC,StateC>& policy;
     const DifferentiableDistribution& prior;
-    Dataset<ActionC,StateC>& data;
+    const Dataset<ActionC,StateC>& data;
 };
 
 }

@@ -69,7 +69,7 @@ public:
      * \param point a point to be evaluated
      * \return the probability of the point
      */
-    virtual double operator() (arma::vec& point) const = 0;
+    virtual double operator() (const arma::vec& point) const = 0;
 
     /*!
      * Getter.
@@ -136,7 +136,7 @@ public:
      *
      * \param increment a vector of increment value for each component
      */
-    virtual void update(arma::vec& increment) = 0;
+    virtual void update(const arma::vec& increment) = 0;
 
     /*!
      * Compute the gradient of the logarithm of the distribution
