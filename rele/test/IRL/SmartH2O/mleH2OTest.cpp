@@ -201,7 +201,8 @@ int main(int argc, char *argv[])
     cout << endl << "Policy: " << policy.getPolicyName() << endl << endl;
 
     MLE<DenseAction,DenseState> mle(policy, data);
-    arma::vec pp = mle.solve(startVal, 400);
+    mle.compute(startVal, 400);
+    arma::vec pp = policy.getParameters();
 
     std::cerr << endl << "MLE Params (" << pp.n_elem << " weights): " << endl << pp.t();
     policy.setParameters(pp);
