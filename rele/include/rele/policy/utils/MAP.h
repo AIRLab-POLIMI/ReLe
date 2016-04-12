@@ -37,7 +37,7 @@ template<class ActionC, class StateC>
 class MAP : public StatisticEstimation<ActionC, StateC>
 {
 protected:
-	USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
+    USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
 
 public:
     MAP(DifferentiablePolicy<ActionC,StateC>& policy,

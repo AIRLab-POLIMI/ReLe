@@ -33,7 +33,7 @@ template<class ActionC, class StateC>
 class MLE : public StatisticEstimation<ActionC, StateC>
 {
 protected:
-	USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
+    USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
 
 public:
     MLE(DifferentiablePolicy<ActionC,StateC>& policy, Dataset<ActionC,StateC>& data)
@@ -86,7 +86,7 @@ class RidgeRegularizedMLE : public MLE<ActionC, StateC>
 {
 
 protected:
-	USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
+    USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
 
 public:
     RidgeRegularizedMLE(DifferentiablePolicy<ActionC,StateC>& policy,
