@@ -21,18 +21,17 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/approximators/features/SparseFeatures.h"
 #include "rele/approximators/features/DenseFeatures.h"
-#include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 
-#include "rele/policy/parametric/differentiable/LinearPolicy.h"
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include "rele/policy/parametric/differentiable/LinearPolicy.h"
 #include "rele/statistics/DifferentiableNormals.h"
 
-#include "rele/environments/LQR.h"
-#include "rele/solvers/lqr/LQRsolver.h"
+#include "rele/environments/NLS.h"
+
 #include "rele/core/PolicyEvalAgent.h"
+#include "rele/core/Core.h"
 
 #include "rele/utils/FileManager.h"
 
@@ -42,50 +41,44 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
+//#define PRINT
+#define RUN_GIRL
+#define RECOVER
+
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 100;
+//  RandomGenerator::seed(45423424);
+//  RandomGenerator::seed(8763575);
 
-    FileManager fm("lqr", "bayesian");
+    unsigned int nbEpisodes = 100;
+
+    FileManager fm("nls", "bayesian");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    //Set reward policy
-    vec eReward = {0.2, 0.7, 0.1};
+    NLS mdp;
 
-    // Build policy
-    int rewardDim = eReward.n_elem;
-    int dim = 3;
-    LQR mdp(dim, rewardDim);
+    //Setup expert policy
+    unsigned int dim = mdp.getSettings().stateDimensionality;
+    unsigned int actionDim = 1;
 
     BasisFunctions basis = IdentityBasis::generate(dim);
+    DenseFeatures phi(basis);
 
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
+    arma::vec p(2);
+    p(0) = 6.5178;
+    p(1) = -2.5994;
 
     DetLinearPolicy<DenseState> expertPolicy(phi);
-
-    // solve the problem in exact way
-    LQRsolver solver(mdp,phi);
-    solver.setRewardWeights(eReward);
-    mat K = solver.computeOptSolution();
-    arma::vec p = K.diag();
-    arma::mat Sigma = arma::eye(dim, dim);
-    Sigma *= 0.001;
+    arma::mat Sigma = arma::eye(dim, dim)*0.1;
     ParametricNormal expertDist(p, Sigma);
 
-    std::cout << "Rewards: ";
-    for (int i = 0; i < eReward.n_elem; ++i)
-    {
-        std::cout << eReward(i) << " ";
-    }
-    std::cout << "| Params: " << expertDist.getParameters().t() << std::endl;
-
+    std::cout << "Params: " << expertDist.getParameters().t() << std::endl;
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 
-    // Generate LQR expert dataset
+    // Generate expert dataset
     Core<DenseAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
@@ -95,11 +88,11 @@ int main(int argc, char *argv[])
     Dataset<DenseAction,DenseState>& data = collection.data;
 
     // recover initial policy
-    arma::vec mu_p = {0.5, 0.5, 0.5};
-    arma::mat Sigma_p = arma::eye(dim, dim)*0.01;
+    arma::vec mu_p = {0.0, 0.0};
+    arma::mat Sigma_p = arma::eye(dim, dim)*10;
     ParametricNormal prior(mu_p, Sigma_p);
 
-    arma::mat SigmaPolicy = arma::eye(dim, dim)*0.01;
+    arma::mat SigmaPolicy = arma::eye(actionDim, actionDim)*0.01;
     MVNPolicy policyFamily(phi, SigmaPolicy);
     BayesianCoordinateAscend<DenseAction, DenseState> alg(Sigma, prior, policyFamily);
 

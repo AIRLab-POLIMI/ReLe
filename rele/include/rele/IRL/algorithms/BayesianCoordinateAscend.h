@@ -63,9 +63,9 @@ public:
             //Compute policy MAP for each element
             for(unsigned int ep = 0; ep < data.size(); ep++)
             {
-            	Dataset<ActionC,StateC> epDataset;
-            	epDataset.push_back(data[ep]);
-            	MAP<ActionC, StateC> mapCalculator(policy, prior, epDataset);
+                Dataset<ActionC,StateC> epDataset;
+                epDataset.push_back(data[ep]);
+                MAP<ActionC, StateC> mapCalculator(policy, prior, epDataset);
                 arma::vec theta_ep = params.col(ep);
                 posteriorP += mapCalculator.compute(theta_ep);
                 params.col(ep) = policy.getParameters();
