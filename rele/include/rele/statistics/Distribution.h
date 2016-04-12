@@ -128,7 +128,17 @@ public:
      */
     virtual unsigned int getParametersSize() const = 0;
 
+    /*!
+     * Getter.
+     * \return The parameters vector
+     */
     virtual arma::vec getParameters() const = 0;
+
+    /*!
+     * Setter.
+     * \param parameters The new parameters of the distribution.
+     */
+    virtual void setParameters(const arma::vec& parameters) = 0;
 
     /*!
      * Update the internal parameters according to the

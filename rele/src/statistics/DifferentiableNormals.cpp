@@ -76,6 +76,11 @@ void ParametricNormal::wmle(const arma::vec& weights, const arma::mat& samples)
     updateInternalState();
 }
 
+void ParametricNormal::setParameters(const arma::vec& newval)
+{
+    mean = newval;
+}
+
 void ParametricNormal::update(const vec &increment)
 {
     mean += increment;
@@ -360,7 +365,7 @@ arma::vec ParametricDiagonalNormal::getParameters() const
     return arma::join_vert(mean, diagStdDev);
 }
 
-void ParametricDiagonalNormal::setParameters(arma::vec& newval)
+void ParametricDiagonalNormal::setParameters(const arma::vec& newval)
 {
     assert(newval.n_elem == 2*mean.n_elem);
     int i, nb = mean.n_elem;
@@ -555,7 +560,7 @@ arma::vec ParametricLogisticNormal::getParameters() const
     return arma::join_vert(mean, logisticWeights);
 }
 
-void ParametricLogisticNormal::setParameters(arma::vec& newval)
+void ParametricLogisticNormal::setParameters(const arma::vec& newval)
 {
     assert(newval.n_elem == 2*mean.n_elem);
     int i, nb = mean.n_elem;
@@ -795,7 +800,7 @@ arma::vec ParametricCholeskyNormal::getParameters() const
     return params;
 }
 
-void ParametricCholeskyNormal::setParameters(arma::vec& newval)
+void ParametricCholeskyNormal::setParameters(const arma::vec& newval)
 {
     int dim = getParametersSize();
     for (int i = 0; i < pointSize; ++i)
@@ -919,7 +924,7 @@ arma::vec ParametricFullNormal::getParameters() const
     return w;
 }
 
-void ParametricFullNormal::setParameters(arma::vec& newval)
+void ParametricFullNormal::setParameters(const arma::vec& newval)
 {
     mean = newval.rows(0, mean.n_elem - 1);
 

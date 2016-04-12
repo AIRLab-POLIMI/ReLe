@@ -87,11 +87,7 @@ public:
         return mean;
     }
 
-    inline virtual void setParameters(arma::vec& newval)
-    {
-        mean = newval;
-    }
-
+    virtual void setParameters(const arma::vec& newval) override;
     virtual void update(const arma::vec &increment) override;
     virtual arma::vec difflog(const arma::vec& point) const override;
     virtual arma::mat diff2log(const arma::vec& point) const override;
@@ -190,7 +186,7 @@ public:
 public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
-    virtual void setParameters(arma::vec& newval) override;
+    virtual void setParameters(const arma::vec& newval) override;
     virtual void update(const arma::vec &increment) override;
 
 
@@ -284,7 +280,7 @@ public:
 public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
-    virtual void setParameters(arma::vec& newval) override;
+    virtual void setParameters(const arma::vec& newval) override;
     virtual void update(const arma::vec &increment) override;
 
 
@@ -373,7 +369,7 @@ public:
 public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
-    virtual void setParameters(arma::vec& newval) override;
+    virtual void setParameters(const arma::vec& newval) override;
     virtual void update(const arma::vec &increment) override;
 
 
@@ -435,7 +431,7 @@ public:
 public:
     unsigned int getParametersSize() const override;
     virtual arma::vec getParameters() const override;
-    virtual void setParameters(arma::vec& newval) override;
+    virtual void setParameters(const arma::vec& newval) override;
     virtual void update(const arma::vec &increment) override;
 
 
