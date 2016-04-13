@@ -62,8 +62,8 @@ Wishart GaussianConjugatePrior::compute(const arma::vec& mean,
 }
 
 InverseWishart GaussianConjugatePrior::compute(const arma::vec& mean,
-                       const InverseWishart& prior,
-                       const arma::mat& samples)
+        const InverseWishart& prior,
+        const arma::mat& samples)
 {
     unsigned int n = samples.n_cols;
 

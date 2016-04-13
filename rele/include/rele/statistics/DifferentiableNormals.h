@@ -101,22 +101,19 @@ public:
 
     // Specific Normal policy interface
 public:
-    /*!
-     * Getter.
-     * \return the mean of the distribution
-     */
-    inline arma::vec getMean() const
+    inline arma::mat getMean() const override
     {
         return mean;
     }
 
-    /*!
-     * Getter.
-     * \return the covariance of the distribution
-     */
-    inline arma::mat getCovariance() const
+    inline arma::mat getCovariance() const override
     {
         return Cov;
+    }
+
+    inline arma::mat getMode() const override
+    {
+        return getMean();
     }
 
 protected:

@@ -48,33 +48,33 @@ void MountainCar::step(const FiniteAction& action,
     double updatedPosition = currentState[position] + updatedVelocity;
 
 
-	if(updatedPosition <= -1.2)
-	{
-		currentState[position] = -1.2;
-		currentState[velocity] = 0;
-	}
-	else if(updatedPosition > 0.5)
-	{
-		currentState[position] = 0.6;
-		currentState[velocity] = 0;
-		currentState.setAbsorbing();
-	}
-	else
-	{
-		currentState[position] = updatedPosition;
-		currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
-	}
+    if(updatedPosition <= -1.2)
+    {
+        currentState[position] = -1.2;
+        currentState[velocity] = 0;
+    }
+    else if(updatedPosition > 0.5)
+    {
+        currentState[position] = 0.6;
+        currentState[velocity] = 0;
+        currentState.setAbsorbing();
+    }
+    else
+    {
+        currentState[position] = updatedPosition;
+        currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
+    }
 
-	//Sutton's article
-	if(envType == Sutton)
-	    reward[0] = -1;
+    //Sutton's article
+    if(envType == Sutton)
+        reward[0] = -1;
     //Klein's article
     else if(envType == Klein)
     {
-		if(currentState[position] > 0.5)
-			reward[0] = 1;
-		else
-			reward[0] = 0;
+        if(currentState[position] > 0.5)
+            reward[0] = 1;
+        else
+            reward[0] = 0;
     }
 
     nextState = currentState;

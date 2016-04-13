@@ -315,6 +315,19 @@ Normal Distributions
    
 .. doxygenclass:: ReLe::ParametricFullNormal
    :members:
+   
+Wishart Distributions
+---------------------
+
+.. doxygenclass:: ReLe::WishartBase
+   :members:
+   
+.. doxygenclass:: ReLe::Wishart
+   :members:
+   
+.. doxygenclass:: ReLe::InverseWishart
+   :members:   
+
 
 Environments
 ============

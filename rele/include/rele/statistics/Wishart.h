@@ -118,6 +118,24 @@ public:
         return "InverseWishart";
     }
 
+    inline arma::mat getMean() const override
+    {
+
+        return nu*V;
+    }
+
+    inline arma::mat getCovariance() const override
+    {
+        //TODO [IMPORTANT] implement
+        return arma::mat();
+    }
+
+    inline arma::mat getMode() const override
+    {
+        unsigned int p = V.n_cols;
+        return (nu - p - 1.0)*V;
+    }
+
     virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
 private:
@@ -175,6 +193,24 @@ public:
     virtual inline std::string getDistributionName() const override
     {
         return "Wishart";
+    }
+
+    inline arma::mat getMean() const override
+    {
+        unsigned int p = Psi.n_cols;
+        return Psi/(nu - p - 1.0);
+    }
+
+    inline arma::mat getCovariance() const override
+    {
+        //TODO [IMPORTANT] implement
+        return arma::mat();
+    }
+
+    inline arma::mat getMode() const override
+    {
+        unsigned int p = Psi.n_cols;
+        return Psi/(nu + p + 1.0);
     }
 
     virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
