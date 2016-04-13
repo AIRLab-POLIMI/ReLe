@@ -26,6 +26,7 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/algorithms/batch/td/DoubleFQI.h"
+#include "rele/algorithms/batch/td/W-FQI.h"
 #include "rele/algorithms/td/Q-Learning.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/core/FiniteMDP.h"
@@ -65,7 +66,8 @@ int main(int argc, char *argv[])
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
     //FQI<FiniteState> batchAgent(QRegressorA, nActions, 1e-8);
-    DoubleFQI<FiniteState> batchAgent(QRegressorA, QRegressorB, nActions, 1e-8);
+    //DoubleFQI<FiniteState> batchAgent(QRegressorA, QRegressorB, nActions, 1e-8);
+    FiniteW_FQI batchAgent(QRegressorA, nStates, nActions, 1e-8);
 
     auto&& core = buildBatchCore(mdp, batchAgent);
 
