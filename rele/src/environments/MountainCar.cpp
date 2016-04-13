@@ -57,7 +57,7 @@ void MountainCar::step(const FiniteAction& action,
     }
     else if(updatedPosition > 0.5)
     {
-        currentState[position] = 0.5;
+        currentState[position] = 0.6;
         currentState[velocity] = 0;
         currentState.setAbsorbing();
     }
