@@ -36,7 +36,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int episodes = 10000;
+    unsigned int episodes = 10000;
     MountainCar mdp;
 
     unsigned int nRbfs = 5;
