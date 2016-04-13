@@ -79,7 +79,7 @@ public:
     virtual void getInitialState(DenseState& state) override;
 
     //! Configuration type.
-    ConfigurationsLabel s0type;
+    ConfigurationsLabel envType;
 };
 
 }
