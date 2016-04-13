@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
     arma::mat SigmaPolicy = arma::eye(actionDim, actionDim)*0.01;
     MVNPolicy policyFamily(phi, SigmaPolicy);
-    BayesianCoordinateAscend<DenseAction, DenseState> alg(Sigma, prior, policyFamily);
+    BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
 
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);

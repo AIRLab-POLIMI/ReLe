@@ -87,6 +87,24 @@ public:
     virtual std::string getDistributionName() const = 0;
 
     /*!
+     * Getter.
+     * \return the distribution mean
+     */
+    virtual arma::mat getMean() const = 0;
+
+    /*!
+     * Getter.
+     * \return the distribution covariance
+     */
+    virtual arma::mat getCovariance() const = 0;
+
+    /*!
+     * Getter.
+     * \return the distribution mode
+     */
+    virtual arma::mat getMode() const = 0;
+
+    /*!
      * This method implements the weighted maximum likelihood estimate of
      * the distribution, given a set of weighted samples.
      *
