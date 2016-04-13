@@ -25,6 +25,7 @@
 #include "rele/core/FiniteMDP.h"
 #include "rele/algorithms/td/SARSA.h"
 #include "rele/algorithms/td/DoubleQ-Learning.h"
+#include "rele/algorithms/td/WQ-Learning.h"
 #include "rele/core/Core.h"
 #include "rele/generators/GridWorldGenerator.h"
 #include "rele/policy/q_policy/e_Greedy.h"
@@ -46,8 +47,9 @@ int main(int argc, char *argv[])
 
         e_Greedy policy;
         ConstantLearningRate alpha(0.2);
-        Q_Learning agent(policy, alpha);
+        //Q_Learning agent(policy, alpha);
         //DoubleQ_Learning agent(policy, alpha);
+        WQ_Learning agent(policy, alpha);
 
         auto&& core = buildCore(mdp, agent);
 

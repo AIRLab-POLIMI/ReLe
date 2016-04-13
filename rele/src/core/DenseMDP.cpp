@@ -32,7 +32,7 @@ DenseMDP::DenseMDP(EnvironmentSettings *settings)
     : Environment(settings)
 {
     settings->statesNumber = 0;
-    settings->actionDimensionality = 0;
+    settings->actionDimensionality = 1;
 }
 
 DenseMDP::DenseMDP(size_t stateSize, unsigned int actionN, size_t rewardSize, bool isFiniteHorizon,
@@ -56,7 +56,7 @@ void DenseMDP::setupenvironment(size_t stateSize, unsigned int actionN, size_t r
     task.statesNumber = 0;
     task.actionsNumber = actionN;
     task.stateDimensionality = stateSize;
-    task.actionDimensionality = 0;
+    task.actionDimensionality = 1;
     task.rewardDimensionality = rewardSize;
     task.max_obj = arma::ones(rewardSize);
 }
