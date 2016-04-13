@@ -40,10 +40,17 @@ public:
 
     /*!
      * Constructor.
-     * \param nu the
+     * \param p the number of rows and columns in the matrix
+     * \param nu he degrees of freedom of the wishart distribution
+     */
+    Wishart(unsigned int p, unsigned int nu);
+
+    /*!
+     * Constructor.
+     * \param nu the degrees of freedom of the wishart distribution
      * \param V the covariance of the distribution
      */
-    Wishart(double nu,
+    Wishart(unsigned int nu,
             const arma::mat& V);
 
     /*!
@@ -68,7 +75,7 @@ protected:
 
 private:
     arma::mat V;
-    double nu;
+    unsigned int nu;
 
 };
 
