@@ -56,18 +56,14 @@ public:
                       FiniteAction& action) override;
     virtual void endEpisode(const Reward& reward) override;
 
+    void setLambda(double lambda);
+
     virtual ~LinearGradientSARSA();
 
-    void setReplacingTraces(bool val)
-    {
-        useReplacingTraces = val;
-    }
-
 private:
+    arma::vec prevQxu;
     arma::vec eligibility;
     double lambda;
-    bool useReplacingTraces;
-
 };
 
 }
