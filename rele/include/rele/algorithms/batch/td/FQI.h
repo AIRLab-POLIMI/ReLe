@@ -174,7 +174,7 @@ public:
     virtual void computeQHat()
     {
         for(unsigned int i = 0; i < states.n_elem; i++)
-            QHat(i) = arma::as_scalar(QRegressor(states.col(i), FiniteAction(actions(i))));
+            QHat(i) = arma::as_scalar(QRegressor(states.col(i), FiniteAction(actions(i)))(0));
     }
 
     inline virtual AgentOutputData* getAgentOutputData() override

@@ -34,6 +34,7 @@
 #include "rele/approximators/regressors/nn/FFNeuralNetwork.h"
 #include "rele/approximators/regressors/nn/FFNeuralNetworkEnsemble.h"
 #include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/core/logger/BatchDatasetLogger.h"
 #include "rele/approximators/regressors/trees/KDTree.h"
 #include "rele/approximators/regressors/trees/ExtraTree.h"
 #include "rele/approximators/regressors/trees/ExtraTreeEnsemble.h"
@@ -65,9 +66,9 @@ int main(int argc, char *argv[])
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    //FQI<FiniteState> batchAgent(QRegressorA, nActions, 1e-8);
+    FQI<FiniteState> batchAgent(QRegressorA, nActions, 1e-8);
     //DoubleFQI<FiniteState> batchAgent(QRegressorA, QRegressorB, nActions, 1e-8);
-    FiniteW_FQI batchAgent(QRegressorA, nStates, nActions, 1e-8);
+    //FiniteW_FQI batchAgent(QRegressorA, nStates, nActions, 1e-8);
 
     auto&& core = buildBatchCore(mdp, batchAgent);
 
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::string fileName = fm.addPath("gwFQI.txt");
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, FiniteState>();
+    core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, FiniteState>(fm.addPath("gw.txt"));
     core.getSettings().episodeLength = 1000;
     core.getSettings().maxBatchIterations = 100;
 
