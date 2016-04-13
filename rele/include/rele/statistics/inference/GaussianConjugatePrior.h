@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_STATISTICS_INFERENCE_GAUSSIANCONJUGATEPRIOR_H_
 
 #include "rele/statistics/DifferentiableNormals.h"
+#include "rele/statistics/Wishart.h"
 
 namespace ReLe
 {
@@ -38,7 +39,7 @@ namespace ReLe
  * \f]
  *
  * Every function implements a different type of problem, depending on which parameters
- * are known (mean, variance, nothing).
+ * should be estimated.
  *
  */
 class GaussianConjugatePrior
@@ -46,10 +47,27 @@ class GaussianConjugatePrior
 public:
     /*!
      * Computes the distribution posterior when the variance is known.
+     * \return the mean posterior distribution
      */
     static ParametricNormal compute(const arma::mat& Sigma,
                                     const ParametricNormal& prior,
                                     const arma::mat& samples);
+
+    /*!
+     * Computes the distribution posterior when the mean is known.
+     * \return the precision matrix posterior distribution
+     */
+    static Wishart compute(const arma::vec& mean,
+                           const Wishart& prior,
+                           const arma::mat& samples);
+
+    /*!
+     * Computes the distribution posterior when the mean is known.
+     * \return the covariance matrix posterior distribution
+     */
+    static InverseWishart compute(const arma::vec& mean,
+                                  const InverseWishart& prior,
+                                  const arma::mat& samples);
 
 };
 

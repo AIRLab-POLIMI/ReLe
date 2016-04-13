@@ -46,7 +46,35 @@ ParametricNormal GaussianConjugatePrior::compute(const arma::mat& Sigma,
     return ParametricNormal(muPost, SigmaPost);
 }
 
+Wishart GaussianConjugatePrior::compute(const arma::vec& mean,
+                                        const Wishart& prior,
+                                        const arma::mat& samples)
+{
+    unsigned int n = samples.n_cols;
 
+    unsigned int nuPost = n + prior.getNu();
+
+    arma::mat Xn = samples.each_col() - arma::mean(samples, 1);
+
+    arma::mat VPost = (prior.getV().i() + Xn*Xn.t()).i();
+
+    return Wishart(nuPost, VPost);
+}
+
+InverseWishart GaussianConjugatePrior::compute(const arma::vec& mean,
+                       const InverseWishart& prior,
+                       const arma::mat& samples)
+{
+    unsigned int n = samples.n_cols;
+
+    unsigned int nuPost = n + prior.getNu();
+
+    arma::mat Xn = samples.each_col() - arma::mean(samples, 1);
+
+    arma::mat VPost = (prior.getPsi() + Xn*Xn.t());
+
+    return InverseWishart(nuPost, VPost);
+}
 
 
 }
