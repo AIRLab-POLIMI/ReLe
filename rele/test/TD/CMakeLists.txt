@@ -8,8 +8,5 @@ target_link_libraries(simple_chain_mean rele)
 add_executable(grid_world GridWorldTest.cpp)
 target_link_libraries(grid_world rele)
 
-add_executable(grid_world2 GridWorldTest2.cpp)
-target_link_libraries(grid_world2 rele)
-
 add_executable(mountain_car MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
