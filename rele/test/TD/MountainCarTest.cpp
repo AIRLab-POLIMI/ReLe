@@ -39,19 +39,9 @@ int main(int argc, char *argv[])
     unsigned int episodes = 10000;
     MountainCar mdp;
 
-    unsigned int nRbfs = 5;
-    unsigned int size = 0;
-    std::vector<BasisFunctions> bRbfs;
-    for(unsigned int i = 0; i < nRbfs; i++)
-    {
-        bRbfs.push_back(GaussianRbf::generate(i + 3, {-0.7, 0.7, -1.2, 0.6}));
-        size += bRbfs[i].size();
-    }
-    std::vector<BasisFunction*> bVector;
-    bVector.reserve(size);
-    for(unsigned int i = 0; i < nRbfs; i++)
-        bVector.insert(bVector.end(), bRbfs[i].begin(), bRbfs[i].end());
+    BasisFunctions bVector = PolynomialFunction::generate(7, mdp.getSettings().statesNumber + 1);
     BasisFunctions basis = AndConditionBasisFunction::generate(bVector, 2, mdp.getSettings().actionsNumber);
+
     DenseFeatures phi(basis);
 
     e_GreedyApproximate policy;
@@ -69,7 +59,7 @@ int main(int argc, char *argv[])
     for (int i = 0; i < episodes; i++)
     {
         core.getSettings().episodeLength = 10000;
-        cout << "starting episode" << endl;
+        cout << "Starting episode: " << i << endl;
         core.runEpisode();
     }
 
