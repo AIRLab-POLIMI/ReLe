@@ -36,7 +36,7 @@ class BayesianCoordinateAscend
 {
 public:
     BayesianCoordinateAscend(DifferentiablePolicy<ActionC, StateC>& policy,
-                             const arma::vec& mu0, const arma::vec& Sigma0)
+                             const arma::vec& mu0, const arma::mat& Sigma0)
         : policy(policy), thetaPrior(mu0, Sigma0)
     {
 
@@ -184,7 +184,7 @@ public:
     virtual double computePosterior() override
     {
         //Use previous covariance estimate
-        arma::vec Sigma = covPosterior.getMode();
+        arma::mat Sigma = covPosterior.getMode();
 
         //Compute mean distribution posterior
         meanPosterior = GaussianConjugatePrior::compute(Sigma, meanPrior, this->params);
@@ -197,7 +197,10 @@ public:
         Sigma = covPosterior.getMode();
 
         //compute posterior probability
-        return std::log(meanPosterior(mu)) + std::log(covPosterior(Sigma));
+        double meanP = meanPosterior(mu);
+        double covP = covPosterior(arma::vectorise(Sigma));
+
+        return std::log(meanP) + std::log(covP);
     }
 
     virtual void computeThetaPrior() override
@@ -210,14 +213,14 @@ public:
         return meanPosterior;
     }
 
-    ParametricNormal getCovPosterior()
+    InverseWishart getCovPosterior()
     {
         return covPosterior;
     }
 
 private:
     const ParametricNormal& meanPrior;
-    const ParametricNormal& covPrior;
+    const InverseWishart& covPrior;
     ParametricNormal meanPosterior;
     InverseWishart covPosterior;
 

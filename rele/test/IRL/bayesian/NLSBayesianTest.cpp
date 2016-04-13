@@ -88,15 +88,22 @@ int main(int argc, char *argv[])
     Dataset<DenseAction,DenseState>& data = collection.data;
 
     // recover initial policy
-    arma::vec mu_p = {0.0, 0.0};
-    arma::mat Sigma_p = arma::eye(dim, dim)*10;
-    ParametricNormal prior(mu_p, Sigma_p);
-
     arma::mat SigmaPolicy = arma::eye(actionDim, actionDim)*0.01;
     MVNPolicy policyFamily(phi, SigmaPolicy);
-    BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
 
-    std::cout << "Recovering Distribution" << std::endl;
+    // priors
+    arma::vec mu_p = {0.0, 0.0};
+    arma::mat Sigma_p = arma::eye(dim, dim)*10;
+    ParametricNormal meanPrior(mu_p, Sigma_p);
+
+    arma::mat Psi = arma::eye(2, 2)*1e-5;
+    unsigned int nu = 2;
+    InverseWishart covPrior(nu, Psi);
+
+
+    BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, meanPrior, Sigma);
+
+    std::cout << "Recovering Distribution (mean only)" << std::endl;
     alg.compute(data);
 
     ParametricNormal posterior = alg.getPosterior();
@@ -105,5 +112,23 @@ int main(int argc, char *argv[])
               << posterior.getMean().t() << std::endl
               << "Covariance estimate" << std::endl
               << posterior.getCovariance() << std::endl;
+
+
+
+    BayesianCoordinateAscendFull<DenseAction, DenseState> alg2(policyFamily, meanPrior, covPrior);
+
+    std::cout << "Recovering Distribution (mean and covariance)" << std::endl;
+    alg2.compute(data);
+
+    ParametricNormal meanPosterior = alg2.getMeanPosterior();
+    InverseWishart covPosterior = alg2.getCovPosterior();
+
+    std::cout << "Mean" << std::endl
+              << meanPosterior.getMean().t() << std::endl
+              << "Covariance estimate" << std::endl
+              << meanPosterior.getCovariance() << std::endl;
+
+    std::cout << "Cov parameters" << std::endl
+              << covPosterior.getMode() << std::endl;
 
 }

@@ -98,7 +98,7 @@ double Wishart::operator() (const arma::vec& point) const
 
 void Wishart::wmle(const arma::vec& weights, const arma::mat& samples)
 {
-	//TODO [IMPORTANT] check
+    //TODO [IMPORTANT] check
     unsigned int p = V.n_rows;
     arma::vec vecV = samples*weights/arma::sum(weights);
     V = arma::reshape(vecV, p, p);

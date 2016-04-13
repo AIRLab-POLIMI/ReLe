@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     std::cout << precPosterior.getNu() << std::endl;
 
     std::cout << "posterior covariance mean" << std::endl;
-    std::cout << precPosterior.getV().i()/precPosterior.getNu() << std::endl;
+    std::cout << precPosterior.getMean().i() << std::endl;
 
     std::cout << "Covariance estimation test" << std::endl;
     InverseWishart&& covPosterior = GaussianConjugatePrior::compute(mu, covPrior, samples);
@@ -96,5 +96,5 @@ int main(int argc, char *argv[])
     std::cout << covPosterior.getNu() << std::endl;
 
     std::cout << "posterior covariance mean" << std::endl;
-    std::cout << covPosterior.getPsi()/(precPosterior.getNu() - 3.0) << std::endl;
+    std::cout << covPosterior.getMean() << std::endl;
 }
