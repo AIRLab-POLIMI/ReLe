@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
     int episodes = 10000;
     MountainCar mdp;
 
-    unsigned int nRbfs = 4;
+    unsigned int nRbfs = 5;
     unsigned int size = 0;
     std::vector<BasisFunctions> bRbfs;
     for(unsigned int i = 0; i < nRbfs; i++)
     {
         bRbfs.push_back(GaussianRbf::generate(i + 3, {-0.7, 0.7, -1.2, 0.6}));
-        size += bRbfs.size();
+        size += bRbfs[i].size();
     }
     std::vector<BasisFunction*> bVector;
     bVector.reserve(size);
