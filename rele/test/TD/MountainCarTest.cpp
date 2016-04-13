@@ -26,24 +26,45 @@
 #include "rele/algorithms/td/LinearSARSA.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
 #include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/utils/FileManager.h"
 
 using namespace std;
 using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int episodes = 40;
+    int episodes = 10000;
     MountainCar mdp;
 
-    BasisFunctions basis = PolynomialFunction::generate(1, mdp.getSettings().stateDimensionality + 1);
+    unsigned int nRbfs = 4;
+    unsigned int size = 0;
+    std::vector<BasisFunctions> bRbfs;
+    for(unsigned int i = 0; i < nRbfs; i++)
+    {
+        bRbfs.push_back(GaussianRbf::generate(i + 3, {-0.7, 0.7, -1.2, 0.6}));
+        size += bRbfs.size();
+    }
+    std::vector<BasisFunction*> bVector;
+    bVector.reserve(size);
+    for(unsigned int i = 0; i < nRbfs; i++)
+        bVector.insert(bVector.end(), bRbfs[i].begin(), bRbfs[i].end());
+    BasisFunctions basis = AndConditionBasisFunction::generate(bVector, 2, mdp.getSettings().actionsNumber);
     DenseFeatures phi(basis);
 
     e_GreedyApproximate policy;
-    ConstantLearningRateDense alpha(0.2);
+    policy.setEpsilon(0.05);
+    ConstantLearningRateDense alpha(0.1);
     LinearGradientSARSA agent(phi, policy, alpha);
+    agent.setLambda(0.8);
 
+    FileManager fm("mc", "linearSarsa");
+    fm.createDir();
+    fm.cleanDir();
     auto&& core = buildCore(mdp, agent);
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mc.txt"));
 
     for (int i = 0; i < episodes; i++)
     {
