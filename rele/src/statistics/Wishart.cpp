@@ -22,21 +22,26 @@
  */
 
 #include "rele/statistics/Wishart.h"
+#include "rele/utils/ArmadilloPDFs.h"
 
 namespace ReLe
 {
 
 Wishart::Wishart(unsigned int p) :
-	Distribution(p*p), V(p, p, arma::fill::eye)
+	Distribution(p*p), nu(p), V(p, p, arma::fill::eye)
 {
-    nu = p + 2;
+
 }
 
+Wishart::Wishart(unsigned int p, unsigned int nu) :
+			Distribution(p*p), nu(nu), V(p, p, arma::fill::eye)
+{
 
+}
 
-Wishart::Wishart(double nu,
+Wishart::Wishart(unsigned int nu,
                  const arma::mat& V) :
-			Distribution(V.n_rows*V.n_cols),nu(nu), V(V)
+			Distribution(V.n_rows*V.n_cols), nu(nu), V(V)
 {
 
 }
@@ -48,8 +53,11 @@ Wishart::~Wishart()
 
 arma::vec Wishart::operator() () const
 {
-	//TODO [IMPORTANT] implement
-	return arma::vec();
+	unsigned int p = V.n_rows;
+	arma::mat X = mvnrand(nu, arma::zeros(p), V);
+	arma::mat Lambda = X*X.t();
+
+	return arma::vectorise(Lambda);
 }
 
 double Wishart::operator() (const arma::vec& point) const
@@ -65,8 +73,9 @@ double Wishart::operator() (const arma::vec& point) const
 
 void Wishart::wmle(const arma::vec& weights, const arma::mat& samples)
 {
-    //TODO [IMPORTANT][INTERFACE] refactoring or change this
-    throw std::logic_error("wmle not implemented for wishart");
+    unsigned int p = V.n_rows;
+    arma::vec vecV = samples*weights/arma::sum(weights);
+    V = arma::reshape(vecV, p, p);
 }
 
 double Wishart::tgamma_p(unsigned int p, double value) const
