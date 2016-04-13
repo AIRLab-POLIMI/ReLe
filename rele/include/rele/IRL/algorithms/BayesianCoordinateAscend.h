@@ -38,7 +38,9 @@ public:
     BayesianCoordinateAscend(const arma::mat& Sigma,
                              const ParametricNormal& prior,
                              DifferentiablePolicy<ActionC, StateC>& policy)
-        : Sigma(Sigma), prior(prior), policy(policy), posterior(policy.getParametersSize())
+        : Sigma(Sigma), prior(prior), policy(policy),
+		  thetaPrior(prior.getMean(), Sigma),
+		  posterior(policy.getParametersSize())
     {
 
     }
@@ -48,35 +50,25 @@ public:
         unsigned int dp = policy.getParametersSize();
         unsigned int n = data.size();
 
-        arma::mat params(dp, n, arma::fill::zeros);
+        params.zeros(dp, n);
 
         double eps = 1e-8;
-        double posteriorP = 0;
+        double posteriorP = -std::numeric_limits<double>::infinity();
         double oldPosteriorP;
 
         do
         {
             //Reset posterior probability
             oldPosteriorP = posteriorP;
-            posteriorP = 0;
 
             //Compute policy MAP for each element
-            for(unsigned int ep = 0; ep < data.size(); ep++)
-            {
-                Dataset<ActionC,StateC> epDataset;
-                epDataset.push_back(data[ep]);
-                MAP<ActionC, StateC> mapCalculator(policy, prior, epDataset);
-                arma::vec theta_ep = params.col(ep);
-                posteriorP += mapCalculator.compute(theta_ep);
-                params.col(ep) = policy.getParameters();
-            }
+			posteriorP = updateTheta(data);
 
             //Compute distribution posterior
-            posterior = GaussianConjugatePrior::compute(Sigma, prior, params);
+			posteriorP += computePosterior();
 
-            //compute posterior probability
-            arma::vec omega = posterior.getMean();
-            posteriorP += std::log(posterior(omega));
+            //Update theta prior
+			computeThetaPrior();
 
         }
         while(posteriorP - oldPosteriorP > eps);
@@ -87,11 +79,48 @@ public:
         return posterior;
     }
 
+protected:
+	double updateTheta(const Dataset<ActionC, StateC>& data)
+	{
+		 double posteriorP = 0;
+
+		//Compute policy MAP for each element
+		for (unsigned int ep = 0; ep < data.size(); ep++)
+		{
+			Dataset<ActionC, StateC> epDataset;
+			epDataset.push_back(data[ep]);
+			MAP<ActionC, StateC> mapCalculator(policy, thetaPrior, epDataset);
+			arma::vec theta_ep = params.col(ep);
+			posteriorP += mapCalculator.compute(theta_ep);
+			params.col(ep) = policy.getParameters();
+		}
+
+		return posteriorP;
+	}
+
+	double computePosterior()
+	{
+		//Compute distribution posterior
+		posterior = GaussianConjugatePrior::compute(Sigma, prior, params);
+
+		//compute posterior probability
+		arma::vec omega = posterior.getMean();
+		return std::log(posterior(omega));
+	}
+
+	void computeThetaPrior()
+	{
+		thetaPrior = ParametricNormal(posterior.getMean(), Sigma);
+	}
+
 private:
+    arma::mat params;
     const arma::mat& Sigma;
     const ParametricNormal& prior;
     DifferentiablePolicy<ActionC, StateC>& policy;
+    ParametricNormal thetaPrior;
     ParametricNormal posterior;
+
 
 };
 
