@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_ALGORITHMS_BATCH_W_FQI_H_
 
 #include "rele/algorithms/batch/td/FQI.h"
+#include "rele/approximators/regressors/others/GaussianProcess.h"
 #include <boost/math/distributions/normal.hpp>
 
 namespace ReLe
@@ -68,9 +69,6 @@ public:
 protected:
     arma::mat idxs;
     unsigned int nUpdatesQ;
-
-protected:
-    virtual inline void updateMeanAndSampleStdQ() = 0;
 };
 
 class FiniteW_FQI: public W_FQI<FiniteState>
@@ -98,10 +96,10 @@ public:
             if(this->absorbingStates.count(i) == 0 && !this->firstStep)
             {
                 arma::vec integrals(this->nActions, arma::fill::zeros);
+                arma::vec means = Q.row(nextState).t();
+                arma::vec sigma = sampleStdQ.row(nextState).t();
                 for(unsigned int j = 0; j < integrals.n_elem; j++)
                 {
-                    arma::vec means = Q.row(nextState).t();
-                    arma::vec sigma = sampleStdQ.row(nextState).t();
                     double pdfMean = means(j);
                     double pdfSampleStd = sigma(j);
                     double lowerLimit = pdfMean - sigmaBound * pdfSampleStd;
@@ -135,7 +133,7 @@ public:
                     integrals(j) = result;
                 }
 
-                double W = arma::dot(Q.row(nextState), integrals);
+                double W = arma::dot(means, integrals);
 
                 outputs(i) = this->rewards(i) + this->gamma * W;
             }
@@ -160,7 +158,7 @@ protected:
     unsigned int nStates;
 
 protected:
-    inline void updateMeanAndSampleStdQ() override
+    inline void updateMeanAndSampleStdQ()
     {
         this->computeQ();
         this->nUpdatesQ++;
@@ -182,6 +180,89 @@ protected:
         for(unsigned int i = 0; i < nStates; i++)
             for(unsigned int j = 0; j < nActions; j++)
                 Q(i, j) = arma::as_scalar(QRegressor(FiniteState(i), FiniteAction(j)));
+    }
+};
+
+class GPW_FQI: public W_FQI<DenseState>
+{
+public:
+    GPW_FQI(GaussianProcess& QRegressor,
+            unsigned int nActions,
+            double epsilon) :
+        W_FQI<DenseState>(QRegressor, nActions, epsilon)
+    {
+    }
+
+    void step() override
+    {
+        arma::mat outputs(1, this->nSamples, arma::fill::zeros);
+
+        for(unsigned int i = 0; i < this->nSamples; i++)
+        {
+            DenseState nextState = DenseState(this->nextStates(0, i));
+            if(this->absorbingStates.count(i) == 0 && !this->firstStep)
+            {
+                arma::vec integrals(this->nActions, arma::fill::zeros);
+                arma::vec means(this->nActions, arma::fill::zeros);
+                arma::vec sigma(this->nActions, arma::fill::zeros);
+                for(unsigned int j = 0; j < this->nActions; j++)
+                {
+                    arma::vec results(2, arma::fill::zeros);
+                    results = this->QRegressor(nextState, FiniteAction(j));
+                    means(j) = results(0);
+                    sigma(j) = sqrt(results(1));
+                }
+                for(unsigned int j = 0; j < integrals.n_elem; j++)
+                {
+                    double pdfMean = means(j);
+                    double pdfSampleStd = sigma(j);
+                    double lowerLimit = pdfMean - sigmaBound * pdfSampleStd;
+                    double upperLimit = pdfMean + sigmaBound * pdfSampleStd;
+
+                    arma::vec trapz = arma::linspace(lowerLimit, upperLimit, nTrapz + 1);
+                    double diff = trapz(1) - trapz(0);
+
+                    double result = 0;
+                    for(unsigned int t = 0; t < trapz.n_elem - 1; t++)
+                    {
+                        arma::vec cdfs(this->idxs.n_cols, arma::fill::zeros);
+                        for(unsigned int k = 0; k < cdfs.n_elem; k++)
+                        {
+                            boost::math::normal cdfNormal(means(this->idxs(j, k)), sigma(this->idxs(j, k)));
+                            cdfs(k) = cdf(cdfNormal, trapz(t));
+                        }
+                        boost::math::normal pdfNormal(pdfMean, pdfSampleStd);
+                        double t1 = pdf(pdfNormal, trapz(t)) * arma::prod(cdfs);
+
+                        for(unsigned int k = 0; k < cdfs.n_elem; k++)
+                        {
+                            boost::math::normal cdfNormal(means(this->idxs(j, k)), sigma(this->idxs(j, k)));
+                            cdfs(k) = cdf(cdfNormal, trapz(t + 1));
+                        }
+                        double t2 = pdf(pdfNormal, trapz(t + 1)) * arma::prod(cdfs);
+
+                        result += (t1 + t2) * diff * 0.5;
+                    }
+
+                    integrals(j) = result;
+                }
+
+                double W = arma::dot(means, integrals);
+
+                outputs(i) = this->rewards(i) + this->gamma * W;
+            }
+            else
+                outputs(i) = this->rewards(i);
+        }
+
+        BatchDataSimple featureDataset(this->features, outputs);
+        this->QRegressor.trainFeatures(featureDataset);
+
+        nUpdatesQ++;
+
+        this->firstStep = false;
+
+        this->checkCond();
     }
 };
 
