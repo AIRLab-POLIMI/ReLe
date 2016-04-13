@@ -31,20 +31,34 @@ using namespace arma;
 int main(int argc, char *argv[])
 {
     unsigned int samplesN = 10000;
-    arma::vec mu_gt = {0.5, 2.3};
-    arma::mat Sigma_gt = {{0.2, 0.1},{0.1, 0.2}};
-
-    arma::mat samples = mvnrand(samplesN, mu_gt, Sigma_gt);
-
-    arma::vec samplesMean = arma::mean(samples, 1);
-
+    arma::vec mu = {0.5, 2.3};
     arma::mat Sigma = {{0.2, 0.1},{0.1, 0.2}};
 
+    arma::mat samples = mvnrand(samplesN, mu, Sigma);
+
+    arma::vec samplesMean = arma::mean(samples, 1);
+    arma::mat samplesCov = arma::cov(samples.t());
+
     arma::vec mu_p(2, arma::fill::zeros);
-    arma::mat Sigma_p(2, 2, arma::fill::eye);
-    Sigma_p *= 10;
+    arma::mat Sigma_p = arma::eye(2, 2)*10;
     ParametricNormal prior(mu_p, Sigma_p);
 
+    arma::mat V_p = arma::eye(2, 2)*1e5;
+    arma::mat Psi_p = V_p.i();
+
+    Wishart precPrior(2, V_p);
+    InverseWishart covPrior(2, Psi_p);
+
+    std::cout << "GT" << std::endl;
+    std::cout << mu.t() << std::endl;
+    std::cout << Sigma << std::endl;
+
+    std::cout << "Maximum Likelihood" << std::endl;
+    std::cout << samplesMean.t() << std::endl;
+    std::cout << samplesCov << std::endl;
+
+
+    std::cout << "Mean estimation test" << std::endl;
     ParametricNormal&& posterior = GaussianConjugatePrior::compute(Sigma, prior, samples);
 
     std::cout << "prior" << std::endl;
@@ -55,12 +69,32 @@ int main(int argc, char *argv[])
     std::cout << posterior.getMean().t() << std::endl;
     std::cout << posterior.getCovariance() << std::endl;
 
-    std::cout << "Maximum Likelihood" << std::endl;
-    std::cout << samplesMean.t() << std::endl;
 
-    std::cout << "GT" << std::endl;
-    std::cout << mu_gt.t() << std::endl;
-    std::cout << Sigma_gt << std::endl;
+    std::cout << "Precision estimation test" << std::endl;
+    Wishart&& precPosterior = GaussianConjugatePrior::compute(mu, precPrior, samples);
 
+    std::cout << "prior" << std::endl;
+    std::cout << precPrior.getV() << std::endl;
+    std::cout << precPrior.getNu() << std::endl;
 
+    std::cout << "posterior" << std::endl;
+    std::cout << precPosterior.getV() << std::endl;
+    std::cout << precPosterior.getNu() << std::endl;
+
+    std::cout << "posterior covariance mean" << std::endl;
+    std::cout << precPosterior.getV().i()/precPosterior.getNu() << std::endl;
+
+    std::cout << "Covariance estimation test" << std::endl;
+    InverseWishart&& covPosterior = GaussianConjugatePrior::compute(mu, covPrior, samples);
+
+    std::cout << "prior" << std::endl;
+    std::cout << covPrior.getPsi() << std::endl;
+    std::cout << covPrior.getNu() << std::endl;
+
+    std::cout << "posterior" << std::endl;
+    std::cout << covPosterior.getPsi() << std::endl;
+    std::cout << covPosterior.getNu() << std::endl;
+
+    std::cout << "posterior covariance mean" << std::endl;
+    std::cout << covPosterior.getPsi()/(precPosterior.getNu() - 3.0) << std::endl;
 }

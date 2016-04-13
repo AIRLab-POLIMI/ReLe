@@ -29,7 +29,48 @@
 namespace ReLe
 {
 
-class Wishart : public Distribution
+/*!
+ * This class is the base class for Wishart and Inverse-Wishart
+ * Distributions.
+ */
+class WishartBase : public Distribution
+{
+public:
+    /*!
+     * Constructor.
+     * \param p the number of columns (and rows) of the sampled matrix
+     */
+    WishartBase(unsigned int p);
+
+    /*!
+     * Constructor.
+     * \param p the number of columns (and rows) of the sampled matrix
+     * \param nu the degrees of freedom of the distribution
+     */
+    WishartBase(unsigned int p, unsigned int nu);
+
+    /*!
+     * Getter.
+     * \return the degrees of freedom of the distribution
+     */
+    inline unsigned int getNu() const
+    {
+        return nu;
+    }
+
+protected:
+    double tgamma_p(unsigned int p, double value) const;
+
+protected:
+    unsigned int nu;
+
+};
+
+/*!
+ * This class implements a Wishart distribution.
+ * This distribution is commonly used for precision matrix estimation.
+ */
+class Wishart : public WishartBase
 {
 public:
     /*!
@@ -54,9 +95,77 @@ public:
             const arma::mat& V);
 
     /*!
+     * Getter.
+     * \return the covariance matrix of the distribution
+     */
+    inline arma::mat getV() const
+    {
+        return V;
+    }
+
+    /*!
      * Destructor.
      */
     virtual ~Wishart();
+
+    // Distribution interface
+public:
+    virtual arma::vec operator() () const override;
+    virtual double operator() (const arma::vec& point) const override;
+
+    virtual inline std::string getDistributionName() const override
+    {
+        return "InverseWishart";
+    }
+
+    virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
+
+private:
+    arma::mat V;
+
+};
+
+/*!
+ * This class implements a Wishart distribution.
+ * This distribution is commonly used for precision matrix estimation.
+ */
+class InverseWishart : public WishartBase
+{
+public:
+    /*!
+     * Constructor.
+     * \param p the number of rows and columns in the matrix
+     */
+    InverseWishart(unsigned int p);
+
+    /*!
+     * Constructor.
+     * \param p the number of rows and columns in the matrix
+     * \param nu he degrees of freedom of the wishart distribution
+     */
+    InverseWishart(unsigned int p, unsigned int nu);
+
+    /*!
+     * Constructor.
+     * \param nu the degrees of freedom of the wishart distribution
+     * \param Psi the scale matrix of the distribution
+     */
+    InverseWishart(unsigned int nu,
+                   const arma::mat& Psi);
+
+    /*!
+     * Getter.
+     * \return the scale matrix of the distribution
+     */
+    inline arma::mat getPsi() const
+    {
+        return Psi;
+    }
+
+    /*!
+     * Destructor.
+     */
+    virtual ~InverseWishart();
 
     // Distribution interface
 public:
@@ -70,12 +179,8 @@ public:
 
     virtual void wmle(const arma::vec& weights, const arma::mat& samples) override;
 
-protected:
-    double tgamma_p(unsigned int p, double value) const;
-
 private:
-    arma::mat V;
-    unsigned int nu;
+    arma::mat Psi;
 
 };
 
