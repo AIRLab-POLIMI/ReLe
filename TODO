@@ -13,6 +13,7 @@ TEO:
 CARLO:
 1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
 2) Test case policy Gradient
+3) Aggiornamento policy in BatchCore
 
 VARIE:
 1) Fixare gradienti distribuzioni! Manca implementazione per ParametricFullNormal.
