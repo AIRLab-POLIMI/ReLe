@@ -102,6 +102,9 @@ int main(int argc, char *argv[])
     unsigned int nu = 2;
     InverseWishart covPrior(nu, Psi);
 
+    std::cout << "initial covariance mode" << std::endl;
+    std::cout << covPrior.getMode() << std::endl;
+
 
     BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, meanPrior, Sigma);
 
