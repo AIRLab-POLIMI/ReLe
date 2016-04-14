@@ -106,4 +106,5 @@ void DoubleFQI::step()
 
     indexes.clear();
 }
+
 }
