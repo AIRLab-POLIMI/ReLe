@@ -103,9 +103,8 @@ double Wishart::logPdf(const arma::vec& point) const
 
 void Wishart::wmle(const arma::vec& weights, const arma::mat& samples)
 {
-    //TODO [IMPORTANT] check
     unsigned int p = V.n_rows;
-    arma::vec vecV = samples*weights/arma::sum(weights);
+    arma::vec vecV = samples*weights/arma::sum(weights)/nu;
     V = arma::reshape(vecV, p, p);
 }
 
@@ -154,8 +153,18 @@ double InverseWishart::logPdf(const arma::vec& point) const
 
 void InverseWishart::wmle(const arma::vec& weights, const arma::mat& samples)
 {
-    //TODO [IMPORTANT] implement
-    throw std::runtime_error("wmle Not implemented");
+    unsigned int p = Psi.n_rows;
+
+    arma::mat inverseSamples(samples.n_rows, samples.n_cols);
+
+    for(unsigned int i = 0; i < samples.size(); i++)
+    {
+    	arma::mat X = arma::reshape(samples.col(i), p, p);
+    	inverseSamples.col(i) = arma::vectorise(X.i());
+    }
+
+    arma::vec vecPsiInv = samples*weights/arma::sum(weights)/nu;
+    Psi = arma::reshape(vecPsiInv, p, p).i();
 }
 
 
