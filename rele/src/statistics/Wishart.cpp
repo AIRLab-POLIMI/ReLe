@@ -39,14 +39,19 @@ WishartBase::WishartBase(unsigned int p, unsigned int nu)
 
 }
 
+double WishartBase::operator() (const arma::vec& point) const
+{
+    return std::exp(this->logPdf(point));
+}
 
-double WishartBase::tgamma_p(unsigned int p, double value) const
+
+double WishartBase::lgamma_p(unsigned int p, double value) const
 {
 
-    double v = std::pow(M_PI, 0.25*p*(p-1));
+    double v = 0.25*p*(p-1)*std::log(M_PI);
     for(unsigned int j = 0; j < p; j++)
     {
-        v *= std::tgamma(value-0.5*j);
+        v += std::lgamma(value-0.5*j);
     }
 
     return v;
@@ -85,14 +90,14 @@ arma::vec Wishart::operator() () const
     return arma::vectorise(Lambda);
 }
 
-double Wishart::operator() (const arma::vec& point) const
+double Wishart::logPdf(const arma::vec& point) const
 {
     unsigned int p = V.n_rows;
     arma::mat X = arma::reshape(point, p, p);
 
-    double Z = std::pow(2, 0.5*nu*p)*std::pow(arma::det(V), 0.5*nu)*tgamma_p(p, 0.5*nu);
+    double Z = 0.5*nu*p*std::log(2) + 0.5*nu*std::log(arma::det(V)) + lgamma_p(p, 0.5*nu);
 
-    return std::pow(arma::det(X), 0.5*(nu-p-1))*std::exp(-0.5*arma::trace(V.i()*X))/Z;
+    return 0.5*((nu-p-1)*std::log(arma::det(X)) - arma::trace(V.i()*X)) - Z;
 
 }
 
@@ -137,14 +142,14 @@ arma::vec InverseWishart::operator() () const
     return arma::vectorise(Lambda.i());
 }
 
-double InverseWishart::operator() (const arma::vec& point) const
+double InverseWishart::logPdf(const arma::vec& point) const
 {
     unsigned int p = Psi.n_rows;
     arma::mat X = arma::reshape(point, p, p);
 
-    double Z = std::pow(2, 0.5*nu*p)*tgamma_p(p, 0.5*nu);
+    double Z =  0.5*nu*std::log(arma::det(Psi)) - 0.5*nu*p*std::log(2) - lgamma_p(p, 0.5*nu);
 
-    return std::pow(arma::det(Psi), 0.5*nu)*std::pow(arma::det(X), -0.5*(nu+p+1))*std::exp(-0.5*arma::trace(Psi*X.i()))/Z;
+    return Z - 0.5*(nu+p+1)*std::log(arma::det(X)) - 0.5*arma::trace(Psi*X.i());
 }
 
 void InverseWishart::wmle(const arma::vec& weights, const arma::mat& samples)

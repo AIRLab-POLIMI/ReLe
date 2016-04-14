@@ -72,6 +72,18 @@ public:
     virtual double operator() (const arma::vec& point) const = 0;
 
     /*!
+     * Return the logarithm of the probability of a point to
+     * be generated from the distribution.
+     * \param point a point to be evaluated
+     * \return the logarithm of the probability of the point
+     */
+    virtual double logPdf(const arma::vec& point) const
+    {
+        auto& self = *this;
+        return self(point);
+    }
+
+    /*!
      * Getter.
      * \return The size of the support
      */

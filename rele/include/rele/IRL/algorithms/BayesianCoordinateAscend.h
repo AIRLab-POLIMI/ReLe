@@ -141,7 +141,7 @@ public:
 
         //compute posterior probability
         arma::vec omega = posterior.getMean();
-        return std::log(posterior(omega));
+        return posterior.logPdf(omega);
     }
 
     virtual void computeThetaPrior() override
@@ -197,10 +197,7 @@ public:
         Sigma = covPosterior.getMode();
 
         //compute posterior probability
-        double meanP = meanPosterior(mu);
-        double covP = covPosterior(arma::vectorise(Sigma));
-
-        return std::log(meanP) + std::log(covP);
+        return meanPosterior.logPdf(mu) + covPosterior.logPdf(arma::vectorise(Sigma));
     }
 
     virtual void computeThetaPrior() override

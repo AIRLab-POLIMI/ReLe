@@ -74,7 +74,9 @@ int main(int argc, char *argv[])
     arma::mat Sigma = arma::eye(dim, dim)*0.1;
     ParametricNormal expertDist(p, Sigma);
 
-    std::cout << "Params: " << expertDist.getParameters().t() << std::endl;
+    std::cout << "Mean gt: " << expertDist.getParameters().t() << std::endl;
+    std::cout << "Sigma gt: " << std::endl
+    			<< Sigma;
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 
@@ -96,7 +98,7 @@ int main(int argc, char *argv[])
     arma::mat Sigma_p = arma::eye(dim, dim)*10;
     ParametricNormal meanPrior(mu_p, Sigma_p);
 
-    arma::mat Psi = arma::eye(2, 2)*1e-5;
+    arma::mat Psi = arma::eye(2, 2);
     unsigned int nu = 2;
     InverseWishart covPrior(nu, Psi);
 
