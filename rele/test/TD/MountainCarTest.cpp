@@ -24,6 +24,7 @@
 #include "rele/environments/MountainCar.h"
 #include "rele/core/Core.h"
 #include "rele/algorithms/td/LinearSARSA.h"
+#include "rele/algorithms/td/DenseSARSA.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/basis/GaussianRbf.h"
@@ -36,7 +37,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    unsigned int episodes = 10000;
+    unsigned int episodes = 1000;
     MountainCar mdp;
 
     BasisFunctions bVector = PolynomialFunction::generate(7, mdp.getSettings().statesNumber + 1);
@@ -54,7 +55,7 @@ int main(int argc, char *argv[])
     fm.createDir();
     fm.cleanDir();
     auto&& core = buildCore(mdp, agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mc.txt"));
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mc.log"));
 
     for (int i = 0; i < episodes; i++)
     {

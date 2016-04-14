@@ -31,17 +31,6 @@
 namespace ReLe
 {
 
-inline arma::vec vectorize(const arma::vec& input)
-{
-    return input;
-}
-
-inline arma::vec vectorize(unsigned int input)
-{
-    const arma::vec tmp = {static_cast<double>(input)};
-    return tmp;
-}
-
 /*!
  * This function and all it's specializations and overloads can be used to handle properly the vectorization
  * of heterogeneus state and action types into a single armadillo vector.

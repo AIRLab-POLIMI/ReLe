@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015  Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,17 +21,17 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/core/Core.h"
 #include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/algorithms/batch/td/DoubleFQI.h"
 #include "rele/algorithms/batch/td/W-FQI.h"
 #include "rele/approximators/features/DenseFeatures.h"
-#include "rele/core/FiniteMDP.h"
-#include "rele/generators/GridWorldGenerator.h"
+#include "rele/environments/MountainCar.h"
 #include "rele/approximators/basis/IdentityBasis.h"
-#include "rele/approximators/regressors/trees/KDTree.h"
+#include "rele/approximators/regressors/others/GaussianProcess.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/utils/FileManager.h"
 
 #include <iostream>
 
@@ -41,30 +41,27 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    GridWorldGenerator generator;
-    generator.load(argv[1]);
+	MountainCar mdp;
 
-    double gamma = 0.9;
-    FiniteMDP&& mdp = generator.getMDP(gamma);
-
-    unsigned int nActions = mdp.getSettings().actionsNumber;
-
-    BasisFunctions bfs;
-    bfs = IdentityBasis::generate(2);
-
-    DenseFeatures phi(bfs);
-
-    arma::vec defaultValue = {0};
+    /*arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
-    FQI batchAgent(QRegressorA, nActions, 1e-8);
-    //DoubleFQI<FiniteState> batchAgent(QRegressorA, QRegressorB, nActions, 1e-8);
-    //FiniteW_FQI batchAgent(QRegressorA, nStates, nActions, 1e-8);
+    FQI<FiniteState> batchAgent(QRegressorA, nActions, epsilon);
+    DoubleFQI<FiniteState> batchAgent(QRegressorA, QRegressorB, nActions, epsilon);*/
 
-    std::string fileName = "gw.log";
-    FileManager fm("gw", "qLearning");
+    BasisFunctions bfs;
+    bfs = IdentityBasis::generate(mdp.getSettings().statesNumber + mdp.getSettings().actionsNumber);
+
+    DenseFeatures phi(bfs);
+
+    double epsilon = 1e-8;
+    GaussianProcess QRegressor(phi);
+    W_FQI batchAgent(QRegressor, mdp.getSettings().actionsNumber, epsilon);
+
+    std::string fileName = "mc.log";
+    FileManager fm("mc", "linearSarsa");
     ifstream is(fm.addPath(fileName));
     Dataset<FiniteAction, DenseState> data;
     data.readFromStream(is);
@@ -74,6 +71,11 @@ int main(int argc, char *argv[])
     core.getSettings().maxBatchIterations = 1;
 
     core.run(mdp.getSettings());
+
+    e_GreedyApproximate* epsP;
+    batchAgent.setPolicy(epsP);
+    Policy<FiniteAction, DenseState>* policy = batchAgent.getPolicy();
+    PolicyEvalAgent<FiniteAction, DenseState> testAgent(*policy);
 
     return 0;
 }

@@ -45,25 +45,12 @@ public:
      * \param QRegressorB the second regressor of the ensemble
      */
     DoubleFQIEnsemble(BatchRegressor& QRegressorA,
-                      BatchRegressor& QRegressorB) :
-        Ensemble(QRegressorA.getFeatures())
-    {
-        regressors.push_back(&QRegressorA);
-        regressors.push_back(&QRegressorB);
-    }
+                      BatchRegressor& QRegressorB);
 
-    virtual void writeOnStream(std::ofstream& out) override
-    {
-    }
+    virtual void writeOnStream(std::ofstream& out) override;
+    virtual void readFromStream(std::ifstream& in) override;
 
-    virtual void readFromStream(std::ifstream& in) override
-    {
-    }
-
-    virtual ~DoubleFQIEnsemble()
-    {
-        regressors.clear();
-    }
+    virtual ~DoubleFQIEnsemble();
 };
 
 /*!
@@ -75,8 +62,7 @@ public:
  * Being a modified version of Fitted Q-Iteration, this algorithms
  * deals only with finite action spaces.
  */
-template<class StateC>
-class DoubleFQI: public FQI<StateC>
+class DoubleFQI: public FQI
 {
 public:
     /*!
@@ -93,62 +79,9 @@ public:
               BatchRegressor& QRegressorB,
               unsigned int nActions,
               double epsilon,
-              bool shuffle = false) :
-        FQI<StateC>(QRegressorEnsemble, nActions, epsilon),
-        QRegressorEnsemble(QRegressorA, QRegressorB),
-        shuffle(shuffle)
-    {
-    }
+              bool shuffle = false);
 
-    void step() override
-    {
-        arma::uvec allIndexes = arma::conv_to<arma::uvec>::from(
-                                    arma::linspace(0, this->nSamples - 1, this->nSamples));
-        if(shuffle)
-            allIndexes = arma::shuffle(allIndexes);
-
-        indexes.push_back(allIndexes(arma::span(0, floor(this->nSamples / 2) - 1)));
-        indexes.push_back(allIndexes(arma::span(floor(this->nSamples / 2), this->nSamples - 1)));
-        for(unsigned int i = 0; i < 2; i++)
-        {
-            arma::mat features = this->features.cols(indexes[i]);
-            arma::vec rewards = this->rewards(indexes[i]);
-            arma::mat nextStates = this->nextStates.cols(indexes[i]);
-            arma::mat outputs(1, indexes[i].n_elem, arma::fill::zeros);
-
-            for(unsigned int j = 0; j < indexes[i].n_elem; j++)
-            {
-                if(this->absorbingStates.count(indexes[i][j]) == 0 && !this->firstStep)
-                {
-                    arma::vec Q_xn(this->nActions, arma::fill::zeros);
-                    for(unsigned int u = 0; u < this->nActions; u++)
-                        Q_xn(u) = arma::as_scalar(
-                                      QRegressorEnsemble.getRegressor(i)(
-                                          nextStates.col(j), FiniteAction(u)));
-
-                    double qmax = Q_xn.max();
-                    arma::uvec maxIndex = find(Q_xn == qmax);
-                    unsigned int index = RandomGenerator::sampleUniformInt(0,
-                                         maxIndex.n_elem - 1);
-
-                    outputs(j) = rewards(j) + this->gamma * arma::as_scalar(
-                                     QRegressorEnsemble.getRegressor(1 - i)(
-                                         nextStates.col(j), FiniteAction(maxIndex(index))));
-                }
-                else
-                    outputs(j) = rewards(j);
-            }
-
-            BatchDataSimple featureDataset(features, outputs);
-            QRegressorEnsemble.getRegressor(i).trainFeatures(featureDataset);
-        }
-
-        this->firstStep = false;
-
-        this->checkCond();
-
-        indexes.clear();
-    }
+    virtual void step() override;
 
 protected:
     DoubleFQIEnsemble QRegressorEnsemble;

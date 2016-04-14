@@ -25,6 +25,8 @@
 #define INCLUDE_RELE_ALGORITHMS_BATCH_BATCHAGENT_H_
 
 #include "rele/approximators/data/BatchData.h"
+#include "rele/core/Transition.h"
+#include "rele/approximators/Regressors.h"
 
 namespace ReLe
 {
