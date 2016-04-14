@@ -52,6 +52,9 @@ target_link_libraries(gaussian_NoGIRL rele)
 add_executable(lqr_bayesian bayesian/LQRBayesianTest.cpp)
 target_link_libraries(lqr_bayesian rele)
 
+add_executable(lqr_approximate_bayesian bayesian/LQRApproximateBayesianTest.cpp)
+target_link_libraries(lqr_approximate_bayesian rele)
+
 add_executable(nls_bayesian bayesian/NLSBayesianTest.cpp)
 target_link_libraries(nls_bayesian rele)
 

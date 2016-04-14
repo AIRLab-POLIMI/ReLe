@@ -35,9 +35,11 @@ namespace ReLe
  * A tile coder evaluate each tile set provided and transform it in a coherent set of
  * binary features sparse matrix.
  */
-template<class InputC>
-class TilesCoder_: public Features_<InputC, false>
+template<class InputC, bool denseOutput = false>
+class TilesCoder_: public Features_<InputC, denseOutput>
 {
+	using return_type = typename feature_traits<denseOutput>::type;
+
 public:
     /*!
      * Constructor.
@@ -62,9 +64,10 @@ public:
         computeRows();
     }
 
-    virtual arma::sp_mat operator()(const InputC& input) override
+    virtual return_type operator()(const InputC& input) override
     {
-        arma::sp_mat output(rowsN, outputs);
+        return_type output(rowsN, outputs);
+        output.zeros();
 
         unsigned int offset = 0;
         for(unsigned int o = 0; o < outputs; o++)
@@ -103,7 +106,7 @@ public:
 protected:
     void computeTile(const InputC& input, unsigned int offset,
                      unsigned int o, Tiles_<InputC>& tiles,
-                     arma::sp_mat& output)
+                     return_type& output)
     {
         try
         {
@@ -135,6 +138,9 @@ private:
 
 //! Template alias.
 typedef TilesCoder_<arma::vec> TilesCoder;
+
+//! Template Alias.
+typedef TilesCoder_<arma::vec, true> DenseTilesCoder;
 
 }
 
