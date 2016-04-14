@@ -91,12 +91,12 @@ public:
 
     inline virtual AgentOutputData* getAgentOutputData() override
     {
-    	return new FQIOutput(false, this->gamma, this->QRegressor);
+        return new FQIOutput(false, this->gamma, this->QRegressor);
     }
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-    	return new FQIOutput(true, this->gamma, this->QRegressor);
+        return new FQIOutput(true, this->gamma, this->QRegressor);
     }
 
 protected:

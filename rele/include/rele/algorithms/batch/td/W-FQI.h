@@ -154,22 +154,22 @@ protected:
  */
 class W_FQI: public FQI
 {
-	public:
-		static constexpr double stdZeroValue = 1e-5;
-		static constexpr double stdInfValue = 1e10;
-		static constexpr double nTrapz = 100;
-		static constexpr double sigmaBound = 5;
+public:
+    static constexpr double stdZeroValue = 1e-5;
+    static constexpr double stdInfValue = 1e10;
+    static constexpr double nTrapz = 100;
+    static constexpr double sigmaBound = 5;
 
-	public:
-		W_FQI(GaussianProcess& QRegressor,
-				unsigned int nActions,
-				double epsilon);
+public:
+    W_FQI(GaussianProcess& QRegressor,
+          unsigned int nActions,
+          double epsilon);
 
-		virtual void step() override;
+    virtual void step() override;
 
-	protected:
-		arma::mat idxs;
-		unsigned int nUpdatesQ;
+protected:
+    arma::mat idxs;
+    unsigned int nUpdatesQ;
 };
 
 }

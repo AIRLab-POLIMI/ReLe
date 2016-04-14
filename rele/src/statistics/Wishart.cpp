@@ -159,8 +159,8 @@ void InverseWishart::wmle(const arma::vec& weights, const arma::mat& samples)
 
     for(unsigned int i = 0; i < samples.size(); i++)
     {
-    	arma::mat X = arma::reshape(samples.col(i), p, p);
-    	inverseSamples.col(i) = arma::vectorise(X.i());
+        arma::mat X = arma::reshape(samples.col(i), p, p);
+        inverseSamples.col(i) = arma::vectorise(X.i());
     }
 
     arma::vec vecPsiInv = samples*weights/arma::sum(weights)/nu;

@@ -39,17 +39,17 @@ template<class StateC>
 class BatchTDAgent : public BatchAgent<FiniteAction, StateC>
 {
 public:
-	/*!
-	 * Constructor
-	 * \param QRegressor the regressor
-	 * \param nActions the number of actions
-	 */
-	BatchTDAgent(BatchRegressor& QRegressor, unsigned int nActions) :
-		QRegressor(QRegressor),
-		nActions(nActions),
-		policy(nullptr)
-	{
-	}
+    /*!
+     * Constructor
+     * \param QRegressor the regressor
+     * \param nActions the number of actions
+     */
+    BatchTDAgent(BatchRegressor& QRegressor, unsigned int nActions) :
+        QRegressor(QRegressor),
+        nActions(nActions),
+        policy(nullptr)
+    {
+    }
 
     /*!
      * Getter.
@@ -57,10 +57,10 @@ public:
      */
     virtual Policy<FiniteAction, StateC>* getPolicy() override
     {
-    	policy->setQ(&QRegressor);
-    	policy->setNactions(nActions);
+        policy->setQ(&QRegressor);
+        policy->setNactions(nActions);
 
-    	return policy;
+        return policy;
     }
 
     /*!
@@ -71,7 +71,7 @@ public:
      */
     inline void setPolicy(ActionValuePolicy<StateC>* policy)
     {
-    	this->policy = policy;
+        this->policy = policy;
     }
 
     /*
@@ -80,7 +80,7 @@ public:
      */
     inline BatchRegressor& getQRegressor()
     {
-    	return QRegressor;
+        return QRegressor;
     }
 
     virtual ~BatchTDAgent()

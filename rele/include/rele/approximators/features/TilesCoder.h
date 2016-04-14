@@ -38,7 +38,7 @@ namespace ReLe
 template<class InputC, bool denseOutput = false>
 class TilesCoder_: public Features_<InputC, denseOutput>
 {
-	using return_type = typename feature_traits<denseOutput>::type;
+    using return_type = typename feature_traits<denseOutput>::type;
 
 public:
     /*!

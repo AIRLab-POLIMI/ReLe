@@ -41,7 +41,7 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	MountainCar mdp;
+    MountainCar mdp;
 
     /*arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);

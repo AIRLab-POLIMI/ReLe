@@ -7,7 +7,7 @@ namespace ReLe
 {
 
 DenseSARSA::DenseSARSA(Features& phi, ActionValuePolicy<DenseState>& policy,
-        LearningRateDense& alpha)
+                       LearningRateDense& alpha)
     : LinearTD(phi, policy, alpha), lambda(0.8), eligibility(Q.getParametersSize(), fill::zeros),
       useReplacingTraces(false)
 {

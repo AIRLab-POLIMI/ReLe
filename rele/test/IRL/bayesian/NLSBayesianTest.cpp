@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Mean gt: " << expertDist.getParameters().t() << std::endl;
     std::cout << "Sigma gt: " << std::endl
-    			<< Sigma;
+              << Sigma;
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 

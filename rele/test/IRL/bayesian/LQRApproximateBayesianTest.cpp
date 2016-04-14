@@ -103,8 +103,8 @@ int main(int argc, char *argv[])
 
     for(unsigned int i = 0; i < dim; i++)
     {
-    	ranges.push_back(Range(-12, 12));
-    	tilesN.push_back(numTiles);
+        ranges.push_back(Range(-12, 12));
+        tilesN.push_back(numTiles);
     }
 
     BasicTiles* tiles = new BasicTiles(ranges, tilesN);
