@@ -32,14 +32,14 @@ namespace ReLe
 // Basic Tiles
 //////////////////////////////
 
-BasicTiles::BasicTiles(Range& range, unsigned int tilesN)
+BasicTiles::BasicTiles(const Range& range, unsigned int tilesN)
 {
     this->tilesSize = tilesN;
     this->ranges.push_back(range);
     this->tilesN.push_back(tilesN);
 }
 
-BasicTiles::BasicTiles(std::vector<Range>& ranges, std::vector<unsigned int>& tilesN)
+BasicTiles::BasicTiles(const std::vector<Range>& ranges, const std::vector<unsigned int>& tilesN)
     : ranges(ranges), tilesN(tilesN)
 {
     assert(ranges.size() == tilesN.size());
@@ -99,8 +99,9 @@ void BasicTiles::readFromStream(std::istream& in)
 // Selective Tiles
 //////////////////////////////
 
-SelectiveTiles::SelectiveTiles(std::vector<unsigned int> stateComponents,
-                               std::vector<Range>& ranges, std::vector<unsigned int>& tilesN)
+SelectiveTiles::SelectiveTiles(const std::vector<unsigned int> stateComponents,
+                               const std::vector<Range>& ranges,
+                               const std::vector<unsigned int>& tilesN)
     : BasicTiles(ranges, tilesN), stateComponents(stateComponents)
 {
 

@@ -43,14 +43,14 @@ public:
      * \param range the range of the first state variable
      * \param tilesN the number of tiles to use for the first state variable
      */
-    BasicTiles(Range& range, unsigned int tilesN);
+    BasicTiles(const Range& range, unsigned int tilesN);
 
     /*!
      * Constructor.
      * \param ranges the range of the (first n) state variables
      * \param tilesN the number of tiles to use for each (of the first n) state variable
      */
-    BasicTiles(std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
+    BasicTiles(const std::vector<Range>& ranges, const std::vector<unsigned int>& tilesN);
 
     inline virtual unsigned int size() override
     {
@@ -86,8 +86,8 @@ public:
      * \param ranges the range to use for each state variable
      * \param tilesN the number of tiles to use for each state variable
      */
-    SelectiveTiles(std::vector<unsigned int> stateComponents,
-                   std::vector<Range>& ranges, std::vector<unsigned int>& tilesN);
+    SelectiveTiles(const std::vector<unsigned int> stateComponents,
+                   const std::vector<Range>& ranges, const std::vector<unsigned int>& tilesN);
 
     virtual unsigned int operator()(const arma::vec& input) override;
     virtual void writeOnStream(std::ostream& out) override;

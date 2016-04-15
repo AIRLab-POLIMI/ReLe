@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
     // recover approximate
     std::vector<Range> ranges;
     std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 3;
+    unsigned int numTiles = 10;
 
     for(unsigned int i = 0; i < dim; i++)
     {
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
     // Covariance prior (fixed)
     arma::mat SigmaImitator = arma::eye(dp, dp);
-    SigmaImitator *= 0.1;
+    SigmaImitator *= 0.025;
 
     arma::mat SigmaPolicy = arma::eye(dim, dim);
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
@@ -137,5 +137,25 @@ int main(int argc, char *argv[])
               << posterior.getMean().t() << std::endl
               << "Covariance estimate" << std::endl
               << posterior.getCovariance() << std::endl;
+
+    ParametricNormal imitatorDist = alg.getDistribution();
+
+    // Generate LQR imitator dataset
+    DetLinearPolicy<DenseState> detPolicyFamily(phiImitator);
+    PolicyEvalDistribution<DenseAction, DenseState> imitator(imitatorDist, detPolicyFamily);
+    Core<DenseAction, DenseState> imitatorCore(mdp, imitator);
+    CollectorStrategy<DenseAction, DenseState> collectionImitator;
+    imitatorCore.getSettings().loggerStrategy = &collectionImitator;
+    imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    imitatorCore.getSettings().testEpisodeN = nbEpisodes;
+    imitatorCore.runTestEpisodes();
+    Dataset<DenseAction,DenseState>& imitatorData = collectionImitator.data;
+
+    //Save trajectories
+    std::ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
+    data.writeToStream(ofs);
+    std::ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
+    imitatorData.writeToStream(ofs2);
+
 
 }
