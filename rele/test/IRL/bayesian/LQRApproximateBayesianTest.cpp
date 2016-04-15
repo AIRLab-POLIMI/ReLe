@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     // Build policy
     int rewardDim = eReward.n_elem;
     int dim = 2;
-    LQR mdp(dim, rewardDim);
+    LQR mdp(dim, rewardDim, LQR::S0Type::RANDOM);
 
     BasisFunctions basis = IdentityBasis::generate(dim);
 
@@ -100,11 +100,11 @@ int main(int argc, char *argv[])
     // recover approximate
     std::vector<Range> ranges;
     std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 5;
+    unsigned int numTiles = 4;
 
     for(unsigned int i = 0; i < dim; i++)
     {
-        ranges.push_back(Range(-12, 12));
+        ranges.push_back(Range(-4, 4));
         tilesN.push_back(numTiles);
     }
 
