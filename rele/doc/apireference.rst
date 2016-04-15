@@ -224,6 +224,22 @@ Basis functions
 
 .. doxygenclass:: ReLe::InverseBasis_
    :members:
+   
+Tiles
+-----
+
+.. doxygenclass:: ReLe::BasicTiles
+   :members:
+   
+.. doxygenclass:: ReLe::SelectiveTiles
+   :members:
+   
+.. doxygenclass:: ReLe::LogTiles
+   :members:
+
+.. doxygenclass:: ReLe::CenteredLogTiles
+   :members:
+   
 
 Features types
 --------------
