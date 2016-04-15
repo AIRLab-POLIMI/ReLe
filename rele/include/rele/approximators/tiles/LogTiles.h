@@ -56,15 +56,15 @@ public:
      * \param tilesN the number of tiles to use for each (of the first n) state variable
      */
     LogTiles(const std::vector<Range>& ranges,
-    	     const std::vector<unsigned int>& tilesN);
+             const std::vector<unsigned int>& tilesN);
 
     virtual unsigned int operator()(const arma::vec& input) override;
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
 private:
-    Range computeLogRange(const Range& range);
-    std::vector<Range> computeLogRange(const std::vector<Range>& range);
+    static Range computeLogRange(const Range& range);
+    static std::vector<Range> computeLogRange(const std::vector<Range>& range);
 
 private:
     arma::vec minComponents;
@@ -76,7 +76,7 @@ private:
  * transformed input space:
  *
  * \f[
- * \hat{input}=sign(input - center)\log(|input - center| +1)
+ * \hat{input}=sign(input - center)\circ\log(|input - center| +1)
  * \f]
  *
  * As only a finite number of tiles is supported, the state space must be range limited.
@@ -97,15 +97,15 @@ public:
      * \param tilesN the number of tiles to use for each (of the first n) state variable
      */
     CenteredLogTiles(const std::vector<Range>& ranges,
-    			     const std::vector<unsigned int>& tilesN);
+                     const std::vector<unsigned int>& tilesN);
 
     virtual unsigned int operator()(const arma::vec& input) override;
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
 private:
-    Range computeLogRange(const Range& range);
-    std::vector<Range> computeLogRange(const std::vector<Range>& range);
+    static Range computeLogRange(const Range& range);
+    static std::vector<Range> computeLogRange(const std::vector<Range>& range);
 
 private:
     arma::vec centers;

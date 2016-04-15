@@ -32,19 +32,19 @@ namespace ReLe
 template<class StateC>
 struct batch_q_type
 {
-	typedef void* type;
+    typedef void* type;
 };
 
 template<>
 struct batch_q_type<FiniteState>
 {
-	typedef arma::mat type;
+    typedef arma::mat type;
 };
 
 template<>
 struct batch_q_type<DenseState>
 {
-	typedef BatchRegressor type;
+    typedef BatchRegressor type;
 };
 
 /*!
@@ -56,7 +56,7 @@ struct batch_q_type<DenseState>
 template<class StateC>
 class BatchTDAgent : public BatchAgent<FiniteAction, StateC>
 {
-typedef typename batch_q_type<StateC>::type QType;
+    typedef typename batch_q_type<StateC>::type QType;
 
 public:
     /*!

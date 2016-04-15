@@ -29,20 +29,21 @@ namespace ReLe
 LogTiles::LogTiles(const Range& range, unsigned int tilesN)
     : BasicTiles(computeLogRange(range), tilesN), minComponents(1)
 {
-	 minComponents(0) = range.lo();
+    minComponents(0) = range.lo();
 }
 
 LogTiles::LogTiles(const std::vector<Range>& ranges,
-			const std::vector<unsigned int>& tilesN)
-    : BasicTiles(computeLogRange(ranges), tilesN)
+                   const std::vector<unsigned int>& tilesN)
+    : BasicTiles(computeLogRange(ranges), tilesN), minComponents(ranges.size())
 {
-
+    for(unsigned int i = 0; i < ranges.size(); i++)
+        minComponents(i) = ranges[i].lo();
 }
 
 unsigned int LogTiles::operator()(const arma::vec& input)
 {
-	arma::vec inputHat = arma::log(input - minComponents + 1);
-	return BasicTiles::operator()(inputHat);
+    arma::vec inputHat = arma::log(input - minComponents + 1);
+    return BasicTiles::operator()(inputHat);
 }
 
 void LogTiles::writeOnStream(std::ostream& out)
@@ -57,68 +58,64 @@ void LogTiles::readFromStream(std::istream& in)
 
 Range LogTiles::computeLogRange(const Range& range)
 {
-	return Range(0, std::log(range.width() + 1));
+    return Range(0, std::log(range.width() + 1));
 }
 
-std::vector<Range> LogTiles::computeLogRange(const std::vector<Range>& range)
+std::vector<Range> LogTiles::computeLogRange(const std::vector<Range>& ranges)
 {
-	minComponents.set_size(range.size());
     std::vector<Range> logRanges;
-    for(unsigned int i = 0; i < range.size(); i++)
-    {
-        logRanges.push_back(computeLogRange(range[i]));
-        minComponents(i) = range[i].lo();
-    }
+
+    for(unsigned int i = 0; i < ranges.size(); i++)
+        logRanges.push_back(computeLogRange(ranges[i]));
 
     return logRanges;
 }
 
 
 CenteredLogTiles::CenteredLogTiles(const Range& range, unsigned int tilesN)
-	: BasicTiles(computeLogRange(range), tilesN), centers(1)
+    : BasicTiles(computeLogRange(range), tilesN), centers(1)
 {
-	centers(0) = range.mid();
+    centers(0) = range.mid();
 }
 
 CenteredLogTiles::CenteredLogTiles(const std::vector<Range>& ranges,
-			const std::vector<unsigned int>& tilesN)
-	: BasicTiles(computeLogRange(ranges), tilesN)
+                                   const std::vector<unsigned int>& tilesN)
+    : BasicTiles(computeLogRange(ranges), tilesN), centers(ranges.size())
 {
-
+    for(unsigned int i = 0; i < ranges.size(); i++)
+    {
+        centers(i) = ranges[i].mid();
+    }
 }
 
 unsigned int CenteredLogTiles::operator()(const arma::vec& input)
 {
-	arma::vec delta = input - centers;
-	arma::vec inputHat = arma::sign(delta) % arma::log(arma::abs(delta) + 1.0);
-	return BasicTiles::operator()(inputHat);
+    arma::vec delta = input - centers;
+    arma::vec inputHat = arma::sign(delta) % arma::log(arma::abs(delta) + 1.0);
+    return BasicTiles::operator()(inputHat);
 }
 
 void CenteredLogTiles::writeOnStream(std::ostream& out)
 {
-	//TODO [SERIALIZATION] implement
+    //TODO [SERIALIZATION] implement
 }
 
 void CenteredLogTiles::readFromStream(std::istream& in)
 {
-	//TODO [SERIALIZATION] implement
+    //TODO [SERIALIZATION] implement
 }
 
 Range CenteredLogTiles::computeLogRange(const Range& range)
 {
-	double delta = std::log(range.width()/2.0 + 1.0);
-	return Range(-delta, delta);
+    double delta = std::log(range.width()/2.0 + 1.0);
+    return Range(-delta, delta);
 }
 
-std::vector<Range> CenteredLogTiles::computeLogRange(const std::vector<Range>& range)
+std::vector<Range> CenteredLogTiles::computeLogRange(const std::vector<Range>& ranges)
 {
-	centers.set_size(range.size());
     std::vector<Range> logRanges;
-    for(unsigned int i = 0; i < range.size(); i++)
-    {
-        logRanges.push_back(computeLogRange(range[i]));
-        centers(i) = range[i].mid();
-    }
+    for(unsigned int i = 0; i < ranges.size(); i++)
+        logRanges.push_back(computeLogRange(ranges[i]));
 
     return logRanges;
 }

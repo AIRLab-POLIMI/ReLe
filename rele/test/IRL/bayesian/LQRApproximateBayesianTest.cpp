@@ -27,6 +27,7 @@
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/tiles/BasicTiles.h"
+#include "rele/approximators/tiles/LogTiles.h"
 
 #include "rele/policy/parametric/differentiable/LinearPolicy.h"
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
     // recover approximate
     std::vector<Range> ranges;
     std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 10;
+    unsigned int numTiles = 5;
 
     for(unsigned int i = 0; i < dim; i++)
     {
@@ -107,7 +108,8 @@ int main(int argc, char *argv[])
         tilesN.push_back(numTiles);
     }
 
-    BasicTiles* tiles = new BasicTiles(ranges, tilesN);
+    //Tiles* tiles = new BasicTiles(ranges, tilesN);
+    Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
 
     DenseTilesCoder phiImitator(tiles, dim);
 

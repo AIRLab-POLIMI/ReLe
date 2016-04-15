@@ -95,7 +95,7 @@ void FQI::step()
         {
             for(unsigned int u = 0; u < this->nActions; u++)
                 Q_xn(u) = arma::as_scalar(this->Q(nextStates.col(i),
-                                          FiniteAction(u))(0));
+                                                  FiniteAction(u))(0));
 
             outputs(i) = rewards(i) + this->gamma * arma::max(Q_xn);
         }
