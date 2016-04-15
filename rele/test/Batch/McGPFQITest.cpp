@@ -58,7 +58,8 @@ int main(int argc, char *argv[])
 
     double epsilon = 1e-8;
     GaussianProcess QRegressor(phi);
-    W_FQI batchAgent(QRegressor, mdp.getSettings().actionsNumber, epsilon);
+    FQI batchAgent(QRegressor, mdp.getSettings().actionsNumber, epsilon);
+    //W_FQI batchAgent(QRegressor, mdp.getSettings().actionsNumber, epsilon);
 
     std::string fileName = "mc.log";
     FileManager fm("mc", "linearSarsa");
@@ -68,14 +69,24 @@ int main(int argc, char *argv[])
     is.close();
 
     auto&& core = buildBatchOnlyCore(data, batchAgent);
-    core.getSettings().maxBatchIterations = 1;
+    core.getSettings().logger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
+    core.getSettings().maxBatchIterations = 10;
 
     core.run(mdp.getSettings());
 
-    e_GreedyApproximate* epsP;
+    // Policy test
+    e_GreedyApproximate epsP;
     batchAgent.setPolicy(epsP);
     Policy<FiniteAction, DenseState>* policy = batchAgent.getPolicy();
     PolicyEvalAgent<FiniteAction, DenseState> testAgent(*policy);
+
+    auto&& testCore = buildCore(mdp, testAgent);
+
+    testCore.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
+    testCore.getSettings().episodeLength = 300;
+    testCore.getSettings().testEpisodeN = 5;
+
+    testCore.runTestEpisodes();
 
     return 0;
 }

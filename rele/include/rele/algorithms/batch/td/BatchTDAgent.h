@@ -22,13 +22,31 @@
 */
 
 #include "rele/core/BatchAgent.h"
-#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/policy/q_policy/ActionValuePolicy.h"
 
 #ifndef INCLUDE_RELE_ALGORITHMS_BATCH_TD_BATCHTDAGENT_H_
 #define INCLUDE_RELE_ALGORITHMS_BATCH_TD_BATCHTDAGENT_H_
 
 namespace ReLe
 {
+template<class StateC>
+struct batch_q_type
+{
+	typedef void* type;
+};
+
+template<>
+struct batch_q_type<FiniteState>
+{
+	typedef arma::mat type;
+};
+
+template<>
+struct batch_q_type<DenseState>
+{
+	typedef BatchRegressor type;
+};
+
 /*!
  * The BatchTDAgent is the basic interface of all TD batch agents.
  * All batch TD algorithms should extend this abstract class.
@@ -38,14 +56,16 @@ namespace ReLe
 template<class StateC>
 class BatchTDAgent : public BatchAgent<FiniteAction, StateC>
 {
+typedef typename batch_q_type<StateC>::type QType;
+
 public:
     /*!
      * Constructor
      * \param QRegressor the regressor
      * \param nActions the number of actions
      */
-    BatchTDAgent(BatchRegressor& QRegressor, unsigned int nActions) :
-        QRegressor(QRegressor),
+    BatchTDAgent(QType& Q, unsigned int nActions) :
+        Q(Q),
         nActions(nActions),
         policy(nullptr)
     {
@@ -57,7 +77,7 @@ public:
      */
     virtual Policy<FiniteAction, StateC>* getPolicy() override
     {
-        policy->setQ(&QRegressor);
+        policy->setQ(&Q);
         policy->setNactions(nActions);
 
         return policy;
@@ -69,18 +89,18 @@ public:
      * with the regressor.
      * \param policy the type of policy to use
      */
-    inline void setPolicy(ActionValuePolicy<StateC>* policy)
+    inline void setPolicy(ActionValuePolicy<StateC>& policy)
     {
-        this->policy = policy;
+        this->policy = &policy;
     }
 
     /*
      * Getter.
      * \return the regressor
      */
-    inline BatchRegressor& getQRegressor()
+    inline QType& getQ()
     {
-        return QRegressor;
+        return Q;
     }
 
     virtual ~BatchTDAgent()
@@ -88,7 +108,7 @@ public:
     }
 
 protected:
-    BatchRegressor& QRegressor;
+    QType& Q;
     unsigned int nActions;
     ActionValuePolicy<StateC>* policy;
 };
