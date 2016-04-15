@@ -43,7 +43,6 @@ void W_FQI::step()
 
     for(unsigned int i = 0; i < this->nSamples; i++)
     {
-        DenseState nextState = DenseState(this->nextStates(0, i));
         if(this->absorbingStates.count(i) == 0 && !this->firstStep)
         {
             arma::vec integrals(this->nActions, arma::fill::zeros);
@@ -52,7 +51,7 @@ void W_FQI::step()
             for(unsigned int j = 0; j < this->nActions; j++)
             {
                 arma::vec results(2, arma::fill::zeros);
-                results = this->QRegressor(nextState, FiniteAction(j));
+                results = this->Q(nextStates.col(i), FiniteAction(j));
                 means(j) = results(0);
                 sigma(j) = sqrt(results(1));
             }
@@ -100,7 +99,7 @@ void W_FQI::step()
     }
 
     BatchDataSimple featureDataset(this->features, outputs);
-    this->QRegressor.trainFeatures(featureDataset);
+    this->Q.trainFeatures(featureDataset);
 
     nUpdatesQ++;
 
@@ -108,4 +107,5 @@ void W_FQI::step()
 
     this->checkCond();
 }
+
 }

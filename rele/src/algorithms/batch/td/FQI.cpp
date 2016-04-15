@@ -57,7 +57,7 @@ FQI::FQI(BatchRegressor& QRegressor, unsigned int nActions,
 void FQI::init(Dataset<FiniteAction, DenseState>& data, EnvironmentSettings& envSettings)
 {
     this->gamma = envSettings.gamma;
-    features = data.featuresAsMatrix(QRegressor.getFeatures());
+    features = data.featuresAsMatrix(Q.getFeatures());
     nSamples = features.n_cols;
     states = arma::mat(envSettings.stateDimensionality,
                        nSamples,
@@ -94,8 +94,8 @@ void FQI::step()
         if(absorbingStates.count(i) == 0 && !firstStep)
         {
             for(unsigned int u = 0; u < this->nActions; u++)
-                Q_xn(u) = arma::as_scalar(this->QRegressor(nextStates.col(i),
-                                          FiniteAction(u)));
+                Q_xn(u) = arma::as_scalar(this->Q(nextStates.col(i),
+                                          FiniteAction(u))(0));
 
             outputs(i) = rewards(i) + this->gamma * arma::max(Q_xn);
         }
@@ -104,7 +104,7 @@ void FQI::step()
     }
 
     BatchDataSimple featureDataset(features, outputs);
-    this->QRegressor.trainFeatures(featureDataset);
+    this->Q.trainFeatures(featureDataset);
 
     firstStep = false;
 
@@ -124,7 +124,7 @@ void FQI::checkCond()
 void FQI::computeQHat()
 {
     for(unsigned int i = 0; i < states.n_cols; i++)
-        QHat(i) = arma::as_scalar(QRegressor(states.col(i), FiniteAction(actions(i)))(0));
+        QHat(i) = arma::as_scalar(Q(states.col(i), FiniteAction(actions(i)))(0));
 }
 
 }
