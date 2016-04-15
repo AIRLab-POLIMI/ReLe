@@ -65,7 +65,7 @@ public:
     // Distribution interface
 public:
     virtual arma::vec operator() () const override;
-    virtual double operator() (const arma::vec& point) const override;
+    virtual double logPdf(const arma::vec& point) const override;
 
     virtual inline std::string getDistributionName() const override
     {

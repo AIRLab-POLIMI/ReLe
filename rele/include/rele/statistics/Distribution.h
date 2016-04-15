@@ -69,7 +69,10 @@ public:
      * \param point a point to be evaluated
      * \return the probability of the point
      */
-    virtual double operator() (const arma::vec& point) const = 0;
+    virtual double operator() (const arma::vec& point) const
+    {
+        return std::exp(logPdf(point));
+    }
 
     /*!
      * Return the logarithm of the probability of a point to
@@ -77,11 +80,7 @@ public:
      * \param point a point to be evaluated
      * \return the logarithm of the probability of the point
      */
-    virtual double logPdf(const arma::vec& point) const
-    {
-        auto& self = *this;
-        return std::log(self(point));
-    }
+    virtual double logPdf(const arma::vec& point) const = 0;
 
     /*!
      * Getter.

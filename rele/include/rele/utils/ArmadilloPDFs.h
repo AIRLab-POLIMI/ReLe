@@ -29,7 +29,7 @@ inline double mvnpdf(const arma::vec& x,
 
     double exponent = -0.5 * arma::dot(diff, prod);
 
-    return pow(2 * M_PI, x.n_elem / -2.0) * exp(exponent) / sqrt(arma::det(cov));
+    return std::pow(2 * M_PI, x.n_elem / -2.0) * std::exp(exponent) / std::sqrt(arma::det(cov));
 }
 
 /*!
@@ -53,8 +53,30 @@ inline double mvnpdfFast(const arma::vec& x,
 
     double exponent = -0.5 * arma::dot(diff, inverse_cov*diff);
 
-    return pow(2 * M_PI, x.n_elem / -2.0) * exp(exponent) / sqrt(det);
+    return std::pow(2 * M_PI, x.n_elem / -2.0) * std::exp(exponent) / std::sqrt(det);
 }
+
+/*!
+ * Calculates the logarithm of Gaussian probability density function.
+ *
+ * Differently from ReLe::mvnpdf, needs the determinant and the inverse matrix for fast
+ * pdf computation.
+ *
+ * \param x Observation
+ * \param mean Mean of multivariate Gaussian
+ * \param inverse_cov Inverse of the covariance of multivariate Gaussian
+ * \param det The determinant of the covariance matrix
+ * \return the logarithm of the probability density of x given the distribution
+ */
+inline double logmvnpdfFast(const arma::vec& x,
+                            const arma::vec& mean,
+                            const arma::mat& inverse_cov,
+                            const double& det)
+{
+    arma::vec diff = x - mean;
+    return -0.5*(x.n_elem*std::log(2 * M_PI)  + arma::as_scalar(diff.t()*inverse_cov*diff) + std::log(det));
+}
+
 
 /*!
  * Calculates the multivariate Gaussian probability density function and also
@@ -80,8 +102,8 @@ inline double mvnpdf(const arma::vec& x,
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, cinv*diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
-                    * exp(exponent) / sqrt(arma::det(cov));
+    long double f = std::pow(2.0 * M_PI, x.n_elem / -2.0)
+                    * std::exp(exponent) / std::sqrt(arma::det(cov));
 
     // Calculate the gradient w.r.t. the input value x; this is a (dim x 1) vector.
     arma::vec invDiff = cinv*diff;
@@ -116,8 +138,8 @@ inline double mvnpdf(const arma::vec& x,
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, cinv*diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
-                    * exp(exponent) / sqrt(arma::det(cov));
+    long double f = std::pow(2.0 * M_PI, x.n_elem / -2.0)
+                    * std::exp(exponent) / std::sqrt(arma::det(cov));
 
     // Calculate the gradient w.r.t. the mean; this is a (dim x 1) vector.
     arma::vec invDiff = cinv*diff;
@@ -158,8 +180,8 @@ inline double mvnpdfFast(const arma::vec& x,
     // compute exponent
     double exponent = -0.5 * arma::dot(diff, inverse_cov * diff);
 
-    long double f = pow(2.0 * M_PI, x.n_elem / -2.0)
-                    * exp(exponent) / sqrt(det);
+    long double f = std::pow(2.0 * M_PI, x.n_elem / -2.0)
+                    * std::exp(exponent) / std::sqrt(det);
 
     // Calculate the gradient w.r.t. the input value x; this is a (dim x 1) vector.
     arma::vec invDiff = inverse_cov * diff;
@@ -196,10 +218,10 @@ inline void mvnpdf(const arma::mat& x,
     arma::mat rhs = -0.5 * inv(cov) * diffs;
     arma::vec exponents(diffs.n_cols); // We will now fill this.
     for (size_t i = 0; i < diffs.n_cols; i++)
-        exponents(i) = exp(accu(diffs.unsafe_col(i) % rhs.unsafe_col(i)));
+        exponents(i) = std::exp(accu(diffs.unsafe_col(i) % rhs.unsafe_col(i)));
 
-    probabilities = pow(2 * M_PI, mean.n_elem / -2.0) *
-                    pow(det(cov), -0.5) * exponents;
+    probabilities = std::pow(2 * M_PI, mean.n_elem / -2.0) *
+                    std::pow(det(cov), -0.5) * exponents;
 }
 
 /*!

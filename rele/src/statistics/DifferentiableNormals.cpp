@@ -59,15 +59,12 @@ ParametricNormal::ParametricNormal(const vec& params, const mat& covariance)
 
 vec ParametricNormal::operator() () const
 {
-    //cerr << "Mean: " << mean;
-    //cerr << "---------" << endl;
-    //cerr << "Cov: " << Cov << endl;
     return mvnrandFast(mean, cholCov);
 }
 
-double ParametricNormal::operator() (const vec& point) const
+double ParametricNormal::logPdf(const vec& point) const
 {
-    return mvnpdfFast(point, mean, invCov, detValue);
+    return logmvnpdfFast(point, mean, invCov, detValue);
 }
 
 void ParametricNormal::wmle(const arma::vec& weights, const arma::mat& samples)
