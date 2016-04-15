@@ -54,7 +54,7 @@ public:
      * \param gamma MDP discount factor
      * \param horizon MDP horizon
      */
-    LQR(unsigned int dimension, unsigned int reward_dimension,
+    LQR(unsigned int dimension, unsigned int reward_dimension, S0Type type = FIXED,
         double eps = 0.1, double gamma = 0.9, unsigned int horizon = 50);
 
     /*!
@@ -67,7 +67,7 @@ public:
      * \param horizon MDP horizon
      */
     LQR(arma::mat& A, arma::mat& B, std::vector<arma::mat>& Q, std::vector<arma::mat>& R,
-        double gamma = 0.9, unsigned int horizon = 50);
+        S0Type type = FIXED, double gamma = 0.9, unsigned int horizon = 50);
 
     /*!
      * \see Environment::step

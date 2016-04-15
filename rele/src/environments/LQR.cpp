@@ -31,20 +31,22 @@ using namespace std;
 namespace ReLe
 {
 
-LQR::LQR(unsigned int dimension, unsigned int reward_dimension, double eps, double gamma, unsigned int horizon) :
+LQR::LQR(unsigned int dimension, unsigned int reward_dimension, S0Type type,
+         double eps, double gamma, unsigned int horizon) :
     ContinuousMDP(dimension, dimension, reward_dimension, true, true, gamma, horizon),
     A(dimension,dimension), B(dimension,dimension), initialState(dimension),
-    startType (S0Type::FIXED)
+    startType (type)
 {
     initialize(dimension, reward_dimension, eps);
 
     setInitialState();
 }
 
-LQR::LQR(arma::mat &A, arma::mat &B, std::vector<arma::mat> &Q, std::vector<arma::mat> &R, double gamma, unsigned int horizon) :
+LQR::LQR(arma::mat &A, arma::mat &B, std::vector<arma::mat> &Q, std::vector<arma::mat> &R,
+         S0Type type, double gamma, unsigned int horizon) :
     ContinuousMDP(A.n_cols, B.n_cols, Q.size(), true, true, gamma, horizon),
     A(A), B(B), Q(Q), R(R),
-    startType (S0Type::FIXED)
+    startType (type)
 {
     initialState.set_size(A.n_cols);
     assert(Q.size() == R.size());

@@ -80,7 +80,7 @@ public:
     virtual double logPdf(const arma::vec& point) const
     {
         auto& self = *this;
-        return self(point);
+        return std::log(self(point));
     }
 
     /*!
