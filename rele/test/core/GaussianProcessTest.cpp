@@ -94,12 +94,12 @@ int main(int argc, char *argv[])
     }
 
     //gp.getHyperParameters().lengthScale = {0.3};
-    //gp.getHyperParameters().signalVariance = 1.08;
-    //gp.getHyperParameters().noiseVariance = 0.00005;
+    //gp.getHyperParameters().signalSigma = 1.08;
+    //gp.getHyperParameters().noiseSigma = 0.00005;
 
     //gp.getHyperParameters().lengthScale = {3.0};
-    //gp.getHyperParameters().signalVariance = 1.16;
-    //gp.getHyperParameters().noiseVariance = 0.89;
+    //gp.getHyperParameters().signalSigma = 1.16;
+    //gp.getHyperParameters().noiseSigma = 0.89;
 
     gp.train(dataset);
 

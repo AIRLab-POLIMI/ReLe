@@ -49,14 +49,14 @@ public:
     struct HyperParameters
     {
         HyperParameters() : lengthScale({1}),
-                        signalVariance(1),
-                        noiseVariance(0.1)
+                        signalSigma(1),
+                        noiseSigma(0.1)
         {
         }
 
         arma::vec lengthScale;
-        double signalVariance;
-        double noiseVariance;
+        double signalSigma;
+        double noiseSigma;
     };
 
     enum CovFunctionLabel
@@ -216,10 +216,10 @@ protected:
 
         if(covFunction == rbf)
         {
-            k = hParams.signalVariance * hParams.signalVariance *
+            k = hParams.signalSigma * hParams.signalSigma *
                 exp(- 0.5 * arma::dot((x_p - x_q).t(), M * (x_p - x_q)));
             if(sameIndex)
-                k += hParams.noiseVariance * hParams.noiseVariance;
+                k += hParams.noiseSigma * hParams.noiseSigma;
         }
         else
         {
