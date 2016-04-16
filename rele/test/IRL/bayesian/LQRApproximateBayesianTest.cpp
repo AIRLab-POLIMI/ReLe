@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
     arma::mat Sigma = arma::eye(dim, dim);
-    Sigma *= 0.001;
+    Sigma *= 1e-3;
     ParametricNormal expertDist(p, Sigma);
 
     std::cout << "Rewards: ";
@@ -108,8 +108,8 @@ int main(int argc, char *argv[])
         tilesN.push_back(numTiles);
     }
 
-    //Tiles* tiles = new BasicTiles(ranges, tilesN);
-    Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
+    Tiles* tiles = new BasicTiles(ranges, tilesN);
+    //Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
 
     DenseTilesCoder phiImitator(tiles, dim);
 
@@ -118,27 +118,28 @@ int main(int argc, char *argv[])
     std::cout << dp << std::endl;
 
     // mean prior
-    arma::vec mu_p(dp, arma::fill::zeros);
-    arma::mat Sigma_p = arma::eye(dp, dp)*10;
+    arma::vec mu_p = arma::zeros(dp);
+    arma::mat Sigma_p = arma::eye(dp, dp)*1e2;
     ParametricNormal prior(mu_p, Sigma_p);
 
     // Covariance prior (fixed)
-    arma::mat SigmaImitator = arma::eye(dp, dp);
-    SigmaImitator *= 0.025;
+    arma::mat Psi = arma::eye(dp, dp)*1e3;
+    unsigned int nu = dp+1;
+    InverseWishart covPrior(nu, Psi);
 
     arma::mat SigmaPolicy = arma::eye(dim, dim);
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, SigmaImitator);
+    BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
 
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);
 
-    ParametricNormal posterior = alg.getPosterior();
+    ParametricNormal posterior = alg.getMeanPosterior();
 
     std::cout << "Mean parameters" << std::endl
-              << posterior.getMean().t() << std::endl
-              << "Covariance estimate" << std::endl
-              << posterior.getCovariance() << std::endl;
+              << posterior.getMean().t() << std::endl;
+              /*<< "Covariance estimate" << std::endl
+              << posterior.getCovariance() << std::endl;*/
 
     ParametricNormal imitatorDist = alg.getDistribution();
 

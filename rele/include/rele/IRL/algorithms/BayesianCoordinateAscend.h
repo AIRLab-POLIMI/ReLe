@@ -72,6 +72,8 @@ public:
             //Update theta prior
             computeThetaPrior();
 
+            std::cout << "Posterior: " << posteriorP << std::endl;
+
         }
         while(posteriorP - oldPosteriorP > eps);
     }
@@ -99,8 +101,11 @@ protected:
             epDataset.push_back(data[ep]);
             MAP<ActionC, StateC> mapCalculator(policy, thetaPrior, epDataset);
             arma::vec theta_ep = params.col(ep);
-            posteriorP += mapCalculator.compute(theta_ep);
+            double thetaP = mapCalculator.compute(theta_ep);
+            posteriorP += thetaP;
             params.col(ep) = policy.getParameters();
+
+            std::cout << thetaP << std::endl;
         }
 
         return posteriorP;
@@ -197,7 +202,9 @@ public:
         Sigma = covPosterior.getMode();
 
         //compute posterior probability
-        return meanPosterior.logPdf(mu) + covPosterior.logPdf(arma::vectorise(Sigma));
+        double logMuP = meanPosterior.logPdf(mu);
+        double logCovP = covPosterior.logPdf(arma::vectorise(Sigma));
+        return logMuP + logCovP;
     }
 
     virtual void computeThetaPrior() override
