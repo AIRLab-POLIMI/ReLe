@@ -29,6 +29,7 @@ W_FQI::W_FQI(GaussianProcess& QRegressor,
              unsigned int nActions,
              double epsilon) :
     FQI(QRegressor, nActions, epsilon),
+    Q(QRegressor),
     nUpdatesQ(0)
 {
     idxs = arma::mat(nActions, nActions - 1, arma::fill::zeros);
@@ -50,10 +51,8 @@ void W_FQI::step()
             arma::vec sigma(this->nActions, arma::fill::zeros);
             for(unsigned int j = 0; j < this->nActions; j++)
             {
-                arma::vec results(2, arma::fill::zeros);
-                results = this->Q(nextStates.col(i), FiniteAction(j));
-                means(j) = results(0);
-                sigma(j) = sqrt(results(1));
+                means(j) = Q(vectorize(nextStates.col(i), FiniteAction(j)))(0);
+                sigma(j) = sqrt(Q.computeVariance(vectorize(nextStates.col(i), FiniteAction(j))));
             }
             for(unsigned int j = 0; j < integrals.n_elem; j++)
             {

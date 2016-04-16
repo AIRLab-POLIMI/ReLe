@@ -49,14 +49,14 @@ public:
     struct HyperParameters
     {
         HyperParameters() : lengthScale({1}),
-                        signalVariance(1),
-                        noiseVariance(0.1)
+                        signalSigma(1),
+                        noiseSigma(0.1)
         {
         }
 
         arma::vec lengthScale;
-        double signalVariance;
-        double noiseVariance;
+        double signalSigma;
+        double noiseSigma;
     };
 
     enum CovFunctionLabel
@@ -78,23 +78,36 @@ public:
     }
 
     /*!
-     * Compute the mean and variance of the function in the given point.
+     * Compute the mean of the function in the given point.
      * \param testInput vector of input
-     * \return the vector with mean and variance
+     * \return the mean
      */
     virtual arma::vec operator()(const InputC& testInputs) override
     {
         arma::mat testFeatures = this->phi(testInputs);
-        arma::vec outputs(2, arma::fill::zeros);
+        arma::vec outputs(1, arma::fill::zeros);
 
         arma::vec k = generateCovVector(features, testFeatures.col(0));
         outputs(0) = arma::dot(k.t(), alpha);
 
+        return outputs;
+    }
+
+    /*!
+     * Compute the variance of the function in the given point.
+     * \param testInput vector of input
+     * \return the variance
+     */
+    double computeVariance(const InputC& testInputs)
+    {
+        arma::mat testFeatures = this->phi(testInputs);
+
+        arma::vec k = generateCovVector(features, testFeatures.col(0));
         arma::vec v = arma::solve(L, k);
-        outputs(1) = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
+        double var = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
                      arma::dot(v.t(), v);
 
-        return outputs;
+        return var;
     }
 
     /*!
@@ -203,10 +216,10 @@ protected:
 
         if(covFunction == rbf)
         {
-            k = hParams.signalVariance * hParams.signalVariance *
+            k = hParams.signalSigma * hParams.signalSigma *
                 exp(- 0.5 * arma::dot((x_p - x_q).t(), M * (x_p - x_q)));
             if(sameIndex)
-                k += hParams.noiseVariance * hParams.noiseVariance;
+                k += hParams.noiseSigma * hParams.noiseSigma;
         }
         else
         {

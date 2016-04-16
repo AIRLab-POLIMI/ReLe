@@ -30,21 +30,21 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	std::cout << "--- test armadillo pdf ---" << std::endl;
-	arma::vec x(3, arma::fill::randn);
-	arma::vec m(3, arma::fill::randn);
-	arma::mat C(3, 3, arma::fill::randn);
-	arma::mat S = C*C.t();
+    std::cout << "--- test armadillo pdf ---" << std::endl;
+    arma::vec x(3, arma::fill::randn);
+    arma::vec m(3, arma::fill::randn);
+    arma::mat C(3, 3, arma::fill::randn);
+    arma::mat S = C*C.t();
 
-	std::cout << "mvn pdf" << std::endl;
-	std::cout << mvnpdfFast(x, m, S.i(), arma::det(S)) << std::endl;
-	std::cout << "log mvn pdf" << std::endl;
-	std::cout << logmvnpdfFast(x, m, S.i(), arma::det(S)) << std::endl;
-	std::cout << "exponentiated log mvn pdf" << std::endl;
-	std::cout << std::exp(logmvnpdfFast(x, m, S.i(), arma::det(S))) << std::endl;
+    std::cout << "mvn pdf" << std::endl;
+    std::cout << mvnpdfFast(x, m, S.i(), arma::det(S)) << std::endl;
+    std::cout << "log mvn pdf" << std::endl;
+    std::cout << logmvnpdfFast(x, m, S.i(), arma::det(S)) << std::endl;
+    std::cout << "exponentiated log mvn pdf" << std::endl;
+    std::cout << std::exp(logmvnpdfFast(x, m, S.i(), arma::det(S))) << std::endl;
 
 
-	std::cout << "--- Bayesian inference test ---" << std::endl;
+    std::cout << "--- Bayesian inference test ---" << std::endl;
     unsigned int samplesN = 10000;
     arma::vec mu = {0.5, 2.3};
     arma::mat Sigma = {{0.2, 0.1},{0.1, 0.2}};
