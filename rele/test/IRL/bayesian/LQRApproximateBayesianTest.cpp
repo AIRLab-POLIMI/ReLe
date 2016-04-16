@@ -138,8 +138,8 @@ int main(int argc, char *argv[])
 
     std::cout << "Mean parameters" << std::endl
               << posterior.getMean().t() << std::endl;
-              /*<< "Covariance estimate" << std::endl
-              << posterior.getCovariance() << std::endl;*/
+    /*<< "Covariance estimate" << std::endl
+    << posterior.getCovariance() << std::endl;*/
 
     ParametricNormal imitatorDist = alg.getDistribution();
 
