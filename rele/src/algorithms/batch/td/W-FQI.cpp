@@ -29,7 +29,7 @@ W_FQI::W_FQI(GaussianProcess& QRegressor,
              unsigned int nActions,
              double epsilon) :
     FQI(QRegressor, nActions, epsilon),
-	Q(QRegressor),
+    Q(QRegressor),
     nUpdatesQ(0)
 {
     idxs = arma::mat(nActions, nActions - 1, arma::fill::zeros);
