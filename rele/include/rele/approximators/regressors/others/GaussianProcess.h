@@ -78,23 +78,36 @@ public:
     }
 
     /*!
-     * Compute the mean and variance of the function in the given point.
+     * Compute the mean of the function in the given point.
      * \param testInput vector of input
-     * \return the vector with mean and variance
+     * \return the mean
      */
     virtual arma::vec operator()(const InputC& testInputs) override
     {
         arma::mat testFeatures = this->phi(testInputs);
-        arma::vec outputs(2, arma::fill::zeros);
+        arma::vec outputs(1, arma::fill::zeros);
 
         arma::vec k = generateCovVector(features, testFeatures.col(0));
         outputs(0) = arma::dot(k.t(), alpha);
 
+        return outputs;
+    }
+
+    /*!
+     * Compute the variance of the function in the given point.
+     * \param testInput vector of input
+     * \return the variance
+     */
+    double computeVariance(const InputC& testInputs)
+    {
+        arma::mat testFeatures = this->phi(testInputs);
+
+        arma::vec k = generateCovVector(features, testFeatures.col(0));
         arma::vec v = arma::solve(L, k);
-        outputs(1) = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
+        double var = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
                      arma::dot(v.t(), v);
 
-        return outputs;
+        return var;
     }
 
     /*!

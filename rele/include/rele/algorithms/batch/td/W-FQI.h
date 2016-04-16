@@ -168,6 +168,7 @@ public:
     virtual void step() override;
 
 protected:
+    GaussianProcess& Q;
     arma::mat idxs;
     unsigned int nUpdatesQ;
 };

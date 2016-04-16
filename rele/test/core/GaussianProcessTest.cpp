@@ -112,7 +112,8 @@ int main(int argc, char *argv[])
     for(unsigned int i = 0; i < testInputs.n_cols; i++)
     {
         arma::vec results(2, arma::fill::zeros);
-        results = gp(testInputs.col(i));
+        results(0) = gp(testInputs.col(i))(0);
+        results(1) = gp.computeVariance(testInputs.col(i));
 
         cout << endl << "Input: " << testInputs(i) << endl;
         cout << "mean: " << results(0) << endl;
