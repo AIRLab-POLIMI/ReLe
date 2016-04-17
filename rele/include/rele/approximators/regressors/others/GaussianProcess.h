@@ -105,7 +105,7 @@ public:
         arma::mat testFeatures = this->phi(testInputs);
 
         arma::vec k = generateCovVector(features, testFeatures.col(0));
-        arma::vec v = arma::solve(L, k);
+        arma::vec v = arma::solve(arma::trimatl(L), k);
         double var = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
                      arma::dot(v.t(), v);
 
@@ -128,7 +128,7 @@ public:
         arma::mat K = generateCovMatrix(features);
 
         L = arma::chol(K, "lower");
-        alpha = arma::solve(L.t(), arma::solve(L, outputs));
+        alpha = arma::solve(arma::trimatu(L.t()), arma::solve(arma::trimatl(L), outputs));
     }
 
     /*!
