@@ -85,9 +85,9 @@ int main(int argc, char *argv[])
                          -0.844156
                         };
 
-    for(unsigned int i = 0; i < inputs.n_elem; i++)
+    for(unsigned int i = 0; i < inputs.n_rows; i++)
     {
-        arma::vec input = {inputs(i)};
+        arma::vec input = inputs.row(i).t();
         arma::vec output = {outputs(i)};
 
         dataset.addSample(input, output);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         results(0) = gp(testInputs.col(i))(0);
         results(1) = gp.computeVariance(testInputs.col(i));
 
-        cout << endl << "Input: " << testInputs(i) << endl;
+        cout << endl << "Input: " << testInputs.col(i) << endl;
         cout << "mean: " << results(0) << endl;
         cout << "variance: " << results(1) << endl;
 
