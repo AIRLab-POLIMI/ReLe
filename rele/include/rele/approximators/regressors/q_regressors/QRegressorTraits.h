@@ -55,20 +55,20 @@ struct q_regressor_simple
 template<class RegressorC, bool isParametric>
 struct q_regressor_parametric
 {
-	q_regressor_parametric(std::vector<RegressorC*>& regressors)
-	{
+    q_regressor_parametric(std::vector<RegressorC*>& regressors)
+    {
 
-	}
+    }
 
 };
 
 template<class RegressorC, bool isSupervised>
 struct q_regressor_supervised
 {
-	q_regressor_supervised(std::vector<RegressorC*>& regressors)
-	{
+    q_regressor_supervised(std::vector<RegressorC*>& regressors)
+    {
 
-	}
+    }
 };
 
 /*template<bool isUnsupervised>
@@ -91,52 +91,52 @@ struct q_regressor_simple<true> : public QRegressor
 template<class RegressorC>
 struct q_regressor_parametric<RegressorC, true> : public ParametricQRegressor
 {
-	q_regressor_parametric(std::vector<RegressorC*>& regressors)
-				: regressors(regressors)
-	{
+    q_regressor_parametric(std::vector<RegressorC*>& regressors)
+        : regressors(regressors)
+    {
 
-	}
+    }
 
-	virtual void set(unsigned int action, const arma::vec& w) override
-	{
-		auto& regressor = *regressors[action];
-		regressor.setParameters(w);
-	}
+    virtual void set(unsigned int action, const arma::vec& w) override
+    {
+        auto& regressor = *regressors[action];
+        regressor.setParameters(w);
+    }
 
-	virtual void update(unsigned int action, const arma::vec& dw) override
-	{
-		//TODO [INTERFACE] add update method to regressors
-		auto& regressor = *regressors[action];
-		arma::vec wOld = regressor.getParameters();
-		regressor.setParameters(wOld+dw);
-	}
+    virtual void update(unsigned int action, const arma::vec& dw) override
+    {
+        //TODO [INTERFACE] add update method to regressors
+        auto& regressor = *regressors[action];
+        arma::vec wOld = regressor.getParameters();
+        regressor.setParameters(wOld+dw);
+    }
 
-	virtual arma::vec diff(const arma::vec state, unsigned int action) override
-	{
-		auto& regressor = *regressors[action];
-		return regressor.diff(state);
-	}
+    virtual arma::vec diff(const arma::vec state, unsigned int action) override
+    {
+        auto& regressor = *regressors[action];
+        return regressor.diff(state);
+    }
 
-	virtual ~q_regressor_parametric()
-	{
+    virtual ~q_regressor_parametric()
+    {
 
-	}
+    }
 
-	std::vector<RegressorC*>& regressors;
+    std::vector<RegressorC*>& regressors;
 };
 
 template<class RegressorC>
 struct q_regressor_supervised<RegressorC, true> : public BatchQRegressor
 {
-	q_regressor_supervised(std::vector<RegressorC*>& regressors)
-	{
+    q_regressor_supervised(std::vector<RegressorC*>& regressors)
+    {
 
-	}
+    }
 
-	virtual void trainFeatures() override
-	{
-		//TODO [IMPRTANT][INTERFACE] Implement & fix interface
-	}
+    virtual void trainFeatures() override
+    {
+        //TODO [IMPRTANT][INTERFACE] Implement & fix interface
+    }
 };
 
 /*template<bool denseOutput>

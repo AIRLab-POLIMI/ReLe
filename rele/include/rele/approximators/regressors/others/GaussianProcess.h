@@ -51,7 +51,7 @@ public:
         HyperParameters() : lengthScale({1}),
                         signalSigma(1),
                         noiseSigma(0.1),
-        				noisyTestData(false)
+                        noisyTestData(false)
         {
         }
 
@@ -110,7 +110,7 @@ public:
                      arma::dot(v.t(), v);
 
         if(hParams.noisyTestData)
-        	var += hParams.noiseSigma * hParams.noiseSigma;
+            var += hParams.noiseSigma * hParams.noiseSigma;
 
         return var;
     }

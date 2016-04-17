@@ -44,8 +44,8 @@ public:
 
     virtual double operator()(const arma::vec& state, unsigned int action) override
     {
-    	auto& Q_a = *regressors[action];
-    	return arma::as_scalar(Q_a(state));
+        auto& Q_a = *regressors[action];
+        return arma::as_scalar(Q_a(state));
     }
 
     virtual ~QRegressor_()

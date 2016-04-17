@@ -42,12 +42,12 @@ template<class InputC, class OutputC, bool denseOutput = true>
 class Regressor_
 {
 public:
-	//! type of input of the regressor
-	typedef InputC InputType;
-	//! type of the output of the regressor
-	typedef OutputC OutputType;
-	//! whether the features are dense or sparse
-	static const bool isDense = denseOutput;
+    //! type of input of the regressor
+    typedef InputC InputType;
+    //! type of the output of the regressor
+    typedef OutputC OutputType;
+    //! whether the features are dense or sparse
+    static const bool isDense = denseOutput;
 
 public:
 
