@@ -36,8 +36,8 @@ class QRegressor_ : public simple_q_reg<RegressorC>,
 
 {
 public:
-    QRegressor_(const std::vector<RegressorC*>& regressors)
-        : regressors(regressors)
+    QRegressor_(std::vector<RegressorC*>& regressors)
+        : regressors(regressors), parametric_q_reg<RegressorC>(regressors), supervised_q_reg<RegressorC>(regressors)
     {
 
     }
@@ -45,7 +45,7 @@ public:
     virtual double operator()(const arma::vec& state, unsigned int action) override
     {
     	auto& Q_a = *regressors[action];
-    	return Q_a(state);
+    	return arma::as_scalar(Q_a(state));
     }
 
     virtual ~QRegressor_()
@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    std::vector<RegressorC*> regressors;
+    std::vector<RegressorC*>& regressors;
 };
 
 }

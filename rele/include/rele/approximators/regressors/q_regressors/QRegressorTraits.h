@@ -36,22 +36,11 @@ namespace ReLe
 template<class RegressorC>
 struct q_regressor_trait
 {
-    static_assert(std::is_base_of<Regressor_, RegressorC>::value,
-                  "Template parameter must be a regressor");
-    static const bool isParametric = std::is_base_of<ParametricRegressor_, RegressorC>::value;
-    static const bool isSupervised = std::is_base_of<BatchRegressor_, RegressorC>::value;
-    static const bool isUnsupervised = std::is_base_of<UnsupervisedBatchRegressor_, RegressorC>::value;
+    static const bool isParametric = std::is_base_of<ParametricRegressor_<typename RegressorC::InputType, RegressorC::isDense>, RegressorC>::value;
+    static const bool isSupervised = std::is_base_of<BatchRegressor_<typename RegressorC::InputType, arma::vec, RegressorC::isDense>, RegressorC>::value;
+    static const bool isUnsupervised = std::is_base_of<UnsupervisedBatchRegressor_<typename RegressorC::InputType, arma::vec, RegressorC::isDense>, RegressorC>::value;
     static const bool isSimple = !(isParametric || isSupervised || isUnsupervised);
 };
-
-template<class RegressorC>
-using simple_q_reg = q_regressor_simple<q_regressor_trait<RegressorC>::isSimple>;
-
-template<class RegressorC>
-using parametric_q_reg = q_regressor_parametric<q_regressor_trait<RegressorC>::isParametric>;
-
-template<class RegressorC>
-using supervised_q_reg = q_regressor_supervised<q_regressor_trait<RegressorC>::isSupervised>;
 
 
 /*
@@ -63,16 +52,23 @@ struct q_regressor_simple
 
 };
 
-template<bool isParametric>
+template<class RegressorC, bool isParametric>
 struct q_regressor_parametric
 {
+	q_regressor_parametric(std::vector<RegressorC*>& regressors)
+	{
+
+	}
 
 };
 
-template<bool isSupervised>
+template<class RegressorC, bool isSupervised>
 struct q_regressor_supervised
 {
+	q_regressor_supervised(std::vector<RegressorC*>& regressors)
+	{
 
+	}
 };
 
 /*template<bool isUnsupervised>
@@ -92,36 +88,54 @@ struct q_regressor_simple<true> : public QRegressor
 
 };
 
-template<>
-struct q_regressor_parametric<true> : public ParametricQRegressor
+template<class RegressorC>
+struct q_regressor_parametric<RegressorC, true> : public ParametricQRegressor
 {
-	virtual void set(unsigned int action, const arma::vec& w) override
+	q_regressor_parametric(std::vector<RegressorC*>& regressors)
+				: regressors(regressors)
 	{
 
+	}
+
+	virtual void set(unsigned int action, const arma::vec& w) override
+	{
+		auto& regressor = *regressors[action];
+		regressor.setParameters(w);
 	}
 
 	virtual void update(unsigned int action, const arma::vec& dw) override
 	{
-
+		//TODO [INTERFACE] add update method to regressors
+		auto& regressor = *regressors[action];
+		arma::vec wOld = regressor.getParameters();
+		regressor.setParameters(wOld+dw);
 	}
 
-	virtual void diff(const arma::vec state, unsigned int action) override
+	virtual arma::vec diff(const arma::vec state, unsigned int action) override
 	{
-
+		auto& regressor = *regressors[action];
+		return regressor.diff(state);
 	}
 
 	virtual ~q_regressor_parametric()
 	{
 
 	}
+
+	std::vector<RegressorC*>& regressors;
 };
 
-template<>
-struct q_regressor_supervised<true> : public BatchQRegressor
+template<class RegressorC>
+struct q_regressor_supervised<RegressorC, true> : public BatchQRegressor
 {
-	virtual void trainFeatures() override
+	q_regressor_supervised(std::vector<RegressorC*>& regressors)
 	{
 
+	}
+
+	virtual void trainFeatures() override
+	{
+		//TODO [IMPRTANT][INTERFACE] Implement & fix interface
 	}
 };
 
@@ -130,6 +144,15 @@ struct q_regressor_unsupervised<true, denseOutput>: public Un
 {
 
 };*/
+
+template<class RegressorC>
+using simple_q_reg = q_regressor_simple<q_regressor_trait<RegressorC>::isSimple>;
+
+template<class RegressorC>
+using parametric_q_reg = q_regressor_parametric<RegressorC, q_regressor_trait<RegressorC>::isParametric>;
+
+template<class RegressorC>
+using supervised_q_reg = q_regressor_supervised<RegressorC, q_regressor_trait<RegressorC>::isSupervised>;
 
 
 }

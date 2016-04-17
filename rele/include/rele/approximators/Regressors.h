@@ -41,6 +41,13 @@ namespace ReLe
 template<class InputC, class OutputC, bool denseOutput = true>
 class Regressor_
 {
+public:
+	//! type of input of the regressor
+	typedef InputC InputType;
+	//! type of the output of the regressor
+	typedef OutputC OutputType;
+	//! whether the features are dense or sparse
+	static const bool isDense = denseOutput;
 
 public:
 
@@ -120,6 +127,7 @@ protected:
     unsigned int outputDimension;
 };
 
+//! Template alias
 typedef Regressor_<arma::vec, arma::vec> Regressor;
 
 /*!
@@ -201,6 +209,7 @@ public:
 
 };
 
+//! Template alias
 typedef ParametricRegressor_<arma::vec> ParametricRegressor;
 
 /*!
@@ -297,6 +306,7 @@ public:
 
 };
 
+//! Template alias
 typedef BatchRegressor_<arma::vec, arma::vec> BatchRegressor;
 
 
@@ -355,6 +365,9 @@ public:
     }
 
 };
+
+//! Template alias
+typedef UnsupervisedBatchRegressor_<arma::vec, arma::vec> UnsupervisedBatchRegressor;
 
 }
 

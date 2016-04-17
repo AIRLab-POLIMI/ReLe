@@ -57,7 +57,7 @@ class ParametricQRegressor : public QRegressor
 public:
     virtual void set(unsigned int action, const arma::vec& w) = 0;
     virtual void update(unsigned int action, const arma::vec& dw) = 0;
-    virtual void diff(const arma::vec state, unsigned int action) = 0;
+    virtual arma::vec diff(const arma::vec state, unsigned int action) = 0;
 
     virtual ~ParametricQRegressor()
     {
