@@ -50,13 +50,15 @@ public:
     {
         HyperParameters() : lengthScale({1}),
                         signalSigma(1),
-                        noiseSigma(0.1)
+                        noiseSigma(0.1),
+        				noisyTestData(false)
         {
         }
 
         arma::vec lengthScale;
         double signalSigma;
         double noiseSigma;
+        bool noisyTestData;
     };
 
     enum CovFunctionLabel
@@ -106,6 +108,9 @@ public:
         arma::vec v = arma::solve(L, k);
         double var = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
                      arma::dot(v.t(), v);
+
+        if(hParams.noisyTestData)
+        	var += hParams.noiseSigma * hParams.noiseSigma;
 
         return var;
     }
