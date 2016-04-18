@@ -36,7 +36,7 @@ protected:
     USING_STATISTIC_ESTIMATION_MEMBERS(ActionC, StateC)
 
 public:
-    MLE(DifferentiablePolicy<ActionC,StateC>& policy, Dataset<ActionC,StateC>& data)
+    MLE(DifferentiablePolicy<ActionC,StateC>& policy, const Dataset<ActionC,StateC>& data)
         : StatisticEstimation<ActionC, StateC>(policy, data)
     {
 
