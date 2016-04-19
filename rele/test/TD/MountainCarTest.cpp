@@ -32,11 +32,16 @@
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/utils/FileManager.h"
 
+#include "rele/approximators/regressors/q_regressors/QRegressorImplementation.h"
+
 using namespace std;
 using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
+    std::vector<LinearApproximator*> regressors;
+    QRegressor_<LinearApproximator> qRegressor(regressors);
+
     unsigned int episodes = 1000;
     MountainCar mdp;
 

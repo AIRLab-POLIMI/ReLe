@@ -40,6 +40,7 @@
 #include "rele/utils/FileManager.h"
 
 #include "rele/IRL/algorithms/BayesianCoordinateAscend.h"
+#include "rele/IRL/algorithms/MLEDistribution.h"
 
 using namespace std;
 using namespace arma;
@@ -47,7 +48,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 100;
+    int nbEpisodes = 300;
 
     FileManager fm("lqr", "approximateBayesian");
     fm.createDir();
@@ -127,21 +128,23 @@ int main(int argc, char *argv[])
     unsigned int nu = dp+1;
     InverseWishart covPrior(nu, Psi);
 
-    arma::mat SigmaPolicy = arma::eye(dim, dim);
+    arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
+    //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
+
+    MLEDistribution<DenseAction, DenseState> alg(policyFamily);
 
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);
 
-    ParametricNormal posterior = alg.getMeanPosterior();
 
-    std::cout << "Mean parameters" << std::endl
-              << posterior.getMean().t() << std::endl;
-    /*<< "Covariance estimate" << std::endl
-    << posterior.getCovariance() << std::endl;*/
 
     ParametricNormal imitatorDist = alg.getDistribution();
+
+    std::cout << "Mean parameters" << std::endl
+              << imitatorDist.getMean().t() << std::endl;
+    /*<< "Covariance estimate" << std::endl
+    << posterior.getCovariance() << std::endl;*/
 
     // Generate LQR imitator dataset
     DetLinearPolicy<DenseState> detPolicyFamily(phiImitator);
