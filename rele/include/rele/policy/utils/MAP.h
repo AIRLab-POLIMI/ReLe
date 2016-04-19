@@ -81,6 +81,13 @@ public:
         double logPrior = prior.logPdf(x);
         dx += prior.pointDifflog(x);
 
+        /*std::cout << "dist" << std::endl;
+        std::cout << prior.getParameters().t() << std::endl;
+        std::cout << "policy" << std::endl;
+        std::cout << x.t() << std::endl;
+        std::cout << "gradient" << std::endl;
+        std::cout << prior.pointDifflog(x).t() << std::endl;*/
+
         return logLikelihood + logPrior;
     }
 

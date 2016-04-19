@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     // recover approximate
     std::vector<Range> ranges;
     std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 4;
+    unsigned int numTiles = 3;
 
     for(unsigned int i = 0; i < dim; i++)
     {
@@ -116,7 +116,10 @@ int main(int argc, char *argv[])
 
     unsigned int dp = phiImitator.rows();
 
+    std::cout << "Parameters Number" << std::endl;
     std::cout << dp << std::endl;
+    std::cout << "Feature expectation" << std::endl;
+    std::cout << data.computefeatureExpectation(phiImitator) << std::endl;
 
     // mean prior
     arma::vec mu_p = arma::zeros(dp);
@@ -130,9 +133,9 @@ int main(int argc, char *argv[])
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
+    BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
 
-    MLEDistribution<DenseAction, DenseState> alg(policyFamily);
+    //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
 
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);

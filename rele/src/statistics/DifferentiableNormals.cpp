@@ -96,7 +96,7 @@ mat ParametricNormal::diff2log(const vec&point) const
 
 vec ParametricNormal::pointDifflog(const vec& point) const
 {
-    return invCov * (point - mean);
+    return -invCov * (point - mean);
 }
 
 void ParametricNormal::writeOnStream(ostream& out)
