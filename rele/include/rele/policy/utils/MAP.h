@@ -78,8 +78,7 @@ public:
         dx /= episodeN;
 
         //compute prior
-        double priorP = prior(x);
-        double logPrior = std::log(priorP);
+        double logPrior = prior.logPdf(x);
         dx += prior.pointDifflog(x);
 
         return logLikelihood + logPrior;

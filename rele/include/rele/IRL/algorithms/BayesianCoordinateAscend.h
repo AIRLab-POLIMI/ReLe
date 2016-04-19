@@ -53,6 +53,7 @@ public:
         unsigned int n = data.size();
 
         params.zeros(dp, n);
+        params.each_col() = getInitialValue();
 
         double eps = 1e-8;
         double posteriorP = -std::numeric_limits<double>::infinity();
@@ -108,11 +109,14 @@ protected:
             std::cout << thetaP << std::endl;
         }
 
+        std::cout << "posteriorTheta" << posteriorP << std::endl;
+
         return posteriorP;
     }
 
     virtual double computePosterior() = 0;
     virtual void computeThetaPrior() = 0;
+    virtual arma::vec getInitialValue() = 0;
 
 protected:
     arma::mat params;
@@ -157,6 +161,11 @@ public:
     ParametricNormal getPosterior()
     {
         return posterior;
+    }
+
+    virtual arma::vec getInitialValue() override
+    {
+        return prior.getMean();
     }
 
 private:
@@ -204,6 +213,10 @@ public:
         //compute posterior probability
         double logMuP = meanPosterior.logPdf(mu);
         double logCovP = covPosterior.logPdf(arma::vectorise(Sigma));
+
+        std::cout << "posteriorMu " << logMuP << std::endl;
+        std::cout << "posteriorCov " << logCovP << std::endl;
+
         return logMuP + logCovP;
     }
 
@@ -220,6 +233,11 @@ public:
     InverseWishart getCovPosterior()
     {
         return covPosterior;
+    }
+
+    virtual arma::vec getInitialValue() override
+    {
+        return meanPrior.getMean();
     }
 
 private:
