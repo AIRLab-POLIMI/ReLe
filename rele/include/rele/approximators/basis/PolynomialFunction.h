@@ -29,19 +29,49 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements functions to build
+ * polynomial basis functions.
+ */
 class PolynomialFunction: public BasisFunction
 {
 public:
+    /*!
+     * Constructor.
+     */
     PolynomialFunction();
+
+    /*!
+     * Constructor.
+     * \param dimension vector of dimensions of the input vector
+     * \param degree vector of degrees of the polynomial
+     */
     PolynomialFunction(std::vector<unsigned int> dimension,
                        std::vector<unsigned int> degree);
+
+    /*!
+     * Constructor.
+     * \param _dimension the dimension of the input vector
+     * \param _degree the degree of the polynomial
+     */
     PolynomialFunction(unsigned int _dimension, unsigned int _degree);
+
+    /*!
+     * Destructor.
+     */
     virtual ~PolynomialFunction();
+
     double operator()(const arma::vec& input) override;
 
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;
 
+    /*!
+     * Generate the basis functions.
+     * \param degree the degree of the polynomial
+     * \param input_size the dimension of the input vector
+     * \return the basis functions
+     */
     static BasisFunctions generate(unsigned int degree, unsigned int input_size);
 
 private:

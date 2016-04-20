@@ -210,6 +210,9 @@ Basis functions
 .. doxygenclass:: ReLe::GaussianRbf
    :members:
    
+.. doxygenclass:: ReLe::AndConditionBasisFunction
+   :members:
+   
 .. doxygenclass:: ReLe::IdentityBasis_
    :members:
    
@@ -224,6 +227,15 @@ Basis functions
 
 .. doxygenclass:: ReLe::InverseBasis_
    :members:
+   
+.. doxygenclass:: ReLe::NormBasis
+   :members:
+   
+.. doxygenclass:: ReLe::InfiniteNorm
+   :members:
+
+.. doxygenclass:: ReLe::PolynomialFunction
+   :members:   
    
 Tiles
 -----
@@ -300,6 +312,24 @@ Normal Policies
 .. doxygenclass:: ReLe::GenericMVNDiagonalPolicy
 
 .. doxygenclass:: ReLe::GenericMVNStateDependantStddevPolicy
+
+Solvers
+=======
+
+.. doxygenclass:: ReLe::DynamicProgrammingAlgorithm
+   :members:
+
+.. doxygenclass:: ReLe::PolicyIteration
+   :members:
+
+.. doxygenclass:: ReLe::ValueIteration
+   :members:
+   
+.. doxygenclass:: ReLe::LQRExact
+   :members:
+
+.. doxygenclass:: ReLe::LQRsolver
+   :members:
 
 Distributions
 =============

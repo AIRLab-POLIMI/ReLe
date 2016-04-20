@@ -31,9 +31,17 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements function to return the p-norm of an
+ * input feature.
+ */
 class NormBasis : public BasisFunction
 {
 public:
+    /*!
+     * Constructor.
+     * \param p the p of the p-norm
+     */
     NormBasis(unsigned int p = 2);
 
     virtual double operator() (const arma::vec& input) override;
@@ -44,9 +52,17 @@ private:
     unsigned int p;
 };
 
+/*!
+ * This class implements function to return the infinite norm of an
+ * input feature.
+ */
 class InfiniteNorm : public BasisFunction
 {
 public:
+    /*!
+     * Constructor.
+     * \param max flag to indicate wheter to use inf or -inf for the p of the p-norm
+     */
     InfiniteNorm(bool max = true);
 
     virtual double operator() (const arma::vec& input) override;
