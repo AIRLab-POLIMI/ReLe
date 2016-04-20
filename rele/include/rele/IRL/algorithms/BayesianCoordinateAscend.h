@@ -55,7 +55,7 @@ public:
         params.zeros(dp, n);
         params.each_col() = getInitialValue();
 
-        double eps = 1e-8;
+        double eps = 0.1;
         double posteriorP = -std::numeric_limits<double>::infinity();
         double oldPosteriorP;
 

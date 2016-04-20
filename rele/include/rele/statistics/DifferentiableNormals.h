@@ -120,15 +120,21 @@ protected:
     /*!
      * Compute mean, covariance, inverse covariance and determinant values
      * according to current parameterization.
-     *
-     * @brief Update internal state
      */
     virtual void updateInternalState();
+
+    /*!
+     * Compute the logarithm of the determinant of a matrix.
+     * Throws an exception if the determinant is non positive.
+     * \param cov covariance matrix
+     * \return the logarithm of the determinant
+     */
+    double computeLogDet(const arma::mat& cov);
 
 protected:
     arma::vec mean;
     arma::mat Cov, invCov, cholCov;
-    double detValue;
+    double logDet;
 
 };
 

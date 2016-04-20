@@ -42,7 +42,8 @@ LogTiles::LogTiles(const std::vector<Range>& ranges,
 
 unsigned int LogTiles::operator()(const arma::vec& input)
 {
-    arma::vec inputHat = arma::log(input - minComponents + 1);
+    unsigned int dp = minComponents.n_elem - 1;
+    arma::vec inputHat = arma::log(input.rows(0, dp) - minComponents + 1);
     return BasicTiles::operator()(inputHat);
 }
 
@@ -90,7 +91,8 @@ CenteredLogTiles::CenteredLogTiles(const std::vector<Range>& ranges,
 
 unsigned int CenteredLogTiles::operator()(const arma::vec& input)
 {
-    arma::vec delta = input - centers;
+    unsigned int dp = centers.n_elem - 1;
+    arma::vec delta = input.rows(0, dp) - centers;
     arma::vec inputHat = arma::sign(delta) % arma::log(arma::abs(delta) + 1.0);
     return BasicTiles::operator()(inputHat);
 }

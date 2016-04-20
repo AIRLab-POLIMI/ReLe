@@ -61,16 +61,18 @@ public:
         }
 
         mu = arma::mean(params, 1);
-        Sigma = arma::cov(params.t());
+        //TODO [IMPORTANT] LEVAMI
+        //Sigma = arma::cov(params.t());
+        Sigma = arma::eye(dp, dp)*1e-3;
 
         std::cout << mu.t() << std::endl;
         std::cout << Sigma << std::endl;
         std::cout << arma::rank(Sigma) << std::endl;
 
-        if(arma::rank(Sigma) < dp)
+        /*if(arma::rank(Sigma) < dp)
         {
             Sigma += arma::eye(dp, dp)*1e-6;
-        }
+        }*/
 
     }
 

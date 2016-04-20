@@ -71,10 +71,10 @@ inline double mvnpdfFast(const arma::vec& x,
 inline double logmvnpdfFast(const arma::vec& x,
                             const arma::vec& mean,
                             const arma::mat& inverse_cov,
-                            const double& det)
+                            const double& logDet)
 {
     arma::vec diff = x - mean;
-    return -0.5*(x.n_elem*std::log(2 * M_PI)  + arma::as_scalar(diff.t()*inverse_cov*diff) + std::log(det));
+    return -0.5*(x.n_elem*std::log(2 * M_PI)  + arma::as_scalar(diff.t()*inverse_cov*diff) + logDet);
 }
 
 
