@@ -39,9 +39,6 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    std::vector<LinearApproximator*> regressors;
-    QRegressor_<LinearApproximator> qRegressor(regressors);
-
     unsigned int episodes = 1000;
     MountainCar mdp;
 
