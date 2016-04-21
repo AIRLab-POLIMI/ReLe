@@ -47,7 +47,7 @@ class MountainCar: public DenseMDP
 public:
     enum StateLabel
     {
-        velocity = 0, position = 1
+        position = 0, velocity = 1
     };
 
     /*!
@@ -56,7 +56,7 @@ public:
      */
     enum ConfigurationsLabel
     {
-        Sutton, Klein, Random
+        Sutton, Klein, Ernst, Random
     };
 
 public:
