@@ -89,7 +89,7 @@ public:
         arma::mat testFeatures = this->phi(testInputs);
         arma::vec outputs(1, arma::fill::zeros);
 
-        arma::vec k = generateCovVector(features, testFeatures.col(0));
+        arma::vec k = generateCovVector(testFeatures.col(0));
         outputs(0) = arma::dot(k.t(), alpha);
 
         return outputs;
@@ -104,7 +104,7 @@ public:
     {
         arma::mat testFeatures = this->phi(testInputs);
 
-        arma::vec k = generateCovVector(features, testFeatures.col(0));
+        arma::vec k = generateCovVector(testFeatures.col(0));
         arma::vec v = arma::solve(arma::trimatl(L), k, arma::solve_opts::fast);
         double var = computeKernel(testFeatures.col(0), testFeatures.col(0)) -
                      arma::dot(v.t(), v);
@@ -217,8 +217,7 @@ protected:
         return K;
     }
 
-    arma::vec generateCovVector(typename input_traits<denseOutput>::type features,
-                                arma::vec testFeatures)
+    arma::vec generateCovVector(arma::vec testFeatures)
     {
         arma::vec k(features.n_cols, arma::fill::zeros);
 
