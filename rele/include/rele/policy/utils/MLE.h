@@ -68,6 +68,7 @@ public:
 
         // compute average value
         logLikelihood /= nbEpisodes;
+        dx /= nbEpisodes;
 
         return logLikelihood;
     }
@@ -122,6 +123,8 @@ public:
 
         // compute average value
         logLikelihood /= nbEpisodes;
+        dx /= nbEpisodes;
+
         double l2normParams = arma::norm(x);
         logLikelihood -= lambda * l2normParams;
         arma::vec L2RegGradient = x / l2normParams;
