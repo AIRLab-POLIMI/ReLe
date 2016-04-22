@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
     auto* irlAlg =  new EGIRL<DenseAction, DenseState>(data, theta, imitatorDist,
-    			rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
 
 
 

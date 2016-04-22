@@ -33,14 +33,25 @@
 namespace ReLe
 {
 
-
+/*!
+ * This class implements the Dynamic Programming (DP) algorithm.
+ */
 class DynamicProgrammingAlgorithm : public Solver<FiniteAction, FiniteState>
 {
 public:
+    /*!
+     * Constructor.
+     * \param mdp the mdp to solve
+     */
     DynamicProgrammingAlgorithm(FiniteMDP& mdp);
+
     virtual Policy<FiniteAction, FiniteState>& getPolicy() override;
     virtual Dataset<FiniteAction, FiniteState> test() override;
 
+    /*!
+     * Getter
+     * \return the value function
+     */
     inline arma::vec getValueFunction()
     {
         return V;
@@ -59,13 +70,23 @@ protected:
     arma::vec V;
 };
 
+/*!
+ * This class implements the Policy Iteration algorithm.
+ */
 class PolicyIteration : public DynamicProgrammingAlgorithm
 {
 public:
+    /*!
+     * Constructor.
+     * \param mdp the mdp to solve
+     */
     PolicyIteration(FiniteMDP& mdp);
 
     virtual void solve() override;
 
+    /*!
+     * Destructor.
+     */
     virtual ~PolicyIteration();
 
 private:
@@ -76,13 +97,24 @@ private:
     bool changed;
 };
 
+/*!
+ * This class implements the Value Iteration algorithm.
+ */
 class ValueIteration : public DynamicProgrammingAlgorithm
 {
 public:
+    /*!
+     * Constructor.
+     * \param mdp the mdp to solve
+     * \param eps threshold to be evaluated to stop the algorithm
+     */
     ValueIteration(FiniteMDP& mdp, double eps);
 
     virtual void solve() override;
 
+    /*!
+     * Destructor.
+     */
     virtual ~ValueIteration();
 
 private:

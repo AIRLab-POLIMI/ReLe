@@ -30,10 +30,12 @@ namespace ReLe
 {
 
 MountainCar::MountainCar(ConfigurationsLabel label) :
-    //Sutton's article
-    DenseMDP(2, 3, 1, false, true),
-    //Klein's articles
-    //DenseMDP(2, 3, 1, false, true, 0.9, 100),
+    // Sutton's article
+    // DenseMDP(2, 3, 1, false, true),
+    // Klein's articles
+    // DenseMDP(2, 3, 1, false, true, 0.9, 100),
+	// Ernst's article
+	DenseMDP(2, 2, 1, false, true, 0.95, 100),
     envType(label)
 {
 }
@@ -43,38 +45,81 @@ void MountainCar::step(const FiniteAction& action,
 {
     int motorAction = action.getActionN() - 1;
 
-    double updatedVelocity = currentState[velocity] + motorAction * 0.001
-                             - 0.0025 * cos(3 * currentState[position]);
-    double updatedPosition = currentState[position] + updatedVelocity;
+    if(envType == Sutton || envType == Klein)
+    {
+		double updatedVelocity = currentState[velocity] + motorAction * 0.001
+								 - 0.0025 * cos(3 * currentState[position]);
+		double updatedPosition = currentState[position] + updatedVelocity;
 
 
-    if(updatedPosition <= -1.2)
-    {
-        currentState[position] = -1.2;
-        currentState[velocity] = 0;
-    }
-    else if(updatedPosition > 0.5)
-    {
-        currentState[position] = 0.6;
-        currentState[velocity] = 0;
-        currentState.setAbsorbing();
-    }
-    else
-    {
-        currentState[position] = updatedPosition;
-        currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
-    }
+		if(updatedPosition <= -1.2)
+		{
+			currentState[position] = -1.2;
+			currentState[velocity] = 0;
+		}
+		else if(updatedPosition > 0.5)
+		{
+			currentState[position] = 0.6;
+			currentState[velocity] = 0;
+			currentState.setAbsorbing();
+		}
+		else
+		{
+			currentState[position] = updatedPosition;
+			currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
+		}
 
-    //Sutton's article
-    if(envType == Sutton)
-        reward[0] = -1;
-    //Klein's article
-    else if(envType == Klein)
+		if(envType == Sutton)
+			reward[0] = -1;
+		else if(envType == Klein)
+		{
+			if(currentState[position] > 0.5)
+				reward[0] = 1;
+			else
+				reward[0] = 0;
+		}
+    }
+    else if(envType == Ernst)
     {
-        if(currentState[position] > 0.5)
-            reward[0] = 1;
-        else
-            reward[0] = 0;
+    	double diffHill;
+    	double diff2Hill;
+    	if(currentState[position] < 0)
+    	{
+    		diffHill = 2 * currentState[position] + 1;
+    		diff2Hill = 2;
+    	}
+    	else
+    	{
+    		diffHill = 1 / sqrt(pow(1 + 5 * currentState[position] * currentState[position], 3));
+    		diff2Hill = (-15 * currentState[position]) /
+    				sqrt(pow(1 + 5 * currentState[position] * currentState[position], 5));
+    	}
+
+    	double h = 0.1;
+    	double m = 1;
+    	double g = 9.81;
+    	double u = (action.getActionN() == 0 ? -4 : 4);
+    	double acceleration = u / (m * (1 + diffHill * diffHill)) -
+    			(g * diffHill) / (1 + diffHill * diffHill) -
+				(currentState[velocity] * currentState[velocity] * diffHill * diff2Hill) /
+				(1 + diffHill * diffHill);
+
+    	double updatedPosition = currentState[position] + h * currentState[velocity] +
+    			0.5 * h * h * acceleration;
+		double updatedVelocity = currentState[velocity] + h * acceleration;
+
+		if(abs(updatedPosition) > 1 || abs(updatedVelocity) > 3)
+			currentState.setAbsorbing();
+
+		currentState[position] = updatedPosition;
+		currentState[velocity] = updatedVelocity;
+
+		if(currentState[position] < -1 || abs(currentState[velocity]) > 3)
+			reward[0] = -1;
+		else if(currentState[position] > 1 && abs(currentState[velocity]) <= 3)
+			reward[0] = 1;
+		else
+			reward[0] = 0;
     }
 
     nextState = currentState;
@@ -83,7 +128,7 @@ void MountainCar::step(const FiniteAction& action,
 void MountainCar::getInitialState(DenseState& state)
 {
     //Sutton's article
-    if (envType == Sutton)
+    if (envType == Sutton || envType == Ernst)
     {
         currentState[position] = -0.5;
         currentState[velocity] =  0.0;

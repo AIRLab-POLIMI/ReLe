@@ -31,23 +31,46 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements the Linear-Quadratic Regulator (LQR) solver.
+ */
 class LQRsolver: public Solver<DenseAction, DenseState>
 {
 public:
     enum Type {MOO, CLASSIC};
 
+    /*!
+     * Constructor.
+     * \param lqr the Linear-Quadratic Regulator
+     * \param phi features
+     * \param type the type of Linear-Quadratic Regulator
+     */
     LQRsolver(LQR& lqr, Features& phi, Type type = Type::MOO);
+
     virtual void solve() override;
     virtual Dataset<DenseAction, DenseState> test() override;
     virtual Policy<DenseAction, DenseState>& getPolicy() override;
 
+    /*!
+     * Compute the optimal solution of the problem.
+     * \return the matrix with the optimal solution
+     */
     arma::mat computeOptSolution();
+
+    /*!
+     * Setter.
+     * \param rewardIndex the index of the reward to set
+     */
     inline void setRewardIndex(unsigned int rewardIndex)
     {
         weightsRew.zeros();
         weightsRew[rewardIndex] = 1;
     }
 
+    /*!
+     * Setter.
+     * \param weights the weights to be set
+     */
     inline void setRewardWeights(arma::vec& weights)
     {
         weightsRew = weights;
