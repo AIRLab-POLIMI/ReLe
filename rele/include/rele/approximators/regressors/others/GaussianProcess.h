@@ -128,22 +128,22 @@ public:
         arma::mat K = generateCovMatrix(features);
 
         L = arma::chol(K, "lower");
-    	alpha = arma::solve(arma::trimatu(L.t()),
-    						arma::solve(arma::trimatl(L),
-    									outputs,
-										arma::solve_opts::fast),
-							arma::solve_opts::fast);
+        alpha = arma::solve(arma::trimatu(L.t()),
+                            arma::solve(arma::trimatl(L),
+                                        outputs,
+                                        arma::solve_opts::fast),
+                            arma::solve_opts::fast);
     }
 
     void updateAlpha(const arma::vec& outputs)
     {
-    	this->outputs = outputs;
+        this->outputs = outputs;
 
-    	alpha = arma::solve(arma::trimatu(L.t()),
-    						arma::solve(arma::trimatl(L),
-    									this->outputs,
-										arma::solve_opts::fast),
-							arma::solve_opts::fast);
+        alpha = arma::solve(arma::trimatu(L.t()),
+                            arma::solve(arma::trimatl(L),
+                                        this->outputs,
+                                        arma::solve_opts::fast),
+                            arma::solve_opts::fast);
     }
 
     /*!
