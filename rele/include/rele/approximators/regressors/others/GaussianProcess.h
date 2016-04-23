@@ -185,6 +185,24 @@ public:
     }
 
     /*!
+     * Setter.
+     * \param alpha vector of weights
+     */
+    void setAlpha(const arma::vec& alpha)
+    {
+        this->alpha = alpha;
+    }
+
+    /*!
+     * Setter.
+     * \param inputs training set to be set
+     */
+    void setFeatures(const typename input_traits<denseOutput>::type inputs)
+    {
+        this->features = this->phi(inputs);
+    }
+
+    /*!
      * Getter.
      * \return the hyperparameters of the model
      */
