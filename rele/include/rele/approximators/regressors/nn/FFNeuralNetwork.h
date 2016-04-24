@@ -119,7 +119,7 @@ public:
     FFNeuralNetwork_(Features_<InputC, denseOutput>& phi,
                      std::vector<unsigned int>& layerNeurons,
                      std::vector<Function*>& layerFunction) :
-        ParametricRegressor(layerNeurons.back()), BatchRegressor_<InputC, arma::vec, denseOutput>(phi),
+        ParametricRegressor(phi, layerNeurons.back()), BatchRegressor_<InputC, arma::vec, denseOutput>(phi),
         layerFunction(layerFunction), layerNeurons(layerNeurons)
     {
         setupNetwork();
