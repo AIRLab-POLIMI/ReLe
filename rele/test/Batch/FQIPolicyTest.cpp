@@ -87,6 +87,8 @@ int main(int argc, char *argv[])
         std::vector<GaussianProcess> gpsB;
 
         std::vector<std::vector<GaussianProcess>> gps;
+        gps.push_back(gpsA);
+        gps.push_back(gpsB);
 
         arma::cube alpha;
         std::vector<arma::cube> activeSets;
