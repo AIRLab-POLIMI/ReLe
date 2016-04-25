@@ -14,3 +14,6 @@ target_link_libraries(mc_GPFQI rele)
 
 add_executable(mc_LSPI McLSPITest.cpp)
 target_link_libraries(mc_LSPI rele)
+
+add_executable(FQI_policy FQIPolicyTest.cpp)
+target_link_libraries(FQI_policy rele)
