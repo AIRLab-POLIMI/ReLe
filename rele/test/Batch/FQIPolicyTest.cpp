@@ -48,21 +48,21 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     arma::mat hParams;
-    hParams.load(" ");
+    hParams.load("hParams.mat");
     arma::vec lengthScale = hParams.col(0);
     arma::vec rawSignalSigma = hParams.col(1);
     double signalSigma = arma::as_scalar(rawSignalSigma(arma::find(rawSignalSigma != arma::datum::inf)));
 
     if(alg == "f" || alg == "w")
     {
-    	std::vector<std::vector<BatchRegressor*>> gps;
-    	std::vector<BatchRegressor*> gpsA;
-    	gps.push_back(gpsA);
+        std::vector<std::vector<BatchRegressor*>> gps;
+        std::vector<BatchRegressor*> gpsA;
+        gps.push_back(gpsA);
 
         arma::mat alpha;
         arma::cube activeSet;
-        alpha.load(" ");
-        activeSet.load(" ");
+        alpha.load("alphas.mat");
+        activeSet.load("activeSetVectors.mat");
 
         for(unsigned int i = 0; i < alpha.n_cols; i++)
         {
@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
 
         for(unsigned int i = 0; i < 100; i++)
         {
-        	std::cout << "Episode: " << i << std::endl;
-        	core.runTestEpisode();
+            std::cout << "Episode: " << i << std::endl;
+            core.runTestEpisode();
         }
     }
     else if(alg == "d")
@@ -106,9 +106,9 @@ int main(int argc, char *argv[])
 
         arma::cube alpha;
         std::vector<arma::cube> activeSets;
-        alpha.load(" ");
-        activeSets[0].load(" ");
-        activeSets[1].load(" ");
+        alpha.load("alphas.mat");
+        activeSets[0].load("activeSetVectors1.mat");
+        activeSets[1].load("activeSetVectors2.mat");
 
         for(unsigned int i = 0; i < alpha.n_cols; i++)
         {
@@ -142,8 +142,8 @@ int main(int argc, char *argv[])
 
         for(unsigned int i = 0; i < 100; i++)
         {
-        	std::cout << "Episode: " << i << std::endl;
-        	core.runTestEpisode();
+            std::cout << "Episode: " << i << std::endl;
+            core.runTestEpisode();
         }
     }
 }

@@ -191,8 +191,8 @@ unsigned int e_GreedyMultipleRegressors::operator()(const arma::vec& state)
         arma::vec outputs(regressors.size(), arma::fill::zeros);
         for(unsigned int r = 0; r < regressors.size(); r++)
         {
-        	auto& self = *regressors[r][un];
-        	outputs(r) = self(regInput)[0];
+            auto& self = *regressors[r][un];
+            outputs(r) = self(regInput)[0];
         }
 
         double qmax = arma::as_scalar(arma::mean(outputs));
@@ -203,8 +203,8 @@ unsigned int e_GreedyMultipleRegressors::operator()(const arma::vec& state)
             arma::vec outputs(regressors.size(), arma::fill::zeros);
             for(unsigned int r = 0; r < regressors.size(); r++)
             {
-            	auto& self = *regressors[r][i];
-            	outputs(r) = self(regInput)[0];
+                auto& self = *regressors[r][i];
+                outputs(r) = self(regInput)[0];
             }
 
             double qvalue = arma::as_scalar(arma::mean(outputs));
