@@ -22,6 +22,7 @@
  */
 
 #include "rele/core/Core.h"
+#include "rele/environments/MountainCar.h"
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/approximators/features/DenseFeatures.h"
@@ -54,7 +55,9 @@ int main(int argc, char *argv[])
 
     if(alg == "f" || alg == "w")
     {
-        std::vector<GaussianProcess> gps;
+    	std::vector<std::vector<BatchRegressor*>> gps;
+    	std::vector<BatchRegressor*> gpsA;
+    	gps.push_back(gpsA);
 
         arma::mat alpha;
         arma::cube activeSet;
@@ -78,15 +81,26 @@ int main(int argc, char *argv[])
 
             gp.setFeatures(activeSetMat);
 
-            gps.push_back(gp);
+            gps[0].push_back(&gp);
+        }
+
+        MountainCar mdp(MountainCar::Ernst);
+        e_GreedyMultipleRegressors policy(gps);
+        PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
+        auto&& core = buildCore(mdp, agent);
+
+        for(unsigned int i = 0; i < 100; i++)
+        {
+        	std::cout << "Episode: " << i << std::endl;
+        	core.runTestEpisode();
         }
     }
     else if(alg == "d")
     {
-        std::vector<GaussianProcess> gpsA;
-        std::vector<GaussianProcess> gpsB;
+        std::vector<BatchRegressor*> gpsA;
+        std::vector<BatchRegressor*> gpsB;
 
-        std::vector<std::vector<GaussianProcess>> gps;
+        std::vector<std::vector<BatchRegressor*>> gps;
         gps.push_back(gpsA);
         gps.push_back(gpsB);
 
@@ -116,8 +130,20 @@ int main(int argc, char *argv[])
 
                 gp.setFeatures(activeSetMat);
 
-                gps[j].push_back(gp);
+                gps[j].push_back(&gp);
             }
+        }
+
+        MountainCar mdp(MountainCar::Ernst);
+        e_GreedyMultipleRegressors policy(gps);
+        policy.setEpsilon(0);
+        PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
+        auto&& core = buildCore(mdp, agent);
+
+        for(unsigned int i = 0; i < 100; i++)
+        {
+        	std::cout << "Episode: " << i << std::endl;
+        	core.runTestEpisode();
         }
     }
 }
