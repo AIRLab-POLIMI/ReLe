@@ -46,7 +46,13 @@ int main(int argc, char *argv[])
     BasisFunctions bfs = IdentityBasis::generate(nStates);
     DenseFeatures phi(bfs);
 
-    if(alg == "fqi" || alg == "wfqi")
+    arma::mat hParams;
+    hParams.load(" ");
+    arma::vec lengthScale = hParams.col(0);
+    arma::vec rawSignalSigma = hParams.col(1);
+    double signalSigma = arma::as_scalar(rawSignalSigma(arma::find(rawSignalSigma != arma::datum::inf)));
+
+    if(alg == "f" || alg == "w")
     {
         std::vector<GaussianProcess> gps;
 
@@ -61,6 +67,9 @@ int main(int argc, char *argv[])
             arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
 
             GaussianProcess gp(phi);
+            gp.getHyperParameters().lengthScale = lengthScale;
+            gp.getHyperParameters().signalSigma = signalSigma;
+
             gp.setAlpha(alphaVec);
 
             arma::mat rawActiveSetMat = activeSet.slice(i);
@@ -72,7 +81,7 @@ int main(int argc, char *argv[])
             gps.push_back(gp);
         }
     }
-    else if(alg=="dfqi")
+    else if(alg == "d")
     {
         std::vector<GaussianProcess> gpsA;
         std::vector<GaussianProcess> gpsB;
@@ -94,6 +103,9 @@ int main(int argc, char *argv[])
                 arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
 
                 GaussianProcess gp(phi);
+                gp.getHyperParameters().lengthScale = lengthScale;
+                gp.getHyperParameters().signalSigma = signalSigma;
+
                 gp.setAlpha(alphaVec);
 
                 arma::mat rawActiveSetMat = activeSets[j].slice(i);
