@@ -200,7 +200,7 @@ unsigned int e_GreedyMultipleRegressors::operator()(const arma::vec& state)
         optimal_actions.push_back(un);
         for(unsigned int i = 1; i < nactions; ++i)
         {
-        	double output = 0;
+            double output = 0;
             for(unsigned int r = 0; r < regressors.size(); r++)
             {
                 auto& self = *regressors[r][i];

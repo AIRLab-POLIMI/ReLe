@@ -199,7 +199,7 @@ public:
      */
     void setFeatures(const typename input_traits<denseOutput>::type inputs)
     {
-    	typename input_traits<denseOutput>::type features(this->phi.rows(), inputs.n_rows, arma::fill::zeros);
+        typename input_traits<denseOutput>::type features(this->phi.rows(), inputs.n_rows, arma::fill::zeros);
         for(int i = 0; i < inputs.n_rows; i++)
             features.col(i) = this->phi(inputs.row(i).t());
         this->features = features;
@@ -211,7 +211,7 @@ public:
      */
     const arma::vec& getAlpha() const
     {
-    	return alpha;
+        return alpha;
     }
 
     /*!
@@ -220,7 +220,7 @@ public:
      */
     const typename input_traits<denseOutput>::type& getFeatures() const
     {
-    	return features;
+        return features;
     }
 
     /*!

@@ -39,11 +39,11 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	MountainCar mdp(MountainCar::Ernst);
-	std::string alg = argv[1];
+    MountainCar mdp(MountainCar::Ernst);
+    std::string alg = argv[1];
 
-	unsigned int stateDim = mdp.getSettings().stateDimensionality;
-	unsigned int nActions = mdp.getSettings().actionsNumber;
+    unsigned int stateDim = mdp.getSettings().stateDimensionality;
+    unsigned int nActions = mdp.getSettings().actionsNumber;
 
     BasisFunctions bfs = IdentityBasis::generate(stateDim);
     DenseFeatures phi(bfs);
@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
         alpha.load("/home/tesla/Desktop/alphas.mat", arma::raw_ascii);
         activeSetMat.load("/home/tesla/Desktop/activeSetVectors.mat", arma::raw_ascii);
 
-    	arma::cube activeSet(activeSetMat.n_rows, activeSetMat.n_cols / nActions, nActions);
-    	for(unsigned int a = 0; a < nActions; a++)
-    		activeSet.slice(a) = activeSetMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+        arma::cube activeSet(activeSetMat.n_rows, activeSetMat.n_cols / nActions, nActions);
+        for(unsigned int a = 0; a < nActions; a++)
+            activeSet.slice(a) = activeSetMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
 
         for(unsigned int i = 0; i < alpha.n_cols; i++)
         {
@@ -99,9 +99,9 @@ int main(int argc, char *argv[])
 
         arma::mat alphaMat;
         alphaMat.load("/home/tesla/Desktop/alphas.mat", arma::raw_ascii);
-    	arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / nActions, nActions);
-    	for(unsigned int a = 0; a < nActions; a++)
-    		alpha.slice(a) = alphaMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+        arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / nActions, nActions);
+        for(unsigned int a = 0; a < nActions; a++)
+            alpha.slice(a) = alphaMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
 
         std::vector<arma::mat> activeSetsMat;
         arma::mat tempMat1;
@@ -110,12 +110,12 @@ int main(int argc, char *argv[])
         arma::mat tempMat2;
         tempMat2.load("/home/tesla/Desktop/activeSetVectors2.mat", arma::raw_ascii);
         activeSetsMat.push_back(tempMat2);
-    	arma::cube tempActiveSet(activeSetsMat[0].n_rows, activeSetsMat[0].n_cols / nActions, nActions);
-    	std::vector<arma::cube> activeSets = {tempActiveSet, tempActiveSet};
+        arma::cube tempActiveSet(activeSetsMat[0].n_rows, activeSetsMat[0].n_cols / nActions, nActions);
+        std::vector<arma::cube> activeSets = {tempActiveSet, tempActiveSet};
 
-    	for(unsigned int i = 0; i < 2; i++)
-			for(unsigned int a = 0; a < nActions; a++)
-				activeSets[i].slice(a) = activeSetsMat[i].cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+        for(unsigned int i = 0; i < 2; i++)
+            for(unsigned int a = 0; a < nActions; a++)
+                activeSets[i].slice(a) = activeSetsMat[i].cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
 
         for(unsigned int i = 0; i < 2; i++)
         {
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 arma::mat rawActiveSetMat = activeSets[i].slice(j);
                 arma::vec rawActiveSetVec = rawActiveSetMat.col(0);
                 arma::mat activeSetMat = rawActiveSetMat.rows(
-                	arma::find(rawActiveSetVec != arma::datum::inf));
+                                             arma::find(rawActiveSetVec != arma::datum::inf));
 
                 gp->setFeatures(activeSetMat);
 
