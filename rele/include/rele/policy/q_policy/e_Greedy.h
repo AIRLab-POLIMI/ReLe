@@ -25,6 +25,7 @@
 #define E_GREEDY_H_
 
 #include "rele/policy/q_policy/ActionValuePolicy.h"
+#include "rele/approximators/regressors/others/GaussianProcess.h"
 
 namespace ReLe
 {
@@ -101,7 +102,7 @@ protected:
 class e_GreedyMultipleRegressors: public ActionValuePolicy<DenseState>
 {
 public:
-    e_GreedyMultipleRegressors(std::vector<std::vector<BatchRegressor*>>& regressors);
+    e_GreedyMultipleRegressors(std::vector<std::vector<GaussianProcess*>>& regressors);
     virtual ~e_GreedyMultipleRegressors();
 
     virtual unsigned int operator()(const arma::vec& state) override;
@@ -119,7 +120,7 @@ public:
         return "MultipleRegressors e-Greedy";
     }
 
-    inline void setRegressor(std::vector<std::vector<BatchRegressor*>>& regressors)
+    inline void setRegressor(std::vector<std::vector<GaussianProcess*>>& regressors)
     {
         this->regressors = regressors;
     }
@@ -136,7 +137,7 @@ public:
 
 protected:
     double eps;
-    std::vector<std::vector<BatchRegressor*>>& regressors;
+    std::vector<std::vector<GaussianProcess*>>& regressors;
 };
 
 }
