@@ -53,9 +53,10 @@ int main(int argc, char *argv[])
     arma::vec rawSignalSigma = hParams.col(1);
     double signalSigma = arma::as_scalar(rawSignalSigma(arma::find(rawSignalSigma != arma::datum::inf)));
 
+    std::vector<std::vector<BatchRegressor*>> gps;
+
     if(alg == "f" || alg == "w")
     {
-        std::vector<std::vector<BatchRegressor*>> gps;
         std::vector<BatchRegressor*> gpsA;
         gps.push_back(gpsA);
 
@@ -83,24 +84,12 @@ int main(int argc, char *argv[])
 
             gps[0].push_back(&gp);
         }
-
-        MountainCar mdp(MountainCar::Ernst);
-        e_GreedyMultipleRegressors policy(gps);
-        PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
-        auto&& core = buildCore(mdp, agent);
-
-        for(unsigned int i = 0; i < 100; i++)
-        {
-            std::cout << "Episode: " << i << std::endl;
-            core.runTestEpisode();
-        }
     }
     else if(alg == "d")
     {
         std::vector<BatchRegressor*> gpsA;
         std::vector<BatchRegressor*> gpsB;
 
-        std::vector<std::vector<BatchRegressor*>> gps;
         gps.push_back(gpsA);
         gps.push_back(gpsB);
 
@@ -112,12 +101,12 @@ int main(int argc, char *argv[])
 
         for(unsigned int i = 0; i < alpha.n_cols; i++)
         {
+            arma::mat rawAlphaMat = alpha.slice(i);
+            arma::vec rawAlphaVec = rawAlphaMat.col(i);
+            arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
+
             for(unsigned int j = 0; j < gps.size(); j++)
             {
-                arma::mat rawAlphaMat = alpha.slice(i);
-                arma::mat rawAlphaVec = rawAlphaMat.col(0);
-                arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
-
                 GaussianProcess gp(phi);
                 gp.getHyperParameters().lengthScale = lengthScale;
                 gp.getHyperParameters().signalSigma = signalSigma;
@@ -125,25 +114,26 @@ int main(int argc, char *argv[])
                 gp.setAlpha(alphaVec);
 
                 arma::mat rawActiveSetMat = activeSets[j].slice(i);
-                arma::vec temp = rawActiveSetMat.col(0);
-                arma::mat activeSetMat = rawActiveSetMat.rows(arma::find(temp != arma::datum::inf));
+                arma::vec rawActiveSetVec = rawActiveSetMat.col(0);
+                arma::mat activeSetMat = rawActiveSetMat.rows(
+                	arma::find(rawActiveSetVec != arma::datum::inf));
 
                 gp.setFeatures(activeSetMat);
 
                 gps[j].push_back(&gp);
             }
         }
+    }
 
-        MountainCar mdp(MountainCar::Ernst);
-        e_GreedyMultipleRegressors policy(gps);
-        policy.setEpsilon(0);
-        PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
-        auto&& core = buildCore(mdp, agent);
+    MountainCar mdp(MountainCar::Ernst);
+    e_GreedyMultipleRegressors policy(gps);
+    policy.setEpsilon(0);
+    PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
+    auto&& core = buildCore(mdp, agent);
 
-        for(unsigned int i = 0; i < 100; i++)
-        {
-            std::cout << "Episode: " << i << std::endl;
-            core.runTestEpisode();
-        }
+    for(unsigned int i = 0; i < 100; i++)
+    {
+        std::cout << "Episode: " << i << std::endl;
+        core.runTestEpisode();
     }
 }

@@ -188,26 +188,26 @@ unsigned int e_GreedyMultipleRegressors::operator()(const arma::vec& state)
         regInput = state;
         un = 0;
 
-        arma::vec outputs(regressors.size(), arma::fill::zeros);
+        double output = 0;
         for(unsigned int r = 0; r < regressors.size(); r++)
         {
             auto& self = *regressors[r][un];
-            outputs(r) = self(regInput)[0];
+            output += self(regInput)[0];
         }
 
-        double qmax = arma::as_scalar(arma::mean(outputs));
+        double qmax = output / regressors.size();
         std::vector<int> optimal_actions;
         optimal_actions.push_back(un);
         for(unsigned int i = 1; i < nactions; ++i)
         {
-            arma::vec outputs(regressors.size(), arma::fill::zeros);
+        	double output = 0;
             for(unsigned int r = 0; r < regressors.size(); r++)
             {
                 auto& self = *regressors[r][i];
-                outputs(r) = self(regInput)[0];
+                output += self(regInput)[0];
             }
 
-            double qvalue = arma::as_scalar(arma::mean(outputs));
+            double qvalue = output / regressors.size();
             if (qmax < qvalue)
             {
                 optimal_actions.clear();
