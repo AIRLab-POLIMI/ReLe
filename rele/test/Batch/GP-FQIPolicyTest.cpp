@@ -151,8 +151,6 @@ int main(int argc, char *argv[])
     auto&& core = buildCore(mdp, agent);
     core.getSettings().episodeLength = 1000;
     FileManager fm("mc", "fqi");
-    fm.createDir();
-    fm.cleanDir();
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mcData.log"));
 
     for(unsigned int i = 0; i < 100; i++)
