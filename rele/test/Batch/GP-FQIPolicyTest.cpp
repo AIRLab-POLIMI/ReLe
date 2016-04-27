@@ -146,6 +146,7 @@ int main(int argc, char *argv[])
 
     e_GreedyMultipleRegressors policy(gps);
     policy.setEpsilon(0);
+    policy.setNactions(nActions);
     PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
     auto&& core = buildCore(mdp, agent);
     core.getSettings().episodeLength = 1000;
