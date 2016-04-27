@@ -39,11 +39,18 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-    MountainCar mdp(MountainCar::Ernst);
-    std::string alg = argv[1];
+	std::string env = argv[1];
+	std::string alg = argv[2];
 
-    unsigned int stateDim = mdp.getSettings().stateDimensionality;
-    unsigned int nActions = mdp.getSettings().actionsNumber;
+	DenseMDP* mdp;
+
+	if(env == "mc")
+		mdp = new MountainCar(MountainCar::Ernst);
+	else if(env == "ip")
+		mdp = new DiscreteActionSwingUp;
+
+    unsigned int stateDim = mdp->getSettings().stateDimensionality;
+    unsigned int nActions = mdp->getSettings().actionsNumber;
 
     BasisFunctions bfs = IdentityBasis::generate(stateDim);
     DenseFeatures phi(bfs);
@@ -148,7 +155,7 @@ int main(int argc, char *argv[])
     policy.setEpsilon(0);
     policy.setNactions(nActions);
     PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
-    auto&& core = buildCore(mdp, agent);
+    auto&& core = buildCore(*mdp, agent);
     core.getSettings().episodeLength = 1000;
     FileManager fm("mc", "fqi");
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mcData.log"));
