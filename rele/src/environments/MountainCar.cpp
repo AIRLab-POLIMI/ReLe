@@ -45,7 +45,7 @@ void MountainCar::step(const FiniteAction& action,
 {
     if(envType == Sutton || envType == Klein)
     {
-    	int motorAction = action.getActionN() - 1;
+        int motorAction = action.getActionN() - 1;
 
         double updatedVelocity = currentState[velocity] + motorAction * 0.001
                                  - 0.0025 * cos(3 * currentState[position]);
