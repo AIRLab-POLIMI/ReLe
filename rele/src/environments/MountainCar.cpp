@@ -43,10 +43,10 @@ MountainCar::MountainCar(ConfigurationsLabel label) :
 void MountainCar::step(const FiniteAction& action,
                        DenseState& nextState, Reward& reward)
 {
-    int motorAction = action.getActionN() - 1;
-
     if(envType == Sutton || envType == Klein)
     {
+    	int motorAction = action.getActionN() - 1;
+
         double updatedVelocity = currentState[velocity] + motorAction * 0.001
                                  - 0.0025 * cos(3 * currentState[position]);
         double updatedPosition = currentState[position] + updatedVelocity;
@@ -90,9 +90,9 @@ void MountainCar::step(const FiniteAction& action,
         }
         else
         {
-            diffHill = 1 / sqrt(pow(1 + 5 * currentState[position] * currentState[position], 3));
+            diffHill = 1 / pow(1 + 5 * currentState[position] * currentState[position], 1.5);
             diff2Hill = (-15 * currentState[position]) /
-                        sqrt(pow(1 + 5 * currentState[position] * currentState[position], 5));
+                        pow(1 + 5 * currentState[position] * currentState[position], 2.5);
         }
 
         double h = 0.1;

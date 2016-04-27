@@ -39,15 +39,15 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	std::string env = argv[1];
-	std::string alg = argv[2];
+    std::string env = argv[1];
+    std::string alg = argv[2];
 
-	DenseMDP* mdp;
+    DenseMDP* mdp;
 
-	if(env == "mc")
-		mdp = new MountainCar(MountainCar::Ernst);
-	else if(env == "ip")
-		mdp = new DiscreteActionSwingUp;
+    if(env == "mc")
+        mdp = new MountainCar(MountainCar::Ernst);
+    else if(env == "ip")
+        mdp = new DiscreteActionSwingUp;
 
     unsigned int stateDim = mdp->getSettings().stateDimensionality;
     unsigned int nActions = mdp->getSettings().actionsNumber;
