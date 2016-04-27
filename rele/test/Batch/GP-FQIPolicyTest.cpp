@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         arma::mat tempMat2;
         tempMat2.load("/home/tesla/Desktop/activeSetVectors2.mat", arma::raw_ascii);
         activeSetsMat.push_back(tempMat2);
-        arma::cube tempActiveSet(activeSetsMat[0].n_rows, activeSetsMat[0].n_cols / nActions, nActions);
+        arma::cube tempActiveSet(activeSetsMat[0].n_rows, activeSetsMat[0].n_cols / nActions, nActions, arma::fill::zeros);
         std::vector<arma::cube> activeSets = {tempActiveSet, tempActiveSet};
 
         for(unsigned int i = 0; i < 2; i++)
