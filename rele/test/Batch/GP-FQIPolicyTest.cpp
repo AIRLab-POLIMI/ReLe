@@ -157,8 +157,9 @@ int main(int argc, char *argv[])
     PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
     auto&& core = buildCore(*mdp, agent);
     core.getSettings().episodeLength = 100;
-    FileManager fm("mc", "fqi");
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mcData.log"));
+    FileManager fm(env, "fqi");
+    string fileName = env + "Data.log";
+    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
     for(unsigned int i = 0; i < 100; i++)
     {
