@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     LinearGradientSARSA agent(phi, policy, alpha);
     agent.setLambda(0.8);
 
-    FileManager fm("mc", "linearSarsa");
+    FileManager fm("mc", "fqi");
     fm.createDir();
     fm.cleanDir();
     auto&& core = buildCore(mdp, agent);
