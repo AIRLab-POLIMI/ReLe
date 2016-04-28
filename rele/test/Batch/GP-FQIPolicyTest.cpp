@@ -152,6 +152,8 @@ int main(int argc, char *argv[])
     }
 
     FileManager fm(env, "testFqi");
+    fm.createDir();
+    fm.cleanDir();
     string fileName = env + "Data.log";
 
     e_GreedyMultipleRegressors policy(gps);
@@ -159,6 +161,7 @@ int main(int argc, char *argv[])
     policy.setNactions(nActions);
     PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
 
+    unsigned int counter = 1;
     for(int i = -8; i <= 8; i++)
         for(int j = -8; j <= 8; j++)
         {
@@ -166,11 +169,13 @@ int main(int argc, char *argv[])
             double initialVelocity = 0.375 * j;
             MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
             auto&& core = buildCore(testMdp, agent);
-            core.getSettings().episodeLength = 1000000;
+            core.getSettings().episodeLength = 100;
             core.getSettings().loggerStrategy =
                 new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
             core.runTestEpisode();
+
+            std::cout << counter++ << "/289" << std::endl;
         }
 
     delete mdp;
