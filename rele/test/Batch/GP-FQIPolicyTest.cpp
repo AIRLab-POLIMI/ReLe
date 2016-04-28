@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     arma::mat hParams;
-    hParams.load("/home/tesla/Desktop/hParams.mat", arma::raw_ascii);
+    hParams.load("/home/shirokuma/Desktop/hParams.mat", arma::raw_ascii);
     arma::vec lengthScale = hParams.col(0);
     arma::vec rawSignalSigma = hParams.col(1);
     double signalSigma = arma::as_scalar(rawSignalSigma(arma::find(rawSignalSigma != arma::datum::inf)));
@@ -70,8 +70,8 @@ int main(int argc, char *argv[])
 
         arma::mat alpha;
         arma::mat activeSetMat;
-        alpha.load("/home/tesla/Desktop/alphas.mat", arma::raw_ascii);
-        activeSetMat.load("/home/tesla/Desktop/activeSetVectors.mat", arma::raw_ascii);
+        alpha.load("/home/shirokuma/Desktop/alphas.mat", arma::raw_ascii);
+        activeSetMat.load("/home/shirokuma/Desktop/activeSetVectors.mat", arma::raw_ascii);
 
         arma::cube activeSet(activeSetMat.n_rows, activeSetMat.n_cols / nActions, nActions);
         for(unsigned int a = 0; a < nActions; a++)
@@ -105,17 +105,17 @@ int main(int argc, char *argv[])
         gps.push_back(gpsB);
 
         arma::mat alphaMat;
-        alphaMat.load("/home/tesla/Desktop/alphas.mat", arma::raw_ascii);
+        alphaMat.load("/home/shirokuma/Desktop/alphas.mat", arma::raw_ascii);
         arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / nActions, nActions);
         for(unsigned int a = 0; a < nActions; a++)
             alpha.slice(a) = alphaMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
 
         std::vector<arma::mat> activeSetsMat;
         arma::mat tempMat1;
-        tempMat1.load("/home/tesla/Desktop/activeSetVectors1.mat", arma::raw_ascii);
+        tempMat1.load("/home/shirokuma/Desktop/activeSetVectors1.mat", arma::raw_ascii);
         activeSetsMat.push_back(tempMat1);
         arma::mat tempMat2;
-        tempMat2.load("/home/tesla/Desktop/activeSetVectors2.mat", arma::raw_ascii);
+        tempMat2.load("/home/shirokuma/Desktop/activeSetVectors2.mat", arma::raw_ascii);
         activeSetsMat.push_back(tempMat2);
         arma::cube tempActiveSet(activeSetsMat[0].n_rows, activeSetsMat[0].n_cols / nActions, nActions, arma::fill::zeros);
         std::vector<arma::cube> activeSets = {tempActiveSet, tempActiveSet};
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     else if(env == "ip")
     {
         auto&& core = buildCore(*mdp, agent);
-        core.getSettings().episodeLength = 10000;
+        core.getSettings().episodeLength = 100;
         core.getSettings().loggerStrategy =
             new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
