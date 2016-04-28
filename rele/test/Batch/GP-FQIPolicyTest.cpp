@@ -172,4 +172,6 @@ int main(int argc, char *argv[])
 
             core.runTestEpisode();
         }
+
+    delete mdp;
 }
