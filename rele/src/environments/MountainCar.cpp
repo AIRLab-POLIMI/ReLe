@@ -29,14 +29,18 @@ using namespace std;
 namespace ReLe
 {
 
-MountainCar::MountainCar(ConfigurationsLabel label) :
+MountainCar::MountainCar(ConfigurationsLabel label,
+                         double initialPosition,
+                         double initialVelocity) :
     // Sutton's article
     // DenseMDP(2, 3, 1, false, true),
     // Klein's articles
     // DenseMDP(2, 3, 1, false, true, 0.9, 100),
     // Ernst's article
     DenseMDP(2, 2, 1, false, true, 0.95, 100),
-    envType(label)
+    envType(label),
+    initialPosition(initialPosition),
+    initialVelocity(initialVelocity)
 {
 }
 
@@ -130,8 +134,8 @@ void MountainCar::getInitialState(DenseState& state)
     //Sutton's article
     if (envType == Sutton || envType == Ernst)
     {
-        currentState[position] = -0.5;
-        currentState[velocity] =  0.0;
+        currentState[position] = initialPosition;
+        currentState[velocity] =  initialVelocity;
     }
     else if(envType == Klein)
     {

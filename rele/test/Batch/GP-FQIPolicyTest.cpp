@@ -151,19 +151,25 @@ int main(int argc, char *argv[])
         }
     }
 
+    FileManager fm(env, "testFqi");
+    string fileName = env + "Data.log";
+
     e_GreedyMultipleRegressors policy(gps);
     policy.setEpsilon(0);
     policy.setNactions(nActions);
     PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
-    auto&& core = buildCore(*mdp, agent);
-    core.getSettings().episodeLength = 100;
-    FileManager fm(env, "fqi");
-    string fileName = env + "Data.log";
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
-    for(unsigned int i = 0; i < 100; i++)
-    {
-        std::cout << "Episode: " << i << std::endl;
-        core.runTestEpisode();
-    }
+    for(int i = -8; i <= 8; i++)
+        for(int j = -8; j <= 8; j++)
+        {
+            double initialPosition = 0.125 * i;
+            double initialVelocity = 0.375 * j;
+            MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
+            auto&& core = buildCore(testMdp, agent);
+            core.getSettings().episodeLength = 1000000;
+            core.getSettings().loggerStrategy =
+                new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
+
+            core.runTestEpisode();
+        }
 }
