@@ -39,7 +39,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    unsigned int episodes = 1000;
+    unsigned int nEpisodes = 1000;
     MountainCar mdp(MountainCar::Ernst);
 
     BasisFunctions bVector = PolynomialFunction::generate(1, mdp.getSettings().statesNumber + 1);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     auto&& core = buildCore(mdp, agent);
     core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mc.log"));
 
-    for (int i = 0; i < episodes; i++)
+    for (int i = 0; i < nEpisodes; i++)
     {
         core.getSettings().episodeLength = 10000;
         cout << "Starting episode: " << i << endl;
