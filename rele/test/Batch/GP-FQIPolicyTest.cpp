@@ -163,32 +163,32 @@ int main(int argc, char *argv[])
 
     if(env == "mc")
     {
-		unsigned int counter = 1;
-		for(int i = -8; i <= 8; i++)
-			for(int j = -8; j <= 8; j++)
-			{
-				double initialPosition = 0.125 * i;
-				double initialVelocity = 0.375 * j;
-				MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
-				auto&& core = buildCore(testMdp, agent);
-				core.getSettings().episodeLength = 10000;
-				core.getSettings().loggerStrategy =
-					new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
+        unsigned int counter = 1;
+        for(int i = -8; i <= 8; i++)
+            for(int j = -8; j <= 8; j++)
+            {
+                double initialPosition = 0.125 * i;
+                double initialVelocity = 0.375 * j;
+                MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
+                auto&& core = buildCore(testMdp, agent);
+                core.getSettings().episodeLength = 10000;
+                core.getSettings().loggerStrategy =
+                    new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
-				core.runTestEpisode();
+                core.runTestEpisode();
 
-				std::cout << counter++ << "/289" << std::endl;
-			}
+                std::cout << counter++ << "/289" << std::endl;
+            }
 
-		delete mdp;
+        delete mdp;
     }
     else if(env == "ip")
     {
-		auto&& core = buildCore(*mdp, agent);
-		core.getSettings().episodeLength = 10000;
-		core.getSettings().loggerStrategy =
-			new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
+        auto&& core = buildCore(*mdp, agent);
+        core.getSettings().episodeLength = 10000;
+        core.getSettings().loggerStrategy =
+            new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
-		core.runTestEpisode();
+        core.runTestEpisode();
     }
 }
