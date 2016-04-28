@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
             double initialVelocity = 0.375 * j;
             MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
             auto&& core = buildCore(testMdp, agent);
-            core.getSettings().episodeLength = 100;
+            core.getSettings().episodeLength = 10000;
             core.getSettings().loggerStrategy =
                 new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
