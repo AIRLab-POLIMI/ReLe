@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
 
                 arma::mat alphaMat;
                 alphaMat.load(loadPath + "alphas_" + std::to_string(e) + ".mat", arma::raw_ascii);
-                arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / nActions, nActions);
-                for(unsigned int a = 0; a < nActions; a++)
-                    alpha.slice(a) = alphaMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+                arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / 2, 2);
+                for(unsigned int r = 0; r < 2; r++)
+                    alpha.slice(r) = alphaMat.cols(arma::span(nActions * r, nActions * r + nActions - 1));
 
                 std::vector<arma::mat> activeSetsMat;
                 arma::mat tempMat1;
