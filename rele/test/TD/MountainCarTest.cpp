@@ -41,7 +41,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    unsigned int nEpisodes = 100;
+    unsigned int nEpisodes = 1000;
     MountainCar mdp(MountainCar::Ernst);
 
     BasisFunctions bVector = PolynomialFunction::generate(1, mdp.getSettings().statesNumber + 1);
