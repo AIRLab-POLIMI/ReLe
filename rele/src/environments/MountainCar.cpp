@@ -29,24 +29,28 @@ using namespace std;
 namespace ReLe
 {
 
-MountainCar::MountainCar(ConfigurationsLabel label) :
+MountainCar::MountainCar(ConfigurationsLabel label,
+                         double initialPosition,
+                         double initialVelocity) :
     // Sutton's article
     // DenseMDP(2, 3, 1, false, true),
     // Klein's articles
     // DenseMDP(2, 3, 1, false, true, 0.9, 100),
     // Ernst's article
     DenseMDP(2, 2, 1, false, true, 0.95, 100),
-    envType(label)
+    envType(label),
+    initialPosition(initialPosition),
+    initialVelocity(initialVelocity)
 {
 }
 
 void MountainCar::step(const FiniteAction& action,
                        DenseState& nextState, Reward& reward)
 {
-    int motorAction = action.getActionN() - 1;
-
     if(envType == Sutton || envType == Klein)
     {
+        int motorAction = action.getActionN() - 1;
+
         double updatedVelocity = currentState[velocity] + motorAction * 0.001
                                  - 0.0025 * cos(3 * currentState[position]);
         double updatedPosition = currentState[position] + updatedVelocity;
@@ -90,9 +94,9 @@ void MountainCar::step(const FiniteAction& action,
         }
         else
         {
-            diffHill = 1 / sqrt(pow(1 + 5 * currentState[position] * currentState[position], 3));
+            diffHill = 1 / pow(1 + 5 * currentState[position] * currentState[position], 1.5);
             diff2Hill = (-15 * currentState[position]) /
-                        sqrt(pow(1 + 5 * currentState[position] * currentState[position], 5));
+                        pow(1 + 5 * currentState[position] * currentState[position], 2.5);
         }
 
         double h = 0.1;
@@ -130,8 +134,8 @@ void MountainCar::getInitialState(DenseState& state)
     //Sutton's article
     if (envType == Sutton || envType == Ernst)
     {
-        currentState[position] = -0.5;
-        currentState[velocity] =  0.0;
+        currentState[position] = initialPosition;
+        currentState[velocity] =  initialVelocity;
     }
     else if(envType == Klein)
     {

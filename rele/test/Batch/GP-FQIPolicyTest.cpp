@@ -39,101 +39,191 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
+    std::string env = argv[1];
 
-    std::string alg = "fqi";
+    DenseMDP* mdp;
 
-    unsigned int nStates = 5;
+    if(env == "mc")
+        mdp = new MountainCar(MountainCar::Ernst);
+    else if(env == "ip")
+        mdp = new DiscreteActionSwingUp;
 
-    BasisFunctions bfs = IdentityBasis::generate(nStates);
+    unsigned int stateDim = mdp->getSettings().stateDimensionality;
+    unsigned int nActions = mdp->getSettings().actionsNumber;
+
+    FileManager fm(env, "testFqi");
+    fm.createDir();
+    fm.cleanDir();
+
+    BasisFunctions bfs = IdentityBasis::generate(stateDim);
     DenseFeatures phi(bfs);
 
-    arma::mat hParams;
-    hParams.load("hParams.mat");
-    arma::vec lengthScale = hParams.col(0);
-    arma::vec rawSignalSigma = hParams.col(1);
-    double signalSigma = arma::as_scalar(rawSignalSigma(arma::find(rawSignalSigma != arma::datum::inf)));
+    std::vector<std::string> algs = {"fqi", "dfqi", "wfqi"};
+    std::string alg;
+    unsigned int nExperiments = 20;
+    unsigned int nEpisodes = 100;
+    arma::mat Js(nExperiments, algs.size(), arma::fill::zeros);
 
-    std::vector<std::vector<BatchRegressor*>> gps;
-
-    if(alg == "f" || alg == "w")
+    for(unsigned int a = 0; a < algs.size(); a++)
     {
-        std::vector<BatchRegressor*> gpsA;
-        gps.push_back(gpsA);
+        alg = algs[a];
 
-        arma::mat alpha;
-        arma::cube activeSet;
-        alpha.load("alphas.mat");
-        activeSet.load("activeSetVectors.mat");
-
-        for(unsigned int i = 0; i < alpha.n_cols; i++)
+        for(unsigned int e = 0; e < nExperiments; e++)
         {
-            arma::vec rawAlphaVec = alpha.col(i);
-            arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
+            std::string testFileName = env + "-" + alg + "_" + std::to_string(e) + "Data.log";
 
-            GaussianProcess gp(phi);
-            gp.getHyperParameters().lengthScale = lengthScale;
-            gp.getHyperParameters().signalSigma = signalSigma;
+            std::string loadPath = "/home/shirokuma/Desktop/NIPS2016-GP/mc/" +
+                                   std::to_string(nEpisodes) + "Episodes/" + alg + "/";
 
-            gp.setAlpha(alphaVec);
+            arma::mat hParams;
+            hParams.load(loadPath + "hParams_" + std::to_string(e) + ".mat", arma::raw_ascii);
+            arma::vec lengthScale = hParams.col(0);
+            arma::vec rawSignalSigma = hParams.col(1);
+            double signalSigma = arma::as_scalar(rawSignalSigma(arma::find(rawSignalSigma != arma::datum::inf)));
 
-            arma::mat rawActiveSetMat = activeSet.slice(i);
-            arma::vec temp = rawActiveSetMat.col(0);
-            arma::mat activeSetMat = rawActiveSetMat.rows(arma::find(temp != arma::datum::inf));
+            std::vector<std::vector<GaussianProcess*>> gps;
 
-            gp.setFeatures(activeSetMat);
-
-            gps[0].push_back(&gp);
-        }
-    }
-    else if(alg == "d")
-    {
-        std::vector<BatchRegressor*> gpsA;
-        std::vector<BatchRegressor*> gpsB;
-
-        gps.push_back(gpsA);
-        gps.push_back(gpsB);
-
-        arma::cube alpha;
-        std::vector<arma::cube> activeSets;
-        alpha.load("alphas.mat");
-        activeSets[0].load("activeSetVectors1.mat");
-        activeSets[1].load("activeSetVectors2.mat");
-
-        for(unsigned int i = 0; i < alpha.n_cols; i++)
-        {
-            arma::mat rawAlphaMat = alpha.slice(i);
-            arma::vec rawAlphaVec = rawAlphaMat.col(i);
-            arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
-
-            for(unsigned int j = 0; j < gps.size(); j++)
+            if(alg == "fqi" || alg == "wfqi")
             {
-                GaussianProcess gp(phi);
-                gp.getHyperParameters().lengthScale = lengthScale;
-                gp.getHyperParameters().signalSigma = signalSigma;
+                std::vector<GaussianProcess*> gpsA;
+                gps.push_back(gpsA);
 
-                gp.setAlpha(alphaVec);
+                arma::mat alpha;
+                arma::mat activeSetMat;
+                alpha.load(loadPath + "alphas_" + std::to_string(e) + ".mat", arma::raw_ascii);
+                activeSetMat.load(loadPath + "activeSetVectors_" + std::to_string(e) + ".mat", arma::raw_ascii);
 
-                arma::mat rawActiveSetMat = activeSets[j].slice(i);
-                arma::vec rawActiveSetVec = rawActiveSetMat.col(0);
-                arma::mat activeSetMat = rawActiveSetMat.rows(
-                                             arma::find(rawActiveSetVec != arma::datum::inf));
+                arma::cube activeSet(activeSetMat.n_rows, activeSetMat.n_cols / nActions, nActions);
+                for(unsigned int a = 0; a < nActions; a++)
+                    activeSet.slice(a) = activeSetMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
 
-                gp.setFeatures(activeSetMat);
+                for(unsigned int i = 0; i < alpha.n_cols; i++)
+                {
+                    arma::vec rawAlphaVec = alpha.col(i);
+                    arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
 
-                gps[j].push_back(&gp);
+                    GaussianProcess* gp = new GaussianProcess(phi);
+                    gp->getHyperParameters().lengthScale = lengthScale;
+                    gp->getHyperParameters().signalSigma = signalSigma;
+
+                    gp->setAlpha(alphaVec);
+
+                    arma::mat rawActiveSetMat = activeSet.slice(i);
+                    arma::vec temp = rawActiveSetMat.col(0);
+                    arma::mat activeSetMat = rawActiveSetMat.rows(arma::find(temp != arma::datum::inf));
+
+                    gp->setFeatures(activeSetMat);
+
+                    gps[0].push_back(gp);
+                }
             }
+            else if(alg == "dfqi")
+            {
+                std::vector<GaussianProcess*> gpsA;
+                std::vector<GaussianProcess*> gpsB;
+                gps.push_back(gpsA);
+                gps.push_back(gpsB);
+
+                arma::mat alphaMat;
+                alphaMat.load(loadPath + "alphas_" + std::to_string(e) + ".mat", arma::raw_ascii);
+                arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / nActions, nActions);
+                for(unsigned int a = 0; a < nActions; a++)
+                    alpha.slice(a) = alphaMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+
+                std::vector<arma::mat> activeSetsMat;
+                arma::mat tempMat1;
+                tempMat1.load(loadPath + "activeSetVectors1_" + std::to_string(e) + ".mat", arma::raw_ascii);
+                activeSetsMat.push_back(tempMat1);
+                arma::mat tempMat2;
+                tempMat2.load(loadPath + "activeSetVectors2_" + std::to_string(e) + ".mat", arma::raw_ascii);
+                activeSetsMat.push_back(tempMat2);
+                arma::cube tempActiveSet(activeSetsMat[0].n_rows, activeSetsMat[0].n_cols / nActions, nActions, arma::fill::zeros);
+                std::vector<arma::cube> activeSets = {tempActiveSet, tempActiveSet};
+
+                for(unsigned int i = 0; i < 2; i++)
+                    for(unsigned int a = 0; a < nActions; a++)
+                        activeSets[i].slice(a) = activeSetsMat[i].cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+
+                for(unsigned int i = 0; i < 2; i++)
+                {
+                    arma::mat rawAlphaMat = alpha.slice(i);
+
+                    for(unsigned int j = 0; j < alpha.n_cols; j++)
+                    {
+                        arma::vec rawAlphaVec = rawAlphaMat.col(j);
+                        arma::vec alphaVec = rawAlphaVec(arma::find(rawAlphaVec != arma::datum::inf));
+
+                        GaussianProcess* gp = new GaussianProcess(phi);
+                        gp->getHyperParameters().lengthScale = lengthScale;
+                        gp->getHyperParameters().signalSigma = signalSigma;
+
+                        gp->setAlpha(alphaVec);
+
+                        arma::mat rawActiveSetMat = activeSets[i].slice(j);
+                        arma::vec rawActiveSetVec = rawActiveSetMat.col(0);
+                        arma::mat activeSetMat = rawActiveSetMat.rows(
+                                                     arma::find(rawActiveSetVec != arma::datum::inf));
+
+                        gp->setFeatures(activeSetMat);
+
+                        gps[i].push_back(gp);
+                    }
+                }
+            }
+
+            e_GreedyMultipleRegressors policy(gps);
+            policy.setEpsilon(0);
+            policy.setNactions(nActions);
+            PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
+
+            if(env == "mc")
+            {
+                unsigned int counter = 1;
+                for(int i = -8; i <= 8; i++)
+                    for(int j = -8; j <= 8; j++)
+                    {
+                        double initialPosition = 0.125 * i;
+                        double initialVelocity = 0.375 * j;
+                        MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
+                        auto&& core = buildCore(testMdp, agent);
+                        core.getSettings().episodeLength = 100;
+                        core.getSettings().loggerStrategy =
+                            new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
+
+                        core.runTestEpisode();
+
+                        std::cout << counter++ << "/289" << std::endl;
+                    }
+
+                arma::mat testEpisodes;
+                testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
+
+                arma::uvec positiveIdxs = arma::find(testEpisodes.col(2 + stateDim + 1) == 1);
+                int nPositives = positiveIdxs.n_elem;
+                int nNegatives = 289 - nPositives;
+
+                Js(e, a) = (nPositives - nNegatives) / double(289);
+            }
+            else if(env == "ip")
+            {
+                auto&& core = buildCore(*mdp, agent);
+                core.getSettings().episodeLength = 100;
+                core.getSettings().loggerStrategy =
+                    new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
+
+                core.runTestEpisode();
+
+                arma::mat testEpisodes;
+                testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
+
+                // calcolo reward medio per esperimento
+            }
+
+            delete mdp;
         }
     }
 
-    MountainCar mdp(MountainCar::Ernst);
-    e_GreedyMultipleRegressors policy(gps);
-    policy.setEpsilon(0);
-    PolicyEvalAgent<FiniteAction, DenseState> agent(policy);
-    auto&& core = buildCore(mdp, agent);
-
-    for(unsigned int i = 0; i < 100; i++)
-    {
-        std::cout << "Episode: " << i << std::endl;
-        core.runTestEpisode();
-    }
+    std::string savePath = "/home/shirokuma/Desktop/";
+    std::string saveFileName = "Js-" + env + ".txt";
+    Js.save(savePath + saveFileName, arma::raw_ascii);
 }

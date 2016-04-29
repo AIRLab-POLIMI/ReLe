@@ -164,7 +164,7 @@ hyperparameters_map e_GreedyApproximate::getPolicyHyperparameters()
     return hyperParameters;
 }
 
-e_GreedyMultipleRegressors::e_GreedyMultipleRegressors(std::vector<std::vector<BatchRegressor*>>& regressors) :
+e_GreedyMultipleRegressors::e_GreedyMultipleRegressors(std::vector<std::vector<GaussianProcess*>>& regressors) :
     regressors(regressors),
     eps(eps)
 {

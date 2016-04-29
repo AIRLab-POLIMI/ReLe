@@ -34,12 +34,14 @@
 
 #include "rele/approximators/regressors/q_regressors/QRegressorImplementation.h"
 
+#include <string>
+
 using namespace std;
 using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    unsigned int episodes = 1000;
+    unsigned int nEpisodes = 1000;
     MountainCar mdp(MountainCar::Ernst);
 
     BasisFunctions bVector = PolynomialFunction::generate(1, mdp.getSettings().statesNumber + 1);
@@ -53,17 +55,22 @@ int main(int argc, char *argv[])
     LinearGradientSARSA agent(phi, policy, alpha);
     agent.setLambda(0.8);
 
-    FileManager fm("mc", "linearSarsa");
+    FileManager fm("mc", "fqi");
     fm.createDir();
     fm.cleanDir();
-    auto&& core = buildCore(mdp, agent);
-    core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath("mc.log"));
 
-    for (int i = 0; i < episodes; i++)
+    unsigned int nExperiments = 20;
+    for(unsigned int e = 0; e < nExperiments; e++)
     {
-        core.getSettings().episodeLength = 10000;
-        cout << "Starting episode: " << i << endl;
-        core.runEpisode();
-    }
+		auto&& core = buildCore(mdp, agent);
+		std::string fileName = "mc_" + std::to_string(e) + ".log";
+		core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
+		for (int i = 0; i < nEpisodes; i++)
+		{
+			core.getSettings().episodeLength = 10000;
+			cout << "Starting episode: " << i << endl;
+			core.runEpisode();
+		}
+    }
 }

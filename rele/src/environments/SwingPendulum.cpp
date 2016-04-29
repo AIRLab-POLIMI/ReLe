@@ -18,9 +18,9 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
     //Environment Parameters
     settings.gamma = 0.999;
     settings.stateDimensionality = 2;
-    settings.actionDimensionality = -1;
+    settings.actionDimensionality = 1;
     settings.rewardDimensionality = 1;
-    settings.statesNumber = -1;
+    settings.statesNumber = 0;
     settings.actionsNumber = 3;
     settings.isFiniteHorizon = false;
     settings.isAverageReward = false;
@@ -29,7 +29,7 @@ void SwingUpSettings::defaultSettings(SwingUpSettings& settings)
 
     //SwingUp parameters
     settings.stepTime = 0.01;
-    double uMax = 2.0/*Doya's paper 5.0*/;
+    double uMax = 5.0;
     double maxVelocity = M_PI_4 / settings.stepTime;
     settings.actionRange = Range(-uMax, uMax);
     settings.thetaRange = Range(-M_PI, M_PI);

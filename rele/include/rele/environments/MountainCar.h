@@ -65,7 +65,9 @@ public:
      * Constructor.
      * \param label configuration type
      */
-    MountainCar(ConfigurationsLabel label = Sutton);
+    MountainCar(ConfigurationsLabel label = Sutton,
+                double initialPosition = -0.5,
+                double initialVelocity = 0);
 
     /*!
      * \see Environment::step
@@ -78,8 +80,12 @@ public:
      */
     virtual void getInitialState(DenseState& state) override;
 
+protected:
     //! Configuration type.
     ConfigurationsLabel envType;
+
+    double initialPosition;
+    double initialVelocity;
 };
 
 }
