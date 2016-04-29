@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
     DetLinearPolicy<DenseState> expertPolicy(phi);
     ParametricNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
 
-    std::cout << "| Params: " << expertDist.getParameters().t() << std::endl;
+    std::cout << "Distribution Params: " << expertDist.getParameters().t() << std::endl;
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 

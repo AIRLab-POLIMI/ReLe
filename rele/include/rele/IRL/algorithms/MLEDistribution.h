@@ -62,8 +62,8 @@ public:
 
         mu = arma::mean(params, 1);
         //TODO [IMPORTANT] LEVAMI
-        //Sigma = arma::cov(params.t());
-        Sigma = arma::eye(dp, dp)*1e-3;
+        Sigma = arma::cov(params.t());
+        //Sigma = arma::eye(dp, dp)*1e-3;
 
         std::cout << mu.t() << std::endl;
         std::cout << Sigma << std::endl;

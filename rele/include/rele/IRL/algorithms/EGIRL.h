@@ -62,14 +62,6 @@ public:
         //compute the derivative wrt active features and simplex
         df = this->simplex.diff(df_full);
 
-        /*std::cout << "g" << gradient.t() << std::endl;
-        std::cout << "g2: " << f << std::endl;
-        std::cout << "df_full: " << df_full.t();
-        std::cout << "df: " << df.t();
-        std::cout << "xSimplex:  " << xSimplex.t();
-        std::cout << "x:  " << x.t();
-        std::cout << "-----------------------------------------" << std::endl;*/
-
         return f;
     }
 

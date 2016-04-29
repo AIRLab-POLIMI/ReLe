@@ -21,9 +21,10 @@ zc = 0.1*zc;
 alg = {
     %'GIRL', ...
     %'ExpectedDeltaIRL',  ...
-    'EGIRL', ...
+    %'EGIRL', ...
     'EMIRL', ...
-    'EpisodicExpectedDeltaIRL'};
+    %'EpisodicExpectedDeltaIRL'
+    'SDPEGIRL'};
 
 lastindex = length(alg);
 
@@ -60,7 +61,7 @@ for i = 1:lastindex
     csv = csvread(['/tmp/ReLe/nls/', alg{i}, '/TrajectoriesExpert.txt']);
     traj = readDataset(csv);
     
-    subplot(3, 1,2);
+    subplot(3, 1, 2);
     title('Expert')
     xlabel('t')
     ylabel('x1')

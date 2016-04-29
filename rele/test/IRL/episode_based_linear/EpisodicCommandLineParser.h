@@ -36,6 +36,7 @@
 #include "rele/IRL/algorithms/EGIRL.h"
 #include "rele/IRL/algorithms/EMIRL.h"
 #include "rele/IRL/algorithms/EpisodicExpectedDeltaIRL.h"
+#include "rele/IRL/algorithms/SDPEGIRL.h"
 
 namespace ReLe
 {
@@ -67,7 +68,7 @@ public:
         desc.add_options() //
         ("help,h", "produce help message") //
         ("algorithm,a", boost::program_options::value<std::string>()->default_value("EMIRL"),
-         "set the algorithm (EMIRL | EGIRL)") //
+         "set the algorithm (EMIRL | EGIRL | SDPEGIRL)") //
         ("episodes,e", boost::program_options::value<int>()->default_value(1000),
          "set the number of episodes") //
         ("gradient,g", boost::program_options::value<std::string>()->default_value("PGPE_BASELINE"),
@@ -119,7 +120,8 @@ private:
             return false;
 
         std::string algorithm = vm["algorithm"].as<std::string>();
-        if(algorithm != "EGIRL" && algorithm != "EMIRL" && algorithm != "EpisodicExpectedDeltaIRL")
+        if(algorithm != "EGIRL" && algorithm != "EMIRL" && algorithm != "EpisodicExpectedDeltaIRL"
+                && algorithm != "SDPEGIRL")
             return false;
 
         std::string gradientType = vm["gradient"].as<std::string>();
@@ -154,6 +156,10 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
     else if(conf.algorithm == "EpisodicExpectedDeltaIRL")
         return new EpisodicExpectedDeltaIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
                 conf.gradient, conf.hessian);
+
+    else if(conf.algorithm == "SDPEGIRL")
+        return new SDPEGIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
+                                            conf.gradient, conf.hessian);
 
     return nullptr;
 

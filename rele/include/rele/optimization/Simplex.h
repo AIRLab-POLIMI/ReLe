@@ -123,6 +123,15 @@ public:
 
     /*!
      * Getter.
+     * \return the nth active parameter index
+     */
+    unsigned int getFeatureIndex(unsigned int i)
+    {
+        return active_feat(i);
+    }
+
+    /*!
+     * Getter.
      * \return the simplex dimension (considering only active features)
      */
     inline unsigned int getEffectiveDim()

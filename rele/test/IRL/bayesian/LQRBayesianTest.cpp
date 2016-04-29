@@ -37,6 +37,9 @@
 #include "rele/utils/FileManager.h"
 
 #include "rele/IRL/algorithms/BayesianCoordinateAscend.h"
+#include "rele/IRL/algorithms/EGIRL.h"
+
+#include "../RewardBasisLQR.h"
 
 using namespace std;
 using namespace arma;
@@ -112,5 +115,29 @@ int main(int argc, char *argv[])
               << posterior.getMean().t() << std::endl
               << "Covariance estimate" << std::endl
               << posterior.getCovariance() << std::endl;
+
+    //Recover reward weights
+    arma::mat theta = alg.getParameters();
+
+    /* Create parametric reward */
+    BasisFunctions basisReward;
+    for(unsigned int i = 0; i < eReward.n_elem; i++)
+        basisReward.push_back(new LQR_RewardBasis(i, dim));
+    DenseFeatures phiReward(basisReward);
+
+
+    LinearApproximator rewardRegressor(phiReward);
+    ParametricNormal imitatorDistribution =  alg.getDistribution();
+    auto* irlAlg =  new EGIRL<DenseAction, DenseState>(data, theta, imitatorDistribution,
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+
+
+
+    //Run GIRL
+    irlAlg->run();
+    arma::vec omega = rewardRegressor.getParameters();
+
+    //Print results
+    cout << "Weights: " << omega.t();
 
 }

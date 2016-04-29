@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
                 arma::mat rawActiveSetMat = activeSets[j].slice(i);
                 arma::vec rawActiveSetVec = rawActiveSetMat.col(0);
                 arma::mat activeSetMat = rawActiveSetMat.rows(
-                	arma::find(rawActiveSetVec != arma::datum::inf));
+                                             arma::find(rawActiveSetVec != arma::datum::inf));
 
                 gp.setFeatures(activeSetMat);
 

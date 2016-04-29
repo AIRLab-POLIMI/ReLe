@@ -26,6 +26,7 @@
 #include "rele/approximators/features/TilesCoder.h"
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/basis/IdentityBasis.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/tiles/BasicTiles.h"
 #include "rele/approximators/tiles/LogTiles.h"
 
@@ -42,6 +43,7 @@
 #include "rele/IRL/algorithms/BayesianCoordinateAscend.h"
 #include "rele/IRL/algorithms/MLEDistribution.h"
 #include "rele/IRL/algorithms/EGIRL.h"
+#include "rele/IRL/algorithms/EMIRL.h"
 
 #include "../RewardBasisLQR.h"
 
@@ -59,7 +61,7 @@ int main(int argc, char *argv[])
     std::cout << std::setprecision(OS_PRECISION);
 
     //Set reward policy
-    vec eReward = {0.2, 0.7, 0.1};
+    vec eReward = {0.3, 0.7};
 
     // Build policy
     int rewardDim = eReward.n_elem;
@@ -101,9 +103,9 @@ int main(int argc, char *argv[])
     Dataset<DenseAction,DenseState>& data = collection.data;
 
     // recover approximate
-    std::vector<Range> ranges;
+    /*std::vector<Range> ranges;
     std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 6;
+    unsigned int numTiles = 5;
 
     for(unsigned int i = 0; i < dim; i++)
     {
@@ -114,7 +116,10 @@ int main(int argc, char *argv[])
     //Tiles* tiles = new BasicTiles(ranges, tilesN);
     Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
 
-    DenseTilesCoder phiImitator(tiles, dim);
+    DenseTilesCoder phiImitator(tiles, dim);*/
+    BasisFunctions basisImitator = PolynomialFunction::generate(2, dim);
+    //basisImitator.erase(basisImitator.begin());
+    SparseFeatures phiImitator(basisImitator, dim);
 
     unsigned int dp = phiImitator.rows();
 
@@ -129,18 +134,17 @@ int main(int argc, char *argv[])
     ParametricNormal prior(mu_p, Sigma_p);
 
     // Covariance prior (fixed)
-    arma::mat Sigma = arma::eye(dp, dp)*1e-3;
+    arma::mat Sigma = arma::eye(dp, dp)*1e-4;
 
     // Covariance prior
-    /*arma::mat Psi = arma::eye(dp, dp)*1e3;
+    arma::mat Psi = arma::eye(dp, dp)*1e3;
     unsigned int nu = dp+1;
-    InverseWishart covPrior(nu, Psi);*/
+    InverseWishart covPrior(nu, Psi);
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
     //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
     BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
-
     //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
 
     std::cout << "Recovering Distribution" << std::endl;
@@ -159,9 +163,9 @@ int main(int argc, char *argv[])
     arma::vec action1 = meanParametrers.rows(0, dp/2 -1);
     arma::vec action2 = meanParametrers.rows(dp/2, dp -1);
 
-    std::cout << "Mean parameters visualized:" << std::endl;
+    /*std::cout << "Mean parameters visualized:" << std::endl;
     std::cout << reshape(action1, numTiles, numTiles).t() << std::endl;
-    std::cout << reshape(action2, numTiles, numTiles).t() << std::endl;
+    std::cout << reshape(action2, numTiles, numTiles).t() << std::endl;*/
 
     std::cout << "Covariance estimate" << std::endl
               << imitatorDist.getCovariance().diag().t() << std::endl;
@@ -199,12 +203,24 @@ int main(int argc, char *argv[])
 
 
 
-    //Run GIRL
+    //Run EGIRL
     irlAlg->run();
     arma::vec omega = rewardRegressor.getParameters();
 
     //Print results
-    cout << "Weights: " << omega.t();
+    cout << "Weights (EGIRL): " << omega.t();
+
+
+    auto* irlAlg2 =  new EMIRL<DenseAction, DenseState>(data, theta, imitatorDist,
+            rewardRegressor, mdp.getSettings().gamma);
+
+    //Run EMIRL
+    irlAlg2->run();
+    arma::vec omega2 = rewardRegressor.getParameters();
+
+    //Print results
+    cout << "Weights (EMIRL): " << omega2.t();
+
 
 
 }

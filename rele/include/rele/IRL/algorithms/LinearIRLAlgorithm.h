@@ -72,7 +72,7 @@ public:
         preprocessing();
 
         //compute effective parameters dimension
-        int effective_dim = simplex.getEffectiveDim();
+        unsigned int effective_dim = simplex.getEffectiveDim();
         std::cout << "Optimization dim: " << effective_dim << std::endl << std::endl;
 
         // handle the case of only one active reward feature
@@ -82,25 +82,8 @@ public:
             return;
         }
 
-        // setup optimization algorithm
-        nlopt::opt optimizator;
-
         // optimization
-        optimizator = nlopt::opt(optAlg, effective_dim);
-        optimizator.set_min_objective(
-            Optimization::objFunctionWrapper<LinearIRLAlgorithm<ActionC, StateC>, false> , this);
-        optimizator.add_inequality_constraint(Optimization::oneSumConstraint, nullptr, 0);
-
-        std::vector<double> lowerBounds(effective_dim, 0.0);
-        std::vector<double> upperBounds(effective_dim, 1.0);
-        optimizator.set_lower_bounds(lowerBounds);
-        optimizator.set_upper_bounds(upperBounds);
-
-        // temination conditions
-        optimizator.set_xtol_rel(1e-8);
-        optimizator.set_ftol_rel(1e-8);
-        optimizator.set_ftol_abs(1e-8);
-        optimizator.set_maxeval(maxFunEvals);
+        setupOptimization(effective_dim, maxFunEvals);
 
         // define initial point
         if (starting.n_elem == 0)
@@ -141,9 +124,24 @@ public:
 protected:
     virtual void preprocessing() = 0;
 
-    //======================================================================
-    // GETTERS and SETTERS
-    //----------------------------------------------------------------------
+    virtual void setupOptimization(unsigned int effective_dim, unsigned int maxFunEvals)
+    {
+        optimizator = nlopt::opt(optAlg, effective_dim);
+        optimizator.set_min_objective(
+            Optimization::objFunctionWrapper<LinearIRLAlgorithm<ActionC, StateC>, false> , this);
+        optimizator.add_inequality_constraint(Optimization::oneSumConstraint, nullptr, 0);
+
+        std::vector<double> lowerBounds(effective_dim, 0.0);
+        std::vector<double> upperBounds(effective_dim, 1.0);
+        optimizator.set_lower_bounds(lowerBounds);
+        optimizator.set_upper_bounds(upperBounds);
+
+        // temination conditions
+        optimizator.set_xtol_rel(1e-8);
+        optimizator.set_ftol_rel(1e-8);
+        optimizator.set_ftol_abs(1e-8);
+        optimizator.set_maxeval(maxFunEvals);
+    }
 
     unsigned int getFunEvals()
     {
@@ -160,7 +158,7 @@ protected:
     unsigned int nbFunEvals;
     Simplex simplex;
     nlopt::algorithm optAlg;
-
+    nlopt::opt optimizator;
 
 };
 
