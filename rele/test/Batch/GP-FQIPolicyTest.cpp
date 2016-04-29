@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
                 unsigned int nPositives = positiveIdxs.n_elem;
                 unsigned int nNegatives = 289 - nPositives;
 
-                Js(e, a) = (nPositives - nNegatives) / 289;
+                Js(e, a) = (nPositives - nNegatives) / double(289);
             }
             else if(env == "ip")
             {
