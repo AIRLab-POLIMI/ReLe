@@ -29,6 +29,7 @@
 #include "rele/core/Core.h"
 #include "rele/generators/GridWorldGenerator.h"
 #include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/utils/FileManager.h"
 
 #include <iostream>
 
@@ -46,17 +47,21 @@ int main(int argc, char *argv[])
         FiniteMDP&& mdp = generator.getMDP(0.9);
 
         e_Greedy policy;
+        policy.setEpsilon(1);
         ConstantLearningRate alpha(0.2);
-        //Q_Learning agent(policy, alpha);
+        Q_Learning agent(policy, alpha);
         //DoubleQ_Learning agent(policy, alpha);
-        WQ_Learning agent(policy, alpha);
+        //WQ_Learning agent(policy, alpha);
 
         auto&& core = buildCore(mdp, agent);
 
         core.getSettings().episodeLength = 100000;
-        core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, FiniteState>(false);
+        FileManager fm("gw", "fqi");
+        fm.createDir();
+        fm.cleanDir();
+        core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, FiniteState>(fm.addPath("gw.log"));
 
-        for(unsigned int i = 0; i < 10000; i++)
+        for(unsigned int i = 0; i < 1000; i++)
         {
             cout << endl << "### Starting episode " << i << " ###" << endl;
             core.runEpisode();
