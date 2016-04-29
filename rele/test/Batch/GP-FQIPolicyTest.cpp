@@ -199,8 +199,8 @@ int main(int argc, char *argv[])
                 testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
 
                 arma::uvec positiveIdxs = arma::find(testEpisodes.col(2 + stateDim + 1) == 1);
-                unsigned int nPositives = positiveIdxs.n_elem;
-                unsigned int nNegatives = 289 - nPositives;
+                int nPositives = positiveIdxs.n_elem;
+                int nNegatives = 289 - nPositives;
 
                 Js(e, a) = (nPositives - nNegatives) / double(289);
             }
