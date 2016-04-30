@@ -50,7 +50,7 @@ double maxEigenvalue(const arma::vec& w)
 
 arma::vec maxEigenvalueDiff(const arma::vec& w)
 {
-	arma::mat hessian = computeHessian(w);
+    arma::mat hessian = computeHessian(w);
     arma::vec grad(w.n_rows);
 
     arma::mat diff_n = diff.slice(w.n_elem);
@@ -75,33 +75,33 @@ arma::vec maxEigenvalueDiff(const arma::vec& w)
 
 int main(int argc, char *argv[])
 {
-	unsigned int dp = 3;
-	unsigned int n = 3;
-	diff = arma::cube(dp, dp, n);
+    unsigned int dp = 3;
+    unsigned int n = 3;
+    diff = arma::cube(dp, dp, n);
 
-	arma::vec wComp(n, arma::fill::randn);
-	wComp /= arma::sum(wComp);
-	arma::vec w = wComp.head_rows(n-1);
+    arma::vec wComp(n, arma::fill::randn);
+    wComp /= arma::sum(wComp);
+    arma::vec w = wComp.head_rows(n-1);
 
-	for(unsigned int i = 0; i < n; i++)
-	{
-		arma::mat tmp = arma::randn(dp, dp);
-		diff.slice(i) = (tmp+tmp.t())/2.0;
-	}
+    for(unsigned int i = 0; i < n; i++)
+    {
+        arma::mat tmp = arma::randn(dp, dp);
+        diff.slice(i) = (tmp+tmp.t())/2.0;
+    }
 
-	auto lambdaFunc = [](const arma::vec& par)
-	{
-		arma::vec p(1);
-		p(0) = maxEigenvalue(par);
-		return p;
-	};
+    auto lambdaFunc = [](const arma::vec& par)
+    {
+        arma::vec p(1);
+        p(0) = maxEigenvalue(par);
+        return p;
+    };
 
-	arma::vec exact = maxEigenvalueDiff(w);
-	arma::vec numerical = ReLe::NumericalGradient::compute(lambdaFunc, w);
-	arma::vec delta = exact - numerical;
+    arma::vec exact = maxEigenvalueDiff(w);
+    arma::vec numerical = ReLe::NumericalGradient::compute(lambdaFunc, w);
+    arma::vec delta = exact - numerical;
 
-	std::cout << "lambda: " << maxEigenvalue(w) << std::endl;
-	std::cout << "diff: " << exact.t() << std::endl;
-	std::cout << "numerical: " << numerical.t() << std::endl;
-	std::cout << "delta: " << delta.t() << std::endl;
+    std::cout << "lambda: " << maxEigenvalue(w) << std::endl;
+    std::cout << "diff: " << exact.t() << std::endl;
+    std::cout << "numerical: " << numerical.t() << std::endl;
+    std::cout << "delta: " << delta.t() << std::endl;
 }

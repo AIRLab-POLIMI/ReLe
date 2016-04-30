@@ -44,10 +44,10 @@ public:
         arma::cube diff = hessianCalculator->getHessianDiff();
         for(unsigned int i = 0; i < diff.n_slices; i++)
         {
-        	double maxEig = arma::max(arma::eig_sym(diff.slice(i)));
+            double maxEig = arma::max(arma::eig_sym(diff.slice(i)));
 
-        	if(maxEig < 0)
-        		std::cout << maxEig << " " << i << std::endl;
+            if(maxEig < 0)
+                std::cout << maxEig << " " << i << std::endl;
         }
     }
 
@@ -59,7 +59,7 @@ public:
 protected:
     virtual void setupOptimization(unsigned int effective_dim, unsigned int maxFunEvals) override
     {
-    	this->optAlg = nlopt::LD_SLSQP;
+        this->optAlg = nlopt::LD_SLSQP;
         LinearIRLAlgorithm<ActionC, StateC>::setupOptimization(effective_dim, maxFunEvals);
 
         this->optimizator.add_inequality_constraint(sdConstraint, this, 0.0);
