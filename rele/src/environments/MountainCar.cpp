@@ -102,7 +102,8 @@ void MountainCar::step(const FiniteAction& action,
         double h = 0.1;
         double m = 1;
         double g = 9.81;
-        double u = (action.getActionN() == 0 ? -4 : 4);
+        //double u = (action.getActionN() == 0 ? -4 : 4);
+        double u = -4 + (double(action.getActionN()) / (this->getSettings().actionsNumber - 1)) * 8;
         double acceleration = u / (m * (1 + diffHill * diffHill)) -
                               (g * diffHill) / (1 + diffHill * diffHill) -
                               (currentState[velocity] * currentState[velocity] * diffHill * diff2Hill) /
