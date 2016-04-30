@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     std::vector<std::string> algs = {"fqi", "dfqi", "wfqi"};
     std::string alg;
-    unsigned int nExperiments = 1;
+    unsigned int nExperiments = 20;
     unsigned int nEpisodes = 100;
     arma::mat Js(nExperiments, algs.size(), arma::fill::zeros);
 
