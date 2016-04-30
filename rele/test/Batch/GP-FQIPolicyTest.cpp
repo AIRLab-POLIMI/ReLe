@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     std::vector<std::string> algs = {"fqi", "dfqi", "wfqi"};
     std::string alg;
-    unsigned int nExperiments = 20;
+    unsigned int nExperiments = 1;
     unsigned int nEpisodes = 100;
     arma::mat Js(nExperiments, algs.size(), arma::fill::zeros);
 
@@ -218,10 +218,10 @@ int main(int argc, char *argv[])
 
                 // calcolo reward medio per esperimento
             }
-
-            delete mdp;
         }
     }
+
+    delete mdp;
 
     std::string savePath = "/home/shirokuma/Desktop/";
     std::string saveFileName = "Js-" + env + ".txt";
