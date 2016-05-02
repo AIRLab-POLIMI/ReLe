@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> algs = {"fqi", "dfqi", "wfqi"};
     std::string alg;
     unsigned int nExperiments = 20;
-    unsigned int nEpisodes = 100;
+    unsigned int nEpisodes = 500;
     arma::mat Js(nExperiments, algs.size(), arma::fill::zeros);
 
     for(unsigned int a = 0; a < algs.size(); a++)
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         {
             std::string testFileName = env + "-" + alg + "_" + std::to_string(e) + "Data.log";
 
-            std::string loadPath = "/home/shirokuma/Desktop/NIPS2016-GP/mc/" +
+            std::string loadPath = "/home/tesla/Desktop/NIPS2016-GP/mc/" +
                                    std::to_string(nEpisodes) + "Episodes/" + alg + "/";
 
             arma::mat hParams;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
                         double initialVelocity = 0.375 * j;
                         MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
                         auto&& core = buildCore(testMdp, agent);
-                        core.getSettings().episodeLength = 100;
+                        core.getSettings().episodeLength = 300;
                         core.getSettings().loggerStrategy =
                             new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
 
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 
     delete mdp;
 
-    std::string savePath = "/home/shirokuma/Desktop/";
+    std::string savePath = "/home/tesla/Desktop/";
     std::string saveFileName = "Js-" + env + ".txt";
     Js.save(savePath + saveFileName, arma::raw_ascii);
 }
