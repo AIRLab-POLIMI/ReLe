@@ -35,7 +35,7 @@ class SDPEGIRL: public EGIRL<ActionC, StateC>
 {
 public:
     SDPEGIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, DifferentiableDistribution& dist,
-             LinearApproximator& rewardf, double gamma, IrlEpGrad gtype, IrlEpHess htype, double eps = 0.1)
+             LinearApproximator& rewardf, double gamma, IrlEpGrad gtype, IrlEpHess htype, double eps = 0.05)
         : EGIRL<ActionC, StateC>(data, theta, dist, rewardf, gamma, gtype), htype(htype), eps(eps)
     {
         hessianCalculator = EpisodicHessianCalculatorFactory<ActionC, StateC>::build(htype, theta, this->phi, dist, gamma);
@@ -56,7 +56,81 @@ public:
 
     }
 
+    virtual void run() override
+    {
+        EGIRL<ActionC, StateC>::run();
+
+        arma::vec w = this->rewardf.getParameters();
+
+        arma::mat hessian = this->hessianCalculator->computeHessian(w);
+        arma::vec eigenvalues = arma::eig_sym(hessian);
+
+        std::cout << "eigenvalues" << std::endl;
+        std::cout << eigenvalues.t() << std::endl;
+        std::cout << "eps: " << eps << std::endl;
+
+    }
+
 protected:
+    virtual void setStartingPoint(arma::vec& starting, unsigned int effective_dim) override
+    {
+        if (starting.n_elem == 0)
+        {
+            starting.ones(effective_dim);
+            starting /= arma::sum(starting);
+        }
+
+        // Check if initial solution is already feasible
+        if(sdConstraint(effective_dim, starting.mem, nullptr, this) < 0)
+        {
+            std::cout << "The starting point is already feasble" << std::endl;
+            return;
+        }
+        else
+        {
+            std::cout << "Searching feasible starting point" << std::endl;
+        }
+
+        // Setup optimization
+        nlopt::opt optimizator(nlopt::LD_MMA, effective_dim);
+        optimizator.set_min_objective(sdConstraint, this);
+        optimizator.add_inequality_constraint(Optimization::oneSumConstraint, nullptr, 0);
+
+        std::vector<double> lowerBounds(effective_dim, 0.0);
+        std::vector<double> upperBounds(effective_dim, 1.0);
+        optimizator.set_lower_bounds(lowerBounds);
+        optimizator.set_upper_bounds(upperBounds);
+
+        // temination conditions
+        optimizator.set_xtol_rel(1e-3);
+        optimizator.set_ftol_rel(1e-3);
+        optimizator.set_ftol_abs(1e-3);
+        optimizator.set_maxeval(100);
+
+
+        // try to find a feasible solution
+        std::vector<double> parameters(effective_dim);
+        for (int i = 0; i < effective_dim; ++i)
+            parameters[i] = starting[i];
+
+        // optimize function
+        double minf;
+
+        if (optimizator.optimize(parameters, minf) < 0)
+        {
+            throw std::runtime_error("Nlopt failed!");
+        }
+
+        if(minf > 0)
+        {
+            std::cout << "WARNING! unable to find feasible starting point" << std::endl;
+        }
+
+
+        starting = arma::conv_to<arma::vec>::from(parameters);
+
+    }
+
     virtual void setupOptimization(unsigned int effective_dim, unsigned int maxFunEvals) override
     {
         this->optAlg = nlopt::LD_SLSQP;
