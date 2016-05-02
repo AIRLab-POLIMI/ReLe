@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
             else if(env == "ip")
             {
                 auto&& core = buildCore(*mdp, agent);
-                core.getSettings().episodeLength = 100;
+                core.getSettings().episodeLength = 300;
                 core.getSettings().loggerStrategy =
                     new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
 
