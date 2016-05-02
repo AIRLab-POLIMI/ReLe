@@ -86,15 +86,7 @@ public:
         setupOptimization(effective_dim, maxFunEvals);
 
         // define initial point
-        if (starting.n_elem == 0)
-        {
-            starting.ones(effective_dim);
-            starting /= arma::sum(starting);
-        }
-        else
-        {
-            assert(effective_dim <= starting.n_elem);
-        }
+        setStartingPoint(starting, effective_dim);
 
         std::vector<double> parameters(effective_dim);
         for (int i = 0; i < effective_dim; ++i)
@@ -123,6 +115,19 @@ public:
 
 protected:
     virtual void preprocessing() = 0;
+
+    virtual void setStartingPoint(arma::vec& starting, unsigned int effective_dim)
+    {
+        if (starting.n_elem == 0)
+        {
+            starting.ones(effective_dim);
+            starting /= arma::sum(starting);
+        }
+        else
+        {
+            assert(effective_dim <= starting.n_elem);
+        }
+    }
 
     virtual void setupOptimization(unsigned int effective_dim, unsigned int maxFunEvals)
     {

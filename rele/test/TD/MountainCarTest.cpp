@@ -62,15 +62,15 @@ int main(int argc, char *argv[])
     unsigned int nExperiments = 20;
     for(unsigned int e = 0; e < nExperiments; e++)
     {
-		auto&& core = buildCore(mdp, agent);
-		std::string fileName = "mc_" + std::to_string(e) + ".log";
-		core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
+        auto&& core = buildCore(mdp, agent);
+        std::string fileName = "mc_" + std::to_string(e) + ".log";
+        core.getSettings().loggerStrategy = new WriteStrategy<FiniteAction, DenseState>(fm.addPath(fileName));
 
-		for (int i = 0; i < nEpisodes; i++)
-		{
-			core.getSettings().episodeLength = 10000;
-			cout << "Starting episode: " << i << endl;
-			core.runEpisode();
-		}
+        for (int i = 0; i < nEpisodes; i++)
+        {
+            core.getSettings().episodeLength = 10000;
+            cout << "Starting episode: " << i << endl;
+            core.runEpisode();
+        }
     }
 }
