@@ -23,6 +23,7 @@
 
 #include "rele/environments/MountainCar.h"
 #include "rele/utils/RandomGenerator.h"
+#include <random>
 
 using namespace std;
 
@@ -31,7 +32,8 @@ namespace ReLe
 
 MountainCar::MountainCar(ConfigurationsLabel label,
                          double initialPosition,
-                         double initialVelocity) :
+                         double initialVelocity,
+						 double rewardSigma) :
     // Sutton's article
     // DenseMDP(2, 3, 1, false, true),
     // Klein's articles
@@ -40,7 +42,10 @@ MountainCar::MountainCar(ConfigurationsLabel label,
     DenseMDP(2, 2, 1, false, true, 0.95, 100),
     envType(label),
     initialPosition(initialPosition),
-    initialVelocity(initialVelocity)
+    initialVelocity(initialVelocity),
+	rewardSigma(rewardSigma),
+	generator(std::default_random_engine()),
+	pdfNormal(std::normal_distribution<double>(0, rewardSigma))
 {
 }
 
@@ -119,11 +124,11 @@ void MountainCar::step(const FiniteAction& action,
         currentState[velocity] = updatedVelocity;
 
         if(currentState[position] < -1 || abs(currentState[velocity]) > 3)
-            reward[0] = -1;
+            reward[0] = -1 + pdfNormal(generator);
         else if(currentState[position] > 1 && abs(currentState[velocity]) <= 3)
-            reward[0] = 1;
+            reward[0] = 1 + pdfNormal(generator);
         else
-            reward[0] = 0;
+            reward[0] = 0 + pdfNormal(generator);
     }
 
     nextState = currentState;

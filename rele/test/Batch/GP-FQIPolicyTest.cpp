@@ -44,16 +44,12 @@ int main(int argc, char *argv[])
     DenseMDP* mdp;
 
     if(env == "mc")
-        mdp = new MountainCar(MountainCar::Ernst);
+        mdp = new MountainCar(MountainCar::Ernst, -0.5, 0, 1);
     else if(env == "ip")
         mdp = new DiscreteActionSwingUp;
 
     unsigned int stateDim = mdp->getSettings().stateDimensionality;
     unsigned int nActions = mdp->getSettings().actionsNumber;
-
-    FileManager fm(env, "testFqi");
-    fm.createDir();
-    fm.cleanDir();
 
     BasisFunctions bfs = IdentityBasis::generate(stateDim);
     DenseFeatures phi(bfs);
@@ -178,34 +174,59 @@ int main(int argc, char *argv[])
 
             if(env == "mc")
             {
-                unsigned int counter = 1;
-                for(int i = -8; i <= 8; i++)
-                    for(int j = -8; j <= 8; j++)
-                    {
-                        double initialPosition = 0.125 * i;
-                        double initialVelocity = 0.375 * j;
-                        MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
-                        auto&& core = buildCore(testMdp, agent);
-                        core.getSettings().episodeLength = 300;
-                        core.getSettings().loggerStrategy =
-                            new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
+            	unsigned int policyNExperiments = 10000;
 
-                        core.runTestEpisode();
+				auto&& core = buildCore(*mdp, agent);
+				core.getSettings().episodeLength = 300;
 
-                        std::cout << counter++ << "/289" << std::endl;
-                    }
+				FileManager fm(env, "testFqi");
+				fm.createDir();
+				fm.cleanDir();
 
-                arma::mat testEpisodes;
-                testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
+				core.getSettings().loggerStrategy =
+					new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
 
-                arma::uvec positiveIdxs = arma::find(testEpisodes.col(2 + stateDim + 1) == 1);
-                int nPositives = positiveIdxs.n_elem;
-                int nNegatives = 289 - nPositives;
+				core.runTestEpisode();
 
-                Js(e, a) = (nPositives - nNegatives) / double(289);
+				arma::mat testEpisodes;
+				testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
+
+				arma::mat rewards(policyNExperiments, testEpisodes.n_rows - 2, arma::fill::zeros);
+				arma::vec lastCol = testEpisodes.col(testEpisodes.n_cols - 1);
+				rewards.row(0) = lastCol(arma::span(1, testEpisodes.n_rows - 1)).t();
+
+            	for(unsigned int i = 1; i < policyNExperiments; i++)
+            	{
+					auto&& core = buildCore(*mdp, agent);
+					core.getSettings().episodeLength = 300;
+
+					FileManager fm(env, "testFqi");
+					fm.createDir();
+					fm.cleanDir();
+
+					core.getSettings().loggerStrategy =
+						new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
+
+					core.runTestEpisode();
+
+					arma::mat testEpisodes;
+					testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
+
+					arma::vec lastCol = testEpisodes.col(testEpisodes.n_cols - 1);
+					rewards.row(i) = lastCol(arma::span(1, testEpisodes.n_rows - 1)).t();
+            	}
+
+            	Js(e, a) = 0;
+            	arma::vec meanRewards = arma::mean(rewards);
+            	for(unsigned int i = 0; i < meanRewards.n_elem; i++)
+            		Js(e, a) += pow(mdp->getSettings().gamma, i) * meanRewards(i);
             }
             else if(env == "ip")
             {
+				FileManager fm(env, "testFqi");
+				fm.createDir();
+				fm.cleanDir();
+
                 auto&& core = buildCore(*mdp, agent);
                 core.getSettings().episodeLength = 300;
                 core.getSettings().loggerStrategy =
