@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     std::vector<std::string> algs = {"fqi", "dfqi", "wfqi"};
     std::string alg;
     unsigned int nExperiments = 20;
-    unsigned int nEpisodes = 100;
+    unsigned int nEpisodes = 500;
     arma::mat Js(nExperiments, algs.size(), arma::fill::zeros);
 
     for(unsigned int a = 0; a < algs.size(); a++)
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         {
             std::string testFileName = env + "-" + alg + "_" + std::to_string(e) + "Data.log";
 
-            std::string loadPath = "/home/shirokuma/Desktop/NIPS2016-GP/mc/" +
+            std::string loadPath = "/home/tesla/Desktop/NIPS2016-GP/mc/" +
                                    std::to_string(nEpisodes) + "Episodes/" + alg + "/";
 
             arma::mat hParams;
@@ -126,9 +126,9 @@ int main(int argc, char *argv[])
 
                 arma::mat alphaMat;
                 alphaMat.load(loadPath + "alphas_" + std::to_string(e) + ".mat", arma::raw_ascii);
-                arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / nActions, nActions);
-                for(unsigned int a = 0; a < nActions; a++)
-                    alpha.slice(a) = alphaMat.cols(arma::span(stateDim * a, stateDim * a + stateDim - 1));
+                arma::cube alpha(alphaMat.n_rows, alphaMat.n_cols / 2, 2);
+                for(unsigned int r = 0; r < 2; r++)
+                    alpha.slice(r) = alphaMat.cols(arma::span(nActions * r, nActions * r + nActions - 1));
 
                 std::vector<arma::mat> activeSetsMat;
                 arma::mat tempMat1;
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
                         double initialVelocity = 0.375 * j;
                         MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
                         auto&& core = buildCore(testMdp, agent);
-                        core.getSettings().episodeLength = 100;
+                        core.getSettings().episodeLength = 300;
                         core.getSettings().loggerStrategy =
                             new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
 
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
             else if(env == "ip")
             {
                 auto&& core = buildCore(*mdp, agent);
-                core.getSettings().episodeLength = 100;
+                core.getSettings().episodeLength = 300;
                 core.getSettings().loggerStrategy =
                     new WriteStrategy<FiniteAction, DenseState>(fm.addPath(testFileName));
 
@@ -218,12 +218,12 @@ int main(int argc, char *argv[])
 
                 // calcolo reward medio per esperimento
             }
-
-            delete mdp;
         }
     }
 
-    std::string savePath = "/home/shirokuma/Desktop/";
+    delete mdp;
+
+    std::string savePath = "/home/tesla/Desktop/";
     std::string saveFileName = "Js-" + env + ".txt";
     Js.save(savePath + saveFileName, arma::raw_ascii);
 }
