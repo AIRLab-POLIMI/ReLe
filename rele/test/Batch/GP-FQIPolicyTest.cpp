@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
                         arma::vec rewards = testEpisodes.col(2 + stateDim + 1);
 
                         discRewards(counter) = 0;
-                        for(unsigned int k = 1; k < testEpisodes.n_rows - 2; k++)
+                        for(unsigned int k = 1; k < testEpisodes.n_rows - 1; k++)
                         	discRewards(counter) += pow(mdp->getSettings().gamma, counter - 1) * rewards(k);
 
                         std::cout << counter++ << "/289" << std::endl;
