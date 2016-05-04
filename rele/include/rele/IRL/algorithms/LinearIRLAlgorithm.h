@@ -78,7 +78,7 @@ public:
         // handle the case of only one active reward feature
         if (effective_dim == 0)
         {
-            rewardf.setParameters(simplex.reconstruct());
+            rewardf.setParameters(simplex.getCenter());
             return;
         }
 
@@ -88,9 +88,7 @@ public:
         // define initial point
         setStartingPoint(starting, effective_dim);
 
-        std::vector<double> parameters(effective_dim);
-        for (int i = 0; i < effective_dim; ++i)
-            parameters[i] = starting[i];
+        auto parameters = arma::conv_to<std::vector<double>>::from(starting);
 
         //optimize function
         double minf;
@@ -101,6 +99,8 @@ public:
         else
         {
             std::cout << "found minimum = " << minf << std::endl;
+
+
             arma::vec x = simplex.reconstruct(parameters);
             rewardf.setParameters(x);
         }
