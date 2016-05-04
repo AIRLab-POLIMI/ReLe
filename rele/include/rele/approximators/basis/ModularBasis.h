@@ -40,12 +40,12 @@ namespace ReLe
 class ModularBasis : public BasisFunction
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index1 index of the first element of the input
-	 * \param index2 index of the second element of the input
-	 * \param range range to be used to transform the input
-	 */
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularBasis(unsigned int index1, unsigned int index2, const ModularRange& range);
 
 protected:
@@ -62,12 +62,12 @@ protected:
 class ModularSum : public ModularBasis
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index1 index of the first element of the input
-	 * \param index2 index of the second element of the input
-	 * \param range range to be used to transform the input
-	 */
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularSum(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
@@ -82,12 +82,12 @@ public:
 class ModularDifference : public ModularBasis
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index1 index of the first element of the input
-	 * \param index2 index of the second element of the input
-	 * \param range range to be used to transform the input
-	 */
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularDifference(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
@@ -102,12 +102,12 @@ public:
 class ModularProduct : public ModularBasis
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index1 index of the first element of the input
-	 * \param index2 index of the second element of the input
-	 * \param range range to be used to transform the input
-	 */
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularProduct(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
@@ -122,12 +122,12 @@ public:
 class ModularDivision : public ModularBasis
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param index1 index of the first element of the input
-	 * \param index2 index of the second element of the input
-	 * \param range range to be used to transform the input
-	 */
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularDivision(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;

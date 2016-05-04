@@ -37,23 +37,23 @@ namespace ReLe
 class SubspaceBasis : public BasisFunction
 {
 public:
-	/*!
-	 * Constructor.
-	 * \param basis basis function
-	 * \param span subset selection of the input
-	 */
+    /*!
+     * Constructor.
+     * \param basis basis function
+     * \param span subset selection of the input
+     */
     SubspaceBasis(BasisFunction* basis, const arma::span& span);
 
-	/*!
-	 * Constructor.
-	 * \param basis basis function
-	 * \param spanVector vector of subsets selection of the input
-	 */
+    /*!
+     * Constructor.
+     * \param basis basis function
+     * \param spanVector vector of subsets selection of the input
+     */
     SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& spanVector);
 
-	/*!
-	 * Destructor.
-	 */
+    /*!
+     * Destructor.
+     */
     ~SubspaceBasis();
 
     double operator() (const arma::vec& input) override;
