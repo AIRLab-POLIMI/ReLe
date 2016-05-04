@@ -79,21 +79,19 @@ public:
     {
         // reconstruct parameters
         int dim = active_feat.n_elem;
-        int n = xSimplex.size();
+        int n = dim - 1;
 
         arma::vec x(size, arma::fill::zeros);
 
-        if (n == dim - 1)
+
+        double sumx = 0.0;
+        for (int i = 0; i < n; ++i)
         {
-            // simplex scenario
-            double sumx = 0.0;
-            for (int i = 0; i < n; ++i)
-            {
-                x(active_feat(i)) = xSimplex[i];
-                sumx += xSimplex[i];
-            }
-            x(active_feat(n)) = 1 - sumx;
+            x(active_feat(i)) = xSimplex[i];
+            sumx += xSimplex[i];
         }
+        x(active_feat(n)) = 1 - sumx;
+
 
         return x;
     }
@@ -102,7 +100,7 @@ public:
      * returns the center of the simplex.
      * \return a vector to the full parametrization
      */
-    inline arma::vec reconstruct()
+    inline arma::vec getCenter()
     {
         arma::vec x(size, arma::fill::zeros);
         x.elem(active_feat).ones();

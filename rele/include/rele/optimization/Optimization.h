@@ -51,6 +51,35 @@ public:
         return val;
     }
 
+    /*!
+     * This function implements the one sum constraint, to be used as nonlinear constraint in nlopt
+     * This version allow to specify a index vector for wich the constraint is valid
+     */
+    static double oneSumConstraintIndex(unsigned int n, const double *x,
+                                        double *grad, void *data)
+    {
+        arma::uvec& indexes = *static_cast<arma::uvec*>(data);
+
+        double val = -1.0;
+
+        for (unsigned int i = 0; i < indexes.n_elem; i++)
+            val += x[indexes(i)];
+
+        if (grad != nullptr)
+        {
+            for (unsigned int i = 0; i < n; i++)
+                grad[i] = 0;
+
+            for(unsigned int i = 0; i < indexes.n_elem; i++)
+            {
+                grad[indexes(i)] = 1;
+            }
+
+        }
+
+        return val;
+    }
+
 public:
     /*!
      * This class implements a simple objective function wrapper, in order to use easily an objective function
