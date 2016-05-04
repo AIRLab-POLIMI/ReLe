@@ -61,4 +61,7 @@ target_link_libraries(lqr_approximate_bayesian rele)
 add_executable(nls_bayesian bayesian/NLSBayesianTest.cpp)
 target_link_libraries(nls_bayesian rele)
 
+add_executable(lqr_bayesian_batch bayesian/BatchTest.cpp)
+target_link_libraries(lqr_bayesian_batch rele)
+
 

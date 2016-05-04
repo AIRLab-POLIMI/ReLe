@@ -68,7 +68,7 @@ public:
     MountainCar(ConfigurationsLabel label = Sutton,
                 double initialPosition = -0.5,
                 double initialVelocity = 0,
-				double rewardSigma = 0);
+                double rewardSigma = 0);
 
     /*!
      * \see Environment::step

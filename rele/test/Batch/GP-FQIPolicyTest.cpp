@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
 
             if(env == "mc")
             {
-            	arma::vec discRewards(289, arma::fill::zeros);
+                arma::vec discRewards(289, arma::fill::zeros);
                 unsigned int counter = 0;
                 for(int i = -8; i <= 8; i++)
                     for(int j = -8; j <= 8; j++)
@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
 
                         discRewards(counter) = 0;
                         for(unsigned int k = 1; k < testEpisodes.n_rows - 1; k++)
-                        	discRewards(counter) += pow(mdp->getSettings().gamma, k - 1) * rewards(k);
+                            discRewards(counter) += pow(mdp->getSettings().gamma, k - 1) * rewards(k);
 
                         std::cout << counter++ << "/289" << std::endl;
                     }
@@ -208,9 +208,9 @@ int main(int argc, char *argv[])
             }
             else if(env == "ip")
             {
-				FileManager fm(env, "testFqi");
-				fm.createDir();
-				fm.cleanDir();
+                FileManager fm(env, "testFqi");
+                fm.createDir();
+                fm.cleanDir();
 
                 auto&& core = buildCore(*mdp, agent);
                 core.getSettings().episodeLength = 300;

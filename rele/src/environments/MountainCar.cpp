@@ -33,7 +33,7 @@ namespace ReLe
 MountainCar::MountainCar(ConfigurationsLabel label,
                          double initialPosition,
                          double initialVelocity,
-						 double rewardSigma) :
+                         double rewardSigma) :
     // Sutton's article
     // DenseMDP(2, 3, 1, false, true),
     // Klein's articles
@@ -43,9 +43,9 @@ MountainCar::MountainCar(ConfigurationsLabel label,
     envType(label),
     initialPosition(initialPosition),
     initialVelocity(initialVelocity),
-	rewardSigma(rewardSigma),
-	generator(std::default_random_engine()),
-	pdfNormal(std::normal_distribution<double>(0, rewardSigma))
+    rewardSigma(rewardSigma),
+    generator(std::default_random_engine()),
+    pdfNormal(std::normal_distribution<double>(0, rewardSigma))
 {
 }
 
