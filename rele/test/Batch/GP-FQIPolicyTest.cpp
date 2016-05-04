@@ -51,10 +51,6 @@ int main(int argc, char *argv[])
     unsigned int stateDim = mdp->getSettings().stateDimensionality;
     unsigned int nActions = mdp->getSettings().actionsNumber;
 
-    FileManager fm(env, "testFqi");
-    fm.createDir();
-    fm.cleanDir();
-
     BasisFunctions bfs = IdentityBasis::generate(stateDim);
     DenseFeatures phi(bfs);
 
@@ -178,10 +174,15 @@ int main(int argc, char *argv[])
 
             if(env == "mc")
             {
-                unsigned int counter = 1;
+            	arma::vec discRewards(289, arma::fill::zeros);
+                unsigned int counter = 0;
                 for(int i = -8; i <= 8; i++)
                     for(int j = -8; j <= 8; j++)
                     {
+                        FileManager fm("mc", "testFqi");
+                        fm.createDir();
+                        fm.cleanDir();
+
                         double initialPosition = 0.125 * i;
                         double initialVelocity = 0.375 * j;
                         MountainCar testMdp(MountainCar::Ernst, initialPosition, initialVelocity);
@@ -192,20 +193,25 @@ int main(int argc, char *argv[])
 
                         core.runTestEpisode();
 
+                        arma::mat testEpisodes;
+                        testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
+                        arma::vec rewards = testEpisodes.col(2 + stateDim + 1);
+
+                        discRewards(counter) = 0;
+                        for(unsigned int k = 1; k < testEpisodes.n_rows - 1; k++)
+                        	discRewards(counter) += pow(mdp->getSettings().gamma, k - 1) * rewards(k);
+
                         std::cout << counter++ << "/289" << std::endl;
                     }
 
-                arma::mat testEpisodes;
-                testEpisodes.load(fm.addPath(testFileName), arma::csv_ascii);
-
-                arma::uvec positiveIdxs = arma::find(testEpisodes.col(2 + stateDim + 1) == 1);
-                int nPositives = positiveIdxs.n_elem;
-                int nNegatives = 289 - nPositives;
-
-                Js(e, a) = (nPositives - nNegatives) / double(289);
+                Js(e, a) = arma::sum(discRewards) / double(289);
             }
             else if(env == "ip")
             {
+				FileManager fm(env, "testFqi");
+				fm.createDir();
+				fm.cleanDir();
+
                 auto&& core = buildCore(*mdp, agent);
                 core.getSettings().episodeLength = 300;
                 core.getSettings().loggerStrategy =

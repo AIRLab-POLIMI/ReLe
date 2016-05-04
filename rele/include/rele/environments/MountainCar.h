@@ -67,7 +67,8 @@ public:
      */
     MountainCar(ConfigurationsLabel label = Sutton,
                 double initialPosition = -0.5,
-                double initialVelocity = 0);
+                double initialVelocity = 0,
+				double rewardSigma = 0);
 
     /*!
      * \see Environment::step
@@ -83,9 +84,12 @@ public:
 protected:
     //! Configuration type.
     ConfigurationsLabel envType;
+    std::default_random_engine generator;
+    std::normal_distribution<double> pdfNormal;
 
     double initialPosition;
     double initialVelocity;
+    double rewardSigma;
 };
 
 }
