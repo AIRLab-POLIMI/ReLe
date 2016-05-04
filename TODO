@@ -2,24 +2,23 @@ TODO:
 
 ### 16 Feb 2016
 DAVE:
-1) Fix gradienti batch
-2) Cleanup interfaccia serializzazione
-3) scegliere una lib per scrivere json
+1) Cleanup interfaccia serializzazione
+2) scegliere una lib per serializzare (json)
 
 TEO:
-1) Scegliere stile doc
-2) scegliere una lib per binding python/altro
+1) scegliere una lib per binding python/altro
+2) controllo gradienti batch
 
 CARLO:
 1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
-2) Test case policy Gradient
-3) Aggiornamento policy in BatchCore
+2) Aggiornamento policy in BatchCore
 
 VARIE:
-1) Fixare gradienti distribuzioni! Manca implementazione per ParametricFullNormal.
-2) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
-3) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
-4) CPIRL 
-5) interfaccia ALE (http://www.arcadelearningenvironment.org/)
-6) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
+1) Rivedere interfaccia regressori, ed eventualmente QRegressor
+2) Fixare gradienti distribuzioni! Manca implementazione per ParametricFullNormal.
+3) Cambiare nota di copyright: mettere come copyright holders Davide Tateo & Matteo Pirotta
+4) Aggiungere ove necessario i crediti per i collaboratori non nel copyright
+5) CPIRL 
+6) interfaccia ALE (http://www.arcadelearningenvironment.org/)
+7) RICORDARSI DI AGGIUNGERE LA NORMALIZZAZIONE AD OGNI MDP ?
 
