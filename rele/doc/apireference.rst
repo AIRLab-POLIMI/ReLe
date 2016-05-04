@@ -213,6 +213,27 @@ Basis functions
 .. doxygenclass:: ReLe::AndConditionBasisFunction
    :members:
    
+.. doxygenclass:: ReLe::SubspaceBasis
+   :members:
+
+.. doxygenclass:: ReLe::ModularBasis
+   :members:
+   
+.. doxygenclass:: ReLe::ModularSum
+   :members:
+   
+.. doxygenclass:: ReLe::ModularDifference
+   :members:
+   
+.. doxygenclass:: ReLe::ModularProduct
+   :members:
+   
+.. doxygenclass:: ReLe::ModularDivision
+   :members:
+   
+.. doxygenclass:: ReLe::QuadraticBasis
+   :members:
+   
 .. doxygenclass:: ReLe::IdentityBasis_
    :members:
    

@@ -29,12 +29,33 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements functions to make basis functions
+ * in quadratic form.
+ */
 class QuadraticBasis : public BasisFunction
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param Q matrix of the quadratic form
+	 * \param span indexes of the elements of the input to consider
+	 */
     QuadraticBasis(arma::mat& Q, arma::span = arma::span::all);
+
+	/*!
+	 * Constructor.
+	 * \param Q vector of matrices of the quadratic forms
+	 */
     QuadraticBasis(std::vector<arma::mat>& Q);
+
+	/*!
+	 * Constructor.
+	 * \param Q vector of matrices of the quadratic forms
+	 * \param span vector of indexes of the elements of the input to consider
+	 */
     QuadraticBasis(std::vector<arma::mat>& Q, std::vector<arma::span> span);
+
     virtual double operator()(const arma::vec& input) override;
     virtual void writeOnStream(std::ostream& out) override;
     virtual void readFromStream(std::istream& in) override;

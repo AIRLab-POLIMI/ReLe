@@ -29,18 +29,49 @@
 namespace ReLe
 {
 
+/*!
+ * This class implements functions to apply
+ * the given basis functions to a subset of the
+ * input.
+ */
 class SubspaceBasis : public BasisFunction
 {
 public:
+	/*!
+	 * Constructor.
+	 * \param basis basis function
+	 * \param span subset selection of the input
+	 */
     SubspaceBasis(BasisFunction* basis, const arma::span& span);
+
+	/*!
+	 * Constructor.
+	 * \param basis basis function
+	 * \param spanVector vector of subsets selection of the input
+	 */
     SubspaceBasis(BasisFunction* basis, std::vector<arma::span>& spanVector);
+
+	/*!
+	 * Destructor.
+	 */
     ~SubspaceBasis();
 
     double operator() (const arma::vec& input) override;
     void writeOnStream (std::ostream& out) override;
     void readFromStream(std::istream& in) override;
 
+    /*!
+     * Return the basis functions for the selected subsets.
+     * \param basisVector vector of basis functions
+     * \param spanVector vector of subsets selection of the input
+     */
     static BasisFunctions generate(BasisFunctions& basisVector, std::vector<arma::span>& spanVector);
+
+    /*!
+     * Return the basis functions for the selected subset.
+     * \param basisVector vector of basis functions
+     * \param span subset selection of the input
+     */
     static BasisFunctions generate(BasisFunctions& basisVector, arma::span span);
 
 private:
