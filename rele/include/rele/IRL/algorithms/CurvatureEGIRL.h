@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_IRL_ALGORITHMS_CURVATUREEGIRL_H_
 
 #include "rele/IRL/utils/EpisodicGradientCalculatorFactory.h"
+#include "rele/IRL/utils/EpisodicHessianCalculatorFactory.h"
 #include "EpisodicLinearIRLAlgorithm.h"
 
 namespace ReLe
