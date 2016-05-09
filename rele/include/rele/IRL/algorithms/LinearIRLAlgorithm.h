@@ -92,17 +92,31 @@ public:
 
         //optimize function
         double minf;
-        if (optimizator.optimize(parameters, minf) < 0)
+
+        try
         {
-            std::cout << "nlopt failed!" << std::endl;
+			nlopt::result result = optimizator.optimize(parameters, minf);
+
+			if (result < 0)
+			{
+				std::cout << "nlopt failed!" << std::endl;
+				arma::vec x = simplex.getCenter();
+				rewardf.setParameters(x);
+			}
+			else
+			{
+				std::cout << "found minimum = " << minf << std::endl;
+
+
+				arma::vec x = simplex.reconstruct(parameters);
+				rewardf.setParameters(x);
+			}
         }
-        else
+        catch(nlopt::roundoff_limited& e)
         {
-            std::cout << "found minimum = " << minf << std::endl;
-
-
-            arma::vec x = simplex.reconstruct(parameters);
-            rewardf.setParameters(x);
+        	std::cout << "WARNING, roundoff limited!!!" << std::endl;
+        	arma::vec x = simplex.reconstruct(parameters);
+        	rewardf.setParameters(x);
         }
     }
 
