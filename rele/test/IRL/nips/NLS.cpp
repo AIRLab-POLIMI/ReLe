@@ -149,6 +149,11 @@ int main(int argc, char *argv[])
     irlAlg3->run();
     arma::vec weights3 = rewardRegressor.getParameters();
 
+    //plot results
+    std::cout << "EGIRL: " << weights1(12) << std::endl;
+    std::cout << "SDPEGIRL: " << weights2(12) << std::endl;
+    std::cout << "CurvatureEGIRL: " << weights3(12) << std::endl;
+
     // Save Reward Function
     weights1.save(fm.addPath("Weights1.txt"), arma::raw_ascii);
     weights2.save(fm.addPath("Weights2.txt"), arma::raw_ascii);
