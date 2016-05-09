@@ -10,7 +10,7 @@ namespace ReLe
 class PGPEPolicyIndividual : public BlackBoxPolicyIndividual
 {
 public:
-    arma::vec diffLogDistr;
+    arma::vec diffLogDistr; //FIXME [IMPORTANT] crash in case of multiple episodes per policy
 
 public:
 
