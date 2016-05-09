@@ -32,10 +32,20 @@
 namespace ReLe
 {
 
-
+/*!
+ * This class is the interface to build basis functions
+ * that transform the input into the corresponding value
+ * in the given range.
+ */
 class ModularBasis : public BasisFunction
 {
 public:
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularBasis(unsigned int index1, unsigned int index2, const ModularRange& range);
 
 protected:
@@ -44,36 +54,80 @@ protected:
     const ModularRange& range;
 };
 
+/*!
+ * This class builds basis functions to transform the
+ * sum of the elements of the input at the given indexes
+ * into the corresponding value in the given range.
+ */
 class ModularSum : public ModularBasis
 {
 public:
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularSum(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
     void readFromStream(std::istream& in) override;
 };
 
+/*!
+ * This class builds basis functions to transform the
+ * difference of the elements of the input at the given indexes
+ * into the corresponding value in the given range.
+ */
 class ModularDifference : public ModularBasis
 {
 public:
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularDifference(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
     void readFromStream(std::istream& in) override;
 };
 
+/*!
+ * This class builds basis functions to transform the
+ * product of the elements of the input at the given indexes
+ * into the corresponding value in the given range.
+ */
 class ModularProduct : public ModularBasis
 {
 public:
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularProduct(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
     void readFromStream(std::istream& in) override;
 };
 
+/*!
+ * This class builds basis functions to transform the
+ * division of the elements of the input at the given indexes
+ * into the corresponding value in the given range.
+ */
 class ModularDivision : public ModularBasis
 {
 public:
+    /*!
+     * Constructor.
+     * \param index1 index of the first element of the input
+     * \param index2 index of the second element of the input
+     * \param range range to be used to transform the input
+     */
     ModularDivision(unsigned int index1, unsigned int index2, const ModularRange& range);
     double operator()(const arma::vec& input) override;
     void writeOnStream(std::ostream& out) override;
