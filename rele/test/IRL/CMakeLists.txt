@@ -4,6 +4,11 @@ find_package(Boost REQUIRED COMPONENTS  program_options)
 add_executable(test_hessian_gradient TestGradientHess.cpp)
 target_link_libraries(test_hessian_gradient rele)
 
+#NIPS
+add_executable(nips_lqr nips/LQR.cpp)
+target_link_libraries(nips_lqr rele)
+
+
 #MWAL
 add_executable(simple_chain_MWAL MWAL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
