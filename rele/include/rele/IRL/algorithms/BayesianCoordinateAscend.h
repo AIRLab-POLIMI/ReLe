@@ -215,7 +215,7 @@ public:
         double logCovP = covPosterior.logPdf(arma::vectorise(Sigma));
 
         //std::cout << "posteriorMu " << logMuP << std::endl;
-        //std::cout << "posteriorCov " << logCovP << std::endl;
+        std::cout << "posteriorCov " << logCovP << std::endl;
 
         return logMuP + logCovP;
     }

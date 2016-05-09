@@ -118,6 +118,7 @@ int main(int argc, char *argv[])
 
     DenseTilesCoder phiImitator(tiles, dim);*/
     BasisFunctions basisImitator = PolynomialFunction::generate(2, dim);
+    //BasisFunctions basisImitator = IdentityBasis::generate(dim);
     //basisImitator.erase(basisImitator.begin());
     SparseFeatures phiImitator(basisImitator, dim);
 
@@ -130,21 +131,21 @@ int main(int argc, char *argv[])
 
     // mean prior
     arma::vec mu_p = arma::zeros(dp);
-    arma::mat Sigma_p = arma::eye(dp, dp)*1e2;
+    arma::mat Sigma_p = arma::eye(dp, dp)*1e-2;
     ParametricNormal prior(mu_p, Sigma_p);
 
     // Covariance prior (fixed)
     arma::mat Sigma = arma::eye(dp, dp)*1e-4;
 
     // Covariance prior
-    arma::mat Psi = arma::eye(dp, dp)*1e3;
     unsigned int nu = dp+1;
+    arma::mat Psi = arma::eye(dp, dp)*1e-3;
     InverseWishart covPrior(nu, Psi);
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
-    BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
+    BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
+    //BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
     //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
 
     std::cout << "Recovering Distribution" << std::endl;
