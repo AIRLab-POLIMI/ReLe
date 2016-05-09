@@ -68,15 +68,15 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	if(argc != 4)
-	{
-		cout << "Wrong argument number: dimension, n_episode, n_experiment must be provided" << endl;
-		return -1;
-	}
+    if(argc != 4)
+    {
+        cout << "Wrong argument number: dimension, n_episode, n_experiment must be provided" << endl;
+        return -1;
+    }
 
-	string dimension(argv[1]);
-	string n_episodes(argv[2]);
-	string n_experiment(argv[3]);
+    string dimension(argv[1]);
+    string n_episodes(argv[2]);
+    string n_experiment(argv[3]);
 
     FileManager fm("nips/lqr_exact/" + dimension + "/" + n_episodes + "/" + n_experiment);
     fm.createDir();
@@ -91,11 +91,11 @@ int main(int argc, char *argv[])
 
     if(dim == 2)
     {
-    	eReward = {0.3, 0.7};
+        eReward = {0.3, 0.7};
     }
     else
     {
-    	eReward = {0.2, 0.7, 0.1};
+        eReward = {0.2, 0.7, 0.1};
     }
 
     int rewardDim = dim;
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 
     arma::mat theta = expert.getParams();
     auto* irlAlg = new EGIRL<DenseAction, DenseState>(data, theta, expertDist,
-                rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
 
     //Run GIRL
     irlAlg->run();

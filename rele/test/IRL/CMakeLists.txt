@@ -8,6 +8,8 @@ target_link_libraries(test_hessian_gradient rele)
 add_executable(nips_lqr nips/LQR.cpp)
 target_link_libraries(nips_lqr rele)
 
+add_executable(nips_nls nips/NLS.cpp)
+target_link_libraries(nips_nls rele)
 
 #MWAL
 add_executable(simple_chain_MWAL MWAL/SimpleChainMWAL.cpp)
