@@ -4,6 +4,7 @@ TODO:
 DAVE:
 1) Cleanup interfaccia serializzazione
 2) scegliere una lib per serializzare (json)
+3) FIX BBO in caso di multipli episodi per policy.
 
 TEO:
 1) scegliere una lib per binding python/altro
@@ -12,6 +13,7 @@ TEO:
 CARLO:
 1) Discutere implementazione algoritmi batch (vedasi LSPI and batch gradients)
 2) Aggiornamento policy in BatchCore
+3) Fix dei test in BBO (come gradiente)
 
 VARIE:
 1) Rivedere interfaccia regressori, ed eventualmente QRegressor
