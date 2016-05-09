@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     string n_episodes(argv[1]);
     string n_experiment(argv[2]);
 
-    FileManager fm("nips/lqr_exact/" + n_episodes + "/" + n_experiment);
+    FileManager fm("nips/nls_exact/" + n_episodes + "/" + n_experiment);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
     // Save Reward Function
     weights1.save(fm.addPath("Weights1.txt"), arma::raw_ascii);
     weights2.save(fm.addPath("Weights2.txt"), arma::raw_ascii);
-    weights3.save(fm.addPath("Weights1.txt"), arma::raw_ascii);
+    weights3.save(fm.addPath("Weights3.txt"), arma::raw_ascii);
 
     return 0;
 }
