@@ -37,12 +37,12 @@
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
 #include "rele/IRL/ParametricRewardMDP.h"
-#include "rele/IRL/algorithms/EMIRL.h"
+#include "rele/IRL/algorithms/EGIRL.h"
+#include "rele/IRL/algorithms/SDPEGIRL.h"
+#include "rele/IRL/algorithms/CurvatureEGIRL.h"
 #include "rele/algorithms/policy_search/gradient/GPOMDPAlgorithm.h"
 
 #include "rele/utils/FileManager.h"
-
-#include "rele/algorithms/policy_search/PGPE/PGPE.h"
 
 using namespace std;
 using namespace arma;
@@ -83,27 +83,39 @@ int main(int argc, char *argv[])
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
 
-    arma::vec p(2);
-    p(0) = 6.5178;
-    p(1) = -2.5994;
+    arma::vec p = {11.5431, -3.8302};
 
     DetLinearPolicy<DenseState> expertPolicy(phi);
 
-    ParametricNormal dist(p, arma::eye(p.n_elem, p.n_elem));
+    /*ParametricNormal dist(p, arma::eye(p.n_elem, p.n_elem));
 
     AdaptiveGradientStep step(0.01);
-    PGPE<DenseAction, DenseState> agent(dist,expertPolicy, 200, 500, step);
+    PGPE<DenseAction, DenseState> agent(dist,expertPolicy, 1, 100, step);
 
     auto core = buildCore(prMDP, agent);
-
+    CollectorStrategy<DenseAction, DenseState> collector;
+    core.getSettings().loggerStrategy = &collector;
     core.getSettings().episodeLength = mdp.getSettings().horizon;
-    core.getSettings().episodeN = 100000;
+    core.getSettings().episodeN = 10000;
+    core.getSettings().testEpisodeN = 100;
 
     core.runEpisodes();
 
-    std::cout << dist.getParameters().t() << std::endl;
 
-    /*ParametricNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
+    auto& data = collector.data;
+    double gamma = mdp.getSettings().gamma;
+    cout << "Features Expectation ratio: " << data.computefeatureExpectation(phiReward, gamma).t();
+    cout << "reward: " << core.runEvaluation() << endl;
+
+
+    stringstream ss;
+    ss << "Trajectories.txt";
+    ofstream ofs(fm.addPath(ss.str()));
+    data.writeToStream(ofs);
+
+    std::cout << dist.getParameters().t() << std::endl;*/
+
+    ParametricNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
 
     std::cout << "Distribution Params: " << expertDist.getParameters().t() << std::endl;
 
@@ -121,15 +133,26 @@ int main(int argc, char *argv[])
 
     // Learn reward weights
     arma::mat theta = expert.getParams();
-    auto* irlAlg = new EGIRL<DenseAction, DenseState>(data, theta, expertDist,
-            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
 
-    //Run
-    irlAlg->run();
-    arma::vec weights = rewardRegressor.getParameters();
+    auto* irlAlg1 = new EGIRL<DenseAction, DenseState>(data, theta, expertDist,
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+    irlAlg1->run();
+    arma::vec weights1 = rewardRegressor.getParameters();
+
+    auto* irlAlg2 = new SDPEGIRL<DenseAction, DenseState>(data, theta, expertDist,
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+    irlAlg2->run();
+    arma::vec weights2 = rewardRegressor.getParameters();
+
+    auto* irlAlg3 = new CurvatureEGIRL<DenseAction, DenseState>(data, theta, expertDist,
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+    irlAlg3->run();
+    arma::vec weights3 = rewardRegressor.getParameters();
 
     // Save Reward Function
-    weights.save(fm.addPath("Weights.txt"), arma::raw_ascii);*/
+    weights1.save(fm.addPath("Weights1.txt"), arma::raw_ascii);
+    weights2.save(fm.addPath("Weights2.txt"), arma::raw_ascii);
+    weights3.save(fm.addPath("Weights1.txt"), arma::raw_ascii);
 
     return 0;
 }
