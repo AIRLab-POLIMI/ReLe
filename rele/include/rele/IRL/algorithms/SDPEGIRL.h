@@ -84,7 +84,7 @@ protected:
         // Check if initial solution is already feasible
         if(sdConstraint(effective_dim, starting.mem, nullptr, this) < 0)
         {
-            std::cout << "The starting point is already feasble" << std::endl;
+            std::cout << "The starting point is already feasible" << std::endl;
             return;
         }
         else
@@ -117,14 +117,23 @@ protected:
         // optimize function
         double minf;
 
-        if (optimizator.optimize(parameters, minf) < 0)
+        try
         {
-            throw std::runtime_error("Nlopt failed!");
-        }
 
-        if(minf > 0)
+            if (optimizator.optimize(parameters, minf) < 0)
+            {
+                throw std::runtime_error("Nlopt failed!");
+            }
+
+            if(minf > 0)
+            {
+                std::cout << "WARNING! unable to find feasible starting point" << std::endl;
+            }
+
+        }
+        catch(nlopt::roundoff_limited& e)
         {
-            std::cout << "WARNING! unable to find feasible starting point" << std::endl;
+            std::cout << "WARNING, roundoff limited!!!" << std::endl;
         }
 
 
