@@ -44,6 +44,8 @@
 
 #include "rele/utils/FileManager.h"
 
+#include "rele/algorithms/policy_search/NES/NES.h"
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
@@ -75,7 +77,7 @@ int main(int argc, char *argv[])
     rewardRegressor.setParameters(v);
 
     NLS mdp;
-    ParametricRewardMDP<DenseAction, DenseState> prMDP(mdp, rewardRegressor);
+    //ParametricRewardMDP<DenseAction, DenseState> prMDP(mdp, rewardRegressor);
 
     //Setup expert policy
     int dim = mdp.getSettings().stateDimensionality;
@@ -83,37 +85,11 @@ int main(int argc, char *argv[])
     BasisFunctions basis = IdentityBasis::generate(dim);
     DenseFeatures phi(basis);
 
-    arma::vec p = {11.5431, -3.8302};
+    arma::vec p(2);
+    p(0) = 6.5178;
+    p(1) = -2.5994;
 
     DetLinearPolicy<DenseState> expertPolicy(phi);
-
-    /*ParametricNormal dist(p, arma::eye(p.n_elem, p.n_elem));
-
-    AdaptiveGradientStep step(0.01);
-    PGPE<DenseAction, DenseState> agent(dist,expertPolicy, 1, 100, step);
-
-    auto core = buildCore(prMDP, agent);
-    CollectorStrategy<DenseAction, DenseState> collector;
-    core.getSettings().loggerStrategy = &collector;
-    core.getSettings().episodeLength = mdp.getSettings().horizon;
-    core.getSettings().episodeN = 10000;
-    core.getSettings().testEpisodeN = 100;
-
-    core.runEpisodes();
-
-
-    auto& data = collector.data;
-    double gamma = mdp.getSettings().gamma;
-    cout << "Features Expectation ratio: " << data.computefeatureExpectation(phiReward, gamma).t();
-    cout << "reward: " << core.runEvaluation() << endl;
-
-
-    stringstream ss;
-    ss << "Trajectories.txt";
-    ofstream ofs(fm.addPath(ss.str()));
-    data.writeToStream(ofs);
-
-    std::cout << dist.getParameters().t() << std::endl;*/
 
     ParametricNormal expertDist(p, 0.1*arma::eye(p.size(), p.size()));
 
