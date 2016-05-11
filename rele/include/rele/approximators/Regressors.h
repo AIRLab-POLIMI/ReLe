@@ -116,6 +116,14 @@ public:
     }
 
     /*!
+     * Return the features used by the regressor.
+     */
+    inline const Features_<InputC, denseOutput>& getFeatures() const
+    {
+    	return phi;
+    }
+
+    /*!
      * Destructor.
      */
     virtual ~Regressor_()
