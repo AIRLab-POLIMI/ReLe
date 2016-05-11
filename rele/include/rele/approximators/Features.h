@@ -79,7 +79,7 @@ public:
      * \param input the input data
      * \return the evaluated features
      */
-    virtual return_type operator()(const InputC& input) = 0;
+    virtual return_type operator()(const InputC& input) const = 0;
 
     /*!
      * Overloading of the evaluation method, simply vectorizes the inputs and then evaluates
@@ -89,7 +89,7 @@ public:
      * \return the evaluated features
      */
     template<class Input1, class Input2>
-    return_type operator()(const Input1& input1, const Input2& input2)
+    return_type operator()(const Input1& input1, const Input2& input2) const
     {
         auto& self = *this;
         return self(vectorize(input1, input2));
@@ -104,7 +104,7 @@ public:
      * \return the evaluated features
      */
     template<class Input1, class Input2, class Input3>
-    return_type operator()(const Input1& input1, const Input2& input2, const Input3& input3)
+    return_type operator()(const Input1& input1, const Input2& input2, const Input3& input3) const
     {
         auto& self = *this;
         return self(vectorize(input1, input2, input3));

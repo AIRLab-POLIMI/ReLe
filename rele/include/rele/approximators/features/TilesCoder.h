@@ -64,7 +64,7 @@ public:
         computeRows();
     }
 
-    virtual return_type operator()(const InputC& input) override
+    virtual return_type operator()(const InputC& input) const override
     {
         return_type output(rowsN, outputs);
         output.zeros();
@@ -106,7 +106,7 @@ public:
 protected:
     void computeTile(const InputC& input, unsigned int offset,
                      unsigned int o, Tiles_<InputC>& tiles,
-                     return_type& output)
+                     return_type& output) const
     {
         try
         {

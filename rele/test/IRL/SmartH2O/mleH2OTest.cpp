@@ -68,7 +68,7 @@ public:
     {
     }
 
-    virtual arma::mat operator()(const arma::vec& input) override
+    virtual arma::mat operator()(const arma::vec& input) const override
     {
         arma::mat output(rows(), cols());
         output.zeros();
