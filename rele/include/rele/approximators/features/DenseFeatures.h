@@ -95,7 +95,7 @@ public:
         }
     }
 
-    virtual arma::mat operator()(const InputC& input) override
+    virtual arma::mat operator()(const InputC& input) const override
     {
         arma::mat output(basis.n_rows, basis.n_cols);
 

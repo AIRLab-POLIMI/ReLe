@@ -81,7 +81,7 @@ public:
         }
     }
 
-    virtual arma::mat operator ()(const InputC& input) override
+    virtual arma::mat operator ()(const InputC& input) const override
     {
         unsigned int c, r, i, nelem = rowsIdxs.size();
         double val;
