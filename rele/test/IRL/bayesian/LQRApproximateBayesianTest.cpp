@@ -42,6 +42,7 @@
 
 #include "rele/IRL/algorithms/BayesianCoordinateAscend.h"
 #include "rele/IRL/algorithms/MLEDistribution.h"
+#include "rele/IRL/algorithms/LinearMLEDistribution.h"
 #include "rele/IRL/algorithms/EGIRL.h"
 #include "rele/IRL/algorithms/EMIRL.h"
 
@@ -144,9 +145,10 @@ int main(int argc, char *argv[])
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
+    //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
     //BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
     //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
+    LinearMLEDistribution alg(phiImitator, Sigma_p);
 
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);
