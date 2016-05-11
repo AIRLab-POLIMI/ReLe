@@ -50,20 +50,19 @@ public:
         //Compute policy MLE for each element
         for (unsigned int ep = 0; ep < data.size(); ep++)
         {
+            arma::mat A(dp, dp, arma::fill::zeros);
+            arma::vec b(dp, arma::fill::zeros);
+            for(auto& tr : data[ep])
+            {
+                const arma::vec& x = tr.x;
+                const arma::vec& u = tr.u;
 
-        	arma::mat A(dp, dp, arma::fill::zeros);
-        	arma::vec b(dp, arma::fill::zeros);
-        	for(auto& tr : data[ep])
-        	{
-        		const arma::vec& x = tr.x;
-        		const arma::vec& u = tr.u;
+                arma::mat phiX = phi(x);
+                A += phiX*SigmaInv*phiX.t();
+                b += phiX*SigmaInv*u;
+            }
 
-        		arma::mat phiX = phi(x);
-        		A += phiX*SigmaInv*phiX.t();
-        		b += phiX*SigmaInv*u;
-        	}
-
-        	params.col(ep) = solve(A, b);
+            params.col(ep) = solve(A, b);
         }
 
         mu = arma::mean(params, 1);

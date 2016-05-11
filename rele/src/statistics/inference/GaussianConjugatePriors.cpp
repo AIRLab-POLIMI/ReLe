@@ -73,9 +73,6 @@ InverseWishart GaussianConjugatePrior::compute(const arma::vec& mean,
 
     arma::mat VPost = (prior.getPsi() + Xn*Xn.t());
 
-    std::cout << prior.getPsi() << std::endl;
-    std::cout << Xn*Xn.t() << std::endl;
-
     return InverseWishart(nuPost, VPost);
 }
 

@@ -120,7 +120,7 @@ public:
      */
     inline const Features_<InputC, denseOutput>& getFeatures() const
     {
-    	return phi;
+        return phi;
     }
 
     /*!
