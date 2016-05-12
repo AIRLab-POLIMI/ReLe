@@ -49,6 +49,8 @@
 
 #include "../RewardBasisLQR.h"
 
+#include "rele/feature_selection/PrincipalComponentAnalysis.h"
+
 using namespace std;
 using namespace arma;
 using namespace ReLe;
@@ -119,12 +121,12 @@ int main(int argc, char *argv[])
     Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
 
     DenseTilesCoder phiImitator(tiles, dim);*/
-    //BasisFunctions basisImitator = PolynomialFunction::generate(1, dim);
-    BasisFunctions basisImitator = IdentityBasis::generate(dim);
+    BasisFunctions basisImitator = PolynomialFunction::generate(3, dim);
+    //BasisFunctions basisImitator = IdentityBasis::generate(dim);
     //basisImitator.erase(basisImitator.begin());
-    //SparseFeatures phiImitator(basisImitator, dim);
-    SparseFeatures phiImitator;
-    phiImitator.setDiagonal(basisImitator);
+    SparseFeatures phiImitator(basisImitator, dim);
+    //SparseFeatures phiImitator;
+    //phiImitator.setDiagonal(basisImitator);
 
     unsigned int dp = phiImitator.rows();
 
@@ -139,20 +141,20 @@ int main(int argc, char *argv[])
     ParametricNormal prior(mu_p, Sigma_p);
 
     // Covariance prior (fixed)
-    arma::mat Sigma = arma::eye(dp, dp)*1e-3;
+    arma::mat Sigma = arma::eye(dp, dp)*1e-2;
 
     // Covariance prior
-    unsigned int nu = dp+1;
-    arma::mat Psi = arma::eye(dp, dp)*(nu+dp+1);
-    InverseWishart covPrior(nu, Psi);
+    unsigned int nu = dp+2;
+    arma::mat V = arma::eye(dp, dp)*1e3;
+    Wishart covPrior(nu, V);
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
     //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
     //BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
     //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
-    //LinearMLEDistribution alg(phiImitator, SigmaPolicy);
-    LinearBayesianCoordinateAscendFull alg(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
+    LinearMLEDistribution alg(phiImitator, SigmaPolicy);
+    //LinearBayesianCoordinateAscendFull alg(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
     //LinearBayesianCoordinateAscendMean alg(policyFamily, phiImitator, SigmaPolicy, prior, Sigma);
 
     std::cout << "Recovering Distribution" << std::endl;
@@ -195,10 +197,25 @@ int main(int argc, char *argv[])
     std::ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
     imitatorData.writeToStream(ofs2);
 
-    //Recover reward weights
+    // Reduce policy
     arma::mat theta = alg.getParameters();
 
-    /* Create parametric reward */
+
+    PrincipalComponentAnalysis featureSelector(0.9, false);
+
+    featureSelector.createFeatures(theta);
+
+    arma::mat T = featureSelector.getTransformation();
+    arma::mat thetaN = featureSelector.getNewFeatures();
+    arma::vec meanN(thetaN.n_rows, arma::fill::zeros);
+    arma::mat SigmaN = T*imitatorDist.getCovariance()*T.t();
+
+    ParametricNormal imitatorDistN(meanN, SigmaN);
+
+    std::cout << "Reduced mean parameters" << std::endl;
+    std::cout << meanN.t() << std::endl;
+
+    //Run EGIRL
     BasisFunctions basisReward;
     for(unsigned int i = 0; i < eReward.n_elem; i++)
         basisReward.push_back(new LQR_RewardBasis(i, dim));
@@ -206,12 +223,9 @@ int main(int argc, char *argv[])
 
 
     LinearApproximator rewardRegressor(phiReward);
-    auto* irlAlg =  new EGIRL<DenseAction, DenseState>(data, theta, imitatorDist,
+    auto* irlAlg =  new EGIRL<DenseAction, DenseState>(data, thetaN, imitatorDistN,
             rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
 
-
-
-    //Run EGIRL
     irlAlg->run();
     arma::vec omega = rewardRegressor.getParameters();
 

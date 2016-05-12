@@ -67,12 +67,6 @@ public:
 
         mu = arma::mean(params, 1);
         Sigma = arma::cov(params.t());
-
-        std::cout << mu.t() << std::endl;
-        std::cout << Sigma << std::endl;
-        std::cout << arma::rank(Sigma) << std::endl;
-
-
     }
 
     arma::mat getParameters()
