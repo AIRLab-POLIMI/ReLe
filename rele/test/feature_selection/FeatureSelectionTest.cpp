@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
     PrincipalFeatureAnalysis pfa1(0.9);
     PrincipalFeatureAnalysis pfa2(0.9, false);
 
-    PrincipalComponentAnalysis pca1(2);
-    PrincipalComponentAnalysis pca2(2, false);
+    PrincipalComponentAnalysis pca1(0.9);
+    PrincipalComponentAnalysis pca2(0.9, false);
 
     pfa1.createFeatures(features);
     pfa2.createFeatures(features);
