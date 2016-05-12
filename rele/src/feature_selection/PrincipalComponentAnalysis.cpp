@@ -27,8 +27,8 @@
 namespace ReLe
 {
 
-PrincipalComponentAnalysis::PrincipalComponentAnalysis(unsigned int k, bool useCorrelation)
-    : k(k), useCorrelation(useCorrelation)
+PrincipalComponentAnalysis::PrincipalComponentAnalysis(double varMin, bool useCorrelation)
+    : varMin(varMin), useCorrelation(useCorrelation)
 {
 
 }
@@ -56,6 +56,9 @@ void PrincipalComponentAnalysis::createFeatures(const arma::mat& features)
     arma::eig_sym(s, A, Sigma);
     s = arma::sort(s, "descend");
     A = fliplr(A);
+
+    //compute minimum features dimensions
+    unsigned int k = computeDimensions(s, varMin);
 
     T = A.cols(0, k-1).t();
 

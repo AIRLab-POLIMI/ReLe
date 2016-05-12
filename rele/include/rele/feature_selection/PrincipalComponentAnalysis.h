@@ -38,10 +38,10 @@ class PrincipalComponentAnalysis : public LinearFeatureSelectionAlgorithm
 public:
     /*!
      * Constructor.
-     * \param k the final number of features to be used
+     * \param varMin the minimum amount of features to be used
      * \param useCorrelation if to use correlation or covariance matrix as selection criterion
      */
-    PrincipalComponentAnalysis(unsigned int k, bool useCorrelation = true);
+    PrincipalComponentAnalysis(double varMin, bool useCorrelation = true);
     virtual void createFeatures(const arma::mat& features) override;
     virtual arma::mat getTransformation() override;
     virtual arma::mat getNewFeatures() override;
@@ -50,7 +50,7 @@ private:
     arma::mat newFeatures;
     arma::mat T;
 
-    unsigned int k;
+    double varMin;
     bool useCorrelation;
 
 };
