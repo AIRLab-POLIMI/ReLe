@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
     ParametricNormal meanPrior(mu_p, Sigma_p);
 
     arma::mat Psi = arma::eye(2, 2);
-    unsigned int nu = 2;
-    InverseWishart covPrior(nu, Psi);
+    unsigned int nu = p.n_elem+2;
+    Wishart covPrior(nu, Psi);
 
     std::cout << "initial covariance mode" << std::endl;
     std::cout << covPrior.getMode() << std::endl;
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     alg2.compute(data);
 
     ParametricNormal meanPosterior = alg2.getMeanPosterior();
-    InverseWishart covPosterior = alg2.getCovPosterior();
+    Wishart precisionPosterior = alg2.getPrecisionPosterior();
 
     std::cout << "Mean" << std::endl
               << meanPosterior.getMean().t() << std::endl
@@ -134,6 +134,6 @@ int main(int argc, char *argv[])
               << meanPosterior.getCovariance() << std::endl;
 
     std::cout << "Cov parameters" << std::endl
-              << covPosterior.getMode() << std::endl;
+              << precisionPosterior.getMode().i() << std::endl;
 
 }
