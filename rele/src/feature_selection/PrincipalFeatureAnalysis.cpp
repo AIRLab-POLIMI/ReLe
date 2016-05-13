@@ -128,19 +128,6 @@ arma::mat PrincipalFeatureAnalysis::getNewFeatures()
     return newFeatures;
 }
 
-unsigned int PrincipalFeatureAnalysis::computeDimensions(arma::vec& s, double varMin)
-{
-    unsigned int q;
-    for (q = 0; q < s.n_elem; q++)
-    {
-        double var = arma::sum(s(arma::span(0, q)))/arma::sum(s);
-        if(var > varMin)
-            break;
-    }
-
-    return q+1;
-}
-
 void PrincipalFeatureAnalysis::cluster(arma::mat& data, arma::mat& means, arma::uvec& clustersIndexes, unsigned int k)
 {
     BasisFunctions basis = IdentityBasis::generate(data.n_rows);

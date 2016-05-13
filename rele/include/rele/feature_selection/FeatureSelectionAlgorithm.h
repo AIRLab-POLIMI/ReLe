@@ -71,10 +71,23 @@ public:
      */
     virtual arma::mat getTransformation() = 0;
 
-
     virtual ~LinearFeatureSelectionAlgorithm()
     {
 
+    }
+
+protected:
+    inline unsigned int computeDimensions(arma::vec& s, double varMin)
+    {
+        unsigned int q;
+        for (q = 0; q < s.n_elem; q++)
+        {
+            double var = arma::sum(s(arma::span(0, q)))/arma::sum(s);
+            if(var > varMin)
+                break;
+        }
+
+        return q+1;
     }
 };
 

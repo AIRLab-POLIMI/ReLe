@@ -58,7 +58,6 @@ public:
     }
 
 private:
-    unsigned int computeDimensions(arma::vec& s, double varMin);
     void cluster(arma::mat& data, arma::mat& means, arma::uvec& clustersIndexes, unsigned int k);
     unsigned int findNearest(const arma::mat& elements, const arma::vec mean);
 
