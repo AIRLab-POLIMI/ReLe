@@ -57,20 +57,39 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 10000;
-    unsigned int degree = 4;
+    if(argc != 5)
+    {
+        cout << "Wrong argument number: dimension, degree, n_episode, n_experiment must be provided" << endl;
+        return -1;
+    }
 
-    FileManager fm("lqr", "approximateBayesian");
+    string dimension(argv[1]);
+    string degree(argv[2]);
+    string n_episodes(argv[3]);
+    string n_experiment(argv[4]);
+
+    FileManager fm("nips/lqr_mle/" + dimension + "/" + degree + "/" + n_episodes + "/" + n_experiment);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    //Set reward policy
-    vec eReward = {0.3, 0.7};
+    unsigned int dim = stoi(dimension);
+    unsigned int deg = stoi(degree);
+    unsigned int nbEpisodes = stoi(n_episodes);
 
-    // Build policy
-    int rewardDim = eReward.n_elem;
-    int dim = 2;
+    //Set reward policy
+    arma::vec eReward;
+
+    if(dim == 2)
+    {
+        eReward = {0.3, 0.7};
+    }
+    else
+    {
+    	eReward = {0.2, 0.7, 0.1};
+    }
+
+    int rewardDim = dim;
     LQR mdp(dim, rewardDim, LQR::S0Type::RANDOM);
 
     BasisFunctions basis = IdentityBasis::generate(dim);
@@ -108,33 +127,13 @@ int main(int argc, char *argv[])
     Dataset<DenseAction,DenseState>& data = collection.data;
 
     // recover approximate
-    /*std::vector<Range> ranges;
-    std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 5;
-
-    for(unsigned int i = 0; i < dim; i++)
-    {
-        ranges.push_back(Range(-3, 3));
-        tilesN.push_back(numTiles);
-    }
-
-    //Tiles* tiles = new BasicTiles(ranges, tilesN);
-    Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
-
-    DenseTilesCoder phiImitator(tiles, dim);*/
-    BasisFunctions basisImitator = PolynomialFunction::generate(degree, dim);
-    //BasisFunctions basisImitator = IdentityBasis::generate(dim);
-    //basisImitator.erase(basisImitator.begin());
+    BasisFunctions basisImitator = PolynomialFunction::generate(deg, dim);
     SparseFeatures phiImitator(basisImitator, dim);
-    //SparseFeatures phiImitator;
-    //phiImitator.setDiagonal(basisImitator);
 
     unsigned int dp = phiImitator.rows();
 
     std::cout << "Parameters Number" << std::endl;
     std::cout << dp << std::endl;
-    std::cout << "Feature expectation" << std::endl;
-    std::cout << data.computefeatureExpectation(phiImitator) << std::endl;
 
     // mean prior
     arma::vec mu_p = arma::zeros(dp);
@@ -151,12 +150,7 @@ int main(int argc, char *argv[])
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
-    //BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
-    //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
     LinearMLEDistribution alg(phiImitator, SigmaPolicy);
-    //LinearBayesianCoordinateAscendFull alg(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
-    //LinearBayesianCoordinateAscendMean alg(policyFamily, phiImitator, SigmaPolicy, prior, Sigma);
 
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);
@@ -164,39 +158,6 @@ int main(int argc, char *argv[])
 
 
     ParametricNormal imitatorDist = alg.getDistribution();
-
-    std::cout << "Mean parameters" << std::endl
-              << imitatorDist.getMean().t() << std::endl;
-
-
-    arma::vec meanParametrers = imitatorDist.getMean();
-
-    arma::vec action1 = meanParametrers.rows(0, dp/2 -1);
-    arma::vec action2 = meanParametrers.rows(dp/2, dp -1);
-
-    /*std::cout << "Mean parameters visualized:" << std::endl;
-    std::cout << reshape(action1, numTiles, numTiles).t() << std::endl;
-    std::cout << reshape(action2, numTiles, numTiles).t() << std::endl;*/
-
-    std::cout << "Covariance estimate" << std::endl
-              << imitatorDist.getCovariance().diag().t() << std::endl;
-
-    // Generate LQR imitator dataset
-    DetLinearPolicy<DenseState> detPolicyFamily(phiImitator);
-    PolicyEvalDistribution<DenseAction, DenseState> imitator(imitatorDist, detPolicyFamily);
-    Core<DenseAction, DenseState> imitatorCore(mdp, imitator);
-    CollectorStrategy<DenseAction, DenseState> collectionImitator;
-    imitatorCore.getSettings().loggerStrategy = &collectionImitator;
-    imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
-    imitatorCore.getSettings().testEpisodeN = nbEpisodes;
-    imitatorCore.runTestEpisodes();
-    Dataset<DenseAction,DenseState>& imitatorData = collectionImitator.data;
-
-    //Save trajectories
-    std::ofstream ofs(fm.addPath("TrajectoriesExpert.txt"));
-    data.writeToStream(ofs);
-    std::ofstream ofs2(fm.addPath("TrajectoriesImitator.txt"));
-    imitatorData.writeToStream(ofs2);
 
     // Reduce policy
     arma::mat theta = alg.getParameters();
@@ -212,9 +173,6 @@ int main(int argc, char *argv[])
     arma::mat SigmaN = T*imitatorDist.getCovariance()*T.t();
 
     ParametricNormal imitatorDistN(meanN, SigmaN);
-
-    std::cout << "Reduced mean parameters" << std::endl;
-    std::cout << meanN.t() << std::endl;
 
     //Run EGIRL
     BasisFunctions basisReward;
