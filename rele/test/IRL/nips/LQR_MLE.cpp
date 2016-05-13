@@ -191,4 +191,7 @@ int main(int argc, char *argv[])
     //Print results
     cout << "Weights (EGIRL): " << omega.t();
 
+    //save weights
+    omega.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
+
 }
