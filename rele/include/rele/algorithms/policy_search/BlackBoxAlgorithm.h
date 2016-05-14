@@ -232,7 +232,7 @@ public:
                               RewardTransformation& reward_tr,
                               bool baseline = true) :
         BlackBoxAlgorithm<ActionC, StateC, AgentOutputC>(
-            dist, policy, nbEpisodes, nbPolicies, reward_tr, baseline),
+            dist, policy, nbEpisodes, nbPolicies, reward_tr),
         stepLengthRule(step_length), useBaseline(baseline)
     {
     }
