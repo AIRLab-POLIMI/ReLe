@@ -39,7 +39,7 @@ MountainCar::MountainCar(ConfigurationsLabel label,
     // Klein's articles
     // DenseMDP(2, 3, 1, false, true, 0.9, 100),
     // Ernst's article
-    DenseMDP(2, 2, 1, false, true, 0.95, 100),
+    DenseMDP(2, 2, 1, false, true, 0.95, 400),
     envType(label),
     initialPosition(initialPosition),
     initialVelocity(initialVelocity),
@@ -124,9 +124,9 @@ void MountainCar::step(const FiniteAction& action,
         currentState[velocity] = updatedVelocity;
 
         if(currentState[position] < -1 || abs(currentState[velocity]) > 3)
-            reward[0] = -1 + pdfNormal(generator);
+            reward[0] = -1;
         else if(currentState[position] > 1 && abs(currentState[velocity]) <= 3)
-            reward[0] = 1 + pdfNormal(generator);
+            reward[0] = 1;
         else
             reward[0] = 0 + pdfNormal(generator);
     }
