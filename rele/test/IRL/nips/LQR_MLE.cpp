@@ -135,19 +135,6 @@ int main(int argc, char *argv[])
     std::cout << "Parameters Number" << std::endl;
     std::cout << dp << std::endl;
 
-    // mean prior
-    arma::vec mu_p = arma::zeros(dp);
-    arma::mat Sigma_p = arma::eye(dp, dp);
-    ParametricNormal prior(mu_p, Sigma_p);
-
-    // Covariance prior (fixed)
-    arma::mat Sigma = arma::eye(dp, dp)*1e-2;
-
-    // Covariance prior
-    unsigned int nu = dp+2;
-    arma::mat V = arma::eye(dp, dp)*1e3;
-    Wishart covPrior(nu, V);
-
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
     MVNPolicy policyFamily(phiImitator, SigmaPolicy);
     LinearMLEDistribution alg(phiImitator, SigmaPolicy);

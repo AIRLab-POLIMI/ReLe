@@ -47,7 +47,7 @@ public:
 
     }
 
-    void compute(const Dataset<ActionC, StateC>& data)
+    void compute(const Dataset<ActionC, StateC>& data, double eps = 0.1)
     {
         unsigned int dp = policy.getParametersSize();
         unsigned int n = data.size();
@@ -55,7 +55,6 @@ public:
         params.zeros(dp, n);
         params.each_col() = getInitialValue();
 
-        double eps = 0.1;
         double posteriorP = -std::numeric_limits<double>::infinity();
         double oldPosteriorP;
 
@@ -73,8 +72,8 @@ public:
             //Evaluate posterior probability
             posteriorP = computeLogPosterior(data);
 
-            std::cout << "Posterior: " << posteriorP << std::endl << std::endl;
-
+            std::cout << "Posterior: " << posteriorP << std::endl;
+            std::cout << "delta: " << posteriorP - oldPosteriorP << std::endl << std::endl;
         }
         while(posteriorP - oldPosteriorP > eps);
     }
@@ -109,13 +108,8 @@ protected:
     {
         double policyP = computePoliciesPosterior(data);
         double priorP = computePriorProbability();
-        double posteriorP = policyP + priorP;
 
-        std::cout << "policyP" << policyP << std::endl;
-        std::cout << "priorP" << priorP << std::endl;
-        std::cout << "posteriorP" << posteriorP << std::endl;
-
-        return posteriorP;
+        return policyP + priorP;
     }
 
     virtual void computeThetaPrior() = 0;

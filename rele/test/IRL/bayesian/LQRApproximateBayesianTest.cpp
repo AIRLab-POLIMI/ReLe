@@ -57,8 +57,8 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 10000;
-    unsigned int degree = 4;
+    int nbEpisodes = 100;
+    unsigned int degree = 3;
 
     FileManager fm("lqr", "approximateBayesian");
     fm.createDir();
@@ -122,12 +122,12 @@ int main(int argc, char *argv[])
     Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
 
     DenseTilesCoder phiImitator(tiles, dim);*/
-    //BasisFunctions basisImitator = PolynomialFunction::generate(degree, dim);
-    BasisFunctions basisImitator = IdentityBasis::generate(dim);
+    BasisFunctions basisImitator = PolynomialFunction::generate(degree, dim);
+    //BasisFunctions basisImitator = IdentityBasis::generate(dim);
     //basisImitator.erase(basisImitator.begin());
-    //SparseFeatures phiImitator(basisImitator, dim);
-    SparseFeatures phiImitator;
-    phiImitator.setDiagonal(basisImitator);
+    SparseFeatures phiImitator(basisImitator, dim);
+    //SparseFeatures phiImitator;
+    //phiImitator.setDiagonal(basisImitator);
 
     unsigned int dp = phiImitator.rows();
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
     // Covariance prior
     unsigned int nu = dp+2;
-    arma::mat V = arma::eye(dp, dp);
+    arma::mat V = arma::eye(dp, dp)*1e5;
     Wishart covPrior(nu, V);
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     arma::mat theta = alg.getParameters();
 
 
-    PrincipalComponentAnalysis featureSelector(0.90, false);
+    /*PrincipalComponentAnalysis featureSelector(0.90, false);
 
     featureSelector.createFeatures(theta);
 
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
     ParametricNormal imitatorDistN(meanN, SigmaN);
 
     std::cout << "Reduced mean parameters" << std::endl;
-    std::cout << meanN.t() << std::endl;
+    std::cout << meanN.t() << std::endl;*/
 
     //Run EGIRL
     BasisFunctions basisReward;
@@ -223,8 +223,12 @@ int main(int argc, char *argv[])
     DenseFeatures phiReward(basisReward);
 
 
-    LinearApproximator rewardRegressor(phiReward);
+    /*LinearApproximator rewardRegressor(phiReward);
     auto* irlAlg =  new EGIRL<DenseAction, DenseState>(data, thetaN, imitatorDistN,
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);*/
+
+    LinearApproximator rewardRegressor(phiReward);
+    auto* irlAlg =  new EGIRL<DenseAction, DenseState>(data, theta, imitatorDist,
             rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
 
     irlAlg->run();
