@@ -109,12 +109,10 @@ int main(int argc, char *argv[])
     std::cout << "Recovering Distribution" << std::endl;
     alg.compute(data);
 
-    ParametricNormal posterior = alg.getPosterior();
+    ParametricNormal posterior = alg.getDistribution();
 
     std::cout << "Mean parameters" << std::endl
-              << posterior.getMean().t() << std::endl
-              << "Covariance estimate" << std::endl
-              << posterior.getCovariance() << std::endl;
+              << posterior.getMean().t() << std::endl;
 
     //Recover reward weights
     arma::mat theta = alg.getParameters();

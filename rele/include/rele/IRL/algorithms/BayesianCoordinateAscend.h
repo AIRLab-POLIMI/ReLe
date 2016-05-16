@@ -65,13 +65,13 @@ public:
             oldPosteriorP = posteriorP;
 
             //Compute policy MAP for each element
-            posteriorP = updateTheta(data) / data.size();
-
-            //Compute distribution posterior
-            posteriorP += computePosterior();
+            updateTheta(data);
 
             //Update theta prior
             computeThetaPrior();
+
+            //Evaluate posterior probability
+            posteriorP = computeLogPosterior(data);
 
             std::cout << "Posterior: " << posteriorP << std::endl << std::endl;
 
@@ -91,10 +91,8 @@ public:
 
 
 protected:
-    virtual double updateTheta(const Dataset<ActionC, StateC>& data)
+    virtual void updateTheta(const Dataset<ActionC, StateC>& data)
     {
-        double posteriorP = 0;
-
         //Compute policy MAP for each element
         for (unsigned int ep = 0; ep < data.size(); ep++)
         {
@@ -102,21 +100,56 @@ protected:
             epDataset.push_back(data[ep]);
             MAP<ActionC, StateC> mapCalculator(policy, thetaPrior, epDataset);
             arma::vec theta_ep = params.col(ep);
-            double thetaP = mapCalculator.compute(theta_ep);
-            posteriorP += thetaP;
+            mapCalculator.compute(theta_ep);
             params.col(ep) = policy.getParameters();
-
-            //std::cout << thetaP << std::endl;
         }
+    }
 
-        //std::cout << "posteriorTheta " << posteriorP << std::endl;
+    virtual double computeLogPosterior(const Dataset<ActionC, StateC>& data)
+    {
+        double policyP = computePoliciesPosterior(data);
+        double priorP = computePriorProbability();
+        double posteriorP = policyP + priorP;
+
+        std::cout << "policyP" << policyP << std::endl;
+        std::cout << "priorP" << priorP << std::endl;
+        std::cout << "posteriorP" << posteriorP << std::endl;
 
         return posteriorP;
     }
 
-    virtual double computePosterior() = 0;
     virtual void computeThetaPrior() = 0;
+    virtual double computePriorProbability() = 0;
+
     virtual arma::vec getInitialValue() = 0;
+
+private:
+    double computePoliciesPosterior(const Dataset<ActionC, StateC>& data)
+    {
+        double policyP = 0;
+        for (unsigned int i = 0; i < params.n_cols; i++)
+        {
+            auto p = params.col(i);
+            auto ep = data[i];
+            policyP += computePolicyPosterior(p, ep);
+        }
+        return policyP;
+    }
+
+    double computePolicyPosterior(const arma::vec& p,
+                                  const Episode<DenseAction, DenseState>& episode)
+    {
+        policy.setParameters(p);
+
+        double logLikelihood = 0;
+        for (auto& tr : episode)
+        {
+            double prob = policy(tr.x, tr.u);
+            logLikelihood += std::log(prob);
+        }
+
+        return logLikelihood + this->thetaPrior.logPdf(p);
+    }
 
 protected:
     arma::mat params;
@@ -133,7 +166,7 @@ public:
                                  const ParametricNormal& prior,
                                  const arma::mat& Sigma) :
         BayesianCoordinateAscend<ActionC, StateC>(policy, prior.getMean(), Sigma),
-        Sigma(Sigma), prior(prior), posterior(policy.getParametersSize())
+        Sigma(Sigma), prior(prior)
     {
 
     }
@@ -143,34 +176,30 @@ public:
 
     }
 
-    virtual double computePosterior() override
-    {
-        //Compute distribution posterior
-        posterior = GaussianConjugatePrior::compute(Sigma, prior, this->params);
-
-        //compute posterior probability
-        arma::vec omega = posterior.getMean();
-        return posterior.logPdf(omega);
-    }
-
-    virtual void computeThetaPrior() override
-    {
-        this->thetaPrior = ParametricNormal(posterior.getMean(), Sigma);
-    }
-
-    ParametricNormal getPosterior()
-    {
-        return posterior;
-    }
-
+protected:
     virtual arma::vec getInitialValue() override
     {
         return prior.getMean();
     }
 
+    virtual void computeThetaPrior() override
+    {
+        auto posterior = GaussianConjugatePrior::compute(Sigma, prior, this->params);
+
+        this->thetaPrior = ParametricNormal(posterior.getMean(), Sigma);
+    }
+
+    virtual double computePriorProbability() override
+    {
+        arma::mat mu = this->thetaPrior.getMean();
+
+        double priorP = prior.logPdf(mu);
+
+        return priorP;
+    }
+
 private:
     const ParametricNormal& prior;
-    ParametricNormal posterior;
     const arma::mat& Sigma;
 
 };
@@ -183,8 +212,7 @@ public:
                                  const ParametricNormal& meanPrior,
                                  const Wishart& precisionPrior) :
         BayesianCoordinateAscend<ActionC, StateC>(policy, meanPrior.getMean(), precisionPrior.getMode().i()),
-        meanPrior(meanPrior), precisionPrior(precisionPrior),
-        meanPosterior(meanPrior), precisionPosterior(precisionPrior)
+        meanPrior(meanPrior), precisionPrior(precisionPrior)
 
     {
 
@@ -195,57 +223,42 @@ public:
 
     }
 
-    virtual double computePosterior() override
-    {
-        //Use previous covariance estimate
-        arma::mat precision = precisionPosterior.getMode();
-        arma::mat Sigma = precision.i();
-
-        //Compute mean distribution posterior
-        meanPosterior = GaussianConjugatePrior::compute(Sigma, meanPrior, this->params);
-        arma::vec mu = meanPosterior.getMean();
-
-        //compute covariance distribution posterior
-        precisionPosterior = GaussianConjugatePrior::compute(mu, precisionPrior, this->params);
-
-        //Update new covariance estimate
-        arma::mat Lambda = precisionPosterior.getMode();
-
-        //compute posterior probability
-        double logMuP = meanPosterior.logPdf(mu);
-        double logCovP = precisionPosterior.logPdf(arma::vectorise(Lambda));
-
-        std::cout << "posteriorMu " << logMuP << std::endl;
-        std::cout << "posteriorCov " << logCovP << std::endl;
-
-        return logMuP + logCovP;
-    }
-
-    virtual void computeThetaPrior() override
-    {
-        this->thetaPrior = ParametricNormal(meanPosterior.getMean(), precisionPosterior.getMode().i());
-    }
-
-    ParametricNormal getMeanPosterior()
-    {
-        return meanPosterior;
-    }
-
-    Wishart getPrecisionPosterior()
-    {
-        return precisionPosterior;
-    }
-
+protected:
     virtual arma::vec getInitialValue() override
     {
         return meanPrior.getMean();
     }
 
+    virtual void computeThetaPrior() override
+    {
+        //Use previous covariance estimate
+        arma::mat Sigma = this->thetaPrior.getCovariance();
+
+        //Compute mean distribution posterior
+        auto meanPosterior = GaussianConjugatePrior::compute(Sigma, meanPrior, this->params);
+        arma::vec mu = meanPosterior.getMean();
+
+        //compute covariance distribution posterior
+        auto precisionPosterior = GaussianConjugatePrior::compute(mu, precisionPrior, this->params);
+
+        this->thetaPrior = ParametricNormal(meanPosterior.getMean(), precisionPosterior.getMode().i());
+    }
+
+    virtual double computePriorProbability() override
+    {
+        arma::mat mu = this->thetaPrior.getMean();
+        arma::mat Sigma = this->thetaPrior.getCovariance();
+
+        double meanPriorP = meanPrior.logPdf(mu);
+        double precisionPriorP = precisionPrior.logPdf(arma::vectorise(Sigma.i()));
+
+        return meanPriorP+precisionPriorP;
+    }
+
+
 protected:
     const ParametricNormal& meanPrior;
     const Wishart& precisionPrior;
-    ParametricNormal meanPosterior;
-    Wishart precisionPosterior;
 
 };
 
@@ -262,10 +275,9 @@ public:
     }
 
 protected:
-    virtual double updateTheta(const Dataset<DenseAction, DenseState>& data) override
+    virtual void updateTheta(const Dataset<DenseAction, DenseState>& data) override
     {
         unsigned int dp = phi.rows();
-        double posteriorP = 0;
 
         //Compute policy MAP for each element
         for (unsigned int ep = 0; ep < data.size(); ep++)
@@ -289,35 +301,8 @@ protected:
 
             arma::vec p = solve(A, b);
             params.col(ep) = p;
-
-            //compute posterior probability
-            double prob =  computePolicyPosterior(p, data[ep]);
-            //std::cout << "p " << prob << std::endl;
-            posteriorP += prob;
-
         }
-
-        std::cout << "posteriorTheta " << posteriorP << std::endl;
-
-        return posteriorP;
     }
-
-private:
-    double computePolicyPosterior(const arma::vec& p,
-                                  const Episode<DenseAction, DenseState>& episode)
-    {
-        policy.setParameters(p);
-
-        double logLikelihood = 0;
-        for (auto& tr : episode)
-        {
-            double prob = policy(tr.x, tr.u);
-            logLikelihood += std::log(prob);
-        }
-
-        return logLikelihood + this->thetaPrior.logPdf(p);
-    }
-
 
 private:
     arma::mat SigmaInv;

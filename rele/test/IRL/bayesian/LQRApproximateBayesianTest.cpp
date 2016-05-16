@@ -122,12 +122,12 @@ int main(int argc, char *argv[])
     Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
 
     DenseTilesCoder phiImitator(tiles, dim);*/
-    BasisFunctions basisImitator = PolynomialFunction::generate(degree, dim);
-    //BasisFunctions basisImitator = IdentityBasis::generate(dim);
+    //BasisFunctions basisImitator = PolynomialFunction::generate(degree, dim);
+    BasisFunctions basisImitator = IdentityBasis::generate(dim);
     //basisImitator.erase(basisImitator.begin());
-    SparseFeatures phiImitator(basisImitator, dim);
-    //SparseFeatures phiImitator;
-    //phiImitator.setDiagonal(basisImitator);
+    //SparseFeatures phiImitator(basisImitator, dim);
+    SparseFeatures phiImitator;
+    phiImitator.setDiagonal(basisImitator);
 
     unsigned int dp = phiImitator.rows();
 
@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
 
     // Covariance prior
     unsigned int nu = dp+2;
-    arma::mat V = arma::eye(dp, dp)*1e3;
+    arma::mat V = arma::eye(dp, dp);
     Wishart covPrior(nu, V);
 
     arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
@@ -154,8 +154,8 @@ int main(int argc, char *argv[])
     //BayesianCoordinateAscendFull<DenseAction, DenseState> alg(policyFamily, prior, covPrior);
     //BayesianCoordinateAscendMean<DenseAction, DenseState> alg(policyFamily, prior, Sigma);
     //MLEDistribution<DenseAction, DenseState> alg(policyFamily);
-    LinearMLEDistribution alg(phiImitator, SigmaPolicy);
-    //LinearBayesianCoordinateAscendFull alg(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
+    //LinearMLEDistribution alg(phiImitator, SigmaPolicy);
+    LinearBayesianCoordinateAscendFull alg(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
     //LinearBayesianCoordinateAscendMean alg(policyFamily, phiImitator, SigmaPolicy, prior, Sigma);
 
     std::cout << "Recovering Distribution" << std::endl;
