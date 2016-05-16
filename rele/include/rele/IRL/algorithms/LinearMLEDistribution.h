@@ -40,7 +40,7 @@ public:
 
     }
 
-    void compute(const Dataset<DenseAction, DenseState>& data)
+    inline void compute(const Dataset<DenseAction, DenseState>& data)
     {
         unsigned int dp = phi.rows();
         unsigned int n = data.size();
@@ -69,12 +69,12 @@ public:
         Sigma = arma::cov(params.t());
     }
 
-    arma::mat getParameters()
+    inline arma::mat getParameters()
     {
         return params;
     }
 
-    ParametricNormal getDistribution()
+    inline ParametricNormal getDistribution()
     {
         return ParametricNormal(mu, Sigma);
     }
