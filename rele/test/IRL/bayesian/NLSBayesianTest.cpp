@@ -99,8 +99,8 @@ int main(int argc, char *argv[])
     ParametricNormal meanPrior(mu_p, Sigma_p);
 
     arma::mat Psi = arma::eye(2, 2);
-    unsigned int nu = 2;
-    InverseWishart covPrior(nu, Psi);
+    unsigned int nu = p.n_elem+2;
+    Wishart covPrior(nu, Psi);
 
     std::cout << "initial covariance mode" << std::endl;
     std::cout << covPrior.getMode() << std::endl;
@@ -111,11 +111,11 @@ int main(int argc, char *argv[])
     std::cout << "Recovering Distribution (mean only)" << std::endl;
     alg.compute(data);
 
-    ParametricNormal posterior = alg.getPosterior();
+    ParametricNormal posterior = alg.getDistribution();
 
     std::cout << "Mean parameters" << std::endl
               << posterior.getMean().t() << std::endl
-              << "Covariance estimate" << std::endl
+              << "Cov parameters" << std::endl
               << posterior.getCovariance() << std::endl;
 
 
@@ -125,15 +125,11 @@ int main(int argc, char *argv[])
     std::cout << "Recovering Distribution (mean and covariance)" << std::endl;
     alg2.compute(data);
 
-    ParametricNormal meanPosterior = alg2.getMeanPosterior();
-    InverseWishart covPosterior = alg2.getCovPosterior();
+    ParametricNormal posteriorDist = alg2.getDistribution();
 
-    std::cout << "Mean" << std::endl
-              << meanPosterior.getMean().t() << std::endl
-              << "Covariance estimate" << std::endl
-              << meanPosterior.getCovariance() << std::endl;
-
-    std::cout << "Cov parameters" << std::endl
-              << covPosterior.getMode() << std::endl;
+    std::cout << "Mean parameters" << std::endl
+              << posteriorDist.getMean().t() << std::endl
+			  << "Cov parameters" << std::endl
+              << posteriorDist.getCovariance() << std::endl;
 
 }
