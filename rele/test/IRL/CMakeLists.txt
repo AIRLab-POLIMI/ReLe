@@ -17,6 +17,9 @@ target_link_libraries(nips_lqr rele)
 add_executable(nips_nls nips/NLS.cpp)
 target_link_libraries(nips_nls rele)
 
+add_executable(nips_nls_fe nips/NLS_FE.cpp)
+target_link_libraries(nips_nls_fe rele)
+
 #MWAL
 add_executable(simple_chain_MWAL MWAL/SimpleChainMWAL.cpp)
 target_link_libraries(simple_chain_MWAL rele)
