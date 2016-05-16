@@ -57,7 +57,7 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 100;
+    int nbEpisodes = 5000;
 
     FileManager fm("nips", "lqr_mle");
     fm.createDir();

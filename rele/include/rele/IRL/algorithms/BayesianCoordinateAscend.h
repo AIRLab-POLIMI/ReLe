@@ -47,7 +47,7 @@ public:
 
     }
 
-    void compute(const Dataset<ActionC, StateC>& data, double eps = 0.1)
+    void compute(const Dataset<ActionC, StateC>& data, double eps = 5e-2)
     {
         unsigned int dp = policy.getParametersSize();
         unsigned int n = data.size();
@@ -73,9 +73,9 @@ public:
             posteriorP = computeLogPosterior(data);
 
             std::cout << "Posterior: " << posteriorP << std::endl;
-            std::cout << "delta: " << posteriorP - oldPosteriorP << std::endl << std::endl;
+            std::cout << "Mean delta: " << (posteriorP - oldPosteriorP)/data.size() << std::endl << std::endl;
         }
-        while(posteriorP - oldPosteriorP > eps);
+        while((posteriorP - oldPosteriorP)/data.size() > eps);
     }
 
     arma::mat getParameters()
