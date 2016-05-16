@@ -59,7 +59,29 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 1000;
+    arma::mat I = arma::eye(2, 2);
+    arma::mat M = {{2, 0.5}, {0.5, 3}};
+    Wishart dist(4, I);
+
+    std::cout << std::setprecision(OS_PRECISION);
+    std::cout << "mode: " << std::endl;
+    std::cout << dist.getMode() << std::endl;
+    std::cout << "logpdf mode: " << std::endl;
+    std::cout << dist.logPdf(vectorise(dist.getMode())) << std::endl;
+    std::cout << "logpdf M: " << std::endl;
+    std::cout << dist.logPdf(vectorise(M)) << std::endl;
+
+    Wishart dist2(4, M);
+
+    std::cout << "mode: " << std::endl;
+    std::cout << dist2.getMode() << std::endl;
+    std::cout << "logpdf mode: " << std::endl;
+    std::cout << dist2.logPdf(vectorise(dist2.getMode())) << std::endl;
+    std::cout << "logpdf I: " << std::endl;
+    std::cout << dist2.logPdf(vectorise(I)) << std::endl;
+
+
+    /*int nbEpisodes = 1000;
     unsigned int degree = 4;
 
     FileManager fm("nips", "lqr_mle");
@@ -77,7 +99,7 @@ int main(int argc, char *argv[])
 
     // Build policy
     std::vector<Range> ranges;
-	std::vector<unsigned int> tilesN;
+    std::vector<unsigned int> tilesN;
     unsigned int numTiles = 5;
 
     for(unsigned int i = 0; i < dim; i++)

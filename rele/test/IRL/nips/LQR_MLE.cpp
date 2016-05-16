@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-    	eReward = {0.2, 0.7, 0.1};
+        eReward = {0.2, 0.7, 0.1};
     }
 
     int rewardDim = dim;
