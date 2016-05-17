@@ -57,24 +57,22 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    if(argc != 5)
+    if(argc != 4)
     {
-        cout << "Wrong argument number: dimension, degree, n_episode, n_experiment must be provided" << endl;
+        cout << "Wrong argument number: dimension, n_episode, n_experiment must be provided" << endl;
         return -1;
     }
 
     string dimension(argv[1]);
-    string degree(argv[2]);
-    string n_episodes(argv[3]);
-    string n_experiment(argv[4]);
+    string n_episodes(argv[2]);
+    string n_experiment(argv[3]);
 
-    FileManager fm("nips/lqr_mle/" + dimension + "/" + degree + "/" + n_episodes + "/" + n_experiment);
+    FileManager fm("nips/lqr_mle/" + dimension + "/" + n_episodes + "/" + n_experiment);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     unsigned int dim = stoi(dimension);
-    unsigned int deg = stoi(degree);
     unsigned int nbEpisodes = stoi(n_episodes);
 
     //Set reward policy
@@ -120,17 +118,20 @@ int main(int argc, char *argv[])
     Dataset<DenseAction,DenseState>& data = collection.data;
 
     // recover approximate
-    BasisFunctions basisImitator = PolynomialFunction::generate(deg, dim);
-    SparseFeatures phiImitator(basisImitator, dim);
+    //BasisFunctions basisImitator = PolynomialFunction::generate(deg, dim);
+    //SparseFeatures phiImitator(basisImitator, dim);
+    BasisFunctions basisImitator = IdentityBasis::generate(dim);
+    SparseFeatures phiImitator;
+    phiImitator.setDiagonal(basisImitator);
 
     unsigned int dp = phiImitator.rows();
 
     std::cout << "Parameters Number" << std::endl;
     std::cout << dp << std::endl;
 
-    arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
-    MVNPolicy policyFamily(phiImitator, SigmaPolicy);
-    LinearMLEDistribution algMLE(phiImitator, SigmaPolicy);
+    //arma::mat SigmaPolicy = arma::eye(dim, dim);
+    MVNPolicy policyFamily(phiImitator, SigmaExpert);
+    LinearMLEDistribution algMLE(phiImitator, SigmaExpert);
 
     // mean prior
     arma::vec mu_p = arma::zeros(dp);
@@ -142,12 +143,13 @@ int main(int argc, char *argv[])
     unsigned int nu = dp+2;
     arma::mat V = arma::eye(dp, dp)*1e3;
     Wishart covPrior(nu, V);
-    LinearBayesianCoordinateAscendFull algMAP(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
+    LinearBayesianCoordinateAscendFull algMAP(policyFamily, phiImitator, SigmaExpert, prior, covPrior);
 
-    std::cout << "Recovering Distribution" << std::endl;
+    std::cout << "Recovering Distribution (MLE)" << std::endl;
     algMLE.compute(data);
 
-
+    std::cout << "Recovering Distribution (MAP)" << std::endl;
+    algMAP.compute(data);
 
     ParametricNormal imitatorDistMLE = algMLE.getDistribution();
     ParametricNormal imitatorDistMAP = algMAP.getDistribution();
@@ -169,7 +171,7 @@ int main(int argc, char *argv[])
     irlAlgMLE->run();
     arma::vec omegaMLE = rewardRegressor.getParameters();
 
-    auto* irlAlgMAP =  new EGIRL<DenseAction, DenseState>(data, thetaMLE, imitatorDistMLE,
+    auto* irlAlgMAP =  new EGIRL<DenseAction, DenseState>(data, thetaMAP, imitatorDistMAP,
                 rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
     irlAlgMAP->run();
     arma::vec omegaMAP = rewardRegressor.getParameters();
