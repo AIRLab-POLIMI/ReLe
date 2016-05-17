@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     string n_episodes(argv[2]);
     string n_experiment(argv[3]);
 
-    FileManager fm("nips/lqr_mle/" + dimension + "/" + n_episodes + "/" + n_experiment);
+    FileManager fm("nips/lqr_map/" + dimension + "/" + n_episodes + "/" + n_experiment);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
