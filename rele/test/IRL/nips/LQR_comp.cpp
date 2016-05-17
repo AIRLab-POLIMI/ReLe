@@ -26,7 +26,7 @@
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 
-#include "rele/policy/parametric/differentiable/LinearPolicy.h"
+#include "rele/policy/parametric/differentiable/NormalPolicy.h"
 #include "rele/statistics/DifferentiableNormals.h"
 
 #include "rele/environments/LQR.h"
@@ -35,7 +35,7 @@
 
 #include "rele/utils/FileManager.h"
 
-#include "rele/IRL/algorithms/EGIRL.h"
+#include "rele/IRL/algorithms/GIRL.h"
 
 #include "../RewardBasisLQR.h"
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     string n_episodes(argv[2]);
     string n_experiment(argv[3]);
 
-    FileManager fm("nips/lqr_exact/" + dimension + "/" + n_episodes + "/" + n_experiment);
+    FileManager fm("nips/lqr_comp/" + dimension + "/" + n_episodes + "/" + n_experiment);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -83,26 +83,18 @@ int main(int argc, char *argv[])
     SparseFeatures phi;
     phi.setDiagonal(basis);
 
-    DetLinearPolicy<DenseState> expertPolicy(phi);
-
     // solve the problem in exact way
     LQRsolver solver(mdp,phi);
     solver.setRewardWeights(eReward);
     mat K = solver.computeOptSolution();
     arma::vec p = K.diag();
-    arma::mat Sigma = arma::eye(dim, dim);
-    Sigma *= 0.001;
-    ParametricNormal expertDist(p, Sigma);
+    arma::mat Sigma = arma::eye(dim, dim)*5e-2;
 
-    std::cout << "Rewards: ";
-    for (int i = 0; i < eReward.n_elem; ++i)
-    {
-        std::cout << eReward(i) << " ";
-    }
-    std::cout << "| Params: " << expertDist.getParameters().t() << std::endl;
+    MVNPolicy expertPolicy(phi, Sigma);
+    expertPolicy.setParameters(p);
 
 
-    PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
+    PolicyEvalAgent<DenseAction, DenseState> expert(expertPolicy);
 
     // Generate LQR expert dataset
     Core<DenseAction, DenseState> expertCore(mdp, expert);
@@ -123,9 +115,8 @@ int main(int argc, char *argv[])
 
     LinearApproximator rewardRegressor(phiReward);
 
-    arma::mat theta = expert.getParams();
-    auto* irlAlg = new EGIRL<DenseAction, DenseState>(data, theta, expertDist,
-            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+    auto* irlAlg = new GIRL<DenseAction, DenseState>(data, expertPolicy, rewardRegressor,
+    			mdp.getSettings().gamma, IrlGrad::GPOMDP_BASELINE);
 
     //Run GIRL
     irlAlg->run();

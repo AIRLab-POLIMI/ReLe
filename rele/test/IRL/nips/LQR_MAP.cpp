@@ -49,7 +49,7 @@
 
 #include "../RewardBasisLQR.h"
 
-#include "rele/algorithms/policy_search/NES/NES.h"
+#include "rele/feature_selection/PrincipalComponentAnalysis.h"
 
 using namespace std;
 using namespace arma;
@@ -57,153 +57,130 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-    int nbEpisodes = 5000;
+    if(argc != 5)
+    {
+        cout << "Wrong argument number: dimension, degree, n_episode, n_experiment must be provided" << endl;
+        return -1;
+    }
 
-    FileManager fm("nips", "lqr_mle");
+    string dimension(argv[1]);
+    string degree(argv[2]);
+    string n_episodes(argv[3]);
+    string n_experiment(argv[4]);
+
+    FileManager fm("nips/lqr_mle/" + dimension + "/" + degree + "/" + n_episodes + "/" + n_experiment);
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    //Build MDP
-    vec eReward = {0.3, 0.7};
+    unsigned int dim = stoi(dimension);
+    unsigned int deg = stoi(degree);
+    unsigned int nbEpisodes = stoi(n_episodes);
 
-    int rewardDim = eReward.n_elem;
-    int dim = 2;
-    LQR mdp(dim, rewardDim, LQR::S0Type::RANDOM);
+    //Set reward policy
+    arma::vec eReward;
 
-
-    // Build policy
-    std::vector<Range> ranges;
-    std::vector<unsigned int> tilesN;
-    unsigned int numTiles = 5;
-
-    for(unsigned int i = 0; i < dim; i++)
+    if(dim == 2)
     {
-        ranges.push_back(Range(-3, 3));
-        tilesN.push_back(numTiles);
+        eReward = {0.3, 0.7};
+    }
+    else
+    {
+        eReward = {0.2, 0.7, 0.1};
     }
 
-    Tiles* tiles = new CenteredLogTiles(ranges, tilesN);
-    DenseTilesCoder phi(tiles, dim);
+    int rewardDim = dim;
+    LQR mdp(dim, rewardDim, LQR::S0Type::RANDOM);
 
-    DetLinearPolicy<DenseState> expertPolicy(phi);
+    BasisFunctions basis = IdentityBasis::generate(dim);
 
-    // solve the problem
-    unsigned int dp = expertPolicy.getParametersSize();
+    SparseFeatures phi;
+    phi.setDiagonal(basis);
 
-    arma::mat SigmaExpert = arma::eye(dp, dp)*1e-2;
+    arma::mat Sigma = arma::eye(dim, dim)*1e-2;
+    MVNPolicy expertPolicy(phi, Sigma);
 
-    arma::vec muExpert;
-    muExpert.load("/tmp/ReLe/nips/lqr_map/ExpertWeights.dat");
-    ParametricNormal expertDist(muExpert, SigmaExpert);
+    // solve the problem in exact way
+    LQRsolver solver(mdp,phi);
+    solver.setRewardWeights(eReward);
+    mat K = solver.computeOptSolution();
+    arma::vec p = K.diag();
+    arma::mat SigmaExpert = arma::eye(dim, dim)*1e-2;
+    ParametricNormal expertDist(p, SigmaExpert);
 
     PolicyEvalDistribution<DenseAction, DenseState> expert(expertDist, expertPolicy);
 
-    /*arma::vec p0 = arma::zeros(dp);
-    ParametricNormal expertDist(p0, SigmaExpert);
-    AdaptiveGradientStep stepLenght(0.01);
-    WeightedSumRT rewardTransformation(eReward);
-
-    NES<DenseAction, DenseState> expert(expertDist, expertPolicy, 1, 10, stepLenght, rewardTransformation);*/
-
     // Generate LQR expert dataset
     Core<DenseAction, DenseState> expertCore(mdp, expert);
-    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
-    expertCore.getSettings().episodeN = 10000;
-    expertCore.getSettings().testEpisodeN = nbEpisodes;
-
-    /*expertCore.runEpisodes();
-    std::cout << "J: " << std::endl;
-    std::cout << eReward.t()*expertCore.runEvaluation() << std::endl;*/
-
     CollectorStrategy<DenseAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
+    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    expertCore.getSettings().testEpisodeN = nbEpisodes;
     expertCore.runTestEpisodes();
     Dataset<DenseAction,DenseState>& data = collection.data;
 
+    // recover approximate
+    BasisFunctions basisImitator = PolynomialFunction::generate(deg, dim);
+    SparseFeatures phiImitator(basisImitator, dim);
 
-    //-- ################################################################### --//
+    unsigned int dp = phiImitator.rows();
+
+    std::cout << "Parameters Number" << std::endl;
+    std::cout << dp << std::endl;
+
+    arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
+    MVNPolicy policyFamily(phiImitator, SigmaPolicy);
+    LinearMLEDistribution algMLE(phiImitator, SigmaPolicy);
 
     // mean prior
     arma::vec mu_p = arma::zeros(dp);
-    arma::mat Sigma_p = arma::eye(dp, dp)*1e1;
+    arma::mat Sigma_p = arma::eye(dp, dp);
     ParametricNormal prior(mu_p, Sigma_p);
+
 
     // Covariance prior
     unsigned int nu = dp+2;
-    arma::mat V = arma::eye(dp, dp)*1e1;
+    arma::mat V = arma::eye(dp, dp)*1e3;
     Wishart covPrior(nu, V);
+    LinearBayesianCoordinateAscendFull algMAP(policyFamily, phiImitator, SigmaPolicy, prior, covPrior);
 
-    //Policy
-    arma::mat SigmaPolicy = arma::eye(dim, dim)*1e-3;
-    MVNPolicy policyFamily(phi, SigmaPolicy);
-
-    // Recover policy
-    LinearMLEDistribution algMLE(phi, SigmaPolicy);
-    LinearBayesianCoordinateAscendFull algMAP(policyFamily, phi, SigmaPolicy, prior, covPrior);
-
+    std::cout << "Recovering Distribution" << std::endl;
     algMLE.compute(data);
-    algMAP.compute(data);
-
-    auto distMLE = algMLE.getDistribution();
-    auto distMAP = algMAP.getDistribution();
-
-    std::cout << "GT" << std::endl
-              << " mean: "  << std::endl
-              << expertDist.getMean().t()
-              << " cov: " << std::endl
-              << expertDist.getCovariance().diag().t() << std::endl;
-
-    std::cout << "MLE" << std::endl
-              << " mean: "  << std::endl
-              << distMLE.getMean().t()
-              << " cov: " << std::endl
-              << distMLE.getCovariance().diag().t() << std::endl;
-
-    std::cout << "MAP" << std::endl
-              << " mean: "  << std::endl
-              << distMAP.getMean().t()
-              << " cov: " << std::endl
-              << distMAP.getCovariance().diag().t() << std::endl;
-
-    std::cout << "error MLE - mean: "
-              << arma::norm(expertDist.getMean()-distMLE.getMean())
-              << " cov: "
-              << arma::norm(expertDist.getCovariance()-distMLE.getCovariance()) << std::endl;
-
-    std::cout << "error MAP - mean: "
-              << arma::norm(expertDist.getMean()-distMAP.getMean())
-              << " cov: "
-              << arma::norm(expertDist.getCovariance()-distMAP.getCovariance()) << std::endl;
 
 
-    //-- ################################################################### --//
+
+    ParametricNormal imitatorDistMLE = algMLE.getDistribution();
+    ParametricNormal imitatorDistMAP = algMAP.getDistribution();
 
     arma::mat thetaMLE = algMLE.getParameters();
     arma::mat thetaMAP = algMAP.getParameters();
 
+    //Run EGIRL
     BasisFunctions basisReward;
     for(unsigned int i = 0; i < eReward.n_elem; i++)
         basisReward.push_back(new LQR_RewardBasis(i, dim));
     DenseFeatures phiReward(basisReward);
+
+
     LinearApproximator rewardRegressor(phiReward);
-
-    auto* irlAlgMLE =  new EGIRL<DenseAction, DenseState>(data, thetaMLE, distMLE,
+    auto* irlAlgMLE =  new EGIRL<DenseAction, DenseState>(data, thetaMLE, imitatorDistMLE,
             rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
 
-    auto* irlAlgMAP =  new EGIRL<DenseAction, DenseState>(data, thetaMAP, distMAP,
-            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
-
-    //Run GIRL
     irlAlgMLE->run();
     arma::vec omegaMLE = rewardRegressor.getParameters();
 
+    auto* irlAlgMAP =  new EGIRL<DenseAction, DenseState>(data, thetaMLE, imitatorDistMLE,
+                rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
     irlAlgMAP->run();
     arma::vec omegaMAP = rewardRegressor.getParameters();
+
 
     //Print results
     cout << "Weights (MLE): " << omegaMLE.t();
     cout << "Weights (MAP): " << omegaMAP.t();
 
+    //save weights
+    omegaMLE.save(fm.addPath("WeightsMLE.txt"),  arma::raw_ascii);
+    omegaMAP.save(fm.addPath("WeightsMAP.txt"),  arma::raw_ascii);
 
 }
