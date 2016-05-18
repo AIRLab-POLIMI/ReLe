@@ -40,6 +40,8 @@
 
 #include "rele/IRL/ParametricRewardMDP.h"
 #include "rele/IRL/algorithms/EGIRL.h"
+#include "rele/IRL/algorithms/SDPEGIRL.h"
+#include "rele/IRL/algorithms/CurvatureEGIRL.h"
 #include "rele/IRL/algorithms/LinearMLEDistribution.h"
 
 #include "rele/utils/FileManager.h"
@@ -141,13 +143,6 @@ int main(int argc, char *argv[])
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    // === define expert's policy === //
-    mountain_car_manual_policy expertPolicy;
-
-    arma::vec muExpert = {0};
-    arma::mat SigmaExpert = { 1e-3 };
-    ParametricNormal expertDist(muExpert, SigmaExpert);
-
 
     // === get expert's trajectories === //
     ifstream is;
@@ -156,37 +151,44 @@ int main(int argc, char *argv[])
     dataExpert.readFromStream(is);
 
 
-    // === Estimate trajectories === //
+    // === Estimate policy === //
     arma::mat theta(1, dataExpert.size());
     for(unsigned int i = 0; i < dataExpert.size(); i++)
     {
-    	double minV = -std::numeric_limits<double>::infinity();
-    	double maxV = -minV;
-    	for(auto& tr : dataExpert[i])
-    	{
+        double minV = -std::numeric_limits<double>::infinity();
+        double maxV = -minV;
+        for(auto& tr : dataExpert[i])
+        {
 
-    		if(tr.u == 0)
-    		{
-    			minV = std::max(tr.x(1), minV);
-    		}
-    		else
-    		{
-    			maxV = std::min(tr.x(1), maxV);
-    		}
-    	}
+            if(tr.u == 0)
+            {
+                minV = std::max(tr.x(1), minV);
+            }
+            else
+            {
+                maxV = std::min(tr.x(1), maxV);
+            }
+        }
 
-		if(std::isinf(minV) || std::isinf(maxV))
-		{
-			theta.col(i) = 0;
-		}
-		else
-		{
-			theta.col(i) = 0.5*(maxV + minV);
-		}
+        if(std::isinf(minV) || std::isinf(maxV))
+        {
+            theta.col(i) = 0;
+        }
+        else
+        {
+            theta.col(i) = 0.5*(maxV + minV);
+        }
     }
 
     std::cout << "theta" << std::endl;
     std::cout << theta << std::endl;
+
+    // === define expert's policy === //
+    mountain_car_manual_policy expertPolicy;
+
+    arma::vec muExpert = arma::mean(theta, 1);
+    arma::mat SigmaExpert = arma::cov(theta.t());
+    ParametricNormal expertDist(muExpert, SigmaExpert);
 
 
     // === recover reward by IRL === //
@@ -216,13 +218,35 @@ int main(int argc, char *argv[])
 
     cout << "Rewards size: " << rewardF.getParametersSize() << endl;
 
-    EGIRL<FiniteAction,DenseState> irlAlg(dataExpert, theta, expertDist, rewardF,
-                                          0.9, IrlEpGrad::PGPE_BASELINE);
+    EGIRL<FiniteAction,DenseState> irlAlg1(dataExpert, theta, expertDist, rewardF,
+                                           0.9, IrlEpGrad::PGPE_BASELINE);
 
-    irlAlg.run();
+    irlAlg1.run();
 
-    vec rewWeights = rewardF.getParameters();
-    cout << "Weights (EGIRL): " << rewWeights.t();
+    vec rewWeights1 = rewardF.getParameters();
+    cout << "Weights (EGIRL): " << rewWeights1.t();
+
+
+    SDPEGIRL<FiniteAction,DenseState> irlAlg2(dataExpert, theta, expertDist, rewardF,
+            0.9, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+
+    irlAlg2.run();
+
+    vec rewWeights2 = rewardF.getParameters();
+    cout << "Weights (SDP EGIRL): " << rewWeights2.t();
+
+    rewWeights2.save(fm.addPath("WeightsHessian.txt"), arma::raw_ascii);
+
+    CurvatureEGIRL<FiniteAction,DenseState> irlAlg3(dataExpert, theta, expertDist, rewardF,
+            0.9, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+
+    irlAlg3.run();
+
+    vec rewWeights3 = rewardF.getParameters();
+    cout << "Weights (Curvature EGIRL): " << rewWeights3.t();
+
+    rewWeights2.save(fm.addPath("WeightsCurvature.txt"), arma::raw_ascii);
+
 
     return 0;
 }
