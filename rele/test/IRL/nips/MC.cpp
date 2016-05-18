@@ -40,6 +40,7 @@
 
 #include "rele/IRL/ParametricRewardMDP.h"
 #include "rele/IRL/algorithms/EGIRL.h"
+#include "rele/IRL/algorithms/LinearMLEDistribution.h"
 
 #include "rele/utils/FileManager.h"
 
@@ -124,19 +125,21 @@ private:
 
 int main(int argc, char *argv[])
 {
-    RandomGenerator::seed(4265436624);
+    if(argc != 3)
+    {
+        cout << "Wrong argument number: n_episode, n_experiment must be provided" << endl;
+        return -1;
+    }
 
-    FileManager fm("mc", "GIRL");
+    string n_episodes(argv[1]);
+    string n_experiment(argv[2]);
+
+    string path = "nips/mc/" + n_episodes + "/" +n_experiment + "/";
+
+    FileManager fm(path + "EGIRL");
     fm.createDir();
     fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
-
-    int nbEpisodes = 100;  // number of episodes simulated to generate mle data
-    int budget = 300;      // number of samples used to estimate policy and learn weights
-    budget = 4000;
-
-    // define domain
-    MountainCar mdp(MountainCar::ConfigurationsLabel::Klein);
 
     // === define expert's policy === //
     mountain_car_manual_policy expertPolicy;
@@ -147,35 +150,43 @@ int main(int argc, char *argv[])
 
 
     // === get expert's trajectories === //
-    PolicyEvalDistribution<FiniteAction, DenseState> expert(expertDist, expertPolicy);
-    Core<FiniteAction, DenseState> expertCore(mdp, expert);
-    CollectorStrategy<FiniteAction, DenseState> collection;
-    expertCore.getSettings().loggerStrategy = &collection;
-    expertCore.getSettings().episodeLength = mdp.getSettings().horizon;
-    expertCore.getSettings().testEpisodeN = nbEpisodes;
-    expertCore.runTestEpisodes();
+    ifstream is;
+    is.open("/tmp/ReLe/" + path + "trajectories.dat");
+    Dataset<FiniteAction, DenseState> dataExpert;
+    dataExpert.readFromStream(is);
 
-    auto& data = collection.data;
-    auto theta = expert.getParams();
 
-    // === get only trailing info === //
-    Dataset<FiniteAction,DenseState> dataExpert;
-    for (int ep = 0; ep < data.size() && budget > 0; ++ep)
+    // === Estimate trajectories === //
+    arma::mat theta(1, dataExpert.size());
+    for(unsigned int i = 0; i < dataExpert.size(); i++)
     {
-        Episode<FiniteAction,DenseState> episodeExpert;
-        int nbSamples = data[ep].size();
-        for (int t = 0; t < nbSamples && budget > 0; ++t)
-        {
-            episodeExpert.push_back(data[ep][t]);
-            --budget;
-        }
-        dataExpert.push_back(episodeExpert);
+    	double minV = -std::numeric_limits<double>::infinity();
+    	double maxV = -minV;
+    	for(auto& tr : dataExpert[i])
+    	{
+
+    		if(tr.u == 0)
+    		{
+    			minV = std::max(tr.x(1), minV);
+    		}
+    		else
+    		{
+    			maxV = std::min(tr.x(1), maxV);
+    		}
+    	}
+
+		if(std::isinf(minV) || std::isinf(maxV))
+		{
+			theta.col(i) = 0;
+		}
+		else
+		{
+			theta.col(i) = 0.5*(maxV + minV);
+		}
     }
 
-    arma::mat thetaExpert = theta.cols(0, dataExpert.size()-1);
-
-    std::cout << "n episodes: " << dataExpert.size() << std::endl;
-    std::cout << "thetaExpert: " << thetaExpert.n_rows << "x" << thetaExpert.n_cols  << std::endl;
+    std::cout << "theta" << std::endl;
+    std::cout << theta << std::endl;
 
 
     // === recover reward by IRL === //
@@ -205,95 +216,13 @@ int main(int argc, char *argv[])
 
     cout << "Rewards size: " << rewardF.getParametersSize() << endl;
 
-    EGIRL<FiniteAction,DenseState> irlAlg(dataExpert, thetaExpert, expertDist, rewardF,
-                                          mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+    EGIRL<FiniteAction,DenseState> irlAlg(dataExpert, theta, expertDist, rewardF,
+                                          0.9, IrlEpGrad::PGPE_BASELINE);
 
     irlAlg.run();
 
     vec rewWeights = rewardF.getParameters();
     cout << "Weights (EGIRL): " << rewWeights.t();
-
-    // === LSPI === //
-    //define basis for Q-function
-    /*vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().actionsNumber; ++i)
-        actions.push_back(FiniteAction(i));
-    BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
-    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, actions.size());
-    //create basis vector
-    DenseFeatures qphi(qbasisrep);
-    StochasticDiscretePolicy<FiniteAction,DenseState> randomPolicy(actions);
-
-    //create data per lspi
-    PolicyEvalAgent<FiniteAction, DenseState> lspiEval(randomPolicy);
-    Core<FiniteAction, DenseState> lspiCore(mdp, lspiEval);
-    CollectorStrategy<FiniteAction, DenseState> collectionlspi;
-    lspiCore.getSettings().loggerStrategy = &collectionlspi;
-    lspiCore.getSettings().episodeLength = 100;
-    lspiCore.getSettings().testEpisodeN = 1000;
-    lspiCore.runTestEpisodes();
-
-
-    Dataset<FiniteAction,DenseState>& dataLSPI = collectionlspi.data;
-
-    e_GreedyApproximate lspiPolicy;
-    lspiPolicy.setEpsilon(0.01);
-    lspiPolicy.setNactions(actions.size());
-
-    LSPI<FiniteAction> batchAgent(dataLSPI, lspiPolicy, qphi, 0.01);
-
-    auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
-
-    core.getSettings().maxBatchIterations = 100;
-
-    double gamma = 0.9;
-    EnvironmentSettings envSettings;
-    envSettings.gamma = gamma;
-
-    core.run(envSettings);
-
-    lspiPolicy.setEpsilon(0.0);
-
-    //create data per lspi
-    PolicyEvalAgent<FiniteAction, DenseState> finalEval(lspiPolicy);
-    Core<FiniteAction, DenseState> finalCore(mdp, finalEval);
-    CollectorStrategy<FiniteAction, DenseState> collectionFinal;
-    finalCore.getSettings().loggerStrategy = &collectionFinal;
-    finalCore.getSettings().episodeLength = 150;
-    finalCore.getSettings().testEpisodeN = 1000;
-    finalCore.runTestEpisodes();
-
-
-    // === save data === //
-    Dataset<FiniteAction,DenseState>& dataFinal = collectionFinal.data;
-
-
-    // output expert
-    double meanLenghtExpert = 0;
-    for(auto& ep : dataExpert)
-    {
-        meanLenghtExpert += ep.size();
-    }
-
-    meanLenghtExpert /= dataExpert.size();
-
-
-    std::cout << "Expert max length: " << dataExpert.getEpisodeMaxLength() << std::endl;
-    std::cout << "Expert mean length: " << meanLenghtExpert << std::endl;
-
-
-    // output data results
-    double meanLenght = 0;
-    for(auto& ep : data)
-    {
-        meanLenght += ep.size();
-    }
-
-    meanLenght /= data.size();
-
-
-    std::cout << "Episode max length: " << dataFinal.getEpisodeMaxLength() << std::endl;
-    std::cout << "Episode mean length: " << meanLenght << std::endl;*/
 
     return 0;
 }
