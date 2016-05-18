@@ -226,6 +226,8 @@ int main(int argc, char *argv[])
     vec rewWeights1 = rewardF.getParameters();
     cout << "Weights (EGIRL): " << rewWeights1.t();
 
+    rewWeights1.save(fm.addPath("Weights.txt"), arma::raw_ascii);
+
 
     SDPEGIRL<FiniteAction,DenseState> irlAlg2(dataExpert, theta, expertDist, rewardF,
             0.9, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
