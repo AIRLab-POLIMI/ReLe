@@ -164,6 +164,8 @@ public:
         /*** Solve the system to find w ***/
         arma::vec w;
         int rank = arma::rank(A);
+
+        std::cout << "rank: " << rank << " dim " << df << std::endl;
         if (rank == df)
         {
             w = arma::solve(A,b);
@@ -406,6 +408,9 @@ public:
         /*** Solve the system to find w ***/
         arma::vec w;
         int rank = arma::rank(A);
+
+        std::cout << "rank: " << rank << std::endl;
+
         if (rank == df)
         {
             w = arma::solve(A,b);

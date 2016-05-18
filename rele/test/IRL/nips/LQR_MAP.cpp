@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     arma::vec omegaMLE = rewardRegressor.getParameters();
 
     auto* irlAlgMAP =  new EGIRL<DenseAction, DenseState>(data, thetaMAP, imitatorDistMAP,
-                rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
     irlAlgMAP->run();
     arma::vec omegaMAP = rewardRegressor.getParameters();
 

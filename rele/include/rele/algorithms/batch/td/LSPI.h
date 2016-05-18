@@ -89,15 +89,6 @@ public:
         firstStep = false;
 
         checkCond(QWeights);
-
-        /*** Display some info ***/
-        /*std::cout << "*********************************************************" << std::endl;
-        if (distance > epsilon)
-            std::cout << "LSPI finished in " << iteration <<
-                      " iterations WITHOUT CONVERGENCE to a fixed point" << std::endl;
-        else
-            std::cout << "LSPI converged in " << iteration << " iterations" << std::endl;
-        std::cout << "********************************************************* " << std::endl;*/
     }
 
     /*!
@@ -113,7 +104,7 @@ public:
         std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
                   "   L2 : " << L2norm << std::endl;
 
-        if(arma::norm(QWeights - oldWeights, 2 < epsilon))
+        if(arma::norm(QWeights - oldWeights, 2) < epsilon)
             this->converged = true;
 
         oldWeights = QWeights;

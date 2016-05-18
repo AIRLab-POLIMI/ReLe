@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
     LinearApproximator rewardRegressor(phiReward);
 
     auto* irlAlg = new GIRL<DenseAction, DenseState>(data, expertPolicy, rewardRegressor,
-    			mdp.getSettings().gamma, IrlGrad::GPOMDP_BASELINE);
+            mdp.getSettings().gamma, IrlGrad::GPOMDP_BASELINE);
 
     //Run GIRL
     irlAlg->run();

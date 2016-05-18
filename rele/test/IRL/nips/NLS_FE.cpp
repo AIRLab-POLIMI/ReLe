@@ -128,10 +128,10 @@ int main(int argc, char *argv[])
 
     for(unsigned int i = 0; i < 2; i++)
     {
-    	std::cout << "Learning reward function " << i << std::endl;
+        std::cout << "Learning reward function " << i << std::endl;
 
-    	//Set parameters of reward function
-    	rewardRegressor.setParameters(weights.col(i));
+        //Set parameters of reward function
+        rewardRegressor.setParameters(weights.col(i));
 
         //Try to recover the initial policy
         int episodesPerPolicy = 1;
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
         arma::vec rewardRealMdp = data2.getMeanReward(gamma);
 
         featureExpectationImitator.save(fm.addPath("FE_" + std::to_string(i) + ".txt"), arma::raw_ascii);
-		rewardRealMdp.save(fm.addPath("R_" + std::to_string(i) + ".txt"), arma::raw_ascii);
+        rewardRealMdp.save(fm.addPath("R_" + std::to_string(i) + ".txt"), arma::raw_ascii);
     }
 
     arma::vec featureExpectationExpert = data.computefeatureExpectation(phiReward, gamma);

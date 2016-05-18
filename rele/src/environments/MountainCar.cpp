@@ -37,9 +37,9 @@ MountainCar::MountainCar(ConfigurationsLabel label,
     // Sutton's article
     // DenseMDP(2, 3, 1, false, true),
     // Klein's articles
-    // DenseMDP(2, 3, 1, false, true, 0.9, 100),
+    DenseMDP(2, 3, 1, false, true, 0.9, 100),
     // Ernst's article
-    DenseMDP(2, 2, 1, false, true, 0.95, 400),
+    //DenseMDP(2, 2, 1, false, true, 0.95, 400),
     envType(label),
     initialPosition(initialPosition),
     initialVelocity(initialVelocity),
