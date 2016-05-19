@@ -14,6 +14,9 @@ target_link_libraries(nips_lqr_comp rele)
 add_executable(nips_lqr_map nips/LQR_MAP.cpp)
 target_link_libraries(nips_lqr_map rele)
 
+add_executable(nips_lqr_map2 nips/LQR_MAP2.cpp)
+target_link_libraries(nips_lqr_map2 rele)
+
 add_executable(nips_lqr_mle nips/LQR_MLE.cpp)
 target_link_libraries(nips_lqr_mle rele)
 
