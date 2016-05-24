@@ -67,37 +67,25 @@ public:
     virtual void init(Dataset<ActionC, DenseState>& data, EnvironmentSettings& envSettings) override
     {
         critic = new LSTDQ<ActionC>(data, policy, phi, envSettings.gamma);
+        firstStep = true;
+        this->converged = false;
     }
 
     virtual void step() override
     {
         //Evaluate the current policy (and implicitly improve)
-        //            RandomGenerator::seed(1000);
         arma::vec QWeights = critic->run(firstStep);
-        //            RandomGenerator::seed(1000);
-        //            arma::vec Q_weights2 = critic.run_slow();
-        //            arma::mat X = arma::join_horiz(Q_weights,Q_weights2);
-        //            std::cout << X << std::endl;
-        //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
-
         critic->getQ().setParameters(QWeights);
-        //            char ddd[100];
-        //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
-        //            Q_weights.save(ddd, arma::raw_ascii);
 
+        //check if termination condition has been reached
+        if(!firstStep)
+        	checkCond(QWeights);
 
+        //save old weights
+        oldWeights = QWeights;
+
+        //set first step variable
         firstStep = false;
-
-        checkCond(QWeights);
-
-        /*** Display some info ***/
-        /*std::cout << "*********************************************************" << std::endl;
-        if (distance > epsilon)
-            std::cout << "LSPI finished in " << iteration <<
-                      " iterations WITHOUT CONVERGENCE to a fixed point" << std::endl;
-        else
-            std::cout << "LSPI converged in " << iteration << " iterations" << std::endl;
-        std::cout << "********************************************************* " << std::endl;*/
     }
 
     /*!
@@ -110,13 +98,9 @@ public:
         double LMAXnorm = arma::norm(QWeights - oldWeights, "inf");
         double L2norm   = arma::norm(QWeights - oldWeights, 2);
         double distance = L2norm;
-        std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
-                  "   L2 : " << L2norm << std::endl;
 
-        if(arma::norm(QWeights - oldWeights, 2 < epsilon))
+        if(arma::norm(QWeights - oldWeights, 2) < epsilon)
             this->converged = true;
-
-        oldWeights = QWeights;
     }
 
     virtual Policy<ActionC, DenseState>* getPolicy() override

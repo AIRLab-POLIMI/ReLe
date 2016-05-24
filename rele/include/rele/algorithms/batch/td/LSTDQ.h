@@ -63,10 +63,6 @@ public:
         data(data), Q(phi), policy(policy), gamma(gamma)
     {
         policy.setQ(&Q);
-        //        arma::vec xi = {0,0.2,0};
-        //        Features_<arma::vec>& rr = Q.getBasis();
-        //        std::cout << rr(xi) << std::endl;
-        //        std::cout << std::endl;
     }
 
     /*!
