@@ -26,6 +26,8 @@
 
 #include "rele/approximators/BasisFunctions.h"
 
+//TODO [IMPORTANT][INTERFACE] Rename and refactor thiss class: ActionBasisFunctions, with always indx == input.tail()
+
 namespace ReLe
 {
 
