@@ -48,7 +48,6 @@ DoubleFQIEnsemble::~DoubleFQIEnsemble()
 
 DoubleFQI::DoubleFQI(BatchRegressor& QRegressorA,
                      BatchRegressor& QRegressorB,
-                     unsigned int nActions,
                      double epsilon,
                      bool shuffle) :
     FQI(QRegressorEnsemble, epsilon),

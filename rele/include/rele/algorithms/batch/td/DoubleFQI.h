@@ -77,7 +77,6 @@ public:
      */
     DoubleFQI(BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
-              unsigned int nActions,
               double epsilon,
               bool shuffle = false);
 

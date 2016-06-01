@@ -44,9 +44,6 @@
 #include "rele/utils/ArmadilloExtensions.h"
 #include "rele/policy/nonparametric/RandomPolicy.h"
 
-#include <boost/timer/timer.hpp>
-
-using namespace boost::timer;
 using namespace std;
 using namespace ReLe;
 using namespace arma;
