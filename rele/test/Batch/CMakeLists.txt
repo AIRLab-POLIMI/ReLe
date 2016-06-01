@@ -11,6 +11,3 @@ target_link_libraries(portfolio_off rele)
 
 add_executable(mc_LSPI McLSPITest.cpp)
 target_link_libraries(mc_LSPI rele)
-
-add_executable(GPFQI_policy GP-FQIPolicyTest.cpp)
-target_link_libraries(GPFQI_policy rele)
