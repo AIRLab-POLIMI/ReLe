@@ -51,69 +51,11 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-class mc_basis : public BasisFunction
-{
-public:
-    mc_basis(arma::vec mu, double sigma_position, double sigma_velocity)
-        : mu(mu), sigma_position(sigma_position), sigma_velocity(sigma_velocity)
-    {
-    }
-
-    virtual void readFromStream(std::istream& in) override {}
-    virtual void writeOnStream(std::ostream& out) override {}
-
-    virtual double operator()(const arma::vec& s) override
-    {
-        int posIdx = MountainCar::StateLabel::position;
-        int velIdx = MountainCar::StateLabel::velocity;
-        double A = - (s[posIdx] - mu[posIdx]) * (s[posIdx] - mu[posIdx]) / sigma_position;
-        double B = - (s[velIdx] - mu[velIdx]) * (s[velIdx] - mu[velIdx]) / sigma_velocity;
-        double val = exp(A + B);
-        return val;
-    }
-protected:
-    arma::vec mu;
-    double sigma_position, sigma_velocity;
-};
-
-/*class mc_reward_bf : public IRLParametricReward<FiniteAction, DenseState>
-{
-public:
-    mc_reward_bf(BasisFunction* basis)
-        : phi(*basis)
-    {
-    }
-
-    double operator()(DenseState& s, FiniteAction& a, DenseState& ns)
-    {
-        //        if (a.getActionN() != actionIdx)
-        //            return 0;
-
-        double val = phi(s);
-        return val;
-    }
-
-    arma::mat diff(DenseState& s, FiniteAction& a, DenseState& ns)
-    {
-        return arma::mat();
-    }
-
-    static std::vector<IRLParametricReward<FiniteAction, DenseState>*> generate(BasisFunctions& basis)
-    {
-        std::vector<IRLParametricReward<FiniteAction, DenseState>*> rewards;
-        for (int i = 0, ie = basis.size(); i < ie; ++i)
-        {
-            rewards.push_back(new mc_reward_bf(basis[i]));
-        }
-        return rewards;
-    }
-
-protected:
-    BasisFunction& phi;
-};*/
-
 int main(int argc, char *argv[])
 {
+    // define domain
+    MountainCar mdp(MountainCar::ConfigurationsLabel::Random);
+
     vector<FiniteAction> actions;
     for (int i = 0; i < 3; ++i)
         actions.push_back(FiniteAction(i));
@@ -142,6 +84,7 @@ int main(int argc, char *argv[])
     BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, actions.size());
     //create basis vector
     DenseFeatures qphi(qbasisrep);
+    LinearApproximator regressor(qphi);
 
     // vec x = {-0.03,0.1,0};
     // vec dd = qphi(x);
@@ -149,43 +92,41 @@ int main(int argc, char *argv[])
     // return 1;
 
     /*** load data ***/
-    ifstream is("mc_lspi_data.dat");
-    Dataset<FiniteAction, DenseState> dataLSPI;
+    //ifstream is("mc_lspi_data.dat");
+    //Dataset<FiniteAction, DenseState> dataLSPI;
+    //dataLSPI.readFromStream(is);
+    //is.close();
+
+    e_GreedyApproximate lspiPolicy;
+    e_GreedyApproximate explorativePolicy;
+
+    lspiPolicy.setQ(&regressor);
+    lspiPolicy.setEpsilon(0.0);
+
+    explorativePolicy.setQ(&regressor);
+    explorativePolicy.setEpsilon(0.9);
+
+    lspiPolicy.setNactions(actions.size());
+    LSPI<FiniteAction> batchAgent(lspiPolicy, qphi, 0.01);
+
+    //auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
+    /*auto&& core = buildBatchCore(mdp, batchAgent);
+    core.getSettings().episodeLength = 3000;
+    core.getSettings().nEpisodes = 3000;
+    core.getSettings().maxBatchIterations = 100;
+
+    core.run(explorativePolicy);*/
+
+    ifstream is("/home/dave/batch.dat");
+    Dataset<FiniteAction,DenseState> dataLSPI;
     dataLSPI.readFromStream(is);
     is.close();
 
-    ofstream of("data.log");
-    of << std::setprecision(OS_PRECISION);
-    for (auto ep : dataLSPI)
-    {
-        for (auto tr : ep)
-        {
-            int a = tr.u - 1;
-            of << tr.x(0) << " " << tr.x(1) << " ";
-            of << a << " " << tr.xn(0) << " " << tr.xn(1) << " " << tr.r[0] << endl;
-        }
-    }
-    of.close();
-
-    e_GreedyApproximate lspiPolicy;
-    lspiPolicy.setEpsilon(-0.0);
-    lspiPolicy.setNactions(actions.size());
-    LSPI<FiniteAction> batchAgent(dataLSPI, lspiPolicy, qphi, 0.01);
-
     auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
+    core.getSettings().maxBatchIterations = 500;
 
-    core.getSettings().maxBatchIterations = 100;
+    core.run(mdp.getSettings());
 
-    double gamma = 0.9;
-    EnvironmentSettings envSettings;
-    envSettings.gamma = gamma;
-
-    core.run(envSettings);
-
-//    cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
-
-    // define domain
-    MountainCar mdp(MountainCar::ConfigurationsLabel::Random);
 
     PolicyEvalAgent<FiniteAction, DenseState> finalEval(lspiPolicy);
     Core<FiniteAction, DenseState> finalCore(mdp, finalEval);
@@ -198,10 +139,13 @@ int main(int argc, char *argv[])
 
     /*** save data ***/
     Dataset<FiniteAction,DenseState>& dataFinal = collectionFinal.data;
-    ofstream datafile("finaldata.log", ios_base::out);
+    /*ofstream datafile("finaldata.log", ios_base::out);
     datafile << std::setprecision(OS_PRECISION);
     dataFinal.writeToStream(datafile);
-    datafile.close();
+    datafile.close();*/
+
+    std::cout << dataFinal.getMeanReward(mdp.getSettings().gamma) << std::endl;
+    //cout << dynamic_cast<LinearApproximator*>(lspiPolicy.getQ())->getParameters() << endl;
 
     return 0;
 }

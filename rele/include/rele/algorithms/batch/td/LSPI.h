@@ -52,9 +52,8 @@ public:
      * \param phi the features to be used for approximation
      * \param epsilon coefficient used to check whether to stop the training
      */
-    LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
+    LSPI(e_GreedyApproximate& policy,
          Features_<arma::vec>& phi, double epsilon) :
-        data(data),
         oldWeights(arma::vec(phi.rows(), arma::fill::zeros)),
         policy(policy),
         phi(phi),
@@ -79,7 +78,7 @@ public:
 
         //check if termination condition has been reached
         if(!firstStep)
-        	checkCond(QWeights);
+            checkCond(QWeights);
 
         //save old weights
         oldWeights = QWeights;
@@ -94,13 +93,16 @@ public:
      */
     virtual void checkCond(const arma::vec& QWeights)
     {
+        static int i = 0;
         //Compute the distance between the current and the previous policy
         double LMAXnorm = arma::norm(QWeights - oldWeights, "inf");
         double L2norm   = arma::norm(QWeights - oldWeights, 2);
         double distance = L2norm;
 
-        if(arma::norm(QWeights - oldWeights, 2) < epsilon)
+        if(distance < epsilon)
             this->converged = true;
+
+        std::cout << i++ << " " << distance << std::endl;
     }
 
     virtual Policy<ActionC, DenseState>* getPolicy() override
@@ -115,7 +117,6 @@ public:
     }
 
 protected:
-    Dataset<ActionC, DenseState>& data;
     LSTDQ<ActionC>* critic;
     Features_<arma::vec>& phi;
     e_GreedyApproximate& policy;

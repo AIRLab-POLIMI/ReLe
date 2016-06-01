@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 
     std::cout << "Mean parameters" << std::endl
               << posteriorDist.getMean().t() << std::endl
-			  << "Cov parameters" << std::endl
+              << "Cov parameters" << std::endl
               << posteriorDist.getCovariance() << std::endl;
 
 }
