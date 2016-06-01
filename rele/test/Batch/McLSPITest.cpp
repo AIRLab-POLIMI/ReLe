@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
     explorativePolicy.setEpsilon(0.9);
 
     lspiPolicy.setNactions(actions.size());
-    LSPI<FiniteAction> batchAgent(lspiPolicy, qphi, 0.01);
+    LSPI batchAgent(regressor, 0.01);
 
     //auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
     /*auto&& core = buildBatchCore(mdp, batchAgent);
@@ -122,10 +122,10 @@ int main(int argc, char *argv[])
     dataLSPI.readFromStream(is);
     is.close();
 
-    auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);
+    auto&& core = buildBatchOnlyCore(mdp.getSettings(), dataLSPI, batchAgent);
     core.getSettings().maxBatchIterations = 500;
 
-    core.run(mdp.getSettings());
+    core.run();
 
 
     PolicyEvalAgent<FiniteAction, DenseState> finalEval(lspiPolicy);

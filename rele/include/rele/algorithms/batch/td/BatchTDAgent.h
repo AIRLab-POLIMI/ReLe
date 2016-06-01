@@ -44,7 +44,7 @@ struct batch_q_type<FiniteState>
 template<>
 struct batch_q_type<DenseState>
 {
-    typedef BatchRegressor type;
+    typedef Regressor type;
 };
 
 /*!
@@ -64,9 +64,8 @@ public:
      * \param QRegressor the regressor
      * \param nActions the number of actions
      */
-    BatchTDAgent(QType& Q, unsigned int nActions) :
+    BatchTDAgent(QType& Q) :
         Q(Q),
-        nActions(nActions),
         policy(nullptr)
     {
     }
@@ -78,7 +77,7 @@ public:
     virtual Policy<FiniteAction, StateC>* getPolicy() override
     {
         policy->setQ(&Q);
-        policy->setNactions(nActions);
+        policy->setNactions(this->task.actionsNumber);
 
         return policy;
     }
@@ -109,7 +108,6 @@ public:
 
 protected:
     QType& Q;
-    unsigned int nActions;
     ActionValuePolicy<StateC>* policy;
 };
 

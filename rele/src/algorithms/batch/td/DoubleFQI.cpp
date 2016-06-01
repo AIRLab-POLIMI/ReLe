@@ -51,7 +51,7 @@ DoubleFQI::DoubleFQI(BatchRegressor& QRegressorA,
                      unsigned int nActions,
                      double epsilon,
                      bool shuffle) :
-    FQI(QRegressorEnsemble, nActions, epsilon),
+    FQI(QRegressorEnsemble, epsilon),
     QRegressorEnsemble(QRegressorA, QRegressorB),
     shuffle(shuffle)
 {
@@ -77,8 +77,8 @@ void DoubleFQI::step()
         {
             if(this->absorbingStates.count(indexes[i][j]) == 0 && !this->firstStep)
             {
-                arma::vec Q_xn(this->nActions, arma::fill::zeros);
-                for(unsigned int u = 0; u < this->nActions; u++)
+                arma::vec Q_xn(task.actionsNumber, arma::fill::zeros);
+                for(unsigned int u = 0; u < task.actionsNumber; u++)
                     Q_xn(u) = arma::as_scalar(
                                   QRegressorEnsemble.getRegressor(i)(
                                       nextStates.col(j), FiniteAction(u)));
@@ -88,7 +88,7 @@ void DoubleFQI::step()
                 unsigned int index = RandomGenerator::sampleUniformInt(0,
                                      maxIndex.n_elem - 1);
 
-                outputs(j) = rewards(j) + this->gamma * arma::as_scalar(
+                outputs(j) = rewards(j) + task.gamma * arma::as_scalar(
                                  QRegressorEnsemble.getRegressor(1 - i)(
                                      nextStates.col(j), FiniteAction(maxIndex(index))));
             }

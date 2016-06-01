@@ -24,8 +24,8 @@
 #ifndef LSPI_H_
 #define LSPI_H_
 
-#include "rele/algorithms/batch/td/LSTDQ.h"
-#include "rele/utils/RandomGenerator.h"
+#include "rele/algorithms/batch/td/BatchTDAgent.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 
 namespace ReLe
 {
@@ -41,85 +41,51 @@ namespace ReLe
  *
  * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
  */
-template<class ActionC>
-class LSPI : public BatchAgent<ActionC, DenseState>
+
+class LSPI : public BatchTDAgent<DenseState>
 {
+private:
+
+    class LSTDQ
+    {
+    public:
+        LSTDQ(Dataset<FiniteAction, DenseState>& data,
+              LinearApproximator& Q, double gamma, unsigned int nActions);
+        arma::vec run();
+
+    private:
+        void computeDatasetFeatures();
+        FiniteAction policy(const DenseState& x);
+
+
+    private:
+        Dataset<FiniteAction, DenseState>& data;
+        LinearApproximator& Q;
+        double gamma;
+        unsigned int nActions;
+        arma::mat Phihat;
+        arma::vec Rhat;
+    };
+
 public:
     /*!
      * Constructor.
-     * \param data the dataset
-     * \param policy the policy
      * \param phi the features to be used for approximation
      * \param epsilon coefficient used to check whether to stop the training
      */
-    LSPI(e_GreedyApproximate& policy,
-         Features_<arma::vec>& phi, double epsilon) :
-        oldWeights(arma::vec(phi.rows(), arma::fill::zeros)),
-        policy(policy),
-        phi(phi),
-        critic(nullptr),
-        epsilon(epsilon),
-        firstStep(true)
-    {
-    }
+    LSPI(LinearApproximator& Q, double epsilon);
 
-    virtual void init(Dataset<ActionC, DenseState>& data, EnvironmentSettings& envSettings) override
-    {
-        critic = new LSTDQ<ActionC>(data, policy, phi, envSettings.gamma);
-        firstStep = true;
-        this->converged = false;
-    }
+    virtual void init(Dataset<FiniteAction, DenseState>& data) override;
+    virtual void step() override;
 
-    virtual void step() override
-    {
-        //Evaluate the current policy (and implicitly improve)
-        arma::vec QWeights = critic->run(firstStep);
-        critic->getQ().setParameters(QWeights);
+    virtual ~LSPI();
 
-        //check if termination condition has been reached
-        if(!firstStep)
-            checkCond(QWeights);
-
-        //save old weights
-        oldWeights = QWeights;
-
-        //set first step variable
-        firstStep = false;
-    }
-
-    /*!
-     * Check whether the stop condition is satisfied.
-     * \param QWeights the current weights
-     */
-    virtual void checkCond(const arma::vec& QWeights)
-    {
-        static int i = 0;
-        //Compute the distance between the current and the previous policy
-        double LMAXnorm = arma::norm(QWeights - oldWeights, "inf");
-        double L2norm   = arma::norm(QWeights - oldWeights, 2);
-        double distance = L2norm;
-
-        if(distance < epsilon)
-            this->converged = true;
-
-        std::cout << i++ << " " << distance << std::endl;
-    }
-
-    virtual Policy<ActionC, DenseState>* getPolicy() override
-    {
-        //TODO [INTERFACE] fix interface implementation for batch methods...
-        return nullptr;
-    }
-
-    virtual ~LSPI()
-    {
-        delete critic;
-    }
+private:
+    void checkCond(const arma::vec& QWeights);
 
 protected:
-    LSTDQ<ActionC>* critic;
-    Features_<arma::vec>& phi;
-    e_GreedyApproximate& policy;
+    LSTDQ* critic;
+    LinearApproximator Q;
     arma::vec oldWeights;
     double epsilon;
     bool firstStep;

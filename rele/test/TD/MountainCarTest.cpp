@@ -32,7 +32,6 @@
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/utils/FileManager.h"
 
-#include "rele/approximators/regressors/q_regressors/QRegressorImplementation.h"
 
 #include <string>
 

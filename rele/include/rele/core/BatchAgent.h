@@ -42,7 +42,6 @@ class BatchAgent
 {
 public:
     BatchAgent() :
-        gamma(1),
         converged(false)
     {
     }
@@ -52,7 +51,7 @@ public:
      * Is called by the BatchCore as the first step of the learning process.
      * \param data the dataset to be used for learning
      */
-    virtual void init(Dataset<ActionC, StateC>& data, EnvironmentSettings& envSettings) = 0;
+    virtual void init(Dataset<ActionC, StateC>& data) = 0;
 
     /*!
      * This method implement a step of the learning process trough the dataset. Must be implemented.
@@ -97,13 +96,35 @@ public:
         return converged;
     }
 
+    /*!
+     * This method sets the agent task, i.e. the environment properties. This method also calls Agent::init()
+     * \param task the task properties of the environment
+     */
+    void setTask(const EnvironmentSettings& task)
+    {
+        this->task = task;
+        this->init();
+    }
+
     virtual ~BatchAgent()
     {
     }
 
 protected:
-    //! The task discount factor
-    double gamma;
+    /*!
+     * This method is called after the agent task has been set.
+     * By default does nothing, but can be overloaded with agent initialization, e.g. Q table allocation.
+     */
+    virtual void init()
+    {
+
+    }
+
+
+protected:
+    //! The task from which the data comes
+    EnvironmentSettings task;
+
     //! flag to signal convergence of the algorithm
     bool converged;
 };

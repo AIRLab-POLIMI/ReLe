@@ -42,14 +42,14 @@ public:
      * \param gamma the discount factor
      * \param QRegressor the regressor
      */
-    FQIOutput(bool isFinal, double gamma, BatchRegressor& QRegressor);
+    FQIOutput(bool isFinal, double gamma, Regressor& QRegressor);
 
     virtual void writeData(std::ostream& os) override;
     virtual void writeDecoratedData(std::ostream& os) override;
 
 protected:
     double gamma;
-    BatchRegressor& QRegressor;
+    Regressor& QRegressor;
 };
 
 /*!
@@ -74,9 +74,9 @@ public:
      * \param nActions the number of actions
      * \param epsilon coefficient used to check whether to stop the training
      */
-    FQI(BatchRegressor& QRegressor, unsigned int nActions, double epsilon);
+    FQI(BatchRegressor& QRegressor, double epsilon);
 
-    virtual void init(Dataset<FiniteAction, DenseState>& data, EnvironmentSettings& envSettings) override;
+    virtual void init(Dataset<FiniteAction, DenseState>& data) override;
     virtual void step() override;
 
     /*!
@@ -91,15 +91,16 @@ public:
 
     inline virtual AgentOutputData* getAgentOutputData() override
     {
-        return new FQIOutput(false, this->gamma, this->Q);
+        return new FQIOutput(false, task.gamma, this->Q);
     }
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        return new FQIOutput(true, this->gamma, this->Q);
+        return new FQIOutput(true, task.gamma, this->Q);
     }
 
 protected:
+    BatchRegressor& Q;
     arma::vec QHat;
     arma::mat features;
     arma::mat states;

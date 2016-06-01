@@ -68,11 +68,13 @@ public:
      * \param data the dataset used for batch learning
      * \param batchAgent a batch learning agent
      */
-    BatchOnlyCore(Dataset<ActionC, StateC> data,
+    BatchOnlyCore(EnvironmentSettings task,
+    			  Dataset<ActionC, StateC> data,
                   BatchAgent<ActionC, StateC>& batchAgent) :
         data(data),
         batchAgent(batchAgent)
     {
+    	batchAgent.setTask(task);
     }
 
     /*!
@@ -88,10 +90,10 @@ public:
      * Run the batch iterations over the dataset specified in the settings.
      * \param envSettings settings of the environment
      */
-    void run(EnvironmentSettings envSettings)
+    void run()
     {
         //Start episode
-        batchAgent.init(data, envSettings);
+        batchAgent.init(data);
 
         for(unsigned int i = 0;
                 i < settings.maxBatchIterations
@@ -182,12 +184,12 @@ public:
         if(settings.datasetLogger)
             settings.datasetLogger->log(data);
 
-        auto&& batchCore = buildBatchOnlyCore(data, batchAgent);
+        auto&& batchCore = buildBatchOnlyCore(environment.getSettings(), data, batchAgent);
 
         batchCore.getSettings().logger = settings.agentLogger;
         batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
 
-        batchCore.run(environment.getSettings());
+        batchCore.run();
     }
 
     /*!
@@ -236,10 +238,11 @@ protected:
  */
 template<class ActionC, class StateC>
 BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
+	EnvironmentSettings task,
     Dataset<ActionC, StateC> data,
     BatchAgent<ActionC, StateC>& batchAgent)
 {
-    return BatchOnlyCore<ActionC, StateC>(data, batchAgent);
+    return BatchOnlyCore<ActionC, StateC>(task, data, batchAgent);
 }
 
 /*!
