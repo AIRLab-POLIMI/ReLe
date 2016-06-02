@@ -42,7 +42,7 @@ namespace ReLe
  */
 class DenseSARSA: public LinearTD
 {
-	//TODO [IMPORTANT] change doc and fix implementation for non linear regressors
+    //TODO [IMPORTANT] change doc and fix implementation for non linear regressors
 
 public:
     /*!

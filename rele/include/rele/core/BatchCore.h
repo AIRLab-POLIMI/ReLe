@@ -69,12 +69,12 @@ public:
      * \param batchAgent a batch learning agent
      */
     BatchOnlyCore(EnvironmentSettings task,
-    			  Dataset<ActionC, StateC> data,
+                  Dataset<ActionC, StateC> data,
                   BatchAgent<ActionC, StateC>& batchAgent) :
         data(data),
         batchAgent(batchAgent)
     {
-    	batchAgent.setTask(task);
+        batchAgent.setTask(task);
     }
 
     /*!
@@ -238,7 +238,7 @@ protected:
  */
 template<class ActionC, class StateC>
 BatchOnlyCore<ActionC, StateC> buildBatchOnlyCore(
-	EnvironmentSettings task,
+    EnvironmentSettings task,
     Dataset<ActionC, StateC> data,
     BatchAgent<ActionC, StateC>& batchAgent)
 {

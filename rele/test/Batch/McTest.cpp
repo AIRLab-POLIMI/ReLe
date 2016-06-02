@@ -43,7 +43,7 @@ using namespace arma;
 
 enum alg
 {
-	fqi = 0, dfqi = 1, lspi = 2
+    fqi = 0, dfqi = 1, lspi = 2
 };
 
 int main(int argc, char *argv[])
@@ -58,10 +58,10 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
 
     // Define regressors
-	arma::vec defaultValue = {0};
-	EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-	KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
-	KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
+    arma::vec defaultValue = {0};
+    EmptyTreeNode<arma::vec> defaultNode(defaultValue);
+    KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
+    KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
 
     double epsilon = 1e-8;
     BatchTDAgent<DenseState>* batchAgent;
@@ -69,17 +69,17 @@ int main(int argc, char *argv[])
     switch(algorithm)
     {
     case fqi:
-    	batchAgent = new FQI(QRegressorA, epsilon);
-    	break;
+        batchAgent = new FQI(QRegressorA, epsilon);
+        break;
     case dfqi:
-    	batchAgent = new DoubleFQI(QRegressorA, QRegressorB, epsilon);
-    	break;
+        batchAgent = new DoubleFQI(QRegressorA, QRegressorB, epsilon);
+        break;
     case lspi:
 
-    	break;
+        break;
 
     default:
-    	break;
+        break;
     }
 
     auto&& core = buildBatchCore(mdp, *batchAgent);

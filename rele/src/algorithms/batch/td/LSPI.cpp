@@ -29,7 +29,7 @@ namespace ReLe
 
 LSPI::LSTDQ::LSTDQ(Dataset<FiniteAction, DenseState>& data,
                    LinearApproximator& Q, double gamma, unsigned int nActions)
-	: data(data), Q(Q), gamma(gamma), nActions(nActions)
+    : data(data), Q(Q), gamma(gamma), nActions(nActions)
 {
     computeDatasetFeatures();
 }
@@ -118,7 +118,7 @@ FiniteAction LSPI::LSTDQ::policy(const DenseState& x)
     arma::vec qValues(nActions, arma::fill::zeros);
     for(unsigned int i = 0; i < nActions; i++)
     {
-    	FiniteAction u(i);
+        FiniteAction u(i);
         qValues(u) = arma::as_scalar(Q(x, u));
     }
 
