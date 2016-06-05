@@ -32,6 +32,7 @@
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/regressors/trees/ExtraTree.h"
 #include "rele/approximators/regressors/trees/KDTree.h"
+#include "rele/core/logger/BatchDatasetLogger.h"
 
 #include "rele/environments/MountainCar.h"
 #include "rele/algorithms/batch/td/FQI.h"
@@ -53,15 +54,15 @@ int main(int argc, char *argv[])
 
     // Define basis
     BasisFunctions bfs;
-    bfs = IdentityBasis::generate(mdp.getSettings().statesNumber + mdp.getSettings().actionsNumber);
+    bfs = IdentityBasis::generate(mdp.getSettings().stateDimensionality + mdp.getSettings().actionDimensionality);
 
     DenseFeatures phi(bfs);
 
     // Define regressors
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode, 1, 1);
-    KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode, 1, 1);
+    ExtraTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode);
+    ExtraTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode);
 
     double epsilon = 1e-8;
     BatchTDAgent<DenseState>* batchAgent;
@@ -84,11 +85,16 @@ int main(int argc, char *argv[])
 
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
-    core.getSettings().nEpisodes = 3000;
+    core.getSettings().nEpisodes = 1000;
     core.getSettings().maxBatchIterations = 20;
+    FileManager fm("mc", "fqi");
+    fm.createDir();
+    fm.cleanDir();
+    core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("mc.log"));
 
     e_GreedyApproximate policy;
     policy.setEpsilon(1);
+    policy.setNactions(mdp.getSettings().actionsNumber);
     core.run(policy);
 
     // Policy test
@@ -101,7 +107,7 @@ int main(int argc, char *argv[])
 
     testCore.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     testCore.getSettings().episodeLength = 300;
-    testCore.getSettings().testEpisodeN = 5;
+    testCore.getSettings().testEpisodeN = 1;
 
     testCore.runTestEpisodes();
 
