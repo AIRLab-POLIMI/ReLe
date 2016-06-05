@@ -65,6 +65,7 @@ void DoubleFQI::step()
 
     indexes.push_back(allIndexes(arma::span(0, floor(this->nSamples / 2) - 1)));
     indexes.push_back(allIndexes(arma::span(floor(this->nSamples / 2), this->nSamples - 1)));
+    std::vector<BatchDataSimple> featureDataset;
     for(unsigned int i = 0; i < 2; i++)
     {
         arma::mat features = this->features.cols(indexes[i]);
@@ -95,9 +96,12 @@ void DoubleFQI::step()
                 outputs(j) = rewards(j);
         }
 
-        BatchDataSimple featureDataset(features, outputs);
-        QRegressorEnsemble.getRegressor(i).trainFeatures(featureDataset);
+        BatchDataSimple currentFeatureDataset(features, outputs);
+        featureDataset.push_back(currentFeatureDataset);
     }
+
+    QRegressorEnsemble.getRegressor(0).trainFeatures(featureDataset[0]);
+    QRegressorEnsemble.getRegressor(1).trainFeatures(featureDataset[1]);
 
     this->firstStep = false;
 
