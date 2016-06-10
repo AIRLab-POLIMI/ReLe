@@ -32,11 +32,15 @@
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/regressors/trees/ExtraTree.h"
 #include "rele/approximators/regressors/trees/KDTree.h"
-#include "rele/core/logger/BatchDatasetLogger.h"
+#include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
+//#include "rele/core/logger/BatchDatasetLogger.h"
 
 #include "rele/environments/MountainCar.h"
 #include "rele/algorithms/batch/td/FQI.h"
 #include "rele/algorithms/batch/td/DoubleFQI.h"
+#include "rele/algorithms/batch/td/LSPI.h"
 
 using namespace std;
 using namespace ReLe;
@@ -49,24 +53,54 @@ enum alg
 
 int main(int argc, char *argv[])
 {
+    FileManager fm("mc", "batch");
+    fm.createDir();
+    fm.cleanDir();
+
     // Define domain
     MountainCar mdp(MountainCar::ConfigurationsLabel::Ernst);
 
-    // Define basis
+
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(mdp.getSettings().stateDimensionality + mdp.getSettings().actionDimensionality);
 
     DenseFeatures phi(bfs);
 
-    // Define regressors
+    // Define tree regressors
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
     ExtraTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode);
     ExtraTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode);
 
+    // Define linear regressors
+    vec pos_linspace = linspace<vec>(-1.2,0.6,7);
+    vec vel_linspace = linspace<vec>(-0.07,0.07,7);
+
+    arma::mat yy_vel, xx_pos;
+    meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
+
+    arma::vec pos_mesh = vectorise(xx_pos);
+    arma::vec vel_mesh = vectorise(yy_vel);
+    arma::mat XX = arma::join_horiz(vel_mesh,pos_mesh);
+
+    double sigma_position = 2*pow((0.6+1.2)/10.,2);
+    double sigma_speed    = 2*pow((0.07+0.07)/10.,2);
+    arma::vec widths = {sigma_speed, sigma_position};
+    arma::mat WW = repmat(widths, 1, XX.n_rows);
+    arma::mat XT = XX.t();
+
+    //BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
+    BasisFunctions qbasis = GaussianRbf::generate({7, 7}, {-1, 1, -1.5, 1.5});
+    qbasis.push_back(new PolynomialFunction());
+    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, mdp.getSettings().actionsNumber);
+
+    DenseFeatures qphi(qbasisrep);
+    LinearApproximator linearQ(qphi);
+
+    // Define algorithm
     double epsilon = 1e-8;
     BatchTDAgent<DenseState>* batchAgent;
-    alg algorithm = fqi;
+    alg algorithm = lspi;
     switch(algorithm)
     {
     case fqi:
@@ -76,20 +110,19 @@ int main(int argc, char *argv[])
         batchAgent = new DoubleFQI(QRegressorA, QRegressorB, epsilon);
         break;
     case lspi:
-
+        batchAgent = new LSPI(linearQ, epsilon);
         break;
 
     default:
         break;
     }
 
+
+    //Run experiments and learning
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;
-    core.getSettings().maxBatchIterations = 20;
-    FileManager fm("mc", "fqi");
-    fm.createDir();
-    fm.cleanDir();
+    core.getSettings().maxBatchIterations = 100;
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("mc.log"));
 
     e_GreedyApproximate policy;
@@ -99,6 +132,7 @@ int main(int argc, char *argv[])
 
     // Policy test
     e_GreedyApproximate epsP;
+    epsP.setEpsilon(0.0);
     batchAgent->setPolicy(epsP);
     Policy<FiniteAction, DenseState>* testPolicy = batchAgent->getPolicy();
     PolicyEvalAgent<FiniteAction, DenseState> testAgent(*testPolicy);

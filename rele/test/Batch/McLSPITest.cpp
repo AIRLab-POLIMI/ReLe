@@ -53,10 +53,6 @@ int main(int argc, char *argv[])
     // define domain
     MountainCar mdp(MountainCar::ConfigurationsLabel::Random);
 
-    vector<FiniteAction> actions;
-    for (int i = 0; i < 3; ++i)
-        actions.push_back(FiniteAction(i));
-
     /*** define basis ***/
     vec pos_linspace = linspace<vec>(-1.2,0.6,7);
     vec vel_linspace = linspace<vec>(-0.07,0.07,7);
@@ -78,21 +74,10 @@ int main(int argc, char *argv[])
 
     BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
     qbasis.push_back(new PolynomialFunction());
-    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, actions.size());
+    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, mdp.getSettings().actionsNumber);
     //create basis vector
     DenseFeatures qphi(qbasisrep);
     LinearApproximator regressor(qphi);
-
-    // vec x = {-0.03,0.1,0};
-    // vec dd = qphi(x);
-    // dd.save(fm.addPath("cbasis.dat"), arma::raw_ascii);
-    // return 1;
-
-    /*** load data ***/
-    //ifstream is("mc_lspi_data.dat");
-    //Dataset<FiniteAction, DenseState> dataLSPI;
-    //dataLSPI.readFromStream(is);
-    //is.close();
 
     e_GreedyApproximate lspiPolicy;
     e_GreedyApproximate explorativePolicy;
@@ -103,7 +88,7 @@ int main(int argc, char *argv[])
     explorativePolicy.setQ(&regressor);
     explorativePolicy.setEpsilon(0.9);
 
-    lspiPolicy.setNactions(actions.size());
+    lspiPolicy.setNactions(mdp.getSettings().actionsNumber);
     LSPI batchAgent(regressor, 0.01);
 
     //auto&& core = buildBatchOnlyCore(dataLSPI, batchAgent);

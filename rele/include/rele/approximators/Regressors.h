@@ -391,7 +391,7 @@ typedef UnsupervisedBatchRegressor_<arma::vec, arma::vec> UnsupervisedBatchRegre
 
 #define USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
     typedef UnsupervisedBatchRegressor_<InputC, OutputC, denseOutput> Base; \
-
+ 
 #define DEFINE_FEATURES_TYPES(denseOutput) \
 	typedef typename input_traits<denseOutput>::type FeaturesCollection; \
 	typedef typename input_traits<denseOutput>::column_type FeaturesVector;

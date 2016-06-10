@@ -12,5 +12,5 @@ target_link_libraries(portfolio_off rele)
 add_executable(mc_LSPI McLSPITest.cpp)
 target_link_libraries(mc_LSPI rele)
 
-add_executable(mc_FQI McFQITest.cpp)
-target_link_libraries(mc_FQI rele)
+add_executable(mc_batch McBatchTest.cpp)
+target_link_libraries(mc_batch rele)
