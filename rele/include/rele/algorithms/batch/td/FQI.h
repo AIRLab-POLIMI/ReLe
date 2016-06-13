@@ -42,13 +42,14 @@ public:
      * \param gamma the discount factor
      * \param QRegressor the regressor
      */
-    FQIOutput(bool isFinal, double gamma, Regressor& QRegressor);
+    FQIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor);
 
     virtual void writeData(std::ostream& os) override;
     virtual void writeDecoratedData(std::ostream& os) override;
 
 protected:
     double gamma;
+    double delta;
     Regressor& QRegressor;
 };
 
@@ -79,25 +80,19 @@ public:
     virtual void init(Dataset<FiniteAction, DenseState>& data) override;
     virtual void step() override;
 
-    /*!
-     * Check whether the stop condition is satisfied.
-     */
-    virtual void checkCond();
-
-    /*!
-     * Compute the Q-values approximation for each element in the dataset.
-     */
-    virtual void computeQHat();
-
     inline virtual AgentOutputData* getAgentOutputData() override
     {
-        return new FQIOutput(false, task.gamma, this->Q);
+        return new FQIOutput(false, task.gamma, delta, this->Q);
     }
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        return new FQIOutput(true, task.gamma, this->Q);
+        return new FQIOutput(true, task.gamma, delta, this->Q);
     }
+
+protected:
+    virtual void checkCond();
+    virtual void computeQHat();
 
 protected:
     BatchRegressor& Q;
@@ -110,6 +105,7 @@ protected:
     unsigned int nSamples;
     std::set<unsigned int> absorbingStates;
     double epsilon;
+    double delta;
     bool firstStep;
 };
 

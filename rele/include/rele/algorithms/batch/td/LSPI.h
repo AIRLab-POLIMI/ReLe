@@ -31,6 +31,29 @@ namespace ReLe
 {
 
 /*!
+ * This class implements the output data for LSPI algorithm.
+ */
+class LSPIOutput : public AgentOutputData
+{
+public:
+    /*!
+     * Constructor.
+     * \param isFinal whether the data logged comes from the end of a run of the algorithm
+     * \param gamma the discount factor
+     * \param QRegressor the regressor
+     */
+	LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor);
+
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
+
+protected:
+    double gamma;
+    double delta;
+    Regressor& QRegressor;
+};
+
+/*!
  * This class implements the Least-Squares Policy Iteration (LSPI) algorithm.
  * This algorithm is an off-policy batch algorithm that exploits
  * the action-values approximation done by the LSTDQ algorithm
@@ -41,7 +64,6 @@ namespace ReLe
  *
  * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
  */
-
 class LSPI : public BatchTDAgent<DenseState>
 {
 private:
@@ -78,6 +100,17 @@ public:
     virtual void init(Dataset<FiniteAction, DenseState>& data) override;
     virtual void step() override;
 
+    inline virtual AgentOutputData* getAgentOutputData() override
+    {
+        return new LSPIOutput(false, task.gamma, delta, this->Q);
+    }
+
+    inline virtual AgentOutputData* getAgentOutputDataEnd() override
+    {
+        return new LSPIOutput(true, task.gamma, delta, this->Q);
+    }
+
+
     virtual ~LSPI();
 
 private:
@@ -88,6 +121,7 @@ protected:
     LinearApproximator Q;
     arma::vec oldWeights;
     double epsilon;
+    double delta;
     bool firstStep;
 };
 

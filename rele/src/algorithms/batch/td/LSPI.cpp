@@ -26,6 +26,28 @@
 namespace ReLe
 {
 
+LSPIOutput::LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor) :
+    AgentOutputData(isFinal),
+    gamma(gamma),
+	delta(delta),
+    QRegressor(QRegressor)
+{
+}
+
+void LSPIOutput::writeData(std::ostream& os)
+{
+    os << "- Parameters" << std::endl;
+    os << "gamma: " << gamma << std::endl;
+    os << "delta: " << delta << std::endl;
+}
+
+void LSPIOutput::writeDecoratedData(std::ostream& os)
+{
+    os << "- Parameters" << std::endl;
+    os << "gamma: " << gamma << std::endl;
+    os << "delta: " << delta << std::endl;
+}
+
 
 LSPI::LSTDQ::LSTDQ(Dataset<FiniteAction, DenseState>& data,
                    LinearApproximator& Q, double gamma, unsigned int nActions)
@@ -43,16 +65,18 @@ arma::vec LSPI::LSTDQ::run()
     Features& phi = Q.getFeatures();
     int df = phi.rows();
 
-    arma::mat PiPhihat(nbSamples, df, arma::fill::zeros);
+    arma::mat PiPhihat(df, nbSamples, arma::fill::zeros);
 
     unsigned int idx = 0;
     for (auto episode : this->data)
     {
         for (auto tr : episode)
         {
-            auto nextAction = policy(tr.xn);
-            arma::mat nextPhi = phi(tr.xn, nextAction);
-            PiPhihat.row(idx) = nextPhi.t();
+        	if(!tr.xn.isAbsorbing())
+        	{
+        		auto nextAction = policy(tr.xn);
+        		PiPhihat.col(idx) = phi(tr.xn, nextAction);
+        	}
 
             // increment sample counter
             ++idx;
@@ -60,8 +84,8 @@ arma::vec LSPI::LSTDQ::run()
     }
 
     // Compute the matrices A and b
-    arma::mat A = Phihat.t() * (Phihat - gamma * PiPhihat);
-    arma::vec b = Phihat.t() * Rhat;
+    arma::mat A = Phihat * (Phihat - gamma * PiPhihat).t();
+    arma::vec b = Phihat * Rhat;
 
     // Solve the system to find w
     arma::vec w;
@@ -90,7 +114,7 @@ void LSPI::LSTDQ::computeDatasetFeatures()
 
 
     // Precompute Phihat and Rhat for all subsequent iterations
-    Phihat.set_size(nbSamples,df);
+    Phihat.set_size(df, nbSamples);
     Rhat.set_size(nbSamples);
 
     unsigned int idx = 0;
@@ -98,17 +122,15 @@ void LSPI::LSTDQ::computeDatasetFeatures()
     {
         for (auto tr : episode)
         {
-            //compute basis in current state-action pair
-            arma::vec phi_xu = phi(tr.x, tr.u);
-
             //update matricies
-            Phihat.row(idx) = phi_xu.t();
+            Phihat.col(idx) = phi(tr.x, tr.u);
             Rhat(idx) = tr.r[0];
 
             // increment sample counter
             ++idx;
         }
     }
+
 }
 
 FiniteAction LSPI::LSTDQ::policy(const DenseState& x)
@@ -136,7 +158,8 @@ LSPI::LSPI(LinearApproximator& Q, double epsilon) :
     Q(Q),
     critic(nullptr),
     epsilon(epsilon),
-    firstStep(true)
+    firstStep(true),
+	delta(0)
 {
 }
 
@@ -167,13 +190,11 @@ void LSPI::step()
 void LSPI::checkCond(const arma::vec& QWeights)
 {
     //Compute the distance between the current and the previous policy
-    double distance = arma::norm(QWeights - oldWeights, 2);
+    delta = arma::norm(QWeights - oldWeights, 2);
 
-    if(distance < epsilon)
+    if(delta < epsilon)
         this->converged = true;
 
-    static int i = 0;
-    std::cout << i++ << " " << distance << std::endl;
 }
 
 LSPI::~LSPI()

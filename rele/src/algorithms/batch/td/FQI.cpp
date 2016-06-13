@@ -26,9 +26,10 @@
 namespace ReLe
 {
 
-FQIOutput::FQIOutput(bool isFinal, double gamma, Regressor& QRegressor) :
+FQIOutput::FQIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor) :
     AgentOutputData(isFinal),
     gamma(gamma),
+	delta(delta),
     QRegressor(QRegressor)
 {
 }
@@ -37,12 +38,14 @@ void FQIOutput::writeData(std::ostream& os)
 {
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
+    os << "delta: " << delta << std::endl;
 }
 
 void FQIOutput::writeDecoratedData(std::ostream& os)
 {
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
+    os << "delta: " << delta << std::endl;
 }
 
 FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
@@ -50,7 +53,8 @@ FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
     Q(QRegressor),
     nSamples(0),
     firstStep(true),
-    epsilon(epsilon)
+    epsilon(epsilon),
+	delta(0)
 {
 }
 
@@ -116,7 +120,9 @@ void FQI::checkCond()
 
     computeQHat();
 
-    if(arma::norm(QHat - prevQHat) < epsilon)
+    delta = arma::norm(QHat - prevQHat);
+
+    if(delta < epsilon)
         this->converged = true;
 }
 

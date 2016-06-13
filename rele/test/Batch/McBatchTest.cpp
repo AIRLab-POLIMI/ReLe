@@ -24,18 +24,22 @@
 #include "rele/core/Core.h"
 #include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
-#include "rele/approximators/features/DenseFeatures.h"
+
 #include "rele/policy/q_policy/e_Greedy.h"
-#include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/utils/FileManager.h"
 #include "rele/core/BatchAgent.h"
 #include "rele/approximators/regressors/others/LinearApproximator.h"
-#include "rele/approximators/regressors/trees/ExtraTree.h"
-#include "rele/approximators/regressors/trees/KDTree.h"
+#include "rele/approximators/regressors/trees/ExtraTreeEnsemble.h"
+
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/features/TilesCoder.h"
+
+#include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/GaussianRbf.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"
-//#include "rele/core/logger/BatchDatasetLogger.h"
+#include "rele/approximators/tiles/BasicTiles.h"
+
 
 #include "rele/environments/MountainCar.h"
 #include "rele/algorithms/batch/td/FQI.h"
@@ -69,11 +73,11 @@ int main(int argc, char *argv[])
     // Define tree regressors
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    ExtraTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode);
-    ExtraTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode);
+    ExtraTreeEnsemble QRegressorA(phi, defaultNode);
+    ExtraTreeEnsemble QRegressorB(phi, defaultNode);
 
     // Define linear regressors
-    vec pos_linspace = linspace<vec>(-1.2,0.6,7);
+    /*vec pos_linspace = linspace<vec>(-1.2,0.6,7);
     vec vel_linspace = linspace<vec>(-0.07,0.07,7);
 
     arma::mat yy_vel, xx_pos;
@@ -93,12 +97,16 @@ int main(int argc, char *argv[])
     BasisFunctions qbasis = GaussianRbf::generate({7, 7}, {-1, 1, -1.5, 1.5});
     qbasis.push_back(new PolynomialFunction());
     BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, mdp.getSettings().actionsNumber);
+    DenseFeatures qphi(qbasisrep);*/
 
-    DenseFeatures qphi(qbasisrep);
+    auto* tiles = new BasicTiles({Range(-1, 1), Range(-3, 3), Range(-0.5, 2.5)}, {10, 10, mdp.getSettings().actionsNumber});
+    DenseTilesCoder qphi(tiles);
+
+
     LinearApproximator linearQ(qphi);
 
     // Define algorithm
-    double epsilon = 1e-8;
+    double epsilon = 1e-6;
     BatchTDAgent<DenseState>* batchAgent;
     alg algorithm = lspi;
     switch(algorithm)
@@ -122,8 +130,9 @@ int main(int argc, char *argv[])
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;
-    core.getSettings().maxBatchIterations = 100;
+    core.getSettings().maxBatchIterations = 1000;
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("mc.log"));
+    core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
     e_GreedyApproximate policy;
     policy.setEpsilon(1);
