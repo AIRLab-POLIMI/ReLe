@@ -42,7 +42,7 @@ public:
      * \param gamma the discount factor
      * \param QRegressor the regressor
      */
-	LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor);
+    LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor);
 
     virtual void writeData(std::ostream& os) override;
     virtual void writeDecoratedData(std::ostream& os) override;

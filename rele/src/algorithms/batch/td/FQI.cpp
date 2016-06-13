@@ -29,7 +29,7 @@ namespace ReLe
 FQIOutput::FQIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor) :
     AgentOutputData(isFinal),
     gamma(gamma),
-	delta(delta),
+    delta(delta),
     QRegressor(QRegressor)
 {
 }
@@ -54,7 +54,7 @@ FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
     nSamples(0),
     firstStep(true),
     epsilon(epsilon),
-	delta(0)
+    delta(0)
 {
 }
 

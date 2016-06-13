@@ -29,7 +29,7 @@ namespace ReLe
 LSPIOutput::LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor) :
     AgentOutputData(isFinal),
     gamma(gamma),
-	delta(delta),
+    delta(delta),
     QRegressor(QRegressor)
 {
 }
@@ -72,11 +72,11 @@ arma::vec LSPI::LSTDQ::run()
     {
         for (auto tr : episode)
         {
-        	if(!tr.xn.isAbsorbing())
-        	{
-        		auto nextAction = policy(tr.xn);
-        		PiPhihat.col(idx) = phi(tr.xn, nextAction);
-        	}
+            if(!tr.xn.isAbsorbing())
+            {
+                auto nextAction = policy(tr.xn);
+                PiPhihat.col(idx) = phi(tr.xn, nextAction);
+            }
 
             // increment sample counter
             ++idx;
@@ -89,16 +89,11 @@ arma::vec LSPI::LSTDQ::run()
 
     // Solve the system to find w
     arma::vec w;
-    int rank = arma::rank(A);
-    if (rank == df)
-    {
+
+    if (arma::rank(A) == df)
         w = arma::solve(A,b);
-    }
     else
-    {
-        std::cout << "Matrix is not invertible" << std::endl;
         w = arma::pinv(A)*b;
-    }
 
     return w;
 }
@@ -159,7 +154,7 @@ LSPI::LSPI(LinearApproximator& Q, double epsilon) :
     critic(nullptr),
     epsilon(epsilon),
     firstStep(true),
-	delta(0)
+    delta(0)
 {
 }
 

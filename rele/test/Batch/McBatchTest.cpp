@@ -99,7 +99,16 @@ int main(int argc, char *argv[])
     BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, mdp.getSettings().actionsNumber);
     DenseFeatures qphi(qbasisrep);*/
 
-    auto* tiles = new BasicTiles({Range(-1, 1), Range(-3, 3), Range(-0.5, 2.5)}, {10, 10, mdp.getSettings().actionsNumber});
+    TilesVector tiles;
+    for(unsigned int i = 0; i < 10; i++)
+    {
+        double shift = i*2.5/9.0;
+        auto* tmp = new BasicTiles({Range(-1+shift, 1+shift), Range(-3+shift, 3+shift),
+                                    Range(-0.5, 3.0)
+                                   }, {9, 9, mdp.getSettings().actionsNumber});
+        tiles.push_back(tmp);
+    }
+
     DenseTilesCoder qphi(tiles);
 
 
