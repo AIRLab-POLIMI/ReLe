@@ -28,8 +28,10 @@
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/utils/FileManager.h"
 #include "rele/core/BatchAgent.h"
+
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/regressors/trees/ExtraTreeEnsemble.h"
+#include "rele/approximators/regressors/trees/KDTree.h"
 
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/features/TilesCoder.h"
@@ -73,12 +75,15 @@ int main(int argc, char *argv[])
     // Define tree regressors
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    ExtraTreeEnsemble QRegressorA(phi, defaultNode);
-    ExtraTreeEnsemble QRegressorB(phi, defaultNode);
+    /*ExtraTreeEnsemble QRegressorA(phi, defaultNode);
+    ExtraTreeEnsemble QRegressorB(phi, defaultNode);*/
+    KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode);
+    KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode);
+
 
     // Define linear regressors
-    /*vec pos_linspace = linspace<vec>(-1.2,0.6,7);
-    vec vel_linspace = linspace<vec>(-0.07,0.07,7);
+    vec pos_linspace = linspace<vec>(-1.0,1.0,7);
+    vec vel_linspace = linspace<vec>(-3.0,3.0,7);
 
     arma::mat yy_vel, xx_pos;
     meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
@@ -93,23 +98,16 @@ int main(int argc, char *argv[])
     arma::mat WW = repmat(widths, 1, XX.n_rows);
     arma::mat XT = XX.t();
 
-    //BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
-    BasisFunctions qbasis = GaussianRbf::generate({7, 7}, {-1, 1, -1.5, 1.5});
+    BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
+    //BasisFunctions qbasis = GaussianRbf::generate({7, 7}, {-1, 1, -3.0, 3.0});
     qbasis.push_back(new PolynomialFunction());
     BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, mdp.getSettings().actionsNumber);
-    DenseFeatures qphi(qbasisrep);*/
+    DenseFeatures qphi(qbasisrep);
 
-    TilesVector tiles;
-    for(unsigned int i = 0; i < 10; i++)
-    {
-        double shift = i*2.5/9.0;
-        auto* tmp = new BasicTiles({Range(-1+shift, 1+shift), Range(-3+shift, 3+shift),
-                                    Range(-0.5, 3.0)
-                                   }, {9, 9, mdp.getSettings().actionsNumber});
-        tiles.push_back(tmp);
-    }
-
-    DenseTilesCoder qphi(tiles);
+    /*auto* tiles = new BasicTiles(
+    {Range(-1, 1), Range(-3, 3), Range(-0.5, 1.5)},
+    {15, 15, mdp.getSettings().actionsNumber});
+    DenseTilesCoder qphi(tiles);*/
 
 
     LinearApproximator linearQ(qphi);
@@ -117,7 +115,7 @@ int main(int argc, char *argv[])
     // Define algorithm
     double epsilon = 1e-6;
     BatchTDAgent<DenseState>* batchAgent;
-    alg algorithm = lspi;
+    alg algorithm = fqi;
     switch(algorithm)
     {
     case fqi:

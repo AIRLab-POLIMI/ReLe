@@ -54,7 +54,7 @@ FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
     nSamples(0),
     firstStep(true),
     epsilon(epsilon),
-    delta(0)
+    delta(std::numeric_limits<double>::infinity())
 {
 }
 

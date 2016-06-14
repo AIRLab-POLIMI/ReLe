@@ -36,16 +36,16 @@ LSPIOutput::LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QReg
 
 void LSPIOutput::writeData(std::ostream& os)
 {
+    os << "delta: " << delta << std::endl;
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
-    os << "delta: " << delta << std::endl;
 }
 
 void LSPIOutput::writeDecoratedData(std::ostream& os)
 {
+    os << "delta: " << delta << std::endl;
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
-    os << "delta: " << delta << std::endl;
 }
 
 
@@ -59,7 +59,6 @@ LSPI::LSTDQ::LSTDQ(Dataset<FiniteAction, DenseState>& data,
 arma::vec LSPI::LSTDQ::run()
 {
     // Initialize variables
-    int nbEpisodes = this->data.size();
     int nbSamples = data.getTransitionsNumber();
 
     Features& phi = Q.getFeatures();
@@ -74,7 +73,7 @@ arma::vec LSPI::LSTDQ::run()
         {
             if(!tr.xn.isAbsorbing())
             {
-                auto nextAction = policy(tr.xn);
+                FiniteAction nextAction = policy(tr.xn);
                 PiPhihat.col(idx) = phi(tr.xn, nextAction);
             }
 
@@ -130,13 +129,12 @@ void LSPI::LSTDQ::computeDatasetFeatures()
 
 FiniteAction LSPI::LSTDQ::policy(const DenseState& x)
 {
-    Features& phi = Q.getFeatures();
     Regressor& Q = this->Q;
     arma::vec qValues(nActions, arma::fill::zeros);
     for(unsigned int i = 0; i < nActions; i++)
     {
         FiniteAction u(i);
-        qValues(u) = arma::as_scalar(Q(x, u));
+        qValues(i) = arma::as_scalar(Q(x, u));
     }
 
     arma::uword maxQIndex;
@@ -154,7 +152,7 @@ LSPI::LSPI(LinearApproximator& Q, double epsilon) :
     critic(nullptr),
     epsilon(epsilon),
     firstStep(true),
-    delta(0)
+    delta(std::numeric_limits<double>::infinity())
 {
 }
 
