@@ -5,8 +5,8 @@ add_executable(test_hessian_gradient TestGradientHess.cpp)
 target_link_libraries(test_hessian_gradient rele)
 
 #NIPS
-add_executable(nips_mc nips/MC.cpp)
-target_link_libraries(nips_mc rele)
+add_executable(nips_car nips/Car.cpp)
+target_link_libraries(nips_car rele)
 
 add_executable(nips_lqr_comp nips/LQR_comp.cpp)
 target_link_libraries(nips_lqr_comp rele)

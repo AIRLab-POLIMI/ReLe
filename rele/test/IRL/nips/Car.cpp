@@ -43,7 +43,7 @@
 #include "rele/approximators/tiles/BasicTiles.h"
 
 
-#include "rele/environments/MountainCar.h"
+#include "rele/environments/CarOnHill.h"
 #include "rele/algorithms/batch/td/FQI.h"
 
 using namespace std;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
     // Define domain
-    MountainCar mdp(MountainCar::ConfigurationsLabel::Ernst);
+    CarOnHill mdp;
 
 
     BasisFunctions bfs;
@@ -70,10 +70,11 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi(bfs);
 
-    // Define tree regressors
+    // Define tree regressor
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    ExtraTreeEnsemble QRegressorA(phi, defaultNode);
+    KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode);
+
     // Define algorithm
     double epsilon = 1e-6;
     BatchTDAgent<DenseState>* batchAgent = new FQI(QRegressorA, epsilon);
