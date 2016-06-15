@@ -36,16 +36,16 @@ FQIOutput::FQIOutput(bool isFinal, double gamma, double delta, Regressor& QRegre
 
 void FQIOutput::writeData(std::ostream& os)
 {
+	os << "delta: " << delta << std::endl;
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
-    os << "delta: " << delta << std::endl;
 }
 
 void FQIOutput::writeDecoratedData(std::ostream& os)
 {
+	os << "delta: " << delta << std::endl;
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
-    os << "delta: " << delta << std::endl;
 }
 
 FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
