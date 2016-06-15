@@ -59,7 +59,7 @@ enum alg
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("mc", "batch");
+    FileManager fm("car_on_hill", "batch");
     fm.createDir();
     fm.cleanDir();
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;
     core.getSettings().maxBatchIterations = 1000;
-    core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("mc.log"));
+    core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
     e_GreedyApproximate policy;
