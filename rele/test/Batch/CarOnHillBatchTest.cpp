@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
     testCore.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     testCore.getSettings().episodeLength = 300;
-    testCore.getSettings().testEpisodeN = 1;
+    testCore.getSettings().testEpisodeN = 3;
 
     testCore.runTestEpisodes();
 
