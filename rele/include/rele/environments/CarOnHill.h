@@ -2,7 +2,7 @@
  * rele,
  *
  *
- * Copyright (C) 2015 Davide Tateo & Matteo Pirotta
+ * Copyright (C) 2016 Davide Tateo
  * Versione 1.0
  *
  * This file is part of rele.
@@ -21,8 +21,8 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MOUNTAINCAR_H_
-#define MOUNTAINCAR_H_
+#ifndef INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_
+#define INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_
 
 #include "rele/core/DenseMDP.h"
 
@@ -30,33 +30,22 @@ namespace ReLe
 {
 
 /*!
- * This class implements the Mountain Car environment.
- * In this problem a car is placed on a valley between two hills
- * and has to reach the top of one of them.
- * Unfortunately, it is not able to do so by only accelerating and,
- * therefore, it has to accelerate in the opposite direction to use
- * the slope of the other hill to acquire inertia that may allow it
- * to reach the goal.
+ * This class implements the Car On Hill problem.
+ * This is a version of mountain car environment, the one proposed by Ernst paper, and is simpler than
+ * the original mountain car problem, as the goal can be reached by a random policy.
+ *
+ * \see MountainCar
  *
  * References
  * ==========
- * [Sutton, Barto. Reinforcement Learning an introduction](http://webdocs.cs.ualberta.ca/~sutton/book/ebook/node89.html)
+ * [ErnstT, Geurts and Wehrnkel. Tree-Based Batch Mode Reinforcement Learning](http://www.jmlr.org/papers/volume6/ernst05a/ernst05a.pdf)
  */
-class MountainCar: public DenseMDP
+class CarOnHill: public DenseMDP
 {
 public:
     enum StateLabel
     {
         position = 0, velocity = 1
-    };
-
-    /*!
-     * Type of configuration obtained from different experiments
-     * in respective articles.
-     */
-    enum ConfigurationsLabel
-    {
-        Sutton, Klein, Random
     };
 
 public:
@@ -65,9 +54,9 @@ public:
      * Constructor.
      * \param label configuration type
      */
-    MountainCar(ConfigurationsLabel label = Sutton,
-                double initialPosition = -0.5,
-                double initialVelocity = 0);
+    CarOnHill(double initialPosition = -0.5,
+              double initialVelocity = 0,
+			  double rewardSigma = 0);
 
     /*!
      * \see Environment::step
@@ -80,14 +69,12 @@ public:
      */
     virtual void getInitialState(DenseState& state) override;
 
-protected:
-    //! Configuration type.
-    ConfigurationsLabel envType;
-
+private:
     double initialPosition;
     double initialVelocity;
+    double rewardSigma;
 };
 
 }
 
-#endif /* MOUNTAINCAR_H_ */
+#endif /* INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_ */

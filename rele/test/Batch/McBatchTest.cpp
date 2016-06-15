@@ -43,7 +43,7 @@
 #include "rele/approximators/tiles/BasicTiles.h"
 
 
-#include "rele/environments/MountainCar.h"
+#include "rele/environments/CarOnHill.h"
 #include "rele/algorithms/batch/td/FQI.h"
 #include "rele/algorithms/batch/td/DoubleFQI.h"
 #include "rele/algorithms/batch/td/LSPI.h"
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
     // Define domain
-    MountainCar mdp(MountainCar::ConfigurationsLabel::Ernst);
+    CarOnHill mdp;
 
 
     BasisFunctions bfs;
