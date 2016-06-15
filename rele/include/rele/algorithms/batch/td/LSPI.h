@@ -24,11 +24,34 @@
 #ifndef LSPI_H_
 #define LSPI_H_
 
-#include "rele/algorithms/batch/td/LSTDQ.h"
-#include "rele/utils/RandomGenerator.h"
+#include "rele/algorithms/batch/td/BatchTDAgent.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
 
 namespace ReLe
 {
+
+/*!
+ * This class implements the output data for LSPI algorithm.
+ */
+class LSPIOutput : public AgentOutputData
+{
+public:
+    /*!
+     * Constructor.
+     * \param isFinal whether the data logged comes from the end of a run of the algorithm
+     * \param gamma the discount factor
+     * \param QRegressor the regressor
+     */
+    LSPIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor);
+
+    virtual void writeData(std::ostream& os) override;
+    virtual void writeDecoratedData(std::ostream& os) override;
+
+protected:
+    double gamma;
+    double delta;
+    Regressor& QRegressor;
+};
 
 /*!
  * This class implements the Least-Squares Policy Iteration (LSPI) algorithm.
@@ -41,93 +64,63 @@ namespace ReLe
  *
  * [Lagoudakis, Parr. Least-Squares Policy Iteration](http://jmlr.csail.mit.edu/papers/volume4/lagoudakis03a/lagoudakis03a.ps)
  */
-template<class ActionC>
-class LSPI : public BatchAgent<ActionC, DenseState>
+class LSPI : public BatchTDAgent<DenseState>
 {
+private:
+
+    class LSTDQ
+    {
+    public:
+        LSTDQ(Dataset<FiniteAction, DenseState>& data,
+              LinearApproximator& Q, double gamma, unsigned int nActions);
+        arma::vec run();
+
+    private:
+        void computeDatasetFeatures();
+        FiniteAction policy(const DenseState& x);
+
+    private:
+        Dataset<FiniteAction, DenseState>& data;
+        LinearApproximator& Q;
+        double gamma;
+        unsigned int nActions;
+        arma::mat Phihat;
+        arma::vec Rhat;
+    };
+
 public:
     /*!
      * Constructor.
-     * \param data the dataset
-     * \param policy the policy
      * \param phi the features to be used for approximation
      * \param epsilon coefficient used to check whether to stop the training
      */
-    LSPI(Dataset<ActionC, DenseState>& data, e_GreedyApproximate& policy,
-         Features_<arma::vec>& phi, double epsilon) :
-        data(data),
-        oldWeights(arma::vec(phi.rows(), arma::fill::zeros)),
-        policy(policy),
-        phi(phi),
-        critic(nullptr),
-        epsilon(epsilon),
-        firstStep(true)
+    LSPI(LinearApproximator& Q, double epsilon);
+
+    virtual void init(Dataset<FiniteAction, DenseState>& data) override;
+    virtual void step() override;
+
+    inline virtual AgentOutputData* getAgentOutputData() override
     {
+        return new LSPIOutput(false, task.gamma, delta, this->Q);
     }
 
-    virtual void init(Dataset<ActionC, DenseState>& data, EnvironmentSettings& envSettings) override
+    inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        critic = new LSTDQ<ActionC>(data, policy, phi, envSettings.gamma);
+        return new LSPIOutput(true, task.gamma, delta, this->Q);
     }
 
-    virtual void step() override
-    {
-        //Evaluate the current policy (and implicitly improve)
-        //            RandomGenerator::seed(1000);
-        arma::vec QWeights = critic->run(firstStep);
-        //            RandomGenerator::seed(1000);
-        //            arma::vec Q_weights2 = critic.run_slow();
-        //            arma::mat X = arma::join_horiz(Q_weights,Q_weights2);
-        //            std::cout << X << std::endl;
-        //            assert(max(abs(Q_weights - Q_weights2)) <=1e-3);
 
-        critic->getQ().setParameters(QWeights);
-        //            char ddd[100];
-        //            sprintf(ddd,"/tmp/ReLe/w_%d.dat", iteration);
-        //            Q_weights.save(ddd, arma::raw_ascii);
+    virtual ~LSPI();
 
-
-        firstStep = false;
-
-        checkCond(QWeights);
-    }
-
-    /*!
-     * Check whether the stop condition is satisfied.
-     * \param QWeights the current weights
-     */
-    virtual void checkCond(const arma::vec& QWeights)
-    {
-        //Compute the distance between the current and the previous policy
-        double LMAXnorm = arma::norm(QWeights - oldWeights, "inf");
-        double L2norm   = arma::norm(QWeights - oldWeights, 2);
-        double distance = L2norm;
-        std::cout << "   Norms -> Lmax : "  << LMAXnorm <<
-                  "   L2 : " << L2norm << std::endl;
-
-        if(arma::norm(QWeights - oldWeights, 2) < epsilon)
-            this->converged = true;
-
-        oldWeights = QWeights;
-    }
-
-    virtual Policy<ActionC, DenseState>* getPolicy() override
-    {
-        //TODO [INTERFACE] fix interface implementation for batch methods...
-        return nullptr;
-    }
-
-    virtual ~LSPI()
-    {
-        delete critic;
-    }
+private:
+    void checkCond(const arma::vec& QWeights);
 
 protected:
-    Dataset<ActionC, DenseState>& data;
-    LSTDQ<ActionC>* critic;
-    Features_<arma::vec>& phi;
-    e_GreedyApproximate& policy;
+    LSTDQ* critic;
+    LinearApproximator Q;
     arma::vec oldWeights;
     double epsilon;
+    double delta;
     bool firstStep;
 };
 

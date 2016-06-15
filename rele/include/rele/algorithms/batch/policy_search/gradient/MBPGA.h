@@ -57,7 +57,7 @@ public:
         Jmean = 0;
     }
 
-    virtual void init(Dataset<ActionC, StateC>& data, EnvironmentSettings& envSettings) override
+    virtual void init(Dataset<ActionC, StateC>& data) override
     {
         if(gCalculator)
             delete gCalculator;
@@ -65,11 +65,10 @@ public:
         if(gM2Calculator)
             delete gM2Calculator;
 
-        this->gamma = envSettings.gamma;
         gCalculator = OffGradientCalculatorFactory<ActionC, StateC>::build(OffGradType::REINFORCE_BASELINE,
-                      *rewardf, data, policy, behaviour, this->gamma);
+                      *rewardf, data, policy, behaviour, this->task.gamma);
         gM2Calculator = OffGradientCalculatorFactory<ActionC, StateC>::build(OffGradType::SECOND_MOMENT,
-                        *rewardf, data, policy, behaviour, this->gamma);
+                        *rewardf, data, policy, behaviour, this->task.gamma);
 
 
         //Select indexes
@@ -81,7 +80,7 @@ public:
         gradientIndexes = indexes.rows(0, breakPoint - 1);
         arma::uvec meanIndexes = indexes.rows(breakPoint, data.size() - 1);
 
-        computeJmean(meanIndexes, data, envSettings.gamma);
+        computeJmean(meanIndexes, data, this->task.gamma);
     }
 
     virtual void step() override

@@ -48,10 +48,13 @@ class GaussianProcess_ : public BatchRegressor_<InputC, arma::vec, denseOutput>
 public:
     struct HyperParameters
     {
-        HyperParameters() : lengthScale({1}),
-                        signalSigma(1),
-                        noiseSigma(0.1),
-                        noisyTestData(false)
+        HyperParameters() : lengthScale(
+        {
+            1
+        }),
+        signalSigma(1),
+                    noiseSigma(0.1),
+                    noisyTestData(false)
         {
         }
 

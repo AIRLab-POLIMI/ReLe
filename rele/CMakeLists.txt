@@ -22,17 +22,14 @@ include_directories(include)
 
 # ----------------------- LIBRARIES ---------------------------
 
-#find_package(Boost REQUIRED COMPONENTS random)
 if(WIN32)
     find_path(ARMADILLO_INCLUDE_DIR
         NAMES armadillo
         PATHS "C:/usr/include"
         )
-    #include_directories("C:/usr/include")
 else()
     find_package(Armadillo REQUIRED)
     find_package(NLopt REQUIRED)
-    #Boost.Numeric.odeint used for integration (odeint)
     set(Boost_USE_STATIC_LIBS        OFF)
     set(Boost_USE_MULTITHREADED      ON)
     set(Boost_USE_STATIC_RUNTIME    OFF)

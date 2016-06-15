@@ -26,9 +26,10 @@
 namespace ReLe
 {
 
-FQIOutput::FQIOutput(bool isFinal, double gamma, BatchRegressor& QRegressor) :
+FQIOutput::FQIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor) :
     AgentOutputData(isFinal),
     gamma(gamma),
+    delta(delta),
     QRegressor(QRegressor)
 {
 }
@@ -37,33 +38,35 @@ void FQIOutput::writeData(std::ostream& os)
 {
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
+    os << "delta: " << delta << std::endl;
 }
 
 void FQIOutput::writeDecoratedData(std::ostream& os)
 {
     os << "- Parameters" << std::endl;
     os << "gamma: " << gamma << std::endl;
+    os << "delta: " << delta << std::endl;
 }
 
-FQI::FQI(BatchRegressor& QRegressor, unsigned int nActions,
-         double epsilon) :
-    BatchTDAgent<DenseState>(QRegressor, nActions),
+FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
+    BatchTDAgent<DenseState>(QRegressor),
+    Q(QRegressor),
     nSamples(0),
     firstStep(true),
-    epsilon(epsilon)
+    epsilon(epsilon),
+    delta(std::numeric_limits<double>::infinity())
 {
 }
 
-void FQI::init(Dataset<FiniteAction, DenseState>& data, EnvironmentSettings& envSettings)
+void FQI::init(Dataset<FiniteAction, DenseState>& data)
 {
-    this->gamma = envSettings.gamma;
     features = data.featuresAsMatrix(Q.getFeatures());
     nSamples = features.n_cols;
-    states = arma::mat(envSettings.stateDimensionality,
+    states = arma::mat(task.stateDimensionality,
                        nSamples,
                        arma::fill::zeros);
     actions = arma::vec(nSamples, arma::fill::zeros);
-    nextStates = arma::mat(envSettings.stateDimensionality,
+    nextStates = arma::mat(task.stateDimensionality,
                            nSamples,
                            arma::fill::zeros);
     rewards = arma::vec(nSamples, arma::fill::zeros);
@@ -90,14 +93,14 @@ void FQI::step()
 
     for(unsigned int i = 0; i < nSamples; i++)
     {
-        arma::vec Q_xn(this->nActions, arma::fill::zeros);
+        arma::vec Q_xn(task.actionsNumber, arma::fill::zeros);
         if(absorbingStates.count(i) == 0 && !firstStep)
         {
-            for(unsigned int u = 0; u < this->nActions; u++)
+            for(unsigned int u = 0; u < task.actionsNumber; u++)
                 Q_xn(u) = arma::as_scalar(this->Q(nextStates.col(i),
                                                   FiniteAction(u)));
 
-            outputs(i) = rewards(i) + this->gamma * arma::max(Q_xn);
+            outputs(i) = rewards(i) + task.gamma * arma::max(Q_xn);
         }
         else
             outputs(i) = rewards(i);
@@ -117,7 +120,9 @@ void FQI::checkCond()
 
     computeQHat();
 
-    if(arma::norm(QHat - prevQHat) < epsilon)
+    delta = arma::norm(QHat - prevQHat);
+
+    if(delta < epsilon)
         this->converged = true;
 }
 

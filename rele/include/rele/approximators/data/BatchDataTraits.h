@@ -26,6 +26,8 @@
 
 #include "rele/core/Basics.h"
 
+#include <type_traits>
+
 namespace ReLe
 {
 

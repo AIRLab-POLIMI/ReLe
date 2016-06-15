@@ -42,14 +42,15 @@ public:
      * \param gamma the discount factor
      * \param QRegressor the regressor
      */
-    FQIOutput(bool isFinal, double gamma, BatchRegressor& QRegressor);
+    FQIOutput(bool isFinal, double gamma, double delta, Regressor& QRegressor);
 
     virtual void writeData(std::ostream& os) override;
     virtual void writeDecoratedData(std::ostream& os) override;
 
 protected:
     double gamma;
-    BatchRegressor& QRegressor;
+    double delta;
+    Regressor& QRegressor;
 };
 
 /*!
@@ -74,32 +75,27 @@ public:
      * \param nActions the number of actions
      * \param epsilon coefficient used to check whether to stop the training
      */
-    FQI(BatchRegressor& QRegressor, unsigned int nActions, double epsilon);
+    FQI(BatchRegressor& QRegressor, double epsilon);
 
-    virtual void init(Dataset<FiniteAction, DenseState>& data, EnvironmentSettings& envSettings) override;
+    virtual void init(Dataset<FiniteAction, DenseState>& data) override;
     virtual void step() override;
-
-    /*!
-     * Check whether the stop condition is satisfied.
-     */
-    virtual void checkCond();
-
-    /*!
-     * Compute the Q-values approximation for each element in the dataset.
-     */
-    virtual void computeQHat();
 
     inline virtual AgentOutputData* getAgentOutputData() override
     {
-        return new FQIOutput(false, this->gamma, this->Q);
+        return new FQIOutput(false, task.gamma, delta, this->Q);
     }
 
     inline virtual AgentOutputData* getAgentOutputDataEnd() override
     {
-        return new FQIOutput(true, this->gamma, this->Q);
+        return new FQIOutput(true, task.gamma, delta, this->Q);
     }
 
 protected:
+    virtual void checkCond();
+    virtual void computeQHat();
+
+protected:
+    BatchRegressor& Q;
     arma::vec QHat;
     arma::mat features;
     arma::mat states;
@@ -109,6 +105,7 @@ protected:
     unsigned int nSamples;
     std::set<unsigned int> absorbingStates;
     double epsilon;
+    double delta;
     bool firstStep;
 };
 

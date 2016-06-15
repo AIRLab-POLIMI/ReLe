@@ -52,7 +52,7 @@ MountainCar::MountainCar(ConfigurationsLabel label,
 void MountainCar::step(const FiniteAction& action,
                        DenseState& nextState, Reward& reward)
 {
-    if(envType == Sutton || envType == Klein)
+    if(envType == Sutton || envType == Klein || envType == Random)
     {
         int motorAction = action.getActionN() - 1;
 
@@ -80,7 +80,7 @@ void MountainCar::step(const FiniteAction& action,
 
         if(envType == Sutton)
             reward[0] = -1;
-        else if(envType == Klein)
+        else if(envType == Klein || envType == Random)
         {
             if(currentState[position] > 0.5)
                 reward[0] = 1;

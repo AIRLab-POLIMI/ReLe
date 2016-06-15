@@ -48,10 +48,9 @@ DoubleFQIEnsemble::~DoubleFQIEnsemble()
 
 DoubleFQI::DoubleFQI(BatchRegressor& QRegressorA,
                      BatchRegressor& QRegressorB,
-                     unsigned int nActions,
                      double epsilon,
                      bool shuffle) :
-    FQI(QRegressorEnsemble, nActions, epsilon),
+    FQI(QRegressorEnsemble, epsilon),
     QRegressorEnsemble(QRegressorA, QRegressorB),
     shuffle(shuffle)
 {
@@ -66,6 +65,7 @@ void DoubleFQI::step()
 
     indexes.push_back(allIndexes(arma::span(0, floor(this->nSamples / 2) - 1)));
     indexes.push_back(allIndexes(arma::span(floor(this->nSamples / 2), this->nSamples - 1)));
+    std::vector<BatchDataSimple> featureDataset;
     for(unsigned int i = 0; i < 2; i++)
     {
         arma::mat features = this->features.cols(indexes[i]);
@@ -77,8 +77,8 @@ void DoubleFQI::step()
         {
             if(this->absorbingStates.count(indexes[i][j]) == 0 && !this->firstStep)
             {
-                arma::vec Q_xn(this->nActions, arma::fill::zeros);
-                for(unsigned int u = 0; u < this->nActions; u++)
+                arma::vec Q_xn(task.actionsNumber, arma::fill::zeros);
+                for(unsigned int u = 0; u < task.actionsNumber; u++)
                     Q_xn(u) = arma::as_scalar(
                                   QRegressorEnsemble.getRegressor(i)(
                                       nextStates.col(j), FiniteAction(u)));
@@ -88,7 +88,7 @@ void DoubleFQI::step()
                 unsigned int index = RandomGenerator::sampleUniformInt(0,
                                      maxIndex.n_elem - 1);
 
-                outputs(j) = rewards(j) + this->gamma * arma::as_scalar(
+                outputs(j) = rewards(j) + task.gamma * arma::as_scalar(
                                  QRegressorEnsemble.getRegressor(1 - i)(
                                      nextStates.col(j), FiniteAction(maxIndex(index))));
             }
@@ -96,9 +96,12 @@ void DoubleFQI::step()
                 outputs(j) = rewards(j);
         }
 
-        BatchDataSimple featureDataset(features, outputs);
-        QRegressorEnsemble.getRegressor(i).trainFeatures(featureDataset);
+        BatchDataSimple currentFeatureDataset(features, outputs);
+        featureDataset.push_back(currentFeatureDataset);
     }
+
+    QRegressorEnsemble.getRegressor(0).trainFeatures(featureDataset[0]);
+    QRegressorEnsemble.getRegressor(1).trainFeatures(featureDataset[1]);
 
     this->firstStep = false;
 
