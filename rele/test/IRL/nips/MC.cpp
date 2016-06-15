@@ -25,230 +25,81 @@
 #include "rele/core/BatchCore.h"
 #include "rele/core/PolicyEvalAgent.h"
 
-#include "rele/environments/MountainCar.h"
+#include "rele/policy/q_policy/e_Greedy.h"
+#include "rele/utils/FileManager.h"
+#include "rele/core/BatchAgent.h"
 
-#include "rele/statistics/DifferentiableNormals.h"
-#include "rele/policy/nonparametric/RandomPolicy.h"
+#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/approximators/regressors/trees/ExtraTreeEnsemble.h"
+#include "rele/approximators/regressors/trees/KDTree.h"
+
+#include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/features/TilesCoder.h"
 
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"
-#include "rele/approximators/features/DenseFeatures.h"
-#include "rele/approximators/regressors/others/LinearApproximator.h"
+#include "rele/approximators/tiles/BasicTiles.h"
 
-#include "rele/algorithms/batch/td/LSPI.h"
 
-#include "rele/IRL/ParametricRewardMDP.h"
-#include "rele/IRL/algorithms/EGIRL.h"
-#include "rele/IRL/algorithms/SDPEGIRL.h"
-#include "rele/IRL/algorithms/CurvatureEGIRL.h"
-#include "rele/IRL/algorithms/LinearMLEDistribution.h"
+#include "rele/environments/MountainCar.h"
+#include "rele/algorithms/batch/td/FQI.h"
 
-#include "rele/utils/FileManager.h"
-
-#include <boost/timer/timer.hpp>
-
-using namespace boost::timer;
 using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-class mountain_car_manual_policy : public ParametricPolicy<FiniteAction, DenseState>
+enum alg
 {
-public:
-    unsigned int operator()(const arma::vec& state) override
-    {
-        if (RandomGenerator::sampleEvent(0.4))
-        {
-            return RandomGenerator::sampleUniformInt(0,1);
-        }
-        else
-        {
-            double speed = state(MountainCar::StateLabel::velocity);
-            if (speed <= eps)
-                return 0;
-            else
-                return 2;
-        }
-    }
-
-    double operator()(const arma::vec& state, const unsigned int& action) override
-    {
-        double speed = state(MountainCar::StateLabel::velocity);
-        if (speed <= eps && action == 0)
-            return 1;
-        else if(speed > eps && action == 2)
-            return 1;
-        else
-            return 0;
-    }
-
-    //Parametric policy interface
-public:
-    virtual arma::vec getParameters() const override
-    {
-        arma::vec w = {eps};
-
-        return w;
-    }
-
-    virtual const unsigned int getParametersSize() const override
-    {
-        return 1;
-    }
-
-    virtual void setParameters(const arma::vec& w) override
-    {
-        eps = w(0);
-        std::cout << eps << std::endl;
-    }
-
-
-    // Policy interface
-public:
-    string getPolicyName() override
-    {
-        return "mountain_car_manual_policy";
-    }
-
-    string printPolicy() override
-    {
-        return "";
-    }
-
-    mountain_car_manual_policy* clone() override
-    {
-        return new mountain_car_manual_policy();
-    }
-
-private:
-    double eps;
+    fqi = 0, dfqi = 1, lspi = 2
 };
 
 int main(int argc, char *argv[])
 {
-    if(argc != 3)
-    {
-        cout << "Wrong argument number: n_episode, n_experiment must be provided" << endl;
-        return -1;
-    }
-
-    string n_episodes(argv[1]);
-    string n_experiment(argv[2]);
-
-    string path = "nips/mc/" + n_episodes + "/" +n_experiment + "/";
-
-    FileManager fm(path + "EGIRL");
+    FileManager fm("nips", "mc");
     fm.createDir();
     fm.cleanDir();
-    std::cout << std::setprecision(OS_PRECISION);
+
+    // Define domain
+    MountainCar mdp(MountainCar::ConfigurationsLabel::Ernst);
 
 
-    // === get expert's trajectories === //
-    ifstream is;
-    is.open("/tmp/ReLe/" + path + "trajectories.dat");
-    Dataset<FiniteAction, DenseState> dataExpert;
-    dataExpert.readFromStream(is);
+    BasisFunctions bfs;
+    bfs = IdentityBasis::generate(mdp.getSettings().stateDimensionality + mdp.getSettings().actionDimensionality);
 
+    DenseFeatures phi(bfs);
 
-    // === Estimate policy === //
-    arma::mat theta(1, dataExpert.size());
-    for(unsigned int i = 0; i < dataExpert.size(); i++)
-    {
-        double minV = -std::numeric_limits<double>::infinity();
-        double maxV = -minV;
-        for(auto& tr : dataExpert[i])
-        {
+    // Define tree regressors
+    arma::vec defaultValue = {0};
+    EmptyTreeNode<arma::vec> defaultNode(defaultValue);
+    ExtraTreeEnsemble QRegressorA(phi, defaultNode);
+    // Define algorithm
+    double epsilon = 1e-6;
+    BatchTDAgent<DenseState>* batchAgent = new FQI(QRegressorA, epsilon);
 
-            if(tr.u == 0)
-            {
-                minV = std::max(tr.x(1), minV);
-            }
-            else
-            {
-                maxV = std::min(tr.x(1), maxV);
-            }
-        }
+    //Learn mountain car
+    auto&& core = buildBatchCore(mdp, *batchAgent);
+    core.getSettings().episodeLength = 3000;
+    core.getSettings().nEpisodes = 1000;
+    core.getSettings().maxBatchIterations = 25;
+    //core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("mc.log"));
+    core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
-        if(std::isinf(minV) || std::isinf(maxV))
-        {
-            theta.col(i) = 0;
-        }
-        else
-        {
-            theta.col(i) = 0.5*(maxV + minV);
-        }
-    }
+    e_GreedyApproximate policy;
+    policy.setEpsilon(1.0);
+    policy.setNactions(mdp.getSettings().actionsNumber);
+    core.run(policy);
 
-    std::cout << "theta" << std::endl;
-    std::cout << theta << std::endl;
+    // get a dataset
+    policy.setEpsilon(0.0);
+    batchAgent->setPolicy(policy);
+    auto&& expertDataset = core.runTest();
 
-    // === define expert's policy === //
-    mountain_car_manual_policy expertPolicy;
+    ofstream fs(fm.addPath("mc.log"));
+    expertDataset.writeToStream(fs);
 
-    arma::vec muExpert = arma::mean(theta, 1);
-    arma::mat SigmaExpert = arma::cov(theta.t());
-    ParametricNormal expertDist(muExpert, SigmaExpert);
-
-
-    // === recover reward by IRL === //
-
-    vec pos_linspace = linspace(-1.2,0.6,7);
-    vec vel_linspace = linspace(-0.07,0.07,7);
-
-    arma::mat yy_vel, xx_pos;
-    meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
-
-    arma::vec pos_mesh = vectorise(xx_pos);
-    arma::vec vel_mesh = vectorise(yy_vel);
-    arma::mat XX = arma::join_horiz(vel_mesh,pos_mesh);
-
-
-    double sigma_position = 2*pow((0.6+1.2)/4.0,2);
-    double sigma_speed    = 2*pow((0.07+0.07)/4.0,2);
-
-
-    arma::vec widths = {sigma_speed, sigma_position};
-    arma::mat WW = repmat(widths, 1, XX.n_rows);
-    arma::mat XT = XX.t();
-
-    BasisFunctions rewardBasis = GaussianRbf::generate(XT, WW);
-    DenseFeatures phiReward(rewardBasis);
-    LinearApproximator rewardF(phiReward);
-
-    cout << "Rewards size: " << rewardF.getParametersSize() << endl;
-
-    EGIRL<FiniteAction,DenseState> irlAlg1(dataExpert, theta, expertDist, rewardF,
-                                           0.9, IrlEpGrad::PGPE_BASELINE);
-
-    irlAlg1.run();
-
-    vec rewWeights1 = rewardF.getParameters();
-    cout << "Weights (EGIRL): " << rewWeights1.t();
-
-    rewWeights1.save(fm.addPath("Weights.txt"), arma::raw_ascii);
-
-
-    SDPEGIRL<FiniteAction,DenseState> irlAlg2(dataExpert, theta, expertDist, rewardF,
-            0.9, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
-
-    irlAlg2.run();
-
-    vec rewWeights2 = rewardF.getParameters();
-    cout << "Weights (SDP EGIRL): " << rewWeights2.t();
-
-    rewWeights2.save(fm.addPath("WeightsHessian.txt"), arma::raw_ascii);
-
-    CurvatureEGIRL<FiniteAction,DenseState> irlAlg3(dataExpert, theta, expertDist, rewardF,
-            0.9, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
-
-    irlAlg3.run();
-
-    vec rewWeights3 = rewardF.getParameters();
-    cout << "Weights (Curvature EGIRL): " << rewWeights3.t();
-
-    rewWeights2.save(fm.addPath("WeightsCurvature.txt"), arma::raw_ascii);
-
+    std::cout << "mean reward: " << expertDataset.getMeanReward(mdp.getSettings().gamma);
 
     return 0;
 }
