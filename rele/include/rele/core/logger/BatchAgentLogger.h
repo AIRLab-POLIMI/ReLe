@@ -81,7 +81,7 @@ protected:
     {
         if(outputData->isFinal())
         {
-            std::cout << std::endl << "--- Agent data at episode end ---" << std::endl;
+            std::cout << std::endl << "--- Agent data at convergence ---" << std::endl;
         }
         else
         {
