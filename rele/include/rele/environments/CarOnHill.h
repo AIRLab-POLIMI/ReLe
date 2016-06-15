@@ -31,8 +31,10 @@ namespace ReLe
 
 /*!
  * This class implements the Car On Hill problem.
- * This version of mountain car environment is the one proposed by Ernst paper, and is simpler than
+ * This is a version of mountain car environment, the one proposed by Ernst paper, and is simpler than
  * the original mountain car problem, as the goal can be reached by a random policy.
+ *
+ * \see MountainCar
  *
  * References
  * ==========
