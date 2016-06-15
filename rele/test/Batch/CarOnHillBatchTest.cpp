@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;
-    core.getSettings().maxBatchIterations = 1000;
+    core.getSettings().maxBatchIterations = 100;
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
