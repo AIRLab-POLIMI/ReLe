@@ -23,7 +23,6 @@
 
 #include "rele/environments/MountainCar.h"
 #include "rele/utils/RandomGenerator.h"
-#include <random>
 
 using namespace std;
 
@@ -32,112 +31,57 @@ namespace ReLe
 
 MountainCar::MountainCar(ConfigurationsLabel label,
                          double initialPosition,
-                         double initialVelocity,
-                         double rewardSigma) :
-    // Sutton's article
-    // DenseMDP(2, 3, 1, false, true),
-    // Klein's articles
-    // DenseMDP(2, 3, 1, false, true, 0.9, 100),
-    // Ernst's article
-    DenseMDP(2, 2, 1, false, true, 0.95, 400),
+                         double initialVelocity) :
+    DenseMDP(2, 3, 1, false, true, 0.9, 100),
     envType(label),
     initialPosition(initialPosition),
-    initialVelocity(initialVelocity),
-    rewardSigma(rewardSigma),
-    generator(std::default_random_engine()),
-    pdfNormal(std::normal_distribution<double>(0, rewardSigma))
+    initialVelocity(initialVelocity)
 {
 }
 
 void MountainCar::step(const FiniteAction& action,
                        DenseState& nextState, Reward& reward)
 {
-    if(envType == Sutton || envType == Klein || envType == Random)
+    int motorAction = action.getActionN() - 1;
+
+    double updatedVelocity = currentState[velocity] + motorAction * 0.001
+                             - 0.0025 * cos(3 * currentState[position]);
+    double updatedPosition = currentState[position] + updatedVelocity;
+
+
+    if(updatedPosition <= -1.2)
     {
-        int motorAction = action.getActionN() - 1;
-
-        double updatedVelocity = currentState[velocity] + motorAction * 0.001
-                                 - 0.0025 * cos(3 * currentState[position]);
-        double updatedPosition = currentState[position] + updatedVelocity;
-
-
-        if(updatedPosition <= -1.2)
-        {
-            currentState[position] = -1.2;
-            currentState[velocity] = 0;
-        }
-        else if(updatedPosition > 0.5)
-        {
-            currentState[position] = 0.6;
-            currentState[velocity] = 0;
-            currentState.setAbsorbing();
-        }
-        else
-        {
-            currentState[position] = updatedPosition;
-            currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
-        }
-
-        if(envType == Sutton)
-            reward[0] = -1;
-        else if(envType == Klein || envType == Random)
-        {
-            if(currentState[position] > 0.5)
-                reward[0] = 1;
-            else
-                reward[0] = 0;
-        }
+        currentState[position] = -1.2;
+        currentState[velocity] = 0;
     }
-    else if(envType == Ernst)
+    else if(updatedPosition > 0.5)
     {
-        double diffHill;
-        double diff2Hill;
-        if(currentState[position] < 0)
-        {
-            diffHill = 2 * currentState[position] + 1;
-            diff2Hill = 2;
-        }
-        else
-        {
-            diffHill = 1 / pow(1 + 5 * currentState[position] * currentState[position], 1.5);
-            diff2Hill = (-15 * currentState[position]) /
-                        pow(1 + 5 * currentState[position] * currentState[position], 2.5);
-        }
-
-        double h = 0.1;
-        double m = 1;
-        double g = 9.81;
-        double u = -4 + (double(action.getActionN()) / (this->getSettings().actionsNumber - 1)) * 8;
-        double acceleration = u / (m * (1 + diffHill * diffHill)) -
-                              (g * diffHill) / (1 + diffHill * diffHill) -
-                              (currentState[velocity] * currentState[velocity] * diffHill * diff2Hill) /
-                              (1 + diffHill * diffHill);
-
-        double updatedPosition = currentState[position] + h * currentState[velocity] +
-                                 0.5 * h * h * acceleration;
-        double updatedVelocity = currentState[velocity] + h * acceleration;
-
-        if(abs(updatedPosition) > 1 || abs(updatedVelocity) > 3)
-            currentState.setAbsorbing();
-
+        currentState[position] = 0.6;
+        currentState[velocity] = 0;
+        currentState.setAbsorbing();
+    }
+    else
+    {
         currentState[position] = updatedPosition;
-        currentState[velocity] = updatedVelocity;
+        currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
+    }
 
-        if(currentState[position] < -1 || abs(currentState[velocity]) > 3)
-            reward[0] = -1;
-        else if(currentState[position] > 1 && abs(currentState[velocity]) <= 3)
+    if(envType == Sutton)
+        reward[0] = -1;
+    else if(envType == Klein || envType == Random)
+    {
+        if(currentState[position] > 0.5)
             reward[0] = 1;
         else
-            reward[0] = 0 + pdfNormal(generator);
+            reward[0] = 0;
     }
 
-    nextState = currentState;
 }
 
 void MountainCar::getInitialState(DenseState& state)
 {
     //Sutton's article
-    if (envType == Sutton || envType == Ernst)
+    if (envType == Sutton)
     {
         currentState[position] = initialPosition;
         currentState[velocity] =  initialVelocity;

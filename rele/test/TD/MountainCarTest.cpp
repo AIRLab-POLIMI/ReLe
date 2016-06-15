@@ -41,7 +41,7 @@ using namespace ReLe;
 int main(int argc, char *argv[])
 {
     unsigned int nEpisodes = 1000;
-    MountainCar mdp(MountainCar::Ernst);
+    MountainCar mdp;
 
     BasisFunctions bVector = PolynomialFunction::generate(1, mdp.getSettings().statesNumber + 1);
     BasisFunctions basis = AndConditionBasisFunction::generate(bVector, 2, mdp.getSettings().actionsNumber);
