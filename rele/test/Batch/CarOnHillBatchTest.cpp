@@ -59,7 +59,7 @@ enum alg
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("mc", "batch");
+    FileManager fm("car_on_hill", "batch");
     fm.createDir();
     fm.cleanDir();
 
@@ -75,8 +75,6 @@ int main(int argc, char *argv[])
     // Define tree regressors
     arma::vec defaultValue = {0};
     EmptyTreeNode<arma::vec> defaultNode(defaultValue);
-    /*ExtraTreeEnsemble QRegressorA(phi, defaultNode);
-    ExtraTreeEnsemble QRegressorB(phi, defaultNode);*/
     KDTree<arma::vec, arma::vec> QRegressorA(phi, defaultNode);
     KDTree<arma::vec, arma::vec> QRegressorB(phi, defaultNode);
 
@@ -99,16 +97,9 @@ int main(int argc, char *argv[])
     arma::mat XT = XX.t();
 
     BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
-    //BasisFunctions qbasis = GaussianRbf::generate({7, 7}, {-1, 1, -3.0, 3.0});
     qbasis.push_back(new PolynomialFunction());
-    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, 2, mdp.getSettings().actionsNumber);
+    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, mdp.getSettings().stateDimensionality, mdp.getSettings().actionsNumber);
     DenseFeatures qphi(qbasisrep);
-
-    /*auto* tiles = new BasicTiles(
-    {Range(-1, 1), Range(-3, 3), Range(-0.5, 1.5)},
-    {15, 15, mdp.getSettings().actionsNumber});
-    DenseTilesCoder qphi(tiles);*/
-
 
     LinearApproximator linearQ(qphi);
 
@@ -137,8 +128,8 @@ int main(int argc, char *argv[])
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;
-    core.getSettings().maxBatchIterations = 1000;
-    core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("mc.log"));
+    core.getSettings().maxBatchIterations = 100;
+    core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
     e_GreedyApproximate policy;
@@ -157,7 +148,7 @@ int main(int argc, char *argv[])
 
     testCore.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     testCore.getSettings().episodeLength = 300;
-    testCore.getSettings().testEpisodeN = 1;
+    testCore.getSettings().testEpisodeN = 3;
 
     testCore.runTestEpisodes();
 
