@@ -1,4 +1,4 @@
-# ReLe [![Build Status](http://131.175.56.232:8080/buildStatus/icon?job=ReLe-CI)](http://131.175.56.232:8080/job/ReLe-CI/) [![Documentation Status](https://readthedocs.org/projects/rele/badge/?version=latest)](http://rele.readthedocs.org/en/latest/?badge=latest)
+# ReLe [![Documentation Status](https://readthedocs.org/projects/rele/badge/?version=latest)](http://rele.readthedocs.org/en/latest/?badge=latest) [![Build Status](http://131.175.56.232:8080/buildStatus/icon?job=ReLe-CI)](http://131.175.56.232:8080/job/ReLe-CI/)
 **RE**inforcement **LE**arning Library of Politecnico di Milano
 
 Tutorial and reference documentation is provided [here](http://rele.readthedocs.io/en/latest).
