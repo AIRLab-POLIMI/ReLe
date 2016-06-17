@@ -194,9 +194,7 @@ int main(int argc, char *argv[])
     std::cout << std::setprecision(OS_PRECISION);
 
     MultiHeat mdp;
-    vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().actionsNumber; ++i)
-        actions.push_back(FiniteAction(i));
+    unsigned int actionsN;
 
     //--- policy setup
     //input = [modo, t1, t2, azione]
@@ -216,7 +214,7 @@ int main(int argc, char *argv[])
     // transformate input for the replicated basis
     BasisFunctions abasis = AffineFunction::generate(basis, affineMtx);
     // replicate basis for each action
-    BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().stateDimensionality,actions.size()-1);
+    BasisFunctions bfs = AndConditionBasisFunction::generate(abasis,mdp.getSettings().stateDimensionality,actionsN-1);
     // create feature vector
     DenseFeatures phi(bfs);
     LinearApproximator reg(phi);
@@ -229,7 +227,7 @@ int main(int argc, char *argv[])
 
 //    return 0;
 
-    GenericParametricGibbsPolicy<DenseState> policy(actions, reg, 1.0/1e8);
+    GenericParametricGibbsPolicy<DenseState> policy(actionsN, reg, 1.0/1e8);
     //---
 
     //--- distribution setup

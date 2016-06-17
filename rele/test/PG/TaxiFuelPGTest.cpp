@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
 
-    vector<FiniteAction> actions = FiniteAction::generate(TaxiFuel::ACTIONNUMBER);
+    unsigned int actionsN = taxiMDP.getSettings().actionsNumber;
 
     //-- Features
     //BasisFunctions basis = GaussianRbf::generate({5, 5, 3, 3}, {0, 5, 0, 5, 0, 12, -1, 1});
@@ -70,13 +70,13 @@ int main(int argc, char *argv[])
     BasisFunctions basis = AndConditionBasisFunction::generate(basisSpace, indexes, values);
     basis.push_back(new IdentityBasis(TaxiFuel::fuel));
 
-    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actions.size()-1);
+    BasisFunctions basisGibbs = AndConditionBasisFunction::generate(basis, TaxiFuel::STATESIZE, actionsN-1);
     DenseFeatures phi(basisGibbs);
     cout << phi.rows() << endl;
     LinearApproximator reg(phi);
 
     double temperature = 100;
-    GenericParametricGibbsPolicy<DenseState> policy(actions, reg, temperature);
+    GenericParametricGibbsPolicy<DenseState> policy(actionsN, reg, temperature);
 
     //-- agent
     int nbepperpol = 10, nbstep = 100;

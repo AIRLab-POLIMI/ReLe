@@ -69,9 +69,7 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
     DeepSeaTreasure mdp;
-    vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().actionsNumber; ++i)
-        actions.push_back(FiniteAction(i));
+    unsigned int actionsN = mdp.getSettings().actionsNumber;
 
     //--- policy setup
     PolynomialFunction* pf0 = new PolynomialFunction();
@@ -87,7 +85,7 @@ int main(int argc, char *argv[])
 
     BasisFunctions bfs;
 
-    for (int i = 0; i < actions.size() -1; ++i)
+    for (int i = 0; i < actionsN -1; ++i)
     {
         bfs.push_back(new AndConditionBasisFunction(pf0,2,i));
         bfs.push_back(new AndConditionBasisFunction(pfs1,2,i));
@@ -100,9 +98,9 @@ int main(int argc, char *argv[])
     DenseFeatures basis(bfs);
     LinearApproximator reg(basis);
 
-    GenericParametricGibbsPolicy<DenseState> behavioral(actions, reg, 1);
+    GenericParametricGibbsPolicy<DenseState> behavioral(actionsN, reg, 1);
 
-    GenericParametricGibbsPolicy<DenseState> target(actions, reg, 1);
+    GenericParametricGibbsPolicy<DenseState> target(actionsN, reg, 1);
 
     AdaptiveGradientStep stepl(0.1);
     IndexRT rewardF(0);

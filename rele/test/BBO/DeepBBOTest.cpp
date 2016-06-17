@@ -221,9 +221,7 @@ int main(int argc, char *argv[])
     std::cout << std::setprecision(OS_PRECISION);
 
     DeepSeaTreasure mdp;
-    vector<FiniteAction> actions;
-    for (int i = 0; i < mdp.getSettings().actionsNumber; ++i)
-        actions.push_back(FiniteAction(i));
+    unsigned int actionsN;
 
     //--- policy setup
     PolynomialFunction* pf0 = new PolynomialFunction();
@@ -239,7 +237,7 @@ int main(int argc, char *argv[])
 
     BasisFunctions bfs;
 
-    for (int i = 0; i < actions.size() -1; ++i)
+    for (int i = 0; i < actionsN -1; ++i)
     {
         bfs.push_back(new AndConditionBasisFunction(pf0,2,i));
         bfs.push_back(new AndConditionBasisFunction(pfs1,2,i));
@@ -252,7 +250,7 @@ int main(int argc, char *argv[])
     DenseFeatures phi(bfs);
     LinearApproximator reg(phi);
 
-    GenericParametricGibbsPolicy<DenseState> policy(actions, reg, 1.0/1e8);
+    GenericParametricGibbsPolicy<DenseState> policy(actionsN, reg, 1.0/1e8);
     //---
 
     //--- distribution setup

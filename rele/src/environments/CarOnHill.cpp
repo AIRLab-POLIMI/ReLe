@@ -32,11 +32,11 @@ namespace ReLe
 
 CarOnHill::CarOnHill(double initialPosition,
                      double initialVelocity,
-					 double rewardSigma)
+                     double rewardSigma)
     : DenseMDP(2, 2, 1, false, true, 0.95, 400),
-	  initialPosition(initialPosition),
-	  initialVelocity(initialVelocity),
-	  rewardSigma(rewardSigma)
+      initialPosition(initialPosition),
+      initialVelocity(initialVelocity),
+      rewardSigma(rewardSigma)
 {
 
 }
