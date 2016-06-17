@@ -43,8 +43,8 @@
 #include "rele/approximators/tiles/BasicTiles.h"
 
 
-#include "rele/environments/CarOnHill.h"
-#include "rele/algorithms/batch/td/FQI.h"
+#include "rele/environments/MountainCar.h"
+#include "rele/algorithms/td/LinearSARSA.h"
 
 using namespace std;
 using namespace ReLe;
@@ -57,17 +57,45 @@ enum alg
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("nips", "mc");
+    FileManager fm("nips", "car");
     fm.createDir();
     fm.cleanDir();
 
     // Define domain
-    CarOnHill mdp;
+    MountainCar mdp;
+
+    Tiles* tiles = new BasicTiles({Range(-1, 1), Range(-3, 3), Range(-0.5, 1.5)}, {6, 12, 2});
+    DenseTilesCoder phi(tiles);
+
+    ConstantLearningRateDense alpha(0.2);
+    e_GreedyApproximate policy;
 
 
+    LinearGradientSARSA agent(phi, policy, alpha);
+
+    auto&& core = buildCore(mdp, agent);
+
+    core.getSettings().episodeLength = mdp.getSettings().horizon;
+    core.getSettings().episodeN = 1000;
+    core.getSettings().testEpisodeN = 1000;
+
+    core.runEpisodes();
+
+
+    PrintStrategy<FiniteAction, DenseState> strategy;
+    core.getSettings().loggerStrategy = &strategy;
+
+    core.runTestEpisodes();
+
+    arma::vec J = core.runEvaluation();
+
+    std::cout << J.t() << std::endl;
+
+
+
+    /*
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(mdp.getSettings().stateDimensionality + mdp.getSettings().actionDimensionality);
-
     DenseFeatures phi(bfs);
 
     // Define tree regressor
@@ -100,7 +128,7 @@ int main(int argc, char *argv[])
     ofstream fs(fm.addPath("mc.log"));
     expertDataset.writeToStream(fs);
 
-    std::cout << "mean reward: " << expertDataset.getMeanReward(mdp.getSettings().gamma);
+    std::cout << "mean reward: " << expertDataset.getMeanReward(mdp.getSettings().gamma);*/
 
     return 0;
 }
