@@ -33,7 +33,7 @@ namespace ReLe
 MountainCar::MountainCar(ConfigurationsLabel label,
                          double initialPosition,
                          double initialVelocity) :
-    DenseMDP(2, 3, 1, false, true, 0.9, 100),
+    DenseMDP(2, 3, 1, false, true, 0.9, 2000),
     envType(label),
     initialPosition(initialPosition),
     initialVelocity(initialVelocity)

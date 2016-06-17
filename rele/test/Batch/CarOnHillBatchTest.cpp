@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
     // Define domain
-    //CarOnHill mdp;
-    MountainCar mdp;
+    CarOnHill mdp;
+    //MountainCar mdp;
 
 
     BasisFunctions bfs;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     // Define algorithm
     double epsilon = 1e-6;
     BatchTDAgent<DenseState>* batchAgent;
-    alg algorithm = lspi;
+    alg algorithm = fqi;
     switch(algorithm)
     {
     case fqi:
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 
 
     //Run experiments and learning
-    /*
+    //*
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;

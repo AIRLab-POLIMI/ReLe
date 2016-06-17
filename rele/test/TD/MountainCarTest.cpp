@@ -21,12 +21,21 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/environments/MountainCar.h"
 #include "rele/core/Core.h"
+
 #include "rele/algorithms/td/LinearSARSA.h"
 #include "rele/algorithms/td/DenseSARSA.h"
+
+#include "rele/environments/MountainCar.h"
+#include "rele/environments/CarOnHill.h"
+
+#include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/features/TilesCoder.h"
+
 #include "rele/approximators/tiles/BasicTiles.h"
+#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/basis/ConditionBasedFunction.h"
+
 #include "rele/policy/q_policy/e_Greedy.h"
 #include "rele/utils/FileManager.h"
 #include "rele/utils/Range.h"
@@ -43,40 +52,31 @@ int main(int argc, char *argv[])
 	fm.createDir();
 	fm.cleanDir();
 
-    unsigned int nEpisodes = 1000;
+    unsigned int nEpisodes = 10000;
     MountainCar mdp;
 
-    //BasisFunctions bVector = PolynomialFunction::generate(1, mdp.getSettings().stateDimensionality + 1);
-
-    unsigned int tilesN = 9;
+    unsigned int tilesN = 25;
     unsigned int actionsN = mdp.getSettings().actionsNumber;
     Range xRange(-1.2, 0.5);
     Range vRange(-0.07, 0.07);
 
-    TilesVector tiles;
-    for(unsigned int i = 0; i < 10; i++)
-    {
-    	double xOffset = RandomGenerator::sampleUniform(-0.5, 0.5)*xRange.width()/static_cast<double>(tilesN);
-    	double vOffset = RandomGenerator::sampleUniform(-0.5, 0.5)*vRange.width()/static_cast<double>(tilesN);
-    	auto* tiling = new BasicTiles({xRange+xOffset, vRange+ vOffset, Range(-0.5, 2.5)},{tilesN, tilesN, actionsN});
-    	tiles.push_back(tiling);
-    }
+    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 2.5)},{tilesN, tilesN, actionsN});
 
     DenseTilesCoder phi(tiles);
 
     e_GreedyApproximate policy;
     policy.setEpsilon(0.0);
-    ConstantLearningRateDense alpha(0.2);
-    DenseSARSA agent(phi, policy, alpha);
+    ConstantLearningRateDense alpha(0.05);
+    LinearGradientSARSA agent(phi, policy, alpha);
     agent.setLambda(0.9);
 
 
     auto&& core = buildCore(mdp, agent);
-    core.getSettings().episodeLength = 2000;
+    core.getSettings().episodeLength = mdp.getSettings().horizon;
     core.getSettings().episodeN = nEpisodes;
     core.runEpisodes();
 
-    core.getSettings().testEpisodeN = 1;
+    core.getSettings().testEpisodeN = 10;
     core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     core.runTestEpisodes();
 
