@@ -118,6 +118,35 @@ Range Range::operator&(const Range& rhs) const
 }
 
 /**
+ * Offset the range by the given double.
+ */
+
+Range& Range::operator+=(const double d)
+{
+    lowerbound += d;
+    upperBound += d;
+
+    return *this;
+}
+
+Range Range::operator+(const double d) const
+{
+    double nlo = lowerbound + d;
+    double nhi = upperBound + d;
+
+    return Range(nlo, nhi);
+}
+
+// Symmetric case.
+Range operator+(const double d, const Range& r)
+{
+    double nlo = r.lowerbound + d;
+    double nhi = r.upperBound + d;
+
+    return Range(nlo, nhi);
+}
+
+/**
  * Scale the bounds by the given double.
  */
 Range& Range::operator*=(const double d)

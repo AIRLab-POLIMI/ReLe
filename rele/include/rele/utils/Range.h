@@ -146,6 +146,28 @@ public:
     Range operator&(const Range& rhs) const;
 
     /*!
+     * Add offset to the bounds by the given double.
+     * \param d offset
+     * \return a reference to the translated range
+     */
+    Range& operator+=(const double d);
+
+    /*!
+     * Add offset to the bounds by the given double.
+     * \param d offset
+     * \return the translated range
+     */
+    Range operator+(const double d) const;
+
+    /*!
+     * Translates the bounds of another range by a given double and creates a new range from them.
+     * \param d offset
+     * \param r range whose bound values are to be translated
+     * \return a new translated range
+     */
+    friend Range operator+(const double d, const Range& r);
+
+    /*!
     * Scale the bounds by the given double.
     * \param d scaling factor
     * \return a reference to the scaled range
