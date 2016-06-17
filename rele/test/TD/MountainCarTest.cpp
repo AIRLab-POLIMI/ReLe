@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     e_GreedyApproximate policy;
     policy.setEpsilon(0.0);
     ConstantLearningRateDense alpha(0.2);
-    LinearGradientSARSA agent(phi, policy, alpha);
+    DenseSARSA agent(phi, policy, alpha);
     agent.setLambda(0.9);
 
 

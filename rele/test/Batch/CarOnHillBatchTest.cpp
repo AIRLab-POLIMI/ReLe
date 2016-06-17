@@ -42,8 +42,9 @@
 #include "rele/approximators/basis/ConditionBasedFunction.h"
 #include "rele/approximators/tiles/BasicTiles.h"
 
-
 #include "rele/environments/CarOnHill.h"
+#include "rele/environments/MountainCar.h"
+
 #include "rele/algorithms/batch/td/FQI.h"
 #include "rele/algorithms/batch/td/DoubleFQI.h"
 #include "rele/algorithms/batch/td/LSPI.h"
@@ -64,7 +65,8 @@ int main(int argc, char *argv[])
     fm.cleanDir();
 
     // Define domain
-    CarOnHill mdp;
+    //CarOnHill mdp;
+    MountainCar mdp;
 
 
     BasisFunctions bfs;
@@ -80,8 +82,8 @@ int main(int argc, char *argv[])
 
 
     // Define linear regressors
-    vec pos_linspace = linspace<vec>(-1.0,1.0,7);
-    vec vel_linspace = linspace<vec>(-3.0,3.0,7);
+    vec pos_linspace = linspace<vec>(-1.2,0.6,10);
+    vec vel_linspace = linspace<vec>(-0.07,0.07,10);
 
     arma::mat yy_vel, xx_pos;
     meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
@@ -106,7 +108,7 @@ int main(int argc, char *argv[])
     // Define algorithm
     double epsilon = 1e-6;
     BatchTDAgent<DenseState>* batchAgent;
-    alg algorithm = fqi;
+    alg algorithm = lspi;
     switch(algorithm)
     {
     case fqi:
@@ -125,6 +127,7 @@ int main(int argc, char *argv[])
 
 
     //Run experiments and learning
+    /*
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
     core.getSettings().nEpisodes = 1000;
@@ -132,10 +135,23 @@ int main(int argc, char *argv[])
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
-    e_GreedyApproximate policy;
+	e_GreedyApproximate policy;
     policy.setEpsilon(1);
     policy.setNactions(mdp.getSettings().actionsNumber);
     core.run(policy);
+
+    /*/
+
+    Dataset<FiniteAction, DenseState> data;
+    ifstream ifs("/home/dave/batch.dat");
+    data.readFromStream(ifs);
+    auto&& core = buildBatchOnlyCore(mdp.getSettings(), data, *batchAgent);
+    core.getSettings().maxBatchIterations = 100;
+    core.getSettings().logger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
+    core.run();
+
+    //*/
+
 
     // Policy test
     e_GreedyApproximate epsP;

@@ -60,7 +60,12 @@ public:
 
     virtual ~DenseSARSA();
 
-    void setReplacingTraces(bool val)
+    inline void setLambda(double lambda)
+    {
+    	this->lambda = lambda;
+    }
+
+    inline void setReplacingTraces(bool val)
     {
         useReplacingTraces = val;
     }
