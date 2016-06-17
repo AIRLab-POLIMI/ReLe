@@ -523,6 +523,8 @@ void testGibbsPolicy()
     actions.push_back(FiniteAction(1));
     actions.push_back(FiniteAction(2));
 
+    unsigned int actionsN = actions.size();
+
     for (int i = 0; i < actions.size() - 1; ++i)
     {
         bfs.push_back(new AndConditionBasisFunction(basis[0], 2, i));
@@ -560,7 +562,7 @@ void testGibbsPolicy()
     std::cout << std::endl;
 
 
-    GenericParametricGibbsPolicy<DenseState> policy(actions, regressor, temperature);
+    GenericParametricGibbsPolicy<DenseState> policy(actionsN, regressor, temperature);
     RandomGenerator::seed(seed);
     FiniteAction output = policy(input);
     double p = policy(input, output);
@@ -604,6 +606,8 @@ void testGibbsPolicyAllPref()
     actions.push_back(FiniteAction(1));
     actions.push_back(FiniteAction(2));
 
+    unsigned int actionsN = actions.size();
+
     for (int i = 0; i < actions.size(); ++i)
     {
         bfs.push_back(new AndConditionBasisFunction(basis[0], 2, i));
@@ -641,7 +645,7 @@ void testGibbsPolicyAllPref()
     std::cout << std::endl;
 
 
-    GenericParametricGibbsPolicyAllPref<DenseState> policy(actions, regressor, temperature);
+    GenericParametricGibbsPolicyAllPref<DenseState> policy(actionsN, regressor, temperature);
     RandomGenerator::seed(seed);
     FiniteAction output = policy(input);
     double p = policy(input, output);

@@ -35,14 +35,14 @@ public:
     /**
      * Create an instance of the class using the given regressor.
      *
-     * \param actions the vector of finite actions
+     * \param actionsN the number of actions
      * \param energy the energy function \f$Q(x,u,\theta)\f$
      * \param temperature the temperature value
      */
-    GenericParametricGibbsPolicy(std::vector<FiniteAction> actions,
-                                 ParametricRegressor& energy, double temperature) :
-        mActions(actions), distribution(actions.size(),0),
-        approximator(energy), tau(temperature)
+    GenericParametricGibbsPolicy(unsigned int actionsN,
+                                 ParametricRegressor& energy,
+                                 double temperature) :
+        actionsN(actionsN),  approximator(energy), tau(temperature)
     {
     }
 
@@ -80,28 +80,24 @@ public:
                        const unsigned int& action) override
     {
         int statesize = state.size();
-        int nactions = mActions.size();
 
         arma::vec tuple(1+statesize);
         tuple(arma::span(0, statesize-1)) = state;
 
-        arma::vec&& distribution = computeDistribution(nactions, tuple,	statesize);
-        unsigned int index = findActionIndex(action);
-        return distribution[index];
+        arma::vec&& distribution = computeDistribution(actionsN, tuple,	statesize);
+        return distribution[action];
     }
 
     unsigned int operator() (typename state_type<StateC>::const_type_ref state) override
     {
         int statesize = state.size();
-        int nactions = mActions.size();
 
         arma::vec tuple(1+statesize);
         tuple(arma::span(0, statesize-1)) = state;
 
 
-        arma::vec&& distribution = computeDistribution(nactions, tuple,	statesize);
-        unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
-        return mActions.at(idx).getActionN();
+        arma::vec&& distribution = computeDistribution(actionsN, tuple,	statesize);
+        return RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
     }
 
     virtual GenericParametricGibbsPolicy<StateC>* clone() override
@@ -139,27 +135,27 @@ public:
                               typename action_type<FiniteAction>::const_type_ref action) override
     {
         int statesize = state.size();
-        int nactions = mActions.size();
 
         arma::vec tuple(1+statesize);
         tuple(arma::span(0, statesize-1)) = state;
 
-        arma::vec&& distribution = computeDistribution(nactions, tuple, statesize);
-        unsigned int index = findActionIndex(action);
+        arma::vec&& distribution = computeDistribution(actionsN, tuple, statesize);
+
 
         arma::vec gradient;
-        if (index != nactions-1)
+        if (action != actionsN-1)
         {
-            tuple[statesize] = mActions[index].getActionN();
+            tuple[statesize] = action;
             gradient = approximator.diff(tuple);
         }
         else
         {
             gradient.zeros(approximator.getParametersSize());
         }
-        for (unsigned int k = 0; k < nactions - 1; k++)
+
+        for (unsigned int k = 0; k < actionsN - 1; k++)
         {
-            tuple[statesize] = mActions[k].getActionN();
+            tuple[statesize] = k;
             gradient -= approximator.diff(tuple)*distribution(k);
         }
 
@@ -199,7 +195,7 @@ private:
         double den = 1.0; //set the value of the last action to the den
         for (unsigned int k = 0; k < na_red; k++)
         {
-            tuple[statesize] = mActions[k].getActionN();
+            tuple[statesize] = k;
             arma::vec preference = approximator(tuple);
             double val = exp(preference[0] / tau);
             den += val;
@@ -217,35 +213,11 @@ private:
         }
 
         distribution /= den;
-//        std::cout << distribution.t();
         return distribution;
     }
 
-    /*!
-     * Look for an action in the action list
-     * \param action the action to be searched
-     * \return return the action number
-     */
-    unsigned int findActionIndex(const unsigned int& action)
-    {
-        unsigned int index;
-
-        for (index = 0; index < mActions.size(); index++)
-        {
-            if (action == mActions[index].getActionN())
-                break;
-        }
-
-        if (index == mActions.size())
-        {
-            throw std::runtime_error("Action not found");
-        }
-
-        return index;
-    }
-
 protected:
-    std::vector<FiniteAction> mActions;
+    unsigned int actionsN;
     std::vector<double> distribution;
     double tau;
     ParametricRegressor& approximator;
@@ -274,10 +246,10 @@ public:
      * \param energy the energy function \f$Q(x,u,\theta)\f$
      * \param temperature the temperature value
      */
-    GenericParametricGibbsPolicyAllPref(std::vector<FiniteAction> actions,
-                                        ParametricRegressor& energy, double temperature) :
-        mActions(actions), distribution(actions.size(),0),
-        approximator(energy), tau(temperature)
+    GenericParametricGibbsPolicyAllPref(unsigned int actionsN,
+                                        ParametricRegressor& energy,
+                                        double temperature) :
+        actionsN(actionsN), approximator(energy), tau(temperature)
     {
     }
 
@@ -315,28 +287,23 @@ public:
                        const unsigned int& action) override
     {
         int statesize = state.size();
-        int nactions = mActions.size();
 
         arma::vec tuple(1+statesize);
         tuple(arma::span(0, statesize-1)) = state;
 
-        arma::vec&& distribution = computeDistribution(nactions, tuple,	statesize);
-        unsigned int index = findActionIndex(action);
-        return distribution[index];
+        arma::vec&& distribution = computeDistribution(actionsN, tuple,	statesize);
+        return distribution[action];
     }
 
     unsigned int operator() (typename state_type<StateC>::const_type_ref state) override
     {
         int statesize = state.size();
-        int nactions = mActions.size();
 
         arma::vec tuple(1+statesize);
         tuple(arma::span(0, statesize-1)) = state;
 
-
-        arma::vec&& distribution = computeDistribution(nactions, tuple,	statesize);
-        unsigned int idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
-        return mActions.at(idx).getActionN();
+        arma::vec&& distribution = computeDistribution(actionsN, tuple,	statesize);
+        return RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
     }
 
     virtual GenericParametricGibbsPolicyAllPref<StateC>* clone() override
@@ -374,20 +341,18 @@ public:
                               typename action_type<FiniteAction>::const_type_ref action) override
     {
         int statesize = state.size();
-        int nactions = mActions.size();
 
         arma::vec tuple(1+statesize);
         tuple(arma::span(0, statesize-1)) = state;
 
 
-        arma::vec&& distribution = computeDistribution(nactions, tuple, statesize);
-        unsigned int index = findActionIndex(action);
-        tuple[statesize] = mActions[index].getActionN();
+        arma::vec&& distribution = computeDistribution(actionsN, tuple, statesize);
+        tuple[statesize] = action;
         arma::vec&& diffsa = approximator.diff(tuple);
         arma::vec sumdiff(diffsa.n_elem, arma::fill::zeros);
-        for (unsigned int k = 0; k < nactions; k++)
+        for (unsigned int k = 0; k < actionsN; k++)
         {
-            tuple[statesize] = mActions[k].getActionN();
+            tuple[statesize] = k;
             sumdiff += approximator.diff(tuple)*distribution(k);
         }
 
@@ -427,7 +392,7 @@ private:
         arma::vec distribution(nactions);
         for (unsigned int k = 0; k < nactions; k++)
         {
-            tuple[statesize] = mActions[k].getActionN();
+            tuple[statesize] = k;
             arma::vec preference = approximator(tuple);
             double val = exp(preference[0] / tau);
             den += val;
@@ -448,32 +413,8 @@ private:
         return distribution;
     }
 
-    /*!
-     * Look for an action in the action list
-     * \param action the action to be searched
-     * \return return the action number
-     */
-    unsigned int findActionIndex(const unsigned int& action)
-    {
-        unsigned int index;
-
-        for (index = 0; index < mActions.size(); index++)
-        {
-            if (action == mActions[index].getActionN())
-                break;
-        }
-
-        if (index == mActions.size())
-        {
-            throw std::runtime_error("Action not found");
-        }
-
-        return index;
-    }
-
 private:
-    std::vector<FiniteAction> mActions;
-    std::vector<double> distribution;
+    unsigned int actionsN;
     double tau;
     ParametricRegressor& approximator;
 };
