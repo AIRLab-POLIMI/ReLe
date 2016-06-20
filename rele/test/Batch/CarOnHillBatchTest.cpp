@@ -80,12 +80,12 @@ int main(int argc, char *argv[])
 
 
     // Define linear regressors
-    unsigned int tilesN = 25;
+    unsigned int tilesN = 9;
     unsigned int actionsN = mdp.getSettings().actionsNumber;
     Range xRange(-1, 1);
     Range vRange(-3, 3);
 
-    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 2.5)},{tilesN, tilesN, actionsN});
+    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 1.5)}, {tilesN, tilesN, actionsN});
 
     DenseTilesCoder qphi(tiles);
 
@@ -113,36 +113,24 @@ int main(int argc, char *argv[])
 
 
     //Run experiments and learning
-    //*
     auto&& core = buildBatchCore(mdp, *batchAgent);
     core.getSettings().episodeLength = 3000;
-    core.getSettings().nEpisodes = 1000;
-    core.getSettings().maxBatchIterations = 100;
+    core.getSettings().nEpisodes = 10000;
+    core.getSettings().maxBatchIterations = 30;
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
-	e_GreedyApproximate policy;
+    e_GreedyApproximate policy;
     policy.setEpsilon(1);
     policy.setNactions(mdp.getSettings().actionsNumber);
     core.run(policy);
-
-    /*/
-
-    Dataset<FiniteAction, DenseState> data;
-    ifstream ifs("/home/dave/batch.dat");
-    data.readFromStream(ifs);
-    auto&& core = buildBatchOnlyCore(mdp.getSettings(), data, *batchAgent);
-    core.getSettings().maxBatchIterations = 100;
-    core.getSettings().logger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
-    core.run();
-
-    //*/
-
 
     // Policy test
     e_GreedyApproximate epsP;
     epsP.setEpsilon(0.0);
     batchAgent->setPolicy(epsP);
+    std::cout << "Inside main" << std::endl;
+    std::cout << linearQ.getParameters().t() << std::endl;
     Policy<FiniteAction, DenseState>* testPolicy = batchAgent->getPolicy();
     PolicyEvalAgent<FiniteAction, DenseState> testAgent(*testPolicy);
 

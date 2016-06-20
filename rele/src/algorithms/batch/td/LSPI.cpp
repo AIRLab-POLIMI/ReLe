@@ -167,6 +167,7 @@ void LSPI::step()
 {
     //Evaluate the current policy (and implicitly improve)
     arma::vec QWeights = critic->run();
+
     Q.setParameters(QWeights);
 
     //check if termination condition has been reached

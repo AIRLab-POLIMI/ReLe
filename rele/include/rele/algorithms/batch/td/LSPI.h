@@ -118,7 +118,7 @@ private:
 
 protected:
     LSTDQ* critic;
-    LinearApproximator Q;
+    LinearApproximator& Q;
     arma::vec oldWeights;
     double epsilon;
     double delta;

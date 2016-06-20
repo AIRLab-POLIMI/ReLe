@@ -132,7 +132,7 @@ public:
     }
 
 private:
-    void printTransitions(std::vector<Transition<ActionC, StateC>>& samples)
+    void printTransitions(Episode<ActionC, StateC>& samples)
     {
         if (logTransitions)
         {
