@@ -66,8 +66,6 @@ int main(int argc, char *argv[])
 
     // Define domain
     CarOnHill mdp;
-    //MountainCar mdp;
-
 
     BasisFunctions bfs;
     bfs = IdentityBasis::generate(mdp.getSettings().stateDimensionality + mdp.getSettings().actionDimensionality);
@@ -82,33 +80,21 @@ int main(int argc, char *argv[])
 
 
     // Define linear regressors
-    vec pos_linspace = linspace<vec>(-1.2,0.6,10);
-    vec vel_linspace = linspace<vec>(-0.07,0.07,10);
+    unsigned int tilesN = 25;
+    unsigned int actionsN = mdp.getSettings().actionsNumber;
+    Range xRange(-1, 1);
+    Range vRange(-3, 3);
 
-    arma::mat yy_vel, xx_pos;
-    meshgrid(vel_linspace, pos_linspace, yy_vel, xx_pos);
+    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 2.5)},{tilesN, tilesN, actionsN});
 
-    arma::vec pos_mesh = vectorise(xx_pos);
-    arma::vec vel_mesh = vectorise(yy_vel);
-    arma::mat XX = arma::join_horiz(vel_mesh,pos_mesh);
-
-    double sigma_position = 2*pow((0.6+1.2)/10.,2);
-    double sigma_speed    = 2*pow((0.07+0.07)/10.,2);
-    arma::vec widths = {sigma_speed, sigma_position};
-    arma::mat WW = repmat(widths, 1, XX.n_rows);
-    arma::mat XT = XX.t();
-
-    BasisFunctions qbasis = GaussianRbf::generate(XT, WW);
-    qbasis.push_back(new PolynomialFunction());
-    BasisFunctions qbasisrep = AndConditionBasisFunction::generate(qbasis, mdp.getSettings().stateDimensionality, mdp.getSettings().actionsNumber);
-    DenseFeatures qphi(qbasisrep);
+    DenseTilesCoder qphi(tiles);
 
     LinearApproximator linearQ(qphi);
 
     // Define algorithm
     double epsilon = 1e-6;
     BatchTDAgent<DenseState>* batchAgent;
-    alg algorithm = fqi;
+    alg algorithm = lspi;
     switch(algorithm)
     {
     case fqi:

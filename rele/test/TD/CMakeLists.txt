@@ -10,3 +10,6 @@ target_link_libraries(grid_world rele)
 
 add_executable(mountain_car MountainCarTest.cpp)
 target_link_libraries(mountain_car rele)
+
+add_executable(car_on_hill CarOnHillTest.cpp)
+target_link_libraries(car_on_hill rele)

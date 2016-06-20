@@ -26,7 +26,7 @@
 #include "rele/algorithms/td/LinearSARSA.h"
 #include "rele/algorithms/td/DenseSARSA.h"
 
-#include "rele/environments/MountainCar.h"
+#include "rele/environments/CarOnHill.h"
 
 #include "rele/approximators/features/DenseFeatures.h"
 #include "rele/approximators/features/TilesCoder.h"
@@ -52,20 +52,20 @@ int main(int argc, char *argv[])
 	fm.cleanDir();
 
     unsigned int nEpisodes = 10000;
-    MountainCar mdp;
+    CarOnHill mdp;
 
-    unsigned int tilesN = 25;
+    unsigned int tilesN = 2;
     unsigned int actionsN = mdp.getSettings().actionsNumber;
-    Range xRange(-1.2, 0.5);
-    Range vRange(-0.07, 0.07);
+    Range xRange(-1.0, 1.0);
+    Range vRange(-3.0, 3.0);
 
-    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 2.5)},{tilesN, tilesN, actionsN});
+    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 1.5)},{tilesN, tilesN, actionsN});
 
     DenseTilesCoder phi(tiles);
 
     e_GreedyApproximate policy;
-    policy.setEpsilon(0.0);
-    ConstantLearningRateDense alpha(0.05);
+    policy.setEpsilon(0.1);
+    ConstantLearningRateDense alpha(0.1);
     LinearGradientSARSA agent(phi, policy, alpha);
     agent.setLambda(0.9);
 
