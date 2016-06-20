@@ -23,6 +23,7 @@
 
 #include "rele/environments/MountainCar.h"
 #include "rele/utils/RandomGenerator.h"
+#include "rele/utils/Range.h"
 
 using namespace std;
 
@@ -32,7 +33,7 @@ namespace ReLe
 MountainCar::MountainCar(ConfigurationsLabel label,
                          double initialPosition,
                          double initialVelocity) :
-    DenseMDP(2, 3, 1, false, true, 0.9, 100),
+    DenseMDP(2, 3, 1, false, true, 0.9, 2000),
     envType(label),
     initialPosition(initialPosition),
     initialVelocity(initialVelocity)
@@ -42,10 +43,12 @@ MountainCar::MountainCar(ConfigurationsLabel label,
 void MountainCar::step(const FiniteAction& action,
                        DenseState& nextState, Reward& reward)
 {
+    Range speedRange(-0.07, 0.07);
+
     int motorAction = action.getActionN() - 1;
 
-    double updatedVelocity = currentState[velocity] + motorAction * 0.001
-                             - 0.0025 * cos(3 * currentState[position]);
+    double updatedVelocity = speedRange.bound(currentState[velocity] + motorAction * 0.001
+                             - 0.0025 * cos(3 * currentState[position]));
     double updatedPosition = currentState[position] + updatedVelocity;
 
 
@@ -56,14 +59,14 @@ void MountainCar::step(const FiniteAction& action,
     }
     else if(updatedPosition > 0.5)
     {
-        currentState[position] = 0.6;
+        currentState[position] = 0.5;
         currentState[velocity] = 0;
         currentState.setAbsorbing();
     }
     else
     {
         currentState[position] = updatedPosition;
-        currentState[velocity] = min(max(updatedVelocity, -0.07), 0.07);
+        currentState[velocity] = updatedVelocity;
     }
 
     if(envType == Sutton)
@@ -75,6 +78,8 @@ void MountainCar::step(const FiniteAction& action,
         else
             reward[0] = 0;
     }
+
+    nextState = currentState;
 
 }
 

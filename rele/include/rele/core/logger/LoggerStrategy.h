@@ -387,48 +387,6 @@ public:
     Dataset<ActionC, StateC> data;
 };
 
-
-inline void getDimensionsWorker(Episode<FiniteAction, FiniteState>& samples, int& ds, int& da, int& dr)
-{
-    ds = 1;
-    da = 1;
-    dr = samples[0].r.size();
-}
-
-inline void getDimensionsWorker(Episode<FiniteAction, DenseState>& samples, int& ds, int& da, int& dr)
-{
-    ds = samples[0].x.n_elem;
-    da = 1;
-    dr = samples[0].r.size();
-}
-
-inline void getDimensionsWorker(Episode<DenseAction, DenseState>& samples, int& ds, int& da, int& dr)
-{
-    ds = samples[0].x.n_elem;
-    da = samples[0].u.n_elem;
-    dr = samples[0].r.size();
-}
-
-inline void assigneActionWorker(double& val, FiniteAction& action, int i)
-{
-    val = action.getActionN();
-}
-
-inline void assigneActionWorker(double& val, DenseAction& action, int i)
-{
-    val = action[i];
-}
-
-inline void assigneStateWorker(arma::vec& val, int idx, FiniteState& state, int i)
-{
-    val[idx] = state.getStateN();
-}
-
-inline void assigneStateWorker(arma::vec& val, int idx, DenseState& state, int i)
-{
-    val[idx] = state[i];
-}
-
 }
 
 #endif /* INCLUDE_RELE_UTILS_LOGGERSTRATEGY_H_ */
