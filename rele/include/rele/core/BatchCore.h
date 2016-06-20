@@ -179,17 +179,24 @@ public:
      */
     void run(Policy<ActionC, StateC>& policy)
     {
-        Dataset<ActionC, StateC>&& data = test(&policy);
+        batchAgent.setTask(environment.getSettings());
 
-        if(settings.datasetLogger)
-            settings.datasetLogger->log(data);
+        runLearning(policy);
+    }
 
-        auto&& batchCore = buildBatchOnlyCore(environment.getSettings(), data, batchAgent);
+    /*!
+     * This method is used to iteratively generate a dataset from the environment using
+     * agent policy and then running the batch learning algorithm on it.
+     */
+    void run(unsigned int iterations)
+    {
+        batchAgent.setTask(environment.getSettings());
 
-        batchCore.getSettings().logger = settings.agentLogger;
-        batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
-
-        batchCore.run();
+        for(unsigned int i = 0; i < iterations; i++)
+        {
+            Policy<ActionC, StateC>& policy = *batchAgent.getPolicy();
+            runLearning(policy);
+        }
     }
 
     /*!
@@ -222,6 +229,18 @@ protected:
         core.runTestEpisodes();
 
         return collection.data;
+    }
+
+    void runLearning(Policy<ActionC, StateC>& policy)
+    {
+        Dataset<ActionC, StateC> && data = test(&policy);
+        if (settings.datasetLogger)
+            settings.datasetLogger->log(data);
+
+        auto&& batchCore = buildBatchOnlyCore(environment.getSettings(), data, batchAgent);
+        batchCore.getSettings().logger = settings.agentLogger;
+        batchCore.getSettings().maxBatchIterations = settings.maxBatchIterations;
+        batchCore.run();
     }
 };
 

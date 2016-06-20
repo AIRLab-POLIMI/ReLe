@@ -161,6 +161,7 @@ void LSPI::init(Dataset<FiniteAction, DenseState>& data)
     critic = new LSTDQ(data, Q, task.gamma, task.actionsNumber);
     firstStep = true;
     this->converged = false;
+    delta = std::numeric_limits<double>::infinity();
 }
 
 void LSPI::step()

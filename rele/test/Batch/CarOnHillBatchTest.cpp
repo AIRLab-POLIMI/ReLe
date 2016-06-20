@@ -111,26 +111,27 @@ int main(int argc, char *argv[])
         break;
     }
 
+    e_GreedyApproximate policy;
+    policy.setEpsilon(0.15);
+    policy.setNactions(mdp.getSettings().actionsNumber);
+
 
     //Run experiments and learning
+    batchAgent->setPolicy(policy);
     auto&& core = buildBatchCore(mdp, *batchAgent);
-    core.getSettings().episodeLength = 3000;
-    core.getSettings().nEpisodes = 10000;
+
+    core.getSettings().episodeLength = mdp.getSettings().horizon;
+    core.getSettings().nEpisodes = 1000;
     core.getSettings().maxBatchIterations = 30;
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
-    e_GreedyApproximate policy;
-    policy.setEpsilon(1);
-    policy.setNactions(mdp.getSettings().actionsNumber);
-    core.run(policy);
+    core.run(5);
 
     // Policy test
     e_GreedyApproximate epsP;
     epsP.setEpsilon(0.0);
     batchAgent->setPolicy(epsP);
-    std::cout << "Inside main" << std::endl;
-    std::cout << linearQ.getParameters().t() << std::endl;
     Policy<FiniteAction, DenseState>* testPolicy = batchAgent->getPolicy();
     PolicyEvalAgent<FiniteAction, DenseState> testAgent(*testPolicy);
 
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
 
     testCore.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     testCore.getSettings().episodeLength = 300;
-    testCore.getSettings().testEpisodeN = 3;
+    testCore.getSettings().testEpisodeN = 1;
 
     testCore.runTestEpisodes();
 
