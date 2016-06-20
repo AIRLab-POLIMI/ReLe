@@ -54,10 +54,10 @@ int main(int argc, char *argv[])
     unsigned int nEpisodes = 10000;
     CarOnHill mdp;
 
-    unsigned int tilesN = 2;
+    unsigned int tilesN = 9;
     unsigned int actionsN = mdp.getSettings().actionsNumber;
-    Range xRange(-1.0, 1.0);
-    Range vRange(-3.0, 3.0);
+    Range xRange(-1, 1);
+    Range vRange(-3, 3);
 
     auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 1.5)},{tilesN, tilesN, actionsN});
 
@@ -75,7 +75,9 @@ int main(int argc, char *argv[])
     core.getSettings().episodeN = nEpisodes;
     core.runEpisodes();
 
-    core.getSettings().testEpisodeN = 10;
+
+    policy.setEpsilon(0.0);
+    core.getSettings().testEpisodeN = 1;
     core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     core.runTestEpisodes();
 
