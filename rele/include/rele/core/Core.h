@@ -27,6 +27,7 @@
 #include "rele/core/Agent.h"
 #include "rele/core/Environment.h"
 #include "rele/core/logger/Logger.h"
+#include "rele/core/callbacks/CoreCallback.h"
 
 namespace ReLe
 {
@@ -53,6 +54,7 @@ public:
         CoreSettings()
         {
             loggerStrategy = nullptr;
+            episodeCallback = nullptr;
             episodeLength = 0;
             episodeN = 0;
             testEpisodeN = 0;
@@ -60,6 +62,8 @@ public:
 
         //! The logger strategy, or a null pointer if no data should be logged
         LoggerStrategy<ActionC, StateC>* loggerStrategy;
+        //! A callback to be called at each episode end
+        CoreCallback* episodeCallback;
         //! The length of episodes
         unsigned int episodeLength;
         //! The number of learning episodes
@@ -149,10 +153,18 @@ public:
      */
     void runEpisodes()
     {
+        if(settings.episodeCallback)
+            settings.episodeCallback->setStepNumbers(settings.episodeN);
+
         for(unsigned int i = 0; i < settings.episodeN; i++)
         {
+            if(settings.episodeCallback)
+                settings.episodeCallback->run(i);
             runEpisode();
         }
+
+        if(settings.episodeCallback)
+            settings.episodeCallback->runEnd();
     }
 
     /*!
@@ -190,10 +202,19 @@ public:
      */
     void runTestEpisodes()
     {
+        if(settings.episodeCallback)
+            settings.episodeCallback->setStepNumbers(settings.episodeN);
+
         for(unsigned int i = 0; i < settings.testEpisodeN; i++)
         {
+            if(settings.episodeCallback)
+                settings.episodeCallback->run(i);
+
             runTestEpisode();
         }
+
+        if(settings.episodeCallback)
+            settings.episodeCallback->runEnd();
     }
 
     /*!
@@ -205,8 +226,6 @@ public:
         //core setup
         StateC xn;
         ActionC u;
-
-
 
         Reward r(environment.getSettings().rewardDimensionality);
         arma::vec J_mean(r.size(), arma::fill::zeros);

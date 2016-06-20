@@ -73,7 +73,10 @@ int main(int argc, char *argv[])
     auto&& core = buildCore(mdp, agent);
     core.getSettings().episodeLength = mdp.getSettings().horizon;
     core.getSettings().episodeN = nEpisodes;
+    core.getSettings().episodeCallback = new CoreProgressBar();
     core.runEpisodes();
+    delete core.getSettings().episodeCallback;
+    core.getSettings().episodeCallback = nullptr;
 
 
     policy.setEpsilon(0.0);
