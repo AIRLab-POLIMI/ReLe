@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 
 
     // Define linear regressors
-    unsigned int tilesN = 9;
+    unsigned int tilesN = 15;
     unsigned int actionsN = mdp.getSettings().actionsNumber;
     Range xRange(-1, 1);
     Range vRange(-3, 3);
@@ -112,7 +112,6 @@ int main(int argc, char *argv[])
     }
 
     e_GreedyApproximate policy;
-    policy.setEpsilon(0.15);
     policy.setNactions(mdp.getSettings().actionsNumber);
 
 
@@ -126,22 +125,16 @@ int main(int argc, char *argv[])
     core.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
     core.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
 
-    core.run(5);
+    core.run(1);
 
-    // Policy test
-    e_GreedyApproximate epsP;
-    epsP.setEpsilon(0.0);
-    batchAgent->setPolicy(epsP);
-    Policy<FiniteAction, DenseState>* testPolicy = batchAgent->getPolicy();
-    PolicyEvalAgent<FiniteAction, DenseState> testAgent(*testPolicy);
 
-    auto&& testCore = buildCore(mdp, testAgent);
+    policy.setEpsilon(0.0);
 
-    testCore.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
-    testCore.getSettings().episodeLength = 300;
-    testCore.getSettings().testEpisodeN = 1;
+    core.getSettings().nEpisodes = 1;
+    auto&& data = core.runTest();
 
-    testCore.runTestEpisodes();
+    std::cout << std::endl << "--- Running Test episode ---" << std::endl << std::endl;
+    data.printDecorated(std::cout);
 
     return 0;
 }

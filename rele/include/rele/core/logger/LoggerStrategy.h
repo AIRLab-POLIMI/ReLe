@@ -137,17 +137,7 @@ private:
         if (logTransitions)
         {
             std::cout << "--- Transitions ---" << std::endl;
-            int t = 0;
-            for (auto sample : samples)
-            {
-                auto& x = sample.x;
-                auto& u = sample.u;
-                auto& xn = sample.xn;
-                Reward& r = sample.r;
-                std::cout << "t = " << t++ << ": x = [" << x << "] u = [" << u
-                          << "] xn = [" << xn << "] r = [" << r << "]"
-                          << std::endl;
-            }
+            samples.printDecorated(std::cout);
         }
     }
 
