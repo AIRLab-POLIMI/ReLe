@@ -47,9 +47,9 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	FileManager fm("mc", "LinearSARSA");
-	fm.createDir();
-	fm.cleanDir();
+    FileManager fm("mc", "LinearSARSA");
+    fm.createDir();
+    fm.cleanDir();
 
     unsigned int nEpisodes = 10000;
     MountainCar mdp;
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     Range xRange(-1.2, 0.5);
     Range vRange(-0.07, 0.07);
 
-    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 2.5)},{tilesN, tilesN, actionsN});
+    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 2.5)}, {tilesN, tilesN, actionsN});
 
     DenseTilesCoder phi(tiles);
 

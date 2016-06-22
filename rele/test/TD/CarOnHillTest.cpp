@@ -47,19 +47,19 @@ using namespace ReLe;
 
 int main(int argc, char *argv[])
 {
-	FileManager fm("mc", "LinearSARSA");
-	fm.createDir();
-	fm.cleanDir();
+    FileManager fm("mc", "LinearSARSA");
+    fm.createDir();
+    fm.cleanDir();
 
     unsigned int nEpisodes = 10000;
     CarOnHill mdp;
 
-    unsigned int tilesN = 2;
+    unsigned int tilesN = 9;
     unsigned int actionsN = mdp.getSettings().actionsNumber;
-    Range xRange(-1.0, 1.0);
-    Range vRange(-3.0, 3.0);
+    Range xRange(-1, 1);
+    Range vRange(-3, 3);
 
-    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 1.5)},{tilesN, tilesN, actionsN});
+    auto* tiles = new BasicTiles({xRange, vRange, Range(-0.5, 1.5)}, {tilesN, tilesN, actionsN});
 
     DenseTilesCoder phi(tiles);
 
@@ -73,9 +73,14 @@ int main(int argc, char *argv[])
     auto&& core = buildCore(mdp, agent);
     core.getSettings().episodeLength = mdp.getSettings().horizon;
     core.getSettings().episodeN = nEpisodes;
+    core.getSettings().episodeCallback = new CoreProgressBar();
     core.runEpisodes();
+    delete core.getSettings().episodeCallback;
+    core.getSettings().episodeCallback = nullptr;
 
-    core.getSettings().testEpisodeN = 10;
+
+    policy.setEpsilon(0.0);
+    core.getSettings().testEpisodeN = 1;
     core.getSettings().loggerStrategy = new PrintStrategy<FiniteAction, DenseState>();
     core.runTestEpisodes();
 

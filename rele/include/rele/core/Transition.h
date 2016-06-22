@@ -210,6 +210,24 @@ public:
         this->back().printLast(os);
     }
 
+    /*!
+     * Writes the decorated verion of the episode (with repetitions and extra tokens)
+     */
+    void printDecorated(std::ostream& os)
+    {
+        int t = 0;
+        for (auto sample : *this)
+        {
+            auto& x = sample.x;
+            auto& u = sample.u;
+            auto& xn = sample.xn;
+            Reward& r = sample.r;
+            os << "t = " << t++ << ": x = [" << x << "] u = [" << u
+                      << "] xn = [" << xn << "] r = [" << r << "]"
+                      << std::endl;
+        }
+    }
+
 };
 
 /*!
@@ -460,6 +478,15 @@ public:
             readEpisodeFromStream(is, stateSize, actionSize, rewardSize);
         }
 
+    }
+
+    /*!
+     *	Writes the decorated verion of the dataset (with repetitions and extra tokens)
+     */
+    void printDecorated(std::ostream& os)
+    {
+    	for(auto& ep : *this)
+    		ep.printDecorated(os);
     }
 
 private:
