@@ -36,7 +36,6 @@
 
 #include "rele/IRL/algorithms/GIRL.h"
 #include "rele/IRL/algorithms/PGIRL.h"
-#include "rele/IRL/algorithms/ExpectedDeltaIRL.h"
 
 namespace ReLe
 {
@@ -150,11 +149,6 @@ IRLAlgorithm<ActionC, StateC>* buildIRLalg(Dataset<ActionC, StateC>& dataset,
     else if(conf.algorithm == "PGIRL")
         return new PlaneGIRL<DenseAction,DenseState>(dataset, policy, rewardf,
                 gamma, conf.gradient);
-
-    else if(conf.algorithm == "ExpectedDeltaIRL")
-        return new ExpectedDeltaIRL<DenseAction,DenseState>(dataset, policy, rewardf,
-                gamma, conf.gradient, conf.hessian);
-
 
 
 }

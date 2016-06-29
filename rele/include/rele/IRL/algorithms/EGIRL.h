@@ -38,10 +38,7 @@ public:
           LinearApproximator& rewardf, double gamma, IrlEpGrad type)
         : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma), type(type)
     {
-        Features& features = rewardf.getFeatures();
-        phi = data.computeEpisodeFeatureExpectation(features, gamma);
-
-        gradientCalculator = EpisodicGradientCalculatorFactory<ActionC, StateC>::build(type, theta, phi, dist, gamma);
+        gradientCalculator = EpisodicGradientCalculatorFactory<ActionC, StateC>::build(type, theta, this->phiBar, dist, gamma);
     }
 
     virtual double objFunction(const arma::vec& xSimplex, arma::vec& df) override
@@ -73,7 +70,6 @@ public:
 
 protected:
     IrlEpGrad type;
-    arma::mat phi;
     GradientCalculator<ActionC, StateC>* gradientCalculator;
 };
 

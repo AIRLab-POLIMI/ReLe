@@ -39,7 +39,7 @@ public:
                    LinearApproximator& rewardf, double gamma, IrlEpGrad gtype, IrlEpHess htype, double eps = 0.025)
         : EGIRL<ActionC, StateC>(data, theta, dist, rewardf, gamma, gtype), htype(htype), eps(eps)
     {
-        hessianCalculator = EpisodicHessianCalculatorFactory<ActionC, StateC>::build(htype, theta, this->phi, dist, gamma);
+        hessianCalculator = EpisodicHessianCalculatorFactory<ActionC, StateC>::build(htype, theta, this->phiBar, dist, gamma);
     }
 
     virtual ~CurvatureEGIRL()

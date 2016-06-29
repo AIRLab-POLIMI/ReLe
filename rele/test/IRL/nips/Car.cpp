@@ -50,10 +50,150 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
-enum alg
+template<class StateC>
+class ProbabilityPolicy : public DifferentiablePolicy<FiniteAction, StateC>
 {
-    fqi = 0, dfqi = 1, lspi = 2
+public:
+
+    /**
+     * Create an instance of the class using the given regressor.
+     *
+     * \param actionsN the number of actions
+     * \param energy the energy function \f$Q(x,u,\theta)\f$
+     * \param temperature the temperature value
+     */
+	ProbabilityPolicy(unsigned int actionsN,
+                      ParametricRegressor& prob) :
+        actionsN(actionsN),  approximator(prob)
+    {
+    }
+
+    virtual ~ProbabilityPolicy()
+    {
+    }
+
+
+    // Policy interface
+public:
+    std::string getPolicyName() override
+    {
+        return std::string("GenericParametricGibbsPolicy");
+    }
+
+    hyperparameters_map getPolicyHyperparameters() override
+    {
+        hyperparameters_map hyperParameters;
+        return hyperParameters;
+    }
+
+    std::string printPolicy() override
+    {
+        return std::string("");
+    }
+
+
+    double operator() (typename state_type<StateC>::const_type_ref state,
+                       const unsigned int& action) override
+    {
+        int statesize = state.size();
+
+        arma::vec tuple(1+statesize);
+        tuple(arma::span(0, statesize-1)) = state;
+
+        arma::vec&& distribution = computeDistribution(actionsN, tuple,	statesize);
+        return distribution[action];
+    }
+
+    unsigned int operator() (typename state_type<StateC>::const_type_ref state) override
+    {
+        int statesize = state.size();
+
+        arma::vec tuple(1+statesize);
+        tuple(arma::span(0, statesize-1)) = state;
+
+
+        arma::vec&& distribution = computeDistribution(actionsN, tuple,	statesize);
+        return RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
+    }
+
+    virtual ProbabilityPolicy<StateC>* clone() override
+    {
+        return new  ProbabilityPolicy<StateC>(*this);
+    }
+
+    // ParametricPolicy interface
+public:
+    virtual inline arma::vec getParameters() const override
+    {
+        return approximator.getParameters();
+    }
+
+    virtual inline const unsigned int getParametersSize() const override
+    {
+        return approximator.getParametersSize();
+    }
+
+    virtual inline void setParameters(const arma::vec& w) override
+    {
+        approximator.setParameters(w);
+    }
+
+    // DifferentiablePolicy interface
+public:
+    virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
+                           typename action_type<FiniteAction>::const_type_ref action) override
+    {
+    	ProbabilityPolicy& pi = *this;
+        return pi(state, action)*difflog(state, action);
+    }
+
+    virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
+                              typename action_type<FiniteAction>::const_type_ref action) override
+    {
+    	 return arma::vec();
+    }
+
+    virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
+                               typename action_type<FiniteAction>::const_type_ref action) override
+    {
+    	 return arma::mat();
+    }
+
+private:
+    arma::vec computeDistribution(int nactions, arma::vec tuple, int statesize)
+    {
+        int na_red = nactions - 1;
+        arma::vec distribution(nactions);
+        distribution(na_red) = 1.0; //last action is valued 1.0
+        double den = 1.0; //set the value of the last action to the den
+        for (unsigned int k = 0; k < na_red; k++)
+        {
+            tuple[statesize] = k;
+            double val = as_scalar(approximator(tuple));
+            den += val;
+            distribution[k] = val;
+        }
+
+        // check extreme cases (if some action is nan or infinite)
+        arma::uvec q_nf = arma::find_nonfinite(distribution);
+        if (q_nf.n_elem > 0)
+        {
+            arma::uvec q_f = arma::find_finite(distribution);
+            distribution(q_f).zeros();
+            distribution(q_nf).ones();
+            den = q_nf.n_elem;
+        }
+
+        distribution /= den;
+        return distribution;
+    }
+
+protected:
+    unsigned int actionsN;
+    ParametricRegressor& approximator;
+
 };
+
 
 int main(int argc, char *argv[])
 {
@@ -106,15 +246,33 @@ int main(int argc, char *argv[])
 
 
     //Create expert distribution
-    LinearApproximator energyApproximator(qphi);
-    GenericParametricGibbsPolicyAllPref<DenseState> policyFamily(mdp.getSettings().actionsNumber, energyApproximator, 1.0);
+    auto* tilesP = new BasicTiles({xRange, vRange}, {tilesN, tilesN});
 
-    vec muExpert = linearQ.getParameters();
-    mat SigmaExpert = 1*eye(muExpert.n_elem, muExpert.n_elem);
+    DenseTilesCoder pphi(tilesP);
+    LinearApproximator energyApproximator(pphi);
+    /*GenericParametricGibbsPolicyAllPref<DenseState> policyFamily(mdp.getSettings().actionsNumber,
+    			energyApproximator, 0.01);*/
+
+
+    ProbabilityPolicy<DenseState> policyFamily(mdp.getSettings().actionsNumber, energyApproximator);
+
+
+    vec preferences = exp(linearQ.getParameters()/0.01);
+    vec preferences1 = preferences.rows(0, preferences.n_rows/2 -1);
+    vec preferences2 = preferences.rows(preferences.n_rows/2,  preferences.n_rows -1);
+
+
+
+    vec muExpert = preferences1/(preferences1+preferences2);
+    mat SigmaExpert = 1e-8*eye(muExpert.n_elem, muExpert.n_elem);
     ParametricNormal expertDist(muExpert, SigmaExpert);
 
+
+    //policyFamily.setParameters(muExpert);
+    //PolicyEvalAgent<FiniteAction, DenseState> expert(policyFamily);
     //Generate dataset from expert distribution
     PolicyEvalDistribution<FiniteAction, DenseState> expert(expertDist, policyFamily);
+
     Core<FiniteAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<FiniteAction, DenseState> collection;
     expertCore.getSettings().loggerStrategy = &collection;
@@ -123,25 +281,30 @@ int main(int argc, char *argv[])
     expertCore.runTestEpisodes();
     Dataset<FiniteAction,DenseState>& data = collection.data;
 
+    std::cout << std::endl << "--- Running Test episode ---" << std::endl << std::endl;
+    //data.printDecorated(cout);
+    cout << "performances distribution: " << data.getMeanReward(mdp.getSettings().gamma) << endl;
+
     // Create parametric reward
-    unsigned tilesRewardN = 7;
+    unsigned tilesRewardN = 15;
     auto* rewardTiles = new BasicTiles({xRange, vRange}, {tilesRewardN, tilesRewardN});
     DenseTilesCoder phiReward(rewardTiles);
     LinearApproximator rewardRegressor(phiReward);
 
     //Create IRL algorithm to run
     arma::mat theta = expert.getParams();
-    auto* irlAlg = new EGIRL<FiniteAction, DenseState>(data, theta, expertDist,
-            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+    /*auto* irlAlg = new EGIRL<FiniteAction, DenseState>(data, theta, expertDist,
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);*/
     /*auto* irlAlg = new CurvatureEGIRL<FiniteAction, DenseState>(data, theta, expertDist,
                 rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);*/
-    /*auto* irlAlg = new SDPEGIRL<FiniteAction, DenseState>(data, theta, expertDist,
-                    rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);*/
+    auto* irlAlg = new SDPEGIRL<FiniteAction, DenseState>(data, theta, expertDist,
+                    rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
 
 
     //Run GIRL
     irlAlg->run();
     arma::vec omega = rewardRegressor.getParameters();
+    omega.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
 
     //Learn back environment
     ParametricRewardMDP<FiniteAction, DenseState> prMdp(mdp, rewardRegressor);
@@ -166,6 +329,8 @@ int main(int argc, char *argv[])
 
     dataImitator.printDecorated(cout);
     cout << "imitator performance: " << dataImitator.getMeanReward(mdp.getSettings().gamma) << endl;
+
+
 
     return 0;
 }

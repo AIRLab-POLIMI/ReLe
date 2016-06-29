@@ -35,10 +35,8 @@
 
 #include "rele/IRL/algorithms/EGIRL.h"
 #include "rele/IRL/algorithms/EMIRL.h"
-#include "rele/IRL/algorithms/EpisodicExpectedDeltaIRL.h"
 #include "rele/IRL/algorithms/SDPEGIRL.h"
 #include "rele/IRL/algorithms/CurvatureEGIRL.h"
-#include "rele/IRL/algorithms/TradeoffEGIRL.h"
 
 namespace ReLe
 {
@@ -155,9 +153,6 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
     else if(conf.algorithm == "EMIRL")
         return new EMIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma);
 
-    else if(conf.algorithm == "EpisodicExpectedDeltaIRL")
-        return new EpisodicExpectedDeltaIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
-                conf.gradient, conf.hessian);
 
     else if(conf.algorithm == "SDPEGIRL")
         return new SDPEGIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
@@ -165,10 +160,6 @@ IRLAlgorithm<ActionC, StateC>* buildEpisodicIRLalg(Dataset<ActionC, StateC>& dat
 
     else if(conf.algorithm == "CurvatureEGIRL")
         return new CurvatureEGIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
-                conf.gradient, conf.hessian);
-
-    else if(conf.algorithm == "TradeoffEGIRL")
-        return new TradeoffEGIRL<ActionC,StateC>(dataset, theta, dist, rewardf, gamma,
                 conf.gradient, conf.hessian);
 
     return nullptr;

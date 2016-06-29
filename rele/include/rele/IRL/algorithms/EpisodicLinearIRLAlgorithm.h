@@ -35,7 +35,7 @@ class EpisodicLinearIRLAlgorithm : public LinearIRLAlgorithm<ActionC, StateC>
 public:
     EpisodicLinearIRLAlgorithm(Dataset<ActionC, StateC>& data, const arma::mat& theta,
                                LinearApproximator& rewardf, double gamma)
-        : LinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma), theta(theta)
+        : LinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
     {
         Features& phi = rewardf.getFeatures();
         phiBar = data.computeEpisodeFeatureExpectation(phi, gamma);
@@ -100,7 +100,6 @@ protected:
 
 protected:
     // Data
-    arma::mat theta;
     arma::mat phiBar;
 
 };
