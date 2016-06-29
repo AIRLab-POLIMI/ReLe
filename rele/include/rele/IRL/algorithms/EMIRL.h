@@ -37,7 +37,7 @@ class EMIRL: public EpisodicLinearIRLAlgorithm<ActionC, StateC>
 public:
     EMIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, ParametricNormal& dist,
           LinearApproximator& rewardFunction, double gamma)
-        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardFunction, gamma),
+        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, rewardFunction, gamma),
           wBar(dist.getMean()), sigmaInv(arma::inv(dist.getCovariance())), theta(theta)
     {
 

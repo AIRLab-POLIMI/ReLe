@@ -33,8 +33,7 @@ template<class ActionC, class StateC>
 class EpisodicLinearIRLAlgorithm : public LinearIRLAlgorithm<ActionC, StateC>
 {
 public:
-    EpisodicLinearIRLAlgorithm(Dataset<ActionC, StateC>& data, const arma::mat& theta,
-                               LinearApproximator& rewardf, double gamma)
+    EpisodicLinearIRLAlgorithm(Dataset<ActionC, StateC>& data, LinearApproximator& rewardf, double gamma)
         : LinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma)
     {
         Features& phi = rewardf.getFeatures();
@@ -101,7 +100,6 @@ protected:
 protected:
     // Data
     arma::mat phiBar;
-
 };
 
 }

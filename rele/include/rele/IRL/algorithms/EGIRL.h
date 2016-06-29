@@ -36,7 +36,7 @@ class EGIRL: public EpisodicLinearIRLAlgorithm<ActionC, StateC>
 public:
     EGIRL(Dataset<ActionC, StateC>& data, const arma::mat& theta, DifferentiableDistribution& dist,
           LinearApproximator& rewardf, double gamma, IrlEpGrad type)
-        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, theta, rewardf, gamma), type(type)
+        : EpisodicLinearIRLAlgorithm<ActionC, StateC>(data, rewardf, gamma), type(type)
     {
         gradientCalculator = EpisodicGradientCalculatorFactory<ActionC, StateC>::build(type, theta, this->phiBar, dist, gamma);
     }
