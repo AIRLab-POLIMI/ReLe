@@ -264,14 +264,14 @@ int main(int argc, char *argv[])
 
 
     vec muExpert = preferences1/(preferences1+preferences2);
-    mat SigmaExpert = 1e-8*eye(muExpert.n_elem, muExpert.n_elem);
+    mat SigmaExpert = 1e-2*eye(muExpert.n_elem, muExpert.n_elem);
     ParametricNormal expertDist(muExpert, SigmaExpert);
 
 
     //policyFamily.setParameters(muExpert);
     //PolicyEvalAgent<FiniteAction, DenseState> expert(policyFamily);
     //Generate dataset from expert distribution
-    PolicyEvalDistribution<FiniteAction, DenseState> expert(expertDist, policyFamily);
+    PolicyEvalDistribution<FiniteAction, DenseState> expert(expertDist, policyFamily, 10);
 
     Core<FiniteAction, DenseState> expertCore(mdp, expert);
     CollectorStrategy<FiniteAction, DenseState> collection;

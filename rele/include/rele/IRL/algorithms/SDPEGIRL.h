@@ -40,16 +40,6 @@ public:
         : EGIRL<ActionC, StateC>(data, theta, dist, rewardf, gamma, gtype), htype(htype), eps(eps)
     {
         hessianCalculator = EpisodicHessianCalculatorFactory<ActionC, StateC>::build(htype, theta, this->phiBar, dist, gamma);
-
-        std::cout << "positive definite features" << std::endl;
-        arma::cube diff = hessianCalculator->getHessianDiff();
-        for(unsigned int i = 0; i < diff.n_slices; i++)
-        {
-            double maxEig = arma::max(arma::eig_sym(diff.slice(i)));
-
-            if(maxEig < 0)
-                std::cout << maxEig << " " << i << std::endl;
-        }
     }
 
     virtual ~SDPEGIRL()

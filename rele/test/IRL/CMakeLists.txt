@@ -8,6 +8,9 @@ target_link_libraries(test_hessian_gradient rele)
 add_executable(nips_car nips/Car.cpp)
 target_link_libraries(nips_car rele)
 
+add_executable(nips_ship nips/Ship.cpp)
+target_link_libraries(nips_ship rele)
+
 add_executable(nips_lqr_comp nips/LQR_comp.cpp)
 target_link_libraries(nips_lqr_comp rele)
 
