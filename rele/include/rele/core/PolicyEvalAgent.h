@@ -122,36 +122,36 @@ public:
      * \param policy the family of parametric policies to be used
      */
     PolicyEvalDistribution(Distribution& dist, ParametricPolicy<ActionC, StateC>& policy,
-    			unsigned int episodesPerPolicy = 1)
+                           unsigned int episodesPerPolicy = 1)
         : PolicyEvalAgent<ActionC, StateC>(policy), policy(policy), dist(dist),
-		  episodesPerPolicy(episodesPerPolicy)
+          episodesPerPolicy(episodesPerPolicy)
     {
-    	episodeCount = episodesPerPolicy;
+        episodeCount = episodesPerPolicy;
     }
 
     virtual void initTestEpisode() override
     {
 
-    	if(episodeCount == episodesPerPolicy)
-    	{
-			//obtain new parameters
-			arma::vec new_params = dist();
+        if(episodeCount == episodesPerPolicy)
+        {
+            //obtain new parameters
+            arma::vec new_params = dist();
 
-			//Save them in the history
-			params_history.push_back(new_params);
+            //Save them in the history
+            params_history.push_back(new_params);
 
-			//set to policy
-			policy.setParameters(new_params);
+            //set to policy
+            policy.setParameters(new_params);
 
-			episodeCount = 0;
-    	}
-    	else
-    	{
-    		arma::vec new_params = policy.getParameters();
-    		params_history.push_back(new_params);
-    	}
+            episodeCount = 0;
+        }
+        else
+        {
+            arma::vec new_params = policy.getParameters();
+            params_history.push_back(new_params);
+        }
 
-    	episodeCount++;
+        episodeCount++;
 
     }
 

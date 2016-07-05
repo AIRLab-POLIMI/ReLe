@@ -223,8 +223,8 @@ public:
             auto& xn = sample.xn;
             Reward& r = sample.r;
             os << "t = " << t++ << ": x = [" << x << "] u = [" << u
-                      << "] xn = [" << xn << "] r = [" << r << "]"
-                      << std::endl;
+               << "] xn = [" << xn << "] r = [" << r << "]"
+               << std::endl;
         }
     }
 
@@ -485,8 +485,8 @@ public:
      */
     void printDecorated(std::ostream& os)
     {
-    	for(auto& ep : *this)
-    		ep.printDecorated(os);
+        for(auto& ep : *this)
+            ep.printDecorated(os);
     }
 
 private:
