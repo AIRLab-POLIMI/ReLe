@@ -92,4 +92,9 @@ target_link_libraries(nls_bayesian rele)
 add_executable(lqr_bayesian_batch bayesian/BatchTest.cpp)
 target_link_libraries(lqr_bayesian_batch rele)
 
+# classification based
+add_executable(car_scirl classification_based/Car.cpp)
+target_link_libraries(car_scirl rele)
+
+
 

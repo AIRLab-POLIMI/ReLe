@@ -24,6 +24,8 @@
 #ifndef INCLUDE_RELE_IRL_ALGORITHMS_SCIRL_H_
 #define INCLUDE_RELE_IRL_ALGORITHMS_SCIRL_H_
 
+#include "EpisodicLinearIRLAlgorithm.h"
+
 namespace ReLe
 {
 
@@ -31,11 +33,14 @@ template<class StateC>
 class SCIRL: public IRLAlgorithm<FiniteAction, StateC>
 {
 public:
-    SCIRL(Dataset<ActionC, StateC>& data, LinearApproximator& rewardf,
+    SCIRL(Dataset<FiniteAction, StateC>& data, LinearApproximator& rewardf,
           double gamma, unsigned int nActions, bool heuristic = true) :
         data(data), rewardf(rewardf), gamma(gamma), nActions(nActions), heuristic(heuristic)
     {
-
+    	lambda_mu = 1e-5;
+    	lambda_c = 0;
+    	epsilon = 1e-3;
+    	N_final = 20;
     }
 
     virtual void run() override
@@ -75,7 +80,7 @@ private:
 
                 for (unsigned int u = 0; u < nActions; u++)
                 {
-                    phiAll.row(count + nTransitions*u) = phi(tr.x, u).t();
+                    phiAll.row(count + nTransitions*u) = phi(tr.x, FiniteAction(u)).t();
                 }
 
                 count++;
@@ -86,8 +91,6 @@ private:
     arma::mat LSTD_mu(const arma::mat& phiData, const arma::mat& phiDataNext, const arma::mat& phiAll)
     {
         unsigned int nFeatures = rewardf.getParametersSize();
-
-        arma::mat phiNext(phiData.size(), arma::fill::zeros);
 
         arma::mat b = phiData.t()*phiData;
         arma::mat A = lambda_mu*arma::eye(nFeatures, nFeatures)+b-gamma*phiData.t()*phiDataNext;
@@ -140,11 +143,17 @@ private:
 
 
 
-        for (unsigned int i=0; i < nTransitions; i++)
+        unsigned int count = 0;
+        for(auto& episode : data)
         {
+            for(unsigned t = 0; t + 1 < episode.size(); t++)
+            {
+                auto& tr = episode[t];
 
-            margin(i+size_data(1)*(data {i,2}-1))=0;
-            phi_sample.row(i)=mu.row(i+size_data(1)*(data {i,2}-1));
+                margin(count+nTransitions*tr.u)=0;
+                phi_sample.row(count)=mu.row(count+nTransitions*tr.u);
+                count++;
+            }
         }
 
         double stoppingCondition=1+epsilon;
@@ -155,9 +164,9 @@ private:
         while (stoppingCondition > epsilon && iterations < N_final)
         {
             // computing theta derivative
-            arma::mat Q_classif=phi*theta+margin;
-            arma::vec a_max;
-            max_Q(Q_classif,n_a, a_max);
+            arma::mat Q_classif=mu*theta+margin;
+            arma::uvec a_max;
+            max_Q(Q_classif, a_max);
 
             for (unsigned int i=0; i < nTransitions; i++)
                 phi_sample_star.row(i) = mu.row(i+nTransitions*a_max(i));
@@ -167,18 +176,40 @@ private:
 
             arma::vec oldTheta=theta;
             // update theta
-            if (norm(derivative,2)!=0)
+            if (arma::norm(derivative)!=0)
                 theta=theta-delta*derivative.t()/(arma::norm(derivative));
 
             // compute termination criterion
-            stoppingCondition=norm(oldTheta-theta,2);
+            stoppingCondition=arma::norm(oldTheta-theta);
             iterations++;
         }
     }
 
+    void max_Q(const arma::mat& Q, arma::uvec& uMax)
+    {
+    	unsigned int N=Q.n_rows/nActions;
+    	uMax.set_size(N);
+
+    	for (unsigned int i=0; i < N; i++)
+    	{
+    		double max = -std::numeric_limits<double>::infinity();
+
+    		for(unsigned int u = 0; u < nActions; u++)
+    		{
+    			double q = Q(i+N*u);
+    			if(q > max)
+    			{
+    				max = q;
+    				uMax(i) = u;
+    			}
+    		}
+    	}
+
+    }
+
 
 private:
-    Dataset<ActionC, StateC>& data;
+    Dataset<FiniteAction, StateC>& data;
     LinearApproximator& rewardf;
     double gamma;
     unsigned int nActions;
