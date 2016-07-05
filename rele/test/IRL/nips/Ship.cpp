@@ -83,14 +83,14 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
 
 int main(int argc, char *argv[])
 {
-	if(argc != 3)
-	{
-		cout << "Wrong argument number: n_episode, n_experiment must be provided" << endl;
-	    return -1;
-	}
+    if(argc != 3)
+    {
+        cout << "Wrong argument number: n_episode, n_experiment must be provided" << endl;
+        return -1;
+    }
 
-	string n_episodes(argv[1]);
-	string n_experiment(argv[2]);
+    string n_episodes(argv[1]);
+    string n_experiment(argv[2]);
 
     FileManager fm("nips/ship/"+n_episodes+"/"+n_experiment);
     fm.cleanDir();
@@ -162,18 +162,18 @@ int main(int argc, char *argv[])
     IRLAlgorithm<DenseAction, DenseState>* irlAlg[numAlg];
 
 
-	irlAlg[0] = new EGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
-	irlAlg[1] = new SDPEGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
-	irlAlg[2] = new CurvatureEGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+    irlAlg[0] = new EGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE);
+    irlAlg[1] = new SDPEGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+    irlAlg[2] = new CurvatureEGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE, 1e-4);
 
-	arma::mat weights(rewardRegressor.getParametersSize(), numAlg, arma::fill::zeros);
+    arma::mat weights(rewardRegressor.getParametersSize(), numAlg, arma::fill::zeros);
 
-	for(unsigned int i = 0; i < numAlg; i++)
-	{
-		irlAlg[i]->run();
-		weights.col(i) = rewardRegressor.getParameters();
-		delete irlAlg[i];
-	}
+    for(unsigned int i = 0; i < numAlg; i++)
+    {
+        irlAlg[i]->run();
+        weights.col(i) = rewardRegressor.getParameters();
+        delete irlAlg[i];
+    }
 
 
     // -- RECOVER! -- //
@@ -192,39 +192,39 @@ int main(int argc, char *argv[])
 
     for(unsigned int i = 0; i < numAlg; i++)
     {
-    	rewardRegressor.setParameters(weights.col(i));
-		ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
-		arma::vec mean = learnShipSteering(prMdp, phi, nbEpisodes);;
+        rewardRegressor.setParameters(weights.col(i));
+        ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
+        arma::vec mean = learnShipSteering(prMdp, phi, nbEpisodes);;
 
-		double epsilon = 0.05;
-		NormalPolicy imitatorPolicy(epsilon, phi);
-		imitatorPolicy.setParameters(mean);
+        double epsilon = 0.05;
+        NormalPolicy imitatorPolicy(epsilon, phi);
+        imitatorPolicy.setParameters(mean);
 
-		//Evaluate policy against the real mdp
-		PolicyEvalAgent<DenseAction, DenseState> imitator(imitatorPolicy);
-		Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
-		CollectorStrategy<DenseAction, DenseState> collector2;
-		evaluationCore.getSettings().loggerStrategy = &collector2;
-		evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
-		evaluationCore.getSettings().episodeN = episodes;
-		evaluationCore.getSettings().testEpisodeN = nbEpisodes;
+        //Evaluate policy against the real mdp
+        PolicyEvalAgent<DenseAction, DenseState> imitator(imitatorPolicy);
+        Core<DenseAction, DenseState> evaluationCore(mdp, imitator);
+        CollectorStrategy<DenseAction, DenseState> collector2;
+        evaluationCore.getSettings().loggerStrategy = &collector2;
+        evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
+        evaluationCore.getSettings().episodeN = episodes;
+        evaluationCore.getSettings().testEpisodeN = nbEpisodes;
 
-		evaluationCore.runTestEpisodes();
+        evaluationCore.runTestEpisodes();
 
-		Dataset<DenseAction,DenseState>& data2 = collector2.data;
+        Dataset<DenseAction,DenseState>& data2 = collector2.data;
 
-		double gamma = mdp.getSettings().gamma;
+        double gamma = mdp.getSettings().gamma;
 
-		arma::vec reward = data2.getMeanReward(mdp.getSettings().gamma);
-		cout << "reward: " << arma::as_scalar(reward) << endl;
+        arma::vec reward = data2.getMeanReward(mdp.getSettings().gamma);
+        cout << "reward: " << arma::as_scalar(reward) << endl;
 
-		arma::vec featuresExpectation = data2.computefeatureExpectation(phiReward, mdp.getSettings().gamma);
+        arma::vec featuresExpectation = data2.computefeatureExpectation(phiReward, mdp.getSettings().gamma);
 
-		reward.save(fm.addPath("reward.txt"), arma::raw_ascii);
-		featuresExpectation.save(fm.addPath("featuresExpectation.txt"), arma::raw_ascii);
+        reward.save(fm.addPath("reward._" + std::to_string(i) + "txt"), arma::raw_ascii);
+        featuresExpectation.save(fm.addPath("featuresExpectation_" + std::to_string(i) + ".txt"), arma::raw_ascii);
 
-		//ofstream ofs2(fm.addPath("TrajectoriesImitator_" + std::to_string(i) +".txt"));
-		//data2.writeToStream(ofs2);
+        ofstream ofs2(fm.addPath("TrajectoriesImitator_" + std::to_string(i) +".txt"));
+        data2.writeToStream(ofs2);
     }
 
 #endif

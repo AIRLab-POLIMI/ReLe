@@ -62,7 +62,7 @@ public:
      * \param energy the energy function \f$Q(x,u,\theta)\f$
      * \param temperature the temperature value
      */
-	ProbabilityPolicy(unsigned int actionsN,
+    ProbabilityPolicy(unsigned int actionsN,
                       ParametricRegressor& prob) :
         actionsN(actionsN),  approximator(prob)
     {
@@ -143,20 +143,20 @@ public:
     virtual arma::vec diff(typename state_type<StateC>::const_type_ref state,
                            typename action_type<FiniteAction>::const_type_ref action) override
     {
-    	ProbabilityPolicy& pi = *this;
+        ProbabilityPolicy& pi = *this;
         return pi(state, action)*difflog(state, action);
     }
 
     virtual arma::vec difflog(typename state_type<StateC>::const_type_ref state,
                               typename action_type<FiniteAction>::const_type_ref action) override
     {
-    	 return arma::vec();
+        return arma::vec();
     }
 
     virtual arma::mat diff2log(typename state_type<StateC>::const_type_ref state,
                                typename action_type<FiniteAction>::const_type_ref action) override
     {
-    	 return arma::mat();
+        return arma::mat();
     }
 
 private:
@@ -298,7 +298,7 @@ int main(int argc, char *argv[])
     /*auto* irlAlg = new CurvatureEGIRL<FiniteAction, DenseState>(data, theta, expertDist,
                 rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);*/
     auto* irlAlg = new SDPEGIRL<FiniteAction, DenseState>(data, theta, expertDist,
-                    rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
+            rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
 
 
     //Run GIRL
