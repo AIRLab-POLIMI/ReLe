@@ -48,9 +48,11 @@ using namespace std;
 using namespace ReLe;
 using namespace arma;
 
+#define TEST
+
 int main(int argc, char *argv[])
 {
-    FileManager fm("nips", "car");
+    FileManager fm("car", "scirl");
     fm.createDir();
     fm.cleanDir();
 
@@ -91,7 +93,7 @@ int main(int argc, char *argv[])
 
     expertPolicy.setEpsilon(0.0);
 
-    core.getSettings().nEpisodes = 1;
+    core.getSettings().nEpisodes = 1000;
     auto&& dataOptimal = core.runTest();
 
 
@@ -101,9 +103,38 @@ int main(int argc, char *argv[])
     DenseTilesCoder phiReward(rewardTiles);
     LinearApproximator rewardRegressor(phiReward);
 
-    SCIRL<DenseState> alg(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
-    			mdp.getSettings().actionsNumber);
+    auto* irlAlg = new SCIRL<DenseState>(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
+                                      mdp.getSettings().actionsNumber);
 
+    //Run GIRL
+    irlAlg->run();
+    arma::vec omega = rewardRegressor.getParameters();
+    omega.save(fm.addPath("Weights.txt"),  arma::raw_ascii);
 
+    //Learn back environment
+    ParametricRewardMDP<FiniteAction, DenseState> prMdp(mdp, rewardRegressor);
+    batchAgent.setPolicy(expertPolicy);
+
+    //Run experiments and learning
+    expertPolicy.setEpsilon(1.0);
+    auto&& imitatorCore = buildBatchCore(prMdp, batchAgent);
+
+    imitatorCore.getSettings().episodeLength = mdp.getSettings().horizon;
+    imitatorCore.getSettings().nEpisodes = 1000;
+    imitatorCore.getSettings().maxBatchIterations = 30;
+    //imitatorCore.getSettings().datasetLogger = new WriteBatchDatasetLogger<FiniteAction, DenseState>(fm.addPath("car.log"));
+    imitatorCore.getSettings().agentLogger = new BatchAgentPrintLogger<FiniteAction, DenseState>();
+
+#ifdef TEST
+    imitatorCore.run(1);
+
+    expertPolicy.setEpsilon(0.0);
+
+    core.getSettings().nEpisodes = 1;
+    auto&& dataImitator = core.runTest();
+
+    dataImitator.printDecorated(cout);
+    cout << "imitator performance: " << dataImitator.getMeanReward(mdp.getSettings().gamma) << endl;
+#endif
     return 0;
 }

@@ -37,10 +37,10 @@ public:
           double gamma, unsigned int nActions, bool heuristic = true) :
         data(data), rewardf(rewardf), gamma(gamma), nActions(nActions), heuristic(heuristic)
     {
-    	lambda_mu = 1e-5;
-    	lambda_c = 0;
-    	epsilon = 1e-3;
-    	N_final = 20;
+        lambda_mu = 1e-5;
+        lambda_c = 0;
+        epsilon = 1e-3;
+        N_final = 20;
     }
 
     virtual void run() override
@@ -136,8 +136,8 @@ private:
         unsigned int nTransitions = data.getTransitionsNumber() - data.size();
         unsigned int nFeatures = rewardf.getParametersSize();
 
-        arma::vec theta(nTransitions, arma::fill::zeros);
-        arma::vec margin(nTransitions, arma::fill::ones);
+        arma::vec theta(mu.n_cols, arma::fill::zeros);
+        arma::vec margin(mu.n_rows, arma::fill::ones);
         arma::mat phi_sample(nTransitions,nFeatures, arma::fill::zeros);
         arma::mat phi_sample_star(nTransitions,nFeatures, arma::fill::zeros);
 
@@ -183,27 +183,30 @@ private:
             stoppingCondition=arma::norm(oldTheta-theta);
             iterations++;
         }
+
+        //set weights of the reward function
+        rewardf.setParameters(theta);
     }
 
     void max_Q(const arma::mat& Q, arma::uvec& uMax)
     {
-    	unsigned int N=Q.n_rows/nActions;
-    	uMax.set_size(N);
+        unsigned int N=Q.n_rows/nActions;
+        uMax.set_size(N);
 
-    	for (unsigned int i=0; i < N; i++)
-    	{
-    		double max = -std::numeric_limits<double>::infinity();
+        for (unsigned int i=0; i < N; i++)
+        {
+            double max = -std::numeric_limits<double>::infinity();
 
-    		for(unsigned int u = 0; u < nActions; u++)
-    		{
-    			double q = Q(i+N*u);
-    			if(q > max)
-    			{
-    				max = q;
-    				uMax(i) = u;
-    			}
-    		}
-    	}
+            for(unsigned int u = 0; u < nActions; u++)
+            {
+                double q = Q(i+N*u);
+                if(q > max)
+                {
+                    max = q;
+                    uMax(i) = u;
+                }
+            }
+        }
 
     }
 
