@@ -43,6 +43,7 @@
 #include "rele/policy/parametric/differentiable/GenericGibbsPolicy.h"
 
 #include "rele/IRL/algorithms/SCIRL.h"
+#include "rele/IRL/algorithms/CSI.h"
 
 using namespace std;
 using namespace ReLe;
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
 
     expertPolicy.setEpsilon(0.0);
 
-    core.getSettings().nEpisodes = 1000;
+    core.getSettings().nEpisodes = 1;
     auto&& dataOptimal = core.runTest();
 
 
@@ -104,7 +105,7 @@ int main(int argc, char *argv[])
     LinearApproximator rewardRegressor(phiReward);
 
     auto* irlAlg = new SCIRL<DenseState>(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
-                                      mdp.getSettings().actionsNumber);
+                                         mdp.getSettings().actionsNumber);
 
     //Run GIRL
     irlAlg->run();
