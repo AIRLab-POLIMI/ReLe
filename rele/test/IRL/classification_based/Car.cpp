@@ -104,8 +104,10 @@ int main(int argc, char *argv[])
     DenseTilesCoder phiReward(rewardTiles);
     LinearApproximator rewardRegressor(phiReward);
 
-    auto* irlAlg = new SCIRL<DenseState>(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
-                                         mdp.getSettings().actionsNumber);
+    //auto* irlAlg = new SCIRL<DenseState>(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
+    //                                     mdp.getSettings().actionsNumber);
+    auto* irlAlg = new CSI<DenseState>(dataOptimal, qphi, rewardRegressor, mdp.getSettings().gamma,
+                                       mdp.getSettings().actionsNumber);
 
     //Run GIRL
     irlAlg->run();

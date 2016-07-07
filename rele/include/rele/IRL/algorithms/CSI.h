@@ -31,9 +31,9 @@ template<class StateC>
 class CSI : public IRLAlgorithm<FiniteAction, StateC>
 {
 public:
-    CSI(Dataset<FiniteAction, StateC>& data, Dataset<FiniteAction, StateC>& dataR,
-        LinearApproximator& rewardf, double gamma, unsigned int nActions, bool heuristic = true) :
-        data(data), rewardf(rewardf), gamma(gamma), nActions(nActions), heuristic(heuristic)
+    CSI(Dataset<FiniteAction, StateC>& data, Features& phiC,
+        LinearApproximator& rewardf, double gamma, unsigned int nActions) :
+        data(data), phiC(phiC), rewardf(rewardf), gamma(gamma), nActions(nActions)
     {
         lambda_r = 1e-5;
         epsilon = 1e-3;
@@ -43,20 +43,22 @@ public:
 
     virtual void run() override
     {
+        //compute features for classification step
         arma::mat phiData, phiDataNext, phiAll, phiAllNext;
-        computeFeatures(phiData, phiDataNext, phiAll, phiAllNext);
+        computeFeatures(data, phiC, phiData, phiDataNext, phiAll, phiAllNext);
 
+        //compute features for regression
         //TODO different dataset for regression
+        arma::mat psiData_r;
+        computeFeaturesRegression(data, psiData_r);
         arma::mat& phiData_r = phiData;
         arma::mat& phiAllNext_r = phiAllNext;
 
-        //TODO different features for regression
-        arma::mat& psiData_r = phiData_r;
-
-        arma::vec theta_c = RCAL(phiData, phiData_r, phiAllNext_r);
+        arma::vec theta_c = RCAL(phiAll, phiData_r, phiAllNext_r);
         arma::vec Q_r = phiData_r*theta_c;
         arma::mat Q_r_next = phiAllNext_r*theta_c;
-        arma::vec Q_r_max = arma::max(Q_r_next, 1);
+        arma::vec Q_r_max;
+        getMaxQ(Q_r_next, Q_r_max);
         arma::vec data_regression = Q_r-gamma*Q_r_max;
 
         regression(psiData_r, data_regression);
@@ -69,19 +71,19 @@ public:
     }
 
 private:
-    void computeFeatures(arma::mat& phiData, arma::mat& phiDataNext, arma::mat& phiAll, arma::mat& phiAllNext)
+    void computeFeatures(const Dataset<FiniteAction, StateC>& dataset, Features& phi,
+                         arma::mat& phiData, arma::mat& phiDataNext, arma::mat& phiAll, arma::mat& phiAllNext)
     {
-        unsigned int nTransitions = data.getTransitionsNumber() - data.size();
-        unsigned int nFeatures = rewardf.getParametersSize();
-
-        Features& phi = rewardf.getFeatures();
+        unsigned int nTransitions = dataset.getTransitionsNumber() - dataset.size();
+        unsigned int nFeatures = phi.rows();
 
         phiData.set_size(nTransitions, nFeatures);
         phiDataNext.set_size(nTransitions, nFeatures);
         phiAll.set_size(nTransitions*nActions, nFeatures);
+        phiAllNext.set_size(nTransitions*nActions, nFeatures);
 
         unsigned int count = 0;
-        for(auto& episode : data)
+        for(auto& episode : dataset)
         {
             for(unsigned t = 0; t + 1 < episode.size(); t++)
             {
@@ -96,6 +98,28 @@ private:
                     phiAllNext.row(count + nTransitions*u) = phi(trNext.x, FiniteAction(u)).t();
                 }
 
+                count++;
+            }
+        }
+    }
+
+    void computeFeaturesRegression(const Dataset<FiniteAction, StateC>& dataset, arma::mat& phiData)
+    {
+        unsigned int nTransitions = dataset.getTransitionsNumber() - dataset.size();
+        unsigned int nFeatures = rewardf.getParametersSize();
+
+        Features& phi = rewardf.getFeatures();
+
+        phiData.set_size(nTransitions, nFeatures);
+
+        unsigned int count = 0;
+        for(auto& episode : dataset)
+        {
+            for(unsigned t = 0; t + 1 < episode.size(); t++)
+            {
+                auto& tr = episode[t];
+                auto& trNext = episode[t+1];
+                phiData.row(count) = phi(tr.x, tr.u).t();
                 count++;
             }
         }
@@ -119,16 +143,22 @@ private:
         unsigned int index = 0;
         for (auto& episode : data)
         {
-        	for(unsigned t = 0; t + 1 < episode.size(); t++)
-        	{
-        		auto& tr = episode[t];
-        		 margin(index+nTransitions_c*tr.u) = 0;
-        		 phi_sample_c.row(index) = phi.row(index+nTransitions_c*tr.u);
-        	}
+            for(unsigned t = 0; t + 1 < episode.size(); t++)
+            {
+                auto& tr = episode[t];
+                margin(index+nTransitions_c*tr.u) = 0;
+                phi_sample_c.row(index) = phi.row(index+nTransitions_c*tr.u);
+
+                index++;
+            }
         }
 
         double criterion = epsilon+1;
         double delta = 1.0/(counter+1);
+
+        std::cout << "phi: " << std::endl << phi << std::endl;
+        std::cout << "phi_r: " << std::endl << phi_r << std::endl;
+        std::cout << "phi_r_next: " << std::endl << phi_r_next << std::endl;
 
         //Gradient descend
         while(criterion > epsilon && counter < N_final)
@@ -136,7 +166,7 @@ private:
 
             arma::mat Q_classif=phi*theta_c+margin;
             arma::uvec uMax;
-            getMaxQIndex(Q_classif,uMax);
+            getMaxQActions(Q_classif,uMax);
             for(unsigned int i=0; i < nTransitions_c; i++)
                 phi_sample_star_c.row(i) = phi.row(i+nTransitions_c*uMax(i));
 
@@ -149,7 +179,7 @@ private:
 
             arma::vec Vmax;
             arma::uvec vector;
-            max_Q_v2(Q_next, Vmax, vector);
+            maxQIndices(Q_next, Vmax, vector);
 
             for (unsigned int i=0; i < nTransitions_r; i++)
                 phi_sample_star_r.row(i) = phi_r_next.row(vector(i));
@@ -173,7 +203,7 @@ private:
     }
 
 
-    void getMaxQIndex(const arma::mat& Q, arma::uvec& uMax)
+    void getMaxQActions(const arma::mat& Q, arma::uvec& uMax)
     {
         unsigned int N = Q.n_rows/nActions;
         uMax.set_size(N);
@@ -195,29 +225,51 @@ private:
 
     }
 
-    void max_Q_v2(arma::mat Q, arma::vec& V, arma::uvec& vector)
+    void getMaxQ(const arma::mat& Q, arma::vec& V)
     {
-		unsigned int N = Q.n_rows/nActions;
-		arma::mat Q_buffer(N,nActions, arma::fill::zeros);
-		vector.zeros(N);
-		for (unsigned int i=0; i < N; i++)
-		{
-			double qMax = -std::numeric_limits<double>::infinity();
-			unsigned int uMax = 0;
+        unsigned int N = Q.n_rows/nActions;
+        V.set_size(N);
 
-			for(unsigned int u=0; u < nActions; u++)
-			{
-				double q = Q(i+N*u);
-				if(q > qMax)
-				{
-					qMax = q;
-				    uMax = u;
-				}
-			}
+        for (unsigned int i = 0; i < N; i++)
+        {
+            double max = -std::numeric_limits<double>::infinity();
 
-			V(i) = qMax;
-			vector(i)=i+N*uMax;
-		}
+            for(unsigned int u = 0; u < nActions; u++)
+            {
+                double q = Q(i+N*u);
+                if(q > max)
+                {
+                    V(i) = q;
+                }
+            }
+        }
+
+    }
+
+    void maxQIndices(arma::mat Q, arma::vec& V, arma::uvec& vector)
+    {
+        unsigned int N = Q.n_rows/nActions;
+        arma::mat Q_buffer(N,nActions, arma::fill::zeros);
+        vector.zeros(N);
+        V.zeros(N);
+        for (unsigned int i=0; i < N; i++)
+        {
+            double qMax = -std::numeric_limits<double>::infinity();
+            unsigned int uMax = 0;
+
+            for(unsigned int u=0; u < nActions; u++)
+            {
+                double q = Q(i+N*u);
+                if(q > qMax)
+                {
+                    qMax = q;
+                    uMax = u;
+                }
+            }
+
+            V(i) = qMax;
+            vector(i)=i+N*uMax;
+        }
     }
 
     void regression(const arma::mat& phi, const arma::mat& y)
@@ -234,10 +286,10 @@ private:
 
 private:
     Dataset<FiniteAction, StateC>& data;
+    Features& phiC;
     LinearApproximator& rewardf;
     double gamma;
     unsigned int nActions;
-    bool heuristic;
 
     double lambda_r;
     double lambda_RCAL;
