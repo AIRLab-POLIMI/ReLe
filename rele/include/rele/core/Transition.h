@@ -287,7 +287,7 @@ public:
      * Getter.
      * \return the total number of transitions contained in this dataset
      */
-    unsigned int getTransitionsNumber()
+    unsigned int getTransitionsNumber() const
     {
         unsigned int nSamples = 0;
 
