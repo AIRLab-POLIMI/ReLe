@@ -43,9 +43,8 @@ public:
 
     virtual void run() override
     {
-    	//TODO compute phiAllNext
         arma::mat phiData, phiDataNext, phiAll, phiAllNext;
-        computeFeatures(phiData, phiDataNext, phiAll);
+        computeFeatures(phiData, phiDataNext, phiAll, phiAllNext);
 
         //TODO different dataset for regression
         arma::mat& phiData_r = phiData;
@@ -54,10 +53,10 @@ public:
         //TODO different features for regression
         arma::mat& psiData_r = phiData_r;
 
-        arma::vec theta_c = RCAL();
-        arma::mat Q_r = phiData_r*theta_c;
+        arma::vec theta_c = RCAL(phiData, phiData_r, phiAllNext_r);
+        arma::vec Q_r = phiData_r*theta_c;
         arma::mat Q_r_next = phiAllNext_r*theta_c;
-        arma::mat Q_r_max = arma::max(Q_r_next, 1);
+        arma::vec Q_r_max = arma::max(Q_r_next, 1);
         arma::vec data_regression = Q_r-gamma*Q_r_max;
 
         regression(psiData_r, data_regression);
@@ -70,7 +69,7 @@ public:
     }
 
 private:
-    void computeFeatures(arma::mat& phiData, arma::mat& phiDataNext, arma::mat& phiAll)
+    void computeFeatures(arma::mat& phiData, arma::mat& phiDataNext, arma::mat& phiAll, arma::mat& phiAllNext)
     {
         unsigned int nTransitions = data.getTransitionsNumber() - data.size();
         unsigned int nFeatures = rewardf.getParametersSize();
@@ -94,6 +93,7 @@ private:
                 for (unsigned int u = 0; u < nActions; u++)
                 {
                     phiAll.row(count + nTransitions*u) = phi(tr.x, FiniteAction(u)).t();
+                    phiAllNext.row(count + nTransitions*u) = phi(trNext.x, FiniteAction(u)).t();
                 }
 
                 count++;
@@ -101,21 +101,136 @@ private:
         }
     }
 
-    arma::vec RCAL()
+    arma::vec RCAL(const arma::mat& phi, const arma::mat& phi_r, const arma::mat& phi_r_next)
     {
-        return arma::vec();
+        unsigned int nTransitions_c = data.getTransitionsNumber() - data.size();
+        unsigned int nTransitions_r = nTransitions_c; //TODO different dataset
+
+        arma::vec theta_c(phi.n_cols,arma::fill::zeros);
+        arma::vec margin(nTransitions_c*nActions,arma::fill::ones);
+
+        arma::mat phi_sample_c(nTransitions_c,phi.n_cols, arma::fill::zeros);
+        arma::mat phi_sample_star_c(nTransitions_c,phi.n_cols, arma::fill::zeros);
+        arma::mat phi_sample_star_r(nTransitions_r,phi.n_cols, arma::fill::zeros);
+
+        unsigned int counter = 0;
+
+        //definition of margin function
+        unsigned int index = 0;
+        for (auto& episode : data)
+        {
+        	for(unsigned t = 0; t + 1 < episode.size(); t++)
+        	{
+        		auto& tr = episode[t];
+        		 margin(index+nTransitions_c*tr.u) = 0;
+        		 phi_sample_c.row(index) = phi.row(index+nTransitions_c*tr.u);
+        	}
+        }
+
+        double criterion = epsilon+1;
+        double delta = 1.0/(counter+1);
+
+        //Gradient descend
+        while(criterion > epsilon && counter < N_final)
+        {
+
+            arma::mat Q_classif=phi*theta_c+margin;
+            arma::uvec uMax;
+            getMaxQIndex(Q_classif,uMax);
+            for(unsigned int i=0; i < nTransitions_c; i++)
+                phi_sample_star_c.row(i) = phi.row(i+nTransitions_c*uMax(i));
+
+            arma::mat derivative_theta_c_c = arma::ones(1,nTransitions_c)*
+                                             (phi_sample_star_c-phi_sample_c)/phi.n_rows;
+
+
+            arma::mat Q_sample = phi_r*theta_c;
+            arma::mat Q_next = phi_r_next*theta_c;
+
+            arma::vec Vmax;
+            arma::uvec vector;
+            max_Q_v2(Q_next, Vmax, vector);
+
+            for (unsigned int i=0; i < nTransitions_r; i++)
+                phi_sample_star_r.row(i) = phi_r_next.row(vector(i));
+            arma::mat derivative_theta_c_r = arma::sign(Q_sample-gamma*Vmax).t()*
+                                             (phi_r-gamma*phi_sample_star_r)*lambda_RCAL/nTransitions_r;
+
+            arma::mat derivative_theta_c = derivative_theta_c_c+derivative_theta_c_r;
+            arma::vec oldTheta_c = theta_c;
+
+            //update theta_r and theta_c vectors
+            if (norm(derivative_theta_c,2)!=0)
+                theta_c=theta_c-delta/(norm(derivative_theta_c,2))*derivative_theta_c.t();
+            counter++;
+            delta=1.0/counter;
+
+            criterion = norm(theta_c-oldTheta_c);
+        }
+
+        return theta_c;
+
+    }
+
+
+    void getMaxQIndex(const arma::mat& Q, arma::uvec& uMax)
+    {
+        unsigned int N = Q.n_rows/nActions;
+        uMax.set_size(N);
+
+        for (unsigned int i = 0; i < N; i++)
+        {
+            double max = -std::numeric_limits<double>::infinity();
+
+            for(unsigned int u = 0; u < nActions; u++)
+            {
+                double q = Q(i+N*u);
+                if(q > max)
+                {
+                    max = q;
+                    uMax(i) = u;
+                }
+            }
+        }
+
+    }
+
+    void max_Q_v2(arma::mat Q, arma::vec& V, arma::uvec& vector)
+    {
+		unsigned int N = Q.n_rows/nActions;
+		arma::mat Q_buffer(N,nActions, arma::fill::zeros);
+		vector.zeros(N);
+		for (unsigned int i=0; i < N; i++)
+		{
+			double qMax = -std::numeric_limits<double>::infinity();
+			unsigned int uMax = 0;
+
+			for(unsigned int u=0; u < nActions; u++)
+			{
+				double q = Q(i+N*u);
+				if(q > qMax)
+				{
+					qMax = q;
+				    uMax = u;
+				}
+			}
+
+			V(i) = qMax;
+			vector(i)=i+N*uMax;
+		}
     }
 
     void regression(const arma::mat& phi, const arma::mat& y)
     {
-    	arma::mat A = phi.t()*phi+lambda_r*arma::eye(phi.n_cols, phi.n_cols);
+        arma::mat A = phi.t()*phi+lambda_r*arma::eye(phi.n_cols, phi.n_cols);
 
-    	arma::vec b = phi.t()*y;
+        arma::vec b = phi.t()*y;
 
-    	arma::vec w = arma::solve(A, b);
+        arma::vec w = arma::solve(A, b);
 
-    	rewardf.setParameters(w);
+        rewardf.setParameters(w);
     }
+
 
 private:
     Dataset<FiniteAction, StateC>& data;
