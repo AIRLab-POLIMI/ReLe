@@ -156,10 +156,6 @@ private:
         double criterion = epsilon+1;
         double delta = 1.0/(counter+1);
 
-        std::cout << "phi: " << std::endl << phi << std::endl;
-        std::cout << "phi_r: " << std::endl << phi_r << std::endl;
-        std::cout << "phi_r_next: " << std::endl << phi_r_next << std::endl;
-
         //Gradient descend
         while(criterion > epsilon && counter < N_final)
         {

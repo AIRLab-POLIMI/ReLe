@@ -53,12 +53,12 @@ public:
 
         arma::vec w = this->rewardf.getParameters();
 
-        arma::mat hessian = this->hessianCalculator->computeHessian(w);
+        /*arma::mat hessian = this->hessianCalculator->computeHessian(w);
         arma::vec eigenvalues = arma::eig_sym(hessian);
 
         std::cout << "eigenvalues" << std::endl;
         std::cout << eigenvalues.t() << std::endl;
-        std::cout << "eps: " << eps << std::endl;
+        std::cout << "eps: " << eps << std::endl;*/
 
     }
 

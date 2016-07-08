@@ -79,13 +79,13 @@ protected:
                                       const_ft.end(), active_feat.begin());
         active_feat.resize(it - active_feat.begin());
 
-        std::cout << "=== LINEAR REWARD: PRE-PROCESSING ===" << std::endl;
+        /*std::cout << "=== LINEAR REWARD: PRE-PROCESSING ===" << std::endl;
         std::cout << "Feature expectation\n mu: " << mu.t();
         std::cout << "Constant features\n cf: " << const_ft.t();
         std::cout << "Based on mu test, the following features are preserved\n q: " << q.t();
         std::cout << "Finally the active features are" <<std::endl;
         std::cout << "q - cf: " << active_feat.t();
-        std::cout << "=====================================" << std::endl;
+        std::cout << "=====================================" << std::endl;*/
 
         //Compute reduced features set
         if (active_feat.n_elem < dpr)

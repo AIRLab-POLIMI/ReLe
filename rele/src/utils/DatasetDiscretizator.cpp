@@ -28,43 +28,43 @@ namespace ReLe
 {
 
 DatasetDiscretizator::DatasetDiscretizator(const Range& range, unsigned int actions)
-	: tile(range, actions)
+    : tile(range, actions)
 {
 
 }
 
 DatasetDiscretizator::DatasetDiscretizator(const std::vector<Range>& ranges,
-			const std::vector<unsigned int>& actionsPerDim)
-	: tile(ranges, actionsPerDim)
+        const std::vector<unsigned int>& actionsPerDim)
+    : tile(ranges, actionsPerDim)
 {
 
 }
 
 Dataset<FiniteAction, DenseState> DatasetDiscretizator::discretize(const Dataset<DenseAction, DenseState>& dataset)
 {
-	Dataset<FiniteAction, DenseState> discreteDataset;
-	discreteDataset.resize(dataset.size());
+    Dataset<FiniteAction, DenseState> discreteDataset;
+    discreteDataset.resize(dataset.size());
 
-	for(unsigned int ep = 0; ep < dataset.size(); ep++)
-	{
-		auto& episode = dataset[ep];
-		auto& discreteEpisode = discreteDataset[ep];
+    for(unsigned int ep = 0; ep < dataset.size(); ep++)
+    {
+        auto& episode = dataset[ep];
+        auto& discreteEpisode = discreteDataset[ep];
 
-		discreteEpisode.resize(episode.size());
+        discreteEpisode.resize(episode.size());
 
-		for(unsigned int t = 0; t < episode.size(); t++)
-		{
-			auto& tr = episode[t];
-			auto& discreteTr = discreteEpisode[t];
+        for(unsigned int t = 0; t < episode.size(); t++)
+        {
+            auto& tr = episode[t];
+            auto& discreteTr = discreteEpisode[t];
 
-			discreteTr.x = tr.x;
-			discreteTr.u = discretizeAction(tr.u);
-			discreteTr.xn = tr.xn;
-			discreteTr.r = tr.r;
-		}
-	}
+            discreteTr.x = tr.x;
+            discreteTr.u = discretizeAction(tr.u);
+            discreteTr.xn = tr.xn;
+            discreteTr.r = tr.r;
+        }
+    }
 
-	return discreteDataset;
+    return discreteDataset;
 }
 
 DatasetDiscretizator::~DatasetDiscretizator()
@@ -74,8 +74,8 @@ DatasetDiscretizator::~DatasetDiscretizator()
 
 FiniteAction DatasetDiscretizator::discretizeAction(const DenseAction& action)
 {
-	unsigned int actionNumber = tile(action);
-	return FiniteAction(actionNumber);
+    unsigned int actionNumber = tile(action);
+    return FiniteAction(actionNumber);
 }
 
 }

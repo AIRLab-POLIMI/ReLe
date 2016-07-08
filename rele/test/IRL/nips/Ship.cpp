@@ -36,13 +36,18 @@
 
 #include "rele/core/PolicyEvalAgent.h"
 #include "rele/core/Core.h"
+
 #include "rele/IRL/ParametricRewardMDP.h"
 #include "rele/IRL/algorithms/EGIRL.h"
 #include "rele/IRL/algorithms/SDPEGIRL.h"
 #include "rele/IRL/algorithms/CurvatureEGIRL.h"
+#include "rele/IRL/algorithms/SCIRL.h"
+#include "rele/IRL/algorithms/CSI.h"
+
 #include "rele/algorithms/policy_search/gradient/REINFORCEAlgorithm.h"
 
 #include "rele/utils/FileManager.h"
+#include "rele/utils/DatasetDiscretizator.h"
 #include "rele/core/callbacks/CoreCallback.h"
 
 using namespace std;
@@ -97,7 +102,7 @@ int main(int argc, char *argv[])
     fm.createDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    unsigned int nbEpisodes = 1000;
+    unsigned int nbEpisodes = std::stod(n_episodes);
 
 
     ShipSteering mdp;
@@ -166,13 +171,47 @@ int main(int argc, char *argv[])
     irlAlg[1] = new SDPEGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE);
     irlAlg[2] = new CurvatureEGIRL<DenseAction,DenseState>(data, theta, expertDist, rewardRegressor, mdp.getSettings().gamma, IrlEpGrad::PGPE_BASELINE, IrlEpHess::PGPE_BASELINE, 1e-4);
 
-    arma::mat weights(rewardRegressor.getParametersSize(), numAlg, arma::fill::zeros);
+    arma::mat weights(rewardRegressor.getParametersSize(), numAlg + 2, arma::fill::zeros);
 
     for(unsigned int i = 0; i < numAlg; i++)
     {
         irlAlg[i]->run();
         weights.col(i) = rewardRegressor.getParameters();
         delete irlAlg[i];
+    }
+
+    //Classification Based
+    IRLAlgorithm<FiniteAction, DenseState>* irlAlg_c[2];
+    BasisFunctions basis_c = GaussianRbf::generate(
+    {
+        3,
+        3,
+        6,
+        2,
+        30
+    },
+    {
+        0.0, 150.0,
+        0.0, 150.0,
+        -M_PI, M_PI,
+        -15.0, 15.0,
+        -0.5, 30.5
+    });
+
+    DenseFeatures phi_c(basis_c);
+
+    unsigned int discretizedActions = 5;
+    DatasetDiscretizator discretizator(Range(-15, 15), discretizedActions);
+    auto&& discretizedData = discretizator.discretize(data);
+
+    irlAlg_c[0] = new SCIRL<DenseState>(discretizedData,rewardRegressor, mdp.getSettings().gamma, discretizedActions);
+    irlAlg_c[1] = new CSI<DenseState>(discretizedData, phi_c, rewardRegressor, mdp.getSettings().gamma, discretizedActions);
+
+    for(unsigned int i = 0; i < 2; i++)
+    {
+        irlAlg_c[i]->run();
+        weights.col(numAlg+i) = rewardRegressor.getParameters();
+        delete irlAlg_c[i];
     }
 
 
@@ -190,7 +229,7 @@ int main(int argc, char *argv[])
     arma::vec stdWeights(stdPhi.rows());
     stdWeights.fill(0.1);
 
-    for(unsigned int i = 0; i < numAlg; i++)
+    for(unsigned int i = 0; i < numAlg + 2; i++)
     {
         rewardRegressor.setParameters(weights.col(i));
         ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);

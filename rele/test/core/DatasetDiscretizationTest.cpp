@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     unsigned int episodes = 10;
     unsigned int transitions = 20;
 
-   cout << endl << "# Testing Dense action/state dataset #" << endl << endl;
-   testDenseDataset(episodes, transitions);
+    cout << endl << "# Testing Dense action/state dataset #" << endl << endl;
+    testDenseDataset(episodes, transitions);
 
 }
