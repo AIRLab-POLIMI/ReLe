@@ -14,6 +14,9 @@ target_link_libraries(pr_mdp rele)
 add_executable(dataset_test DatasetTest.cpp)
 target_link_libraries(dataset_test rele)
 
+add_executable(dataset_discretization_test DatasetDiscretizationTest.cpp)
+target_link_libraries(dataset_discretization_test rele)
+
 add_executable(nn_test NeuralNetworksTest.cpp)
 target_link_libraries(nn_test rele)
 
