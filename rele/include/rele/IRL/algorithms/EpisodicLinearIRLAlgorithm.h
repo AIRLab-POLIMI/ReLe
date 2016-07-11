@@ -54,7 +54,7 @@ protected:
         // performs preprocessing in order to remove the features
         // that are constant and the one that are almost never
         // under the given samples
-        unsigned int dpr = phiBar.n_cols;
+        unsigned int dpr = phiBar.n_rows;
 
         arma::uvec active_feat(dpr);
 

@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi_c(basis_c);
 
-    unsigned int discretizedActions = 5;
+    unsigned int discretizedActions = 30;
     DatasetDiscretizator discretizator(Range(-15, 15), discretizedActions);
     auto&& discretizedData = discretizator.discretize(data);
 
