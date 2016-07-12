@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi_c(basis_c);
 
-    unsigned int discretizedActions = 30;
+    unsigned int discretizedActions = 5;
     DatasetDiscretizator discretizator(Range(-15, 15), discretizedActions);
     auto&& discretizedData = discretizator.discretize(data);
 
@@ -213,6 +213,9 @@ int main(int argc, char *argv[])
         weights.col(numAlg+i) = rewardRegressor.getParameters();
         delete irlAlg_c[i];
     }
+
+    // -- Save weights -- //
+    weights.save(fm.addPath("Weights.txt"), arma::raw_ascii);
 
 
     // -- RECOVER! -- //
