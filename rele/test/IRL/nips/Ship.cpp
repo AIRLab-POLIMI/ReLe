@@ -90,14 +90,15 @@ arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeat
 
 int main(int argc, char *argv[])
 {
-    if(argc != 3)
+    if(argc != 4)
     {
-        cout << "Wrong argument number: n_episode, n_experiment must be provided" << endl;
+        cout << "Wrong argument number: n_episode, n_discretizations, n_experiment must be provided" << endl;
         return -1;
     }
 
     string n_episodes(argv[1]);
-    string n_experiment(argv[2]);
+    string n_discretizations(argv[2]);
+    string n_experiment(argv[3]);
 
     FileManager fm("nips/ship/"+n_episodes+"/"+n_experiment);
     fm.cleanDir();
@@ -206,7 +207,7 @@ int main(int argc, char *argv[])
 
     DenseFeatures phi_c(basis_c);
 
-    unsigned int discretizedActions = 30;
+    unsigned int discretizedActions = std::stoi(n_discretizations);
     DatasetDiscretizator discretizator(Range(-15, 15), discretizedActions);
     auto&& discretizedData = discretizator.discretize(data);
 
