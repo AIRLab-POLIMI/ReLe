@@ -23,10 +23,12 @@
 
 #include "rele/approximators/features/SparseFeatures.h"
 #include "rele/approximators/features/DenseFeatures.h"
+#include "rele/approximators/features/TilesCoder.h"
 #include "rele/approximators/regressors/others/GaussianMixtureModels.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/PolynomialFunction.h"
 #include "rele/approximators/basis/GaussianRbf.h"
+#include "rele/approximators/tiles/BasicTiles.h"
 
 #include "rele/policy/parametric/differentiable/NormalPolicy.h"
 #include "rele/policy/parametric/differentiable/LinearPolicy.h"
@@ -158,8 +160,12 @@ int main(int argc, char *argv[])
     // -- RUN -- //
 
     // Create parametric reward
-    BasisFunctions basisReward = GaussianRbf::generate({20, 20}, {0, 150, 0, 150});
-    DenseFeatures phiReward(basisReward);
+    //BasisFunctions basisReward = GaussianRbf::generate({20, 20}, {0, 150, 0, 150});
+    //DenseFeatures phiReward(basisReward);
+
+    auto* tiles = new BasicTiles({Range(0, 150), Range(0, 150)}, {20, 20});
+    DenseTilesCoder phiReward(tiles);
+
     LinearApproximator rewardRegressor(phiReward);
 
 
