@@ -52,9 +52,7 @@ public:
     virtual OutputC operator() (const InputC& input) override
     {
         if (!root)
-        {
-            throw std::runtime_error("Empty tree evaluated");
-        }
+        	return emptyNode.getValue(phi(input));
 
         return root->getValue(phi(input));
     }
