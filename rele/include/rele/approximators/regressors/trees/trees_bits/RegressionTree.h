@@ -52,7 +52,7 @@ public:
     virtual OutputC operator() (const InputC& input) override
     {
         if (!root)
-        	return emptyNode.getValue(phi(input));
+            return emptyNode.getValue(phi(input));
 
         return root->getValue(phi(input));
     }
