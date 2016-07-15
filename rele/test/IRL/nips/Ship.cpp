@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
         0.0, 150.0,
         -M_PI, M_PI,
         -15.0, 15.0,
-        discretizedActions-0.5, discretizedActions+0.5
+        -0.5, discretizedActions+0.5
     });
 
     DenseFeatures phi_c(basis_c);
