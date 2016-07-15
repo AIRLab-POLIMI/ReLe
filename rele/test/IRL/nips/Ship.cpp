@@ -269,12 +269,15 @@ int main(int argc, char *argv[])
 
         arma::vec featuresExpectation = data2.computefeatureExpectation(phiReward, mdp.getSettings().gamma);
 
-        reward.save(fm.addPath("reward._" + std::to_string(i) + "txt"), arma::raw_ascii);
+        reward.save(fm.addPath("reward_" + std::to_string(i) + ".txt"), arma::raw_ascii);
         featuresExpectation.save(fm.addPath("featuresExpectation_" + std::to_string(i) + ".txt"), arma::raw_ascii);
 
         ofstream ofs2(fm.addPath("TrajectoriesImitator_" + std::to_string(i) +".txt"));
         data2.writeToStream(ofs2);
     }
+
+    arma::vec featuresExpectationExpert = data.computefeatureExpectation(phiReward, mdp.getSettings().gamma);
+    featuresExpectationExpert.save(fm.addPath("featuresExpectationExpert.txt"), arma::raw_ascii);
 
 #endif
 
