@@ -188,6 +188,8 @@ int main(int argc, char *argv[])
     }
 
     //Classification Based
+    unsigned int discretizedActions = std::stoi(n_discretizations);
+
     IRLAlgorithm<FiniteAction, DenseState>* irlAlg_c[2];
     BasisFunctions basis_c = GaussianRbf::generate(
     {
@@ -195,19 +197,19 @@ int main(int argc, char *argv[])
         3,
         6,
         2,
-        30
+        discretizedActions
     },
     {
         0.0, 150.0,
         0.0, 150.0,
         -M_PI, M_PI,
         -15.0, 15.0,
-        -0.5, 30.5
+        discretizedActions-0.5, discretizedActions+0.5
     });
 
     DenseFeatures phi_c(basis_c);
 
-    unsigned int discretizedActions = std::stoi(n_discretizations);
+
     DatasetDiscretizator discretizator(Range(-15, 15), discretizedActions);
     auto&& discretizedData = discretizator.discretize(data);
 

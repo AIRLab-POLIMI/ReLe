@@ -53,13 +53,13 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
-	if(argc != 2)
-	{
-		std::cout << "choose the algorithm" << std::endl;
-		return -1;
-	}
+    if(argc != 2)
+    {
+        std::cout << "choose the algorithm" << std::endl;
+        return -1;
+    }
 
-	std::string algName(argv[1]);
+    std::string algName(argv[1]);
 
     FileManager fm("car", algName);
     fm.createDir();
@@ -116,18 +116,18 @@ int main(int argc, char *argv[])
 
     if(algName == "scirl")
     {
-    	irlAlg = new SCIRL<DenseState>(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
-                                         mdp.getSettings().actionsNumber);
+        irlAlg = new SCIRL<DenseState>(dataOptimal, rewardRegressor, mdp.getSettings().gamma,
+                                       mdp.getSettings().actionsNumber);
     }
     else if(algName == "csi")
     {
-    	irlAlg = new CSI<DenseState>(dataOptimal, qphi, rewardRegressor, mdp.getSettings().gamma,
-                                       mdp.getSettings().actionsNumber);
+        irlAlg = new CSI<DenseState>(dataOptimal, qphi, rewardRegressor, mdp.getSettings().gamma,
+                                     mdp.getSettings().actionsNumber);
     }
     else
     {
-    	std::cout << "invalid algorithm choosed" << std::endl;
-    	return -1;
+        std::cout << "invalid algorithm choosed" << std::endl;
+        return -1;
     }
 
     //Run GIRL
