@@ -24,10 +24,37 @@
 #ifndef INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_
 #define INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_
 
+#include "rele/utils/ArmadilloOdeint.h"
 #include "rele/core/DenseMDP.h"
+#include <boost/numeric/odeint.hpp>
 
 namespace ReLe
 {
+
+class CarOnHillSettings : public EnvironmentSettings
+{
+public:
+    /*!
+     * Constructor.
+     */
+	CarOnHillSettings();
+
+    /*!
+     * Default settings initialization
+     * \param settings the default settings
+     */
+    static void defaultSettings(CarOnHillSettings& settings);
+
+    virtual ~CarOnHillSettings();
+    virtual void WriteToStream(std::ostream& out) const;
+    virtual void ReadFromStream(std::istream& in);
+
+public:
+    double h;
+    double m;
+
+    double dt;
+};
 
 /*!
  * This class implements the Car On Hill problem.
@@ -42,6 +69,27 @@ namespace ReLe
  */
 class CarOnHill: public DenseMDP
 {
+	typedef arma::vec state_type;
+
+private:
+    //used in odeint
+    class CarOnHillOde
+    {
+
+    public:
+    	double action;
+
+        CarOnHillOde(CarOnHillSettings& config);
+
+        void operator()(const state_type& x, state_type& dx,
+                        const double /* t */);
+
+    private:
+        double m;
+
+        static constexpr double g = 9.81;
+    };
+
 public:
     enum StateLabel
     {
@@ -49,14 +97,25 @@ public:
     };
 
 public:
+    /*!
+     * Constructor.
+     */
+    CarOnHill();
 
     /*!
      * Constructor.
-     * \param label configuration type
+     * \param config the initial settings
      */
-    CarOnHill(double initialPosition = -0.5,
-              double initialVelocity = 0,
-              double rewardSigma = 0);
+    CarOnHill(CarOnHillSettings& config);
+
+    /*!
+     * Destructor.
+     */
+    virtual ~CarOnHill()
+    {
+        if(cleanConfig)
+        	delete carOnHillConfig;
+    }
 
     /*!
      * \see Environment::step
@@ -69,10 +128,23 @@ public:
      */
     virtual void getInitialState(DenseState& state) override;
 
+    /*!
+     * \see Environment::getSettings
+     */
+    inline const CarOnHillSettings& getSettings() const
+    {
+        return *carOnHillConfig;
+    }
+
 private:
-    double initialPosition;
-    double initialVelocity;
-    double rewardSigma;
+    CarOnHillSettings* carOnHillConfig;
+    CarOnHillOde carOnHillOde;
+    bool cleanConfig;
+
+    //[ define_adapt_stepper
+    typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
+    typedef boost::numeric::odeint::controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+    controlled_stepper_type controlled_stepper;
 };
 
 }

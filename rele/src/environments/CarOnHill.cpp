@@ -26,75 +26,153 @@
 #include "rele/utils/RandomGenerator.h"
 
 using namespace std;
+using namespace boost::numeric::odeint;
 
 namespace ReLe
 {
 
-CarOnHill::CarOnHill(double initialPosition,
-                     double initialVelocity,
-                     double rewardSigma)
-    : DenseMDP(2, 2, 1, false, true, 0.95, 400),
-      initialPosition(initialPosition),
-      initialVelocity(initialVelocity),
-      rewardSigma(rewardSigma)
+CarOnHillSettings::CarOnHillSettings()
+{
+	CarOnHillSettings::defaultSettings(*this);
+}
+
+void CarOnHillSettings::defaultSettings(CarOnHillSettings& settings)
+{
+    //Environment Parameters
+    settings.gamma = 0.95;
+    settings.stateDimensionality = 2;
+    settings.actionDimensionality = 1;
+    settings.rewardDimensionality = 1;
+    settings.statesNumber = 0;
+    settings.actionsNumber = 2;
+    settings.isFiniteHorizon = true;
+    settings.isAverageReward = false;
+    settings.isEpisodic = true;
+    settings.horizon = 300;
+
+    //CarOnHillway Parameters
+    settings.m = 1;
+
+    settings.dt = 0.1;
+}
+
+CarOnHillSettings::~CarOnHillSettings()
 {
 
+}
+
+void CarOnHillSettings::WriteToStream(std::ostream& out) const
+{
+    //TODO [SERIALIZATION] implement
+}
+
+void CarOnHillSettings::ReadFromStream(std::istream& in)
+{
+    //TODO [SERIALIZATION] implement
+}
+
+CarOnHill::CarOnHillOde::CarOnHillOde(CarOnHillSettings& config) :
+    m(config.m), action(0)
+{
+}
+
+void CarOnHill::CarOnHillOde::operator()(const state_type& x, state_type& dx,
+                                    	  const double /* t */)
+{
+    // Status and actions
+    const double u = action;
+    const double p = x[position];
+    const double v = x[velocity];
+
+    // Parameters
+    double diffHill;
+    double diff2Hill;
+    if(p < 0)
+    {
+        diffHill = 2 * p + 1;
+        diff2Hill = 2;
+    }
+    else
+    {
+        diffHill = 1 / pow(1 + 5 * x[position] * x[position], 1.5);
+        diff2Hill = (-15 * p) /
+                    pow(1 + 5 * x[position] * x[position], 2.5);
+    }
+
+    // Dynamics
+    // Velocity
+    const double dPosition = v;
+
+    // Acceleration
+    const double dVelocity = u / (m * (1 + diffHill * diffHill)) -
+    						(g * diffHill) / (1 + diffHill * diffHill) -
+    						(v * v * diffHill * diff2Hill) / (1 + diffHill * diffHill);
+
+    dx.resize(2);
+    dx[0] = dPosition;
+    dx[1] = dVelocity;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////
+/// CARONHILL ENVIRONMENT
+///////////////////////////////////////////////////////////////////////////////////////
+
+CarOnHill::CarOnHill()
+	: DenseMDP(new CarOnHillSettings()),
+	  cleanConfig(true),
+	  carOnHillOde(static_cast<CarOnHillSettings&>(getWritableSettings())),
+      controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
+{
+	carOnHillConfig = static_cast<CarOnHillSettings*>(settings);
+    currentState.set_size(carOnHillConfig->stateDimensionality);
+}
+
+CarOnHill::CarOnHill(CarOnHillSettings& config)
+    : DenseMDP(&config),
+	  cleanConfig(false),
+	  carOnHillConfig(&config),
+	  carOnHillOde(*carOnHillConfig),
+      controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
+{
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void CarOnHill::step(const FiniteAction& action,
                      DenseState& nextState, Reward& reward)
 {
-    double diffHill;
-    double diff2Hill;
-    if(currentState[position] < 0)
-    {
-        diffHill = 2 * currentState[position] + 1;
-        diff2Hill = 2;
-    }
-    else
-    {
-        diffHill = 1 / pow(1 + 5 * currentState[position] * currentState[position], 1.5);
-        diff2Hill = (-15 * currentState[position]) /
-                    pow(1 + 5 * currentState[position] * currentState[position], 2.5);
-    }
+	//ODEINT (BOOST 1.53+)
+	carOnHillOde.action = (action.getActionN() == 0? -4 : 4);
+    double t0 = 0;
+    double t1 = carOnHillConfig->dt;
+    integrate_adaptive(controlled_stepper,
+    				   carOnHillOde,
+					   currentState,
+					   t0,
+					   t1,
+					   t1 / 1000);
 
-    double h = 0.1;
-    double m = 1;
-    double g = 9.81;
-    double u = -4 + (double(action.getActionN()) / (this->getSettings().actionsNumber - 1)) * 8;
-    double acceleration = u / (m * (1 + diffHill * diffHill)) -
-                          (g * diffHill) / (1 + diffHill * diffHill) -
-                          (currentState[velocity] * currentState[velocity] * diffHill * diff2Hill) /
-                          (1 + diffHill * diffHill);
-
-    double updatedPosition = currentState[position] + h * currentState[velocity] +
-                             0.5 * h * h * acceleration;
-    double updatedVelocity = currentState[velocity] + h * acceleration;
-
-    if(abs(updatedPosition) > 1 || abs(updatedVelocity) > 3)
-        currentState.setAbsorbing();
-
-    currentState[position] = updatedPosition;
-    currentState[velocity] = updatedVelocity;
-
+    // Compute reward
     if(currentState[position] < -1 || abs(currentState[velocity]) > 3)
+    {
+    	currentState.setAbsorbing();
         reward[0] = -1;
+    }
     else if(currentState[position] > 1 && abs(currentState[velocity]) <= 3)
+    {
+    	currentState.setAbsorbing();
         reward[0] = 1;
+    }
     else
-        reward[0] = RandomGenerator::sampleNormal(0, rewardSigma);
-
+        reward[0] = 0;
 
     nextState = currentState;
 }
 
 void CarOnHill::getInitialState(DenseState& state)
 {
-    currentState[position] = initialPosition;
-    currentState[velocity] =  initialVelocity;
-
-    currentState.setAbsorbing(false);
-
+	currentState.setAbsorbing(false);
+    currentState[position] = -0.5;
+    currentState[velocity] = 0;
     state = currentState;
 }
 
