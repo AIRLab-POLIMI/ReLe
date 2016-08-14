@@ -42,7 +42,7 @@ public:
         unsigned int nbEpisodes, unsigned int nbPolicies, GradientStep& step_length,
         bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
+          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj)
     {
         if (dist.getDistributionName().compare("ParametricCholeskyNormal") == 0)
         {
@@ -55,7 +55,7 @@ public:
         RewardTransformation& reward_tr,
         bool baseline = true)
         : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline)
+          (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline)
     {
         if (dist.getDistributionName().compare("ParametricCholeskyNormal") == 0)
         {
@@ -185,8 +185,8 @@ public:
          unsigned int nbEpisodes, unsigned int nbPolicies, GradientStep& step_length,
          bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
-        distFI(dynamic_cast<FisherInterface&>(dist))
+          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
+          distFI(dynamic_cast<FisherInterface&>(dist))
     {
     }
 
@@ -195,8 +195,8 @@ public:
          RewardTransformation& reward_tr,
          bool baseline = true)
         : GradientBlackBoxAlgorithm<ActionC, StateC, NESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
-        distFI(dynamic_cast<FisherInterface&>(dist))
+          (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
+          distFI(dynamic_cast<FisherInterface&>(dist))
     {
     }
 
@@ -335,8 +335,8 @@ public:
          double step_mu, double step_sigma, double step_b,
          int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, ParametricCholeskyNormal, xNESIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, 0.0, false, reward_obj),
-        stepmu(step_mu), stepsigma(step_sigma), stepb(step_b)
+          (dist, policy, nbEpisodes, nbPolicies, 0.0, false, reward_obj),
+          stepmu(step_mu), stepsigma(step_sigma), stepb(step_b)
     {
 
         arma::mat A = dist.getCholeskyDec();

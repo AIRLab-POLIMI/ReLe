@@ -116,7 +116,7 @@ protected:
 		typedef StatisticEstimation<ActionC, StateC> Base; \
 		using Base::policy; \
 		using Base::data; \
- 
+
 }
 
 #endif /* INCLUDE_RELE_POLICY_UTILS_STATISTICESTIMATION_H_ */

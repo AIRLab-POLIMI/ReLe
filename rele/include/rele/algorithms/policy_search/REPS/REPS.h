@@ -44,7 +44,7 @@ public:
     REPS(DifferentiableDistribution& dist, ParametricPolicy<ActionC, StateC>& policy,
          unsigned int nbEpisodes, unsigned int nbPolicies, int reward_obj = 0)
         : BlackBoxAlgorithm<ActionC, StateC, REPSOutputData>
-        (dist, policy, nbEpisodes, nbPolicies, reward_obj)
+          (dist, policy, nbEpisodes, nbPolicies, reward_obj)
     {
         etaOpt = 1;
         //default parameters

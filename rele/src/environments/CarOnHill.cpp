@@ -33,7 +33,7 @@ namespace ReLe
 
 CarOnHillSettings::CarOnHillSettings()
 {
-	CarOnHillSettings::defaultSettings(*this);
+    CarOnHillSettings::defaultSettings(*this);
 }
 
 void CarOnHillSettings::defaultSettings(CarOnHillSettings& settings)
@@ -77,7 +77,7 @@ CarOnHill::CarOnHillOde::CarOnHillOde(CarOnHillSettings& config) :
 }
 
 void CarOnHill::CarOnHillOde::operator()(const state_type& x, state_type& dx,
-                                    	  const double /* t */)
+        const double /* t */)
 {
     // Status and actions
     const double u = action;
@@ -105,8 +105,8 @@ void CarOnHill::CarOnHillOde::operator()(const state_type& x, state_type& dx,
 
     // Acceleration
     const double dVelocity = u / (m * (1 + diffHill * diffHill)) -
-    						(g * diffHill) / (1 + diffHill * diffHill) -
-    						(v * v * diffHill * diff2Hill) / (1 + diffHill * diffHill);
+                             (g * diffHill) / (1 + diffHill * diffHill) -
+                             (v * v * diffHill * diff2Hill) / (1 + diffHill * diffHill);
 
     dx.resize(2);
     dx[0] = dPosition;
@@ -118,20 +118,20 @@ void CarOnHill::CarOnHillOde::operator()(const state_type& x, state_type& dx,
 ///////////////////////////////////////////////////////////////////////////////////////
 
 CarOnHill::CarOnHill()
-	: DenseMDP(new CarOnHillSettings()),
-	  cleanConfig(true),
-	  carOnHillOde(static_cast<CarOnHillSettings&>(getWritableSettings())),
+    : DenseMDP(new CarOnHillSettings()),
+      cleanConfig(true),
+      carOnHillOde(static_cast<CarOnHillSettings&>(getWritableSettings())),
       controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
 {
-	carOnHillConfig = static_cast<CarOnHillSettings*>(settings);
+    carOnHillConfig = static_cast<CarOnHillSettings*>(settings);
     currentState.set_size(carOnHillConfig->stateDimensionality);
 }
 
 CarOnHill::CarOnHill(CarOnHillSettings& config)
     : DenseMDP(&config),
-	  cleanConfig(false),
-	  carOnHillConfig(&config),
-	  carOnHillOde(*carOnHillConfig),
+      cleanConfig(false),
+      carOnHillConfig(&config),
+      carOnHillOde(*carOnHillConfig),
       controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
@@ -140,26 +140,26 @@ CarOnHill::CarOnHill(CarOnHillSettings& config)
 void CarOnHill::step(const FiniteAction& action,
                      DenseState& nextState, Reward& reward)
 {
-	//ODEINT (BOOST 1.53+)
-	carOnHillOde.action = (action.getActionN() == 0? -4 : 4);
+    //ODEINT (BOOST 1.53+)
+    carOnHillOde.action = (action.getActionN() == 0? -4 : 4);
     double t0 = 0;
     double t1 = carOnHillConfig->dt;
     integrate_adaptive(controlled_stepper,
-    				   carOnHillOde,
-					   currentState,
-					   t0,
-					   t1,
-					   t1 / 1000);
+                       carOnHillOde,
+                       currentState,
+                       t0,
+                       t1,
+                       t1 / 1000);
 
     // Compute reward
     if(currentState[position] < -1 || abs(currentState[velocity]) > 3)
     {
-    	currentState.setAbsorbing();
+        currentState.setAbsorbing();
         reward[0] = -1;
     }
     else if(currentState[position] > 1 && abs(currentState[velocity]) <= 3)
     {
-    	currentState.setAbsorbing();
+        currentState.setAbsorbing();
         reward[0] = 1;
     }
     else
@@ -170,7 +170,7 @@ void CarOnHill::step(const FiniteAction& action,
 
 void CarOnHill::getInitialState(DenseState& state)
 {
-	currentState.setAbsorbing(false);
+    currentState.setAbsorbing(false);
     currentState[position] = -0.5;
     currentState[velocity] = 0;
     state = currentState;

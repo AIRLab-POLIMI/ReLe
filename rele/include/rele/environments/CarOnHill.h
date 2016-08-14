@@ -37,7 +37,7 @@ public:
     /*!
      * Constructor.
      */
-	CarOnHillSettings();
+    CarOnHillSettings();
 
     /*!
      * Default settings initialization
@@ -50,7 +50,6 @@ public:
     virtual void ReadFromStream(std::istream& in);
 
 public:
-    double h;
     double m;
 
     double dt;
@@ -69,7 +68,7 @@ public:
  */
 class CarOnHill: public DenseMDP
 {
-	typedef arma::vec state_type;
+    typedef arma::vec state_type;
 
 private:
     //used in odeint
@@ -77,7 +76,7 @@ private:
     {
 
     public:
-    	double action;
+        double action;
 
         CarOnHillOde(CarOnHillSettings& config);
 
@@ -114,7 +113,7 @@ public:
     virtual ~CarOnHill()
     {
         if(cleanConfig)
-        	delete carOnHillConfig;
+            delete carOnHillConfig;
     }
 
     /*!
