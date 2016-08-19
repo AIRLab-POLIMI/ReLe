@@ -160,7 +160,7 @@ void Acrobot::step(const FiniteAction& action,
                        t1 / 1000);
 
     // Compute reward
-    double k = floor(currentState[theta1idx] / (2 * M_PI));
+    double k = round((currentState[theta1idx] - M_PI) / (2 * M_PI));
     arma::vec x = {currentState[theta1idx],
     			   currentState[theta2idx],
 				   currentState[dTheta1idx],
