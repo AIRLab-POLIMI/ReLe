@@ -129,7 +129,7 @@ Acrobot::Acrobot()
     : DenseMDP(new AcrobotSettings()),
       cleanConfig(true),
       acrobotOde(static_cast<AcrobotSettings&>(getWritableSettings())),
-      controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
+	  controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
 {
     acrobotConfig = static_cast<AcrobotSettings*>(settings);
     currentState.set_size(acrobotConfig->stateDimensionality);
@@ -140,7 +140,7 @@ Acrobot::Acrobot(AcrobotSettings& config)
       cleanConfig(false),
       acrobotConfig(&config),
       acrobotOde(*acrobotConfig),
-      controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
+	  controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
 }
@@ -157,17 +157,16 @@ void Acrobot::step(const FiniteAction& action,
                        currentState,
                        t0,
                        t1,
-                       t1 / 1000);
+                       0.001);
 
     // Compute reward
-    double k = round((currentState[theta1idx] - M_PI) / (2 * M_PI));
+    int k = round((currentState[theta1idx] - M_PI) / (2 * M_PI));
     arma::vec x = {currentState[theta1idx],
     			   currentState[theta2idx],
 				   currentState[dTheta1idx],
 				   currentState[dTheta2idx]
     			  };
-    double value = currentState[theta1idx] - 2 * k * M_PI - M_PI;
-    arma::vec o = {value, 0, 0, 0};
+    arma::vec o = {2 * k * M_PI + M_PI, 0, 0, 0};
     arma::vec diffVector = x - o;
     double d = arma::norm(diffVector);
     if(d < 1)
