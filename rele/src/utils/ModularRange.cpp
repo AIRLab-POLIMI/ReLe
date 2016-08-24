@@ -43,7 +43,7 @@ double ModularRange::bound(const double& value) const
     if(contains(value))
     {
         double tmp = value - lo();
-        tmp = std::fmod(tmp, width());
+        tmp -= width() * floor(tmp / width());
         return tmp + lo();
     }
     else
