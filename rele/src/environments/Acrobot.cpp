@@ -22,7 +22,7 @@
  */
 
 #include "rele/environments/Acrobot.h"
-
+#include "rele/utils/ModularRange.h"
 #include "rele/utils/RandomGenerator.h"
 
 using namespace std;
@@ -178,6 +178,8 @@ void Acrobot::step(const FiniteAction& action,
         reward[0] = 0;
 
     nextState = currentState;
+    nextState[0] = RangePi::wrap(nextState[0]);
+    nextState[1] = RangePi::wrap(nextState[1]);
 }
 
 void Acrobot::getInitialState(DenseState& state)
