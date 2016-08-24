@@ -177,9 +177,9 @@ void Acrobot::step(const FiniteAction& action,
     else
         reward[0] = 0;
 
+    currentState[0] = RangePi::wrap(currentState[0]);
+    currentState[1] = RangePi::wrap(currentState[1]);
     nextState = currentState;
-    nextState[0] = RangePi::wrap(nextState[0]);
-    nextState[1] = RangePi::wrap(nextState[1]);
 }
 
 void Acrobot::getInitialState(DenseState& state)
