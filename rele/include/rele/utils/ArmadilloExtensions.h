@@ -55,33 +55,6 @@ arma::mat null(const arma::mat& A, double tol = -1);
  */
 arma::uvec rref(const arma::mat& X, arma::mat& A, double tol = -1);
 
-/*!
- * Wrap angle in radians to [−pi, pi].
- * \param lambda the angle in radians
- * \return wraps angle lambda (in radians) to the interval [−pi, pi]
- */
-double wrapTo2Pi(double lambda);
-
-/*!
- * Wrap angle in radians to [−pi, pi].
- * \param lambda the vector of angles to be wrapped
- * \return wraps angles in lambda (in radians) to the interval [−pi, pi]
- */
-arma::vec wrapTo2Pi(const arma::vec& lambda);
-
-/*!
- * Wrap angle in radians to [0, 2 * pi].
- * \param lambda the angle in radians
- * \return wraps angle lambda (in radians) to the interval [0, 2 * pi]
- */
-double wrapToPi(double lambda);
-
-/*!
- * Wrap angle in radians to [0, 2 * pi]
- * \param lambda the vector of angles to be wrapped
- * \return wraps angles in lambda (in radians) to the interval [0, 2 * pi]
- */
-arma::vec wrapToPi(const arma::vec& lambda);
 
 /*!
  * Rectangular grid in 2-D space. meshgrid(xgv, ygv, X, Y) replicates the grid vectors xgv and ygv to produce a full grid stored in X and Y.

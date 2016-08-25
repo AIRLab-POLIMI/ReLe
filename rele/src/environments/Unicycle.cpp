@@ -24,6 +24,7 @@
 #include "rele/environments/Unicycle.h"
 #include "rele/utils/RandomGenerator.h"
 #include "rele/utils/ArmadilloExtensions.h"
+#include "rele/utils/ModularRange.h"
 
 using namespace std;
 using namespace boost::numeric::odeint;
@@ -128,8 +129,8 @@ void UnicyclePolar::step(const DenseAction& action, DenseState& nextState, Rewar
     integrate_adaptive(controlled_stepper , unicycleode , currentState, t0 , t1 , t1/100.0);
 
     // wrap to [-pi,pi]
-    currentState[gamma] = wrapToPi(currentState[gamma]);
-    currentState[delta] = wrapToPi(currentState[delta]);
+    currentState[gamma] = RangePi::wrap(currentState[gamma]);
+    currentState[delta] = RangePi::wrap(currentState[delta]);
 
     // update next state
     nextState = currentState;
@@ -176,8 +177,8 @@ void UnicyclePolar::getInitialState(DenseState& state)
     currentState[delta] = currentState[gamma] + e(2);
 
     // wrap to [-pi,pi]
-    currentState[gamma] = wrapToPi(currentState[gamma]);
-    currentState[delta] = wrapToPi(currentState[delta]);
+    currentState[gamma] = RangePi::wrap(currentState[gamma]);
+    currentState[delta] = RangePi::wrap(currentState[delta]);
 
     // set not absorbing
     currentState.setAbsorbing(false);
