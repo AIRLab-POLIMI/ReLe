@@ -139,8 +139,6 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
     double t1 = segwayConfig->dt;
     integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/1000.0);
 
-    nextState = currentState;
-
     //compute reward
     if(abs(currentState[0]) > M_PI/18)
     {
@@ -159,6 +157,8 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
 
         reward[0] = -J[0];
     }
+
+    nextState = currentState;
 
 }
 

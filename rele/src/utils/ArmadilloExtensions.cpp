@@ -110,47 +110,6 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
     return jb;
 }
 
-double wrapTo2Pi(double lambda)
-{
-    double val = fmod(lambda, 2.0*M_PI);
-    if ((lambda > 0) && (val == 0.0))
-    {
-        return 2*M_PI;
-    }
-    return val;
-}
-
-arma::vec wrapTo2Pi(const arma::vec& lambda)
-{
-    unsigned int n = lambda.n_elem;
-    arma::vec tmp(n);
-    for (unsigned int i = 0; i < n; ++i)
-    {
-        tmp(i) = wrapTo2Pi(lambda(i));
-    }
-    return tmp;
-}
-
-double wrapToPi(double lambda)
-{
-    if ((lambda < -M_PI) || (M_PI < lambda))
-    {
-        return wrapTo2Pi(lambda + M_PI) - M_PI;
-    }
-    return lambda;
-}
-
-arma::vec wrapToPi(const arma::vec& lambda)
-{
-    unsigned int n = lambda.n_elem;
-    arma::vec ret(n);
-    for (unsigned int i = 0; i < n; ++i)
-    {
-        ret(i) = wrapTo2Pi(lambda(i) + M_PI) - M_PI;
-    }
-    return ret;
-}
-
 void meshgrid(const arma::vec& x, const arma::vec& y, arma::mat& xx, arma::mat& yy)
 {
     if ((x.n_elem == 0) || (y.n_elem == 0))

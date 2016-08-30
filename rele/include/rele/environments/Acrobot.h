@@ -21,70 +21,75 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_
-#define INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_
+#ifndef INCLUDE_RELE_ENVIRONMENTS_ACROBOT_H_
+#define INCLUDE_RELE_ENVIRONMENTS_ACROBOT_H_
 
 #include "rele/utils/ArmadilloOdeint.h"
+#include "rele/utils/ArmadilloPDFs.h"
 #include "rele/core/DenseMDP.h"
+#include "rele/utils/RandomGenerator.h"
 #include <boost/numeric/odeint.hpp>
 
 namespace ReLe
 {
 
-class CarOnHillSettings : public EnvironmentSettings
+class AcrobotSettings : public EnvironmentSettings
 {
 public:
     /*!
      * Constructor.
      */
-    CarOnHillSettings();
+    AcrobotSettings();
 
     /*!
      * Default settings initialization
      * \param settings the default settings
      */
-    static void defaultSettings(CarOnHillSettings& settings);
+    static void defaultSettings(AcrobotSettings& settings);
 
-    virtual ~CarOnHillSettings();
+    virtual ~AcrobotSettings();
     virtual void WriteToStream(std::ostream& out) const;
     virtual void ReadFromStream(std::istream& in);
 
 public:
-    double m;
+    double M1, M2;
+    double L1, L2;
+    double mu1, mu2;
 
     double dt;
 };
 
 /*!
- * This class implements the Car On Hill problem.
- * This is a version of mountain car environment, the one proposed by Ernst paper, and is simpler than
- * the original mountain car problem, as the goal can be reached by a random policy.
+ * This class implements the Acrobot problem.
+ * This is the version of Acrobot environment proposed in Ernst paper.
  *
- * \see MountainCar
+ * \see Acrobot
  *
  * References
  * ==========
  * [ErnstT, Geurts and Wehrnkel. Tree-Based Batch Mode Reinforcement Learning](http://www.jmlr.org/papers/volume6/ernst05a/ernst05a.pdf)
  */
-class CarOnHill: public DenseMDP
+class Acrobot: public DenseMDP
 {
     typedef arma::vec state_type;
 
 private:
     //used in odeint
-    class CarOnHillOde
+    class AcrobotOde
     {
 
     public:
         double action;
 
-        CarOnHillOde(CarOnHillSettings& config);
+        AcrobotOde(AcrobotSettings& config);
 
         void operator()(const state_type& x, state_type& dx,
                         const double /* t */);
 
     private:
-        double m;
+        double M1, M2;
+        double L1, L2;
+        double mu1, mu2;
 
         static constexpr double g = 9.81;
     };
@@ -92,28 +97,28 @@ private:
 public:
     enum StateLabel
     {
-        position = 0, velocity = 1
+        theta1idx = 0, theta2idx = 1, dTheta1idx = 2, dTheta2idx = 3
     };
 
 public:
     /*!
      * Constructor.
      */
-    CarOnHill();
+    Acrobot();
 
     /*!
      * Constructor.
      * \param config the initial settings
      */
-    CarOnHill(CarOnHillSettings& config);
+    Acrobot(AcrobotSettings& config);
 
     /*!
      * Destructor.
      */
-    virtual ~CarOnHill()
+    virtual ~Acrobot()
     {
         if(cleanConfig)
-            delete carOnHillConfig;
+            delete acrobotConfig;
     }
 
     /*!
@@ -130,15 +135,16 @@ public:
     /*!
      * \see Environment::getSettings
      */
-    inline const CarOnHillSettings& getSettings() const
+    inline const AcrobotSettings& getSettings() const
     {
-        return *carOnHillConfig;
+        return *acrobotConfig;
     }
 
 private:
-    CarOnHillSettings* carOnHillConfig;
-    CarOnHillOde carOnHillOde;
+    AcrobotSettings* acrobotConfig;
+    AcrobotOde acrobotOde;
     bool cleanConfig;
+    RandomGenerator rg;
 
     //[ define_adapt_stepper
     typedef boost::numeric::odeint::runge_kutta_cash_karp54< state_type > error_stepper_type;
@@ -148,4 +154,4 @@ private:
 
 }
 
-#endif /* INCLUDE_RELE_ENVIRONMENTS_CARONHILL_H_ */
+#endif /* INCLUDE_RELE_ENVIRONMENTS_ACROBOT_H_ */

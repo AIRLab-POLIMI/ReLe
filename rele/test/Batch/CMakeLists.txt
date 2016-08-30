@@ -11,3 +11,6 @@ target_link_libraries(portfolio_off rele)
 
 add_executable(car_batch CarOnHillBatchTest.cpp)
 target_link_libraries(car_batch rele)
+
+add_executable(acro_batch AcrobotBatchTest.cpp)
+target_link_libraries(acro_batch rele)
