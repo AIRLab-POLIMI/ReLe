@@ -50,13 +50,13 @@ void SegwaySettings::defaultSettings(SegwaySettings& settings)
 
     //TODO [MINOR] change default parameters
     //Segway Parameters
-    settings.Mp = 10;
-    settings.Mr = 15;
-    settings.Ip = 19;
-    settings.Ir = 19;
-    settings.l = 1.2;
+    settings.Mr = 1.7*2;
+    settings.Mp = 25-settings.Mr;
+    settings.Ip = 10;
+    settings.Ir = 0.034*2;
+    settings.l = 0.4;
     settings.r = 0.2;
-    settings.dt = 0.03;
+    settings.dt = 1e-2;
 }
 
 SegwaySettings::~SegwaySettings()
@@ -153,7 +153,7 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
 
         const arma::vec& x = currentState;
         const arma::vec& u = action;
-        arma::mat J = x.t()*Q*x;// + u.t()*R*u;
+        arma::mat J = x.t()*Q*x + u.t()*R*u;
 
         reward[0] = -J[0];
     }

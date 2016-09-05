@@ -81,7 +81,7 @@ public:
 
     virtual arma::vec operator() (typename state_type<StateC>::const_type_ref state) override
     {
-    	arma::vec u(ranges.size());
+        arma::vec u(ranges.size());
 
         for (int i = 0; i < ranges.size(); ++i)
         {
@@ -195,9 +195,9 @@ public:
         int idx = findAction(action);
 
         if(idx < 0)
-        	return 0;
+            return 0;
         else
-        	return distribution[idx];
+            return distribution[idx];
     }
 
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) override
@@ -230,12 +230,12 @@ private:
     //TODO [INTERFACE] implement with generic traits
     bool isAlmostEqual(unsigned int a, unsigned int b)
     {
-    	return a == b;
+        return a == b;
     }
 
     bool isAlmostEqual(const arma::vec& a, const arma::vec& b)
     {
-       	return arma::sum(a == b) >= a.n_elem;
+        return arma::sum(a == b) >= a.n_elem;
     }
 };
 

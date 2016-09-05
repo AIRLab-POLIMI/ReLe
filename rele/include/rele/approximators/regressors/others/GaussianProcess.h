@@ -53,8 +53,8 @@ public:
             1
         }),
         signalSigma(1),
-        noiseSigma(0.1),
-        noisyTestData(false)
+                    noiseSigma(0.1),
+                    noisyTestData(false)
         {
         }
 
