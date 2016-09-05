@@ -193,7 +193,11 @@ public:
         typename action_type<ActionC>::const_type_ref action) override
     {
         int idx = findAction(action);
-        return distribution[idx];
+
+        if(idx < 0)
+        	return 0;
+        else
+        	return distribution[idx];
     }
 
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) override
@@ -214,14 +218,24 @@ private:
         for (int i = 0, ie = actions.size(); i < ie; ++i)
         {
             typename action_type<ActionC>::type a2 = actions[i];
-            if(a1 == a2)
+            if(isAlmostEqual(a1,a2))
             {
                 return i;
             }
         }
-        std::cerr << "Error: unknown action" << std::endl;
-        std::cerr << "Action: " << action << std::endl;
-        abort();
+
+        return -1;
+    }
+
+    //TODO [INTERFACE] implement with generic traits
+    bool isAlmostEqual(unsigned int a, unsigned int b)
+    {
+    	return a == b;
+    }
+
+    bool isAlmostEqual(const arma::vec& a, const arma::vec& b)
+    {
+       	return arma::sum(a == b) >= a.n_elem;
     }
 };
 
