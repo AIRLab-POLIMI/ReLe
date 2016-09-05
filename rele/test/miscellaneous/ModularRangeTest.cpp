@@ -35,17 +35,17 @@ int main()
     RangePi range1;
     Range2Pi range2;
 
-	for(int k = -2; k < 3; k++)
-		for(int i = 0; i < 8; i++)
-		{
-			double angle = i*M_PI/4.0;
-			double anglePi = range1.wrap(angle + 2 * k * M_PI);
-			double angle2Pi = range2.wrap(angle  + 2 * k * M_PI);
-			if(-M_PI > anglePi && anglePi > M_PI)
-				throw std::logic_error("Bug in RangePi::wrap.");
-			if(0 > angle2Pi && angle2Pi > 2 * M_PI)
-				throw std::logic_error("Bug in Range2Pi::wrap.");
-			cout << "angle 2PI: " << angle << " = " << angle2Pi << endl;
-			cout << "angle PI:  " << (angle > M_PI ? angle - 2*M_PI : angle)  << " = "  << anglePi << endl;
-		}
+    for(int k = -2; k < 3; k++)
+        for(int i = 0; i < 8; i++)
+        {
+            double angle = i*M_PI/4.0;
+            double anglePi = range1.wrap(angle + 2 * k * M_PI);
+            double angle2Pi = range2.wrap(angle  + 2 * k * M_PI);
+            if(-M_PI > anglePi && anglePi > M_PI)
+                throw std::logic_error("Bug in RangePi::wrap.");
+            if(0 > angle2Pi && angle2Pi > 2 * M_PI)
+                throw std::logic_error("Bug in Range2Pi::wrap.");
+            cout << "angle 2PI: " << angle << " = " << angle2Pi << endl;
+            cout << "angle PI:  " << (angle > M_PI ? angle - 2*M_PI : angle)  << " = "  << anglePi << endl;
+        }
 }

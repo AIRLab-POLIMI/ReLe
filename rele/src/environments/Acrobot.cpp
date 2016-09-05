@@ -75,17 +75,17 @@ void AcrobotSettings::ReadFromStream(std::istream& in)
 
 Acrobot::AcrobotOde::AcrobotOde(AcrobotSettings& config) :
     M1(config.M1),
-	M2(config.M2),
-	L1(config.L1),
-	L2(config.L2),
-	mu1(mu1),
-	mu2(mu2),
-	action(0)
+    M2(config.M2),
+    L1(config.L1),
+    L2(config.L2),
+    mu1(mu1),
+    mu2(mu2),
+    action(0)
 {
 }
 
 void Acrobot::AcrobotOde::operator()(const state_type& x, state_type& dx,
-        const double /* t */)
+                                     const double /* t */)
 {
     // Status and actions
     const double u = action;
@@ -111,7 +111,7 @@ void Acrobot::AcrobotOde::operator()(const state_type& x, state_type& dx,
     // Acceleration
     const double d12d22 = d12 / d22;
     const double diffDiffTheta1 = (-mu1 * dTheta1 - d12d22 * u + d12d22 * mu2 * dTheta2 +
-    							d12d22 * c2 + d12d22 * phi2 - c1 - phi1) / (d11 - (d12d22 * d12));
+                                   d12d22 * c2 + d12d22 * phi2 - c1 - phi1) / (d11 - (d12d22 * d12));
     const double diffDiffTheta2 = (u - mu2 * dTheta2 - d12 * diffDiffTheta1 - c2 - phi2) / d22;
 
     dx.resize(4);
@@ -129,7 +129,7 @@ Acrobot::Acrobot()
     : DenseMDP(new AcrobotSettings()),
       cleanConfig(true),
       acrobotOde(static_cast<AcrobotSettings&>(getWritableSettings())),
-	  controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
+      controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
 {
     acrobotConfig = static_cast<AcrobotSettings*>(settings);
     currentState.set_size(acrobotConfig->stateDimensionality);
@@ -140,13 +140,13 @@ Acrobot::Acrobot(AcrobotSettings& config)
       cleanConfig(false),
       acrobotConfig(&config),
       acrobotOde(*acrobotConfig),
-	  controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
+      controlled_stepper(make_controlled< error_stepper_type >(1.0e-6, 1.0e-6))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void Acrobot::step(const FiniteAction& action,
-                     DenseState& nextState, Reward& reward)
+                   DenseState& nextState, Reward& reward)
 {
     //ODEINT (BOOST 1.53+)
     acrobotOde.action = (action.getActionN() == 0? -5 : 5);
@@ -162,10 +162,10 @@ void Acrobot::step(const FiniteAction& action,
     // Compute reward
     int k = round((currentState[theta1idx] - M_PI) / (2 * M_PI));
     arma::vec x = {currentState[theta1idx],
-    			   currentState[theta2idx],
-				   currentState[dTheta1idx],
-				   currentState[dTheta2idx]
-    			  };
+                   currentState[theta2idx],
+                   currentState[dTheta1idx],
+                   currentState[dTheta2idx]
+                  };
     arma::vec o = {2 * k * M_PI + M_PI, 0, 0, 0};
     arma::vec diffVector = x - o;
     double d = arma::norm(diffVector);
