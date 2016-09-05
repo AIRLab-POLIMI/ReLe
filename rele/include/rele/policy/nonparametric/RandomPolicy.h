@@ -124,7 +124,7 @@ template<class ActionC, class StateC>
 class StochasticDiscretePolicy: public virtual Policy<ActionC,StateC>
 {
 protected:
-    std::vector<ActionC> mActions;
+    std::vector<ActionC> actions;
     arma::vec distribution;
 public:
 
@@ -137,9 +137,9 @@ public:
      * \param actionDim the dimension of each action
      */
     StochasticDiscretePolicy(std::vector<ActionC> actions) :
-        mActions(actions), distribution(actions.size())
+        actions(actions), distribution(actions.size())
     {
-        double nbel = mActions.size();
+        double nbel = actions.size();
         double p = 1/nbel;
         for (int i = 0; i < nbel; ++i)
         {
@@ -157,15 +157,15 @@ public:
      * \param dist an array storing the discrete distribution
      */
     StochasticDiscretePolicy(std::vector<ActionC> actions, double* dist) :
-        mActions(actions), distribution(mActions.size())
+        actions(actions), distribution(actions.size())
     {
         double tot = 0.0;
-        for (int i = 0; i < mActions.size(); ++i)
+        for (int i = 0; i < actions.size(); ++i)
         {
             tot += dist[i];
             distribution[i] = dist[i];
         }
-        for (int i = 0; i < mActions.size(); ++i)
+        for (int i = 0; i < actions.size(); ++i)
         {
             distribution[i] /= tot;
             std::cout << distribution[i] << " ";
@@ -199,7 +199,7 @@ public:
     virtual typename action_type<ActionC>::type operator() (typename state_type<StateC>::const_type_ref state) override
     {
         std::size_t idx = RandomGenerator::sampleDiscrete(distribution.begin(), distribution.end());
-        return mActions[idx];
+        return actions[idx];
     }
 
     virtual StochasticDiscretePolicy<ActionC, StateC>* clone() override
@@ -211,9 +211,9 @@ private:
     int findAction(typename action_type<ActionC>::const_type action)
     {
         typename action_type<ActionC>::type a1 = action;
-        for (int i = 0, ie = mActions.size(); i < ie; ++i)
+        for (int i = 0, ie = actions.size(); i < ie; ++i)
         {
-            typename action_type<ActionC>::type a2 = mActions[i];
+            typename action_type<ActionC>::type a2 = actions[i];
             if(a1 == a2)
             {
                 return i;
