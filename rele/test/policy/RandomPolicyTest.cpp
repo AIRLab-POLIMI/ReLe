@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
         actions.push_back(FiniteAction(i));
     StochasticDiscretePolicy<FiniteAction, DenseState> policy(actions);
 
+    vector<DenseAction> denseActions;
+    StochasticDiscretePolicy<DenseAction, DenseState> policyDense(denseActions);
+
     vec state(1);
     int dim = 5000;
     vec samples(dim);
