@@ -49,9 +49,7 @@ protected:
     ///Vector of ranges, each one representing
     /// the range of the i-th element of an action,
     /// i.e., \f$u_i \sim U(Omega_i)\f$
-    std::vector<Range> mpRanges;
-    /// Action pointer
-    DenseAction mpAction;
+    std::vector<Range> ranges;
 
 public:
     /**
@@ -59,74 +57,56 @@ public:
      * \param ranges the range of the action elements
      */
     RandomPolicy(std::vector<Range>& ranges)
-        : mpRanges(ranges), mpAction(ranges.size())
+        : ranges(ranges)
     {
-        for (int i = 0; i < ranges.size(); ++i)
-        {
-            mpAction[i] = 0.0;
-        }
+
     }
 
     virtual ~RandomPolicy()
     {
-        delete [] mpAction;
+
     }
 
     // Policy interface
 public:
-    std::string getPolicyName()
+    std::string getPolicyName() override
     {
         return std::string("RandomPolicy");
     }
 
-    std::string getPolicyHyperparameters()
+    std::string printPolicy() override
     {
         return std::string("");
     }
 
-    std::string printPolicy()
+    virtual arma::vec operator() (typename state_type<StateC>::const_type_ref state) override
     {
-        return std::string("");
-    }
+    	arma::vec u(ranges.size());
 
-    virtual DenseAction operator() (const StateC state)
-    {
-        for (int i = 0; i < mpRanges.size(); ++i)
+        for (int i = 0; i < ranges.size(); ++i)
         {
-            double a = mpRanges[i].lowerbound();
-            double b = mpRanges[i].upperBound();
-            double val = a + (b - a) * RandomGenerator::sampleUniform(0,1);
-            mpAction[i] =  val;
+            double a = ranges[i].lo();
+            double b = ranges[i].hi();
+            u[i] = RandomGenerator::sampleUniform(a, b);
         }
 
-        return mpAction;
+        return u;
     }
 
     virtual double operator() (
-        typename state_type<StateC>::const_type state,
-        const DenseAction& action)
+        typename state_type<StateC>::const_type_ref state,
+        const arma::vec& action) override
     {
         double prob = 1.0;
         std::vector<Range>::iterator it;
-        for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
+        for(it = ranges.begin(); it != ranges.end(); ++it)
         {
             prob *= 1.0 / it->width();
         }
         return prob;
     }
 
-    double pi(const double* state, const double* action)
-    {
-        double prob = 1.0;
-        std::vector<Range>::iterator it;
-        for(it = mpRanges.begin(); it != mpRanges.end(); ++it)
-        {
-            prob *= 1.0 / it->width();
-        }
-        return prob;
-    }
-
-    virtual RandomPolicy<StateC>* clone()
+    virtual RandomPolicy<StateC>* clone() override
     {
         return new RandomPolicy<StateC>(*this);
     }
