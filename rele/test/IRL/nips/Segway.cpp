@@ -143,9 +143,6 @@ int main(int argc, char *argv[])
     // -- RUN -- //
 
     // Create parametric reward
-    //BasisFunctions basisReward = GaussianRbf::generate({20, 20}, {0, 150, 0, 150});
-    //DenseFeatures phiReward(basisReward);
-
     BasisFunctions basisReward;
     for(unsigned int i = 0; i < 3; i++)
         basisReward.push_back(new LQR_RewardBasis(i, 3));
