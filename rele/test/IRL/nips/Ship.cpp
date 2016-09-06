@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
         evaluationCore.getSettings().loggerStrategy = &collector2;
         evaluationCore.getSettings().episodeLength = mdp.getSettings().horizon;
         evaluationCore.getSettings().episodeN = episodes;
-        evaluationCore.getSettings().testEpisodeN = nbEpisodes;
+        evaluationCore.getSettings().testEpisodeN = nbEpisodes; //TODO check this
 
         evaluationCore.runTestEpisodes();
 
