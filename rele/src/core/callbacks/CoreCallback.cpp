@@ -45,12 +45,12 @@ void CoreProgressBar::run(unsigned int step)
     unsigned int done = size*ratio;
     unsigned int todo = size - done;
 
-    cout << "\r[" << string(done, '#') << string(todo, ' ') << "] " << done << "%";
+    cout << "\e[?25l\r[" << string(done, '#') << string(todo, ' ') << "] " << done << "%";
 }
 
 void CoreProgressBar::runEnd()
 {
-    cout << "\r[" << string(100, '#') << "] " << 100 << "%";
+    cout << "\r[" << string(100, '#') << "] " << 100 << "%\e[?25h";
     cout << endl;
 }
 
