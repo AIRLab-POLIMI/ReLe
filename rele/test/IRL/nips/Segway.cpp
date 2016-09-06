@@ -46,13 +46,14 @@
 #include "rele/utils/DatasetDiscretizator.h"
 #include "rele/core/callbacks/CoreCallback.h"
 
-#include "../RewardBasisLQR.h"
+#include "../RewardBasisSegway.h"
 
 using namespace std;
 using namespace ReLe;
 using namespace arma;
 
 #define RUN
+
 
 /*AdaptiveGradientStep stepRule(0.01);
 PGPE<DenseAction, DenseState> agent(expertDist, policy, episodesPerPolicy, policyPerUpdates,
@@ -91,13 +92,8 @@ arma::vec learnSegway(Environment<DenseAction, DenseState>& mdp, DenseFeatures& 
 int main(int argc, char *argv[])
 {
     //parameters
-    unsigned int datasetSize = 10;
+    unsigned int datasetSize = 100;
     std::string n_discretizations("5");
-
-
-    unsigned int episodesPerPolicy = 1;
-    unsigned int policyPerUpdates = 100;
-    unsigned int learningEpisodes = 10000;
 
     FileManager fm("nips/segway");///"+n_episodes+"/"+n_experiment);
     fm.cleanDir();
@@ -113,10 +109,10 @@ int main(int argc, char *argv[])
     int nparams = phi.rows();
     arma::vec mean(nparams, fill::ones);
     arma::mat cov(nparams, nparams, arma::fill::eye);
-    cov *= 0.001;
-    mean(0) = 1.2430e+02;
-    mean(1) = 5.5160e+01;
-    mean(2) = 1.0500e-01;
+    cov *= 0.01;
+    mean(0) = 87.4249;
+    mean(1) = 32.6788;
+    mean(2) = 1.0;
     ParametricNormal expertDist(mean, cov);
 
     //Create expert dataset
@@ -125,7 +121,6 @@ int main(int argc, char *argv[])
 
     auto&& core = buildCore(mdp, expert);
 
-    core.getSettings().episodeN = learningEpisodes;
     core.getSettings().episodeLength = mdp.getSettings().horizon;
     core.getSettings().testEpisodeN = datasetSize;
     core.getSettings().loggerStrategy = &strategy;
@@ -144,8 +139,9 @@ int main(int argc, char *argv[])
 
     // Create parametric reward
     BasisFunctions basisReward;
-    for(unsigned int i = 0; i < 3; i++)
-        basisReward.push_back(new LQR_RewardBasis(i, 3));
+    unsigned int dim = 4;
+    for(unsigned int i = 0; i < dim; i++)
+        basisReward.push_back(new Segway_RewardBasis(i, dim));
     DenseFeatures phiReward(basisReward);
     LinearApproximator rewardRegressor(phiReward);
 
@@ -213,7 +209,7 @@ int main(int argc, char *argv[])
     {
         rewardRegressor.setParameters(weights.col(i));
         ParametricRewardMDP<DenseAction, DenseState> prMdp(mdp, rewardRegressor);
-        arma::vec mean = learnSegway(prMdp, phi);;
+        arma::vec mean = learnSegway(prMdp, phi);
 
         double epsilon = 0.05;
         NormalPolicy imitatorPolicy(epsilon, phi);
