@@ -161,12 +161,22 @@ void Acrobot::step(const FiniteAction& action,
 
     // Compute reward
     int k = round((currentState[theta1idx] - M_PI) / (2 * M_PI));
+#ifndef ARMA_USE_CXX11
+	arma::vec x(4);
+	x(0) = currentState[theta1idx];
+	x(1) = currentState[theta2idx];
+	x(2) = currentState[dTheta1idx];
+	x(3) = currentState[dTheta2idx];
+	arma::vec o = arma::zeros<arma::vec>(4);
+	o(0) = 2 * k * M_PI + M_PI;
+#else
     arma::vec x = {currentState[theta1idx],
                    currentState[theta2idx],
                    currentState[dTheta1idx],
                    currentState[dTheta2idx]
                   };
     arma::vec o = {2 * k * M_PI + M_PI, 0, 0, 0};
+#endif
     arma::vec diffVector = x - o;
     double d = arma::norm(diffVector);
     if(d < 1)
