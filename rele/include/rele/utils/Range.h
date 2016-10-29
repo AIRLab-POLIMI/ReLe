@@ -24,6 +24,7 @@
 #define RANGE_H_
 
 #include <iostream>
+#include <string>
 
 namespace ReLe
 {

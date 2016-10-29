@@ -26,6 +26,7 @@
 
 #include <map>
 #include <stdexcept>
+#include <string>
 
 namespace ReLe
 {

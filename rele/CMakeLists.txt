@@ -10,7 +10,7 @@ if(catkin_FOUND)
     set(CATKIN_MSG TRUE)
 else()
     set(CATKIN_MSG FALSE)
-endif() 
+endif()
 
 #----------------------- CMAKE MODULES ------------------------
 
@@ -22,21 +22,16 @@ include_directories(include)
 
 # ----------------------- LIBRARIES ---------------------------
 
-if(WIN32)
-    find_path(ARMADILLO_INCLUDE_DIR
-        NAMES armadillo
-        PATHS "C:/usr/include"
-        )
-else()
-    find_package(Armadillo REQUIRED)
-    find_package(NLopt REQUIRED)
-    set(Boost_USE_STATIC_LIBS        OFF)
-    set(Boost_USE_MULTITHREADED      ON)
-    set(Boost_USE_STATIC_RUNTIME    OFF)
-    find_package(Boost 1.53 REQUIRED system timer)
-    if(Boost_FOUND)
-        include_directories(${Boost_INCLUDE_DIRS})
-    endif()
+find_package(Armadillo REQUIRED)
+find_package(NLopt REQUIRED)
+set(Boost_USE_STATIC_LIBS        OFF)
+set(Boost_USE_MULTITHREADED      ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
+find_package(Boost 1.53 REQUIRED system timer)
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    message(STATUS ${Boost_INCLUDE_DIRS})
+    message(STATUS "CIAO")
 endif()
 include_directories(${ARMADILLO_INCLUDE_DIR})
 
@@ -45,10 +40,10 @@ include_directories(${ARMADILLO_INCLUDE_DIR})
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
 
-if(CMAKE_BUILD_TYPE MATCHES Debug)	
+if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(BUILD_TYPE_MSG "Debug")
 
-else()	
+else()
     set(BUILD_TYPE_MSG "Release")
 endif()
 
@@ -82,13 +77,9 @@ file(GLOB_RECURSE ReLe_INCLUDE
     include/*.h)
 
 add_library(rele ${ReLe_SOURCE} ${ReLe_INCLUDE})
-if(WIN32)
-    target_link_libraries(rele -L"C:/usr/bin" -L"C:/usr/lib" -larmadillo -lnlopt -lgfortran)
-else()
-    target_link_libraries(rele ${ARMADILLO_LIBRARIES}
-        ${NLOPT_LIBRARY}
-        ${Boost_LIBRARIES})
-endif()
+target_link_libraries(rele ${ARMADILLO_LIBRARIES}
+    ${NLOPT_LIBRARY}
+    ${Boost_LIBRARIES})
 
 add_subdirectory(test)
 
@@ -124,7 +115,3 @@ endif()
 
 # ------------------------ DOCUMENTATION ------------------------
 add_subdirectory(doc EXCLUDE_FROM_ALL)
-
-
-
-
