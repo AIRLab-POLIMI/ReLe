@@ -1,6 +1,6 @@
 ### How to install ReLe under Windows ###
 
-This guide is out-of-date, please refert to [this](https://github.com/AIRLab-POLIMI/ReLe/README_WINVS.md).
+This guide is out-of-date, please refert to [this](README_WINVS.md).
 
 #Prerequisites
 - Mingw 32 bits or 64 bits
