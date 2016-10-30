@@ -30,8 +30,6 @@ set(Boost_USE_STATIC_RUNTIME    OFF)
 find_package(Boost 1.53 REQUIRED system timer)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
-    message(STATUS ${Boost_INCLUDE_DIRS})
-    message(STATUS "CIAO")
 endif()
 include_directories(${ARMADILLO_INCLUDE_DIR})
 
