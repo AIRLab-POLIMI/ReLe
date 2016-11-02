@@ -29,9 +29,11 @@ endif()
 
 find_package(Armadillo REQUIRED)
 find_package(NLopt REQUIRED)
-set(Boost_USE_STATIC_LIBS        OFF)
-set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME     OFF)
+# set(Boost_USE_STATIC_LIBS        OFF)
+# set(Boost_USE_MULTITHREADED      ON)
+# set(Boost_USE_STATIC_RUNTIME     OFF)
+set (Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
+set (Boost_USE_MULTITHREADED ON)
 # set (Boost_NO_SYSTEM_PATHS ON)
 # set (Boost_USE_MULTITHREADED ON)
 # set (Boost_USE_STATIC_LIBS ON)
@@ -43,6 +45,15 @@ if(Boost_FOUND)
 endif()
 include_directories(${ARMADILLO_INCLUDE_DIR})
 include_directories(${NLOPT_INCLUDE_DIR})
+
+if (WIN32)
+  # disable autolinking in boost
+  add_definitions( -DBOOST_ALL_NO_LIB )
+
+  # force all boost libraries to dynamic link (we already disabled
+  # autolinking, so I don't know why we need this, but we do!)
+  add_definitions( -DBOOST_ALL_DYN_LINK )
+endif()
 
 # ----------------------- GCC FLAGS ----------------------------
 
