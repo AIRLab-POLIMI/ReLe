@@ -22,16 +22,22 @@ include_directories(include)
 
 # ----------------------- LIBRARIES ---------------------------
 
+include(FindLAlib)
+if (ARMA_USE_ATLAS)
+    include_directories(${LA_ATLAS_INCLUDE_DIR})
+endif()
+
 find_package(Armadillo REQUIRED)
 find_package(NLopt REQUIRED)
 set(Boost_USE_STATIC_LIBS        OFF)
 set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    OFF)
+set(Boost_USE_STATIC_RUNTIME     OFF)
 find_package(Boost 1.53 REQUIRED system timer)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 endif()
 include_directories(${ARMADILLO_INCLUDE_DIR})
+include_directories(${NLOPT_INCLUDE_DIR})
 
 # ----------------------- GCC FLAGS ----------------------------
 
@@ -40,7 +46,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     set(BUILD_TYPE_MSG "Debug")
-
 else()
     set(BUILD_TYPE_MSG "Release")
 endif()
@@ -75,8 +80,9 @@ file(GLOB_RECURSE ReLe_INCLUDE
     include/*.h)
 
 add_library(rele ${ReLe_SOURCE} ${ReLe_INCLUDE})
-target_link_libraries(rele ${ARMADILLO_LIBRARIES}
-    ${NLOPT_LIBRARY}
+target_link_libraries(rele ${LA_LIBS}
+    ${ARMADILLO_LIBRARIES}
+    ${NLOPT_LIBRARIES}
     ${Boost_LIBRARIES})
 
 add_subdirectory(test)
