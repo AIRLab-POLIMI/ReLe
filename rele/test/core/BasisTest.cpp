@@ -24,6 +24,9 @@
 #ifndef SRC_TEST_CORE_ANDCONDITIONFEATURESTEST_CPP_
 #define SRC_TEST_CORE_ANDCONDITIONFEATURESTEST_CPP_
 
+#define ARMA_USE_CXX11 //workaround for VS2015
+#include <armadillo>
+
 #include "rele/approximators/Features.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"

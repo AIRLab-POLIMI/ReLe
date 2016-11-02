@@ -21,6 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define ARMA_USE_CXX11 //workaround for VS2015
+#include <armadillo>
+
 #include "rele/statistics/inference/GaussianConjugatePrior.h"
 #include "rele/utils/ArmadilloPDFs.h"
 
