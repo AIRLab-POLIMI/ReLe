@@ -30,14 +30,10 @@ Go to `Tools > NuGet Package Manager > Manage NuGet Packages for Solution` and c
 
 I want to download OpenBLAS so search for it and click the project (rele) which you want to apply.
 
-You can search for the names of the dependencies to download.
-
 ### Boost
-Note that boost provides also prebuilt libraries [here](http://www.boost.org/users/download/).
+Note that boost provides also prebuilt libraries [here](https://sourceforge.net/projects/boost/files/boost-binaries/).
+Download the version named `msvc-14` that corresponds to Visual Studio 15 (e.g. [for boost 1.62 on win 64](https://sourceforge.net/projects/boost/files/boost-binaries/1.62.0/boost_1_62_0-msvc-14.0-64.exe/download)).
 Execute the Boost installation script and replace the destination folder with `C:/projects/`.
-
-*Boost through NuGet [Optional]:*
-Another way is to perform a selective download of the required boost libraries using NuGet.
 
 ### Armadillo
 Download the latest stable version of [Armadillo](http://arma.sourceforge.net/download.html). As a courtesy. You extract it anywhere, but for this example I extracted it under `C:/projects/` folder. projects folder now contains `armadillo-7.500.0` and `ReLe`.
