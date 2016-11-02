@@ -57,12 +57,14 @@ You can download the source code of nlopt from [here](http://ab-initio.mit.edu/w
 To simplify installation, they provide a precompiled 32-bit and 64-bit Windows [DLLs](http://ab-initio.mit.edu/wiki/index.php/NLopt_on_Windows).
 
 Extract the files into `C:/projects/`. You should have the directory `C:/projects/nlopt-2.4.2-dll64` (or 32 bit).
+
 Move into the folder and run the following commands
 
 ```
-call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x86
+call "%VS140COMNTOOLS%..\..\VC\vcvarsall.bat" x64
 lib /def:libnlopt-0.def
 ```
+*Attention:* replace x64 with x86 on Windows 32 bit with nlopt-2.4.2-dll32.
 
 Step 3: Build ReLe
 ------------------
