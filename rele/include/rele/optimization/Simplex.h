@@ -26,6 +26,7 @@
 
 #include <armadillo>
 #include <vector>
+#include <numeric>
 
 namespace ReLe
 {

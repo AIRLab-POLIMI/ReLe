@@ -56,7 +56,9 @@ int main(int argc, char *argv[])
         {
             double k1 = -static_cast<double>(i)/static_cast<double>(steps);
             double k2 = -static_cast<double>(j)/static_cast<double>(steps);
-            arma::vec k = {k1, k2};
+			arma::vec k(2);
+			k(0) = k1;
+			k(1) = k2;
             arma::mat Sigma = arma::eye(dim, dim)*0.1;
 
             J.col(index) = lqrExact.computeJ(k, Sigma);

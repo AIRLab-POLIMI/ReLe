@@ -31,8 +31,10 @@ Go to `Tools > NuGet Package Manager > Manage NuGet Packages for Solution` and c
 I want to download OpenBLAS so search for it and click the project (rele) which you want to apply.
 
 ### Boost
+**Attention:** ReLe has been tested with boost 1.59
+
 Note that boost provides also prebuilt libraries [here](https://sourceforge.net/projects/boost/files/boost-binaries/).
-Download the version named `msvc-14` that corresponds to Visual Studio 15 (e.g. [for boost 1.62 on win 64](https://sourceforge.net/projects/boost/files/boost-binaries/1.62.0/boost_1_62_0-msvc-14.0-64.exe/download)).
+Download the version named `msvc-14` that corresponds to Visual Studio 15 (e.g. [for boost 1.59 on win 64](https://sourceforge.net/projects/boost/files/boost-binaries/1.59.0/boost_1_59_0-msvc-14.0-64.exe/download)).
 Execute the Boost installation script and replace the destination folder with `C:/projects/`.
 
 ### Armadillo
@@ -70,7 +72,7 @@ The instructions are same as building armadillo, so it should be easier as youâ€
 
 Create a directory `build` in `C:/projects/ReLe/rele`. Move into the folder and run the following command
 ```
-cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug -DBLAS_LIBRARY:FILEPATH="C:/projects/ReLe/rele/packages/OpenBLAS.0.2.14.1/lib/native/lib/x64/libopenblas.dll.a" -DLAPACK_LIBRARY:FILEPATH="C:/projects/ReLe/rele/packages/OpenBLAS.0.2.14.1/lib/native/lib/x64/libopenblas.dll.a" -DARMADILLO_INCLUDE_DIR="C:/projects/armadillo-7.500.0/include" -DARMADILLO_LIBRARY:FILEPATH="C:/projects/armadillo-7.500.0/build/Debug/armadillo.lib" -DBOOST_INCLUDEDIR:PATH="C:/projects/boost_1_62_0" -DBOOST_LIBRARYDIR:PATH="C:/projects/boost_1_62_0/lib64-msvc-14.0" -DNLOPT_INCLUDE_DIR:PATH="C:/projects/nlopt-2.4.2-dll64" -DNLOPT_LIBRARY:FILEPATH="C:/projects/nlopt-2.4.2-dll64/libnlopt-0.lib" ..
+cmake -G "Visual Studio 14 2015 Win64" -DCMAKE_BUILD_TYPE=Debug -DBLAS_LIBRARY:FILEPATH="C:/projects/ReLe/rele/packages/OpenBLAS.0.2.14.1/lib/native/lib/x64/libopenblas.dll.a" -DLAPACK_LIBRARY:FILEPATH="C:/projects/ReLe/rele/packages/OpenBLAS.0.2.14.1/lib/native/lib/x64/libopenblas.dll.a" -DARMADILLO_INCLUDE_DIR="C:/projects/armadillo-7.500.0/include" -DARMADILLO_LIBRARY:FILEPATH="C:/projects/armadillo-7.500.0/build/Debug/armadillo.lib" -DBOOST_INCLUDEDIR:PATH="C:/projects/boost_1_59_0" -DBOOST_LIBRARYDIR:PATH="C:/projects/boost_1_59_0/lib64-msvc-14.0" -DNLOPT_INCLUDE_DIR:PATH="C:/projects/nlopt-2.4.2-dll64" -DNLOPT_LIBRARY:FILEPATH="C:/projects/nlopt-2.4.2-dll64/libnlopt-0.lib" ..
 ```
 
 Cmake then should create many files below build folder. click on `rele.sln` file to open with Visual Studio. Next, click `Build > Build Solution` to build armadillo. This will compile the library and all the examples. You can easily build only the library by selecting `rele` in the solution explorer.
