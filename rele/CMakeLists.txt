@@ -85,7 +85,10 @@ target_link_libraries(rele ${LA_LIBS}
     ${NLOPT_LIBRARIES}
     ${Boost_LIBRARIES})
 
+message(STATUS "")
+message(STATUS "ADDING TESTS")
 add_subdirectory(test)
+message(STATUS "")
 
 # ------------------------ INSTALLATION ------------------------
 
