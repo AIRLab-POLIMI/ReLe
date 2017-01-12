@@ -23,6 +23,7 @@
 #include "rele/utils/Range.h"
 #include <cfloat>
 #include <sstream>
+#include <algorithm>
 
 namespace ReLe
 {

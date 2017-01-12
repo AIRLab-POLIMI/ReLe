@@ -24,6 +24,8 @@
 #ifndef SWINGPENDULUM_H_
 #define SWINGPENDULUM_H_
 
+#define _USE_MATH_DEFINES // this is for compatibility with VC++
+#include <cmath>
 #include "rele/core/DenseMDP.h"
 #include "rele/utils/Range.h"
 

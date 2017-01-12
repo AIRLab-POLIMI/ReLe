@@ -21,8 +21,9 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _USE_MATH_DEFINES // this is for compatibility with VC++
+#include <cmath>
 #include "rele/environments/Pursuer.h"
-
 #include "rele/utils/ModularRange.h"
 #include "rele/utils/RandomGenerator.h"
 

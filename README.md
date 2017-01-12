@@ -32,6 +32,9 @@ brew install boost homebrew/science/armadillo homebrew/science/nlopt
 
 Homebrew provides also cmake package (`brew install cmake`).
 
+### Windows
+Refer to the dedicated [guide](README_WINVS.md).
+
 COMPILING
 ---------
 

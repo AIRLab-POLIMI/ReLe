@@ -31,11 +31,24 @@ namespace ReLe
 
 TaxiFuel::TaxiFuel() : DenseMDP(STATESIZE, ACTIONNUMBER, 1, false, true, 1.0), gridDim(0, 4)
 {
+#ifndef ARMA_USE_CXX11
+	G(0) = 4.0;
+	G(1) = 4.0;
+	Y(0) = 0.0;
+	Y(1) = 0.0;
+	B(0) = 3.0;
+	B(1) = 0.0;
+	R(0) = 0.0;
+	R(1) = 4.0;
+	F(0) = 2.0;
+	F(1) = 1.0;
+#else
     G = {4.0, 4.0};
     Y = {0.0, 0.0};
     B = {3.0, 0.0};
     R = {0.0, 4.0};
     F = {2.0, 1.0};
+#endif
 
 }
 

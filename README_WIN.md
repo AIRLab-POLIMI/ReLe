@@ -1,4 +1,7 @@
 ### How to install ReLe under Windows ###
+
+This guide is out-of-date, please refert to [this](README_WINVS.md).
+
 #Prerequisites
 - Mingw 32 bits or 64 bits
 MinGW 32 bits
@@ -18,7 +21,7 @@ http://icl.cs.utk.edu/lapack-for-windows/lapack/#build
 1. Extract the archive
 2. Create a "build" folder into lapack folder
 3. Open cmake
-	3.1 Point to your lapack folder as the source code folder 
+	3.1 Point to your lapack folder as the source code folder
 	3.2 Use the "build" folder as build folder
 	3.3 Click configure, check the install path if you want to have the libraries and includes in a particular location.
 		We suggest to use "C:/usr" as installation path
@@ -28,7 +31,7 @@ http://icl.cs.utk.edu/lapack-for-windows/lapack/#build
 	3.7 Click again configure until everything becomes white
 	3.8 Click generate, that will create the mingw build.
 	3.9 Close CMake
-4. Open a cmd prompt (Click Run.. then enter cmd) 
+4. Open a cmd prompt (Click Run.. then enter cmd)
 5. Go to your build folder using the cd command
 6. type mingw32-make
 7. type mingw32-make install
@@ -46,7 +49,7 @@ http://arma.sourceforge.net/download.html
 	2.5 Click again configure until everything becomes white
 	2.6 Click generate, that will create the mingw build.
 	2.7 Close CMake
-3. Open a cmd prompt (Click Run.. then enter cmd) 
+3. Open a cmd prompt (Click Run.. then enter cmd)
 4. Go to your armadillo folder using the cd command
 5. Type mingw32-make
 7. Type mingw32-make install
@@ -62,7 +65,7 @@ http://arma.sourceforge.net/download.html
 	2.5 Click again configure until everything becomes white
 	2.6 Click generate, that will create the mingw build.
 	2.7 Close CMake
-3. Open a cmd prompt (Click Run.. then enter cmd) 
+3. Open a cmd prompt (Click Run.. then enter cmd)
 4. Go to your ReLe-master/build folder using the cd command
 5. Type mingw32-make
 8. You must have a library named "librele.a" and a file "lqr_pgpe.exe"

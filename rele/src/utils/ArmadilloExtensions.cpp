@@ -63,7 +63,7 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
         else
         {
             //Remember column index
-#ifdef ARMA_DONT_USE_CXX11
+#ifndef ARMA_USE_CXX11
             arma::uvec u(1);
             u(0) = j;
 #else
@@ -72,7 +72,7 @@ arma::uvec rref(const arma::mat& X, arma::mat& A, double tol)
             jb = arma::join_vert(jb,u);
 
             // Swap i-th and k-th rows.
-#ifdef ARMA_DONT_USE_CXX11
+#ifndef ARMA_USE_CXX11
             arma::uvec idx(2), idx2(2);
             idx(0) = i;
             idx(1) = k;
