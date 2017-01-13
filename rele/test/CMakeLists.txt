@@ -1,4 +1,4 @@
-#Test Makefile
+#Test subdirectories to be added
 
 add_subdirectory(Batch)
 add_subdirectory(BBO)

@@ -65,9 +65,7 @@ target_link_libraries(releROS ${catkin_LIBRARIES})
 add_dependencies(releROS ${catkin_EXPORTED_TARGETS})
 
 #releROS test
-
-add_executable(rrbot_test test/RRBotTest.cpp)
-target_link_libraries(rrbot_test releROS ${catkin_LIBRARIES})
+add_subdirectory(test)
 
 
 # ------------------------ INSTALLATION ------------------------

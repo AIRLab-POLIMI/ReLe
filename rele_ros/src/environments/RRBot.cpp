@@ -45,13 +45,13 @@ void RRBot::publishAction(const ReLe::DenseAction& action)
 
 void RRBot::setState(ReLe::DenseState& state)
 {
-	//TODO [MINOR] implement environment
+    //TODO [MINOR] implement environment
 }
 
 void RRBot::setReward(const ReLe::DenseAction& action,
                       const ReLe::DenseState& state, ReLe::Reward& reward)
 {
-	//TODO [MINOR] implement environment
+    //TODO [MINOR] implement environment
 }
 
 

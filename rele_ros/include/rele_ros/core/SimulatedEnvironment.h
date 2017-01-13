@@ -41,10 +41,10 @@ class SimulatedEnvironment: public RosEnvironment<ActionC, StateC>
 {
 
 public:
-	/*!
-	 * Constructor
-	 * \param controlFrequency the frequency of the control publishing
-	 */
+    /*!
+     * Constructor
+     * \param controlFrequency the frequency of the control publishing
+     */
     SimulatedEnvironment(double controlFrequency) :
         RosEnvironment<ActionC, StateC>(controlFrequency)
     {
