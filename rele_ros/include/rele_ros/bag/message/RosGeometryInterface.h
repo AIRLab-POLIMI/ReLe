@@ -49,6 +49,7 @@ public:
 
         if(ros_data != nullptr)
         {
+        	data.resize(6);
             data(0) = ros_data->linear.x;
             data(1) = ros_data->linear.y;
             data(2) = ros_data->linear.z;

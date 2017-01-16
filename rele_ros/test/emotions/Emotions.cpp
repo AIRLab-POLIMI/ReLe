@@ -54,21 +54,27 @@ int main(int argc, char *argv[])
 
 
     //Create basis function for learning policy
-    BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
+    /*BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
    	BasisFunctions tmp = FrequencyBasis::generate(0, 0.0, fE, df, false);
-    basis.insert(tmp.begin(), tmp.end(), basis.end());
+    basis.insert(basis.end(), tmp.begin(), tmp.end());
 
-    SparseFeatures phi(basis, uDim);
+    SparseFeatures phi(basis, uDim);*/
 
     //Read datatset
 
-    auto t1 = new RosTopicInterface_<geometry_msgs::Twist>("cmd_vel", true, true);
+    auto* t1 = new RosTopicInterface_<geometry_msgs::Twist>("/cmd_vel", true, true);
     std::vector<RosTopicInterface*> topics;
     topics.push_back(t1);
 
     RosDataset rosDataset(topics);
 
-    rosDataset.readEpisode("prova.txt");
+    std::string basePath = "/home/dave/Dropbox/Dottorato/Major/test/arrabbiato/";
+    std::string file = "triskar_2017-01-10-15-46-18.bag";
+
+    rosDataset.readEpisode(basePath+file);
+
+    std::ofstream os(fm.addPath("bag"));
+    rosDataset.getData().writeToStream(os);
 
 
     return 0;

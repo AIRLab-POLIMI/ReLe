@@ -43,10 +43,11 @@ void RosDataset::readEpisode(const std::string& episodePath)
 
     rosbag::View view(bag, rosbag::TopicQuery(topicsNames));
 
-    DenseAction u(uDim);
+    DenseAction u(uDim), un(uDim);
     DenseState x(xDim), xn(xDim);
 
     bool first = true;
+    ros::Time startTime;
 
     for(rosbag::MessageInstance const m : view)
     {
@@ -56,11 +57,11 @@ void RosDataset::readEpisode(const std::string& episodePath)
             if(topic->readTopic(tmp, m))
             {
                 unsigned int start = topic->getIndex();
-                unsigned int end = start + topic->getDimension();
+                unsigned int end = start + topic->getDimension()-1;
 
                 if(topic->isAction())
                 {
-                    u.rows(start, end) = tmp;
+                    un.rows(start, end) = tmp;
                 }
                 else
                 {
@@ -70,10 +71,18 @@ void RosDataset::readEpisode(const std::string& episodePath)
                 if(topic->isMain())
                 {
                     auto time = m.getTime();
-                    tmp(0) = time.toSec();
 
-                    if(!first)
+                    if(first)
                     {
+                    	startTime = time;
+                    	first = false;
+
+                    	xn(0) = 0;
+                    }
+                    else
+                    {
+                    	xn(0) = (time-startTime).toSec();
+
                         Transition<DenseAction, DenseState> tr;
                         tr.x = x;
                         tr.u = u;
@@ -81,11 +90,10 @@ void RosDataset::readEpisode(const std::string& episodePath)
                         //tr.r = 0; //TODO [IMPORTANT] add computation of reward function
 
                         ep.push_back(tr);
-
-                        first = false;
                     }
 
                     x = xn;
+                    u = un;
 
                 }
 
@@ -105,6 +113,8 @@ void RosDataset::preprocessTopics()
     xDim = 1;
     uDim = 0;
 
+    unsigned int mainCount = 0;
+
     for(auto* topic : topics)
     {
         if(topic->isAction())
@@ -118,7 +128,17 @@ void RosDataset::preprocessTopics()
             xDim += topic->getDimension();
         }
 
+        if(topic->isMain())
+        {
+        	mainCount++;
+        }
+
         topicsNames.push_back(topic->getName());
+    }
+
+    if(mainCount < 1)
+    {
+    	throw std::runtime_error("At least one topic should be the main topic");
     }
 }
 
