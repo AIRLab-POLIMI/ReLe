@@ -28,11 +28,16 @@
 #include <rele/approximators/basis/FrequencyBasis.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
+#include <rele/policy/utils/MLE.h>
 
 #include <rele/utils/FileManager.h>
 
-#include <rele_ros/bag/RosDataset.h>
-#include <rele_ros/bag/message/RosGeometryInterface.h>
+#include <rele/environments/EmptyEnv.h>
+#include <rele/core/PolicyEvalAgent.h>
+#include <rele/core/Core.h>
+
+#include "rele_ros/bag/RosDataset.h"
+#include "rele_ros/bag/message/RosGeometryInterface.h"
 
 
 using namespace std;
@@ -40,9 +45,10 @@ using namespace arma;
 using namespace ReLe;
 using namespace ReLe_ROS;
 
+
 int main(int argc, char *argv[])
 {
-    FileManager fm("emotions");
+    FileManager fm("emotions", "arrabbiato");
     fm.createDir();
     //fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
@@ -51,17 +57,14 @@ int main(int argc, char *argv[])
     double fE = 100.0/5.0;
     int uDim = 3;
 
-
-
     //Create basis function for learning policy
-    /*BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
+    BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
    	BasisFunctions tmp = FrequencyBasis::generate(0, 0.0, fE, df, false);
     basis.insert(basis.end(), tmp.begin(), tmp.end());
 
-    SparseFeatures phi(basis, uDim);*/
+    SparseFeatures phi(basis, uDim);
 
-    //Read datatset
-
+    //Read emotion datatset
     auto* t1 = new RosTopicInterface_<geometry_msgs::Twist>("/cmd_vel", true, true);
     std::vector<RosTopicInterface*> topics;
     topics.push_back(t1);
@@ -73,8 +76,30 @@ int main(int argc, char *argv[])
 
     rosDataset.readEpisode(basePath+file);
 
-    std::ofstream os(fm.addPath("bag"));
-    rosDataset.getData().writeToStream(os);
+    //Fit Normal policy
+    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-6);
+    MLE<DenseAction, DenseState> mle(policy, rosDataset.getData());
+
+    cout << "MLE value: " << mle.compute(0.1*arma::ones(phi.rows(), 1), 1000) << endl;
+
+
+    //Test the fitted policy
+    EmptyEnv env(uDim, 100.0);
+    PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+    Core<DenseAction, DenseState> core(env, agent);
+
+    CollectorStrategy<DenseAction, DenseState> s;
+    core.getSettings().episodeLength = 500;
+    core.getSettings().loggerStrategy = &s;
+    core.runTestEpisode();
+
+    //Save the dataset in ReLe format
+    std::ofstream os1(fm.addPath("expert_dataset.log"));
+    rosDataset.getData().writeToStream(os1);
+
+    std::ofstream os2(fm.addPath("imitator_dataset.log"));
+    s.data.writeToStream(os2);
+
 
 
     return 0;

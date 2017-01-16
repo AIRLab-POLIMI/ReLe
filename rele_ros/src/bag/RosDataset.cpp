@@ -74,14 +74,14 @@ void RosDataset::readEpisode(const std::string& episodePath)
 
                     if(first)
                     {
-                    	startTime = time;
-                    	first = false;
+                        startTime = time;
+                        first = false;
 
-                    	xn(0) = 0;
+                        xn(0) = 0;
                     }
                     else
                     {
-                    	xn(0) = (time-startTime).toSec();
+                        xn(0) = (time-startTime).toSec();
 
                         Transition<DenseAction, DenseState> tr;
                         tr.x = x;
@@ -130,7 +130,7 @@ void RosDataset::preprocessTopics()
 
         if(topic->isMain())
         {
-        	mainCount++;
+            mainCount++;
         }
 
         topicsNames.push_back(topic->getName());
@@ -138,7 +138,7 @@ void RosDataset::preprocessTopics()
 
     if(mainCount < 1)
     {
-    	throw std::runtime_error("At least one topic should be the main topic");
+        throw std::runtime_error("At least one topic should be the main topic");
     }
 }
 

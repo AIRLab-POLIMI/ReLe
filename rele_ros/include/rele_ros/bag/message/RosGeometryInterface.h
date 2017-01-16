@@ -37,11 +37,11 @@ class RosTopicInterface_<geometry_msgs::Twist> : public RosTopicInterface
 
 public:
 
-	RosTopicInterface_(const std::string& name, bool action, bool main)
-		: RosTopicInterface(name, action, main)
-	{
+    RosTopicInterface_(const std::string& name, bool action, bool main)
+        : RosTopicInterface(name, action, main)
+    {
 
-	}
+    }
 
     virtual bool readTopic(arma::vec& data, rosbag::MessageInstance const& m) override
     {
@@ -49,7 +49,7 @@ public:
 
         if(ros_data != nullptr)
         {
-        	data.resize(6);
+            data.resize(6);
             data(0) = ros_data->linear.x;
             data(1) = ros_data->linear.y;
             data(2) = ros_data->linear.z;

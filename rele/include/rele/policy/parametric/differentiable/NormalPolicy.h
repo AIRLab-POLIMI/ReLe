@@ -342,7 +342,7 @@ public:
      * \param phi the basis functions
      * \param covariance the covariance matrix (\f$n_u \times n_u\f$)
      */
-    MVNPolicy(Features& phi, arma::mat& covariance) :
+    MVNPolicy(Features& phi, const arma::mat& covariance) :
         approximator(phi),
         mMean(approximator.getOutputSize(), arma::fill::zeros),
         mCovariance(covariance)

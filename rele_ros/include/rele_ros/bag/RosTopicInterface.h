@@ -75,11 +75,11 @@ class RosTopicInterface_ : public RosTopicInterface
 {
 
 public:
-	RosTopicInterface_(const std::string& name, bool action, bool main)
-		: RosTopicInterface(name, action, main)
-	{
+    RosTopicInterface_(const std::string& name, bool action, bool main)
+        : RosTopicInterface(name, action, main)
+    {
 
-	}
+    }
 
     virtual bool readTopic(arma::vec& data, rosbag::MessageInstance const& m) override
     {

@@ -27,7 +27,7 @@ namespace ReLe_ROS
 {
 
 RosTopicInterface::RosTopicInterface(const std::string& name, bool action, bool main)
-	: topicName(name), action(action), main(main), index(0)
+    : topicName(name), action(action), main(main), index(0)
 {
 
 }
