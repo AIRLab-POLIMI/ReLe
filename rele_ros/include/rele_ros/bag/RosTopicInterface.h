@@ -25,6 +25,7 @@
 #define INCLUDE_RELE_ROS_BAG_ROSTOPICINTERFACE_H_
 
 #include <rosbag/message_instance.h>
+#include <armadillo>
 
 namespace ReLe_ROS
 {
@@ -74,7 +75,13 @@ class RosTopicInterface_ : public RosTopicInterface
 {
 
 public:
-    virtual bool readTopic(arma::vec& data, rosbag::MessageInstance const& m)
+	RosTopicInterface_(const std::string& name, bool action, bool main)
+		: RosTopicInterface(name, action, main)
+	{
+
+	}
+
+    virtual bool readTopic(arma::vec& data, rosbag::MessageInstance const& m) override
     {
         typename T::ConstPtr ros_data =  m.instantiate<T>();
 
@@ -91,7 +98,7 @@ public:
         }
     }
 
-    virtual unsigned int getDimension()
+    virtual unsigned int getDimension() override
     {
         return 1;
     }

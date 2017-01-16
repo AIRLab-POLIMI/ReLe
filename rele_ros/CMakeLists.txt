@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.3)
 
 find_package(catkin REQUIRED COMPONENTS rele
                                         roscpp
+                                        rosbag
                                         std_srvs)
 project(rele_ros)
 
@@ -58,7 +59,7 @@ message(STATUS "Build type       : " ${BUILD_TYPE_MSG})
 
 #releROS library
 file(GLOB_RECURSE ReLeROS_SOURCE
-                  src/environments/*.cpp)
+                  src/*.cpp)
 
 add_library(releROS ${ReLeROS_SOURCE})
 target_link_libraries(releROS ${catkin_LIBRARIES})

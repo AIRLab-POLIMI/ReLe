@@ -21,43 +21,20 @@
  *  along with rele_ros.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INCLUDE_RELE_ROS_BAG_ROSDATASET_H_
-#define INCLUDE_RELE_ROS_BAG_ROSDATASET_H_
-
-#include <rosbag/bag.h>
-#include <rosbag/view.h>
-
-#include <rele/core/Transition.h>
-
 #include "rele_ros/bag/RosTopicInterface.h"
 
 namespace ReLe_ROS
 {
 
-class RosDataset
+RosTopicInterface::RosTopicInterface(const std::string& name, bool action, bool main)
+	: topicName(name), action(action), main(main), index(0)
 {
-
-public:
-    RosDataset(std::vector<RosTopicInterface*>& topics);
-
-    void readEpisode(const std::string& episodePath);
-
-    inline ReLe::Dataset<ReLe::DenseAction, ReLe::DenseState> getData()
-    {
-        return data;
-    }
-
-private:
-    void preprocessTopics();
-
-private:
-    ReLe::Dataset<ReLe::DenseAction, ReLe::DenseState> data;
-    std::vector<RosTopicInterface*> topics;
-
-    unsigned int uDim, xDim;
-    std::vector<std::string> topicsNames;
-};
 
 }
 
-#endif /* INCLUDE_RELE_ROS_BAG_ROSDATASET_H_ */
+RosTopicInterface::~RosTopicInterface()
+{
+
+}
+
+}

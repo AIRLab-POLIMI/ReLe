@@ -22,18 +22,23 @@
  */
 
 
-#include "rele/approximators/features/SparseFeatures.h"
-#include "rele/approximators/features/DenseFeatures.h"
-#include "rele/approximators/regressors/others/LinearApproximator.h"
-#include "rele/approximators/basis/FrequencyBasis.h"
+#include <rele/approximators/features/SparseFeatures.h>
+#include <rele/approximators/features/DenseFeatures.h>
+#include <rele/approximators/regressors/others/LinearApproximator.h>
+#include <rele/approximators/basis/FrequencyBasis.h>
 
-#include "rele/policy/parametric/differentiable/NormalPolicy.h"
+#include <rele/policy/parametric/differentiable/NormalPolicy.h>
 
-#include "rele/utils/FileManager.h"
+#include <rele/utils/FileManager.h>
+
+#include <rele_ros/bag/RosDataset.h>
+#include <rele_ros/bag/message/RosGeometryInterface.h>
+
 
 using namespace std;
 using namespace arma;
 using namespace ReLe;
+using namespace ReLe_ROS;
 
 int main(int argc, char *argv[])
 {
@@ -46,13 +51,24 @@ int main(int argc, char *argv[])
     double fE = 100.0/5.0;
     int uDim = 3;
 
+
+
+    //Create basis function for learning policy
     BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
    	BasisFunctions tmp = FrequencyBasis::generate(0, 0.0, fE, df, false);
     basis.insert(tmp.begin(), tmp.end(), basis.end());
 
-
-
     SparseFeatures phi(basis, uDim);
+
+    //Read datatset
+
+    auto t1 = new RosTopicInterface_<geometry_msgs::Twist>("cmd_vel", true, true);
+    std::vector<RosTopicInterface*> topics;
+    topics.push_back(t1);
+
+    RosDataset rosDataset(topics);
+
+    rosDataset.readEpisode("prova.txt");
 
 
     return 0;

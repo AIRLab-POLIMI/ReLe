@@ -28,7 +28,7 @@ using namespace ReLe;
 namespace ReLe_ROS
 {
 
-RosDataset::RosDataset(std::vector<RosTopicInterface> topics)
+RosDataset::RosDataset(std::vector<RosTopicInterface*>& topics)
     : topics(topics)
 {
     preprocessTopics();
@@ -41,7 +41,7 @@ void RosDataset::readEpisode(const std::string& episodePath)
     rosbag::Bag bag;
     bag.open(episodePath, rosbag::bagmode::Read);
 
-    rosbag::View view(bag, rosbag::TopicQuery(topics));
+    rosbag::View view(bag, rosbag::TopicQuery(topicsNames));
 
     DenseAction u(uDim);
     DenseState x(xDim), xn(xDim);
@@ -78,7 +78,7 @@ void RosDataset::readEpisode(const std::string& episodePath)
                         tr.x = x;
                         tr.u = u;
                         tr.xn = xn; //TODO [IMPORTANT] set absorbing state
-                        tr.r = 0; //TODO [IMPORTANT] add computation of reward function
+                        //tr.r = 0; //TODO [IMPORTANT] add computation of reward function
 
                         ep.push_back(tr);
 

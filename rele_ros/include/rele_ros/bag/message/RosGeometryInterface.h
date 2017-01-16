@@ -36,7 +36,14 @@ class RosTopicInterface_<geometry_msgs::Twist> : public RosTopicInterface
 {
 
 public:
-    virtual bool readTopic(arma::vec& data, rosbag::MessageInstance const& m)
+
+	RosTopicInterface_(const std::string& name, bool action, bool main)
+		: RosTopicInterface(name, action, main)
+	{
+
+	}
+
+    virtual bool readTopic(arma::vec& data, rosbag::MessageInstance const& m) override
     {
         typename geometry_msgs::Twist::ConstPtr ros_data =  m.instantiate<geometry_msgs::Twist>();
 
@@ -57,7 +64,7 @@ public:
         }
     }
 
-    virtual unsigned int getDimension()
+    virtual unsigned int getDimension() override
     {
         return 6;
     }
