@@ -37,8 +37,8 @@ class RosTopicInterface_<geometry_msgs::Twist> : public RosTopicInterface
 
 public:
 
-    RosTopicInterface_(const std::string& name, bool action, bool main)
-        : RosTopicInterface(name, action, main)
+    RosTopicInterface_(const std::string& name, bool action, bool main, bool planar = true)
+        : RosTopicInterface(name, action, main), planar(planar)
     {
 
     }
@@ -49,13 +49,23 @@ public:
 
         if(ros_data != nullptr)
         {
-            data.resize(6);
-            data(0) = ros_data->linear.x;
-            data(1) = ros_data->linear.y;
-            data(2) = ros_data->linear.z;
-            data(3) = ros_data->angular.x;
-            data(4) = ros_data->angular.y;
-            data(5) = ros_data->angular.z;
+            data.resize(getDimension());
+
+            if(planar)
+            {
+            	data(0) = ros_data->linear.x;
+            	data(1) = ros_data->linear.y;
+            	data(2) = ros_data->angular.z;
+            }
+            else
+            {
+            	data(0) = ros_data->linear.x;
+            	data(1) = ros_data->linear.y;
+            	data(2) = ros_data->linear.z;
+            	data(3) = ros_data->angular.x;
+            	data(4) = ros_data->angular.y;
+            	data(5) = ros_data->angular.z;
+            }
 
             return true;
         }
@@ -67,8 +77,11 @@ public:
 
     virtual unsigned int getDimension() override
     {
-        return 6;
+        return planar ? 3 : 6;
     }
+
+private:
+    bool planar;
 };
 
 }

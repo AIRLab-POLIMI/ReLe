@@ -26,9 +26,11 @@
 #include <rele/approximators/features/DenseFeatures.h>
 #include <rele/approximators/regressors/others/LinearApproximator.h>
 #include <rele/approximators/basis/FrequencyBasis.h>
+#include <rele/approximators/basis/PolynomialFunction.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
-#include <rele/policy/utils/MLE.h>
+//#include <rele/policy/utils/MLE.h>
+#include <rele/policy/utils/LinearStatisticEstimation.h>
 
 #include <rele/utils/FileManager.h>
 
@@ -46,23 +48,15 @@ using namespace ReLe;
 using namespace ReLe_ROS;
 
 
+
+
+
 int main(int argc, char *argv[])
 {
     FileManager fm("emotions", "arrabbiato");
     fm.createDir();
     //fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
-
-    double df = 0.5;
-    double fE = 100.0/5.0;
-    int uDim = 3;
-
-    //Create basis function for learning policy
-    BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
-   	BasisFunctions tmp = FrequencyBasis::generate(0, 0.0, fE, df, false);
-    basis.insert(basis.end(), tmp.begin(), tmp.end());
-
-    SparseFeatures phi(basis, uDim);
 
     //Read emotion datatset
     auto* t1 = new RosTopicInterface_<geometry_msgs::Twist>("/cmd_vel", true, true);
@@ -72,16 +66,41 @@ int main(int argc, char *argv[])
     RosDataset rosDataset(topics);
 
     std::string basePath = "/home/dave/Dropbox/Dottorato/Major/test/arrabbiato/";
-    std::string file = "triskar_2017-01-10-15-46-18.bag";
+    std::string file = "triskar_2017-01-10-15-47-34.bag";
 
     rosDataset.readEpisode(basePath+file);
 
+    unsigned int N = rosDataset.getData().getTransitionsNumber();
+    double df = 0.1;
+    double fE = 20.0;
+    int uDim = 3;
+
+    std::cout << "df: " << df << " fe: " << fE << " N: " << N << endl;
+
+    //Create basis function for policy
+    BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
+   	BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
+    basis.insert(basis.end(), tmp.begin(), tmp.end());
+
+    SparseFeatures phi(basis, uDim);
+
     //Fit Normal policy
-    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-6);
-    MLE<DenseAction, DenseState> mle(policy, rosDataset.getData());
+    LinearStatisticEstimation estimator;
+    BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
+    BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
+    basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());
+    //auto* tmp2Est = new PolynomialFunction();
+    //basisEst.push_back(tmp2Est);
 
-    cout << "MLE value: " << mle.compute(0.1*arma::ones(phi.rows(), 1), 1000) << endl;
+    DenseFeatures phiEst(basisEst);
 
+    estimator.computeMLE(phiEst, rosDataset.getData());
+
+    cout << "Cov:" << endl << estimator.getCovariance() << endl;
+
+    //Create policy (add small elements on diagonal to avoid uncontrolled axis)
+    MVNPolicy policy(phi, estimator.getCovariance()+arma::eye(uDim, uDim)*1e-10);
+    policy.setParameters(estimator.getMeanParameters());
 
     //Test the fitted policy
     EmptyEnv env(uDim, 100.0);
@@ -89,7 +108,7 @@ int main(int argc, char *argv[])
     Core<DenseAction, DenseState> core(env, agent);
 
     CollectorStrategy<DenseAction, DenseState> s;
-    core.getSettings().episodeLength = 500;
+    core.getSettings().episodeLength = 2000;
     core.getSettings().loggerStrategy = &s;
     core.runTestEpisode();
 

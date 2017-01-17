@@ -42,7 +42,7 @@ public:
 
     void readEpisode(const std::string& episodePath);
 
-    inline ReLe::Dataset<ReLe::DenseAction, ReLe::DenseState> getData()
+    inline ReLe::Dataset<ReLe::DenseAction, ReLe::DenseState>& getData()
     {
         return data;
     }
