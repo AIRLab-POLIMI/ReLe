@@ -47,9 +47,66 @@ using namespace arma;
 using namespace ReLe;
 using namespace ReLe_ROS;
 
+void preprocessDataset(Dataset<DenseAction, DenseState>& data)
+{
+	for(unsigned int ep = 0; ep < data.size(); ep++)
+	{
+		auto& episode = data[ep];
+
+		unsigned int i;
+		for(i = 0; i < data[ep].size(); i++)
+		{
+			auto& tr = episode[i];
+
+			if(tr.u(0) != 0 || tr.u(1) != 0 || tr.u(2) != 0)
+			{
+				break;
+			}
+		}
+
+		episode.erase(episode.begin(), episode.begin() + i);
+
+		double t0 = episode[0].x(0);
+
+		for(i = 0; i < data[ep].size(); i++)
+		{
+			auto& tr = episode[i];
+
+			tr.x(0) -= t0;
+		}
 
 
+		for(i = episode.size() - 1; i > 0; i--)
+		{
+			auto& tr = episode[i];
 
+			if(tr.u(0) != 0 || tr.u(1) != 0 || tr.u(2) != 0)
+			{
+				break;
+			}
+		}
+
+		episode.erase(episode.begin() + i + 1, episode.end());
+
+	}
+
+	/*unsigned int size = data[0].size();
+
+	double tf = data[0].back().x(0);
+
+
+	cout <<  size << endl;
+
+	for(unsigned int i = 0; i < size; i++)
+	{
+		auto tr = data[0][i];
+		tr.x += tf;
+		data[0].push_back(tr);
+	}
+
+
+	cout <<  data[0].size() << endl;*/
+}
 
 int main(int argc, char *argv[])
 {
@@ -66,16 +123,26 @@ int main(int argc, char *argv[])
     RosDataset rosDataset(topics);
 
     std::string basePath = "/home/dave/Dropbox/Dottorato/Major/test/arrabbiato/";
-    std::string file = "triskar_2017-01-10-15-47-34.bag";
+    //std::string file = "triskar_2017-01-10-15-47-34.bag";
+    //std::string file = "triskar_2017-01-10-15-46-18.bag";
+    std::string file = "triskar_2017-01-10-16-01-03.bag";
 
     rosDataset.readEpisode(basePath+file);
 
+    /*std::ofstream os0(fm.addPath("expert_dataset_original.log"));
+    rosDataset.getData().writeToStream(os0);*/
+
+    preprocessDataset(rosDataset.getData());
+
+    double maxT = rosDataset.getData()[0].back().x(0);
+
     unsigned int N = rosDataset.getData().getTransitionsNumber();
-    double df = 0.1;
+    double df = 1/maxT;
     double fE = 20.0;
     int uDim = 3;
 
-    std::cout << "df: " << df << " fe: " << fE << " N: " << N << endl;
+    std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
+    			<< maxT << " 1/tmax: " << 1.0/maxT << endl;
 
     //Create basis function for policy
     BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
