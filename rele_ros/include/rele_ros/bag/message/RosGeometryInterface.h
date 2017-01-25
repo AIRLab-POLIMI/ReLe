@@ -53,18 +53,18 @@ public:
 
             if(planar)
             {
-            	data(0) = ros_data->linear.x;
-            	data(1) = ros_data->linear.y;
-            	data(2) = ros_data->angular.z;
+                data(0) = ros_data->linear.x;
+                data(1) = ros_data->linear.y;
+                data(2) = ros_data->angular.z;
             }
             else
             {
-            	data(0) = ros_data->linear.x;
-            	data(1) = ros_data->linear.y;
-            	data(2) = ros_data->linear.z;
-            	data(3) = ros_data->angular.x;
-            	data(4) = ros_data->angular.y;
-            	data(5) = ros_data->angular.z;
+                data(0) = ros_data->linear.x;
+                data(1) = ros_data->linear.y;
+                data(2) = ros_data->linear.z;
+                data(3) = ros_data->angular.x;
+                data(4) = ros_data->angular.y;
+                data(5) = ros_data->angular.z;
             }
 
             return true;

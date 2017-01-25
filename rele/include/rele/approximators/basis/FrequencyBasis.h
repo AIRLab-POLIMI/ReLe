@@ -43,7 +43,7 @@ public:
      * \param phi the phase of the sinusoid
      * \param index the input component to be processed
      */
-	FrequencyBasis(double f, double phi, unsigned int index);
+    FrequencyBasis(double f, double phi, unsigned int index);
 
     /*!
      * Destructor.

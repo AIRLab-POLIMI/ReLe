@@ -39,25 +39,25 @@ FrequencyBasis::~FrequencyBasis()
 
 double FrequencyBasis::operator()(const vec& input)
 {
-	return std::sin(omega*input(index)+phi);
+    return std::sin(omega*input(index)+phi);
 }
 
 BasisFunctions FrequencyBasis::generate(unsigned int index, double fS, double fE, double df, double phi)
 {
-	BasisFunctions basis;
+    BasisFunctions basis;
 
-	for(double f = fS; f <= fE; f += df)
-	{
-		auto* bf = new FrequencyBasis(f, phi, index);
-		basis.push_back(bf);
-	}
+    for(double f = fS; f <= fE; f += df)
+    {
+        auto* bf = new FrequencyBasis(f, phi, index);
+        basis.push_back(bf);
+    }
 
-	return basis;
+    return basis;
 }
 
 BasisFunctions FrequencyBasis::generate(unsigned int index, double fS, double fE, double df, bool sine)
 {
-	return generate(index, fS, fE, df, sine ? 0.0 : 0.5*M_PI);
+    return generate(index, fS, fE, df, sine ? 0.0 : 0.5*M_PI);
 }
 
 void FrequencyBasis::writeOnStream(std::ostream &out)
@@ -67,7 +67,7 @@ void FrequencyBasis::writeOnStream(std::ostream &out)
 
 void FrequencyBasis::readFromStream(std::istream &in)
 {
-	//TODO [SERIALIZATION] implement
+    //TODO [SERIALIZATION] implement
 }
 
 

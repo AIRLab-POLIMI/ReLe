@@ -30,56 +30,56 @@ namespace ReLe
 
 void LinearStatisticEstimation::computeMLE(const Features& phi, const Dataset<DenseAction,DenseState>& data)
 {
-	assert(data.size() > 0 && data[0].size() > 0);
-	assert(phi.cols() == 1);
+    assert(data.size() > 0 && data[0].size() > 0);
+    assert(phi.cols() == 1);
 
-	unsigned int uDim = data[0][0].u.n_elem;
+    unsigned int uDim = data[0][0].u.n_elem;
 
-	arma::mat X(phi.rows(), data.getTransitionsNumber());
-	arma::mat U(uDim, data.getTransitionsNumber());
+    arma::mat X(phi.rows(), data.getTransitionsNumber());
+    arma::mat U(uDim, data.getTransitionsNumber());
 
-	unsigned int index = 0;
-	for(auto& episode : data)
-	{
-		for(auto& tr : episode)
-		{
-			X.col(index) = phi(tr.x);
-			U.col(index) = tr.u;
+    unsigned int index = 0;
+    for(auto& episode : data)
+    {
+        for(auto& tr : episode)
+        {
+            X.col(index) = phi(tr.x);
+            U.col(index) = tr.u;
 
-			index++;
-		}
-	}
+            index++;
+        }
+    }
 
-	arma::mat W = U*arma::pinv(X);
-	Sigma = arma::zeros(uDim, uDim);
+    arma::mat W = U*arma::pinv(X);
+    Sigma = arma::zeros(uDim, uDim);
 
-	unsigned int n = 0;
-	for(auto& episode : data)
-	{
-		for(auto& tr : episode)
-		{
-			arma::vec xn = X.col(n);
-			arma::vec un = U.col(n);
-			arma::vec delta = un - W*xn;
-			Sigma += delta*delta.t();
+    unsigned int n = 0;
+    for(auto& episode : data)
+    {
+        for(auto& tr : episode)
+        {
+            arma::vec xn = X.col(n);
+            arma::vec un = U.col(n);
+            arma::vec delta = un - W*xn;
+            Sigma += delta*delta.t();
 
-			n++;
-		}
-	}
+            n++;
+        }
+    }
 
-	Sigma /= n;
-	theta =  arma::vectorise(W.t());
+    Sigma /= n;
+    theta =  arma::vectorise(W.t());
 
 }
 
 arma::vec LinearStatisticEstimation::getMeanParameters()
 {
-	return theta;
+    return theta;
 }
 
 arma::mat LinearStatisticEstimation::getCovariance()
 {
-	return Sigma;
+    return Sigma;
 }
 
 }

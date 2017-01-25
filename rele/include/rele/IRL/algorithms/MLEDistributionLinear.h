@@ -21,44 +21,37 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TEST_IRL_REWARDBASISSEGWAY_H_
-#define TEST_IRL_REWARDBASISSEGWAY_H_
+#ifndef INCLUDE_RELE_IRL_ALGORITHMS_MLEDISTRIBUTION_H_
+#define INCLUDE_RELE_IRL_ALGORITHMS_MLEDISTRIBUTION_H_
 
-#include "rele/approximators/basis/QuadraticBasis.h"
+#include "rele/core/Transition.h"
+#include "rele/policy/utils/MLE.h"
+#include "rele/statistics/DifferentiableNormals.h"
+#include "rele/policy/utils/LinearStatisticEstimation.h"
 
 namespace ReLe
 {
 
-class Segway_RewardBasis : public BasisFunction
+
+class MLEDistributionLinear
 {
 public:
-    Segway_RewardBasis(unsigned int i, unsigned int dim)
-    {
-        arma::mat Q(dim, dim, arma::fill::zeros);
-        Q(i, i) = dim;
-        bf = new QuadraticBasis(Q, arma::span(0, dim-1));
-    }
+    MLEDistributionLinear(Features& phi);
+    void compute(const Dataset<DenseAction, DenseState>& data);
 
-    virtual double operator()(const arma::vec& input) override
-    {
-        return -(*bf)(input);
-    }
-
-    virtual void writeOnStream(std::ostream& out) override
-    {
-
-    }
-
-    virtual void readFromStream(std::istream& in) override
-    {
-
-    }
+    arma::mat getParameters();
+    ParametricNormal getDistribution();
 
 private:
-    BasisFunction* bf;
-
+    Features& phi;
+    arma::mat params;
+    arma::vec mu;
+    arma::mat Sigma;
 };
+
+
 
 }
 
-#endif /* TEST_IRL_REWARDBASISSEGWAY_H_ */
+
+#endif /* INCLUDE_RELE_IRL_ALGORITHMS_MLEDISTRIBUTION_H_ */

@@ -44,7 +44,7 @@ public:
      * \param nActions number of actions
      * \param frequency the frequency of the actions
      */
-	EmptyEnv(unsigned int nActions, double frequency);
+    EmptyEnv(unsigned int nActions, double frequency);
 
     /*!
      * \see Environment::step

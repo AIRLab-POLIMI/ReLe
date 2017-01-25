@@ -35,17 +35,17 @@ EmptyEnv::EmptyEnv(unsigned int nActions, double frequency) :
 
 
 void EmptyEnv::step(const DenseAction& action, DenseState& nextState,
-                             Reward& reward)
+                    Reward& reward)
 {
-	currentState(0) += dt;
-	currentState.setAbsorbing(false);
-	nextState = currentState;
-	reward[0] = 0;
+    currentState(0) += dt;
+    currentState.setAbsorbing(false);
+    nextState = currentState;
+    reward[0] = 0;
 }
 
 void EmptyEnv::getInitialState(DenseState& state)
 {
-	currentState(0) = 0.0;
+    currentState(0) = 0.0;
     currentState.setAbsorbing(false);
     state = currentState;
 }

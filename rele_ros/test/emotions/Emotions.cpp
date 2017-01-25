@@ -21,16 +21,17 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include <rele/approximators/features/SparseFeatures.h>
 #include <rele/approximators/features/DenseFeatures.h>
+
 #include <rele/approximators/regressors/others/LinearApproximator.h>
 #include <rele/approximators/basis/FrequencyBasis.h>
 #include <rele/approximators/basis/PolynomialFunction.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
-//#include <rele/policy/utils/MLE.h>
-#include <rele/policy/utils/LinearStatisticEstimation.h>
+#include <rele/IRL/algorithms/MLEDistributionLinear.h>
+#include <rele/utils/ArmadilloExtensions.h>
+
 
 #include <rele/utils/FileManager.h>
 
@@ -41,9 +42,11 @@
 #include "rele_ros/bag/RosDataset.h"
 #include "rele_ros/bag/message/RosGeometryInterface.h"
 
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace arma;
+using namespace boost::filesystem;
 using namespace ReLe;
 using namespace ReLe_ROS;
 
@@ -51,6 +54,7 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
 	for(unsigned int ep = 0; ep < data.size(); ep++)
 	{
+		cout << ep << endl;
 		auto& episode = data[ep];
 
 		unsigned int i;
@@ -89,23 +93,6 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 		episode.erase(episode.begin() + i + 1, episode.end());
 
 	}
-
-	/*unsigned int size = data[0].size();
-
-	double tf = data[0].back().x(0);
-
-
-	cout <<  size << endl;
-
-	for(unsigned int i = 0; i < size; i++)
-	{
-		auto tr = data[0][i];
-		tr.x += tf;
-		data[0].push_back(tr);
-	}
-
-
-	cout <<  data[0].size() << endl;*/
 }
 
 int main(int argc, char *argv[])
@@ -123,21 +110,28 @@ int main(int argc, char *argv[])
     RosDataset rosDataset(topics);
 
     std::string basePath = "/home/dave/Dropbox/Dottorato/Major/test/arrabbiato/";
-    //std::string file = "triskar_2017-01-10-15-47-34.bag";
-    //std::string file = "triskar_2017-01-10-15-46-18.bag";
-    std::string file = "triskar_2017-01-10-16-01-03.bag";
 
-    rosDataset.readEpisode(basePath+file);
+    int count = 0;
 
-    /*std::ofstream os0(fm.addPath("expert_dataset_original.log"));
-    rosDataset.getData().writeToStream(os0);*/
+    boost::filesystem::directory_iterator end_itr;
+    for(boost::filesystem::directory_iterator i(basePath); i != end_itr; ++i )
+    {
+        if(boost::filesystem::is_regular_file(i->status()) &&
+        			i->path().extension() == ".bag")
+        {
+        	cout << count++ << std::endl;
+        	cout << i->path().string() << endl;
+        	rosDataset.readEpisode(i->path().string());
+        }
+    }
+
 
     preprocessDataset(rosDataset.getData());
 
     double maxT = rosDataset.getData()[0].back().x(0);
 
     unsigned int N = rosDataset.getData().getTransitionsNumber();
-    double df = 1/maxT;
+    double df = 1/maxT*2;
     double fE = 20.0;
     int uDim = 3;
 
@@ -151,8 +145,7 @@ int main(int argc, char *argv[])
 
     SparseFeatures phi(basis, uDim);
 
-    //Fit Normal policy
-    LinearStatisticEstimation estimator;
+    //Fit Normal distribution
     BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
     BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
     basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());
@@ -161,17 +154,19 @@ int main(int argc, char *argv[])
 
     DenseFeatures phiEst(basisEst);
 
-    estimator.computeMLE(phiEst, rosDataset.getData());
+    MLEDistributionLinear estimator(phiEst);
+    estimator.compute(rosDataset.getData());
 
-    cout << "Cov:" << endl << estimator.getCovariance() << endl;
+    auto theta = estimator.getParameters();
 
-    //Create policy (add small elements on diagonal to avoid uncontrolled axis)
-    MVNPolicy policy(phi, estimator.getCovariance()+arma::eye(uDim, uDim)*1e-10);
-    policy.setParameters(estimator.getMeanParameters());
+    arma::mat Cov = arma::cov(theta.t());
+    auto M = safeChol(Cov);
+    ParametricNormal dist(arma::mean(theta, 1), M*M.t());
+    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-10);
 
     //Test the fitted policy
     EmptyEnv env(uDim, 100.0);
-    PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+    PolicyEvalDistribution<DenseAction, DenseState> agent(dist, policy);
     Core<DenseAction, DenseState> core(env, agent);
 
     CollectorStrategy<DenseAction, DenseState> s;

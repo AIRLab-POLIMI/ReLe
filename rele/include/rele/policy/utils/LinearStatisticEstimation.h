@@ -32,13 +32,13 @@ namespace ReLe
 class LinearStatisticEstimation
 {
 public:
-	void computeMLE(const Features& phi, const Dataset<DenseAction,DenseState>& data);
-	arma::vec getMeanParameters();
-	arma::mat getCovariance();
+    void computeMLE(const Features& phi, const Dataset<DenseAction,DenseState>& data);
+    arma::vec getMeanParameters();
+    arma::mat getCovariance();
 
 private:
-	arma::vec theta;
-	arma::mat Sigma;
+    arma::vec theta;
+    arma::mat Sigma;
 
 };
 
