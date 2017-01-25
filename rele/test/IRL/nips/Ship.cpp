@@ -56,8 +56,8 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-//#define RUN
-#define LEARN
+#define RUN
+//#define LEARN
 
 arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeatures& phi, int nbEpisodes)
 {
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
     fm.createDir();
     std::cout << std::setprecision(OS_PRECISION);
 
-    unsigned int nbEpisodes = std::stod(n_episodes);
+    unsigned int nbEpisodes = std::stoi(n_episodes);
 
 
     ShipSteering mdp;
