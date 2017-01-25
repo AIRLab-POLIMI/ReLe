@@ -56,7 +56,8 @@ using namespace std;
 using namespace arma;
 using namespace ReLe;
 
-#define RUN
+//#define RUN
+#define LEARN
 
 arma::vec learnShipSteering(Environment<DenseAction, DenseState>& mdp, DenseFeatures& phi, int nbEpisodes)
 {
@@ -124,7 +125,7 @@ int main(int argc, char *argv[])
         0.0, 150.0,
         0.0, 150.0,
         -M_PI, M_PI,
-        -15.0, 15.0
+        -M_PI/12.0, M_PI/12.0
     });
 
     DenseFeatures phi(basis);
@@ -203,14 +204,14 @@ int main(int argc, char *argv[])
         0.0, 150.0,
         0.0, 150.0,
         -M_PI, M_PI,
-        -15.0, 15.0,
+        -M_PI/12.0, M_PI/12.0,
         -0.5, discretizedActions+0.5
     });
 
     DenseFeatures phi_c(basis_c);
 
 
-    DatasetDiscretizator discretizator(Range(-15, 15), discretizedActions);
+    DatasetDiscretizator discretizator(Range(-M_PI/12.0, M_PI/12.0), discretizedActions);
     auto&& discretizedData = discretizator.discretize(data);
 
     irlAlg_c[0] = new SCIRL<DenseState>(discretizedData,rewardRegressor, mdp.getSettings().gamma, discretizedActions);
