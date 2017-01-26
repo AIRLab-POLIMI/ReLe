@@ -26,7 +26,7 @@
 
 #include <rele/approximators/regressors/others/LinearApproximator.h>
 #include <rele/approximators/basis/FrequencyBasis.h>
-#include <rele/approximators/basis/PolynomialFunction.h>
+#include <rele/approximators/basis/HaarWavelets.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
 #include <rele/IRL/algorithms/MLEDistributionLinear.h>
@@ -54,7 +54,7 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
 	for(unsigned int ep = 0; ep < data.size(); ep++)
 	{
-		cout << ep << endl;
+		//truncate start
 		auto& episode = data[ep];
 
 		unsigned int i;
@@ -70,6 +70,7 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 
 		episode.erase(episode.begin(), episode.begin() + i);
 
+		//update timestamp
 		double t0 = episode[0].x(0);
 
 		for(i = 0; i < data[ep].size(); i++)
@@ -80,6 +81,7 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 		}
 
 
+		//truncate end of episode
 		for(i = episode.size() - 1; i > 0; i--)
 		{
 			auto& tr = episode[i];
@@ -91,6 +93,29 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 		}
 
 		episode.erase(episode.begin() + i + 1, episode.end());
+
+		//set episode lenght to 4 seconds
+		double tf = episode.back().x(0);
+		double dt = tf - episode[episode.size() - 2].x(0);
+		while(tf < 4.0)
+		{
+			tf += dt;
+			Transition<DenseAction, DenseState> tr;
+
+		    DenseAction u(3);
+		    DenseState x(1), xn(1);
+
+		    x(0) = tf;
+		    xn(0) = tf + dt;
+		    u(0) = 0;
+		    u(1) = 0;
+		    u(2) = 0;
+
+			tr.x = x;
+			tr.u = u;
+			tr.xn = xn;
+			episode.push_back(tr);
+		}
 
 	}
 }
@@ -128,30 +153,29 @@ int main(int argc, char *argv[])
 
     preprocessDataset(rosDataset.getData());
 
-    double maxT = rosDataset.getData()[0].back().x(0);
+    //Create basis function for policy
+    int uDim = 3;
+    /*double maxT = rosDataset.getData()[0].back().x(0);
 
     unsigned int N = rosDataset.getData().getTransitionsNumber();
     double df = 1/maxT*2;
     double fE = 20.0;
-    int uDim = 3;
 
     std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
     			<< maxT << " 1/tmax: " << 1.0/maxT << endl;
 
-    //Create basis function for policy
     BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
    	BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
-    basis.insert(basis.end(), tmp.begin(), tmp.end());
+    basis.insert(basis.end(), tmp.begin(), tmp.end());*/
+    BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
 
     SparseFeatures phi(basis, uDim);
 
     //Fit Normal distribution
-    BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
+    /*BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
     BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
-    basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());
-    //auto* tmp2Est = new PolynomialFunction();
-    //basisEst.push_back(tmp2Est);
-
+    basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());*/
+    BasisFunctions basisEst = HaarWavelets::generate(0, 5, 4);
     DenseFeatures phiEst(basisEst);
 
     MLEDistributionLinear estimator(phiEst);
@@ -162,26 +186,55 @@ int main(int argc, char *argv[])
     arma::mat Cov = arma::cov(theta.t());
     auto M = safeChol(Cov);
     ParametricNormal dist(arma::mean(theta, 1), M*M.t());
-    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-10);
+    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
 
-    //Test the fitted policy
+
+    /* Testing */
     EmptyEnv env(uDim, 100.0);
+
+    CollectorStrategy<DenseAction, DenseState> f;
+
+    //Compute fitted trajectory for each demonstration
+    for(int i = 0; i < theta.n_cols; i++)
+    {
+    	policy.setParameters(theta.col(i));
+        PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+        Core<DenseAction, DenseState> core(env, agent);
+
+        core.getSettings().episodeLength = 2000;
+        core.getSettings().loggerStrategy = &f;
+        core.runTestEpisode();
+    }
+
+    //Test the fitted distribution
     PolicyEvalDistribution<DenseAction, DenseState> agent(dist, policy);
     Core<DenseAction, DenseState> core(env, agent);
 
     CollectorStrategy<DenseAction, DenseState> s;
     core.getSettings().episodeLength = 2000;
+    core.getSettings().testEpisodeN = theta.n_cols;
     core.getSettings().loggerStrategy = &s;
-    core.runTestEpisode();
+    core.runTestEpisodes();
 
-    //Save the dataset in ReLe format
+
+    /* Save the dataset in ReLe format */
     std::ofstream os1(fm.addPath("expert_dataset.log"));
     rosDataset.getData().writeToStream(os1);
 
     std::ofstream os2(fm.addPath("imitator_dataset.log"));
     s.data.writeToStream(os2);
 
+    std::ofstream os3(fm.addPath("fitted_dataset.log"));
+    f.data.writeToStream(os3);
 
+    std::ofstream os4(fm.addPath("basis.log"));
+    for(int i = 0; i < basis.size(); i++)
+    {
+    	basis[i]->writeOnStream(os4);
+    }
+
+    // print basis function used
+    cout << basis.size() << std::endl;
 
     return 0;
 }

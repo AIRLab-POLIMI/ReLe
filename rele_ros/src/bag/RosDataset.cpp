@@ -104,8 +104,6 @@ void RosDataset::readEpisode(const std::string& episodePath)
 
     bag.close();
 
-    std::cout << ep.size() << std::endl;
-
     data.push_back(ep);
 
 }
