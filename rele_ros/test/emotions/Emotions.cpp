@@ -27,10 +27,12 @@
 #include <rele/approximators/regressors/others/LinearApproximator.h>
 #include <rele/approximators/basis/FrequencyBasis.h>
 #include <rele/approximators/basis/HaarWavelets.h>
+#include <rele/approximators/basis/IdentityBasis.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
 #include <rele/IRL/algorithms/MLEDistributionLinear.h>
 #include <rele/utils/ArmadilloExtensions.h>
+#include <rele/approximators/regressors/nn/Autoencoder.h>
 
 
 #include <rele/utils/FileManager.h>
@@ -49,6 +51,10 @@ using namespace arma;
 using namespace boost::filesystem;
 using namespace ReLe;
 using namespace ReLe_ROS;
+
+
+//#define WAVELETS
+//#define REDUCTION
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
@@ -144,8 +150,8 @@ int main(int argc, char *argv[])
         if(boost::filesystem::is_regular_file(i->status()) &&
         			i->path().extension() == ".bag")
         {
-        	cout << count++ << std::endl;
-        	cout << i->path().string() << endl;
+        	//cout << count++ << std::endl;
+        	//cout << i->path().string() << endl;
         	rosDataset.readEpisode(i->path().string());
         }
     }
@@ -155,10 +161,13 @@ int main(int argc, char *argv[])
 
     //Create basis function for policy
     int uDim = 3;
-    /*double maxT = rosDataset.getData()[0].back().x(0);
+#ifdef WAVELETS
+    BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
+#else
+    double maxT = rosDataset.getData()[0].back().x(0);
 
     unsigned int N = rosDataset.getData().getTransitionsNumber();
-    double df = 1/maxT*2;
+    double df = 1/maxT;
     double fE = 20.0;
 
     std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
@@ -166,16 +175,20 @@ int main(int argc, char *argv[])
 
     BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
    	BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
-    basis.insert(basis.end(), tmp.begin(), tmp.end());*/
-    BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
+    basis.insert(basis.end(), tmp.begin(), tmp.end());
+#endif
 
     SparseFeatures phi(basis, uDim);
 
     //Fit Normal distribution
-    /*BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
-    BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
-    basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());*/
+#ifdef WAVELETS
     BasisFunctions basisEst = HaarWavelets::generate(0, 5, 4);
+#else
+    BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
+    BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
+    basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());
+#endif
+
     DenseFeatures phiEst(basisEst);
 
     MLEDistributionLinear estimator(phiEst);
@@ -183,9 +196,27 @@ int main(int argc, char *argv[])
 
     auto theta = estimator.getParameters();
 
+
+#ifdef REDUCTION
+    /* Dimensionality reduction */
+    unsigned int reducedDim = 30;
+    auto basisEnc = IdentityBasis::generate(theta.n_cols);
+    DenseFeatures phiEnc(basisEnc);
+    Autoencoder autoencoder(phiEnc, reducedDim);
+
+    autoencoder.trainFeatures(theta);
+
+    arma::mat thetaNew(reducedDim, theta.n_cols);
+
+    for(unsigned int i = 0; i < theta.n_cols; i++)
+    {
+    	thetaNew.col(i) = autoencoder.encode(theta.col(i));
+    }
+#endif
+
     arma::mat Cov = arma::cov(theta.t());
     auto M = safeChol(Cov);
-    ParametricNormal dist(arma::mean(theta, 1), M*M.t());
+    ParametricNormal dist(arma::mean(theta, 1), M.t()*M);
     MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
 
 
