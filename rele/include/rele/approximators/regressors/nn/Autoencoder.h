@@ -46,8 +46,20 @@ public	:
 
     virtual arma::vec operator()(const InputC& input) override
     {
-        this->forwardComputation(Base::phi(input));
+    	return encode(input);
+    }
+
+    arma::vec encode(const InputC& input)
+    {
+    	const arma::vec& x = this->getHyperParameters().normalizationF->normalize(Base::phi(input));
+        this->forwardComputation(x, 0, this->layerFunction.size()/2);
         return this->h[1];
+    }
+
+    arma::vec decode(const InputC& input)
+    {
+        this->forwardComputation(input, 1, this->layerFunction.size());
+        return this->getHyperParameters().normalizationO->restore(this->h.back());
     }
 
     virtual arma::vec diff(const InputC& input) override

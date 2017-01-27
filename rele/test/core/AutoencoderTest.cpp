@@ -80,7 +80,9 @@ int main(int argc, char *argv[])
         std::cout << "base           = " << testNumbers.col(i).t();
         std::cout << "input          = " << testFeatures.col(i).t();
         std::cout << "features       = " << encoder(testFeatures.col(i)).t();
+        std::cout << "reconstructed  = " << encoder.decode(encoder.encode(testFeatures.col(i))).t();
         std::cout << "reconstructed  = " << encoder.FFNeuralNetwork::operator()(testFeatures.col(i)).t();
+
         std::cout << std::endl;
     }
 

@@ -253,9 +253,13 @@ private:
 protected:
     void forwardComputation(const arma::vec& input)
     {
-        h[0] = input;
-        unsigned int start = 0;
-        for (unsigned int layer = 0; layer < layerFunction.size(); layer++)
+    	forwardComputation(input, 0, layerFunction.size());
+    }
+
+    void forwardComputation(const arma::vec& input, unsigned int start, unsigned int end)
+    {
+        h[start] = input;
+        for (unsigned int layer = start; layer < end; layer++)
         {
             //Compute activation
             a[layer] = W(layer) * h[layer] + b(layer);
