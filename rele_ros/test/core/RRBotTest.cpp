@@ -41,7 +41,7 @@ class FakeAgent: public Agent<DenseAction, DenseState>
     }
 
     virtual void step(const Reward& reward, const DenseState& nextState,
-    			DenseAction& action) override
+                      DenseAction& action) override
     {
 
     }

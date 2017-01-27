@@ -46,6 +46,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include "CompressedPolicy.h"
+
 using namespace std;
 using namespace arma;
 using namespace boost::filesystem;
@@ -53,77 +55,77 @@ using namespace ReLe;
 using namespace ReLe_ROS;
 
 
-//#define WAVELETS
-//#define REDUCTION
+#define WAVELETS
+#define REDUCTION
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
-	for(unsigned int ep = 0; ep < data.size(); ep++)
-	{
-		//truncate start
-		auto& episode = data[ep];
+    for(unsigned int ep = 0; ep < data.size(); ep++)
+    {
+        //truncate start
+        auto& episode = data[ep];
 
-		unsigned int i;
-		for(i = 0; i < data[ep].size(); i++)
-		{
-			auto& tr = episode[i];
+        unsigned int i;
+        for(i = 0; i < data[ep].size(); i++)
+        {
+            auto& tr = episode[i];
 
-			if(tr.u(0) != 0 || tr.u(1) != 0 || tr.u(2) != 0)
-			{
-				break;
-			}
-		}
+            if(tr.u(0) != 0 || tr.u(1) != 0 || tr.u(2) != 0)
+            {
+                break;
+            }
+        }
 
-		episode.erase(episode.begin(), episode.begin() + i);
+        episode.erase(episode.begin(), episode.begin() + i);
 
-		//update timestamp
-		double t0 = episode[0].x(0);
+        //update timestamp
+        double t0 = episode[0].x(0);
 
-		for(i = 0; i < data[ep].size(); i++)
-		{
-			auto& tr = episode[i];
+        for(i = 0; i < data[ep].size(); i++)
+        {
+            auto& tr = episode[i];
 
-			tr.x(0) -= t0;
-		}
+            tr.x(0) -= t0;
+        }
 
 
-		//truncate end of episode
-		for(i = episode.size() - 1; i > 0; i--)
-		{
-			auto& tr = episode[i];
+        //truncate end of episode
+        for(i = episode.size() - 1; i > 0; i--)
+        {
+            auto& tr = episode[i];
 
-			if(tr.u(0) != 0 || tr.u(1) != 0 || tr.u(2) != 0)
-			{
-				break;
-			}
-		}
+            if(tr.u(0) != 0 || tr.u(1) != 0 || tr.u(2) != 0)
+            {
+                break;
+            }
+        }
 
-		episode.erase(episode.begin() + i + 1, episode.end());
+        episode.erase(episode.begin() + i + 1, episode.end());
 
-		//set episode lenght to 4 seconds
-		double tf = episode.back().x(0);
-		double dt = tf - episode[episode.size() - 2].x(0);
-		while(tf < 4.0)
-		{
-			tf += dt;
-			Transition<DenseAction, DenseState> tr;
+        //set episode lenght to 4 seconds
+        double tf = episode.back().x(0);
+        double dt = tf - episode[episode.size() - 2].x(0);
+        while(tf < 4.0)
+        {
+            tf += dt;
+            Transition<DenseAction, DenseState> tr;
 
-		    DenseAction u(3);
-		    DenseState x(1), xn(1);
+            DenseAction u(3);
+            DenseState x(1), xn(1);
 
-		    x(0) = tf;
-		    xn(0) = tf + dt;
-		    u(0) = 0;
-		    u(1) = 0;
-		    u(2) = 0;
+            x(0) = tf;
+            xn(0) = tf + dt;
+            u(0) = 0;
+            u(1) = 0;
+            u(2) = 0;
 
-			tr.x = x;
-			tr.u = u;
-			tr.xn = xn;
-			episode.push_back(tr);
-		}
+            tr.x = x;
+            tr.u = u;
+            tr.xn = xn;
+            episode.push_back(tr);
+        }
 
-	}
+    }
 }
 
 int main(int argc, char *argv[])
@@ -148,11 +150,11 @@ int main(int argc, char *argv[])
     for(boost::filesystem::directory_iterator i(basePath); i != end_itr; ++i )
     {
         if(boost::filesystem::is_regular_file(i->status()) &&
-        			i->path().extension() == ".bag")
+                i->path().extension() == ".bag")
         {
-        	//cout << count++ << std::endl;
-        	//cout << i->path().string() << endl;
-        	rosDataset.readEpisode(i->path().string());
+            //cout << count++ << std::endl;
+            //cout << i->path().string() << endl;
+            rosDataset.readEpisode(i->path().string());
         }
     }
 
@@ -171,10 +173,10 @@ int main(int argc, char *argv[])
     double fE = 20.0;
 
     std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
-    			<< maxT << " 1/tmax: " << 1.0/maxT << endl;
+              << maxT << " 1/tmax: " << 1.0/maxT << endl;
 
     BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
-   	BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
+    BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
     basis.insert(basis.end(), tmp.begin(), tmp.end());
 #endif
 
@@ -200,25 +202,34 @@ int main(int argc, char *argv[])
 #ifdef REDUCTION
     /* Dimensionality reduction */
     unsigned int reducedDim = 30;
-    auto basisEnc = IdentityBasis::generate(theta.n_cols);
+    auto basisEnc = IdentityBasis::generate(theta.n_rows);
     DenseFeatures phiEnc(basisEnc);
     Autoencoder autoencoder(phiEnc, reducedDim);
 
+    autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
+    autoencoder.getHyperParameters().lambda = 0;
     autoencoder.trainFeatures(theta);
 
     arma::mat thetaNew(reducedDim, theta.n_cols);
 
     for(unsigned int i = 0; i < theta.n_cols; i++)
     {
-    	thetaNew.col(i) = autoencoder.encode(theta.col(i));
+        thetaNew.col(i) = autoencoder.encode(theta.col(i));
     }
-#endif
 
     arma::mat Cov = arma::cov(theta.t());
-    auto M = safeChol(Cov);
-    ParametricNormal dist(arma::mean(theta, 1), M.t()*M);
-    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
+    arma::vec mean = arma::mean(thetaNew, 1);
 
+    CompressedPolicy policy(phi, autoencoder);
+#else
+    arma::mat Cov = arma::cov(theta.t());
+    arma::vec mean = arma::mean(theta, 1);
+
+    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
+#endif
+
+    auto M = safeChol(Cov);
+    ParametricNormal dist(mean, M.t()*M);
 
     /* Testing */
     EmptyEnv env(uDim, 100.0);
@@ -228,7 +239,7 @@ int main(int argc, char *argv[])
     //Compute fitted trajectory for each demonstration
     for(int i = 0; i < theta.n_cols; i++)
     {
-    	policy.setParameters(theta.col(i));
+        policy.setParameters(theta.col(i));
         PolicyEvalAgent<DenseAction, DenseState> agent(policy);
         Core<DenseAction, DenseState> core(env, agent);
 
@@ -261,7 +272,7 @@ int main(int argc, char *argv[])
     std::ofstream os4(fm.addPath("basis.log"));
     for(int i = 0; i < basis.size(); i++)
     {
-    	basis[i]->writeOnStream(os4);
+        basis[i]->writeOnStream(os4);
     }
 
     // print basis function used
