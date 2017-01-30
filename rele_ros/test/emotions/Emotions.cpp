@@ -201,14 +201,18 @@ int main(int argc, char *argv[])
 
 #ifdef REDUCTION
     /* Dimensionality reduction */
-    unsigned int reducedDim = 30;
+    unsigned int reducedDim = 90;
     auto basisEnc = IdentityBasis::generate(theta.n_rows);
     DenseFeatures phiEnc(basisEnc);
     Autoencoder autoencoder(phiEnc, reducedDim);
 
+    std::cout << "J0: " << autoencoder.computeJFeatures(theta) << std::endl;
+
     autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
     autoencoder.getHyperParameters().lambda = 0;
     autoencoder.trainFeatures(theta);
+
+    std::cout << "Jf: " << autoencoder.computeJFeatures(theta) << std::endl;
 
     arma::mat thetaNew(reducedDim, theta.n_cols);
 
