@@ -58,7 +58,7 @@ public	:
 
     arma::vec decode(const InputC& input)
     {
-        this->forwardComputation(input, 1, this->layerFunction.size());
+        this->forwardComputation(input, this->layerFunction.size()/2, this->layerFunction.size());
         return this->getHyperParameters().normalizationO->restore(this->h.back());
     }
 

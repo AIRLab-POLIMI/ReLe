@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
         thetaNew.col(i) = autoencoder.encode(theta.col(i));
     }
 
-    arma::mat Cov = arma::cov(theta.t());
+    arma::mat Cov = arma::cov(thetaNew.t());
     arma::vec mean = arma::mean(thetaNew, 1);
 
     CompressedPolicy policy(phi, autoencoder);
@@ -239,7 +239,11 @@ int main(int argc, char *argv[])
     //Compute fitted trajectory for each demonstration
     for(int i = 0; i < theta.n_cols; i++)
     {
-        policy.setParameters(theta.col(i));
+#ifdef REDUCTION
+    	policy.setParameters(thetaNew.col(i));
+#else
+    	policy.setParameters(theta.col(i));
+#endif
         PolicyEvalAgent<DenseAction, DenseState> agent(policy);
         Core<DenseAction, DenseState> core(env, agent);
 
