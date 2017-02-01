@@ -56,7 +56,7 @@ using namespace ReLe_ROS;
 
 
 #define WAVELETS
-#define REDUCTION
+//#define REDUCTION
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
@@ -130,9 +130,6 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 
 int main(int argc, char *argv[])
 {
-    FileManager fm("emotions", "arrabbiato");
-    fm.createDir();
-    //fm.cleanDir();
     std::cout << std::setprecision(OS_PRECISION);
 
     //Read emotion datatset
@@ -140,151 +137,170 @@ int main(int argc, char *argv[])
     std::vector<RosTopicInterface*> topics;
     topics.push_back(t1);
 
-    RosDataset rosDataset(topics);
-
-    std::string basePath = "/home/dave/Dropbox/Dottorato/Major/test/arrabbiato/";
-
-    int count = 0;
+    std::string basePath = "/home/dave/Dropbox/Dottorato/Major/test/";
 
     boost::filesystem::directory_iterator end_itr;
     for(boost::filesystem::directory_iterator i(basePath); i != end_itr; ++i )
     {
-        if(boost::filesystem::is_regular_file(i->status()) &&
-                i->path().extension() == ".bag")
+        RosDataset rosDataset(topics);
+
+        int count = 0;
+
+        if(boost::filesystem::is_directory(i->status()))
         {
-            //cout << count++ << std::endl;
-            //cout << i->path().string() << endl;
-            rosDataset.readEpisode(i->path().string());
+            std::string emotionName = i->path().filename().string();
+
+            std::cout << "-----------------------------------------------------" << std::endl;
+            std::cout << "Emotion: " << emotionName << std::endl;
+
+            FileManager fm("emotions", emotionName);
+            fm.createDir();
+
+
+            for(boost::filesystem::directory_iterator j(i->path()); j != end_itr; ++j )
+            {
+                if(boost::filesystem::is_regular_file(j->status()) &&
+                        j->path().extension() == ".bag")
+                {
+                    //cout << count++ << std::endl;
+                    cout << j->path().string() << endl;
+                    rosDataset.readEpisode(j->path().string());
+                }
+            }
+
+
+            preprocessDataset(rosDataset.getData());
+
+            //Create basis function for policy
+            int uDim = 3;
+#ifdef WAVELETS
+            BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
+#else
+            double maxT = rosDataset.getData()[0].back().x(0);
+
+            unsigned int N = rosDataset.getData().getTransitionsNumber();
+            double df = 1/maxT;
+            double fE = 20.0;
+
+            std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
+                      << maxT << " 1/tmax: " << 1.0/maxT << endl;
+
+            BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
+            BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
+            basis.insert(basis.end(), tmp.begin(), tmp.end());
+#endif
+
+            SparseFeatures phi(basis, uDim);
+
+            //Fit Normal distribution
+#ifdef WAVELETS
+            BasisFunctions basisEst = HaarWavelets::generate(0, 5, 4);
+#else
+            BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
+            BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
+            basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());
+#endif
+
+            DenseFeatures phiEst(basisEst);
+
+            MLEDistributionLinear estimator(phiEst);
+            estimator.compute(rosDataset.getData());
+
+            auto theta = estimator.getParameters();
+
+
+#ifdef REDUCTION
+            // Dimensionality reduction
+            unsigned int reducedDim = 120;
+            auto basisEnc = IdentityBasis::generate(theta.n_rows);
+            DenseFeatures phiEnc(basisEnc);
+            Autoencoder autoencoder(phiEnc, reducedDim);
+
+            autoencoder.getHyperParameters().Omega = new L2_Regularization();
+            autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
+            autoencoder.getHyperParameters().lambda = 0.01;
+
+            std::cout << "J0: " << autoencoder.computeJFeatures(theta) << std::endl;
+
+            autoencoder.trainFeatures(theta);
+
+            std::cout << "Jf: " << autoencoder.computeJFeatures(theta) << std::endl;
+
+            arma::mat thetaNew(reducedDim, theta.n_cols);
+
+            for(unsigned int i = 0; i < theta.n_cols; i++)
+            {
+                thetaNew.col(i) = autoencoder.encode(theta.col(i));
+            }
+
+            arma::mat Cov = arma::cov(thetaNew.t());
+            arma::vec mean = arma::mean(thetaNew, 1);
+
+            CompressedPolicy policy(phi, autoencoder);
+#else
+            arma::mat Cov = arma::cov(theta.t());
+            arma::vec mean = arma::mean(theta, 1);
+
+            MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
+#endif
+
+            auto M = safeChol(Cov);
+            ParametricNormal dist(mean, M.t()*M);
+
+            // Testing
+            EmptyEnv env(uDim, 100.0);
+
+            CollectorStrategy<DenseAction, DenseState> f;
+
+            //Compute fitted trajectory for each demonstration
+            for(int i = 0; i < theta.n_cols; i++)
+            {
+#ifdef REDUCTION
+                policy.setParameters(thetaNew.col(i));
+#else
+                policy.setParameters(theta.col(i));
+#endif
+                PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+                Core<DenseAction, DenseState> core(env, agent);
+
+                core.getSettings().episodeLength = 2000;
+                core.getSettings().loggerStrategy = &f;
+                core.runTestEpisode();
+            }
+
+            //Test the fitted distribution
+            PolicyEvalDistribution<DenseAction, DenseState> agent(dist, policy);
+            Core<DenseAction, DenseState> core(env, agent);
+
+            CollectorStrategy<DenseAction, DenseState> s;
+            core.getSettings().episodeLength = 2000;
+            core.getSettings().testEpisodeN = theta.n_cols;
+            core.getSettings().loggerStrategy = &s;
+            core.runTestEpisodes();
+
+
+            // Save the dataset in ReLe format
+            std::ofstream os1(fm.addPath("expert_dataset.log"));
+            rosDataset.getData().writeToStream(os1);
+
+            std::ofstream os2(fm.addPath("imitator_dataset.log"));
+            s.data.writeToStream(os2);
+
+            std::ofstream os3(fm.addPath("fitted_dataset.log"));
+            f.data.writeToStream(os3);
+
+            std::ofstream os4(fm.addPath("basis.log"));
+            for(int i = 0; i < basis.size(); i++)
+            {
+                basis[i]->writeOnStream(os4);
+            }
+
+            // print basis function used
+            cout << basis.size() << std::endl;
+
         }
+
     }
-
-
-    preprocessDataset(rosDataset.getData());
-
-    //Create basis function for policy
-    int uDim = 3;
-#ifdef WAVELETS
-    BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
-#else
-    double maxT = rosDataset.getData()[0].back().x(0);
-
-    unsigned int N = rosDataset.getData().getTransitionsNumber();
-    double df = 1/maxT;
-    double fE = 20.0;
-
-    std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
-              << maxT << " 1/tmax: " << 1.0/maxT << endl;
-
-    BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
-    BasisFunctions tmp = FrequencyBasis::generate(0, 0, fE, df, false);
-    basis.insert(basis.end(), tmp.begin(), tmp.end());
-#endif
-
-    SparseFeatures phi(basis, uDim);
-
-    //Fit Normal distribution
-#ifdef WAVELETS
-    BasisFunctions basisEst = HaarWavelets::generate(0, 5, 4);
-#else
-    BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
-    BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
-    basisEst.insert(basisEst.end(), tmpEst.begin(), tmpEst.end());
-#endif
-
-    DenseFeatures phiEst(basisEst);
-
-    MLEDistributionLinear estimator(phiEst);
-    estimator.compute(rosDataset.getData());
-
-    auto theta = estimator.getParameters();
-
-
-#ifdef REDUCTION
-    /* Dimensionality reduction */
-    unsigned int reducedDim = 90;
-    auto basisEnc = IdentityBasis::generate(theta.n_rows);
-    DenseFeatures phiEnc(basisEnc);
-    Autoencoder autoencoder(phiEnc, reducedDim);
-
-    std::cout << "J0: " << autoencoder.computeJFeatures(theta) << std::endl;
-
-    autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
-    autoencoder.getHyperParameters().lambda = 0;
-    autoencoder.trainFeatures(theta);
-
-    std::cout << "Jf: " << autoencoder.computeJFeatures(theta) << std::endl;
-
-    arma::mat thetaNew(reducedDim, theta.n_cols);
-
-    for(unsigned int i = 0; i < theta.n_cols; i++)
-    {
-        thetaNew.col(i) = autoencoder.encode(theta.col(i));
-    }
-
-    arma::mat Cov = arma::cov(thetaNew.t());
-    arma::vec mean = arma::mean(thetaNew, 1);
-
-    CompressedPolicy policy(phi, autoencoder);
-#else
-    arma::mat Cov = arma::cov(theta.t());
-    arma::vec mean = arma::mean(theta, 1);
-
-    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
-#endif
-
-    auto M = safeChol(Cov);
-    ParametricNormal dist(mean, M.t()*M);
-
-    /* Testing */
-    EmptyEnv env(uDim, 100.0);
-
-    CollectorStrategy<DenseAction, DenseState> f;
-
-    //Compute fitted trajectory for each demonstration
-    for(int i = 0; i < theta.n_cols; i++)
-    {
-#ifdef REDUCTION
-    	policy.setParameters(thetaNew.col(i));
-#else
-    	policy.setParameters(theta.col(i));
-#endif
-        PolicyEvalAgent<DenseAction, DenseState> agent(policy);
-        Core<DenseAction, DenseState> core(env, agent);
-
-        core.getSettings().episodeLength = 2000;
-        core.getSettings().loggerStrategy = &f;
-        core.runTestEpisode();
-    }
-
-    //Test the fitted distribution
-    PolicyEvalDistribution<DenseAction, DenseState> agent(dist, policy);
-    Core<DenseAction, DenseState> core(env, agent);
-
-    CollectorStrategy<DenseAction, DenseState> s;
-    core.getSettings().episodeLength = 2000;
-    core.getSettings().testEpisodeN = theta.n_cols;
-    core.getSettings().loggerStrategy = &s;
-    core.runTestEpisodes();
-
-
-    /* Save the dataset in ReLe format */
-    std::ofstream os1(fm.addPath("expert_dataset.log"));
-    rosDataset.getData().writeToStream(os1);
-
-    std::ofstream os2(fm.addPath("imitator_dataset.log"));
-    s.data.writeToStream(os2);
-
-    std::ofstream os3(fm.addPath("fitted_dataset.log"));
-    f.data.writeToStream(os3);
-
-    std::ofstream os4(fm.addPath("basis.log"));
-    for(int i = 0; i < basis.size(); i++)
-    {
-        basis[i]->writeOnStream(os4);
-    }
-
-    // print basis function used
-    cout << basis.size() << std::endl;
 
     return 0;
 }

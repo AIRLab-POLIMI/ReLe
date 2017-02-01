@@ -57,7 +57,7 @@ arma::vec CompressedPolicy::operator()(const arma::vec& state)
 }
 
 double CompressedPolicy::operator()(const arma::vec& state,
-        const arma::vec& action)
+                                    const arma::vec& action)
 {
     arma::vec output = approximator(state);
 
