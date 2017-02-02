@@ -55,8 +55,11 @@ using namespace ReLe;
 using namespace ReLe_ROS;
 
 
+const double maxT = 10.0;
+
+
 #define WAVELETS
-//#define REDUCTION
+#define REDUCTION
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
@@ -105,7 +108,7 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
         //set episode lenght to 4 seconds
         double tf = episode.back().x(0);
         double dt = tf - episode[episode.size() - 2].x(0);
-        while(tf < 4.0)
+        while(tf < maxT)
         {
             tf += dt;
             Transition<DenseAction, DenseState> tr;
@@ -176,8 +179,6 @@ int main(int argc, char *argv[])
 #ifdef WAVELETS
             BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
 #else
-            double maxT = rosDataset.getData()[0].back().x(0);
-
             unsigned int N = rosDataset.getData().getTransitionsNumber();
             double df = 1/maxT;
             double fE = 20.0;
@@ -216,8 +217,8 @@ int main(int argc, char *argv[])
             DenseFeatures phiEnc(basisEnc);
             Autoencoder autoencoder(phiEnc, reducedDim);
 
-            autoencoder.getHyperParameters().Omega = new L2_Regularization();
             autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
+            autoencoder.getHyperParameters().Omega = new L2_Regularization();
             autoencoder.getHyperParameters().lambda = 0.01;
 
             std::cout << "J0: " << autoencoder.computeJFeatures(theta) << std::endl;
