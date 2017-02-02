@@ -178,7 +178,7 @@ public:
         newDelta *= maxValue - minValue;
 
         deltaFactor = newDelta/delta;
-        deltaFactor(arma::find_nonfinite(deltaFactor)).zeros();
+        deltaFactor(arma::find_nonfinite(deltaFactor)).ones();
     }
 
     /*!
