@@ -107,7 +107,8 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 
         //set episode lenght to 4 seconds
         double tf = episode.back().x(0);
-        double dt = tf - episode[episode.size() - 2].x(0);
+        double dt = 1e-2;
+
         while(tf < maxT)
         {
             tf += dt;
@@ -127,7 +128,6 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
             tr.xn = xn;
             episode.push_back(tr);
         }
-
     }
 }
 
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
             //Create basis function for policy
             int uDim = 3;
 #ifdef WAVELETS
-            BasisFunctions basis = HaarWavelets::generate(0, 5, 4);
+            BasisFunctions basis = HaarWavelets::generate(0, 5, 10);
 #else
             unsigned int N = rosDataset.getData().getTransitionsNumber();
             double df = 1/maxT;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 
             //Fit Normal distribution
 #ifdef WAVELETS
-            BasisFunctions basisEst = HaarWavelets::generate(0, 5, 4);
+            BasisFunctions basisEst = HaarWavelets::generate(0, 5, 10);
 #else
             BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
             BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
