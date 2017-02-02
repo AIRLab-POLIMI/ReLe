@@ -35,7 +35,7 @@ ShipSteering::ShipSteering(bool small) :
     double fieldSize = small ? 150 : 1000;
 
     rangeField = Range(0, fieldSize);
-    rangeOmega = Range(-15, +15);
+    rangeOmega = Range(-M_PI/12.0, M_PI/12.0);
 
     gateS[0] = small ? 100 : 900;
     gateS[1] = small ? 120 : 920;

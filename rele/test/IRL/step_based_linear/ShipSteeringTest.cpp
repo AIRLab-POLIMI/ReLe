@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
         0.0, 150.0,
         0.0, 150.0,
         -M_PI, M_PI,
-        -15.0, 15.0
+        -M_PI/12.0, M_PI/12.0
     });
 
     DenseFeatures phi(basis);

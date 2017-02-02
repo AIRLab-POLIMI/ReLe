@@ -177,7 +177,13 @@ public:
         arma::vec newDelta(dataset.n_rows, arma::fill::ones);
         newDelta *= maxValue - minValue;
 
+        std::cout << "newdelta   :" << newDelta.t() << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+        std::cout << "delta      :" << delta.t() << std::endl;
+        std::cout << "--------------------------------" << std::endl;
+
         deltaFactor = newDelta/delta;
+        deltaFactor(arma::find_nonfinite(deltaFactor)).zeros();
     }
 
     /*!
