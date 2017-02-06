@@ -44,10 +44,6 @@ int main(int argc, char *argv[])
 
     cout << "tree outputSize: " << tree.getOutputSize() << endl;
 
-    BatchDataRaw_<arma::vec, arma::vec> dataset;
-    tree.train(dataset);
-
-
     //Test the tree
     arma::vec input1 = {0, 0};
     cout << "tree({0}) =" << endl;
@@ -55,19 +51,21 @@ int main(int argc, char *argv[])
 
 
     //Train with atan2
-    BatchDataRaw_<arma::vec, arma::vec> datasetAtan2;
+    arma::mat input(2, 1200);
+    arma::mat output(1, 1200);
+
     for(int i = 0; i < 1200; i++)
     {
         double step = 0.005;
         double angle = step*i;
 
-        arma::vec input = {sin(angle), cos(angle)};
-        arma::vec output = {atan2(sin(angle), cos(angle))};
-
-        datasetAtan2.addSample(input, output);
+        input.col(i) = arma::vec({sin(angle), cos(angle)});
+        output.col(i) = arma::vec({atan2(sin(angle), cos(angle))});
     }
 
-    tree.train(datasetAtan2);
+    BatchDataSimple datasetAtan2(input, output);
+
+    tree.trainFeatures(datasetAtan2);
 
     arma::vec test(2);
     test(0) = sin(M_PI/4);
@@ -90,7 +88,7 @@ int main(int argc, char *argv[])
     //ExtraTree test
     ExtraTreeEnsemble_<arma::vec, arma::vec> extraTree(phi, defaultNode);
 
-    extraTree.train(datasetAtan2);
+    extraTree.trainFeatures(datasetAtan2);
 
     test(0) = sin(M_PI/4);
     test(1) = cos(M_PI/4);

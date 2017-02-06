@@ -38,20 +38,22 @@ int main(int argc, char *argv[])
 
     FFNeuralNetwork planeNet(phiPlane, 10, 1);
 
-    BatchDataRaw_<arma::vec, arma::vec> datasetPlane;
+    arma::mat input(1, 200);
+    arma::mat output(1, 200);
 
     //Config parameters
     for(int i = -100; i < 100; i++)
     {
         double f = i;
-        arma::vec input = { f };
-        arma::vec output = { f };
-        datasetPlane.addSample(input, output);
+        input(0, i+100) =  i;
+        output(0, i+100) =  i;
     }
+
+    BatchDataSimple datasetPlane(input, output);
 
     planeNet.getHyperParameters().normalizationF = new MinMaxNormalization<>();
     //planeNet.getHyperParameters().normalizationO = new MinMaxNormalization<>();
-    planeNet.train(datasetPlane);
+    planeNet.trainFeatures(datasetPlane);
 
     cout << "plane(100)  = " << planeNet({100.0}) <<  endl;
     cout << "plane(50)   = " << planeNet({50.0}) << endl;
@@ -61,14 +63,14 @@ int main(int argc, char *argv[])
     cout << "plane(-50)  = " << planeNet({-50.0}) << endl;
     cout << "plane(-100) = " << planeNet({-100.0}) <<  endl;
 
-    arma::vec input = {1.0};
-    arma::vec numerical = NumericalGradient::compute(planeNet, planeNet.getParameters(), input);
+    arma::vec testinput = {1.0};
+    arma::vec numerical = NumericalGradient::compute(planeNet, planeNet.getParameters(), testinput);
     cout << "numerical: " << numerical.t();
-    cout << "exact:     " << planeNet.diff(input).t();
-    cout << "n/e:       " << numerical.t()/planeNet.diff(input).t();
-    cout << "error norm: " << norm(numerical - planeNet.diff(input)) << endl;
+    cout << "exact:     " << planeNet.diff(testinput).t();
+    cout << "n/e:       " << numerical.t()/planeNet.diff(testinput).t();
+    cout << "error norm: " << norm(numerical - planeNet.diff(testinput)) << endl;
 
-    cout << "J = " << planeNet.computeJ(datasetPlane) << endl;
+    cout << "J = " << planeNet.computeJFeatures(datasetPlane) << endl;
 
 
     // Generate adequate basis
@@ -79,26 +81,26 @@ int main(int argc, char *argv[])
     //Train atan2
     cout << "atan2 test" << endl;
     FFNeuralNetwork atan2Net(phi, 20, 1);
-    BatchDataRaw_<arma::vec, arma::vec> dataset;
 
     //Config parameters
     atan2Net.getHyperParameters().optimizator = new GradientDescend<arma::vec>(10000, 0.2);
 
 
+    arma::mat inputAtan(2, 300);
+    arma::mat outputAtan(1, 300);
 
     for(int i = 0; i < 300; i++)
     {
         double step = 0.01;
         double angle = step*i;
 
-        arma::vec input = {sin(angle), cos(angle)};
-        arma::vec output = {atan2(sin(angle), cos(angle))};
-
-        dataset.addSample(input, output);
-
+        inputAtan.col(i) = arma::vec({sin(angle), cos(angle)});
+        outputAtan.col(i) = arma::vec({atan2(sin(angle), cos(angle))});
     }
 
-    atan2Net.train(dataset);
+    BatchDataSimple dataset(inputAtan, outputAtan);
+
+    atan2Net.trainFeatures(dataset);
 
     arma::vec test(2);
     test(0) = sin(M_PI/4);
@@ -109,12 +111,11 @@ int main(int argc, char *argv[])
     test(1) = cos(M_PI/3);
     cout << "net =" << atan2Net(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
 
-    cout << "J = " << atan2Net.computeJ(dataset) << endl;
+    cout << "J = " << atan2Net.computeJFeatures(dataset) << endl;
 
 
     //Train xor
     FFNeuralNetwork xorNet(phi, 3, 1);
-    BatchDataRaw_<arma::vec, arma::vec> datasetXor;
 
     //Config parameters
     xorNet.getHyperParameters().optimizator = new GradientDescend<arma::vec>(10000, 0.2);
@@ -127,19 +128,28 @@ int main(int argc, char *argv[])
     arma::vec o0 = {0.0};
     arma::vec o1 = {1.0};
 
-    datasetXor.addSample(i0, o0);
-    datasetXor.addSample(i1, o1);
-    datasetXor.addSample(i2, o1);
-    datasetXor.addSample(i3, o0);
+    arma::mat inputXor(2, 4);
+    arma::mat outputXor(1, 4);
 
-    xorNet.train(datasetXor);
+    inputXor.col(0) = i0;
+    outputXor.col(0) = o0;
+	inputXor.col(1) = i1;
+	outputXor.col(1) = o1;
+	inputXor.col(2) = i2;
+	outputXor.col(2) = o1;
+	inputXor.col(3) = i3;
+	outputXor.col(3) = o0;
+
+    BatchDataSimple datasetXor(inputXor, outputXor);
+
+    xorNet.trainFeatures(datasetXor);
 
     cout << "xor(0, 0) =" << xorNet(i0) << "gt = " << "0" << endl;
     cout << "xor(1, 0) =" << xorNet(i1) << "gt = " << "1" <<  endl;
     cout << "xor(0, 1) =" << xorNet(i2) << "gt = " << "1" << endl;
     cout << "xor(1, 1) =" << xorNet(i3) << "gt = " << "0" <<  endl;
 
-    cout << "J = " << xorNet.computeJ(datasetXor) << endl;
+    cout << "J = " << xorNet.computeJFeatures(datasetXor) << endl;
 
 }
 

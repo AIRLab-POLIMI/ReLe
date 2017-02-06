@@ -39,8 +39,6 @@ int main(int argc, char *argv[])
 
     GaussianProcess gp(phi);
 
-    BatchDataRaw_<arma::vec, arma::vec> dataset;
-
     arma::vec inputs = {-7.32558,
                         -6.34884,
                         -6.34884,
@@ -85,13 +83,7 @@ int main(int argc, char *argv[])
                          -0.844156
                         };
 
-    for(unsigned int i = 0; i < inputs.n_rows; i++)
-    {
-        arma::vec input = inputs.row(i).t();
-        arma::vec output = {outputs(i)};
-
-        dataset.addSample(input, output);
-    }
+    BatchDataSimple dataset(inputs.t(), outputs.t());
 
     //gp.getHyperParameters().lengthScale = {0.3};
     //gp.getHyperParameters().signalSigma = 1.08;
@@ -101,7 +93,7 @@ int main(int argc, char *argv[])
     //gp.getHyperParameters().signalSigma = 1.16;
     //gp.getHyperParameters().noiseSigma = 0.89;
 
-    gp.train(dataset);
+    gp.trainFeatures(dataset);
 
     unsigned int nTestPoints = 100;
     arma::mat testInputs(1, nTestPoints, arma::fill::zeros);
@@ -132,7 +124,7 @@ int main(int argc, char *argv[])
     testDataset.col(1) = testOutputs.row(0).t();
     testDataset.col(2) = testOutputs.row(1).t();
 
-    cout << "J: " << gp.computeJ(dataset) << endl;
+    cout << "J: " << gp.computeJFeatures(dataset) << endl;
 
     FileManager fm("GaussianProcess");
     fm.createDir();

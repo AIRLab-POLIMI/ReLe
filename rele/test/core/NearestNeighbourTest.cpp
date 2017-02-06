@@ -41,13 +41,7 @@ int main(int argc, char *argv[])
 
     arma::mat data = arma::join_horiz(data_1, data_2);
 
-    std::vector<arma::vec> vectorData;
-    for(unsigned i = 0; i < data.n_cols; i++)
-    {
-        vectorData.push_back(data.col(i));
-    }
-
-    regressor.train(vectorData);
+    regressor.trainFeatures(data);
 
     std::cout << "-- Test #1 --" << std::endl;
     std::cout << "data" << std::endl << data <<std::endl;
@@ -63,18 +57,12 @@ int main(int argc, char *argv[])
         {-0.0358,   -0.2098,   -0.0000,   -0.9771}
     };
 
-    std::vector<arma::vec> vectorData2;
-    for(unsigned i = 0; i < data2.n_cols; i++)
-    {
-        vectorData2.push_back(data2.col(i));
-    }
-
     BasisFunctions basis2 = IdentityBasis::generate(2);
     DenseFeatures phi2(basis2);
     NearestNeighbourRegressor regressor2(phi2, 2);
 
     regressor2.setIterations(5);
-    regressor2.train(vectorData2);
+    regressor2.trainFeatures(data2);
 
     std::cout << "-- Test #2 --" << std::endl;
     std::cout << "data" << std::endl << data2 << std::endl;

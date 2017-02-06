@@ -243,53 +243,6 @@ public:
     }
 
     /*!
-     * This method is used to train raw input data
-     * \param dataset the input dataset
-     */
-    virtual void train(const BatchDataRaw_<InputC, OutputC>& dataset)
-    {
-        unsigned int N = dataset.size();
-
-        //compute features matrix
-        FeaturesCollection features(this->phi.rows(), N);
-        OutputCollection outputs(this->outputDimension, N);
-
-        for(int i = 0; i < N; i++)
-        {
-            features.col(i) = this->phi(dataset.getInput(i));
-            outputs.col(i) = dataset.getOutput(i);
-        }
-
-        BatchDataSimple_<OutputC, denseOutput> featureDataset(features, outputs);
-        trainFeatures(featureDataset);
-    }
-
-    /*!
-     * This method is used to compute the performance of an input dataset w.r.t.
-     * the current learned regressor.
-     * \param dataset the input dataset
-     * \return the value of the objective function
-     */
-    double computeJ(const BatchDataRaw_<InputC, arma::vec>& dataset)
-    {
-        unsigned int N = dataset.size();
-
-        //compute features matrix
-        FeaturesCollection features(this->phi.rows(), N);
-        OutputCollection outputs(this->outputDimension, N);
-
-        for(int i = 0; i < N; i++)
-        {
-            features.col(i) = this->phi(dataset.getInput(i));
-            outputs.col(i) = dataset.getOutput(i);
-        }
-
-        BatchDataSimple_<OutputC, denseOutput> featureDataset(features, outputs);
-
-        return computeJFeatures(featureDataset);
-    }
-
-    /*!
      * This method implements the low level training of a dataset from a set of already computed features.
      * \param dataset the set of computed features.
      */
@@ -336,26 +289,6 @@ public:
         : Regressor_<InputC, OutputC, denseOutput>(phi, output)
     {
 
-    }
-
-    /*!
-     * This method is used to compute the performance of an input dataset w.r.t.
-     * the current learned regressor.
-     * \param dataset the input dataset
-     * \return the value of the objective function
-     */
-    virtual void train(const std::vector<InputC>& dataset)
-    {
-        unsigned int N = dataset.size();
-
-        //compute features matrix
-        arma::mat features(this->phi.rows(), N);
-        for(int i = 0; i < N; i++)
-        {
-            features.col(i) = this->phi(dataset[i]);
-        }
-
-        trainFeatures(features);
     }
 
     /*!

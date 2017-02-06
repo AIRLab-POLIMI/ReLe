@@ -29,13 +29,13 @@
 using namespace ReLe;
 using namespace std;
 
-
+//FIXME [IMPORTANT] BUGGED EM!
 int main(int argc, char *argv[])
 {
     //Test EM
     unsigned int size = 2;
     unsigned int nSamples = 10000;
-    std::vector<arma::vec> samples(nSamples);
+    arma::mat samples(size, nSamples);
 
     //generate data from gaussians
     arma::vec componentProbabilities = { 0.2, 0.3, 0.4, 0.1 };
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
         unsigned int k = RandomGenerator::sampleDiscrete(
                              componentProbabilities.begin(),
                              componentProbabilities.end());
-        samples[i] = mvnrandFast(componentMeans.col(k),
+        samples.col(i) = mvnrandFast(componentMeans.col(k),
                                  0.1 * arma::eye(size, size));
     }
 
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     BasisFunctions basis = IdentityBasis::generate(size);
     DenseFeatures phi(basis);
     GaussianMixtureRegressor regressor(phi, componentProbabilities.n_elem);
-    regressor.train(samples);
+    regressor.trainFeatures(samples);
 
     cout << regressor.getParameters().t();
 }
