@@ -122,7 +122,7 @@ public:
      * Train the Gaussian Process with a given dataset.
      * \param featureDataset the dataset to be used to train the model
      */
-    virtual void trainFeatures(const BatchData_<arma::vec, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<arma::vec, denseOutput>& featureDataset) override
     {
         features = featureDataset.getFeatures();
         typename output_traits<arma::vec>::type out = featureDataset.getOutputs();
@@ -155,7 +155,7 @@ public:
      * \param featureDataset the dataset to be used to test the model
      * \return the mean squared error
      */
-    virtual double computeJFeatures(const BatchData_<arma::vec, denseOutput>& featureDataset) override
+    virtual double computeJ(const BatchData_<arma::vec, denseOutput>& featureDataset) override
     {
         features = featureDataset.getFeatures();
         typename output_traits<arma::vec>::type out = featureDataset.getOutputs();

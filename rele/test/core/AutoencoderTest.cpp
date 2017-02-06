@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     encoder.getHyperParameters().lambda = 0;
 
 
-    std::cout << "J0 = " << encoder.computeJFeatures(features) << std::endl;
-    encoder.trainFeatures(features);
-    std::cout << "J  = " << encoder.computeJFeatures(features) << std::endl;
+    std::cout << "J0 = " << encoder.computeJ(features) << std::endl;
+    encoder.train(features);
+    std::cout << "J  = " << encoder.computeJ(features) << std::endl;
 
     arma::mat testNumbers(3, 5, arma::fill::randn);
 

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
     BatchDataSimple datasetAtan2(input, output);
 
-    tree.trainFeatures(datasetAtan2);
+    tree.train(datasetAtan2);
 
     arma::vec test(2);
     test(0) = sin(M_PI/4);
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     //ExtraTree test
     ExtraTreeEnsemble_<arma::vec, arma::vec> extraTree(phi, defaultNode);
 
-    extraTree.trainFeatures(datasetAtan2);
+    extraTree.train(datasetAtan2);
 
     test(0) = sin(M_PI/4);
     test(1) = cos(M_PI/4);

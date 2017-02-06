@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
     arma::mat data = arma::join_horiz(data_1, data_2);
 
-    regressor.trainFeatures(data);
+    regressor.train(data);
 
     std::cout << "-- Test #1 --" << std::endl;
     std::cout << "data" << std::endl << data <<std::endl;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     NearestNeighbourRegressor regressor2(phi2, 2);
 
     regressor2.setIterations(5);
-    regressor2.trainFeatures(data2);
+    regressor2.train(data2);
 
     std::cout << "-- Test #2 --" << std::endl;
     std::cout << "data" << std::endl << data2 << std::endl;

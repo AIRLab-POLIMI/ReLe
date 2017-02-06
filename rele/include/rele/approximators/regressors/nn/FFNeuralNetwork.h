@@ -166,7 +166,7 @@ public:
         return paramSize;
     }
 
-    void trainFeatures(const BatchData& featureDataset) override
+    void train(const BatchData& featureDataset) override
     {
 
         //Setup default optimizator
@@ -181,7 +181,7 @@ public:
         params.optimizator->train(normalizedDataset);
     }
 
-    virtual double computeJFeatures(const BatchData& featureDataset) override
+    virtual double computeJ(const BatchData& featureDataset) override
     {
         const BatchData& normalizedDataset = normalizeDatasetFull(featureDataset, *params.normalizationF, *params.normalizationO);
         return computeJlowLevel(normalizedDataset);

@@ -246,7 +246,7 @@ public:
      * This method implements the low level training of a dataset from a set of already computed features.
      * \param dataset the set of computed features.
      */
-    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& dataset) = 0;
+    virtual void train(const BatchData_<OutputC, denseOutput>& dataset) = 0;
 
     /*!
      * This method is used to compute the performance of the features dataset w.r.t.
@@ -254,7 +254,7 @@ public:
      * \param dataset the features dataset
      * \return the value of the objective function
      */
-    virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& dataset) = 0;
+    virtual double computeJ(const BatchData_<OutputC, denseOutput>& dataset) = 0;
 
 
     /*!
@@ -295,7 +295,7 @@ public:
      * This method implements the low level training of a dataset from a set of already computed features.
      * \param dataset the set of computed features.
      */
-    virtual void trainFeatures(const FeaturesCollection& features) = 0;
+    virtual void train(const FeaturesCollection& features) = 0;
 
     /*!
      * Destructor.

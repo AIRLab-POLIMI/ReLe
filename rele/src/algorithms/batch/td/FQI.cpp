@@ -107,7 +107,7 @@ void FQI::step()
     }
 
     BatchDataSimple featureDataset(features, outputs);
-    this->Q.trainFeatures(featureDataset);
+    this->Q.train(featureDataset);
 
     firstStep = false;
 

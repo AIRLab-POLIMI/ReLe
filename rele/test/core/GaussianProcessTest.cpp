@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     //gp.getHyperParameters().signalSigma = 1.16;
     //gp.getHyperParameters().noiseSigma = 0.89;
 
-    gp.trainFeatures(dataset);
+    gp.train(dataset);
 
     unsigned int nTestPoints = 100;
     arma::mat testInputs(1, nTestPoints, arma::fill::zeros);
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
     testDataset.col(1) = testOutputs.row(0).t();
     testDataset.col(2) = testOutputs.row(1).t();
 
-    cout << "J: " << gp.computeJFeatures(dataset) << endl;
+    cout << "J: " << gp.computeJ(dataset) << endl;
 
     FileManager fm("GaussianProcess");
     fm.createDir();

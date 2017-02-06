@@ -57,13 +57,13 @@ public:
         return out / static_cast<double>(this->regressors.size());
     }
 
-    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override
     {
         for(auto regressor : regressors)
-            regressor->trainFeatures(featureDataset);
+            regressor->train(featureDataset);
     }
 
-    virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual double computeJ(const BatchData_<OutputC, denseOutput>& featureDataset) override
     {
         //TODO [IMPORTANT][INTERFACE] implement, probably this method cannot be called by ensemble...
         assert(false);

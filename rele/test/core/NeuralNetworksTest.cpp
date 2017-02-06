@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
     planeNet.getHyperParameters().normalizationF = new MinMaxNormalization<>();
     //planeNet.getHyperParameters().normalizationO = new MinMaxNormalization<>();
-    planeNet.trainFeatures(datasetPlane);
+    planeNet.train(datasetPlane);
 
     cout << "plane(100)  = " << planeNet({100.0}) <<  endl;
     cout << "plane(50)   = " << planeNet({50.0}) << endl;
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     cout << "n/e:       " << numerical.t()/planeNet.diff(testinput).t();
     cout << "error norm: " << norm(numerical - planeNet.diff(testinput)) << endl;
 
-    cout << "J = " << planeNet.computeJFeatures(datasetPlane) << endl;
+    cout << "J = " << planeNet.computeJ(datasetPlane) << endl;
 
 
     // Generate adequate basis
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
     BatchDataSimple dataset(inputAtan, outputAtan);
 
-    atan2Net.trainFeatures(dataset);
+    atan2Net.train(dataset);
 
     arma::vec test(2);
     test(0) = sin(M_PI/4);
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     test(1) = cos(M_PI/3);
     cout << "net =" << atan2Net(test) << "gt = " << atan2(test(0), test(1)) <<  endl;
 
-    cout << "J = " << atan2Net.computeJFeatures(dataset) << endl;
+    cout << "J = " << atan2Net.computeJ(dataset) << endl;
 
 
     //Train xor
@@ -142,14 +142,14 @@ int main(int argc, char *argv[])
 
     BatchDataSimple datasetXor(inputXor, outputXor);
 
-    xorNet.trainFeatures(datasetXor);
+    xorNet.train(datasetXor);
 
     cout << "xor(0, 0) =" << xorNet(i0) << "gt = " << "0" << endl;
     cout << "xor(1, 0) =" << xorNet(i1) << "gt = " << "1" <<  endl;
     cout << "xor(0, 1) =" << xorNet(i2) << "gt = " << "1" << endl;
     cout << "xor(1, 1) =" << xorNet(i3) << "gt = " << "0" <<  endl;
 
-    cout << "J = " << xorNet.computeJFeatures(datasetXor) << endl;
+    cout << "J = " << xorNet.computeJ(datasetXor) << endl;
 
 }
 

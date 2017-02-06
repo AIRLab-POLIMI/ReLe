@@ -100,8 +100,8 @@ void DoubleFQI::step()
         featureDataset.push_back(currentFeatureDataset);
     }
 
-    QRegressorEnsemble.getRegressor(0).trainFeatures(featureDataset[0]);
-    QRegressorEnsemble.getRegressor(1).trainFeatures(featureDataset[1]);
+    QRegressorEnsemble.getRegressor(0).train(featureDataset[0]);
+    QRegressorEnsemble.getRegressor(1).train(featureDataset[1]);
 
     this->firstStep = false;
 

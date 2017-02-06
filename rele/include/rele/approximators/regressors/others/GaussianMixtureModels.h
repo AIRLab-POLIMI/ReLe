@@ -239,7 +239,7 @@ public:
 
 
 
-    virtual void trainFeatures(const arma::mat& features) override
+    virtual void train(const arma::mat& features) override
     {
         double oldLogL, logL = logLikelihood(features);
         arma::uvec deletedIndexes;

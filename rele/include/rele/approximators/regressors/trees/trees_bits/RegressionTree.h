@@ -57,7 +57,7 @@ public:
         return root->getValue(phi(input));
     }
 
-    virtual double computeJFeatures(const BatchData_<OutputC, denseOutput>& dataset) override
+    virtual double computeJ(const BatchData_<OutputC, denseOutput>& dataset) override
     {
         double J = 0;
 
@@ -83,7 +83,7 @@ public:
         return nMin;
     }
 
-    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override = 0;
+    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override = 0;
 
 
     TreeNode<OutputC>* getRoot()

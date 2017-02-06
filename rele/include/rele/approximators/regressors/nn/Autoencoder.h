@@ -56,21 +56,21 @@ public	:
         return arma::vec();
     }
 
-    virtual void trainFeatures(const FeaturesCollection& features) override
+    virtual void train(const FeaturesCollection& features) override
     {
         //Set normalization
         this->getHyperParameters().normalizationF = normalizationF;
         this->getHyperParameters().normalizationO = normalizationO;
 
         BatchDataSimple dataset(features, features);
-        FFNeuralNetwork_<InputC, denseOutput>::trainFeatures(dataset);
+        FFNeuralNetwork_<InputC, denseOutput>::train(dataset);
     }
 
-    double computeJFeatures(const arma::mat& features)
+    double computeJ(const arma::mat& features)
     {
         //Run training
         BatchDataSimple data(features, features);
-        return FFNeuralNetwork_<InputC, denseOutput>::computeJFeatures(data);
+        return FFNeuralNetwork_<InputC, denseOutput>::computeJ(data);
     }
 
     virtual ~Autoencoder_()

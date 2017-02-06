@@ -72,7 +72,7 @@ public:
 
     }
 
-    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override
     {
         this->cleanTree();
         root = buildKDTree(featureDataset, 0);

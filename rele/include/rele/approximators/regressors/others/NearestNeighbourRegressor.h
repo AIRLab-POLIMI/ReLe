@@ -56,7 +56,7 @@ public:
         return centroids.col(index);
     }
 
-    virtual void trainFeatures(const FeaturesCollection& features) override
+    virtual void train(const FeaturesCollection& features) override
     {
         wcss = std::numeric_limits<double>::infinity();
 

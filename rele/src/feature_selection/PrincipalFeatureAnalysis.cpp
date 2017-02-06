@@ -136,7 +136,7 @@ void PrincipalFeatureAnalysis::cluster(arma::mat& data, arma::mat& means, arma::
     NearestNeighbourRegressor regressor(phi, k);
     regressor.setIterations(10);
 
-    regressor.trainFeatures(data);
+    regressor.train(data);
 
     means = regressor.getCentroids();
     clustersIndexes = regressor.getClustersIndexes();

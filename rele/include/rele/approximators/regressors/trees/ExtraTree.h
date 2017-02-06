@@ -75,7 +75,7 @@ public:
         featureRelevance.resize(featureSize, 0.0);
     }
 
-    virtual void trainFeatures(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override
     {
         this->cleanTree();
         root = buildExtraTree(featureDataset);

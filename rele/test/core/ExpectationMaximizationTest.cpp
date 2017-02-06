@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     BasisFunctions basis = IdentityBasis::generate(size);
     DenseFeatures phi(basis);
     GaussianMixtureRegressor regressor(phi, componentProbabilities.n_elem);
-    regressor.trainFeatures(samples);
+    regressor.train(samples);
 
     cout << regressor.getParameters().t();
 }
