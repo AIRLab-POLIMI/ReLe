@@ -46,7 +46,8 @@ public:
      * \param tiles a set of tiles to be used
      * \param outputs the number of output features vectors
      */
-    TilesCoder_(Tiles_<InputC>* tiles)
+    TilesCoder_(Tiles_<InputC>* tiles, bool destroy = true)
+		: destroy(destroy)
     {
         tilesVector.push_back(tiles);
         rowsN = tiles->size();
@@ -57,8 +58,8 @@ public:
      * \param tilesVector a vector of multiple tilings to be used
      * \param outputs the number of output features vectors
      */
-    TilesCoder_(TilesVector_<InputC>& tilesVector) :
-        tilesVector(tilesVector), rowsN(0)
+    TilesCoder_(TilesVector_<InputC>& tilesVector, bool destroy = true) :
+        tilesVector(tilesVector), rowsN(0), destroy(destroy)
     {
         computeRows();
     }
@@ -92,8 +93,11 @@ public:
      */
     virtual ~TilesCoder_()
     {
-        for(auto tile : tilesVector)
-            delete tile;
+    	if(destroy)
+    	{
+    		for(auto tile : tilesVector)
+    			delete tile;
+    	}
     }
 
 protected:
@@ -124,6 +128,7 @@ private:
 private:
     TilesVector_<InputC> tilesVector;
     size_t rowsN;
+    bool destroy;
 };
 
 //! Template alias.
