@@ -43,13 +43,14 @@ namespace ReLe
 {
 
 //TODO [OPTIMIZATION] fix NN with sparse features
-template<class InputC, bool denseOutput = true>
-class FFNeuralNetwork_: public ParametricRegressor_<InputC, denseOutput>,
-    public BatchRegressor_<InputC, arma::vec, denseOutput>
+template<bool denseInput = true>
+class FFNeuralNetwork_: public ParametricRegressor_<denseInput>,
+    public BatchRegressor_<arma::vec, denseInput>
 {
-    USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
+    friend Optimizator<denseInput>;
 
-    friend Optimizator<InputC, denseOutput>;
+public:
+    DEFINE_FEATURES_TYPES(denseInput)
 
 public:
 
@@ -82,14 +83,14 @@ public:
         }
 
         //Optimization agorithm
-        Optimizator<InputC, denseOutput>* optimizator;
+        Optimizator<denseInput>* optimizator;
 
         //Regularization class
         Regularization* Omega;
 
         //Normalization class
-        Normalization<denseOutput>* normalizationF;
-        Normalization<denseOutput>* normalizationO;
+        Normalization<denseInput>* normalizationF;
+        Normalization<denseInput>* normalizationO;
 
         //Regularization weight
         double lambda;
@@ -98,14 +99,15 @@ public:
         bool freePointers;
 
     private:
-        NoNormalization<denseOutput> defaultNormalization;
+        NoNormalization<denseInput> defaultNormalization;
         NoRegularization defaultRegularization;
     };
 
 public:
-    FFNeuralNetwork_(Features_<InputC, denseOutput>& phi, unsigned int neurons,
+    FFNeuralNetwork_(unsigned int inputs, unsigned int neurons,
                      unsigned int outputs) :
-        ParametricRegressor(phi, outputs), BatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
+        ParametricRegressor_<denseInput>(inputs, outputs),
+		BatchRegressor_<arma::vec, denseInput>(inputs, outputs)
     {
         layerFunction.push_back(new Sigmoid());
         layerFunction.push_back(new Linear());
@@ -116,10 +118,11 @@ public:
         setupNetwork();
     }
 
-    FFNeuralNetwork_(Features_<InputC, denseOutput>& phi,
+    FFNeuralNetwork_(unsigned int inputs,
                      std::vector<unsigned int>& layerNeurons,
                      std::vector<Function*>& layerFunction) :
-        ParametricRegressor(phi, layerNeurons.back()), BatchRegressor_<InputC, arma::vec, denseOutput>(phi),
+        ParametricRegressor_<denseInput>(inputs, layerNeurons.back()),
+		BatchRegressor_<arma::vec, denseInput>(inputs, layerNeurons.back()),
         layerFunction(layerFunction), layerNeurons(layerNeurons)
     {
         setupNetwork();
@@ -133,16 +136,16 @@ public:
         }
     }
 
-    virtual arma::vec operator()(const InputC& input) override
+    virtual arma::vec operator()(const FeaturesType& input) override
     {
-        const arma::vec& x = params.normalizationF->normalize(Base::phi(input));
+        const arma::vec& x = params.normalizationF->normalize(input);
         forwardComputation(x);
         return params.normalizationO->restore(h.back());
     }
 
-    virtual arma::vec diff(const InputC& input) override
+    virtual arma::vec diff(const FeaturesType& input) override
     {
-        const arma::vec& x = params.normalizationF->normalize(Base::phi(input));
+        const arma::vec& x = params.normalizationF->normalize(input);
         forwardComputation(x);
         arma::vec g(layerNeurons.back(), arma::fill::ones);
 
@@ -171,7 +174,7 @@ public:
 
         //Setup default optimizator
         if(!params.optimizator)
-            params.optimizator = new GradientDescend<InputC, denseOutput>(10000, 0.1);
+            params.optimizator = new GradientDescend<denseInput>(10000, 0.1);
 
         //Normalize dataset
         auto&& normalizedDataset = normalizeDatasetFull(featureDataset, *params.normalizationF, *params.normalizationO, true);
@@ -207,7 +210,7 @@ private:
 
         //Create the network
         aux_mem = new double[paramSize];
-        unsigned int input = Base::phi.rows();
+        unsigned int input = ParametricRegressor_<denseInput>::inputDimension;
 
         // create weights and initialize randomly
         w = new arma::vec(aux_mem, paramSize, false);
@@ -240,7 +243,7 @@ private:
 
     void calculateParamSize()
     {
-        unsigned int paramN = (Base::phi.rows() + 1) * layerNeurons[0];
+        unsigned int paramN = (ParametricRegressor_<denseInput>::inputDimension + 1) * layerNeurons[0];
 
         for (unsigned int layer = 1; layer < layerNeurons.size(); layer++)
         {
@@ -389,7 +392,7 @@ protected:
     OptimizationParameters params;
 };
 
-typedef FFNeuralNetwork_<arma::vec> FFNeuralNetwork;
+typedef FFNeuralNetwork_<> FFNeuralNetwork;
 
 }
 

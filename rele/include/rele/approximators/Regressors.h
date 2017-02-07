@@ -31,6 +31,10 @@
 namespace ReLe
 {
 
+#define DEFINE_FEATURES_TYPES(dense) \
+	typedef typename input_traits<dense>::type FeaturesCollection; \
+	typedef typename input_traits<dense>::column_type FeaturesType;
+
 /*!
  * This is the default interface for function approximators.
  * We suppose that function approximation works applying an arbitrary function over
@@ -38,16 +42,11 @@ namespace ReLe
  * Formally a regressor is a function \f$f(i)\rightarrow\mathcal{D}_{output}^n\f$ with \f$i\in\mathcal{D}_{input}\f$
  * Function approximation can work with any type of input data and features over data (dense, sparse).
  */
-template<class InputC, class OutputC, bool denseOutput = true>
+template<class OutputC, bool denseInput = true>
 class Regressor_
 {
 public:
-    //! type of input of the regressor
-    typedef InputC InputType;
-    //! type of the output of the regressor
-    typedef OutputC OutputType;
-    //! whether the features are dense or sparse
-    static const bool isDense = denseOutput;
+	DEFINE_FEATURES_TYPES(denseInput)
 
 public:
 
@@ -56,8 +55,8 @@ public:
      * \param phi the features used by the approximator
      * \param output the dimensionality of the output vector
      */
-    Regressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
-        phi(phi), outputDimension(output)
+    Regressor_(unsigned int input, unsigned int output = 1) :
+    	inputDimension(input), outputDimension(output)
     {
     }
 
@@ -67,7 +66,7 @@ public:
      * \param input the input data
      * \return the value of the function at input
      */
-    virtual OutputC operator() (const InputC& input) = 0;
+    virtual OutputC operator() (const FeaturesType& input) = 0;
 
     /*!
      * Overloading of the evaluation method, simply vectorizes the inputs and then evaluates
@@ -102,25 +101,18 @@ public:
      * Getter.
      * \return the dimensionality of the output.
      */
-    int getOutputSize()
+    int getOutputSize() const
     {
         return outputDimension;
     }
 
     /*!
-     * Return the features used by the regressor.
+     * Getter.
+     * \return the dimensionality of the input.
      */
-    inline Features_<InputC, denseOutput>& getFeatures()
+    int getInputSize() const
     {
-        return phi;
-    }
-
-    /*!
-     * Return the features used by the regressor.
-     */
-    inline const Features_<InputC, denseOutput>& getFeatures() const
-    {
-        return phi;
+        return inputDimension;
     }
 
     /*!
@@ -131,28 +123,31 @@ public:
     }
 
 protected:
-    Features_<InputC, denseOutput>& phi;
+    unsigned int inputDimension;
     unsigned int outputDimension;
 };
 
 //! Template alias
-typedef Regressor_<arma::vec, arma::vec> Regressor;
+typedef Regressor_<arma::vec> Regressor;
 
 /*!
  * This is the default interface for function approximators that can be described through parameters.
  * This interface assumes that the parametrization should be differentiable.
  */
-template<class InputC, bool denseOutput = true>
-class ParametricRegressor_: public Regressor_<InputC, arma::vec, denseOutput>
+template<bool denseInput = true>
+class ParametricRegressor_: public Regressor_<arma::vec, denseInput>
 {
+public:
+	DEFINE_FEATURES_TYPES(denseInput)
+
 public:
     /*!
      * Constructor.
      * \param phi the features used by the approximator
      * \param output the dimensionality of the output vector
      */
-    ParametricRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
-        Regressor_<InputC, arma::vec, denseOutput>(phi, output)
+    ParametricRegressor_(unsigned int input, unsigned int output = 1) :
+        Regressor_<arma::vec, denseInput>(input, output)
     {
     }
 
@@ -178,7 +173,7 @@ public:
      * Compute the derivative of the represented function w.r.t. the parameters,
      * at input.
      */
-    virtual arma::vec diff(const InputC& input) = 0;
+    virtual arma::vec diff(const FeaturesType& input) = 0;
 
     /*!
      * Overloading of the differentiation method, simply vectorizes the inputs and then evaluates
@@ -218,26 +213,27 @@ public:
 };
 
 //! Template alias
-typedef ParametricRegressor_<arma::vec> ParametricRegressor;
+typedef ParametricRegressor_<> ParametricRegressor;
 
 /*!
  * This is the default interface for regressors that uses supervised learning for learning the target function.
  * It contains functions to train the regressor from raw data or from already computed features,
  * and performance evaluation methods as well.
  */
-template<class InputC, class OutputC, bool denseOutput=true>
-class BatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
+template<class OutputC, bool denseInput=true>
+class BatchRegressor_ : public Regressor_<OutputC, denseInput>
 {
-    typedef typename input_traits<denseOutput>::type FeaturesCollection;
-    typedef typename output_traits<OutputC>::type OutputCollection;
+public:
+	DEFINE_FEATURES_TYPES(denseInput)
+
 public:
     /*!
      * Constructor.
      * \param phi the features used by the approximator
      * \param output the dimensionality of the output vector
      */
-    BatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1) :
-        Regressor_<InputC, OutputC, denseOutput>(phi, output)
+    BatchRegressor_(unsigned int input, unsigned int output = 1) :
+        Regressor_<OutputC, denseInput>(input, output)
     {
 
     }
@@ -246,7 +242,7 @@ public:
      * This method implements the low level training of a dataset from a set of already computed features.
      * \param dataset the set of computed features.
      */
-    virtual void train(const BatchData_<OutputC, denseOutput>& dataset) = 0;
+    virtual void train(const BatchData_<OutputC, denseInput>& dataset) = 0;
 
     /*!
      * This method is used to compute the performance of the features dataset w.r.t.
@@ -254,7 +250,7 @@ public:
      * \param dataset the features dataset
      * \return the value of the objective function
      */
-    virtual double computeJ(const BatchData_<OutputC, denseOutput>& dataset) = 0;
+    virtual double computeJ(const BatchData_<OutputC, denseInput>& dataset) = 0;
 
 
     /*!
@@ -268,25 +264,27 @@ public:
 };
 
 //! Template alias
-typedef BatchRegressor_<arma::vec, arma::vec> BatchRegressor;
+typedef BatchRegressor_<arma::vec> BatchRegressor;
 
 
 /*!
  * This is the default interface for regressors that uses unsupervised learning for learning the target function.
  * It contains functions to train the regressor from raw data or from already computed feature.
  */
-template<class InputC, class OutputC, bool denseOutput = true>
-class UnsupervisedBatchRegressor_ : public Regressor_<InputC, OutputC, denseOutput>
+template<class OutputC, bool denseInput = true>
+class UnsupervisedBatchRegressor_ : public Regressor_<OutputC, denseInput>
 {
-    typedef typename input_traits<denseOutput>::type FeaturesCollection;
+public:
+	DEFINE_FEATURES_TYPES(denseInput)
+
 public:
     /*!
      * Constructor.
      * \param phi the features used by the approximator
      * \param output the dimensionality of the output vector
      */
-    UnsupervisedBatchRegressor_(Features_<InputC, denseOutput>& phi, unsigned int output = 1)
-        : Regressor_<InputC, OutputC, denseOutput>(phi, output)
+    UnsupervisedBatchRegressor_(unsigned int input, unsigned int output = 1)
+        : Regressor_<OutputC, denseInput>(input, output)
     {
 
     }
@@ -308,25 +306,8 @@ public:
 };
 
 //! Template alias
-typedef UnsupervisedBatchRegressor_<arma::vec, arma::vec> UnsupervisedBatchRegressor;
+typedef UnsupervisedBatchRegressor_<arma::vec> UnsupervisedBatchRegressor;
 
 }
-
-#define USE_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
-    typedef Regressor_<InputC, OutputC, denseOutput> Base; \
-    using Base::phi;
-
-#define USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
-    typedef ParametricRegressor_<InputC, denseOutput> Base;
-
-#define USE_BATCH_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
-    typedef BatchRegressor_<InputC, OutputC, denseOutput> Base;
-
-#define USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, OutputC, denseOutput) \
-    typedef UnsupervisedBatchRegressor_<InputC, OutputC, denseOutput> Base; \
- 
-#define DEFINE_FEATURES_TYPES(denseOutput) \
-	typedef typename input_traits<denseOutput>::type FeaturesCollection; \
-	typedef typename input_traits<denseOutput>::column_type FeaturesVector;
 
 #endif /* REGRESSORS_H_ */

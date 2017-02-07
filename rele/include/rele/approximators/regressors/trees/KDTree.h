@@ -46,8 +46,8 @@ namespace ReLe
  * contains less than nmin tuples. In this method the tree structure is
  * independent of the output values of the training sample.
  */
-template<class InputC, class OutputC, bool denseOutput = true>
-class KDTree: public RegressionTree<InputC, OutputC, denseOutput>
+template<class OutputC, bool denseOutput = true>
+class KDTree: public RegressionTree<OutputC, denseOutput>
 {
     USE_REGRESSION_TREE_MEMBERS
 
@@ -57,9 +57,9 @@ public:
      * Basic constructor
      * @param nm nmin, the minimum number of tuples for splitting
      */
-    KDTree(Features_<InputC, denseOutput>& phi, const EmptyTreeNode<OutputC>& emptyNode,
+    KDTree(unsigned int inputs, const EmptyTreeNode<OutputC>& emptyNode,
            unsigned int output_size = 1, unsigned int nMin = 2)
-        : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nMin)
+        : RegressionTree<OutputC, denseOutput>(inputs, emptyNode, output_size, nMin)
     {
 
     }

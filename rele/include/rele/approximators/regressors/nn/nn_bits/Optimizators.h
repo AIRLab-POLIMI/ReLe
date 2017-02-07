@@ -24,8 +24,8 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NN_NN_BITS_OPTIMIZATORS_H_
 #define INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NN_NN_BITS_OPTIMIZATORS_H_
 
-#define USE_OPTIMIZATOR_METHODS(InputC, denseOutput) \
-	typedef Optimizator<InputC, denseOutput> Base; \
+#define USE_OPTIMIZATOR_METHODS(denseInput) \
+	typedef Optimizator<denseInput> Base; \
     using Base::maxIterations; \
 	using Base::w; \
 	using Base::computeGradient; \
@@ -34,13 +34,13 @@
 namespace ReLe
 {
 
-template<class InputC, bool denseOutput>
+template<bool denseInput>
 class FFNeuralNetwork_;
 
-template<class InputC, bool denseOutput = true>
+template<bool denseInput = true>
 class Optimizator
 {
-    friend FFNeuralNetwork_<InputC, denseOutput>;
+    friend FFNeuralNetwork_<denseInput>;
 
 public:
     Optimizator(unsigned int maxIterations) : maxIterations(maxIterations)
@@ -68,14 +68,14 @@ protected:
     }
 
 private:
-    void setNet(FFNeuralNetwork_<InputC, denseOutput>* net)
+    void setNet(FFNeuralNetwork_<denseInput>* net)
     {
         this->net = net;
         this->w = net->w;
     }
 
 private:
-    FFNeuralNetwork_<InputC, denseOutput>* net;
+    FFNeuralNetwork_<denseInput>* net;
 
 protected:
     arma::vec* w;
@@ -83,13 +83,13 @@ protected:
 
 };
 
-template<class InputC, bool denseOutput = true>
-class GradientDescend: public Optimizator<InputC, denseOutput>
+template<bool denseInput = true>
+class GradientDescend: public Optimizator<denseInput>
 {
-    USE_OPTIMIZATOR_METHODS(InputC, denseOutput)
+    USE_OPTIMIZATOR_METHODS(denseInput)
 public:
     GradientDescend(unsigned int maxIterations, double alpha)
-        : Optimizator<InputC, denseOutput>(maxIterations), alpha(alpha)
+        : Optimizator<denseInput>(maxIterations), alpha(alpha)
     {
 
     }
@@ -115,13 +115,13 @@ private:
     double alpha;
 };
 
-template<class InputC, bool denseOutput = true>
-class StochasticGradientDescend: public Optimizator<InputC, denseOutput>
+template<bool denseInput = true>
+class StochasticGradientDescend: public Optimizator<denseInput>
 {
-    USE_OPTIMIZATOR_METHODS(InputC, denseOutput)
+    USE_OPTIMIZATOR_METHODS(denseInput)
 public:
     StochasticGradientDescend(unsigned int maxIterations, double alpha, unsigned int minibatchSize)
-        : Optimizator<InputC, denseOutput>(maxIterations), alpha(alpha), minibatchSize(minibatchSize)
+        : Optimizator<denseInput>(maxIterations), alpha(alpha), minibatchSize(minibatchSize)
     {
 
     }
@@ -152,14 +152,14 @@ private:
 
 };
 
-template<class InputC, bool denseOutput = true>
-class Adadelta: public Optimizator<InputC, denseOutput>
+template<bool denseInput = true>
+class Adadelta: public Optimizator<denseInput>
 {
-    USE_OPTIMIZATOR_METHODS(InputC, denseOutput)
+    USE_OPTIMIZATOR_METHODS(denseInput)
 
 public:
     Adadelta(unsigned int maxIterations, unsigned int minibatchSize, double rho, double epsilon)
-        : Optimizator<InputC, denseOutput>(maxIterations), minibatchSize(minibatchSize), rho(rho), epsilon(epsilon)
+        : Optimizator<denseInput>(maxIterations), minibatchSize(minibatchSize), rho(rho), epsilon(epsilon)
     {
 
     }
@@ -208,13 +208,13 @@ private:
 
 };
 
-template<class InputC, bool denseOutput = true>
-class ScaledConjugateGradient: public Optimizator<InputC, denseOutput>
+template<bool denseInput = true>
+class ScaledConjugateGradient: public Optimizator<denseInput>
 {
-    USE_OPTIMIZATOR_METHODS(InputC, denseOutput)
+    USE_OPTIMIZATOR_METHODS(denseInput)
 public:
     ScaledConjugateGradient(unsigned int maxIterations)
-        : Optimizator<InputC, denseOutput>(maxIterations)
+        : Optimizator<denseInput>(maxIterations)
     {
 
     }

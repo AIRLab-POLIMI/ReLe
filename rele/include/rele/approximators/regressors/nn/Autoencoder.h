@@ -29,28 +29,29 @@
 namespace ReLe
 {
 
-template<class InputC, bool denseOutput = true>
-class Autoencoder_: public UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>,
-    public FFNeuralNetwork_<InputC, denseOutput>
+template<bool denseInput = true>
+class Autoencoder_: public UnsupervisedBatchRegressor_<arma::vec, denseInput>,
+    public FFNeuralNetwork_<denseInput>
 {
-    USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, arma::vec, true)
-    DEFINE_FEATURES_TYPES(denseOutput)
+public:
+    DEFINE_FEATURES_TYPES(denseInput)
 
 public	:
-    Autoencoder_(Features_<InputC, denseOutput>& phi, unsigned int outputs)
-        : FFNeuralNetwork_<InputC, denseOutput>(phi, outputs, phi.rows()), UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, outputs)
+    Autoencoder_(unsigned int inputs, unsigned int outputs)
+        : FFNeuralNetwork_<denseInput>(inputs, outputs),
+		  UnsupervisedBatchRegressor_<InputC, arma::vec, denseInput>(inputs, outputs)
     {
-        normalizationF = new MinMaxNormalization<denseOutput>();
-        normalizationO = new MinMaxNormalization<denseOutput>();
+        normalizationF = new MinMaxNormalization<denseInput>();
+        normalizationO = new MinMaxNormalization<denseInput>();
     }
 
-    virtual arma::vec operator()(const InputC& input) override
+    virtual arma::vec operator()(const FeaturesType& input) override
     {
-        this->forwardComputation(Base::phi(input));
+        this->forwardComputation(input);
         return this->h[1];
     }
 
-    virtual arma::vec diff(const InputC& input) override
+    virtual arma::vec diff(const FeaturesType& input) override
     {
         //TODO [IMPORTANT][INTERFACE] implement. vectorial diff?
         return arma::vec();
@@ -63,14 +64,14 @@ public	:
         this->getHyperParameters().normalizationO = normalizationO;
 
         BatchDataSimple dataset(features, features);
-        FFNeuralNetwork_<InputC, denseOutput>::train(dataset);
+        FFNeuralNetwork_<denseInput>::train(dataset);
     }
 
-    double computeJ(const arma::mat& features)
+    double computeJ(const FeaturesCollection& features)
     {
         //Run training
         BatchDataSimple data(features, features);
-        return FFNeuralNetwork_<InputC, denseOutput>::computeJ(data);
+        return FFNeuralNetwork_<denseInput>::computeJ(data);
     }
 
     virtual ~Autoencoder_()
@@ -79,11 +80,11 @@ public	:
     }
 
 private:
-    Normalization<denseOutput>* normalizationF;
-    Normalization<denseOutput>* normalizationO;
+    Normalization<denseInput>* normalizationF;
+    Normalization<denseInput>* normalizationO;
 };
 
-typedef Autoencoder_<arma::vec> Autoencoder;
+typedef Autoencoder_<> Autoencoder;
 
 }
 

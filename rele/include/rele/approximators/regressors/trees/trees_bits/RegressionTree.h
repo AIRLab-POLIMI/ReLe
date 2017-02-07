@@ -34,30 +34,30 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC, bool denseOutput>
-class RegressionTree: public BatchRegressor_<InputC, OutputC, denseOutput>
+template<class OutputC, bool denseInput>
+class RegressionTree: public BatchRegressor_<OutputC, denseInput>
 {
-    using BatchRegressor_<InputC, OutputC, denseOutput>::phi;
+    using BatchRegressor_<OutputC, denseInput>::phi;
 public:
-    RegressionTree(Features_<InputC, denseOutput>& phi,
+    RegressionTree(unsigned int inputs,
                    const EmptyTreeNode<OutputC>& emptyNode,
                    unsigned int outputDimensions = 1,
                    unsigned int nMin = 2) :
-        BatchRegressor_<InputC, OutputC, denseOutput>(phi, outputDimensions),
+        BatchRegressor_<OutputC, denseInput>(inputs, outputDimensions),
         root(nullptr), emptyNode(emptyNode), nMin(nMin)
     {
 
     }
 
-    virtual OutputC operator() (const InputC& input) override
+    virtual OutputC operator() (const FeaturesType& input) override
     {
         if (!root)
-            return emptyNode.getValue(phi(input));
+            return emptyNode.getValue(input);
 
-        return root->getValue(phi(input));
+        return root->getValue(input);
     }
 
-    virtual double computeJ(const BatchData_<OutputC, denseOutput>& dataset) override
+    virtual double computeJ(const BatchData_<OutputC, denseInput>& dataset) override
     {
         double J = 0;
 
@@ -83,7 +83,7 @@ public:
         return nMin;
     }
 
-    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override = 0;
+    virtual void train(const BatchData_<OutputC, denseInput>& featureDataset) override = 0;
 
 
     TreeNode<OutputC>* getRoot()
@@ -103,7 +103,7 @@ protected:
             delete root;
     }
 
-    void splitDataset(const BatchData_<OutputC, denseOutput>& ds,
+    void splitDataset(const BatchData_<OutputC, denseInput>& ds,
                       int cutDir, double cutPoint,
                       arma::uvec& indexesLow,
                       arma::uvec& indexesHigh)
@@ -135,16 +135,16 @@ protected:
         indexesHigh.resize(highNumber);
     }
 
-    TreeNode<OutputC>* buildLeaf(const BatchData_<OutputC, denseOutput>& ds, LeafType type)
+    TreeNode<OutputC>* buildLeaf(const BatchData_<OutputC, denseInput>& ds, LeafType type)
     {
         switch(type)
         {
         case Constant:
-            return new LeafTreeNode<OutputC, denseOutput>(ds);
+            return new LeafTreeNode<OutputC, denseInput>(ds);
         case Linear:
             return nullptr; //TODO [MINOR] implement
         case Samples:
-            return new SampleLeafTreeNode<OutputC, denseOutput>(ds.clone());
+            return new SampleLeafTreeNode<OutputC, denseInput>(ds.clone());
         default:
             return nullptr;
         }
@@ -160,7 +160,7 @@ protected:
 };
 
 #define USE_REGRESSION_TREE_MEMBERS               \
-	typedef RegressionTree<InputC, OutputC, denseOutput> Base; \
+	typedef RegressionTree<OutputC, denseInput> Base; \
     using Base::root;                             \
     using Base::emptyNode;                        \
     using Base::nMin;

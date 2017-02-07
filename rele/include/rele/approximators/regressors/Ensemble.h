@@ -30,18 +30,20 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC, bool denseOutput = true>
-class Ensemble_ : public BatchRegressor_<InputC, OutputC, denseOutput>
+template<class OutputC, bool denseInput = true>
+class Ensemble_ : public BatchRegressor_<OutputC, denseInput>
 {
+public:
+	DEFINE_FEATURES_TYPES(denseInput)
 
 public:
-    Ensemble_(Features_<InputC>& phi,
+    Ensemble_(unsigned int inputSize,
               unsigned int outputSize = 1)
-        : BatchRegressor_<InputC, OutputC>(phi, outputSize)
+        : BatchRegressor_<OutputC, denseInput>(phi, outputSize)
     {
     }
 
-    virtual OutputC operator()(const InputC& input) override
+    virtual OutputC operator()(const FeaturesType& input) override
     {
         if (this->regressors.size() == 0)
             throw std::runtime_error("Empty ensemble evaluated");
@@ -57,20 +59,20 @@ public:
         return out / static_cast<double>(this->regressors.size());
     }
 
-    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<OutputC, denseInput>& featureDataset) override
     {
         for(auto regressor : regressors)
             regressor->train(featureDataset);
     }
 
-    virtual double computeJ(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual double computeJ(const BatchData_<OutputC, denseInput>& featureDataset) override
     {
         //TODO [IMPORTANT][INTERFACE] implement, probably this method cannot be called by ensemble...
         assert(false);
         return 0;
     }
 
-    BatchRegressor_<InputC, OutputC, denseOutput>& getRegressor(unsigned int index)
+    BatchRegressor_<OutputC, denseInput>& getRegressor(unsigned int index)
     {
         return *regressors[index];
     }
@@ -93,10 +95,10 @@ protected:
     }
 
 protected:
-    std::vector<BatchRegressor_<InputC, OutputC, denseOutput>*> regressors; // The regressors ensemble
+    std::vector<BatchRegressor_<OutputC, denseInput>*> regressors; // The regressors ensemble
 };
 
-typedef Ensemble_<arma::vec, arma::vec> Ensemble;
+typedef Ensemble_<arma::vec> Ensemble;
 
 }
 

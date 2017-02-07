@@ -34,15 +34,16 @@
 namespace ReLe
 {
 
-template<class InputC, bool denseOutput = true>
-class LinearApproximator_: public ParametricRegressor_<InputC, denseOutput>
+template<bool denseInput = true>
+class LinearApproximator_: public ParametricRegressor_<denseInput>
 {
-    USE_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
+public:
+	DEFINE_FEATURES_TYPES(denseInput)
 
 public:
-    LinearApproximator_(Features_<InputC, denseOutput>& phi)
-        : ParametricRegressor_<InputC>(phi, phi.cols()),
-          parameters(phi.rows(), arma::fill::zeros)
+    LinearApproximator_(unsigned int input, unsigned int output)
+        : ParametricRegressor_<denseInput>(input, output),
+          parameters(input*output, arma::fill::zeros)
     {
     }
 
@@ -50,17 +51,22 @@ public:
     {
     }
 
-    arma::vec operator()(const InputC& input) override
+    arma::vec operator()(const FeaturesType& input) override
     {
-        arma::mat features = phi(input);
-        arma::vec output = features.t()*parameters;
+    	arma::vec output(this->outputDimension);
+    	for(unsigned int i = 0; i < this->outputDimension; i++)
+    	{
+    		unsigned int start = i*this->outputDimension;
+    		unsigned int end = start + this->outputDimension -1;
+    		output(i) = arma::as_scalar(input.t()*parameters.rows(start, end));
+    	}
+
         return output;
     }
 
-    arma::vec diff(const InputC& input) override
+    arma::vec diff(const FeaturesType& input) override
     {
-        arma::mat features = phi(input);
-        return vectorise(features);
+        return input;
     }
 
     inline arma::vec getParameters() const override
@@ -84,7 +90,7 @@ private:
 
 };
 
-typedef LinearApproximator_<arma::vec> LinearApproximator;
+typedef LinearApproximator_<> LinearApproximator;
 
 } //end namespace
 

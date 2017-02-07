@@ -31,15 +31,15 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC>
-class ExtraTreeEnsemble_: public Ensemble_<InputC, OutputC>
+template<class OutputC, bool denseInput = true>
+class ExtraTreeEnsemble_: public Ensemble_<OutputC, denseInput>
 {
 public:
-    ExtraTreeEnsemble_(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
+    ExtraTreeEnsemble_(unsigned int inputs, const EmptyTreeNode<OutputC>& emptyNode,
                        unsigned int outputSize = 1, unsigned int nRegressors = 50,
                        unsigned int k = 5, unsigned int nMin = 2,
                        double scoreThreshold = 0.0, LeafType leafType = Constant)
-        : Ensemble_<InputC, OutputC>(phi, outputSize), emptyNode(emptyNode),
+        : Ensemble_<OutputC, denseInput>(inputs, outputSize), emptyNode(emptyNode),
           k(k), nMin(nMin), scoreThreshold(scoreThreshold),
           leafType(leafType)
     {
@@ -52,8 +52,9 @@ public:
         this->regressors.clear();
         for (unsigned int i = 0; i < nRegressors; i++)
         {
-            auto tree = new ExtraTree<InputC, OutputC>(this->phi, emptyNode, leafType, this->outputDimension,
-                    k, nMin, scoreThreshold);
+
+            auto tree = new ExtraTree<OutputC, denseInput>(this->inputDimension, emptyNode,
+            		leafType, this->outputDimension, k, nMin, scoreThreshold);
             this->regressors.push_back(tree);
         }
     }
@@ -87,7 +88,7 @@ private:
     LeafType leafType;
 };
 
-typedef ExtraTreeEnsemble_<arma::vec, arma::vec> ExtraTreeEnsemble;
+typedef ExtraTreeEnsemble_<arma::vec> ExtraTreeEnsemble;
 
 }
 

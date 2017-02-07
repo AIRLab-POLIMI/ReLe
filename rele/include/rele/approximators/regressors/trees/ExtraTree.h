@@ -40,8 +40,8 @@
 namespace ReLe
 {
 
-template<class InputC, class OutputC, bool denseOutput = true>
-class ExtraTree: public RegressionTree<InputC, OutputC, denseOutput>
+template<class OutputC, bool denseInput = true>
+class ExtraTree: public RegressionTree<OutputC, denseInput>
 {
     USE_REGRESSION_TREE_MEMBERS
 
@@ -54,9 +54,9 @@ class ExtraTree: public RegressionTree<InputC, OutputC, denseOutput>
 
 public:
 
-    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
+    ExtraTree(unsigned int inputs, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
               unsigned int output_size = 1, int k = 5, unsigned int nmin = 2, double score_th = 0.0)
-        : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nmin), leafType(leafType)
+        : RegressionTree<OutputC, denseInput>(inputs, emptyNode, output_size, nmin), leafType(leafType)
     {
         numSplits = k;
         scoreThreshold = score_th;
@@ -75,7 +75,7 @@ public:
         featureRelevance.resize(featureSize, 0.0);
     }
 
-    virtual void train(const BatchData_<OutputC, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<OutputC, denseInput>& featureDataset) override
     {
         this->cleanTree();
         root = buildExtraTree(featureDataset);
@@ -98,7 +98,7 @@ public:
 
 private:
 
-    TreeNode<InputC>* buildExtraTree(const BatchData_<OutputC, denseOutput>& ds)
+    TreeNode<InputC>* buildExtraTree(const BatchData_<OutputC, denseInput>& ds)
     {
         /*************** part 1 - END CONDITIONS ********************/
         int size = ds.size(); //size of dataset
@@ -216,8 +216,8 @@ private:
         // split inputs in two subsets
         this->splitDataset(ds, bestAttribute, bestSplit, indexesLeftBest, indexesRightBest);
 
-        BatchData_<OutputC, denseOutput>* leftDs = ds.cloneSubset(indexesLeftBest);
-        BatchData_<OutputC, denseOutput>* rightDs = ds.cloneSubset(indexesRightBest);
+        BatchData_<OutputC, denseInput>* leftDs = ds.cloneSubset(indexesLeftBest);
+        BatchData_<OutputC, denseInput>* rightDs = ds.cloneSubset(indexesRightBest);
 
         double bestScore = score(ds, *leftDs, *rightDs);
 
@@ -295,7 +295,7 @@ private:
         }
     }
 
-    double pickRandomSplit(const BatchData_<OutputC, denseOutput>& ds, int attsplit)
+    double pickRandomSplit(const BatchData_<OutputC, denseInput>& ds, int attsplit)
     {
 #ifdef SPLIT_UNIFORM
         double min, max, tmp;
@@ -350,9 +350,9 @@ private:
 #endif
     }
 
-    double varianceReduction(const BatchData_<OutputC, denseOutput>& ds,
-                             const BatchData_<OutputC, denseOutput>& dsl,
-                             const BatchData_<OutputC, denseOutput>& dsr)
+    double varianceReduction(const BatchData_<OutputC, denseInput>& ds,
+                             const BatchData_<OutputC, denseInput>& dsl,
+                             const BatchData_<OutputC, denseInput>& dsr)
     {
         // VARIANCE REDUCTION
         double corr_fact_dsl = 1.0, corr_fact_dsr = 1.0, corr_fact_ds = 1.0;
@@ -384,9 +384,9 @@ private:
         }
     }
 
-    double probabilityDifferentMeans(const BatchData_<OutputC, denseOutput>& ds,
-                                     const BatchData_<OutputC, denseOutput>& dsl,
-                                     const BatchData_<OutputC, denseOutput>& dsr)
+    double probabilityDifferentMeans(const BatchData_<OutputC, denseInput>& ds,
+                                     const BatchData_<OutputC, denseInput>& dsl,
+                                     const BatchData_<OutputC, denseInput>& dsr)
     {
         if (ds.size() == 0)
             return 0.0;
@@ -454,9 +454,9 @@ private:
         return score;
     }
 
-    double score(const BatchData_<OutputC, denseOutput>& ds,
-                 const BatchData_<OutputC, denseOutput>& dsl,
-                 const BatchData_<OutputC, denseOutput>& dsr)
+    double score(const BatchData_<OutputC, denseInput>& ds,
+                 const BatchData_<OutputC, denseInput>& dsl,
+                 const BatchData_<OutputC, denseInput>& dsr)
     {
 #ifdef SPLIT_VARIANCE
         return varianceReduction(ds, dsl, dsr);

@@ -31,13 +31,13 @@
 namespace ReLe
 {
 
-template<class InputC>
-class GaussianRegressor_ : public ParametricRegressor_<InputC>
+//FIXME [IMPORTANT] move to c++ file
+class GaussianRegressor: public ParametricRegressor
 {
 public:
-    GaussianRegressor_(Features_<InputC>& phi) : ParametricRegressor_<InputC>(phi)
+    GaussianRegressor(unsigned int input) : ParametricRegressor(input)
     {
-        unsigned int size = phi.rows();
+        unsigned int size = this->inputDimension;
         sigma = arma::eye(size, size);
         mu.set_size(size);
     }
@@ -57,12 +57,10 @@ public:
         return mu.n_elem;
     }
 
-    virtual arma::vec operator() (const InputC& input) override
+    virtual arma::vec operator() (const arma::vec& input) override
     {
-        const arma::vec& value = this->phi(input);
-
         arma::vec result(1);
-        result(0) = mvnpdf(value, mu, sigma);
+        result(0) = mvnpdf(input, mu, sigma);
 
         return result;
     }
@@ -71,14 +69,13 @@ public:
     {
         arma::vec g_mean;
         arma::vec g_sigma;
-        const arma::vec& value = this->phi(input);
 
-        mvnpdf(value, mu, sigma, g_mean);
+        mvnpdf(input, mu, sigma, g_mean);
 
         return g_mean;
     }
 
-    virtual ~GaussianRegressor_()
+    virtual ~GaussianRegressor()
     {
 
     }
@@ -89,19 +86,16 @@ private:
 
 };
 
-typedef GaussianRegressor_<arma::vec> GaussianRegressor;
 
-
-template<class InputC>
-class GaussianMixtureRegressor_ : public ParametricRegressor_<InputC>, public UnsupervisedBatchRegressor_<InputC, arma::vec>
+class GaussianMixtureRegressor_ : public ParametricRegressor, public UnsupervisedBatchRegressor
 {
-    USE_PARAMETRIC_REGRESSOR_MEMBERS(InputC, arma::vec, true)
 
 public:
-    GaussianMixtureRegressor_(Features_<InputC>& phi, unsigned int n, double muVariance = 1) : ParametricRegressor_<InputC>(phi, 1),
-        UnsupervisedBatchRegressor_<InputC, arma::vec>(phi)
+    GaussianMixtureRegressor_(unsigned int input, unsigned int n, double muVariance = 1)
+		: ParametricRegressor(input),
+        UnsupervisedBatchRegressor(input)
     {
-        unsigned int size = phi.rows();
+        unsigned int size = ParametricRegressor::inputDimension;
 
         for(unsigned int i = 0; i < n; i++)
         {
@@ -116,10 +110,10 @@ public:
 
     }
 
-    GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu)
-        : ParametricRegressor_<InputC>(phi), UnsupervisedBatchRegressor_<InputC, arma::vec>(phi), mu(mu)
+    GaussianMixtureRegressor_(std::vector<arma::vec>& mu)
+        : ParametricRegressor(mu.back().n_elem), UnsupervisedBatchRegressor(mu.back().n_elem), mu(mu)
     {
-        unsigned int size = phi.rows();
+        unsigned int size = ParametricRegressor::inputDimension;
         unsigned int n = mu.size();
 
         for(unsigned int i = 0; i < n; i++)
@@ -133,8 +127,8 @@ public:
         precision = 1e-8;
     }
 
-    GaussianMixtureRegressor_(Features_<InputC>& phi, std::vector<arma::vec>& mu, std::vector<arma::mat>& cholSigma)
-        : ParametricRegressor_<InputC>(phi),  UnsupervisedBatchRegressor_<InputC, arma::vec>(phi), mu(mu), cholSigma(cholSigma)
+    GaussianMixtureRegressor_(std::vector<arma::vec>& mu, std::vector<arma::mat>& cholSigma)
+        : ParametricRegressor(mu.back().n_elem), UnsupervisedBatchRegressor(mu.back().n_elem), mu(mu), cholSigma(cholSigma)
     {
         unsigned int n = mu.size();
         h = arma::vec(n, arma::fill::ones)/n;
@@ -192,16 +186,14 @@ public:
     virtual unsigned int getParametersSize() const override
     {
         unsigned int n = mu.size();
-        unsigned int dim = Base::phi.rows();
+        unsigned int dim = ParametricRegressor::inputDimension;
         unsigned int varPar = dim + (dim * dim - dim) / 2;
         return dim*n+varPar*n+n;
     }
 
-    virtual arma::vec operator() (const InputC& input) override
+    virtual arma::vec operator() (const arma::vec& input) override
     {
-        const arma::vec& value = Base::phi(input);
-
-        arma::vec result = {arma::sum(computeMemberships(value))};
+        arma::vec result = {arma::sum(computeMemberships(input))};
 
         return result;
     }
@@ -210,9 +202,8 @@ public:
     {
         arma::vec diffV(getParametersSize());
 
-        const arma::vec& value = Base::phi(input);
         unsigned int n = mu.size();
-        unsigned int dim = Base::phi.rows();
+        unsigned int dim =ParametricRegressor::inputDimension;
 
         unsigned int start = n;
         for(unsigned int i = 0; i < n; i++)
@@ -220,7 +211,7 @@ public:
             arma::vec g_mean;
             arma::mat dCholSigma;
 
-            diffV(i) = mvnpdf(value, mu[i], cholSigma[i], g_mean, dCholSigma);
+            diffV(i) = mvnpdf(input, mu[i], cholSigma[i], g_mean, dCholSigma);
 
             diffV(arma::span(start,start + dim - 1)) = h[i]*g_mean;
             start = start + dim;

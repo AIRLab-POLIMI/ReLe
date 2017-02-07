@@ -42,9 +42,12 @@ namespace ReLe
  * the given input.
  */
 
-template<class InputC, bool denseOutput = true>
-class GaussianProcess_ : public BatchRegressor_<InputC, arma::vec, denseOutput>
+template<bool denseInput = true>
+class GaussianProcess_ : public BatchRegressor_<arma::vec, denseInput>
 {
+public:
+	DEFINE_FEATURES_TYPES(denseInput)
+
 public:
     struct HyperParameters
     {
@@ -75,8 +78,8 @@ public:
      * \param phi features of the regressor
      * \param covFunction label to specify which covariance function to use
      */
-    GaussianProcess_(Features_<InputC, denseOutput>& phi, CovFunctionLabel covFunction = rbf) :
-        BatchRegressor_<InputC, arma::vec, denseOutput>(phi),
+    GaussianProcess_(unsigned int input, CovFunctionLabel covFunction = rbf) :
+        BatchRegressor_<arma::vec, denseInput>(input),
         covFunction(covFunction)
     {
         hParams.lengthScale = arma::vec(phi.rows(), arma::fill::ones) * hParams.lengthScale(0);
@@ -87,12 +90,11 @@ public:
      * \param testInput vector of input
      * \return the mean
      */
-    virtual arma::vec operator()(const InputC& testInputs) override
+    virtual arma::vec operator()(const FeaturesType& testInputs) override
     {
-        arma::mat testFeatures = this->phi(testInputs);
         arma::vec outputs(1, arma::fill::zeros);
 
-        arma::vec k = generateCovVector(testFeatures.col(0));
+        arma::vec k = generateCovVector(testInputs.col(0));
         outputs(0) = arma::dot(k.t(), alpha);
 
         return outputs;
@@ -103,7 +105,7 @@ public:
      * \param testInput vector of input
      * \return the variance
      */
-    double computeVariance(const InputC& testInputs)
+    double computeVariance(const FeaturesType& testInputs)
     {
         arma::mat testFeatures = this->phi(testInputs);
 
@@ -122,7 +124,7 @@ public:
      * Train the Gaussian Process with a given dataset.
      * \param featureDataset the dataset to be used to train the model
      */
-    virtual void train(const BatchData_<arma::vec, denseOutput>& featureDataset) override
+    virtual void train(const BatchData_<arma::vec, denseInput>& featureDataset) override
     {
         features = featureDataset.getFeatures();
         typename output_traits<arma::vec>::type out = featureDataset.getOutputs();
@@ -155,7 +157,7 @@ public:
      * \param featureDataset the dataset to be used to test the model
      * \return the mean squared error
      */
-    virtual double computeJ(const BatchData_<arma::vec, denseOutput>& featureDataset) override
+    virtual double computeJ(const BatchData_<arma::vec, denseInput>& featureDataset) override
     {
         features = featureDataset.getFeatures();
         typename output_traits<arma::vec>::type out = featureDataset.getOutputs();
@@ -200,9 +202,9 @@ public:
      * Setter.
      * \param inputs training set to be set
      */
-    void setFeatures(const typename input_traits<denseOutput>::type inputs)
+    void setFeatures(const FeaturesCollection& inputs)
     {
-        typename input_traits<denseOutput>::type features(this->phi.rows(), inputs.n_rows, arma::fill::zeros);
+    	FeaturesCollection features(this->inputDimension, inputs.n_rows, arma::fill::zeros);
         for(int i = 0; i < inputs.n_rows; i++)
             features.col(i) = this->phi(inputs.row(i).t());
         this->features = features;
@@ -221,7 +223,7 @@ public:
      * Getter.
      * \return training set
      */
-    const typename input_traits<denseOutput>::type& getFeatures() const
+    const FeaturesCollection& getFeatures() const
     {
         return features;
     }
@@ -242,13 +244,13 @@ public:
 protected:
     arma::mat L;
     arma::vec alpha;
-    typename input_traits<denseOutput>::type features;
+    typename input_traits<denseInput>::type features;
     arma::vec outputs;
     HyperParameters hParams;
     CovFunctionLabel covFunction;
 
 protected:
-    arma::mat generateCovMatrix(typename input_traits<denseOutput>::type testFeatures)
+    arma::mat generateCovMatrix(typename input_traits<denseInput>::type testFeatures)
     {
         arma::mat K(testFeatures.n_cols, testFeatures.n_cols, arma::fill::zeros);
 
@@ -291,7 +293,7 @@ protected:
     }
 };
 
-typedef GaussianProcess_<arma::vec> GaussianProcess;
+typedef GaussianProcess_<> GaussianProcess;
 
 }
 

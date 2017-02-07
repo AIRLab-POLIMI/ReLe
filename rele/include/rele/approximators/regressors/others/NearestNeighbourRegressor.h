@@ -34,24 +34,23 @@
 namespace ReLe
 {
 
-template<class InputC, bool denseOutput = true>
-class NearestNeighbourRegressor_: public UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>
+template<bool denseInput = true>
+class NearestNeighbourRegressor_: public UnsupervisedBatchRegressor_<arma::vec, denseInput>
 {
-    USE_UNSUPERVISED_REGRESSOR_MEMBERS(InputC, arma::vec, denseOutput)
-    DEFINE_FEATURES_TYPES(denseOutput)
 public:
-    NearestNeighbourRegressor_(Features_<InputC, denseOutput>& phi, unsigned int k)
-        : UnsupervisedBatchRegressor_<InputC, arma::vec, denseOutput>(phi, phi.cols()), k(k), iterations(1),
-          centroids(phi.rows(), k, arma::fill::randn), wcss(std::numeric_limits<double>::infinity())
+	DEFINE_FEATURES_TYPES(denseInput)
+
+public:
+    NearestNeighbourRegressor_(unsigned int input, unsigned int output, unsigned int k)
+        : UnsupervisedBatchRegressor_<arma::vec, denseInput>(input, output), k(k), iterations(1),
+          centroids(input, k, arma::fill::randn), wcss(std::numeric_limits<double>::infinity())
     {
         assert(k >= 2);
     }
 
-    arma::vec operator()(const InputC& input) override
+    arma::vec operator()(const FeaturesType& input) override
     {
-        arma::vec features = this->phi(input);
-
-        unsigned int index = findNearestCluster(features, centroids);
+        unsigned int index = findNearestCluster(input, centroids);
 
         return centroids.col(index);
     }
@@ -112,7 +111,7 @@ public:
     }
 
 private:
-    arma::mat initRandom(const arma::mat& features)
+    arma::mat initRandom(const FeaturesCollection& features)
     {
         arma::mat centroids(features.n_rows, k);
 
@@ -139,7 +138,7 @@ private:
         return arma::uvec(const_cast<arma::uword*>(sparseVec.row_indices), sparseVec.n_nonzero, false);
     }
 
-    arma::sp_umat createClusters(const arma::mat& features, const arma::mat& centroids)
+    arma::sp_umat createClusters(const FeaturesCollection& features, const arma::mat& centroids)
     {
         arma::sp_umat clusters(features.n_cols, centroids.n_cols);
 
@@ -152,7 +151,7 @@ private:
         return clusters;
     }
 
-    void recomputeCentroids(const arma::sp_umat& clusters, const arma::mat& features,
+    void recomputeCentroids(const arma::sp_umat& clusters, const FeaturesCollection& features,
                             arma::mat& centroids)
     {
         //for every cluster, re-calculate its centroid.
@@ -166,7 +165,7 @@ private:
         }
     }
 
-    unsigned int findNearestCluster(const arma::vec& currentFeature,
+    unsigned int findNearestCluster(const FeaturesType& currentFeature,
                                     const arma::mat& centroids)
     {
         unsigned int minIndex = 0;
@@ -186,7 +185,7 @@ private:
         return minIndex;
     }
 
-    double computeWCSS(const arma::mat& features, const arma::sp_umat& clusters, const arma::mat centroids)
+    double computeWCSS(const FeaturesCollection& features, const arma::sp_umat& clusters, const arma::mat centroids)
     {
         double wcss = 0;
 
@@ -250,7 +249,7 @@ private:
     double wcss;
 };
 
-typedef NearestNeighbourRegressor_<arma::vec> NearestNeighbourRegressor;
+typedef NearestNeighbourRegressor_<> NearestNeighbourRegressor;
 
 }
 
