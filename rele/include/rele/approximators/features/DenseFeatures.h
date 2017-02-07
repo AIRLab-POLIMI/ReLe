@@ -31,10 +31,10 @@ namespace ReLe
 {
 
 /*!
- * This class implements a dense features matrix.
- * A dense features matrix is a feature matrix where all the elements
+ * This class implements a dense features vector.
+ * A dense features vector is a feature vector where all the elements
  * are specified as a set of basis functions.
- * The evaluation of this features class returns a dense matrix.
+ * The evaluation of this features class returns a dense vector.
  */
 template<class InputC>
 class DenseFeatures_: public Features_<InputC>
@@ -43,10 +43,11 @@ class DenseFeatures_: public Features_<InputC>
 public:
     /*!
      * Constructor.
-     * Construct a single feature matrix (a scalar).
+     * Construct a single feature vector (a scalar).
      * \param basisFunction the basis function rappresenting this feature.
      */
-    DenseFeatures_(BasisFunction_<InputC>* basisFunction) : basis(1)
+    DenseFeatures_(BasisFunction_<InputC>* basisFunction, bool destroy = true)
+		: basis(1), destroy(destroy)
     {
         basis[0] = basisFunction;
     }
@@ -56,31 +57,10 @@ public:
      * Construct a feature vector.
      * \param basisVector the set of basis functions to use
      */
-    DenseFeatures_(BasisFunctions_<InputC>& basisVector) :  basis(basisVector.size())
+    DenseFeatures_(BasisFunctions_<InputC>& basisVector, bool destroy = true)
+    	:  basis(basisVector), destroy(destroy)
     {
 
-        for(unsigned int i = 0; i < basisVector.size(); i++)
-        {
-            basis[i] = basisVector[i];
-        }
-    }
-
-    /*!
-     * Constructor.
-     * Construct a feature matrix.
-     * \param basisVector the set of basis functions to use
-     * \param rows the number of rows of the feature matrix
-     * \param cols the number of cols of the feature matrix
-     */
-    DenseFeatures_(BasisFunctions_<InputC>& basisVector, unsigned int rows, unsigned int cols)
-        : basis(rows, cols)
-    {
-        assert(rows*cols == basisVector.size());
-
-        for(unsigned int i = 0; i < basisVector.size(); i++)
-        {
-            basis[i] = basisVector[i];
-        }
     }
 
     /*!
@@ -89,10 +69,13 @@ public:
      */
     virtual ~DenseFeatures_()
     {
-        for(auto bf : basis)
-        {
-            delete bf;
-        }
+    	if(destroy)
+    	{
+			for(auto bf : basis)
+			{
+				delete bf;
+			}
+    	}
     }
 
     virtual arma::mat operator()(const InputC& input) const override
@@ -108,18 +91,14 @@ public:
         return output;
     }
 
-    inline virtual size_t rows() const override
+    inline virtual size_t size() const override
     {
-        return basis.n_rows;
-    }
-
-    inline virtual size_t cols() const override
-    {
-        return basis.n_cols;
+        return basis.size();
     }
 
 private:
-    arma::field<BasisFunction_<InputC>*> basis;
+    std::vector<BasisFunction_<InputC>*> basis;
+    bool destroy;
 
 };
 

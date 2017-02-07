@@ -33,7 +33,7 @@ namespace ReLe
 /*!
  * A tile coder can be used to transform tiles into a set of features.
  * A tile coder evaluate each tile set provided and transform it in a coherent set of
- * binary features sparse matrix.
+ * binary features sparse vector.
  */
 template<class InputC, bool denseOutput = false>
 class TilesCoder_: public Features_<InputC, denseOutput>
@@ -46,11 +46,10 @@ public:
      * \param tiles a set of tiles to be used
      * \param outputs the number of output features vectors
      */
-    TilesCoder_(Tiles_<InputC>* tiles, unsigned int outputs = 1) :
-        outputs(outputs)
+    TilesCoder_(Tiles_<InputC>* tiles)
     {
         tilesVector.push_back(tiles);
-        rowsN = tiles->size() * outputs;
+        rowsN = tiles->size();
     }
 
     /*!
@@ -58,40 +57,34 @@ public:
      * \param tilesVector a vector of multiple tilings to be used
      * \param outputs the number of output features vectors
      */
-    TilesCoder_(TilesVector_<InputC>& tilesVector, unsigned int outputs = 1) :
-        tilesVector(tilesVector), outputs(outputs), rowsN(0)
+    TilesCoder_(TilesVector_<InputC>& tilesVector) :
+        tilesVector(tilesVector), rowsN(0)
     {
         computeRows();
     }
 
     virtual return_type operator()(const InputC& input) const override
     {
-        return_type output(rowsN, outputs);
+        return_type output(rowsN);
         output.zeros();
 
         unsigned int offset = 0;
-        for(unsigned int o = 0; o < outputs; o++)
+        for(auto t : tilesVector)
         {
-            for(auto t : tilesVector)
-            {
-                auto& tiles = *t;
-                computeTile(input, offset, o, tiles, output);
-                offset += tiles.size();
-            }
+             auto& tiles = *t;
+             computeTile(input, offset, tiles, output);
+             offset += tiles.size();
         }
+
 
         return output;
     }
 
-    virtual size_t rows() const override
+    virtual size_t size() const override
     {
         return rowsN;
     }
 
-    virtual size_t cols() const override
-    {
-        return outputs;
-    }
 
     /*!
      * Destructor.
@@ -105,13 +98,13 @@ public:
 
 protected:
     void computeTile(const InputC& input, unsigned int offset,
-                     unsigned int o, Tiles_<InputC>& tiles,
+                     Tiles_<InputC>& tiles,
                      return_type& output) const
     {
         try
         {
             unsigned int index = tiles(input) + offset;
-            output(index, o) = 1.0;
+            output(index) = 1.0;
         }
         catch (out_of_bounds& e) {}
 
@@ -126,13 +119,10 @@ private:
         {
             rowsN += tiles->size();
         }
-
-        rowsN *= outputs;
     }
 
 private:
     TilesVector_<InputC> tilesVector;
-    unsigned int outputs;
     size_t rowsN;
 };
 

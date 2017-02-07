@@ -33,7 +33,7 @@ namespace ReLe
 /*!
  * Trait defined to return sparse or dense features matrices
  */
-template<bool denseOutput>
+template<bool dense>
 struct feature_traits
 {
 
@@ -63,7 +63,7 @@ struct feature_traits<false>
 template<class InputC, bool denseOutput = true>
 class Features_
 {
-    using return_type = typename feature_traits<denseOutput>::type;
+    using return_type = typename feature_traits<denseOutput>::column_type;
 
 public:
 
@@ -112,15 +112,9 @@ public:
 
     /*!
      * Getter.
-     * \return the number of rows of the output feature matrix
+     * \return the number of elements of the output feature vector
      */
-    virtual size_t rows() const = 0;
-
-    /*!
-     * Getter.
-     * \return the number of columns of the output feature matrix
-     */
-    virtual size_t cols() const = 0;
+    virtual size_t size() const = 0;
 
 };
 
