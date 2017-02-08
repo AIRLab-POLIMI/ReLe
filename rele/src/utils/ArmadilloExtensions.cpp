@@ -213,18 +213,19 @@ void triangularToVec(const arma::mat& triangular, arma::vec& vector)
     }
 }
 
-arma::mat safeChol(arma::mat& M)
+arma::mat nearestSPD(arma::mat& M)
 {
     if(M.n_elem == 1 && M(0) <= 0)
     {
-        arma::mat C(1, 1, arma::fill::randn);
+        arma::mat C(1, 1);
         C(0) = std::numeric_limits<double>::epsilon();
         return C;
     }
 
     try
     {
-        return arma::chol(M);
+        volatile arma::mat tmp = arma::chol(M);
+        return M;
     }
     catch(std::runtime_error& e)
     {
@@ -247,7 +248,8 @@ arma::mat safeChol(arma::mat& M)
         {
             try
             {
-                return arma::chol(C);
+            	volatile arma::mat tmp = arma::chol(C);
+                return C;
             }
             catch(std::runtime_error& e)
             {

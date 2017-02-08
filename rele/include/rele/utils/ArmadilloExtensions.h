@@ -115,7 +115,6 @@ void vecToTriangular(const arma::vec& vector, arma::mat& triangular);
 void triangularToVec(const arma::mat& triangular, arma::vec& vector);
 
 /*!
- * Perform Cholesky Decomposition using nearest SPD.
  * Nearest SPD finds the nearest (in Frobenius norm) Symmetric Positive Definite
  * matrix to A. It can be calculated with (B + H) / 2 where H is the symmetric
  * polar factor of B = (A + A') / 2.
@@ -127,7 +126,7 @@ void triangularToVec(const arma::mat& triangular, arma::vec& vector);
  * \param M the matrix to be decomposed
  * \return the decomposed matrix
  */
-arma::mat safeChol(arma::mat& M);
+arma::mat nearestSPD(arma::mat& M);
 
 //void meshgrid(const arma::vec& x, const arma::vec& y, const arma::vec& z, arma::mat& xx, arma::mat& yy, arma::mat& zz);
 
