@@ -43,7 +43,8 @@ class PortfolioNormalPolicy: public DifferentiablePolicy<FiniteAction, DenseStat
 public:
     PortfolioNormalPolicy(const double& epsilon, Features& phi) :
         epsilon(epsilon),
-        approximator(phi)
+        approximator(phi.size()),
+		phi(phi)
     {
     }
 
@@ -104,6 +105,7 @@ public:
 protected:
     double epsilon;
     LinearApproximator approximator;
+    Features& phi;
 };
 
 } // end namespace ReLe

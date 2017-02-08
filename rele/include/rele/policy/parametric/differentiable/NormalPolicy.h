@@ -57,10 +57,9 @@ public:
      */
     NormalPolicy(const double initialStddev, Features& phi) :
         mInitialStddev(initialStddev), mMean(0.0),
-        approximator(phi)
+        approximator(phi.size()), phi(phi)
     {
-        assert(phi.cols() == 1);
-        assert(phi.rows() >= 1);
+        assert(phi.size() >= 1);
     }
 
     virtual ~NormalPolicy()
@@ -134,6 +133,7 @@ protected:
     //mMean is used to store the mean value of a state
     double mInitialStddev, mMean;
     LinearApproximator approximator;
+    Features& phi;
 };
 
 // ////////////////////////////////////////////////////////////////////////////////////
@@ -160,7 +160,7 @@ public:
      */
     NormalStateDependantStddevPolicy(Features& phi,
                                      Features& stdPhi, arma::vec& stdDevParameters) :
-        NormalPolicy(1, phi), stdApproximator(stdPhi)
+        NormalPolicy(1, phi), stdApproximator(stdPhi.size()), stdPhi(stdPhi)
     {
         stdApproximator.setParameters(stdDevParameters);
     }
@@ -190,7 +190,7 @@ protected:
 
     NormalStateDependantStddevPolicy(Features& phi,
                                      Features& stdPhi)
-        : NormalPolicy(1, phi), stdApproximator(stdPhi)
+        : NormalPolicy(1, phi), stdApproximator(stdPhi.size()), stdPhi(stdPhi)
     {
     }
 
@@ -202,6 +202,7 @@ protected:
 
 protected:
     LinearApproximator stdApproximator;
+    Features& stdPhi;
 
 };
 
@@ -323,9 +324,10 @@ public:
      *
      * \param phi the basis functions
      */
-    MVNPolicy(Features& phi) :
-        approximator(phi),
-        mMean(approximator.getOutputSize(), arma::fill::zeros)
+    MVNPolicy(Features& phi, unsigned int outputs) :
+        approximator(phi.size(), outputs),
+        mMean(approximator.getOutputSize(), arma::fill::zeros),
+		phi(phi)
     {
         int output_dim = approximator.getOutputSize();
         mCovariance.eye(output_dim, output_dim);
@@ -343,69 +345,15 @@ public:
      * \param covariance the covariance matrix (\f$n_u \times n_u\f$)
      */
     MVNPolicy(Features& phi, arma::mat& covariance) :
-        approximator(phi),
+        approximator(phi.size(), covariance.n_rows),
         mMean(approximator.getOutputSize(), arma::fill::zeros),
-        mCovariance(covariance)
+        mCovariance(covariance), phi(phi)
     {
         mCinv = arma::inv(mCovariance);
         mCholeskyDec = arma::chol(mCovariance);
         mDeterminant = arma::det(mCovariance);
     }
 
-    /*!
-     * Create an instance of the class using the given basis functions
-     * and the covariance matrix.
-     *
-     * \param phi the basis functions
-     * \param initialCov The covariance matrix (\f$n_u \times n_u\f$) as list
-     */
-    MVNPolicy(Features& phi,
-              std::initializer_list<double> initialCov) :
-        approximator(phi),
-        mMean(approximator.getOutputSize(), arma::fill::zeros)
-    {
-        int output_dim = approximator.getOutputSize();
-        mCovariance.zeros(output_dim, output_dim);
-        int row = 0, col = 0;
-        for (double x : initialCov)
-        {
-            mCovariance(row, col++) = x;
-            if (col == output_dim)
-            {
-                col = 0;
-                ++row;
-            }
-        }
-        mCinv = arma::inv(mCovariance);
-        mCholeskyDec = arma::chol(mCovariance);
-        mDeterminant = arma::det(mCovariance);
-    }
-
-    /*!
-     * Create an instance of the class using the given basis functions
-     * and the covariance matrix.
-     *
-     * \param projector the basis functions
-     * \param initialCov The covariance matrix (\f$n_u \times n_u\f$) as an array
-     */
-    MVNPolicy(Features& phi, double* covariance) :
-        approximator(phi),
-        mMean(approximator.getOutputSize(), arma::fill::zeros)
-    {
-        int output_dim = approximator.getOutputSize();
-        mCovariance.zeros(output_dim, output_dim);
-        for (int i = 0; i < output_dim; ++i)
-        {
-            for (int j = 0; j < output_dim; ++j)
-            {
-                mCovariance(i, j) = covariance[i + output_dim * j];
-            }
-        }
-
-        mCinv = arma::inv(mCovariance);
-        mCholeskyDec = arma::chol(mCovariance);
-        mDeterminant = arma::det(mCovariance);
-    }
 
     virtual ~MVNPolicy()
     {
@@ -476,7 +424,7 @@ protected:
     inline virtual void updateInternalState(const arma::vec& state, bool cholesky_dec = false)
     {
         // compute mean vector
-        mMean = approximator(state);
+        mMean = approximator(phi(state));
 
     }
 
@@ -485,9 +433,10 @@ protected:
     double mDeterminant;
     LinearApproximator approximator;
     arma::vec mMean;
+    Features& phi;
 };
 
-
+#if 0
 // ////////////////////////////////////////////////////////////////////////////////////
 // MVN POLICY with state dependant covariance
 // ////////////////////////////////////////////////////////////////////////////////////
@@ -818,6 +767,8 @@ protected:
     void UpdateCovarianceMatrix();
 
 };
+
+#endif
 
 } // end namespace ReLe
 #endif // NORMALPOLICY_H

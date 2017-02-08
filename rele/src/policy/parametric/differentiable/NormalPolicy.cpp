@@ -37,7 +37,7 @@ namespace ReLe
 void NormalPolicy::calculateMeanAndStddev(const arma::vec& state)
 {
     // compute mean value
-    arma::vec mean = approximator(state);
+    arma::vec mean = approximator(phi(state));
     mMean = mean[0];
 }
 
@@ -57,11 +57,8 @@ arma::vec NormalPolicy::operator() (const arma::vec& state)
 {
     // compute mean value
     calculateMeanAndStddev(state);
-    //        MY_PRINT(mMean);
-    //        MY_PRINT(mInitialStddev);
 
     double normn = RandomGenerator::sampleNormal();
-    //        MY_PRINT(normn);
 
     arma::vec output(1);
     output[0] = normn * mInitialStddev + mMean;
@@ -82,8 +79,7 @@ arma::vec NormalPolicy::difflog(const arma::vec& state, const arma::vec& action)
     calculateMeanAndStddev(state);
 
     // get features
-    Features& basis = approximator.getFeatures();
-    arma::mat features = basis(state);
+    arma::mat features = phi(state);
 
     // compute gradient
     return features * (a - mMean) / (mInitialStddev * mInitialStddev);
@@ -96,8 +92,7 @@ arma::mat NormalPolicy::diff2log(const arma::vec& state, const arma::vec& action
     calculateMeanAndStddev(state);
 
     // get features
-    Features& basis = approximator.getFeatures();
-    arma::mat features = basis(state);
+    arma::mat features = phi(state);
 
     return -features * features.t() / (mInitialStddev * mInitialStddev);
 
@@ -111,11 +106,11 @@ void
 NormalStateDependantStddevPolicy::calculateMeanAndStddev(const arma::vec& state)
 {
     // compute mean value
-    arma::vec mean = approximator(state);
+    arma::vec mean = approximator(phi(state));
     mMean = mean[0];
 
     // compute stddev
-    arma::vec evalstd = stdApproximator(state);
+    arma::vec evalstd = stdApproximator(stdPhi(state));
     mInitialStddev = evalstd[0];
 }
 
@@ -133,13 +128,9 @@ arma::vec NormalLearnableStateDependantStddevPolicy::difflog(const arma::vec &st
     //probabilmente va reimplementata, come?
     calculateMeanAndStddev(state);
 
-    // get features
-    Features& meanBasis = approximator.getFeatures();
-    Features& stddevBasis = stdApproximator.getFeatures();
-
     // compute gradient
-    arma::vec gMean = meanBasis(state) * (a - mMean) / (mInitialStddev * mInitialStddev);
-    arma::vec gStd = stddevBasis(state) * ((a-mMean)*(a-mMean) / (mInitialStddev*mInitialStddev*mInitialStddev) - 1.0 / mInitialStddev);
+    arma::vec gMean = phi(state) * (a - mMean) / (mInitialStddev * mInitialStddev);
+    arma::vec gStd = stdPhi(state) * ((a-mMean)*(a-mMean) / (mInitialStddev*mInitialStddev*mInitialStddev) - 1.0 / mInitialStddev);
 
     return vectorize(gMean, gStd);
 }
@@ -164,8 +155,6 @@ double MVNPolicy::operator()(const arma::vec& state, const arma::vec& action)
 arma::vec MVNPolicy::operator() (const arma::vec& state)
 {
     updateInternalState(state);
-//    std::cout << mMean.t();
-//    std::cout << mCholeskyDec << std::endl;
     return mvnrandFast(mMean, mCholeskyDec);
 }
 
@@ -180,8 +169,7 @@ arma::vec MVNPolicy::difflog(const arma::vec &state, const arma::vec &action)
 
     arma::vec smdiff = action - mMean;
 
-    Features& basis = approximator.getFeatures();
-    arma::mat features = basis(state);
+    arma::mat features = phi(state);
 
     // compute gradient
     return 0.5 * features * (mCinv + mCinv.t()) * smdiff;
@@ -191,8 +179,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 {
     updateInternalState(state);
 
-    Features& basis = approximator.getFeatures();
-    arma::mat features = basis(state);
+    arma::mat features = phi(state);
 
     // compute gradient
     return - 0.5 * features * (mCinv + mCinv.t()) * features.t();
@@ -201,6 +188,7 @@ arma::mat MVNPolicy::diff2log(const arma::vec &state, const arma::vec &action)
 ///////////////////////////////////////////////////////////////////////////////////////
 /// MVN POLICY with Diagonal covariance (parameters of the diagonal are stddev)
 ///////////////////////////////////////////////////////////////////////////////////////
+#if 0
 
 void MVNDiagonalPolicy::setParameters(const arma::vec& w)
 {
@@ -427,6 +415,6 @@ void MVNLogisticPolicy::UpdateCovarianceMatrix()
     }
 //        mCholeskyDec = arma::chol(mCovariance);
 }
-
+#endif
 
 } //end namespace

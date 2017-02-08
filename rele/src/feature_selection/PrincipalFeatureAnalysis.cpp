@@ -24,8 +24,6 @@
 #include "rele/feature_selection/PrincipalFeatureAnalysis.h"
 
 #include "rele/approximators/regressors/others/NearestNeighbourRegressor.h"
-#include "rele/approximators/basis/IdentityBasis.h"
-#include "rele/approximators/features/DenseFeatures.h"
 
 
 namespace ReLe
@@ -130,10 +128,7 @@ arma::mat PrincipalFeatureAnalysis::getNewFeatures()
 
 void PrincipalFeatureAnalysis::cluster(arma::mat& data, arma::mat& means, arma::uvec& clustersIndexes, unsigned int k)
 {
-    BasisFunctions basis = IdentityBasis::generate(data.n_rows);
-    DenseFeatures phi(basis);
-
-    NearestNeighbourRegressor regressor(phi, k);
+    NearestNeighbourRegressor regressor(data.n_rows, k);
     regressor.setIterations(10);
 
     regressor.train(data);

@@ -39,7 +39,7 @@ public:
 public:
     Ensemble_(unsigned int inputSize,
               unsigned int outputSize = 1)
-        : BatchRegressor_<OutputC, denseInput>(phi, outputSize)
+        : BatchRegressor_<OutputC, denseInput>(inputSize, outputSize)
     {
     }
 

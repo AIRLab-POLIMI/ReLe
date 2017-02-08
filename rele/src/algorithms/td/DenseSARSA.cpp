@@ -42,12 +42,11 @@ void DenseSARSA::step(const Reward& reward, const DenseState& nextState, FiniteA
         regInput[i] = x[i];
     }
     regInput[nstates] = u;
-    vec&& Qxu = Q(regInput);
+    vec&& Qxu = Q(phi(regInput));
 
 
     //Compute gradient dQ(x,u)
-    Features& basis = Q.getFeatures();
-    mat dQxu = basis(regInput);
+    mat dQxu = phi(regInput);
 
 
     //Q(xn, un)
@@ -56,7 +55,7 @@ void DenseSARSA::step(const Reward& reward, const DenseState& nextState, FiniteA
         regInput[i] = nextState[i];
     }
     regInput[nstates] = un;
-    vec&& Qxnun = Q(regInput);
+    vec&& Qxnun = Q(phi(regInput));
 
     double r = reward[0];
 
@@ -103,12 +102,11 @@ void DenseSARSA::endEpisode(const Reward& reward)
     // Q(x,u)
     regInput.subvec(0, nstates - 1) = x;
     regInput[nstates] = u;
-    vec&& Qxu = Q(regInput);
+    vec&& Qxu = Q(phi(regInput));
 
 
     //Compute gradient dQ(x,u)
-    Features& basis = Q.getFeatures();
-    vec dQxu = arma::vectorise(basis(regInput));
+    vec dQxu = phi(regInput);
 
 
     double r = reward[0];

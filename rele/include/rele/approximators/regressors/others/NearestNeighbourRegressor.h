@@ -41,8 +41,8 @@ public:
 	DEFINE_FEATURES_TYPES(denseInput)
 
 public:
-    NearestNeighbourRegressor_(unsigned int input, unsigned int output, unsigned int k)
-        : UnsupervisedBatchRegressor_<arma::vec, denseInput>(input, output), k(k), iterations(1),
+    NearestNeighbourRegressor_(unsigned int input, unsigned int k)
+        : UnsupervisedBatchRegressor_<arma::vec, denseInput>(input, input), k(k), iterations(1),
           centroids(input, k, arma::fill::randn), wcss(std::numeric_limits<double>::infinity())
     {
         assert(k >= 2);

@@ -48,8 +48,9 @@ void FQIOutput::writeDecoratedData(std::ostream& os)
     os << "gamma: " << gamma << std::endl;
 }
 
-FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
+FQI::FQI(Features& phi, BatchRegressor& QRegressor, double epsilon) :
     BatchTDAgent<DenseState>(QRegressor),
+	phi(phi),
     Q(QRegressor),
     nSamples(0),
     firstStep(true),
@@ -60,7 +61,7 @@ FQI::FQI(BatchRegressor& QRegressor, double epsilon) :
 
 void FQI::init(Dataset<FiniteAction, DenseState>& data)
 {
-    features = data.featuresAsMatrix(Q.getFeatures());
+    features = data.featuresAsMatrix(phi);
     nSamples = features.n_cols;
     states = arma::mat(task.stateDimensionality,
                        nSamples,
@@ -97,8 +98,8 @@ void FQI::step()
         if(absorbingStates.count(i) == 0 && !firstStep)
         {
             for(unsigned int u = 0; u < task.actionsNumber; u++)
-                Q_xn(u) = arma::as_scalar(this->Q(nextStates.col(i),
-                                                  FiniteAction(u)));
+                Q_xn(u) = arma::as_scalar(this->Q(phi(nextStates.col(i),
+                                                  FiniteAction(u))));
 
             outputs(i) = rewards(i) + task.gamma * arma::max(Q_xn);
         }
@@ -129,7 +130,7 @@ void FQI::checkCond()
 void FQI::computeQHat()
 {
     for(unsigned int i = 0; i < states.n_cols; i++)
-        QHat(i) = arma::as_scalar(Q(states.col(i), FiniteAction(actions(i)))(0));
+        QHat(i) = arma::as_scalar(Q(phi(states.col(i), FiniteAction(actions(i)))));
 }
 
 }

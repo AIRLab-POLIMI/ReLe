@@ -41,7 +41,7 @@ public:
 	DEFINE_FEATURES_TYPES(denseInput)
 
 public:
-    LinearApproximator_(unsigned int input, unsigned int output)
+    LinearApproximator_(unsigned int input, unsigned int output = 1)
         : ParametricRegressor_<denseInput>(input, output),
           parameters(input*output, arma::fill::zeros)
     {

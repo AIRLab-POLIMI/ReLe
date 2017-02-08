@@ -82,7 +82,7 @@ public:
         BatchRegressor_<arma::vec, denseInput>(input),
         covFunction(covFunction)
     {
-        hParams.lengthScale = arma::vec(phi.rows(), arma::fill::ones) * hParams.lengthScale(0);
+        hParams.lengthScale = arma::vec(input, arma::fill::ones) * hParams.lengthScale(0);
     }
 
     /*!

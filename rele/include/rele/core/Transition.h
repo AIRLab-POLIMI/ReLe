@@ -134,9 +134,9 @@ public:
      * \param gamma the discount factor for the features expectations
      * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
      */
-    arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
+    arma::vec computefeatureExpectation(Features& phi, double gamma = 1)
     {
-        arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
+        arma::vec featureExpectation(phi.size(), arma::fill::zeros);
 
         double df = 1;
 
@@ -245,10 +245,10 @@ public:
      * \param gamma the discount factor for the features expectations
      * \return a matrix of features expectation, with size phi.rows()\f$\times\f$phi.cols()
      */
-    arma::mat computefeatureExpectation(Features& phi, double gamma = 1)
+    arma::vec computefeatureExpectation(Features& phi, double gamma = 1)
     {
         size_t episodes = this->size();
-        arma::mat featureExpectation(phi.rows(), phi.cols(), arma::fill::zeros);
+        arma::vec featureExpectation(phi.size(), arma::fill::zeros);
 
         for(auto& episode : *this)
         {
@@ -269,15 +269,11 @@ public:
     arma::mat computeEpisodeFeatureExpectation(Features& phi, double gamma = 1)
     {
         auto& dataset = *this;
-        arma::mat episodeFeatures(phi.rows(), dataset.size());
-        bool vectorize = phi.cols() > 1;
+        arma::mat episodeFeatures(phi.size(), dataset.size());
 
         for(unsigned int i = 0; i < dataset.size(); i++)
         {
-            if(vectorize)
-                episodeFeatures.col(i) = arma::vectorise(dataset[i].computefeatureExpectation(phi, gamma));
-            else
-                episodeFeatures.col(i) = dataset[i].computefeatureExpectation(phi, gamma);
+              episodeFeatures.col(i) = dataset[i].computefeatureExpectation(phi, gamma);
         }
 
         return episodeFeatures;
@@ -378,7 +374,7 @@ public:
     {
         auto& dataset = *this;
 
-        unsigned int featuresSize = phi.rows();
+        unsigned int featuresSize = phi.size();
         unsigned int nTransitions = getTransitionsNumber();
         arma::mat features(featuresSize, nTransitions);
 

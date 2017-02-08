@@ -189,6 +189,8 @@ protected:
     virtual void init() override;
 
 protected:
+    //! Features
+	Features& phi;
     //! Linear approximated action-value function
     LinearApproximator Q;
     //! previous state

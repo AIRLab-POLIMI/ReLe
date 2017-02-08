@@ -71,7 +71,7 @@ private:
     class LSTDQ
     {
     public:
-        LSTDQ(Dataset<FiniteAction, DenseState>& data,
+        LSTDQ(Dataset<FiniteAction, DenseState>& data, Features& phi,
               LinearApproximator& Q, double gamma, unsigned int nActions);
         arma::vec run();
 
@@ -81,6 +81,7 @@ private:
 
     private:
         Dataset<FiniteAction, DenseState>& data;
+        Features& phi;
         LinearApproximator& Q;
         double gamma;
         unsigned int nActions;
@@ -94,7 +95,7 @@ public:
      * \param phi the features to be used for approximation
      * \param epsilon coefficient used to check whether to stop the training
      */
-    LSPI(LinearApproximator& Q, double epsilon);
+    LSPI(Features& phi, LinearApproximator& Q, double epsilon);
 
     virtual void init(Dataset<FiniteAction, DenseState>& data) override;
     virtual void step() override;
@@ -117,6 +118,7 @@ private:
 
 protected:
     LSTDQ* critic;
+    Features& phi;
     LinearApproximator& Q;
     arma::vec oldWeights;
     double epsilon;

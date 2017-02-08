@@ -51,8 +51,8 @@ public:
      *
      * \param phi the features \f$\phi(x,u)\f$
      */
-    DetLinearPolicy(Features& phi) :
-        approximator(phi)
+    DetLinearPolicy(Features& phi, unsigned int outputs) :
+        approximator(phi.size(), outputs), phi(phi)
     {
     }
 
@@ -76,13 +76,13 @@ public:
 
     virtual arma::vec operator()(typename state_type<StateC>::const_type_ref state) override
     {
-        return approximator(state);
+        return approximator(phi(state));
     }
 
     virtual double operator()(typename state_type<StateC>::const_type_ref state,
                               const arma::vec& action) override
     {
-        arma::vec output = approximator(state);
+        arma::vec output = approximator(phi(state));
 
         DenseAction a(output);
 
@@ -119,25 +119,26 @@ public:
     arma::vec diff(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
         //FIXME [IMPORTANT] this only works when considering a scalar
-        return approximator.diff(state);
+        return approximator.diff(phi(state));
     }
 
     arma::vec difflog(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
         //FIXME [IMPORTANT] this only works when considering a scalar
-        return approximator.diff(state) / approximator(state);
+        return approximator.diff(phi(state)) / approximator(phi(state));
     }
 
     arma::mat diff2log(typename state_type<StateC>::const_type_ref state, const arma::vec& action) override
     {
         //TODO [IMPORTANT] this only works when considering a scalar
-        arma::mat phi = approximator.diff(state);
-        double value = arma::as_scalar(approximator(state));
-        return phi*phi.t()/(value*value);
+        arma::mat phiBar = approximator.diff(phi(state));
+        double value = arma::as_scalar(approximator(phi(state)));
+        return phiBar*phiBar.t()/(value*value);
     }
 
 protected:
-    LinearApproximator_<InputC, denseFeatures> approximator;
+    LinearApproximator_<denseFeatures> approximator;
+    Features_<InputC, denseFeatures>& phi;
 
 };
 

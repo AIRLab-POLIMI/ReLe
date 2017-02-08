@@ -75,7 +75,8 @@ public:
      * \param shuffle if true, each regressor takes a different half of the dataset
      *        at each iteration
      */
-    DoubleFQI(BatchRegressor& QRegressorA,
+    DoubleFQI(Features& phi,
+    		  BatchRegressor& QRegressorA,
               BatchRegressor& QRegressorB,
               double epsilon,
               bool shuffle = false);

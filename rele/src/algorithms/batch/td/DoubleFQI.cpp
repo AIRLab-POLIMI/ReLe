@@ -27,7 +27,7 @@ namespace ReLe
 {
 DoubleFQIEnsemble::DoubleFQIEnsemble(BatchRegressor& QRegressorA,
                                      BatchRegressor& QRegressorB) :
-    Ensemble(QRegressorA.getFeatures())
+    Ensemble(QRegressorA.getInputSize(), QRegressorA.getOutputSize())
 {
     regressors.push_back(&QRegressorA);
     regressors.push_back(&QRegressorB);
@@ -46,11 +46,12 @@ DoubleFQIEnsemble::~DoubleFQIEnsemble()
     regressors.clear();
 }
 
-DoubleFQI::DoubleFQI(BatchRegressor& QRegressorA,
+DoubleFQI::DoubleFQI(Features& phi,
+					 BatchRegressor& QRegressorA,
                      BatchRegressor& QRegressorB,
                      double epsilon,
                      bool shuffle) :
-    FQI(QRegressorEnsemble, epsilon),
+    FQI(phi, QRegressorEnsemble, epsilon),
     QRegressorEnsemble(QRegressorA, QRegressorB),
     shuffle(shuffle)
 {
@@ -80,8 +81,8 @@ void DoubleFQI::step()
                 arma::vec Q_xn(task.actionsNumber, arma::fill::zeros);
                 for(unsigned int u = 0; u < task.actionsNumber; u++)
                     Q_xn(u) = arma::as_scalar(
-                                  QRegressorEnsemble.getRegressor(i)(
-                                      nextStates.col(j), FiniteAction(u)));
+                                  QRegressorEnsemble.getRegressor(i)(phi(
+                                      nextStates.col(j), FiniteAction(u))));
 
                 double qmax = Q_xn.max();
                 arma::uvec maxIndex = find(Q_xn == qmax);
@@ -89,8 +90,8 @@ void DoubleFQI::step()
                                      maxIndex.n_elem - 1);
 
                 outputs(j) = rewards(j) + task.gamma * arma::as_scalar(
-                                 QRegressorEnsemble.getRegressor(1 - i)(
-                                     nextStates.col(j), FiniteAction(maxIndex(index))));
+                                 QRegressorEnsemble.getRegressor(1 - i)(phi(
+                                     nextStates.col(j), FiniteAction(maxIndex(index)))));
             }
             else
                 outputs(j) = rewards(j);

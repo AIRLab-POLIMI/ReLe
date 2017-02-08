@@ -49,9 +49,9 @@ void LSPIOutput::writeDecoratedData(std::ostream& os)
 }
 
 
-LSPI::LSTDQ::LSTDQ(Dataset<FiniteAction, DenseState>& data,
+LSPI::LSTDQ::LSTDQ(Dataset<FiniteAction, DenseState>& data, Features& phi,
                    LinearApproximator& Q, double gamma, unsigned int nActions)
-    : data(data), Q(Q), gamma(gamma), nActions(nActions)
+    : data(data), phi(phi), Q(Q), gamma(gamma), nActions(nActions)
 {
     computeDatasetFeatures();
 }
@@ -61,8 +61,7 @@ arma::vec LSPI::LSTDQ::run()
     // Initialize variables
     int nbSamples = data.getTransitionsNumber();
 
-    Features& phi = Q.getFeatures();
-    int df = phi.rows();
+    int df = phi.size();
 
     arma::mat PiPhihat(df, nbSamples, arma::fill::zeros);
 
@@ -103,8 +102,7 @@ void LSPI::LSTDQ::computeDatasetFeatures()
     int nbEpisodes = this->data.size();
     int nbSamples = data.getTransitionsNumber();
 
-    Features& phi = Q.getFeatures();
-    int df = phi.rows();
+    int df = phi.size();
 
 
     // Precompute Phihat and Rhat for all subsequent iterations
@@ -134,7 +132,7 @@ FiniteAction LSPI::LSTDQ::policy(const DenseState& x)
     for(unsigned int i = 0; i < nActions; i++)
     {
         FiniteAction u(i);
-        qValues(i) = arma::as_scalar(Q(x, u));
+        qValues(i) = arma::as_scalar(Q(phi(x, u)));
     }
 
     arma::uword maxQIndex;
@@ -145,9 +143,10 @@ FiniteAction LSPI::LSTDQ::policy(const DenseState& x)
     return uMax;
 }
 
-LSPI::LSPI(LinearApproximator& Q, double epsilon) :
+LSPI::LSPI(Features& phi, LinearApproximator& Q, double epsilon) :
     BatchTDAgent<DenseState>(Q),
     oldWeights(Q.getParametersSize(), arma::fill::zeros),
+	phi(phi),
     Q(Q),
     critic(nullptr),
     epsilon(epsilon),
@@ -158,7 +157,7 @@ LSPI::LSPI(LinearApproximator& Q, double epsilon) :
 
 void LSPI::init(Dataset<FiniteAction, DenseState>& data)
 {
-    critic = new LSTDQ(data, Q, task.gamma, task.actionsNumber);
+    critic = new LSTDQ(data, phi, Q, task.gamma, task.actionsNumber);
     firstStep = true;
     this->converged = false;
     delta = std::numeric_limits<double>::infinity();

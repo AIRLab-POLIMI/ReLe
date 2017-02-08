@@ -75,7 +75,7 @@ public:
      * \param nActions the number of actions
      * \param epsilon coefficient used to check whether to stop the training
      */
-    FQI(BatchRegressor& QRegressor, double epsilon);
+    FQI(Features& phi, BatchRegressor& QRegressor, double epsilon);
 
     virtual void init(Dataset<FiniteAction, DenseState>& data) override;
     virtual void step() override;
@@ -95,6 +95,7 @@ protected:
     virtual void computeQHat();
 
 protected:
+    Features& phi;
     BatchRegressor& Q;
     arma::vec QHat;
     arma::mat features;

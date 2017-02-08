@@ -101,7 +101,7 @@ void FiniteTDOutput::writeDecoratedData(ostream& os)
 LinearTD::LinearTD(Features& phi,
                    ActionValuePolicy<DenseState>& policy,
                    LearningRateDense& alpha) :
-    Q(phi), policy(policy), alpha(alpha)
+		phi(phi), Q(phi.size()), policy(policy), alpha(alpha)
 {
     u = 0;
 }

@@ -25,7 +25,7 @@ void LinearGradientSARSA::initEpisode(const DenseState& state, FiniteAction& act
     for(unsigned int i = 0; i < nStates; i++)
         regrInput[i] = x[i];
     regrInput[nStates] = u;
-    prevQxu = Q(regrInput);
+    prevQxu = Q(phi(regrInput));
 }
 
 void LinearGradientSARSA::sampleAction(const DenseState& state, FiniteAction& action)
@@ -48,19 +48,18 @@ void LinearGradientSARSA::step(const Reward& reward, const DenseState& nextState
     for(unsigned int i = 0; i < nStates; i++)
         regrInput[i] = nextState[i];
     regrInput[nStates] = un;
-    arma::vec&& Qxnun = Q(regrInput);
+    arma::vec&& Qxnun = Q(phi(regrInput));
 
     // Q(x,u)
     for(unsigned int i = 0; i < nStates; i++)
         regrInput[i] = x[i];
     regrInput[nStates] = u;
-    arma::vec&& Qxu = Q(regrInput);
+    arma::vec&& Qxu = Q(phi(regrInput));
 
     double r = reward[0];
 
     double delta = r + task.gamma * Qxnun[0] - Qxu[0];
 
-    Features_<arma::vec, true>& phi = Q.getFeatures();
     arma::vec temp = alpha(x, u) * (1 - task.gamma * this->lambda * this->eligibility.t() * phi(regrInput));
     this->eligibility = task.gamma * this->lambda * this->eligibility +
                         temp(0) * phi(regrInput);
@@ -93,12 +92,11 @@ void LinearGradientSARSA::endEpisode(const Reward& reward)
     // Q(x,u)
     regrInput.subvec(0, nStates - 1) = x;
     regrInput[nStates] = u;
-    arma::vec&& Qxu = Q(regrInput);
+    arma::vec&& Qxu = Q(phi(regrInput));
 
     double r = reward[0];
     double delta = r - Qxu[0];
 
-    Features_<arma::vec, true>& phi = Q.getFeatures();
     arma::vec temp = alpha(x, u) * (1 - task.gamma * this->lambda * this->eligibility.t() * phi(regrInput));
     this->eligibility = task.gamma * this->lambda * this->eligibility +
                         temp(0) * phi(regrInput);

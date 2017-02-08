@@ -78,11 +78,11 @@ public:
     	}
     }
 
-    virtual arma::mat operator()(const InputC& input) const override
+    virtual arma::vec operator()(const InputC& input) const override
     {
-        arma::mat output(basis.n_rows, basis.n_cols);
+        arma::vec output(basis.size());
 
-        for(unsigned int i = 0; i < basis.n_elem; i++)
+        for(unsigned int i = 0; i < basis.size(); i++)
         {
             BasisFunction_<InputC>& bf = *basis[i];
             output[i] = bf(input);
