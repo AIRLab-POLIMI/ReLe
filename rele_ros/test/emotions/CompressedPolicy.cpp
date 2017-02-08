@@ -28,8 +28,8 @@ using namespace ReLe;
 namespace ReLe_ROS
 {
 
-CompressedPolicy::CompressedPolicy(Features& phi, Autoencoder& decoder) :
-    approximator(phi), decoder(decoder)
+CompressedPolicy::CompressedPolicy(Features& phi, const arma::uvec& indices, Autoencoder& decoder) :
+    approximator(phi), indices(indices), decoder(decoder)
 {
 }
 
@@ -86,7 +86,9 @@ const unsigned int CompressedPolicy::getParametersSize() const
 void CompressedPolicy::setParameters(const arma::vec& w)
 {
     arma::vec wDecoded = decoder.decode(w);
-    approximator.setParameters(wDecoded);
+    arma::vec wExpanded(approximator.getParametersSize(), arma::fill::zeros);
+    wExpanded.rows(indices) = wDecoded;
+    approximator.setParameters(wExpanded);
 }
 
 }

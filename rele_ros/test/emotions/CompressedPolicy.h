@@ -36,7 +36,7 @@ class CompressedPolicy: public ReLe::ParametricPolicy<ReLe::DenseAction, ReLe::D
 {
 
 public:
-    CompressedPolicy(ReLe::Features& phi, ReLe::Autoencoder& decoder);
+    CompressedPolicy(ReLe::Features& phi, const arma::uvec& indices, ReLe::Autoencoder& decoder);
 
     virtual ~CompressedPolicy();
 
@@ -62,6 +62,7 @@ public:
 
 protected:
     ReLe::LinearApproximator approximator;
+    arma::uvec indices;
     ReLe::Autoencoder& decoder;
 
 };

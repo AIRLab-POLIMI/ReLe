@@ -131,6 +131,15 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
     }
 }
 
+
+arma::uvec findFeatures(const arma::mat& theta)
+{
+	arma::vec min = arma::min(theta, 1);
+	arma::vec max = arma::max(theta, 1);
+
+	return arma::find((max - min) > 0.1);
+}
+
 int main(int argc, char *argv[])
 {
     std::cout << std::setprecision(OS_PRECISION);
@@ -153,6 +162,10 @@ int main(int argc, char *argv[])
         {
             std::string emotionName = i->path().filename().string();
 
+#ifdef TEST
+            if(emotionName!= "arrabbiato")
+            	continue;
+#endif
             std::cout << "-----------------------------------------------------" << std::endl;
             std::cout << "Emotion: " << emotionName << std::endl;
 
@@ -177,10 +190,10 @@ int main(int argc, char *argv[])
             //Create basis function for policy
             int uDim = 3;
 #ifdef WAVELETS
-            BasisFunctions basis = HaarWavelets::generate(0, 5, 10);
+            BasisFunctions basis = HaarWavelets::generate(0, 5, maxT);
 #else
             unsigned int N = rosDataset.getData().getTransitionsNumber();
-            double df = 1/maxT;
+            double df = 0.1;
             double fE = 20.0;
 
             std::cout << "df: " << df << " fe: " << fE << " N: " << N << " tmax: "
@@ -195,7 +208,7 @@ int main(int argc, char *argv[])
 
             //Fit Normal distribution
 #ifdef WAVELETS
-            BasisFunctions basisEst = HaarWavelets::generate(0, 5, 10);
+            BasisFunctions basisEst = HaarWavelets::generate(0, 5, maxT);
 #else
             BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
             BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);
@@ -211,33 +224,45 @@ int main(int argc, char *argv[])
 
 
 #ifdef REDUCTION
-            // Dimensionality reduction
-            unsigned int reducedDim = 120;
-            auto basisEnc = IdentityBasis::generate(theta.n_rows);
+            arma::uvec indices = findFeatures(theta);
+            arma::mat thetaRed = theta.rows(indices);
+
+            double reductionFactor = 0.3;
+
+            unsigned int reducedDim = thetaRed.n_rows/2;
+
+            std::cout << reducedDim << std::endl;
+
+
+            auto basisEnc = IdentityBasis::generate(thetaRed.n_rows);
             DenseFeatures phiEnc(basisEnc);
             Autoencoder autoencoder(phiEnc, reducedDim);
 
-            autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
-            autoencoder.getHyperParameters().Omega = new L2_Regularization();
-            autoencoder.getHyperParameters().lambda = 0.01;
+            autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(1000);
 
-            std::cout << "J0: " << autoencoder.computeJFeatures(theta) << std::endl;
+            /*autoencoder.getHyperParameters().Omega = new L2_Regularization();
+            autoencoder.getHyperParameters().lambda = 0.01;*/
 
-            autoencoder.trainFeatures(theta);
+            std::cout << "J0: " << autoencoder.computeJFeatures(thetaRed) << std::endl;
 
-            std::cout << "Jf: " << autoencoder.computeJFeatures(theta) << std::endl;
+            autoencoder.trainFeatures(thetaRed);
+
+            std::cout << "Jf: " << autoencoder.computeJFeatures(thetaRed) << std::endl;
 
             arma::mat thetaNew(reducedDim, theta.n_cols);
 
             for(unsigned int i = 0; i < theta.n_cols; i++)
             {
-                thetaNew.col(i) = autoencoder.encode(theta.col(i));
+                thetaNew.col(i) = autoencoder.encode(thetaRed.col(i));
             }
+
+            thetaNew.save(fm.addPath("thetaNew.txt"), arma::raw_ascii);
+            thetaRed.save(fm.addPath("thetaRed.txt"), arma::raw_ascii);
 
             arma::mat Cov = arma::cov(thetaNew.t());
             arma::vec mean = arma::mean(thetaNew, 1);
 
-            CompressedPolicy policy(phi, autoencoder);
+            CompressedPolicy policy(phi, indices, autoencoder);
 #else
             arma::mat Cov = arma::cov(theta.t());
             arma::vec mean = arma::mean(theta, 1);
@@ -245,8 +270,8 @@ int main(int argc, char *argv[])
             MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
 #endif
 
-            auto M = safeChol(Cov);
-            ParametricNormal dist(mean, M.t()*M);
+            auto M = nearestSPD(Cov);
+            ParametricNormal dist(mean, M);
 
             // Testing
             EmptyEnv env(uDim, 100.0);
