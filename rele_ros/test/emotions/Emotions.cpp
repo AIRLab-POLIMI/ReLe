@@ -227,9 +227,9 @@ int main(int argc, char *argv[])
             arma::uvec indices = findFeatures(theta);
             arma::mat thetaRed = theta.rows(indices);
 
-            double reductionFactor = 0.3;
+            double reductionFactor = 0.4;
 
-            unsigned int reducedDim = thetaRed.n_rows/2;
+            unsigned int reducedDim = thetaRed.n_rows*reductionFactor;
 
             std::cout << reducedDim << std::endl;
 
@@ -238,10 +238,10 @@ int main(int argc, char *argv[])
             DenseFeatures phiEnc(basisEnc);
             Autoencoder autoencoder(phiEnc, reducedDim);
 
-            autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(1000);
+            autoencoder.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
 
-            /*autoencoder.getHyperParameters().Omega = new L2_Regularization();
-            autoencoder.getHyperParameters().lambda = 0.01;*/
+            autoencoder.getHyperParameters().Omega = new L2_Regularization();
+            autoencoder.getHyperParameters().lambda = 0.01;
 
             std::cout << "J0: " << autoencoder.computeJFeatures(thetaRed) << std::endl;
 
