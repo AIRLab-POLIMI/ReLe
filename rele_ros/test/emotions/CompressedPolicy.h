@@ -27,6 +27,7 @@
 #include "rele/policy/Policy.h"
 #include "rele/approximators/regressors/others/LinearApproximator.h"
 #include "rele/approximators/regressors/nn/Autoencoder.h"
+#include "rele/utils/Range.h"
 #include <armadillo>
 
 namespace ReLe_ROS
@@ -36,7 +37,8 @@ class CompressedPolicy: public ReLe::ParametricPolicy<ReLe::DenseAction, ReLe::D
 {
 
 public:
-    CompressedPolicy(ReLe::Features& phi, const arma::uvec& indices, ReLe::Autoencoder& decoder);
+    CompressedPolicy(ReLe::Features& phi, const arma::uvec& indices, ReLe::Autoencoder& decoder,
+                     std::vector<ReLe::Range>& limits);
 
     virtual ~CompressedPolicy();
 
@@ -64,7 +66,7 @@ protected:
     ReLe::LinearApproximator approximator;
     arma::uvec indices;
     ReLe::Autoencoder& decoder;
-
+    std::vector<ReLe::Range> limits;
 };
 
 } //end namespace

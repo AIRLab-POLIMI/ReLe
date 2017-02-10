@@ -28,8 +28,8 @@ using namespace ReLe;
 namespace ReLe_ROS
 {
 
-CompressedPolicy::CompressedPolicy(Features& phi, const arma::uvec& indices, Autoencoder& decoder) :
-    approximator(phi), indices(indices), decoder(decoder)
+CompressedPolicy::CompressedPolicy(Features& phi, const arma::uvec& indices, Autoencoder& decoder, std::vector<Range>& limits) :
+    approximator(phi), indices(indices), decoder(decoder), limits(limits)
 {
 }
 
@@ -53,13 +53,26 @@ std::string CompressedPolicy::printPolicy()
 
 arma::vec CompressedPolicy::operator()(const arma::vec& state)
 {
-    return approximator(state);
+    arma::vec output = approximator(state);
+
+    for(int i = 0; i < limits.size(); i++)
+    {
+        output(i) = limits[i].bound(output(i));
+    }
+
+    return output;
 }
 
 double CompressedPolicy::operator()(const arma::vec& state,
                                     const arma::vec& action)
 {
     arma::vec output = approximator(state);
+
+    for(int i = 0; i < limits.size(); i++)
+    {
+        output(i) = limits[i].bound(output(i));
+    }
+
 
     DenseAction a(output);
 

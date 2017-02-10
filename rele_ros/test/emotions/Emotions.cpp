@@ -134,10 +134,10 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 
 arma::uvec findFeatures(const arma::mat& theta)
 {
-	arma::vec min = arma::min(theta, 1);
-	arma::vec max = arma::max(theta, 1);
+    arma::vec min = arma::min(theta, 1);
+    arma::vec max = arma::max(theta, 1);
 
-	return arma::find((max - min) > 0.1);
+    return arma::find((max - min) > 0.1);
 }
 
 int main(int argc, char *argv[])
@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 #ifdef TEST
             if(emotionName!= "arrabbiato")
-            	continue;
+                continue;
 #endif
             std::cout << "-----------------------------------------------------" << std::endl;
             std::cout << "Emotion: " << emotionName << std::endl;
@@ -262,7 +262,13 @@ int main(int argc, char *argv[])
             arma::mat Cov = arma::cov(thetaNew.t());
             arma::vec mean = arma::mean(thetaNew, 1);
 
-            CompressedPolicy policy(phi, indices, autoencoder);
+            std::vector<Range> ranges;
+
+            ranges.push_back(Range(-1.20, 1.2));
+            ranges.push_back(Range(-1.20, 1.2));
+            ranges.push_back(Range(-6.28, 6.28));
+
+            CompressedPolicy policy(phi, indices, autoencoder, ranges);
 #else
             arma::mat Cov = arma::cov(theta.t());
             arma::vec mean = arma::mean(theta, 1);
