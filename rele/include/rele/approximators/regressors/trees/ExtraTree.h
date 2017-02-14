@@ -54,7 +54,7 @@ class ExtraTree: public RegressionTree<InputC, OutputC, denseOutput>
 
 public:
 
-    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = Constant,
+    ExtraTree(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode, LeafType leafType = LeafType::Constant,
               unsigned int output_size = 1, int k = 5, unsigned int nmin = 2, double score_th = 0.0)
         : RegressionTree<InputC, OutputC, denseOutput>(phi, emptyNode, output_size, nmin), leafType(leafType)
     {

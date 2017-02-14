@@ -32,9 +32,9 @@
 
 #include "rele/approximators/Regressors.h"
 
-#include "nn_bits/ActivationFunctions.h"
-#include "nn_bits/Regularization.h"
-#include "nn_bits/Optimizators.h"
+#include "rele/approximators/regressors/nn/nn_bits/ActivationFunctions.h"
+#include "rele/approximators/regressors/nn/nn_bits/Regularization.h"
+#include "rele/approximators/regressors/nn/nn_bits/Optimizators.h"
 #include "rele/utils/NumericalGradient.h"
 
 #include "rele/approximators/data/BatchDataNormalization.h"

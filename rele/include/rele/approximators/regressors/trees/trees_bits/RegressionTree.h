@@ -139,11 +139,11 @@ protected:
     {
         switch(type)
         {
-        case Constant:
+        case LeafType::Constant:
             return new LeafTreeNode<OutputC, denseOutput>(ds);
-        case Linear:
+        case LeafType::Linear:
             return nullptr; //TODO [MINOR] implement
-        case Samples:
+        case LeafType::Samples:
             return new SampleLeafTreeNode<OutputC, denseOutput>(ds.clone());
         default:
             return nullptr;

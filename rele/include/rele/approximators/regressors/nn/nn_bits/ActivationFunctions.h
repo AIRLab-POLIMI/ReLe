@@ -26,6 +26,9 @@
 
 #include <cmath>
 
+namespace ReLe
+{
+
 class Function
 {
 public:
@@ -146,5 +149,7 @@ public:
 private:
     double alpha;
 };
+
+}
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NN_BITS_ACTIVATIONFUNCTIONS_H_ */
