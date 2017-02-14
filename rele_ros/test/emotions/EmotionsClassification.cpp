@@ -27,6 +27,7 @@
 #include <rele/core/Core.h>
 #include <rele/approximators/regressors/trees/ExtraTreeEnsemble.h>
 #include <rele/approximators/regressors/trees/KDTree.h>
+#include <rele/approximators/regressors/nn/FFNeuralNetwork.h>
 #include <rele/approximators/basis/FrequencyBasis.h>
 #include <rele/approximators/basis/IdentityBasis.h>
 #include <rele/IRL/algorithms/MLEDistributionLinear.h>
@@ -153,7 +154,7 @@ int main(int argc, char *argv[])
 
 
     //Create appropriate features
-    double df = 0.9;
+    double df = 0.2;
     double fE = 20.0;
 
     BasisFunctions basis = FrequencyBasis::generate(0, df, fE, df, true);
@@ -165,6 +166,7 @@ int main(int argc, char *argv[])
 
     //Load dataset and compute features
     std::vector<arma::mat> inputTmp;
+    arma::mat negativeTmp;
 
     boost::filesystem::directory_iterator end_itr;
     for(boost::filesystem::directory_iterator i(basePath); i != end_itr; ++i )
@@ -206,7 +208,10 @@ int main(int argc, char *argv[])
 
             auto theta = estimator.getParameters();
 
-            inputTmp.push_back(theta);
+            if(emotionName == "negative_examples")
+            	negativeTmp = theta;
+            else
+            	inputTmp.push_back(theta);
 
             // print basis function used
             cout << "Feature extracted!" << std::endl;
@@ -215,12 +220,14 @@ int main(int argc, char *argv[])
 
     }
 
+    inputTmp.push_back(negativeTmp);
+
     //Create dataset
     int datasetSize = countSamples(inputTmp);
     int featuresSize = phi.rows()*3;
 
     arma::mat input(featuresSize, datasetSize);
-    arma::mat output(emotionCount, datasetSize);
+    arma::mat output(emotionCount - 1, datasetSize, arma::fill::zeros);
 
     unsigned int start = 0;
 
@@ -228,15 +235,17 @@ int main(int argc, char *argv[])
     {
     	unsigned int delta = inputTmp[i].n_cols;
     	input.cols(start, start + delta -1) = inputTmp[i];
-    	output.cols(start, start + delta -1).row(i) = arma::ones(1, delta);
+    	if(i+1 != inputTmp.size())
+    		output.cols(start, start + delta -1).row(i) = arma::ones(1, delta);
     	start += delta;
     }
 
     auto bfs = IdentityBasis::generate(input.n_rows);
     DenseFeatures identity(bfs);
     EmptyTreeNode<arma::vec> emptyNode(arma::zeros(output.n_rows));
-    ExtraTreeEnsemble regressor(identity, emptyNode, 1, 200);
+    //ExtraTreeEnsemble regressor(identity, emptyNode, emotionCount - 1, 10000);
     //KDTree<arma::vec, arma::vec> regressor(identity, emptyNode);
+    FFNeuralNetwork regressor(identity, 100, emotionCount - 1);
 
 
     BatchDataSimple trainingData(input, output);
@@ -247,8 +256,10 @@ int main(int argc, char *argv[])
     //Evaluate
     for(unsigned int i = 0; i < input.n_cols; i++)
     {
-    	J += arma::norm(regressor(input.col(i)) - output.col(i));
+    	J += std::pow(arma::norm(regressor(input.col(i)) - output.col(i)), 2);
     }
+
+    J /= input.n_cols;
 
     std::cout << "J: " << J << std::endl;
 
