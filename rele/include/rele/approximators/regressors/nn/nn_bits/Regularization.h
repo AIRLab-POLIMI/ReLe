@@ -26,6 +26,9 @@
 
 #include <armadillo>
 
+namespace ReLe
+{
+
 class Regularization
 {
 public:
@@ -68,5 +71,6 @@ public:
 
 };
 
+}
 
 #endif /* INCLUDE_RELE_APPROXIMATORS_REGRESSORS_NN_BITS_REGULARIZATION_H_ */

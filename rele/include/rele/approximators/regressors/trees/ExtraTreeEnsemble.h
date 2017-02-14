@@ -38,7 +38,7 @@ public:
     ExtraTreeEnsemble_(Features_<InputC>& phi, const EmptyTreeNode<OutputC>& emptyNode,
                        unsigned int outputSize = 1, unsigned int nRegressors = 50,
                        unsigned int k = 5, unsigned int nMin = 2,
-                       double scoreThreshold = 0.0, LeafType leafType = Constant)
+                       double scoreThreshold = 0.0, LeafType leafType = LeafType::Constant)
         : Ensemble_<InputC, OutputC>(phi, outputSize), emptyNode(emptyNode),
           k(k), nMin(nMin), scoreThreshold(scoreThreshold),
           leafType(leafType)

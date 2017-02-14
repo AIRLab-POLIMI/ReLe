@@ -163,7 +163,7 @@ private:
             }
             else
             {
-                return this->buildLeaf(ds, store_sample ? Samples : Constant);
+                return this->buildLeaf(ds, store_sample ? LeafType::Samples : LeafType::Constant);
             }
         }
 
@@ -182,7 +182,7 @@ private:
         // if constants create a leaf
         if (equal)
         {
-            return this->buildLeaf(ds, store_sample ? Samples : Constant);
+            return this->buildLeaf(ds, store_sample ? LeafType::Samples : LeafType::Constant);
         }
 
         /****************part 2: generate the tree**************/

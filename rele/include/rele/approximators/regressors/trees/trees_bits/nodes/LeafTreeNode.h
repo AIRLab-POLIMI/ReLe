@@ -29,7 +29,7 @@
 namespace ReLe
 {
 
-enum LeafType
+enum class LeafType
 {
     Constant,
     Linear,
