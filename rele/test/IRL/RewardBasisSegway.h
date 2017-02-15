@@ -32,7 +32,7 @@ namespace ReLe
 class Segway_RewardBasis : public BasisFunction
 {
 public:
-	Segway_RewardBasis(unsigned int i, unsigned int dim)
+    Segway_RewardBasis(unsigned int i, unsigned int dim)
     {
         arma::mat Q(dim, dim, arma::fill::zeros);
         Q(i, i) = dim;
