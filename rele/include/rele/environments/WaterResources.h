@@ -77,7 +77,7 @@ public:
      * Constructor.
      * \param config the initial settings
      */
-    WaterResources::WaterResources(WaterResourcesSettings& config);
+    WaterResources(WaterResourcesSettings& config);
 
     /*!
      * \see Environment::step
