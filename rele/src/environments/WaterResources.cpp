@@ -102,7 +102,7 @@ void WaterResourcesSettings::ReadFromStream(istream& in)
 WaterResources::WaterResources()
     : ContinuousMDP(new WaterResourcesSettings()),
       cleanConfig(true),
-      config(static_cast<UWVSettings*>(settings))
+      config(static_cast<WaterResourcesSettings*>(settings))
 {
 
 }
