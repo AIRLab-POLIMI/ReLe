@@ -29,6 +29,42 @@
 namespace ReLe
 {
 
+class WaterResourcesSettings : public EnvironmentSettings
+{
+public:
+
+    WaterResourcesSettings();
+    static void defaultSettings(WaterResourcesSettings& settings);
+
+    virtual ~WaterResourcesSettings();
+
+public:
+    //Noise parameters
+    arma::vec mu;
+    arma::mat Sigma;
+
+    //Reservoirs parameters
+    arma::vec maxCapacity;
+    arma::vec S;
+
+    //Flooding related
+    arma::vec h_flo;
+
+    //Irrigation parameters
+    double w_irr;
+
+    //Power related
+    double w_hyd;
+    double q_mef;
+    double eta;
+    double gamma_h20;
+
+    double delta;
+
+    virtual void WriteToStream(std::ostream& out) const;
+    virtual void ReadFromStream(std::istream& in);
+};
+
 class WaterResources: public ContinuousMDP
 {
 public:
@@ -36,6 +72,12 @@ public:
      * Constructor.
      */
     WaterResources();
+
+    /*!
+     * Constructor.
+     * \param config the initial settings
+     */
+    WaterResources::WaterResources(WaterResourcesSettings& config);
 
     /*!
      * \see Environment::step
@@ -47,6 +89,8 @@ public:
      * \see Environment::getInitialState
      */
     virtual void getInitialState(DenseState& state) override;
+
+    virtual ~WaterResources();
 
     enum StateComponents
     {
@@ -73,28 +117,8 @@ private:
     double computePowerGeneration(double h, double r);
 
 private:
-    //Noise parameters
-    arma::vec mu;
-    arma::mat Sigma;
-
-    //Reservoirs parameters
-    arma::vec maxCapacity;
-    arma::vec S;
-
-    //Irrigation parameters
-    double w_irr;
-
-    //Flooding related
-    arma::vec h_flo;
-
-    //Power related
-    double w_hyd;
-    double q_mef;
-    double eta;
-    double gamma_h20;
-
-
-    double delta;
+    WaterResourcesSettings* config;
+    bool cleanConfig;
 };
 
 

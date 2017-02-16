@@ -26,22 +26,101 @@
 #include "rele/utils/Range.h"
 #include "rele/utils/RandomGenerator.h"
 
+using namespace std;
+
 namespace ReLe
 {
 
-WaterResources::WaterResources()
+WaterResourcesSettings::WaterResourcesSettings()
+    : mu(WaterResources::STATESIZE),
+      Sigma(WaterResources::STATESIZE, WaterResources::STATESIZE),
+      maxCapacity(WaterResources::STATESIZE),
+      S(WaterResources::STATESIZE),
+      h_flo(WaterResources::STATESIZE)
 {
-	//TODO init parameters
+    WaterResourcesSettings::defaultSettings(*this);
+}
+
+void WaterResourcesSettings::defaultSettings(WaterResourcesSettings& settings)
+{
+    //Environment Parameters
+    settings.gamma = 0.99;
+    settings.stateDimensionality = WaterResources::STATESIZE;
+    settings.actionDimensionality = WaterResources::STATESIZE;
+    settings.rewardDimensionality = WaterResources::REWARDSIZE;
+    settings.statesNumber = -1;
+    settings.actionsNumber = -1;
+    settings.isFiniteHorizon = false;
+    settings.isAverageReward = false;
+    settings.isEpisodic = false;
+    settings.horizon = 100;
+
+    //WaterResources Parameters
+    //Noise parameters
+    settings.mu[WaterResources::up] = 40;
+    settings.mu[WaterResources::dn] = 20;
+    settings.Sigma.eye();
+    settings.Sigma(WaterResources::up, WaterResources::up) *= 16;
+    settings.Sigma(WaterResources::dn, WaterResources::dn) *= 2;
+
+    //Reservoirs parameters
+    settings.maxCapacity;
+    settings.S[WaterResources::up] = 1;
+    settings.S[WaterResources::dn] = 1;
+
+    //Flooding related
+    settings.h_flo[WaterResources::up] = 45;
+    settings.h_flo[WaterResources::dn] = 50;
+
+    //Irrigation parameters
+    settings.w_irr = 60;
+
+    //Power related
+    settings.w_hyd = 4.36;
+    settings.q_mef = 0.9;
+    settings.eta = 1;
+    settings.gamma_h20 = 1000;
+}
+
+WaterResourcesSettings::~WaterResourcesSettings()
+{
+
+}
+
+void WaterResourcesSettings::WriteToStream(ostream& out) const
+{
+    //TODO [SERIALIZATION] implement
+}
+
+void WaterResourcesSettings::ReadFromStream(istream& in)
+{
+    //TODO [SERIALIZATION] implement
+}
+
+
+
+WaterResources::WaterResources()
+    : ContinuousMDP(new WaterResourcesSettings()),
+      cleanConfig(true),
+      config(static_cast<UWVSettings*>(settings))
+{
+
+}
+
+WaterResources::WaterResources(WaterResourcesSettings& config)
+    : ContinuousMDP(&config), cleanConfig(false), config(&config)
+{
+
 }
 
 void WaterResources::step(const DenseAction& action, DenseState& nextState,
                           Reward& reward)
 {
-	arma::vec& s = currentState;
-    arma::vec v = s/delta;
+    arma::vec& s = currentState;
+    arma::vec v = s/config->delta;
     arma::vec V(2);
-    V[up] = std::max(s[up] - maxCapacity[up], 0.0)/delta;
-    V[dn] = std::max(s[dn] - maxCapacity[dn], 0.0)/delta;
+    V[up] = std::max(s[up] - config->maxCapacity[up], 0.0)/config->delta;
+    V[dn] = std::max(s[dn] - config->maxCapacity[dn], 0.0)/config->delta;
 
     Range limitUp(v[up], V[up]);
     Range limitDown(v[dn], V[dn]);
@@ -50,10 +129,10 @@ void WaterResources::step(const DenseAction& action, DenseState& nextState,
     r[up] = limitUp.bound(action[up]);
     r[dn] = limitUp.bound(action[dn]);
 
-    arma::vec eps = mvnrand(mu, Sigma);
+    arma::vec eps = mvnrand(config->mu, config->Sigma);
 
-    currentState[up] += (eps[up] - r[up])*delta;
-    currentState[dn] += (eps[dn] + r[up] - r[dn])*delta;
+    currentState[up] += (eps[up] - r[up])*config->delta;
+    currentState[dn] += (eps[dn] + r[up] - r[dn])*config->delta;
 
 
     nextState = currentState;
@@ -61,30 +140,36 @@ void WaterResources::step(const DenseAction& action, DenseState& nextState,
 
 void WaterResources::getInitialState(DenseState& state)
 {
-	currentState[up] = RandomGenerator::sampleUniform(0, maxCapacity[up]);
-	currentState[dn] = RandomGenerator::sampleUniform(0, maxCapacity[dn]);
+    currentState[up] = RandomGenerator::sampleUniform(0, config->maxCapacity[up]);
+    currentState[dn] = RandomGenerator::sampleUniform(0, config->maxCapacity[dn]);
 
-	state = currentState;
+    state = currentState;
 }
 
 void WaterResources::computeReward(Reward& reward, const arma::vec& r)
 {
-	arma::vec& s = currentState;
-	arma::vec h = s / S;
-	double P = computePowerGeneration(h[up], r[up]);
+    arma::vec& s = currentState;
+    arma::vec h = s / config->S;
+    double P = computePowerGeneration(h[up], r[up]);
 
-	reward[flo_up] = std::pow(std::max(h[up] - h_flo[up], 0.0), 2);
-	reward[flo_dn] = std::pow(std::max(h[dn] - h_flo[dn], 0.0), 2);
-	reward[irr] = std::pow(std::max(w_irr - r[dn], 0.0), 2);
-	reward[hyd] = std::max(w_hyd - P, 0.0);
+    reward[flo_up] = std::pow(std::max(h[up] - config->h_flo[up], 0.0), 2);
+    reward[flo_dn] = std::pow(std::max(h[dn] - config->h_flo[dn], 0.0), 2);
+    reward[irr] = std::pow(std::max(config->w_irr - r[dn], 0.0), 2);
+    reward[hyd] = std::max(config->w_hyd - P, 0.0);
 }
 
 double WaterResources::computePowerGeneration(double h, double r)
 {
-	const double g = 9.81;
-	double q = std::max(r - q_mef, 0.0);
+    const double g = 9.81;
+    double q = std::max(r - config->q_mef, 0.0);
 
-	return eta*g*gamma_h20*h * q / (3.6e6);
+    return config->eta*g*config->gamma_h20*h * q / (3.6e6);
+}
+
+WaterResources::~WaterResources()
+{
+    if (cleanConfig)
+        delete config;
 }
 
 

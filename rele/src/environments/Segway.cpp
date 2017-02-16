@@ -117,7 +117,7 @@ void Segway::SegwayOde::operator ()(const state_type& x, state_type& dx,
 
 Segway::Segway()
     : ContinuousMDP(new SegwaySettings()), cleanConfig(true), segwayode(static_cast<SegwaySettings&>(getWritableSettings())),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6, 1.0e-6 ))
 {
     segwayConfig = static_cast<SegwaySettings*>(settings);
     currentState.set_size(segwayConfig->stateDimensionality);
@@ -125,7 +125,7 @@ Segway::Segway()
 
 Segway::Segway(SegwaySettings& config)
     : ContinuousMDP(&config), cleanConfig(false), segwayConfig(&config), segwayode(*segwayConfig),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6, 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
 }
@@ -138,7 +138,7 @@ void Segway::step(const DenseAction& action, DenseState& nextState, Reward& rewa
     segwayode.action = u;
     double t0 = 0;
     double t1 = segwayConfig->dt;
-    integrate_adaptive(controlled_stepper , segwayode , currentState, t0 , t1 , t1/1000.0);
+    integrate_adaptive(controlled_stepper, segwayode, currentState, t0, t1, t1/1000.0);
 
     //compute reward
     if(abs(currentState[0]) > M_PI/18)
