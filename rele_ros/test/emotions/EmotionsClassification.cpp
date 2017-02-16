@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 
 
     //Count emotions
-    int emotionCount = std::count_if(
+    unsigned int emotionCount = std::count_if(
             directory_iterator(basePath),
             directory_iterator(),
             static_cast<bool(*)(const path&)>(is_directory) );
@@ -245,7 +245,18 @@ int main(int argc, char *argv[])
     EmptyTreeNode<arma::vec> emptyNode(arma::zeros(output.n_rows));
     //ExtraTreeEnsemble regressor(identity, emptyNode, emotionCount - 1, 10000);
     //KDTree<arma::vec, arma::vec> regressor(identity, emptyNode);
-    FFNeuralNetwork regressor(identity, 100, emotionCount - 1);
+    //FFNeuralNetwork regressor(identity, 100, emotionCount - 1);
+
+    std::vector<Function*> layerFunction;
+    layerFunction.push_back(new ReLU());
+    layerFunction.push_back(new ReLU());
+    layerFunction.push_back(new Linear());
+    std::vector<unsigned int> layerNeurons = {100, 100, emotionCount - 1};
+    FFNeuralNetwork regressor(identity, layerNeurons, layerFunction);
+
+    regressor.getHyperParameters().Omega = new L2_Regularization();
+    regressor.getHyperParameters().lambda = 0.01;
+    regressor.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
 
 
     BatchDataSimple trainingData(input, output);
@@ -265,3 +276,4 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
