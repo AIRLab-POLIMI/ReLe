@@ -64,7 +64,8 @@ void WaterResourcesSettings::defaultSettings(WaterResourcesSettings& settings)
     settings.Sigma(WaterResources::dn, WaterResources::dn) *= 2;
 
     //Reservoirs parameters
-    settings.maxCapacity;
+    settings.maxCapacity[WaterResources::up] = 100;
+    settings.maxCapacity[WaterResources::dn] = 100;
     settings.S[WaterResources::up] = 1;
     settings.S[WaterResources::dn] = 1;
 
@@ -80,6 +81,9 @@ void WaterResourcesSettings::defaultSettings(WaterResourcesSettings& settings)
     settings.q_mef = 0.9;
     settings.eta = 1;
     settings.gamma_h20 = 1000;
+
+    //Control delta
+    settings.delta = 1.0;
 }
 
 WaterResourcesSettings::~WaterResourcesSettings()
@@ -104,36 +108,45 @@ WaterResources::WaterResources()
       cleanConfig(true),
       config(static_cast<WaterResourcesSettings*>(settings))
 {
-
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 WaterResources::WaterResources(WaterResourcesSettings& config)
     : ContinuousMDP(&config), cleanConfig(false), config(&config)
 {
-
+    currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 void WaterResources::step(const DenseAction& action, DenseState& nextState,
                           Reward& reward)
 {
+    arma::vec eps = mvnrand(config->mu, config->Sigma);
+
     arma::vec& s = currentState;
-    arma::vec v = s/config->delta;
-    arma::vec V(2);
-    V[up] = std::max(s[up] - config->maxCapacity[up], 0.0)/config->delta;
-    V[dn] = std::max(s[dn] - config->maxCapacity[dn], 0.0)/config->delta;
+    arma::vec V = s/config->delta;
+    arma::vec v(2);
+    v[up] = std::max(s[up] + eps[up] - config->maxCapacity[up], 0.0)/config->delta;
+    v[dn] = std::max(s[dn] + eps[dn] + v[up] - config->maxCapacity[dn], 0.0)/config->delta;
 
     Range limitUp(v[up], V[up]);
     Range limitDown(v[dn], V[dn]);
 
     arma::vec r(2);
     r[up] = limitUp.bound(action[up]);
-    r[dn] = limitUp.bound(action[dn]);
-
-    arma::vec eps = mvnrand(config->mu, config->Sigma);
+    r[dn] = limitDown.bound(action[dn]);
 
     currentState[up] += (eps[up] - r[up])*config->delta;
     currentState[dn] += (eps[dn] + r[up] - r[dn])*config->delta;
 
+    /*std::cout << "r: " << r.t() << std::endl;
+    std::cout << "v: " << v.t() << std::endl;
+    std::cout << "V: " << V.t() << std::endl;
+    std::cout << "eps: " << eps.t() << std::endl;
+    std::cout << "u: " << action.t() << std::endl;
+    std::cout << "s: " << currentState.t() << std::endl;
+    std::cout << "--------------------------------------" << std::endl;*/
+
+    computeReward(reward, r);
 
     nextState = currentState;
 }
@@ -152,10 +165,10 @@ void WaterResources::computeReward(Reward& reward, const arma::vec& r)
     arma::vec h = s / config->S;
     double P = computePowerGeneration(h[up], r[up]);
 
-    reward[flo_up] = std::pow(std::max(h[up] - config->h_flo[up], 0.0), 2);
-    reward[flo_dn] = std::pow(std::max(h[dn] - config->h_flo[dn], 0.0), 2);
-    reward[irr] = std::pow(std::max(config->w_irr - r[dn], 0.0), 2);
-    reward[hyd] = std::max(config->w_hyd - P, 0.0);
+    reward[flo_up] = -std::pow(std::max(h[up] - config->h_flo[up], 0.0), 2);
+    reward[flo_dn] = -std::pow(std::max(h[dn] - config->h_flo[dn], 0.0), 2);
+    reward[irr] = -std::pow(std::max(config->w_irr - r[dn], 0.0), 2);
+    reward[hyd] = -std::max(config->w_hyd - P, 0.0);
 }
 
 double WaterResources::computePowerGeneration(double h, double r)
