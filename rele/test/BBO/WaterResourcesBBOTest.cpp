@@ -23,6 +23,7 @@
 
 
 #include "rele/algorithms/policy_search/PGPE/PGPE.h"
+#include "rele/algorithms/policy_search/em/episode_based/RWR.h"
 #include "rele/statistics/DifferentiableNormals.h"
 #include "rele/core/Core.h"
 #include "rele/policy/parametric/differentiable/LinearPolicy.h"
@@ -48,7 +49,7 @@ int main(int argc, char** argv)
     ranges.push_back(Range(0, 101));
     ranges.push_back(Range(0, 101));
 
-    std::vector<unsigned int> tilesN = {4, 4};
+    std::vector<unsigned int> tilesN = {25, 25};
 
     BasicTiles* tiles = new BasicTiles(ranges, tilesN);
 
@@ -56,9 +57,13 @@ int main(int argc, char** argv)
     DetLinearPolicy<DenseState> policy(phi);
 
     //Build distribution
-    arma::vec mean = arma::ones(phi.rows())*50;
-    arma::mat Sigma = arma::eye(phi.rows(), phi.rows())*0.05;
+    //arma::vec mean = arma::ones(phi.rows())*60;
+    arma::vec mean = arma::zeros(phi.rows());
+    arma::mat Sigma = arma::eye(phi.rows(), phi.rows())*10;
+    arma::mat SigmaEv = arma::eye(phi.rows(), phi.rows())*0.01;
     ParametricNormal dist(mean, Sigma);
+
+    //ParametricCholeskyNormal dist(mean, arma::chol(Sigma));
 
     //Build Reward Transformation
     //arma::vec rewardWeights = {0.5, 0.5, 0.0, 0.0};
@@ -71,22 +76,50 @@ int main(int argc, char** argv)
     PGPE<DenseAction, DenseState> agent(dist, policy, 1, 10, step, rewardT);
 
     //Run experiments
+    unsigned int nbUpdates = 10000;
+    unsigned int nbepperpol = 1;
+    unsigned int nbpolperupd = 10;
+
     Core<DenseAction, DenseState> core(mdp, agent);
-    core.getSettings().episodeN = 10000000;
     core.getSettings().testEpisodeN = 100;
     core.getSettings().episodeLength = mdp.getSettings().horizon;
+    core.getSettings().testEpisodeN = 100;
 
     arma::vec J = core.runEvaluation();
     std::cout << "J: " << J.t() << " " << J.t()*rewardWeights << std::endl;
 
-    core.runEpisodes();
+    int episodes  = nbUpdates*nbepperpol*nbpolperupd;
+    double every, bevery;
+    every = bevery = 0.1; //%
+    int updateCount = 0;
+    for (int i = 0; i < episodes; i++)
+    {
+    	dist.setCovariance(Sigma);
+        core.runEpisode();
 
-    J = core.runEvaluation();
-    std::cout << "J: " << J.t() << " " << J.t()*rewardWeights << std::endl;
+        int v = nbepperpol*nbpolperupd;
+        if (i % v == 0)
+        {
+            updateCount++;
+            if ((updateCount >= nbUpdates*every) || (updateCount == 1))
+            {
+            	dist.setCovariance(SigmaEv);
+                int p = 100 * updateCount/static_cast<double>(nbUpdates);
+                std::cout << "### " << p << "% ###" << std::endl;
+                arma::vec J = core.runEvaluation();
+                std::cout << "mean score: " << J.t()*rewardWeights << std::endl;
+                std::cout << "objective score:" << J.t() << std::endl;
+                every += bevery;
+            }
+        }
+    }
 
-    WriteStrategy<DenseAction, DenseState> wStrategy(fm.addPath("dataset.log"),
-            WriteStrategy<DenseAction, DenseState>::TRANS, true);
-    core.getSettings().loggerStrategy = &wStrategy;
+    dist.setCovariance(SigmaEv);
+    dist.getParameters().save(fm.addPath("Weights.txt"),  arma::raw_ascii);
+
+    WriteStrategy<DenseAction, DenseState> strategy(fm.addPath("Trajectories.txt"),
+    			WriteStrategy<DenseAction, DenseState>::TRANS, true);
+    core.getSettings().loggerStrategy = &strategy;
 
     core.runTestEpisodes();
 

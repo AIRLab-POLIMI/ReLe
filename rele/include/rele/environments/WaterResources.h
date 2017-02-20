@@ -105,8 +105,8 @@ public:
     {
         // robot state
         flo_up = 0,
-        hyd,
         flo_dn,
+        hyd,
         irr,
         // state size
         REWARDSIZE

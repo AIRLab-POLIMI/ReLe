@@ -126,7 +126,7 @@ void WaterResources::step(const DenseAction& action, DenseState& nextState,
     arma::vec V = s/config->delta;
     arma::vec v(2);
     v[up] = std::max(s[up] + eps[up] - config->maxCapacity[up], 0.0)/config->delta;
-    v[dn] = std::max(s[dn] + eps[dn] + v[up] - config->maxCapacity[dn], 0.0)/config->delta;
+    v[dn] = std::max(s[dn] + eps[dn] + V[up] - config->maxCapacity[dn], 0.0)/config->delta;
 
     Range limitUp(v[up], V[up]);
     Range limitDown(v[dn], V[dn]);
