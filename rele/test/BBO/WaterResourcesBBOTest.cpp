@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     ranges.push_back(Range(0, 101));
     ranges.push_back(Range(0, 101));
 
-    std::vector<unsigned int> tilesN = {25, 25};
+    std::vector<unsigned int> tilesN = {10, 10};
 
     BasicTiles* tiles = new BasicTiles(ranges, tilesN);
 
@@ -57,8 +57,8 @@ int main(int argc, char** argv)
     DetLinearPolicy<DenseState> policy(phi);
 
     //Build distribution
-    //arma::vec mean = arma::ones(phi.rows())*60;
-    arma::vec mean = arma::zeros(phi.rows());
+    arma::vec mean = arma::ones(phi.rows())*50;
+    //arma::vec mean = arma::zeros(phi.rows());
     arma::mat Sigma = arma::eye(phi.rows(), phi.rows())*10;
     arma::mat SigmaEv = arma::eye(phi.rows(), phi.rows())*0.01;
     ParametricNormal dist(mean, Sigma);
