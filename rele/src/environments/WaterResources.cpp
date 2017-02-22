@@ -123,7 +123,7 @@ void WaterResources::step(const DenseAction& action, DenseState& nextState,
     arma::vec eps = mvnrand(config->mu, config->Sigma);
 
     arma::vec& s = currentState;
-    arma::vec V = s/config->delta;
+    arma::vec V = (s + eps)/config->delta;
     arma::vec v(2);
     v[up] = std::max(s[up] + eps[up] - config->maxCapacity[up], 0.0)/config->delta;
     v[dn] = std::max(s[dn] + eps[dn] + V[up] - config->maxCapacity[dn], 0.0)/config->delta;

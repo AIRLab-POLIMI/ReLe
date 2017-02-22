@@ -29,11 +29,15 @@
 #include "rele/policy/parametric/differentiable/LinearPolicy.h"
 #include "rele/approximators/tiles/BasicTiles.h"
 #include "rele/approximators/features/TilesCoder.h"
+/*#include "rele/approximators/basis/PolynomialFunction.h"
+#include "rele/approximators/features/DenseFeatures.h"*/
 #include "rele/utils/FileManager.h"
 
 #include "rele/environments/WaterResources.h"
 
 using namespace ReLe;
+
+#define LOAD
 
 int main(int argc, char** argv)
 {
@@ -54,12 +58,21 @@ int main(int argc, char** argv)
     BasicTiles* tiles = new BasicTiles(ranges, tilesN);
 
     DenseTilesCoder phi(tiles, 2);
+    /*auto basis = PolynomialFunction::generate(2, 2);
+    DenseFeatures phi(basis);*/
+
+
     DetLinearPolicy<DenseState> policy(phi);
 
     //Build distribution
+    arma::vec mean;
+#ifdef LOAD
+    mean.load(fm.addPath("Weights.txt"));
+#else
     arma::vec mean = arma::ones(phi.rows())*50;
+#endif
     //arma::vec mean = arma::zeros(phi.rows());
-    arma::mat Sigma = arma::eye(phi.rows(), phi.rows())*10;
+    arma::mat Sigma = arma::eye(phi.rows(), phi.rows())*5;
     arma::mat SigmaEv = arma::eye(phi.rows(), phi.rows())*0.01;
     ParametricNormal dist(mean, Sigma);
 
@@ -78,7 +91,7 @@ int main(int argc, char** argv)
     //Run experiments
     unsigned int nbUpdates = 10000;
     unsigned int nbepperpol = 1;
-    unsigned int nbpolperupd = 10;
+    unsigned int nbpolperupd = 100;
 
     Core<DenseAction, DenseState> core(mdp, agent);
     core.getSettings().testEpisodeN = 100;
