@@ -38,6 +38,8 @@ target_link_libraries(nips_nls_fe rele)
 add_executable(nips_segway nips/Segway.cpp)
 target_link_libraries(nips_segway rele)
 
+add_executable(nips_water nips/Water.cpp)
+target_link_libraries(nips_water rele)
 
 #MWAL
 add_executable(simple_chain_MWAL MWAL/SimpleChainMWAL.cpp)

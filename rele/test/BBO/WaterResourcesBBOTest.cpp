@@ -79,8 +79,8 @@ int main(int argc, char** argv)
     //ParametricCholeskyNormal dist(mean, arma::chol(Sigma));
 
     //Build Reward Transformation
-    //arma::vec rewardWeights = {0.5, 0.5, 0.0, 0.0};
-    arma::vec rewardWeights = arma::ones(4)/4.0;
+    arma::vec rewardWeights = {0.3, 0.5, 0.2, 0.1};
+    //arma::vec rewardWeights = arma::ones(4)/4.0;
     WeightedSumRT rewardT(rewardWeights);
 
     //Build agent
