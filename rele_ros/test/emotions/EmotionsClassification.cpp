@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
 
 
     //Load dataset and compute features
+    std::vector<string> emotionNames;
     std::vector<arma::mat> inputTmp;
     arma::mat negativeTmp;
 
@@ -211,7 +212,10 @@ int main(int argc, char *argv[])
             if(emotionName == "negative_examples")
             	negativeTmp = theta;
             else
+            {
             	inputTmp.push_back(theta);
+            	emotionNames.push_back(emotionName);
+            }
 
             // print basis function used
             cout << "Feature extracted!" << std::endl;
@@ -231,32 +235,34 @@ int main(int argc, char *argv[])
 
     unsigned int start = 0;
 
+    std::fstream fs(basePath + "emotionLabels");
+
     for(unsigned int i = 0; i < inputTmp.size(); i++)
     {
     	unsigned int delta = inputTmp[i].n_cols;
     	input.cols(start, start + delta -1) = inputTmp[i];
     	if(i+1 != inputTmp.size())
+    	{
     		output.cols(start, start + delta -1).row(i) = arma::ones(1, delta);
+    		fs << emotionNames[i] << " " << i;
+    	}
     	start += delta;
     }
 
     auto bfs = IdentityBasis::generate(input.n_rows);
     DenseFeatures identity(bfs);
     EmptyTreeNode<arma::vec> emptyNode(arma::zeros(output.n_rows));
-    //ExtraTreeEnsemble regressor(identity, emptyNode, emotionCount - 1, 10000);
-    //KDTree<arma::vec, arma::vec> regressor(identity, emptyNode);
-    //FFNeuralNetwork regressor(identity, 100, emotionCount - 1);
 
     std::vector<Function*> layerFunction;
     layerFunction.push_back(new ReLU());
     layerFunction.push_back(new ReLU());
-    layerFunction.push_back(new Linear());
+    layerFunction.push_back(new Sigmoid());
     std::vector<unsigned int> layerNeurons = {100, 100, emotionCount - 1};
     FFNeuralNetwork regressor(identity, layerNeurons, layerFunction);
 
     regressor.getHyperParameters().Omega = new L2_Regularization();
     regressor.getHyperParameters().lambda = 0.01;
-    regressor.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(10000);
+    regressor.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(50000);
 
 
     BatchDataSimple trainingData(input, output);
@@ -273,6 +279,8 @@ int main(int argc, char *argv[])
     J /= input.n_cols;
 
     std::cout << "J: " << J << std::endl;
+
+    regressor.getParameters().save(basePath + "ClassifierWeights.txt", arma::raw_ascii);
 
     return 0;
 }

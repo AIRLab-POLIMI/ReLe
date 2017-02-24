@@ -4,3 +4,6 @@ target_link_libraries(emotions releROS ${catkin_LIBRARIES})
 
 add_executable(emotions_classification EmotionsClassification.cpp)
 target_link_libraries(emotions_classification releROS ${catkin_LIBRARIES})
+
+add_executable(emotions_performances EmotionPerformances.cpp)
+target_link_libraries(emotions_performances releROS ${catkin_LIBRARIES})
