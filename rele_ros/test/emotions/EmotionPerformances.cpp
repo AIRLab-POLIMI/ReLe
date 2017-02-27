@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     DenseFeatures phi(basis);
 
     //Load NN regressor
-    auto bfs = IdentityBasis::generate(phi.rows());
+    auto bfs = IdentityBasis::generate(phi.rows()*3);
     DenseFeatures identity(bfs);
 
     std::vector<Function*> layerFunction;
