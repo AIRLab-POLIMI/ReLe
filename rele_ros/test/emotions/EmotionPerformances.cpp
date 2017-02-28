@@ -55,6 +55,8 @@ map<string, int> loadLabels(string basePath)
 		string name;
 		int label;
 		fs >> name >> label;
+
+		cout << name << label << endl;
 		map[name] = label;
 	}
 
@@ -151,7 +153,9 @@ int main(int argc, char *argv[])
 
             Jemotion /= tot;
 
-            cout << "errors: " << errors << "/" << tot << " " << (float) (tot-errors) / tot << "%" << std::endl;
+            cout << "Label: " << labels[emotionName] << std::endl;
+            cout << "errors: " << errors << "/" << tot << std::endl;
+            cout << "Recognized emotions: " << (float) (tot-errors) / tot*100 << "%" << std::endl;
             cout << "emotion performace: " << Jemotion << std::endl;
             std::cout << "=====================================================" << std::endl;
 

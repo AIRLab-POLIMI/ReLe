@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 
     unsigned int start = 0;
 
-    std::fstream fs(basePath + "emotionLabels");
+    std::ofstream fs(basePath + "emotionLabels.txt");
 
     for(unsigned int i = 0; i < inputTmp.size(); i++)
     {
@@ -244,10 +244,12 @@ int main(int argc, char *argv[])
     	if(i+1 != inputTmp.size())
     	{
     		output.cols(start, start + delta -1).row(i) = arma::ones(1, delta);
-    		fs << emotionNames[i] << " " << i;
+    		fs << emotionNames[i] << " " << i << endl;
     	}
     	start += delta;
     }
+
+    fs.close();
 
     auto bfs = IdentityBasis::generate(input.n_rows);
     DenseFeatures identity(bfs);
@@ -261,7 +263,7 @@ int main(int argc, char *argv[])
     FFNeuralNetwork regressor(identity, layerNeurons, layerFunction);
 
     regressor.getHyperParameters().Omega = new L2_Regularization();
-    regressor.getHyperParameters().lambda = 0.01;
+    regressor.getHyperParameters().lambda = 1e-4;
     regressor.getHyperParameters().optimizator = new ScaledConjugateGradient<arma::vec>(50000);
 
 
