@@ -111,6 +111,12 @@ public:
         return Cov;
     }
 
+    inline void setCovariance(const arma::mat& Cov)
+    {
+         this->Cov = Cov;
+         updateInternalState();
+    }
+
     inline arma::mat getMode() const override
     {
         return getMean();

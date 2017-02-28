@@ -248,7 +248,7 @@ arma::mat nearestSPD(arma::mat& M)
         {
             try
             {
-            	volatile arma::mat tmp = arma::chol(C);
+                volatile arma::mat tmp = arma::chol(C);
                 return C;
             }
             catch(std::runtime_error& e)

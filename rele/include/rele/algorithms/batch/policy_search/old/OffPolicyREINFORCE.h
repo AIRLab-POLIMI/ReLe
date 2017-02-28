@@ -239,8 +239,8 @@ public:
                        unsigned int nbEpisodes, GradientStep& stepL,
                        bool baseline = true, int reward_obj = 0)
         : MBPGA<ActionC, StateC>(
-            target, behave_pol, nbEpisodes, 0, stepL, 0.0,
-            baseline, reward_obj)
+              target, behave_pol, nbEpisodes, 0, stepL, 0.0,
+              baseline, reward_obj)
     {
     }
 

@@ -90,7 +90,7 @@ private:
 
         UWVOde() : action(0) { }
 
-        void operator() ( const state_type& x , state_type& dxdt , const double /* t */ )
+        void operator() ( const state_type& x, state_type& dxdt, const double /* t */ )
         {
             const double u     = action;
             const double v     = x[0];

@@ -45,8 +45,8 @@ public:
          unsigned int nbEpisodes, unsigned int nbPolicies, GradientStep& step_length,
          bool baseline = true, int reward_obj = 0)
         : GradientBlackBoxAlgorithm<ActionC, StateC, PGPEIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
-        useDirection(false)
+          (dist, policy, nbEpisodes, nbPolicies, step_length, baseline, reward_obj),
+          useDirection(false)
     {
     }
 
@@ -55,8 +55,8 @@ public:
          RewardTransformation& reward_tr,
          bool baseline = true)
         : GradientBlackBoxAlgorithm<ActionC, StateC, PGPEIterationStats>
-        (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
-        useDirection(false)
+          (dist, policy, nbEpisodes, nbPolicies, step_length, reward_tr, baseline),
+          useDirection(false)
     {
     }
 

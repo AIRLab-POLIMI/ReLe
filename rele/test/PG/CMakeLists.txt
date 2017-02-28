@@ -22,3 +22,6 @@ target_link_libraries(pursuer_PG rele)
 
 add_executable(taxi_PG TaxiFuelPGTest.cpp)
 target_link_libraries(taxi_PG rele)
+
+add_executable(water_PG WaterResourcesPGTest.cpp)
+target_link_libraries(water_PG rele)

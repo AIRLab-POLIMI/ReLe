@@ -87,14 +87,14 @@ void UWVSettings::ReadFromStream(istream& in)
 
 UnderwaterVehicle::UnderwaterVehicle()
     : DenseMDP(new UWVSettings()), cleanConfig(true), uwvode(), config(static_cast<UWVSettings*>(settings)),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6, 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
 }
 
 UnderwaterVehicle::UnderwaterVehicle(UWVSettings& config)
     : DenseMDP(&config), cleanConfig(false), config(&config), uwvode(),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6, 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
 }
@@ -107,7 +107,7 @@ void UnderwaterVehicle::step(const FiniteAction& action, DenseState& nextState, 
     uwvode.action = u;
     double t0 = 0;
     double t1 = config->dt;
-    integrate_adaptive( controlled_stepper , uwvode , currentState, t0 , t1 , t1/1000.0);
+    integrate_adaptive( controlled_stepper, uwvode, currentState, t0, t1, t1/1000.0);
 
     nextState = currentState;
 

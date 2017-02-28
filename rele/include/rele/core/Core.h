@@ -203,7 +203,7 @@ public:
     void runTestEpisodes()
     {
         if(settings.episodeCallback)
-            settings.episodeCallback->setStepNumbers(settings.episodeN);
+            settings.episodeCallback->setStepNumbers(settings.testEpisodeN);
 
         for(unsigned int i = 0; i < settings.testEpisodeN; i++)
         {

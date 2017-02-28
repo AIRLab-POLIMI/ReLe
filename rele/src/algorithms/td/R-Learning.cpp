@@ -114,7 +114,7 @@ R_LearningOutput::R_LearningOutput(const std::string& alpha,
                                    const hyperparameters_map& policyHPar,
                                    const arma::mat& Q,
                                    double ro)
-    : FiniteTDOutput(1.0, alpha, policyName, policyHPar, Q) , beta(beta), ro(ro)
+    : FiniteTDOutput(1.0, alpha, policyName, policyHPar, Q), beta(beta), ro(ro)
 {
 
 }

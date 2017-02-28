@@ -19,3 +19,6 @@ target_link_libraries(ucp_BBO rele)
 
 add_executable(mh_BBO MultiHeatBBOTest.cpp)
 target_link_libraries(mh_BBO rele)
+
+add_executable(water_BBO WaterResourcesBBOTest.cpp)
+target_link_libraries(water_BBO rele)

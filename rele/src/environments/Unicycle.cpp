@@ -105,7 +105,7 @@ void UnicyclePolar::UnicyclePolarOde::operator ()(const state_type& x, state_typ
 
 UnicyclePolar::UnicyclePolar()
     : ContinuousMDP(new UnicyclePolarSettings()), cleanConfig(true),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6, 1.0e-6 ))
 {
     unicycleConfig = static_cast<UnicyclePolarSettings*>(settings);
     currentState.set_size(unicycleConfig->stateDimensionality);
@@ -113,7 +113,7 @@ UnicyclePolar::UnicyclePolar()
 
 UnicyclePolar::UnicyclePolar(UnicyclePolarSettings& config)
     : ContinuousMDP(&config), cleanConfig(false), unicycleConfig(&config),
-      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6 , 1.0e-6 ))
+      controlled_stepper (make_controlled< error_stepper_type >( 1.0e-6, 1.0e-6 ))
 {
     currentState.set_size(this->getSettings().stateDimensionality);
 }
@@ -128,7 +128,7 @@ void UnicyclePolar::step(const DenseAction& action, DenseState& nextState, Rewar
     unicycleode.w = w;
     double t0 = 0;
     double t1 = unicycleConfig->dt;
-    integrate_adaptive(controlled_stepper , unicycleode , currentState, t0 , t1 , t1/100.0);
+    integrate_adaptive(controlled_stepper, unicycleode, currentState, t0, t1, t1/100.0);
 
     // wrap to [-pi,pi]
     currentState[gamma] = RangePi::wrap(currentState[gamma]);
