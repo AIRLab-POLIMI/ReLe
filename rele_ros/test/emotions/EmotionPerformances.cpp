@@ -101,17 +101,19 @@ int main(int argc, char *argv[])
 
     //Load dataset and compute features
     std::vector<arma::mat> inputTmp;
+    int count = 0;
 
     boost::filesystem::directory_iterator end_itr;
     for(boost::filesystem::directory_iterator i(basePath); i != end_itr; ++i )
     {
-        int count = 0;
 
         if(boost::filesystem::is_directory(i->status()))
         {
             std::string emotionName = i->path().filename().string();
 
-            std::cout << "-----------------------------------------------------" << std::endl;
+            if(emotionName == "negative_examples")
+            	continue;
+
             std::cout << "Emotion: " << emotionName << std::endl;
 
             FileManager fm("emotions", emotionName);
@@ -133,24 +135,35 @@ int main(int argc, char *argv[])
 
 
             double Jemotion = 0;
-            for(unsigned int i = 0; i < dataset.getEpisodesNumber(); i++)
+            int errors = 0;
+            int tot = dataset.getEpisodesNumber();
+            for(unsigned int i = 0; i < tot; i++)
             {
-            	arma::vec res = regressor(theta);
+            	arma::vec res = regressor(theta.col(i));
             	arma::vec target(res.n_rows, arma::fill::zeros);
             	target(labels[emotionName]) = 1;
             	arma::vec delta = (res-target);
             	Jemotion += arma::as_scalar(delta.t()*delta);
+            	errors += labels[emotionName] != res.index_max();
+            	/*std:: cout << "res: " << res.t() << std::endl;
+            	std:: cout << "target: " << target.t() << std::endl;*/
             }
 
+            Jemotion /= tot;
+
+            cout << "errors: " << errors << "/" << tot << " " << (float) (tot-errors) / tot << "%" << std::endl;
             cout << "emotion performace: " << Jemotion << std::endl;
-            std::cout << "-----------------------------------------------------" << std::endl;
+            std::cout << "=====================================================" << std::endl;
 
             Jtot += Jemotion;
+            count++;
         }
 
     }
 
+    Jtot /= count;
     cout << "system performaces: " << Jtot << std::endl;
+    std::cout << "=====================================================" << std::endl;
 
     return 0;
 }
