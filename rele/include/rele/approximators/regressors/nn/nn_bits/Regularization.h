@@ -60,7 +60,7 @@ class L2_Regularization : public Regularization
 public:
     inline virtual double cost(const arma::vec& w) override
     {
-        return arma::norm(w);
+        return arma::as_scalar(w.t()*w);
     }
 
     inline virtual arma::vec diff(const arma::vec& w) override
