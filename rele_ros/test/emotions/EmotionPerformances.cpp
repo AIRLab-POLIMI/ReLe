@@ -48,15 +48,13 @@ using namespace ReLe_ROS;
 map<string, int> loadLabels(string basePath)
 {
 	map<string, int> map;
-	std::fstream fs(basePath + "emotionLabels");
+	std::ifstream fs(basePath + "emotionLabels.txt");
 
 	while(fs)
 	{
 		string name;
 		int label;
 		fs >> name >> label;
-
-		cout << name << label << endl;
 		map[name] = label;
 	}
 
@@ -117,6 +115,7 @@ int main(int argc, char *argv[])
             	continue;
 
             std::cout << "Emotion: " << emotionName << std::endl;
+            cout << "Label: " << labels[emotionName] << std::endl;
 
             FileManager fm("emotions", emotionName);
             fm.createDir();
@@ -131,8 +130,6 @@ int main(int argc, char *argv[])
 
             auto theta = estimator.getParameters();
 
-            // print basis function used
-            cout << "Feature extracted!" << std::endl;
             std::cout << "-----------------------------------------------------" << std::endl;
 
 
@@ -153,7 +150,6 @@ int main(int argc, char *argv[])
 
             Jemotion /= tot;
 
-            cout << "Label: " << labels[emotionName] << std::endl;
             cout << "errors: " << errors << "/" << tot << std::endl;
             cout << "Recognized emotions: " << (float) (tot-errors) / tot*100 << "%" << std::endl;
             cout << "emotion performace: " << Jemotion << std::endl;
