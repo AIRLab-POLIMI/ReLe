@@ -216,8 +216,30 @@ int main(int argc, char *argv[])
             auto theta = estimator.getParameters();
             theta.save(fm.addPath("theta_expert.txt"), arma::raw_ascii);
 
+            CollectorStrategy<DenseAction, DenseState> f;
+
+            //Compute fitted trajectory for each demonstration
+            MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
+            EmptyEnv env(uDim, 100.0);
+            for(int i = 0; i < theta.n_cols; i++)
+            {
+
+                policy.setParameters(theta.col(i));
+
+                PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+                Core<DenseAction, DenseState> core(env, agent);
+
+                core.getSettings().episodeLength = 2000;
+                core.getSettings().loggerStrategy = &f;
+                core.runTestEpisode();
+            }
+
+            //Save datasets
             std::ofstream ofs(fm.addPath("expert_dataset.log"));
             rosDataset.getData().writeToStream(ofs);
+
+            std::ofstream ofs2(fm.addPath("fitted_dataset.log"));
+            f.data.writeToStream(ofs2);
 
         }
 
