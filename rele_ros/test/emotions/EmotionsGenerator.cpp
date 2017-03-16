@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
     SparseFeatures phi(basis, uDim);
 
-    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
+    MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-5);
     EmptyEnv env(uDim, 100.0);
 
 

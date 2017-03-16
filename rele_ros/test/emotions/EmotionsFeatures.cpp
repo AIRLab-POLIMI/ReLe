@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
             CollectorStrategy<DenseAction, DenseState> f;
 
             //Compute fitted trajectory for each demonstration
-            MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-3);
+            MVNPolicy policy(phi, arma::eye(uDim, uDim)*1e-5);
             EmptyEnv env(uDim, 100.0);
             for(int i = 0; i < theta.n_cols; i++)
             {
