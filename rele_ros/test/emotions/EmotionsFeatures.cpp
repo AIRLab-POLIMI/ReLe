@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
             std::cout << "-----------------------------------------------------" << std::endl;
             std::cout << "Emotion: " << emotionName << std::endl;
 
-            FileManager fm("emotions_features", emotionName);
+            FileManager fm("emotions", emotionName);
             fm.createDir();
 
 
@@ -214,7 +214,10 @@ int main(int argc, char *argv[])
             estimator.compute(rosDataset.getData());
 
             auto theta = estimator.getParameters();
-            theta.save(fm.addPath("theta.txt"), arma::raw_ascii);
+            theta.save(fm.addPath("theta_expert.txt"), arma::raw_ascii);
+
+            std::ofstream ofs(fm.addPath("expert_dataset.log"));
+            rosDataset.getData().writeToStream(ofs);
 
         }
 

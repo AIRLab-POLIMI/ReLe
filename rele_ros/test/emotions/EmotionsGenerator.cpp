@@ -64,7 +64,10 @@ int main(int argc, char *argv[])
     EmptyEnv env(uDim, 100.0);
 
 
-    std::string basePath = "/tmp/ReLe/emotions_generated/";
+    std::string basePath = "/tmp/ReLe/emotions/";
+
+    std::cout << "==========================================================" << std::endl;
+    std::cout << "Generating emotions from parameters" << std::endl;
 
     boost::filesystem::directory_iterator end_itr;
     for(boost::filesystem::directory_iterator i(basePath); i != end_itr; ++i )
@@ -75,14 +78,19 @@ int main(int argc, char *argv[])
             //Get emotion path and name
             std::string emotionName = i->path().filename().string();
 
+            if(emotionName == "negative_examples")
+            	continue;
+
             std::cout << "-----------------------------------------------------" << std::endl;
             std::cout << "Emotion: " << emotionName << std::endl;
 
-            FileManager fm("emotions_generated", emotionName);
+            FileManager fm("emotions", emotionName);
 
             //Load emotions parameters
             arma::mat theta;
             theta.load(fm.addPath("theta.txt"), arma::raw_ascii);
+
+            std::cout << "Trajectories: " << theta.n_cols << std::endl;
 
             //Run emotion
             CollectorStrategy<DenseAction, DenseState> f;
@@ -100,7 +108,7 @@ int main(int argc, char *argv[])
             }
 
             // Save the dataset in ReLe format
-            std::ofstream os(fm.addPath("trajectories.log"));
+            std::ofstream os(fm.addPath("imitator_dataset.log"));
             f.data.writeToStream(os);
 
 
