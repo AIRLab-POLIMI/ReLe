@@ -78,8 +78,10 @@ int main(int argc, char *argv[])
             //Get emotion path and name
             std::string emotionName = i->path().filename().string();
 
-            if(emotionName == "negative_examples")
-            	continue;
+            if(emotionName == "negative_examples" ||
+                    emotionName == "training" ||
+                    emotionName == "model")
+                continue;
 
             std::cout << "-----------------------------------------------------" << std::endl;
             std::cout << "Emotion: " << emotionName << std::endl;
