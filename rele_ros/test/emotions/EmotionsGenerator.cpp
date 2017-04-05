@@ -37,6 +37,7 @@
 using namespace ReLe;
 
 #define WAVELETS
+#define PCA
 
 const double maxT = 10.0;
 
@@ -113,6 +114,33 @@ int main(int argc, char *argv[])
             std::ofstream os(fm.addPath("imitator_dataset.log"));
             f.data.writeToStream(os);
 
+#ifdef PCA
+            //Load emotions parameters
+            arma::mat theta_pca;
+            theta_pca.load(fm.addPath("theta_pca.txt"), arma::raw_ascii);
+
+            std::cout << "Trajectories: " << theta_pca.n_cols << std::endl;
+
+            //Run emotion
+            CollectorStrategy<DenseAction, DenseState> f2;
+
+            //Compute fitted trajectory for each demonstration
+            for(int i = 0; i < theta_pca.n_cols; i++)
+            {
+                policy.setParameters(theta_pca.col(i));
+                PolicyEvalAgent<DenseAction, DenseState> agent(policy);
+                Core<DenseAction, DenseState> core(env, agent);
+
+                core.getSettings().episodeLength = 2000;
+                core.getSettings().loggerStrategy = &f2;
+                core.runTestEpisode();
+            }
+
+            // Save the dataset in ReLe format
+            std::ofstream os2(fm.addPath("pca_dataset.log"));
+            f2.data.writeToStream(os2);
+
+#endif
 
         }
     }
