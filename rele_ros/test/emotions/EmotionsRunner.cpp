@@ -34,6 +34,7 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/Joy.h>
 
 using namespace ReLe;
 
@@ -53,6 +54,23 @@ void publishSetpoint(ros::Publisher& p, arma::vec& v)
 	p.publish(msg);
 }
 
+bool stop;
+bool next;
+
+void joyCallback(const sensor_msgs::Joy::ConstPtr& joy_msg)
+{
+	if(joy_msg->buttons[2])
+	{
+		stop = true;
+		std::cout << "STOPPED!" << std::endl;
+	}
+	else if(joy_msg->buttons[1])
+	{
+		next = true;
+		std::cout << "NEXT!" << std::endl;
+	}
+}
+
 int main(int argc, char *argv[])
 {
 
@@ -61,6 +79,9 @@ int main(int argc, char *argv[])
 	ros::NodeHandle nh;
 
 	ros::Publisher p = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+	ros::Subscriber s = nh.subscribe<sensor_msgs::Joy>("joy", 1, joyCallback);
+	stop = false;
+	next = false;
 
 	if(argc < 2)
 	{
@@ -118,13 +139,31 @@ int main(int argc, char *argv[])
     	const double dt = 1e-2;
 
     	ros::Rate r(1.0/dt);
-    	for(int i = 0; i < 2000 && ros::ok(); i++)
+    	for(int i = 0; i < 2000 && ros::ok() && !stop && !next; i++)
     	{
     		arma::vec v = policy(t);
     		publishSetpoint(p, v);
 
     		t(0) += dt;
     		r.sleep();
+    		ros::spinOnce();
+    	}
+
+    	if(stop)
+    	{
+    		while(!next)
+    		{
+    			ros::spinOnce();
+    			usleep(200);
+    		}
+
+    		stop = false;
+    		next = false;
+    	}
+
+    	if(next)
+    	{
+    		next = false;
     	}
 	}
 
