@@ -57,29 +57,29 @@ using namespace ReLe;
 class WaterRewardFeatures: public Features
 {
 public:
-	WaterRewardFeatures(const WaterResourcesSettings* config)
-		: config(config)
-	{
+    WaterRewardFeatures(const WaterResourcesSettings* config)
+        : config(config)
+    {
 
-	}
+    }
 
     virtual arma::mat operator()(const arma::vec& input) const override
     {
-    	arma::vec x = input.rows(0, 1);
-    	arma::vec xn = input.rows(4, 5);
+        arma::vec x = input.rows(0, 1);
+        arma::vec xn = input.rows(4, 5);
 
-    	arma::vec r = input.rows(2, 3);
-    	arma::vec reward(4);
+        arma::vec r = input.rows(2, 3);
+        arma::vec reward(4);
 
-    	arma::vec h = xn / config->S;
-    	double P = computePowerGeneration(h[0], r[0]);
+        arma::vec h = xn / config->S;
+        double P = computePowerGeneration(h[0], r[0]);
 
-    	reward[0] = -std::pow(std::max(h[0] - config->h_flo[0], 0.0), 2);
-    	reward[1] = -std::pow(std::max(h[1] - config->h_flo[1], 0.0), 2);
-    	reward[2] = -std::pow(std::max(config->w_irr - r[1], 0.0), 2);
-    	reward[3] = -std::max(config->w_hyd - P, 0.0);
+        reward[0] = -std::pow(std::max(h[0] - config->h_flo[0], 0.0), 2);
+        reward[1] = -std::pow(std::max(h[1] - config->h_flo[1], 0.0), 2);
+        reward[2] = -std::pow(std::max(config->w_irr - r[1], 0.0), 2);
+        reward[3] = -std::max(config->w_hyd - P, 0.0);
 
-    	return reward;
+        return reward;
     }
 
     virtual size_t rows() const override

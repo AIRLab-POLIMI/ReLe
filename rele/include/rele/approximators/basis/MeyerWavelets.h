@@ -21,42 +21,30 @@
  *  along with rele.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rele/approximators/basis/HaarWavelets.h"
-#include <cassert>
+#ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_MEYERWAVELETS_H_
+#define INCLUDE_RELE_APPROXIMATORS_BASIS_MEYERWAVELETS_H_
 
-using namespace arma;
+#include "rele/approximators/basis/Wavelets.h"
+#include <armadillo>
 
 namespace ReLe
 {
 
-
-HaarWavelets::~HaarWavelets()
+/*!
+ * This class implements a haar wavelets
+ */
+class MeyerWavelets : public WaveletType
 {
-}
+public:
+    virtual ~MeyerWavelets();
+    virtual double scaling(double value) override;
+    virtual double mother(double value) override;
 
-double HaarWavelets::scaling(double value)
-{
-    if(value >= 0 && value <= 1)
-    {
-        return 1;
-    }
+};
 
-    return 0;
-}
-
-double HaarWavelets::mother(double value)
-{
-    if(value >= 0 && value < 0.5)
-    {
-        return 1;
-    }
-    else if(value > 0.5 && value <= 1)
-    {
-        return -1;
-    }
-
-    return 0;
-}
+}//end namespace
 
 
-}
+
+
+#endif /* INCLUDE_RELE_APPROXIMATORS_BASIS_MEYERWAVELETS_H_ */

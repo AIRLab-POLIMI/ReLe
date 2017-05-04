@@ -183,7 +183,8 @@ int main(int argc, char *argv[])
             //Create basis function for policy
             int uDim = 3;
 #ifdef WAVELETS
-            BasisFunctions basis = HaarWavelets::generate(0, 5, maxT);
+            HaarWavelets wavelet;
+            BasisFunctions basis = Wavelets::generate(wavelet, 0, 5, maxT);
 #else
             unsigned int N = rosDataset.getData().getTransitionsNumber();
             double df = 0.1;
@@ -201,7 +202,7 @@ int main(int argc, char *argv[])
 
             //Fit Normal distribution
 #ifdef WAVELETS
-            BasisFunctions basisEst = HaarWavelets::generate(0, 5, maxT);
+            BasisFunctions basisEst = Wavelets::generate(wavelet, 0, 5, maxT);
 #else
             BasisFunctions basisEst = FrequencyBasis::generate(0, df, fE, df, true);
             BasisFunctions tmpEst = FrequencyBasis::generate(0, 0, fE, df, false);

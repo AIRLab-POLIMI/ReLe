@@ -94,7 +94,8 @@ int main(int argc, char *argv[])
     //Create basis function for policy
     int uDim = 3;
 #ifdef WAVELETS
-    BasisFunctions basis = HaarWavelets::generate(0, 5, maxT);
+    HaarWavelets wavelet;
+    BasisFunctions basis = Wavelets::generate(wavelet, 0, 5, maxT);
 #else
     double df = 0.1;
     double fE = 20.0;

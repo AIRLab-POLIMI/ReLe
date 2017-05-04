@@ -107,7 +107,7 @@ int main(int argc, char** argv)
     int updateCount = 0;
     for (int i = 0; i < episodes; i++)
     {
-    	dist.setCovariance(Sigma);
+        dist.setCovariance(Sigma);
         core.runEpisode();
 
         int v = nbepperpol*nbpolperupd;
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
             updateCount++;
             if ((updateCount >= nbUpdates*every) || (updateCount == 1))
             {
-            	dist.setCovariance(SigmaEv);
+                dist.setCovariance(SigmaEv);
                 int p = 100 * updateCount/static_cast<double>(nbUpdates);
                 std::cout << "### " << p << "% ###" << std::endl;
                 arma::vec J = core.runEvaluation();
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     dist.getParameters().save(fm.addPath("Weights.txt"),  arma::raw_ascii);
 
     WriteStrategy<DenseAction, DenseState> strategy(fm.addPath("Trajectories.txt"),
-    			WriteStrategy<DenseAction, DenseState>::TRANS, true);
+            WriteStrategy<DenseAction, DenseState>::TRANS, true);
     core.getSettings().loggerStrategy = &strategy;
 
     core.runTestEpisodes();

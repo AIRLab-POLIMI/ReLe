@@ -253,7 +253,7 @@ private:
 protected:
     void forwardComputation(const arma::vec& input)
     {
-    	forwardComputation(input, 0, layerFunction.size());
+        forwardComputation(input, 0, layerFunction.size());
     }
 
     void forwardComputation(const arma::vec& input, unsigned int start, unsigned int end)

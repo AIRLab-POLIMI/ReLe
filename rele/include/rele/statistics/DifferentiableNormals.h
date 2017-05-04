@@ -113,8 +113,8 @@ public:
 
     inline void setCovariance(const arma::mat& Cov)
     {
-         this->Cov = Cov;
-         updateInternalState();
+        this->Cov = Cov;
+        updateInternalState();
     }
 
     inline arma::mat getMode() const override

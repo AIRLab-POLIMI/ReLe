@@ -24,57 +24,21 @@
 #ifndef INCLUDE_RELE_APPROXIMATORS_BASIS_HAARWAVELETS_H_
 #define INCLUDE_RELE_APPROXIMATORS_BASIS_HAARWAVELETS_H_
 
-#include "rele/approximators/BasisFunctions.h"
+#include "rele/approximators/basis/Wavelets.h"
 #include <armadillo>
 
 namespace ReLe
 {
 
 /*!
- * This class implements a haar wavelets basis function with given scale and translation.
+ * This class implements a haar wavelets
  */
-class HaarWavelets : public BasisFunction
+class HaarWavelets : public WaveletType
 {
-
 public:
-    /*!
-     * Constructor.
-     * Construct an haar scaling function
-     */
-    HaarWavelets(unsigned int k, unsigned int index);
-
-    /*!
-     * Constructor.
-     * Construct the jk-th haar wavelet
-     * \param j the frequency of the sinusoid
-     * \param phi the phase of the sinusoid
-     * \param index the input component to be processed
-     */
-    HaarWavelets(unsigned int j, unsigned int k, unsigned int index);
-
-    /*!
-     * Destructor.
-     */
     virtual ~HaarWavelets();
-
-    double operator() (const arma::vec& input) override;
-
-    /*!
-     * Return the set of haar wavelets and scaling functions
-     * \param jMax the maximum scaling factor
-     * \param kMax the maximum translation length
-     * \return the generated basis functions
-     */
-    static BasisFunctions generate(unsigned int index, unsigned int jMax, int maxT);
-
-    virtual void writeOnStream (std::ostream& out) override;
-    virtual void readFromStream(std::istream& in) override;
-
-private:
-    bool scale;
-    unsigned int j;
-    unsigned int k;
-    unsigned int index;
+    virtual double scaling(double value) override;
+    virtual double mother(double value) override;
 
 };
 
