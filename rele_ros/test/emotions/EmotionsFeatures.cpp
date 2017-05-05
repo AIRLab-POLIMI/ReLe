@@ -27,6 +27,7 @@
 #include <rele/approximators/regressors/others/LinearApproximator.h>
 #include <rele/approximators/basis/FrequencyBasis.h>
 #include <rele/approximators/basis/HaarWavelets.h>
+#include <rele/approximators/basis/MeyerWavelets.h>
 #include <rele/approximators/basis/IdentityBasis.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
@@ -59,7 +60,7 @@ const double maxT = 10.0;
 
 
 #define WAVELETS
-#define REDUCTION
+#define MEYER
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
@@ -183,7 +184,11 @@ int main(int argc, char *argv[])
             //Create basis function for policy
             int uDim = 3;
 #ifdef WAVELETS
+#ifdef MEYER
+            MeyerWavelets wavelet;
+#else
             HaarWavelets wavelet;
+#endif
             BasisFunctions basis = Wavelets::generate(wavelet, 0, 5, maxT);
 #else
             unsigned int N = rosDataset.getData().getTransitionsNumber();

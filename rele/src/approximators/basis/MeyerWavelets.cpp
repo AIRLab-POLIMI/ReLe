@@ -36,7 +36,11 @@ MeyerWavelets::~MeyerWavelets()
 
 double MeyerWavelets::scaling(double value)
 {
-    if(value != 0)
+	if(std::abs(value) == 0.75)
+	{
+		return 2.0/3.0/M_PI;
+	}
+	else if(value != 0)
     {
     	double tmp1 = std::sin(2*M_PI/3.0*value);
     	double tmp2 = 4.0/3.0*value*std::cos(4*M_PI/3.0*value);

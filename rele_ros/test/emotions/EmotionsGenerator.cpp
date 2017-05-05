@@ -23,6 +23,7 @@
 
 #include <rele/approximators/features/SparseFeatures.h>
 #include <rele/approximators/basis/HaarWavelets.h>
+#include <rele/approximators/basis/MeyerWavelets.h>
 
 #include <rele/policy/parametric/differentiable/NormalPolicy.h>
 
@@ -38,6 +39,7 @@ using namespace ReLe;
 
 #define WAVELETS
 #define PCA
+#define MEYER
 
 const double maxT = 10.0;
 
@@ -46,7 +48,11 @@ int main(int argc, char *argv[])
     //Create basis function for policy
     int uDim = 3;
 #ifdef WAVELETS
-    HaarWavelets wavelet;
+#ifdef MEYER
+            MeyerWavelets wavelet;
+#else
+            HaarWavelets wavelet;
+#endif
     BasisFunctions basis = Wavelets::generate(wavelet, 0, 5, maxT);
 #else
     double df = 0.1;
