@@ -60,6 +60,7 @@ const double maxT = 10.0;
 
 #define WAVELETS
 #define REDUCTION
+//#define TEST
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
@@ -163,7 +164,7 @@ int main(int argc, char *argv[])
             std::string emotionName = i->path().filename().string();
 
 #ifdef TEST
-            if(emotionName!= "arrabbiato")
+            if(emotionName!= "felice")
                 continue;
 #endif
             std::cout << "-----------------------------------------------------" << std::endl;

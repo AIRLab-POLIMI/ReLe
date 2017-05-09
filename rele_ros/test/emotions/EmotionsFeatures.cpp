@@ -61,6 +61,7 @@ const double maxT = 10.0;
 
 #define WAVELETS
 #define MEYER
+//#define TEST
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
 {
@@ -78,6 +79,14 @@ void preprocessDataset(Dataset<DenseAction, DenseState>& data)
             {
                 break;
             }
+        }
+
+        if(i >= episode.size())
+        {
+        	data.erase(data.begin()+ep);
+        	std::cout << "empty bag: " << ep + 1 << ", skipping..." << std::endl;
+        	ep--;
+        	continue;
         }
 
         episode.erase(episode.begin(), episode.begin() + i);
@@ -160,6 +169,11 @@ int main(int argc, char *argv[])
         if(boost::filesystem::is_directory(i->status()))
         {
             std::string emotionName = i->path().filename().string();
+
+#ifdef TEST
+            if(emotionName != "felice")
+            	continue;
+#endif
 
             std::cout << "-----------------------------------------------------" << std::endl;
             std::cout << "Emotion: " << emotionName << std::endl;
