@@ -44,8 +44,15 @@ void MLEDistributionLinear::compute(const Dataset<DenseAction, DenseState>& data
         Dataset<DenseAction, DenseState> epDataset;
         epDataset.push_back(data[ep]);
         LinearStatisticEstimation mleCalculator;
-        mleCalculator.computeMLE(phi, epDataset);
-        params.col(ep) = mleCalculator.getMeanParameters();
+        try
+        {
+            mleCalculator.computeMLE(phi, epDataset);
+            params.col(ep) = mleCalculator.getMeanParameters();
+        }
+        catch (...)
+        {
+            std::cout << "Error processing trajectory of episode: " << ep << std::endl;
+        }
     }
 
     mu = arma::mean(params, 1);

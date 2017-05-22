@@ -36,17 +36,17 @@ MeyerWavelets::~MeyerWavelets()
 
 double MeyerWavelets::scaling(double value)
 {
-	if(std::abs(value) == 0.75)
-	{
-		return 2.0/3.0/M_PI;
-	}
-	else if(value != 0)
+    if(std::abs(value) == 0.75)
     {
-    	double tmp1 = std::sin(2*M_PI/3.0*value);
-    	double tmp2 = 4.0/3.0*value*std::cos(4*M_PI/3.0*value);
-    	double tmp3 = M_PI*value - 16.0/9.0*M_PI*value*value*value;
+        return 2.0/3.0/M_PI;
+    }
+    else if(value != 0)
+    {
+        double tmp1 = std::sin(2*M_PI/3.0*value);
+        double tmp2 = 4.0/3.0*value*std::cos(4*M_PI/3.0*value);
+        double tmp3 = M_PI*value - 16.0/9.0*M_PI*value*value*value;
 
-    	return (tmp1+tmp2)/tmp3;
+        return (tmp1+tmp2)/tmp3;
     }
 
     return 2.0/3.0+4.0/3.0/M_PI;
@@ -54,16 +54,16 @@ double MeyerWavelets::scaling(double value)
 
 double MeyerWavelets::mother(double value)
 {
-	double tmp1 = 4.0/3.0/M_PI*(value-0.5)*std::cos(2*M_PI/3.0*(value-0.5));
-	double tmp2 = std::sin(4.0*M_PI/3.0*(value-0.5))/M_PI;
-	double tmp3 = value - 0.5 - 16.0/9.0*std::pow(value -0.5, 3);
-	double phi1 = (tmp1-tmp2)/tmp3;
+    double tmp1 = 4.0/3.0/M_PI*(value-0.5)*std::cos(2*M_PI/3.0*(value-0.5));
+    double tmp2 = std::sin(4.0*M_PI/3.0*(value-0.5))/M_PI;
+    double tmp3 = value - 0.5 - 16.0/9.0*std::pow(value -0.5, 3);
+    double phi1 = (tmp1-tmp2)/tmp3;
 
 
-	tmp1 = 8.0/3.0/M_PI*(value-0.5)*std::cos(8*M_PI/3.0*(value-0.5));
-	tmp2 = std::sin(4.0*M_PI/3.0*(value-0.5))/M_PI;
-	tmp3 = value - 0.5 - 64.0/9.0*std::pow(value -0.5, 3);
-	double phi2 = (tmp1+tmp2)/tmp3;
+    tmp1 = 8.0/3.0/M_PI*(value-0.5)*std::cos(8*M_PI/3.0*(value-0.5));
+    tmp2 = std::sin(4.0*M_PI/3.0*(value-0.5))/M_PI;
+    tmp3 = value - 0.5 - 64.0/9.0*std::pow(value -0.5, 3);
+    double phi2 = (tmp1+tmp2)/tmp3;
 
     return phi1+phi2;
 }
