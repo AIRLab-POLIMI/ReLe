@@ -39,7 +39,7 @@ using namespace ReLe;
 
 #define WAVELETS
 #define PCA
-#define MEYER
+//#define MEYER
 
 const double maxT = 10.0;
 

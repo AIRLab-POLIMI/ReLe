@@ -60,7 +60,7 @@ const double maxT = 10.0;
 
 
 #define WAVELETS
-#define MEYER
+//#define MEYER
 //#define TEST
 
 void preprocessDataset(Dataset<DenseAction, DenseState>& data)
