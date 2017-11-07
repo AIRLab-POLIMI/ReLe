@@ -57,7 +57,7 @@ void ShipSteering::step(const DenseAction& action, DenseState& nextState,
     if(!(rangeField.contains(nextState[x]) &&
             rangeField.contains(nextState[y])))
     {
-        reward[0] = -10000;
+        reward[0] = -100;
         nextState.setAbsorbing();
     }
     else if(throughGate(currentState(span(x, y)), nextState(span(x, y))))

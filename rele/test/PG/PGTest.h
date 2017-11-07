@@ -194,6 +194,15 @@ public:
 
             core.runEpisode();
         }
+
+        delete core.getSettings().loggerStrategy;
+        core.getSettings().loggerStrategy = new WriteStrategy<ActionC, StateC>(
+                    fm.addPath(outputName),
+                    WriteStrategy<ActionC, StateC>::TRANS,
+                    true /*delete file*/
+                );
+        core.getSettings().testEpisodeN = 1000;
+        core.runTestEpisodes();
     }
 
 protected:

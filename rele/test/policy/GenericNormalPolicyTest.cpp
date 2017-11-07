@@ -33,25 +33,30 @@ using namespace ReLe;
 int main(int argc, char *argv[])
 {
     BasisFunctions basis = IdentityBasis::generate(2);
-    SparseFeatures phi;
-    phi.setDiagonal(basis);
+    SparseFeatures phi(basis, 2);
+    //phi.setDiagonal(basis);
 
     arma::vec uMin = {0.0, -1.0};
     arma::vec uMax = {5.0,  1.0};
 
-    arma::vec w = {1.0, 1.0};
+    arma::vec w = {1.0, 0.0, 0.0, 1.0};
     LinearApproximator regressor(phi);
     regressor.setParameters(w);
 
     GenericMVNPolicy policy(regressor);
 
-    arma::vec input = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({10.0, 10.0})));
-    arma::vec output = policy(input);
+    //arma::vec input = mvnrand({0.0, 0.0}, arma::diagmat(arma::vec({10.0, 10.0})));
+    //arma::vec output = policy(input);
+    arma::vec input = {-1.2731,  -2.4746};
+    arma::vec output = {-2.2535,  -2.7151};
+
     arma::vec diff = policy.diff(input, output);
+    double prob = policy(input, output);
     arma::vec numDiff = arma::vectorise(NumericalGradient::compute(policy, policy.getParameters(), input, output));
 
     std::cout << "input       : " << input.t();
     std::cout << "output      : " << output.t();
+    std::cout << "prob        : " << prob << std::endl;
     std::cout << "gradient    : " << diff.t();
     std::cout << "num gradient: " << numDiff.t();
 

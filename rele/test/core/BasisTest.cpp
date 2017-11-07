@@ -30,6 +30,7 @@
 #include "rele/approximators/Features.h"
 #include "rele/approximators/basis/IdentityBasis.h"
 #include "rele/approximators/basis/ConditionBasedFunction.h"
+#include "rele/approximators/basis/GaussianRbf.h"
 #include "rele/approximators/features/DenseFeatures.h"
 
 using namespace std;
@@ -38,6 +39,33 @@ using namespace arma;
 
 int main(int argc, char *argv[])
 {
+	/* test gaussian RBF */
+	cout << "Gaussias RBF Test" << endl;
+	BasisFunctions basis = GaussianRbf::generate(
+	{
+		3,
+		3
+	},
+	{
+	    0.0, 1.0,
+	    0.0, 1.0
+	});
+
+	for(auto bf : basis)
+		std::cout << *bf << std::endl;
+
+	DenseFeatures phi(basis);
+
+	vec input1 = {0.1, 0.1};
+	vec input2 = {0.5, 0.5};
+	vec input3 = {0.1, 0.9};
+	vec input4 = {0.9, 0.1};
+
+	cout << "phi(0)" << endl << phi(input1) << endl;
+	cout << "phi(1)" << endl << phi(input2) << endl;
+	cout << "phi(2)" << endl << phi(input3) << endl;
+	cout << "phi(3)" << endl << phi(input4) << endl;
+
     /* Test vectorFiniteIdentity */
     cout << "VectorFiniteIdentity Basis Test" << endl;
     BasisFunctions basis0 = VectorFiniteIdentityBasis::generate(1, 3);
